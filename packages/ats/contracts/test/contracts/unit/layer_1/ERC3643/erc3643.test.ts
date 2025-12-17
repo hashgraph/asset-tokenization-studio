@@ -5,19 +5,19 @@ import { isinGenerator } from "@thomaschaplin/isin-generator";
 import {
   type ResolverProxy,
   type ERC20,
-  type Pause,
-  Kyc,
+  type PauseFacet,
+  type KycFacet,
   type ControlListFacet,
-  SsiManagement,
-  ClearingActionsFacet,
+  type SsiManagementFacet,
+  type ClearingActionsFacet,
   type AccessControl,
   type IERC1410,
-  AdjustBalances,
-  Cap,
-  Equity,
-  ERC1644,
-  ERC1594,
-  Lock,
+  AdjustBalancesFacet,
+  CapFacet,
+  EquityUSAFacet,
+  ERC1644Facet,
+  ERC1594Facet,
+  LockFacet,
   IHold,
   ProtectedPartitions,
   DiamondFacet,
@@ -68,19 +68,19 @@ describe("ERC3643 Tests", () => {
   let erc3643Facet: IERC3643;
   let erc1410Facet: IERC1410;
   let timeTravelFacet: TimeTravelFacet;
-  let adjustBalancesFacet: AdjustBalances;
-  let capFacet: Cap;
-  let equityFacet: Equity;
+  let adjustBalancesFacet: AdjustBalancesFacet;
+  let capFacet: CapFacet;
+  let equityFacet: EquityUSAFacet;
 
-  let pauseFacet: Pause;
-  let kycFacet: Kyc;
+  let pauseFacet: PauseFacet;
+  let kycFacet: KycFacet;
   let controlList: ControlListFacet;
   let clearingActionsFacet: ClearingActionsFacet;
-  let ssiManagementFacet: SsiManagement;
+  let ssiManagementFacet: SsiManagementFacet;
   let accessControlFacet: AccessControl;
-  let erc1644Facet: ERC1644;
-  let erc1594Facet: ERC1594;
-  let lockFacet: Lock;
+  let erc1644Facet: ERC1644Facet;
+  let erc1594Facet: ERC1594Facet;
+  let lockFacet: LockFacet;
   let clearingFacet: Contract;
   let holdFacet: IHold;
   let protectedPartitionsFacet: ProtectedPartitions;
@@ -169,7 +169,7 @@ describe("ERC3643 Tests", () => {
 
       erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
 
-      pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_B);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_B);
 
       erc3643Issuer = erc3643Facet.connect(signer_C);
       erc3643Transferor = erc3643Facet.connect(signer_E);
@@ -179,20 +179,20 @@ describe("ERC3643 Tests", () => {
 
       controlList = await ethers.getContractAt("ControlListFacet", diamond.address);
 
-      kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-      ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address);
       erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
       accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
       timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
-      adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
-      capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
-      equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
+      adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address, signer_A);
+      capFacet = await ethers.getContractAt("CapFacet", diamond.address, signer_A);
+      equityFacet = await ethers.getContractAt("EquityUSAFacet", diamond.address, signer_A);
 
       clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
-      erc1594Facet = await ethers.getContractAt("ERC1594", diamond.address);
-      erc1644Facet = await ethers.getContractAt("ERC1644", diamond.address);
-      lockFacet = await ethers.getContractAt("Lock", diamond.address);
-      snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
+      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
+      erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address);
+      lockFacet = await ethers.getContractAt("LockFacet", diamond.address);
+      snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
 
       const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", diamond.address, signer_A);
       const clearingHoldCreationFacet = await ethers.getContractAt(
@@ -2449,7 +2449,7 @@ describe("ERC3643 Tests", () => {
 
       accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
 
-      pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
 
       controlList = await ethers.getContractAt("ControlListFacet", diamond.address);
 
