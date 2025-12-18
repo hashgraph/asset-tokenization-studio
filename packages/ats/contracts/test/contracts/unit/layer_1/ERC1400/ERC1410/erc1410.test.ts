@@ -1059,7 +1059,7 @@ describe("ERC1410 Tests", () => {
       // transfer
       await expect(erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data))
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 1);
+        .withArgs(1);
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
       dividend = await equityFacet.getDividends(2);
@@ -1085,7 +1085,7 @@ describe("ERC1410 Tests", () => {
       // transfer From
       await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData))
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 2);
+        .withArgs(2);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1196,7 +1196,7 @@ describe("ERC1410 Tests", () => {
         }),
       )
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_A.address, 1);
+        .withArgs(1);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1285,7 +1285,7 @@ describe("ERC1410 Tests", () => {
       // transfer
       await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data))
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 1);
+        .withArgs(1);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1303,7 +1303,7 @@ describe("ERC1410 Tests", () => {
           .operatorRedeemByPartition(_PARTITION_ID_1, signer_E.address, amount, data, operatorData),
       )
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 2);
+        .withArgs(2);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1543,7 +1543,7 @@ describe("ERC1410 Tests", () => {
           ),
       )
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 1);
+        .withArgs(1);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1561,7 +1561,7 @@ describe("ERC1410 Tests", () => {
           .controllerRedeemByPartition(_PARTITION_ID_1, signer_D.address, amount, data, operatorData),
       )
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 2);
+        .withArgs(2);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);

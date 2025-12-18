@@ -108,7 +108,7 @@ describe("Scheduled Snapshots Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_1 + 1);
     await expect(scheduledTasksFacet.connect(signer_A).triggerPendingScheduledCrossOrderedTasks())
       .to.emit(scheduledSnapshotsFacet, "SnapshotTriggered")
-      .withArgs(signer_A.address, 1);
+      .withArgs(1);
 
     scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
     scheduledSnapshots = await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);
@@ -124,7 +124,7 @@ describe("Scheduled Snapshots Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_2 + 1);
     await expect(scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(100))
       .to.emit(scheduledSnapshotsFacet, "SnapshotTriggered")
-      .withArgs(signer_A.address, 2);
+      .withArgs(2);
 
     scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
     scheduledSnapshots = await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);
@@ -138,7 +138,7 @@ describe("Scheduled Snapshots Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_3 + 1);
     await expect(scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(0))
       .to.emit(scheduledSnapshotsFacet, "SnapshotTriggered")
-      .withArgs(signer_A.address, 3);
+      .withArgs(3);
 
     scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
     scheduledSnapshots = await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);

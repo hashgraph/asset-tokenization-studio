@@ -9,7 +9,7 @@ abstract contract AdjustBalances is IAdjustBalances, Internals {
         uint256 factor,
         uint8 decimals
     ) external override onlyUnpaused onlyRole(_ADJUSTMENT_BALANCE_ROLE) validateFactor(factor) returns (bool success_) {
-        _triggerScheduledCrossOrderedTasks(0);
+        _callTriggerPendingScheduledCrossOrderedTasks();
         _adjustBalances(factor, decimals);
         success_ = true;
     }

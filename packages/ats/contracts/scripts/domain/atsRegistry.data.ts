@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-17T13:30:23.323Z
- * Facets: 183
+ * Generated: 2025-12-18T10:28:57.636Z
+ * Facets: 189
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -29,6 +29,12 @@ import {
   AccessControlSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   AdjustBalancesFacet__factory,
   AdjustBalancesFacetTimeTravel__factory,
+  AdjustBalancesFixedRateFacet__factory,
+  AdjustBalancesFixedRateFacetTimeTravel__factory,
+  AdjustBalancesKpiLinkedRateFacet__factory,
+  AdjustBalancesKpiLinkedRateFacetTimeTravel__factory,
+  AdjustBalancesSustainabilityPerformanceTargetRateFacet__factory,
+  AdjustBalancesSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   BondUSAFacet__factory,
   BondUSAFacetTimeTravel__factory,
   BondUSAFixedRateFacet__factory,
@@ -333,6 +339,12 @@ import {
   ProtectedPartitionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ScheduledBalanceAdjustmentsFacet__factory,
   ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
+  ScheduledBalanceAdjustmentsFixedRateFacet__factory,
+  ScheduledBalanceAdjustmentsFixedRateFacetTimeTravel__factory,
+  ScheduledBalanceAdjustmentsKpiLinkedRateFacet__factory,
+  ScheduledBalanceAdjustmentsKpiLinkedRateFacetTimeTravel__factory,
+  ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet__factory,
+  ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ScheduledCouponListingFacet__factory,
   ScheduledCouponListingFacetTimeTravel__factory,
   ScheduledCouponListingFixedRateFacet__factory,
@@ -788,6 +800,82 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new AdjustBalancesFacetTimeTravel__factory(signer) : new AdjustBalancesFacet__factory(signer),
+  },
+
+  AdjustBalancesFixedRateFacet: {
+    name: "AdjustBalancesFixedRateFacet",
+    resolverKey: {
+      name: "_BALANCE_ADJUSTMENTS_FIXED_RATE_RESOLVER_KEY",
+      value: "0xa7e8f6d5c4b3a2e1f9d8c7b6a5e4f3d2c1b9a8e7f6d5c4b3a2e1f9d8c7b6a5e4",
+    },
+    inheritance: ["AdjustBalancesFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "adjustBalances",
+        signature: "function adjustBalances(uint256 factor, uint8 decimals) returns (bool success_)",
+        selector: "0xe2d77e44",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new AdjustBalancesFixedRateFacetTimeTravel__factory(signer)
+        : new AdjustBalancesFixedRateFacet__factory(signer),
+  },
+
+  AdjustBalancesKpiLinkedRateFacet: {
+    name: "AdjustBalancesKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_BALANCE_ADJUSTMENTS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xb8f9e7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5",
+    },
+    inheritance: ["AdjustBalancesFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "adjustBalances",
+        signature: "function adjustBalances(uint256 factor, uint8 decimals) returns (bool success_)",
+        selector: "0xe2d77e44",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new AdjustBalancesKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new AdjustBalancesKpiLinkedRateFacet__factory(signer),
+  },
+
+  AdjustBalancesSustainabilityPerformanceTargetRateFacet: {
+    name: "AdjustBalancesSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_BALANCE_ADJUSTMENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xc9e1f8d7c6b5a4e3f2d1c9b8a7e6f5d4c3b2a1e9f8d7c6b5a4e3f2d1c9b8a7e6",
+    },
+    inheritance: ["AdjustBalancesFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "adjustBalances",
+        signature: "function adjustBalances(uint256 factor, uint8 decimals) returns (bool success_)",
+        selector: "0xe2d77e44",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new AdjustBalancesSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new AdjustBalancesSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   BondUSAFacet: {
@@ -9919,6 +10007,100 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new ScheduledBalanceAdjustmentsFacet__factory(signer),
   },
 
+  ScheduledBalanceAdjustmentsFixedRateFacet: {
+    name: "ScheduledBalanceAdjustmentsFixedRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_BALANCE_ADJUSTMENTS_FIXED_RATE_RESOLVER_KEY",
+      value: "0xb3336a1ececdcd807fd6e81cc57e9392c75bf3fd303a2f5df0b11c0dda87ce7f",
+    },
+    inheritance: ["ScheduledBalanceAdjustmentsFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getScheduledBalanceAdjustments",
+        signature:
+          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
+        selector: "0xcb884d41",
+      },
+      {
+        name: "scheduledBalanceAdjustmentCount",
+        signature: "function scheduledBalanceAdjustmentCount() view returns (uint256)",
+        selector: "0x2de241e3",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledBalanceAdjustmentsFixedRateFacetTimeTravel__factory(signer)
+        : new ScheduledBalanceAdjustmentsFixedRateFacet__factory(signer),
+  },
+
+  ScheduledBalanceAdjustmentsKpiLinkedRateFacet: {
+    name: "ScheduledBalanceAdjustmentsKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_BALANCE_ADJUSTMENTS_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x3da33aed4e04baa1b9c39bd96d0bc7be51ecaa1468eff7f632c29fb134644cb4",
+    },
+    inheritance: ["ScheduledBalanceAdjustmentsFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getScheduledBalanceAdjustments",
+        signature:
+          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
+        selector: "0xcb884d41",
+      },
+      {
+        name: "scheduledBalanceAdjustmentCount",
+        signature: "function scheduledBalanceAdjustmentCount() view returns (uint256)",
+        selector: "0x2de241e3",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledBalanceAdjustmentsKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new ScheduledBalanceAdjustmentsKpiLinkedRateFacet__factory(signer),
+  },
+
+  ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet: {
+    name: "ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_BALANCE_ADJUSTMENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x1168df5bb8a348d137af6e29915c261dc82c495f72484a046ac4f750899625f4",
+    },
+    inheritance: ["ScheduledBalanceAdjustmentsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "getScheduledBalanceAdjustments",
+        signature:
+          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
+        selector: "0xcb884d41",
+      },
+      {
+        name: "scheduledBalanceAdjustmentCount",
+        signature: "function scheduledBalanceAdjustmentCount() view returns (uint256)",
+        selector: "0x2de241e3",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   ScheduledCouponListingFacet: {
     name: "ScheduledCouponListingFacet",
     resolverKey: {
@@ -11401,7 +11583,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 183 as const;
+export const TOTAL_FACETS = 189 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -12248,8 +12430,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
       {
         name: "SnapshotTriggered",
-        signature: "SnapshotTriggered(address,uint256)",
-        topic0: "0xa25b876b2f3947e9c6cc9e952e8f278d53aeaddffe3aec1c86bc75c491d60a19",
+        signature: "SnapshotTriggered(uint256)",
+        topic0: "0x0eec0abde2b179159e265a3659aa23e6c815e932b49ed19684a9717c1db37c8f",
       },
     ],
     errors: [
@@ -12351,6 +12533,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  ScheduledCrossOrderedTasksStorageWrapperFixingDateInterestRate: {
+    name: "ScheduledCrossOrderedTasksStorageWrapperFixingDateInterestRate",
+    inheritance: ["Common"],
+    methods: [],
+  },
+
   ScheduledSnapshotsStorageWrapper: {
     name: "ScheduledSnapshotsStorageWrapper",
     inheritance: ["ScheduledTasksCommon"],
@@ -12397,7 +12585,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 55 as const;
+export const TOTAL_STORAGE_WRAPPERS = 56 as const;
 
 /**
  * All role identifiers extracted from contracts.

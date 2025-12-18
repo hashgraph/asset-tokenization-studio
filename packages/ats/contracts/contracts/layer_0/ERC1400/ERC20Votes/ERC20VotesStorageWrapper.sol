@@ -83,7 +83,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     }
 
     function _delegate(address delegator, address delegatee) internal virtual override {
-        _triggerScheduledCrossOrderedTasks(0);
+        _callTriggerPendingScheduledCrossOrderedTasks();
 
         _takeAbafCheckpoint();
 

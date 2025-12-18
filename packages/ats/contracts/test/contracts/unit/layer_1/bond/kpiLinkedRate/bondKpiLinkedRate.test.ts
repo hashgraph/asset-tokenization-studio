@@ -19,7 +19,7 @@ const couponPeriod = TIME_PERIODS_S.WEEK;
 const referenceDate = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
 const amount = 1000;
 
-describe.skip("Bond KpiLinked Rate Tests", () => {
+describe("Bond KpiLinked Rate Tests", () => {
   let couponRecordDateInSeconds = 0;
   let couponExecutionDateInSeconds = 0;
   let couponFixingDateInSeconds = 0;

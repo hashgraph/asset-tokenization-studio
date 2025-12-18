@@ -12,14 +12,14 @@ abstract contract ProceedRecipientsStorageWrapperSustainabilityPerformanceTarget
         address _proceedRecipient,
         bytes calldata _data
     ) internal override(Internals, ProceedRecipientsStorageWrapper) {
-        _triggerScheduledCrossOrderedTasks(0);
+        _callTriggerPendingScheduledCrossOrderedTasks();
         super._addProceedRecipient(_proceedRecipient, _data);
     }
 
     function _removeProceedRecipient(
         address _proceedRecipient
     ) internal override(Internals, ProceedRecipientsStorageWrapper) {
-        _triggerScheduledCrossOrderedTasks(0);
+        _callTriggerPendingScheduledCrossOrderedTasks();
         super._removeProceedRecipient(_proceedRecipient);
     }
 }

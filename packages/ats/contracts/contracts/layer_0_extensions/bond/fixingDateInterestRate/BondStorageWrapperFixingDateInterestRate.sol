@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "contracts/layer_0/common/Common.sol";
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
 import { COUPON_LISTING_TASK_TYPE, COUPON_CORPORATE_ACTION_TYPE } from "../../../layer_0/constants/values.sol";
 import { LowLevelCall } from "contracts/layer_0/common/libraries/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
+import {
+    ScheduledCrossOrderedTasksStorageWrapperFixingDateInterestRate
+} from "./ScheduledCrossOrderedTasksStorageWrapper.sol";
 
-abstract contract BondStorageWrapperFixingDateInterestRate is Common {
+abstract contract BondStorageWrapperFixingDateInterestRate is
+    ScheduledCrossOrderedTasksStorageWrapperFixingDateInterestRate
+{
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -37,7 +41,7 @@ abstract contract BondStorageWrapperFixingDateInterestRate is Common {
     ) internal view virtual returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
         registeredCoupon_ = super._getCoupon(_couponID);
 
-        /*if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return registeredCoupon_;
+        if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return registeredCoupon_;
 
         if (registeredCoupon_.coupon.fixingDate > _blockTimestamp()) return registeredCoupon_;
 
@@ -45,6 +49,6 @@ abstract contract BondStorageWrapperFixingDateInterestRate is Common {
             _couponID,
             registeredCoupon_.coupon
         );
-        registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;*/
+        registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
     }
 }

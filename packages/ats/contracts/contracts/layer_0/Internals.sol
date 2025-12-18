@@ -1324,6 +1324,7 @@ abstract contract Internals is Modifiers {
     function _triggerScheduledBalanceAdjustments(uint256 _max) internal virtual returns (uint256);
     function _triggerScheduledCouponListing(uint256 _max) internal virtual returns (uint256);
     function _triggerScheduledCrossOrderedTasks(uint256 _max) internal virtual returns (uint256);
+    function _callTriggerPendingScheduledCrossOrderedTasks() internal virtual returns (uint256);
     function _triggerScheduledSnapshots(uint256 _max) internal virtual returns (uint256);
     function _triggerScheduledTasks(
         ScheduledTasksDataStorage storage _scheduledTasks,

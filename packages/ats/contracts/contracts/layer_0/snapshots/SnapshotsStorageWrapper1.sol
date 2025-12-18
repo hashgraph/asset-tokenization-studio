@@ -70,7 +70,7 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
 
         uint256 currentId = _getCurrentSnapshotId();
 
-        emit SnapshotTriggered(_msgSender(), currentId);
+        emit SnapshotTriggered(currentId);
 
         return currentId;
     }

@@ -57,7 +57,7 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
     }
 
     function _triggerAndSyncAll(bytes32 _partition, address _from, address _to) internal override {
-        _triggerScheduledCrossOrderedTasks(0);
+        _callTriggerPendingScheduledCrossOrderedTasks();
         _syncBalanceAdjustments(_partition, _from, _to);
     }
 

@@ -77,9 +77,11 @@ const BOND_FACETS = [
   "ExternalPauseManagementFacet",
 
   // Advanced Features
+  "AdjustBalancesFacet",
   "LockFacet",
   "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
+  "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
   "ScheduledCouponListingFacet",
   "ScheduledSnapshotsFacet",

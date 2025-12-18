@@ -6,11 +6,14 @@ import { _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION } from "../../constants
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from "../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol";
-import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE, COUPON_LISTING_TASK_TYPE } from "../../constants/values.sol";
+import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE } from "contracts/layer_0/constants/values.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
 } from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import {
+    IScheduledCrossOrderedTasks
+} from "contracts/layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
 
 abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAdjustmentsStorageWrapper {
     function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes memory _newData) internal override {
@@ -25,6 +28,13 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
                 _max,
                 _blockTimestamp()
             );
+    }
+
+    function _callTriggerPendingScheduledCrossOrderedTasks() internal override returns (uint256) {
+        if (_getScheduledCrossOrderedTaskCount() == 0) {
+            return 0;
+        }
+        return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
     }
 
     function _onScheduledCrossOrderedTaskTriggered(
@@ -46,11 +56,11 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
             _triggerScheduledBalanceAdjustments(1);
             return;
         }
-        if (taskType == COUPON_LISTING_TASK_TYPE) {
-            _triggerScheduledCouponListing(1);
-            return;
-        }
+
+        _postOnScheduledCrossOrderedTaskTriggered(taskType);
     }
+
+    function _postOnScheduledCrossOrderedTaskTriggered(bytes32 taskType) internal virtual {}
 
     function _getScheduledCrossOrderedTaskCount() internal view override returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledCrossOrderedTaskStorage());

@@ -22,7 +22,7 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
     function _setSPTInterestRate(
         ISustainabilityPerformanceTargetRate.InterestRate calldata _newInterestRate
     ) internal override {
-        _triggerScheduledCrossOrderedTasks(0);
+        _callTriggerPendingScheduledCrossOrderedTasks();
         SustainabilityPerformanceTargetRateDataStorage
             storage sustainabilityPerformanceTargetRateDataStorage = _sustainabilityPerformanceTargetRateStorage();
         sustainabilityPerformanceTargetRateDataStorage.baseRate = _newInterestRate.baseRate;
@@ -34,7 +34,7 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
         ISustainabilityPerformanceTargetRate.ImpactData calldata _newImpactData,
         address _project
     ) internal override {
-        _triggerScheduledCrossOrderedTasks(0);
+        _callTriggerPendingScheduledCrossOrderedTasks();
         ISustainabilityPerformanceTargetRate.ImpactData
             storage impactData = _sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
         impactData.baseLine = _newImpactData.baseLine;

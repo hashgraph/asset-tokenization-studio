@@ -7,7 +7,7 @@ import { _SNAPSHOT_ROLE } from "../constants/roles.sol";
 
 abstract contract Snapshots is ISnapshots, Internals {
     function takeSnapshot() external override onlyUnpaused onlyRole(_SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
-        _triggerScheduledCrossOrderedTasks(0);
+        _callTriggerPendingScheduledCrossOrderedTasks();
         snapshotID_ = _takeSnapshot();
     }
 
