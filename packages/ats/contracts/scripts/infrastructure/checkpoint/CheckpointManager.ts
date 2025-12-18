@@ -36,12 +36,25 @@ export class CheckpointManager {
   /**
    * Create a checkpoint manager instance.
    *
-   * @param checkpointsDir - Optional custom checkpoints directory path
+   * @param network - Network name for network-specific checkpoint directories
+   * @param checkpointsDir - Optional custom checkpoints directory path (overrides network-based path)
    */
-  constructor(checkpointsDir?: string) {
-    // Default: deployments/.checkpoints relative to this file
-    // scripts/infrastructure/checkpoint/CheckpointManager.ts -> ../../../deployments/.checkpoints
-    this.checkpointsDir = checkpointsDir || join(__dirname, "../../../deployments/.checkpoints");
+  constructor(network?: string, checkpointsDir?: string) {
+    // Determine checkpoint directory:
+    // 1. If checkpointsDir is provided, use it (explicit override)
+    // 2. If network is "hardhat", use deployments/test/hardhat/.checkpoints (test isolation)
+    // 3. If network is provided, use deployments/{network}/.checkpoints
+    // 4. Otherwise, fall back to deployments/.checkpoints (backward compatibility)
+    if (checkpointsDir) {
+      this.checkpointsDir = checkpointsDir;
+    } else if (network === "hardhat") {
+      // Test isolation: hardhat network always uses test checkpoint directory
+      this.checkpointsDir = join(__dirname, `../../../deployments/test/hardhat/.checkpoints`);
+    } else if (network) {
+      this.checkpointsDir = join(__dirname, `../../../deployments/${network}/.checkpoints`);
+    } else {
+      this.checkpointsDir = join(__dirname, "../../../deployments/.checkpoints");
+    }
 
     // Warn if checkpoint directory is inside node_modules (will be deleted on npm install)
     if (this.checkpointsDir.includes("node_modules")) {
@@ -180,25 +193,26 @@ export class CheckpointManager {
    */
   async findCheckpoints(network: string, status?: CheckpointStatus): Promise<DeploymentCheckpoint[]> {
     try {
-      // Ensure directory exists
+      // Ensure checkpoints directory exists
       await fs.mkdir(this.checkpointsDir, { recursive: true });
 
+      // Read all checkpoint files for this network
       const files = await fs.readdir(this.checkpointsDir);
-
-      // Filter files matching network pattern: network-timestamp.json
       const networkFiles = files.filter((file) => file.startsWith(`${network}-`) && file.endsWith(".json"));
 
-      // Load all matching checkpoints
       const checkpoints: DeploymentCheckpoint[] = [];
       for (const file of networkFiles) {
-        const checkpointId = file.replace(".json", "");
-        const checkpoint = await this.loadCheckpoint(checkpointId);
+        const checkpointPath = join(this.checkpointsDir, file);
+        try {
+          const content = await fs.readFile(checkpointPath, "utf-8");
+          const checkpoint = JSON.parse(content, this.mapReviver) as DeploymentCheckpoint;
 
-        if (checkpoint) {
-          // Apply status filter if provided
           if (!status || checkpoint.status === status) {
             checkpoints.push(checkpoint);
           }
+        } catch (err) {
+          // Skip invalid checkpoint files
+          continue;
         }
       }
 
@@ -288,7 +302,7 @@ export class CheckpointManager {
    *
    * @private
    */
-  private mapReplacer(key: string, value: unknown): unknown {
+  private mapReplacer(_key: string, value: unknown): unknown {
     if (value instanceof Map) {
       return {
         __type: "Map",
@@ -305,7 +319,7 @@ export class CheckpointManager {
    *
    * @private
    */
-  private mapReviver(key: string, value: unknown): unknown {
+  private mapReviver(_key: string, value: unknown): unknown {
     if (typeof value === "object" && value !== null && "__type" in value && value.__type === "Map") {
       // First cast to unknown, then to the expected type to handle the conversion safely
       const mapValue = value as unknown as { __value: Array<[string, unknown]> };

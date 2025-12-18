@@ -256,8 +256,11 @@ export function assertCheckpointAtStep(
  * ```
  */
 export function createTestCheckpointsDir(): string {
-  // Return shared checkpoint directory
-  return join(__dirname, "../../deployments/.checkpoints");
+  // Return test-specific checkpoint directory under deployments/test/
+  // Isolated from production deployments (deployments/hardhat/.checkpoints)
+  // Note: Tests run from build/ directory, so we need to go up 3 levels:
+  // build/test/helpers/ → ../../../ → contracts/deployments/test/hardhat/.checkpoints
+  return join(__dirname, "../../../deployments/test/hardhat/.checkpoints");
 }
 
 /**

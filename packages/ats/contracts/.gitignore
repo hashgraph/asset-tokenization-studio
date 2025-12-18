@@ -54,5 +54,8 @@ deployments/*local*.json
 deployments/test-*.json
 
 # Checkpoint files (deployment state tracking) - never commit checkpoints
-deployments/.checkpoints/
+deployments/**/.checkpoints/
 *.checkpoint.json
+
+# Test artifacts - all test-generated files go here
+.temp/

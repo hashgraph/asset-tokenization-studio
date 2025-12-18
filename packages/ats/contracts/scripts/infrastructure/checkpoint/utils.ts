@@ -178,6 +178,22 @@ export function getStepName(step: number, workflowType: WorkflowType = "newBlr")
       default:
         return `Unknown Step ${step}`;
     }
+  } else if (workflowType === "upgradeTupProxies") {
+    // upgradeTupProxies workflow
+    switch (step) {
+      case 0:
+        return "Validate";
+      case 1:
+        return "Deploy Implementations";
+      case 2:
+        return "Verify Implementations";
+      case 3:
+        return "Upgrade Proxies";
+      case 4:
+        return "Verify Upgrades";
+      default:
+        return `Unknown Step ${step}`;
+    }
   } else {
     // existingBlr workflow
     switch (step) {

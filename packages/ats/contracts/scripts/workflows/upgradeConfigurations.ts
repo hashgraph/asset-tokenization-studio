@@ -20,7 +20,7 @@ import { z } from "zod";
 import {
   deployFacets,
   registerFacets,
-  updateResolverProxyConfig,
+  updateResolverProxyVersion,
   getResolverProxyConfigInfo,
   success,
   info,
@@ -37,6 +37,7 @@ import {
   formatCheckpointStatus,
   getStepName,
   validateAddress,
+  generateTimestamp,
 } from "@scripts/infrastructure";
 import { atsRegistry, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
 
@@ -330,8 +331,8 @@ async function validateAndInitialize(
 
   // Initialize checkpoint manager
   const checkpointManager = ignoreCheckpoint
-    ? new NullCheckpointManager(checkpointDir)
-    : new CheckpointManager(checkpointDir);
+    ? new NullCheckpointManager(network, checkpointDir)
+    : new CheckpointManager(network, checkpointDir);
 
   let checkpoint: DeploymentCheckpoint | null = null;
 
@@ -871,9 +872,7 @@ async function updateProxiesPhase(ctx: UpgradePhaseContext): Promise<ProxyUpdate
         // Unable to get current config, continue anyway
       }
 
-      const result = await updateResolverProxyConfig(signer, {
-        proxyAddress,
-        newVersion,
+      const result = await updateResolverProxyVersion(signer, proxyAddress, newVersion, {
         confirmations,
       });
 
@@ -1161,16 +1160,8 @@ export async function upgradeConfigurations(
 
     // Save output to file if requested
     if (saveOutput) {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const seconds = String(now.getSeconds()).padStart(2, "0");
-      const timestamp = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
-
-      const finalOutputPath = outputPath || `deployments/upgrade_${network}_${timestamp}.json`;
+      const timestamp = generateTimestamp();
+      const finalOutputPath = outputPath || `deployments/${network}/${network}-upgrade-${timestamp}.json`;
 
       await saveUpgradeOutput(output, finalOutputPath);
       info(`\n💾 Upgrade output saved: ${finalOutputPath}`);

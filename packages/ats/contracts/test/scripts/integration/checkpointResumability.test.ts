@@ -42,7 +42,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(testDir);
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -174,7 +174,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(testDir);
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -291,7 +291,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(testDir);
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -401,7 +401,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(testDir);
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -542,7 +542,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(testDir);
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -679,7 +679,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(testDir);
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -880,7 +880,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(testDir);
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -1047,7 +1047,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(testDir);
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 

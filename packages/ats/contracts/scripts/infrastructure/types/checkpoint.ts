@@ -57,7 +57,7 @@ export type CheckpointStatus = "in-progress" | "completed" | "failed";
 /**
  * Workflow type for checkpoint tracking.
  */
-export type WorkflowType = "newBlr" | "existingBlr" | "upgradeConfigurations";
+export type WorkflowType = "newBlr" | "existingBlr" | "upgradeConfigurations" | "upgradeTupProxies";
 
 /**
  * Deployment checkpoint for state tracking and resumability.

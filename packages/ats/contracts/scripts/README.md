@@ -46,10 +46,11 @@ This README provides comprehensive reference documentation for the deployment sy
 7. [Quick Start](#quick-start)
 8. [Usage Modes](#usage-modes)
 9. [Upgrading Configurations](#upgrading-configurations)
-10. [Directory Structure](#directory-structure)
-11. [Examples](#examples)
-12. [API Reference](#api-reference)
-13. [Troubleshooting](#troubleshooting)
+10. [Upgrading TUP Proxy Implementations](#upgrading-tup-proxy-implementations)
+11. [Directory Structure](#directory-structure)
+12. [Examples](#examples)
+13. [API Reference](#api-reference)
+14. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -489,7 +490,7 @@ npm run deploy:hardhat -- --network hedera-previewnet
 
 ### Step 3: Verify Deployment
 
-Check the output file in `deployments/{network}_{timestamp}.json`:
+Check the output file in `deployments/{network}/{network}-deployment-{timestamp}.json`:
 
 ```json
 {
@@ -518,7 +519,7 @@ Check the output file in `deployments/{network}_{timestamp}.json`:
 
 ```bash
 # Clean up failed checkpoint
-rm deployments/.checkpoints/*.json
+rm deployments/{network}/.checkpoints/*.json
 
 # Deploy fresh (adjust network as needed)
 npm run deploy:hedera:testnet
@@ -665,6 +666,208 @@ BLR_ADDRESS=0x123... npm run upgrade:testnet
 - Individual proxy failures don't stop the upgrade
 - Check proxy logs for specific error
 - Proxies can be updated later using updateResolverProxyConfig operation
+
+## Upgrading TUP Proxy Implementations
+
+The upgrade workflow allows you to upgrade TransparentUpgradeableProxy (TUP) implementations for infrastructure contracts (BLR and Factory) without redeploying the entire system.
+
+**Important**: This is different from [Upgrading Configurations](#upgrading-configurations), which upgrades ResolverProxy (Diamond pattern) token contracts. Use this workflow only for BLR/Factory infrastructure upgrades.
+
+### When to Use
+
+Upgrade TUP proxies when:
+
+- Fixing bugs in BusinessLogicResolver (BLR) implementation
+- Adding features to Factory implementation
+- Upgrading BLR and Factory to new major versions
+- Rolling out implementation improvements across environments
+
+### Prerequisites
+
+- Existing ProxyAdmin address
+- BLR and/or Factory proxy addresses
+- Private key with sufficient balance
+- Either: new implementation ready to deploy, OR existing implementation address to upgrade to
+
+### Quick Start
+
+**Pattern A: Deploy and upgrade new implementation**
+
+```bash
+export PROXY_ADMIN=0x...          # ProxyAdmin contract address
+export BLR_PROXY=0x...            # BLR proxy to upgrade
+export DEPLOY_NEW_BLR_IMPL=true   # Deploy new implementation
+
+npm run upgrade:tup:testnet
+```
+
+**Pattern B: Upgrade to existing implementation**
+
+```bash
+export PROXY_ADMIN=0x...
+export BLR_PROXY=0x...
+export BLR_IMPLEMENTATION=0x...   # Address of pre-deployed implementation
+
+npm run upgrade:tup:testnet
+```
+
+### CLI Usage
+
+**Upgrade BLR on testnet**
+
+```bash
+npm run upgrade:tup:testnet
+```
+
+**Upgrade Factory on testnet**
+
+```bash
+FACTORY_PROXY=0x... npm run upgrade:tup:testnet
+```
+
+**Upgrade both BLR and Factory**
+
+```bash
+BLR_PROXY=0x... FACTORY_PROXY=0x... npm run upgrade:tup:testnet
+```
+
+**Upgrade with existing implementations**
+
+```bash
+BLR_PROXY=0x... \
+BLR_IMPLEMENTATION=0x... \
+FACTORY_PROXY=0x... \
+FACTORY_IMPLEMENTATION=0x... \
+npm run upgrade:tup:testnet
+```
+
+### Environment Variables
+
+| Variable                  | Required | Purpose                                 |
+| ------------------------- | -------- | --------------------------------------- |
+| `PROXY_ADMIN`             | Yes      | ProxyAdmin contract address             |
+| `BLR_PROXY`               | No\*     | BLR proxy address to upgrade            |
+| `FACTORY_PROXY`           | No\*     | Factory proxy address to upgrade        |
+| `DEPLOY_NEW_BLR_IMPL`     | No\*\*   | Deploy new BLR implementation           |
+| `DEPLOY_NEW_FACTORY_IMPL` | No\*\*   | Deploy new Factory implementation       |
+| `BLR_IMPLEMENTATION`      | No\*\*   | Existing BLR implementation address     |
+| `FACTORY_IMPLEMENTATION`  | No\*\*   | Existing Factory implementation address |
+
+\*At least one proxy address required
+\*\*For each proxy, either deploy new OR provide existing implementation
+
+### What Happens During Upgrade
+
+1. **Validate** - Checks ProxyAdmin exists on-chain
+2. **Deploy Implementations** (if needed) - Deploys new implementation contracts
+3. **Verify Implementations** - Ensures implementations are bytecode-correct
+4. **Upgrade Proxies** - Calls ProxyAdmin.upgrade() for each proxy
+5. **Verify Upgrades** - Confirms proxies now point to new implementations
+
+### Output
+
+Results are saved to `deployments/{network}/{network}-upgrade-tup-{timestamp}.json`:
+
+```json
+{
+  "network": "hedera-testnet",
+  "timestamp": "2025-12-17T10:30:00Z",
+  "deployer": "0x1234...",
+  "proxyAdmin": { "address": "0x5678..." },
+  "implementations": {
+    "blr": {
+      "address": "0xabcd...",
+      "transactionHash": "0x9876...",
+      "gasUsed": 1234567
+    }
+  },
+  "blrUpgrade": {
+    "proxyAddress": "0xabcd...",
+    "success": true,
+    "upgraded": true,
+    "oldImplementation": "0x5555...",
+    "newImplementation": "0xabcd...",
+    "transactionHash": "0x9999...",
+    "gasUsed": 123456
+  },
+  "summary": {
+    "proxiesUpgraded": 1,
+    "proxiesFailed": 0,
+    "deploymentTime": 45000,
+    "gasUsed": "1357623",
+    "success": true
+  }
+}
+```
+
+### Resumable Upgrades
+
+For long-running upgrades on slow networks, checkpoints automatically resume on failure:
+
+```bash
+# Initial attempt (may fail)
+BLR_PROXY=0x... npm run upgrade:tup:testnet
+
+# Fix the issue, then retry - workflow resumes automatically
+BLR_PROXY=0x... npm run upgrade:tup:testnet
+```
+
+Progress is tracked in `deployments/{network}/.checkpoints/` and automatically cleaned up on success.
+
+### Troubleshooting
+
+**"ProxyAdmin address is required"**
+
+- Set `PROXY_ADMIN` environment variable
+- Get address from initial deployment output
+
+**"BLR proxy specified but no implementation provided"**
+
+- Set either `DEPLOY_NEW_BLR_IMPL=true` OR `BLR_IMPLEMENTATION=0x...`
+
+**"Insufficient balance"**
+
+- Fund the deployer account
+- Retry the upgrade
+
+**"Already at target implementation"**
+
+- This is not an error
+- Proxy is already using the target implementation
+- Verify you're targeting the correct address
+
+**"Upgrade verification failed"**
+
+- Wait a few blocks for transaction finality
+- Retry the upgrade
+- Check ProxyAdmin has upgrade authority for the proxy
+
+### Multi-Environment Rollout
+
+Use the same workflow across networks:
+
+```bash
+# Testnet
+BLR_PROXY=0xTestnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:testnet
+
+# Previewnet (after validation)
+BLR_PROXY=0xPreviewnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:previewnet
+
+# Mainnet (after production testing)
+BLR_PROXY=0xMainnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:mainnet
+```
+
+### Difference from Upgrading Configurations
+
+| Aspect                | TUP Proxies (upgradeTupProxies) | ResolverProxy Tokens (upgradeConfigurations) |
+| --------------------- | ------------------------------- | -------------------------------------------- |
+| **Used for**          | BLR, Factory infrastructure     | Equity, Bond token contracts                 |
+| **Upgrade mechanism** | ProxyAdmin.upgrade()            | DiamondCutFacet delegates                    |
+| **What changes**      | Implementation address          | Facet registry configuration                 |
+| **Call path**         | Direct via ProxyAdmin           | Via ResolverProxy delegation                 |
+| **Command**           | `npm run upgrade:tup:*`         | `npm run upgrade:*`                          |
+
+**In short**: Upgrade TUP proxies for infrastructure bugs/features, upgrade configurations for token facet changes.
 
 ---
 
@@ -1049,7 +1252,7 @@ If a deployment fails, **the recommended approach is to start fresh** with new c
 
 ```bash
 # 1. Clean up the failed checkpoint (optional)
-rm deployments/.checkpoints/*.json
+rm deployments/{network}/.checkpoints/*.json
 
 # 2. Deploy with new contracts (adjust for your network)
 npm run deploy:hedera:testnet

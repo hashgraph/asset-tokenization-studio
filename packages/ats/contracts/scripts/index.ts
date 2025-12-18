@@ -128,6 +128,7 @@ export * from "./domain/factory/deployBondToken";
 export * from "./workflows/deploySystemWithNewBlr";
 export * from "./workflows/deploySystemWithExistingBlr";
 export * from "./workflows/upgradeConfigurations";
+export * from "./workflows/upgradeTupProxies";
 
 // ========================================
 // Registry Generation Tools (for extending ATS)

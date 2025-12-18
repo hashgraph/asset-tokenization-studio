@@ -47,6 +47,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "both",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -67,6 +68,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -83,6 +85,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "bond",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -99,6 +102,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.network).to.equal("hardhat");
@@ -116,6 +120,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.facets).to.be.an("array");
@@ -142,6 +147,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "equity",
         proxyAddresses: [equityTokenAddress],
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -169,6 +175,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "both",
         proxyAddresses: [equityTokenAddress, bondTokenAddress],
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -195,6 +202,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "equity",
         proxyAddresses: [invalidProxyAddress, equityTokenAddress],
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       // Workflow should succeed even with partial failures
@@ -223,6 +231,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "equity",
         proxyAddresses: [],
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -239,6 +248,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -255,7 +265,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
-      manager = new CheckpointManager(testDir);
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
       signers = await ethers.getSigners();
     });
@@ -472,6 +482,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: true,
         configurations: "equity",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -489,6 +500,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -509,6 +521,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
           useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
+          ignoreCheckpoint: true,
         }),
       ).to.be.rejectedWith("Invalid BLR address format");
     });
@@ -523,6 +536,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
           useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
+          ignoreCheckpoint: true,
         }),
       ).to.be.rejectedWith(/No contract found at BLR address/);
     });
@@ -538,6 +552,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
           useTimeTravel: false,
           configurations: "equity",
           saveOutput: false,
+          ignoreCheckpoint: true,
         }),
       ).to.be.rejected;
     });
@@ -568,6 +583,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "equity",
         batchSize: 10,
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -584,6 +600,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "equity",
         confirmations: 1, // Use 1 confirmation for Hardhat network compatibility
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -638,6 +655,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "equity",
         proxyAddresses: [equityTokenAddress],
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -655,6 +673,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "equity",
         proxyAddresses: [invalidProxy],
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true; // Workflow succeeds even with proxy failures
@@ -672,6 +691,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "equity",
         proxyAddresses: [equityTokenAddress],
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.proxyUpdates![0].previousVersion).to.equal(1);
@@ -688,6 +708,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.totalFacetsDeployed).to.equal(result.facets.length);
@@ -702,6 +723,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
       expect(resultEquity.summary.configurationsCreated).to.equal(1);
 
@@ -710,6 +732,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "both",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
       expect(resultBoth.summary.configurationsCreated).to.equal(2);
     });
@@ -724,6 +747,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         configurations: "equity",
         proxyAddresses: [equityTokenAddress, invalidProxy],
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.proxiesUpdated).to.equal(1);
@@ -738,6 +762,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         configurations: "equity",
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       expect(result.summary.success).to.be.true;
@@ -756,6 +781,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         batchSize: 10,
         proxyAddresses: Object.freeze([]),
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       // Store original values for comparison
@@ -782,6 +808,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
         useTimeTravel: false,
         proxyAddresses: Object.freeze([equityTokenAddress]),
         saveOutput: false,
+        ignoreCheckpoint: true,
       });
 
       const originalOptions = JSON.parse(JSON.stringify(options));

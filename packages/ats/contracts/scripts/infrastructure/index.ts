@@ -222,6 +222,8 @@ export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./util
 
 export { getSelector } from "./utils/selector";
 
+export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
+
 // ============================================================================
 // Checkpoint System
 // ============================================================================
