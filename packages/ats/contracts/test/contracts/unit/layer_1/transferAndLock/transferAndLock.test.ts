@@ -248,7 +248,7 @@ describe("Transfer and lock Tests", () => {
     });
 
     describe("multi-partition transactions arent enabled", () => {
-      it("GIVEN a token with multi-partition enabled GIVEN transferAndLockByPartition THEN fails with NotAllowedInMultiPartitionMode", async () => {
+      it("GIVEN a token with multi-partition disabled GIVEN transferAndLockByPartition with non-default partition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
         await expect(
           transferAndLockFacet.transferAndLockByPartition(
             _NON_DEFAULT_PARTITION,

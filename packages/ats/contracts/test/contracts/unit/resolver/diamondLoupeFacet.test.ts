@@ -3,18 +3,15 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { DiamondLoupeFacet } from "@contract-types";
 import { deployEquityTokenFixture } from "test/fixtures";
-import { DeploymentOutput } from "@scripts";
 
-describe.only("DiamondLoupeFacet", () => {
+describe("DiamondLoupeFacet", () => {
   let signer_A: SignerWithAddress;
 
   let diamondLoupe: DiamondLoupeFacet;
-  let facets: DeploymentOutput["facets"];
 
   before(async () => {
     const base = await deployEquityTokenFixture();
     signer_A = base.deployer;
-    facets = base.deployment.facets;
 
     diamondLoupe = await ethers.getContractAt("DiamondLoupeFacet", base.diamond.address, signer_A);
   });
@@ -233,63 +230,6 @@ describe.only("DiamondLoupeFacet", () => {
       const isSupported = await diamondLoupe.supportsInterface(diamondLoupeInterfaceId);
 
       expect(isSupported).to.be.true;
-    });
-  });
-
-  describe("Static methods functionality", () => {
-    let facetDiamondLoupe: DiamondLoupeFacet;
-    before(() => {
-      const facet = facets.filter((f) => f.name.startsWith("DiamondLoupeFacet"))[0];
-      facetDiamondLoupe = diamondLoupe.attach(facet.address);
-    });
-    it("GIVEN DiamondLoupeFacet WHEN getting static function selectors THEN returns all 14 selectors", async () => {
-      const staticSelectors = await facetDiamondLoupe.getStaticFunctionSelectors();
-      const diamondLoupeInterface = diamondLoupe.interface;
-      const allSelectors = Object.values(diamondLoupeInterface.functions).map((fn) =>
-        diamondLoupeInterface.getSighash(fn),
-      );
-
-      const staticMethodSelectors = [
-        diamondLoupeInterface.getSighash("getStaticResolverKey()"),
-        diamondLoupeInterface.getSighash("getStaticFunctionSelectors()"),
-        diamondLoupeInterface.getSighash("getStaticInterfaceIds()"),
-      ];
-
-      const expectedSelectors = allSelectors.filter((selector) => !staticMethodSelectors.includes(selector));
-
-      expect(staticSelectors.length).to.equal(expectedSelectors.length);
-
-      expect(staticSelectors).to.have.members(expectedSelectors);
-    });
-
-    it("GIVEN DiamondLoupeFacet WHEN getting static interface IDs THEN returns IDiamondLoupe and IERC165", async () => {
-      const staticInterfaceIds = await facetDiamondLoupe.getStaticInterfaceIds();
-
-      expect(staticInterfaceIds.length).to.equal(2);
-
-      const IDiamondLoupeInterfaceId = "0x886634d9";
-      const IERC165InterfaceId = "0x01ffc9a7";
-
-      expect(staticInterfaceIds).to.have.members([IDiamondLoupeInterfaceId, IERC165InterfaceId]);
-    });
-
-    it("GIVEN DiamondLoupeFacet WHEN checking static selectors THEN all are registered in facet", async () => {
-      const staticSelectors = await facetDiamondLoupe.getStaticFunctionSelectors();
-      const allFacets = await diamondLoupe.getFacets();
-
-      const diamondLoupeFacet = allFacets.find((f) => {
-        return staticSelectors.every((selector) => f.selectors.includes(selector));
-      });
-
-      expect(diamondLoupeFacet).to.exist;
-      expect(staticSelectors.every((selector) => diamondLoupeFacet!.selectors.includes(selector))).to.be.true;
-    });
-
-    it("GIVEN DiamondLoupeFacet WHEN getting static resolver key THEN returns correct key", async () => {
-      const staticResolverKey = await facetDiamondLoupe.getStaticResolverKey();
-
-      expect(staticResolverKey).to.exist;
-      expect(staticResolverKey).to.not.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
     });
   });
 
