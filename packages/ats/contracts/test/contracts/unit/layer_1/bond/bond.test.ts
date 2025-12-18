@@ -30,7 +30,7 @@ import {
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
 } from "@scripts";
-import { grantRoleAndPauseToken } from "@test";
+import { getBondDetails, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
@@ -190,6 +190,31 @@ describe("Bond Tests", () => {
       rateStatus: 1,
     };
     await loadFixture(deploySecurityFixture);
+  });
+
+  describe("Initialization", () => {
+    it("GIVEN an initialized bond WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+      const regulationData = {
+        regulationType: 1, // REG_S
+        regulationSubType: 0, // NONE
+        dealSize: 0,
+        accreditedInvestors: 1, // ACCREDITATION_REQUIRED
+        maxNonAccreditedInvestors: 0,
+        manualInvestorVerification: 1, // VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
+        internationalInvestors: 1, // ALLOWED
+        resaleHoldPeriod: 0, // NOT_APPLICABLE
+      };
+
+      const additionalSecurityData = {
+        countriesControlListType: false,
+        listOfCountries: "",
+        info: "",
+      };
+
+      await expect(
+        bondFacet._initialize_bondUSA(await getBondDetails(), regulationData, additionalSecurityData),
+      ).to.be.rejectedWith("AlreadyInitialized");
+    });
   });
 
   describe("Single Partition", () => {
