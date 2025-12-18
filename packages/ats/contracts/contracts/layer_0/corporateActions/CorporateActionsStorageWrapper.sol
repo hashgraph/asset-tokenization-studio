@@ -14,12 +14,12 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    modifier validateDates(uint256 _firstDate, uint256 _secondDate) {
+    modifier validateDates(uint256 _firstDate, uint256 _secondDate) override {
         _checkDates(_firstDate, _secondDate);
         _;
     }
 
-    modifier onlyMatchingActionType(bytes32 _actionType, uint256 _index) {
+    modifier onlyMatchingActionType(bytes32 _actionType, uint256 _index) override {
         _checkMatchingActionType(_actionType, _index);
         _;
     }
@@ -28,7 +28,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     function _addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
-    ) internal returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
+    ) internal override returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
         CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
         corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
         // TODO: Review when it can return false.
@@ -47,11 +47,15 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         corporateActions_.actionsData[corporateActionId_].actionIdByType = corporateActionIdByType_;
     }
 
-    function _updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal {
+    function _updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal override {
         _corporateActionsStorage().actionsData[_actionId].data = _newData;
     }
 
-    function _updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal {
+    function _updateCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId,
+        bytes memory newResult
+    ) internal override {
         CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
         bytes[] memory results = corporateActions_.actionsData[actionId].results;
 
@@ -69,32 +73,34 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
 
     function _getCorporateAction(
         bytes32 _corporateActionId
-    ) internal view returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
+    ) internal view override returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
         CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
         actionType_ = corporateActions_.actionsData[_corporateActionId].actionType;
         data_ = corporateActions_.actionsData[_corporateActionId].data;
         actionTypeId_ = corporateActions_.actionsData[_corporateActionId].actionIdByType;
     }
 
-    function _getCorporateActionCount() internal view virtual returns (uint256 corporateActionCount_) {
+    function _getCorporateActionCount() internal view virtual override returns (uint256 corporateActionCount_) {
         return _corporateActionsStorage().actions.length();
     }
 
     function _getCorporateActionIds(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (bytes32[] memory corporateActionIds_) {
+    ) internal view override returns (bytes32[] memory corporateActionIds_) {
         corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
     }
 
-    function _getCorporateActionCountByType(bytes32 _actionType) internal view returns (uint256 corporateActionCount_) {
+    function _getCorporateActionCountByType(
+        bytes32 _actionType
+    ) internal view override returns (uint256 corporateActionCount_) {
         return _corporateActionsStorage().actionsByType[_actionType].length;
     }
 
     function _getCorporateActionIdByTypeIndex(
         bytes32 _actionType,
         uint256 _typeIndex
-    ) internal view returns (bytes32 corporateActionId_) {
+    ) internal view override returns (bytes32 corporateActionId_) {
         return _corporateActionsStorage().actionsByType[_actionType][_typeIndex];
     }
 
@@ -102,7 +108,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         bytes32 _actionType,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (bytes32[] memory corporateActionIds_) {
+    ) internal view override returns (bytes32[] memory corporateActionIds_) {
         (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
 
         corporateActionIds_ = new bytes32[](LibCommon.getSize(start, end, _getCorporateActionCountByType(_actionType)));
@@ -117,20 +123,20 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     function _getCorporateActionResult(
         bytes32 actionId,
         uint256 resultId
-    ) internal view returns (bytes memory result_) {
+    ) internal view override returns (bytes memory result_) {
         if (_getCorporateActionResultCount(actionId) > resultId)
             result_ = _corporateActionsStorage().actionsData[actionId].results[resultId];
     }
 
-    function _getCorporateActionResultCount(bytes32 actionId) internal view returns (uint256) {
+    function _getCorporateActionResultCount(bytes32 actionId) internal view override returns (uint256) {
         return _corporateActionsStorage().actionsData[actionId].results.length;
     }
 
-    function _getCorporateActionData(bytes32 actionId) internal view returns (bytes memory) {
+    function _getCorporateActionData(bytes32 actionId) internal view override returns (bytes memory) {
         return _corporateActionsStorage().actionsData[actionId].data;
     }
 
-    function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view returns (uint256) {
+    function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view override returns (uint256) {
         bytes memory data = _getCorporateActionResult(_actionId, resultId);
 
         uint256 bytesLength = data.length;

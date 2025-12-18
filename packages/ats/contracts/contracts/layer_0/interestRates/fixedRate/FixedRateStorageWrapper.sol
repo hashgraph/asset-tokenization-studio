@@ -13,14 +13,14 @@ abstract contract FixedRateStorageWrapper is SustainabilityPerformanceTargetRate
         bool initialized;
     }
 
-    function _setRate(uint256 _newRate, uint8 _newRateDecimals) internal {
+    function _setRate(uint256 _newRate, uint8 _newRateDecimals) internal override {
         FixedRateDataStorage storage fixedRateStorage = _fixedRateStorage();
 
         fixedRateStorage.rate = _newRate;
         fixedRateStorage.decimals = _newRateDecimals;
     }
 
-    function _getRate() internal view returns (uint256 rate_, uint8 decimals_) {
+    function _getRate() internal view override returns (uint256 rate_, uint8 decimals_) {
         rate_ = _fixedRateStorage().rate;
         decimals_ = _fixedRateStorage().decimals;
     }

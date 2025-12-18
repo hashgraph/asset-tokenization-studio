@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IScheduledCouponListing
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledCouponListing/IScheduledCouponListing.sol";
 import { ScheduledSnapshotsStorageWrapper } from "../scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { _SCHEDULED_COUPON_LISTING_STORAGE_POSITION } from "../../constants/storagePositions.sol";
@@ -15,11 +12,11 @@ import {
 import { COUPON_LISTING_RESULT_ID } from "../../constants/values.sol";
 
 abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStorageWrapper {
-    function _addScheduledCouponListing(uint256 _newScheduledTimestamp, bytes memory _newData) internal {
+    function _addScheduledCouponListing(uint256 _newScheduledTimestamp, bytes memory _newData) internal override {
         ScheduledTasksLib.addScheduledTask(_scheduledCouponListingStorage(), _newScheduledTimestamp, _newData);
     }
 
-    function _triggerScheduledCouponListing(uint256 _max) internal returns (uint256) {
+    function _triggerScheduledCouponListing(uint256 _max) internal override returns (uint256) {
         return
             _triggerScheduledTasks(
                 _scheduledCouponListingStorage(),
@@ -33,7 +30,7 @@ abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStor
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
-    ) internal {
+    ) internal override {
         bytes memory data = _scheduledTask.data;
 
         if (data.length == 0) return;
@@ -46,21 +43,20 @@ abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStor
         _updateCorporateActionResult(actionId, COUPON_LISTING_RESULT_ID, abi.encodePacked(pos));
     }
 
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual;
-    function _getCouponsOrderedListTotal() internal view virtual returns (uint256 total_);
-
-    function _getScheduledCouponListingCount() internal view returns (uint256) {
+    function _getScheduledCouponListingCount() internal view override returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledCouponListingStorage());
     }
 
     function _getScheduledCouponListing(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (ScheduledTask[] memory scheduledCouponListing_) {
+    ) internal view override returns (ScheduledTask[] memory scheduledCouponListing_) {
         return ScheduledTasksLib.getScheduledTasks(_scheduledCouponListingStorage(), _pageIndex, _pageLength);
     }
 
-    function _getPendingScheduledCouponListingTotalAt(uint256 _timestamp) internal view returns (uint256 total_) {
+    function _getPendingScheduledCouponListingTotalAt(
+        uint256 _timestamp
+    ) internal view override returns (uint256 total_) {
         total_ = 0;
 
         ScheduledTasksDataStorage storage scheduledCouponListing = _scheduledCouponListingStorage();
@@ -83,7 +79,7 @@ abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStor
         }
     }
 
-    function _getScheduledCouponListingIdAtIndex(uint256 _index) internal view returns (uint256 couponID_) {
+    function _getScheduledCouponListingIdAtIndex(uint256 _index) internal view override returns (uint256 couponID_) {
         ScheduledTask memory couponListing = ScheduledTasksLib.getScheduledTasksByIndex(
             _scheduledCouponListingStorage(),
             _index

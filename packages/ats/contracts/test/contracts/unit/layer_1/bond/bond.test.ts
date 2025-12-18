@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   ResolverProxy,
-  BondUSA,
+  BondUSAFacet,
   AccessControl,
   Pause,
   Lock,
@@ -74,7 +74,7 @@ describe("Bond Tests", () => {
   let signer_C: SignerWithAddress;
   let signer_D: SignerWithAddress;
 
-  let bondFacet: BondUSA;
+  let bondFacet: BondUSAFacet;
   let bondReadFacet: BondUSAReadFacet;
   let accessControlFacet: AccessControl;
   let pauseFacet: Pause;

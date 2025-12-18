@@ -1,25 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICap } from "../interfaces/cap/ICap.sol";
+import { ICap } from "contracts/layer_1/interfaces/cap/ICap.sol";
 import { _CAP_ROLE } from "../constants/roles.sol";
-import { Common } from "../../layer_0/common/Common.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 
-abstract contract Cap is ICap, Common {
+abstract contract Cap is ICap, Internals {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply,
         PartitionCap[] calldata partitionCap
-    ) external override onlyUninitialized(_capStorage().initialized) onlyValidNewMaxSupply(maxSupply) {
-        CapDataStorage storage capStorage = _capStorage();
-
-        capStorage.maxSupply = maxSupply;
-
-        for (uint256 i = 0; i < partitionCap.length; i++) {
-            capStorage.maxSupplyByPartition[partitionCap[i].partition] = partitionCap[i].maxSupply;
-        }
-
-        capStorage.initialized = true;
+    ) external override onlyUninitialized(_isCapInitialized()) onlyValidNewMaxSupply(maxSupply) {
+        _initialize_Cap(maxSupply, partitionCap);
     }
 
     function setMaxSupply(

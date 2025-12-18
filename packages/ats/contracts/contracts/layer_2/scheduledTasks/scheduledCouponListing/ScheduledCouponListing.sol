@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../../layer_0/common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 import {
     IScheduledCouponListing
 } from "../../interfaces/scheduledTasks/scheduledCouponListing/IScheduledCouponListing.sol";
 import { ScheduledTask } from "../../interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-abstract contract ScheduledCouponListing is IScheduledCouponListing, Common {
+abstract contract ScheduledCouponListing is IScheduledCouponListing, Internals {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function scheduledCouponListingCount() external view override returns (uint256) {

@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICorporateActions } from "../interfaces/corporateActions/ICorporateActions.sol";
-import { Common } from "../../layer_0/common/Common.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 import { _CORPORATE_ACTION_ROLE } from "../constants/roles.sol";
 
-abstract contract CorporateActions is ICorporateActions, Common {
+abstract contract CorporateActions is ICorporateActions, Internals {
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data

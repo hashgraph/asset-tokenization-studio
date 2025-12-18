@@ -2,9 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {
-    IScheduledBalanceAdjustments
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol";
-import {
     ScheduledCouponListingStorageWrapper
 } from "../scheduledCouponListing/ScheduledCouponListingStorageWrapper.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
@@ -16,11 +13,11 @@ import {
 } from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponListingStorageWrapper {
-    function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes memory _newData) internal {
+    function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes memory _newData) internal override {
         ScheduledTasksLib.addScheduledTask(_scheduledBalanceAdjustmentStorage(), _newScheduledTimestamp, _newData);
     }
 
-    function _triggerScheduledBalanceAdjustments(uint256 _max) internal returns (uint256) {
+    function _triggerScheduledBalanceAdjustments(uint256 _max) internal override returns (uint256) {
         return
             _triggerScheduledTasks(
                 _scheduledBalanceAdjustmentStorage(),
@@ -34,7 +31,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
-    ) internal {
+    ) internal override {
         bytes memory data = _scheduledTask.data;
 
         if (data.length == 0) return;
@@ -47,22 +44,20 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
         _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
-    function _adjustBalances(uint256 _factor, uint8 _decimals) internal virtual;
-
-    function _getScheduledBalanceAdjustmentCount() internal view returns (uint256) {
+    function _getScheduledBalanceAdjustmentCount() internal view override returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledBalanceAdjustmentStorage());
     }
 
     function _getScheduledBalanceAdjustments(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
+    ) internal view override returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
         return ScheduledTasksLib.getScheduledTasks(_scheduledBalanceAdjustmentStorage(), _pageIndex, _pageLength);
     }
 
     function _getPendingScheduledBalanceAdjustmentsAt(
         uint256 _timestamp
-    ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
+    ) internal view override returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
         // * Initialization
         pendingABAF_ = 1;
         pendingDecimals_ = 0;

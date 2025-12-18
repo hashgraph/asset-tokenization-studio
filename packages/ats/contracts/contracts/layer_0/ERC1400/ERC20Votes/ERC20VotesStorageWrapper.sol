@@ -7,6 +7,7 @@ import { IERC20Votes } from "../../../layer_1/interfaces/ERC1400/IERC20Votes.sol
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { CheckpointsLib } from "../../common/libraries/CheckpointsLib.sol";
+import { _CONTRACT_NAME_ERC20VOTES, _CONTRACT_VERSION_ERC20VOTES } from "contracts/layer_1/constants/values.sol";
 
 // solhint-disable custom-errors
 abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
@@ -27,15 +28,23 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
     event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
 
-    function _setActivate(bool _activated) internal virtual {
+    function _initialize_ERC20Votes(bool _activated) internal override {
+        ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
+        _setActivate(_activated);
+        erc20VotesStorage.initialized = true;
+        erc20VotesStorage.contractName = _CONTRACT_NAME_ERC20VOTES;
+        erc20VotesStorage.contractVersion = _CONTRACT_VERSION_ERC20VOTES;
+    }
+
+    function _setActivate(bool _activated) internal virtual override {
         _erc20VotesStorage().activated = _activated;
     }
 
-    function _delegate(address delegatee) internal virtual {
+    function _delegate(address delegatee) internal override {
         _delegate(_msgSender(), delegatee);
     }
 
-    function _takeAbafCheckpoint() internal {
+    function _takeAbafCheckpoint() internal override {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
 
         uint256 abaf = _getAbaf();
@@ -73,8 +82,8 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         }
     }
 
-    function _delegate(address delegator, address delegatee) internal virtual {
-        _triggerScheduledCrossOrderedTasks(0);
+    function _delegate(address delegator, address delegatee) internal virtual override {
+        _callTriggerPendingScheduledCrossOrderedTasks();
 
         _takeAbafCheckpoint();
 
@@ -94,7 +103,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         _moveVotingPower(currentDelegate, delegatee, delegatorBalance);
     }
 
-    function _moveVotingPower(address src, address dst, uint256 amount) internal {
+    function _moveVotingPower(address src, address dst, uint256 amount) internal override {
         if (src != dst && amount > 0) {
             if (src != address(0)) {
                 _moveVotingPower(src, _subtract, amount);
@@ -140,12 +149,12 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         }
     }
 
-    function _clock() internal view virtual returns (uint48) {
+    function _clock() internal view virtual override returns (uint48) {
         return SafeCast.toUint48(_blockNumber());
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _CLOCK_MODE() internal view virtual returns (string memory) {
+    function _CLOCK_MODE() internal view virtual override returns (string memory) {
         // Check that the clock was not modified
         require(_clock() == _blockNumber(), "ERC20Votes: broken clock mode");
         return "mode=blocknumber&from=default";
@@ -154,28 +163,28 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     function _checkpoints(
         address account,
         uint256 pos
-    ) internal view virtual returns (CheckpointsLib.Checkpoint memory) {
+    ) internal view virtual override returns (CheckpointsLib.Checkpoint memory) {
         return _erc20VotesStorage().checkpoints[account][pos];
     }
 
-    function _numCheckpoints(address account) internal view virtual returns (uint256) {
+    function _numCheckpoints(address account) internal view virtual override returns (uint256) {
         return _erc20VotesStorage().checkpoints[account].length;
     }
 
-    function _delegates(address account) internal view virtual returns (address) {
+    function _delegates(address account) internal view virtual override returns (address) {
         return _erc20VotesStorage().delegates[account];
     }
 
-    function _getVotes(address account) internal view virtual returns (uint256) {
+    function _getVotes(address account) internal view virtual override returns (uint256) {
         return _getVotesAdjusted(_clock(), _erc20VotesStorage().checkpoints[account]);
     }
 
-    function _getPastVotes(address account, uint256 timepoint) internal view virtual returns (uint256) {
+    function _getPastVotes(address account, uint256 timepoint) internal view virtual override returns (uint256) {
         require(timepoint < _clock(), "ERC20Votes: future lookup");
         return _getVotesAdjusted(timepoint, _erc20VotesStorage().checkpoints[account]);
     }
 
-    function _getPastTotalSupply(uint256 timepoint) internal view virtual returns (uint256) {
+    function _getPastTotalSupply(uint256 timepoint) internal view virtual override returns (uint256) {
         require(timepoint < _clock(), "ERC20Votes: future lookup");
         return _getVotesAdjusted(timepoint, _erc20VotesStorage().totalSupplyCheckpoints);
     }
@@ -183,13 +192,13 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     function _getVotesAdjusted(
         uint256 timepoint,
         CheckpointsLib.Checkpoint[] storage ckpts
-    ) internal view returns (uint256) {
+    ) internal view override returns (uint256) {
         (uint256 blockNumber, uint256 votes) = ckpts.checkpointsLookup(timepoint);
 
         return votes * _calculateFactorBetween(blockNumber, timepoint);
     }
 
-    function _calculateFactorBetween(uint256 _fromBlock, uint256 _toBlock) internal view returns (uint256) {
+    function _calculateFactorBetween(uint256 _fromBlock, uint256 _toBlock) internal view override returns (uint256) {
         (, uint256 abafAtBlockFrom) = _erc20VotesStorage().abafCheckpoints.checkpointsLookup(_fromBlock);
         (, uint256 abafAtBlockTo) = _erc20VotesStorage().abafCheckpoints.checkpointsLookup(_toBlock);
 
@@ -198,16 +207,20 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         return abafAtBlockTo / abafAtBlockFrom;
     }
 
-    function _isActivated() internal view returns (bool) {
+    function _isActivated() internal view override returns (bool) {
         return _erc20VotesStorage().activated;
     }
 
-    function _add(uint256 a, uint256 b) internal pure returns (uint256) {
+    function _add(uint256 a, uint256 b) internal pure override returns (uint256) {
         return a + b;
     }
 
-    function _subtract(uint256 a, uint256 b) internal pure returns (uint256) {
+    function _subtract(uint256 a, uint256 b) internal pure override returns (uint256) {
         return a - b;
+    }
+
+    function _isERC20VotesInitialized() internal view override returns (bool) {
+        return _erc20VotesStorage().initialized;
     }
 
     function _erc20VotesStorage() internal pure returns (ERC20VotesStorage storage erc20votesStorage_) {

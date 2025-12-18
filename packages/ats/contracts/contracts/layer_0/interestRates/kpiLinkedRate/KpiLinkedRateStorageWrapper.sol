@@ -24,7 +24,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         bool initialized;
     }
 
-    modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
+    modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) override {
         if (
             _newInterestRate.minRate > _newInterestRate.baseRate || _newInterestRate.baseRate > _newInterestRate.maxRate
         ) {
@@ -33,7 +33,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         _;
     }
 
-    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
+    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) override {
         if (
             _newImpactData.maxDeviationFloor > _newImpactData.baseLine ||
             _newImpactData.baseLine > _newImpactData.maxDeviationCap
@@ -43,8 +43,8 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         _;
     }
 
-    function _setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal {
-        _triggerScheduledCrossOrderedTasks(0);
+    function _setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal override {
+        _callTriggerPendingScheduledCrossOrderedTasks();
 
         KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
         kpiLinkedRateDataStorage.maxRate = _newInterestRate.maxRate;
@@ -56,8 +56,8 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         kpiLinkedRateDataStorage.reportPeriod = _newInterestRate.reportPeriod;
         kpiLinkedRateDataStorage.rateDecimals = _newInterestRate.rateDecimals;
     }
-    function _setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal {
-        _triggerScheduledCrossOrderedTasks(0);
+    function _setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal override {
+        _callTriggerPendingScheduledCrossOrderedTasks();
 
         KpiLinkedRateDataStorage storage kpiLinkedRateDataStorage = _kpiLinkedRateStorage();
         kpiLinkedRateDataStorage.maxDeviationCap = _newImpactData.maxDeviationCap;
@@ -67,15 +67,13 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         kpiLinkedRateDataStorage.adjustmentPrecision = _newImpactData.adjustmentPrecision;
     }
 
-    function _setKpiOracle(address _kpiOracle) internal {
-        _triggerScheduledCrossOrderedTasks(0);
+    function _setKpiOracle(address _kpiOracle) internal override {
+        _callTriggerPendingScheduledCrossOrderedTasks();
 
         _kpiLinkedRateStorage().kpiOracle = _kpiOracle;
     }
 
-    function _triggerScheduledCrossOrderedTasks(uint256 _max) internal virtual returns (uint256);
-
-    function _getInterestRate() internal view returns (IKpiLinkedRate.InterestRate memory interestRate_) {
+    function _getInterestRate() internal view override returns (IKpiLinkedRate.InterestRate memory interestRate_) {
         interestRate_ = IKpiLinkedRate.InterestRate({
             maxRate: _kpiLinkedRateStorage().maxRate,
             baseRate: _kpiLinkedRateStorage().baseRate,
@@ -88,7 +86,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         });
     }
 
-    function _getImpactData() internal view returns (IKpiLinkedRate.ImpactData memory impactData_) {
+    function _getImpactData() internal view override returns (IKpiLinkedRate.ImpactData memory impactData_) {
         impactData_ = IKpiLinkedRate.ImpactData({
             maxDeviationCap: _kpiLinkedRateStorage().maxDeviationCap,
             baseLine: _kpiLinkedRateStorage().baseLine,
@@ -98,7 +96,7 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         });
     }
 
-    function _getKpiOracle() internal view returns (address kpiOracle_) {
+    function _getKpiOracle() internal view override returns (address kpiOracle_) {
         kpiOracle_ = _kpiLinkedRateStorage().kpiOracle;
     }
 

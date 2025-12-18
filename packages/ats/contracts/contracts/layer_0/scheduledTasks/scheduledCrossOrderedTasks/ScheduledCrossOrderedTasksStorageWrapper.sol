@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IScheduledCrossOrderedTasks
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from "../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol";
-import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE, COUPON_LISTING_TASK_TYPE } from "../../constants/values.sol";
+import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE } from "contracts/layer_0/constants/values.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
 } from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import {
+    IScheduledCrossOrderedTasks
+} from "contracts/layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
 
 abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAdjustmentsStorageWrapper {
-    function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes memory _newData) internal {
+    function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes memory _newData) internal override {
         ScheduledTasksLib.addScheduledTask(_scheduledCrossOrderedTaskStorage(), _newScheduledTimestamp, _newData);
     }
 
@@ -30,11 +30,18 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
             );
     }
 
+    function _callTriggerPendingScheduledCrossOrderedTasks() internal override returns (uint256) {
+        if (_getScheduledCrossOrderedTaskCount() == 0) {
+            return 0;
+        }
+        return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
+    }
+
     function _onScheduledCrossOrderedTaskTriggered(
         uint256 /*_pos*/,
         uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
-    ) internal {
+    ) internal override {
         bytes memory data = _scheduledTask.data;
 
         if (data.length == 0) return;
@@ -49,20 +56,20 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
             _triggerScheduledBalanceAdjustments(1);
             return;
         }
-        if (taskType == COUPON_LISTING_TASK_TYPE) {
-            _triggerScheduledCouponListing(1);
-            return;
-        }
+
+        _postOnScheduledCrossOrderedTaskTriggered(taskType);
     }
 
-    function _getScheduledCrossOrderedTaskCount() internal view returns (uint256) {
+    function _postOnScheduledCrossOrderedTaskTriggered(bytes32 taskType) internal virtual {}
+
+    function _getScheduledCrossOrderedTaskCount() internal view override returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledCrossOrderedTaskStorage());
     }
 
     function _getScheduledCrossOrderedTasks(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
+    ) internal view override returns (ScheduledTask[] memory scheduledTask_) {
         return ScheduledTasksLib.getScheduledTasks(_scheduledCrossOrderedTaskStorage(), _pageIndex, _pageLength);
     }
 

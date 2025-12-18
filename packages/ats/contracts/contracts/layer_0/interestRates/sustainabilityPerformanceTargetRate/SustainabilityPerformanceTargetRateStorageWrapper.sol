@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { PauseStorageWrapper } from "../../core/pause/PauseStorageWrapper.sol";
 import {
     _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION
-} from "../../../layer_2/constants/storagePositions.sol";
+} from "contracts/layer_2/constants/storagePositions.sol";
 import {
     ISustainabilityPerformanceTargetRate
-} from "../../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { KpiLinkedRateStorageWrapper } from "../kpiLinkedRate/KpiLinkedRateStorageWrapper.sol";
 
 abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinkedRateStorageWrapper {
@@ -20,8 +19,10 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
         bool initialized;
     }
 
-    function _setSPTInterestRate(ISustainabilityPerformanceTargetRate.InterestRate calldata _newInterestRate) internal {
-        _triggerScheduledCrossOrderedTasks(0);
+    function _setSPTInterestRate(
+        ISustainabilityPerformanceTargetRate.InterestRate calldata _newInterestRate
+    ) internal override {
+        _callTriggerPendingScheduledCrossOrderedTasks();
         SustainabilityPerformanceTargetRateDataStorage
             storage sustainabilityPerformanceTargetRateDataStorage = _sustainabilityPerformanceTargetRateStorage();
         sustainabilityPerformanceTargetRateDataStorage.baseRate = _newInterestRate.baseRate;
@@ -32,8 +33,8 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
     function _setSPTImpactData(
         ISustainabilityPerformanceTargetRate.ImpactData calldata _newImpactData,
         address _project
-    ) internal {
-        _triggerScheduledCrossOrderedTasks(0);
+    ) internal override {
+        _callTriggerPendingScheduledCrossOrderedTasks();
         ISustainabilityPerformanceTargetRate.ImpactData
             storage impactData = _sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
         impactData.baseLine = _newImpactData.baseLine;
@@ -45,6 +46,7 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
     function _getSPTInterestRate()
         internal
         view
+        override
         returns (ISustainabilityPerformanceTargetRate.InterestRate memory interestRate_)
     {
         SustainabilityPerformanceTargetRateDataStorage
@@ -59,7 +61,7 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
 
     function _getSPTImpactDataFor(
         address _project
-    ) internal view returns (ISustainabilityPerformanceTargetRate.ImpactData memory impactData_) {
+    ) internal view override returns (ISustainabilityPerformanceTargetRate.ImpactData memory impactData_) {
         return _sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
     }
 
