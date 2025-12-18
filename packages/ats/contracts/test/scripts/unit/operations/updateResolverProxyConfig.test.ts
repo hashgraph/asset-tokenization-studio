@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Unit tests for updateResolverProxyConfig operation.
+ * Unit tests for updateResolverProxy* operations.
  *
- * Tests parameter-based action detection and input validation logic.
- * These tests verify the operation correctly determines which update
- * method to call based on the provided parameters.
+ * Tests the three explicit update methods and input validation logic.
+ * These tests verify correct method dispatch based on which explicit
+ * method is called.
  *
  * @module test/scripts/unit/operations/updateResolverProxyConfig.test
  */
@@ -14,32 +14,52 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
+  updateResolverProxyVersion,
   updateResolverProxyConfig,
+  updateResolverProxyResolver,
   getResolverProxyConfigInfo,
   configureLogger,
   LogLevel,
 } from "@scripts/infrastructure";
 import { BLR_VERSIONS, deployResolverProxyFixture } from "@test";
 
-describe("updateResolverProxyConfig - Unit Tests", () => {
+describe("updateResolverProxy* - Unit Tests", () => {
   before(() => {
     configureLogger({ level: LogLevel.SILENT });
   });
 
-  describe("Parameter-Based Action Detection", () => {
-    it("should return updateType 'version' when only newVersion is provided", async () => {
+  describe("updateResolverProxyVersion", () => {
+    it("should return updateType 'version'", async () => {
       const { deployer, proxyAddress, initialVersion } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyConfig(deployer, {
-        proxyAddress,
-        newVersion: initialVersion + 1,
-      });
+      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
 
       expect(result.success).to.be.true;
       expect(result.updateType).to.equal("version");
     });
 
-    it("should return updateType 'config' when newVersion and newConfigurationId are provided", async () => {
+    it("should fail with invalid proxy address format", async () => {
+      const { deployer } = await loadFixture(deployResolverProxyFixture);
+
+      const result = await updateResolverProxyVersion(deployer, "0xinvalid", 2, { confirmations: 0 });
+
+      expect(result.success).to.be.false;
+      expect(result.error).to.exist;
+    });
+
+    it("should fail when proxy address does not exist", async () => {
+      const { deployer } = await loadFixture(deployResolverProxyFixture);
+      const nonExistentAddress = "0x1234567890123456789012345678901234567890";
+
+      const result = await updateResolverProxyVersion(deployer, nonExistentAddress, 2, { confirmations: 0 });
+
+      expect(result.success).to.be.false;
+      expect(result.error).to.exist;
+    });
+  });
+
+  describe("updateResolverProxyConfig", () => {
+    it("should return updateType 'config'", async () => {
       const { deployer, proxyAddress, blr, initialVersion, facetAddresses } =
         await loadFixture(deployResolverProxyFixture);
 
@@ -57,17 +77,48 @@ describe("updateResolverProxyConfig - Unit Tests", () => {
       // Create at version 2
       await blr.createConfiguration(altConfigId, facetConfigs);
 
-      const result = await updateResolverProxyConfig(deployer, {
-        proxyAddress,
-        newVersion: initialVersion + 1,
-        newConfigurationId: altConfigId,
+      const result = await updateResolverProxyConfig(deployer, proxyAddress, altConfigId, initialVersion + 1, {
+        confirmations: 0,
       });
 
       expect(result.success).to.be.true;
       expect(result.updateType).to.equal("config");
     });
 
-    it("should return updateType 'resolver' when all parameters are provided", async () => {
+    it("should fail with invalid proxy address format", async () => {
+      const { deployer } = await loadFixture(deployResolverProxyFixture);
+
+      const result = await updateResolverProxyConfig(
+        deployer,
+        "0xinvalid",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        2,
+        { confirmations: 0 },
+      );
+
+      expect(result.success).to.be.false;
+      expect(result.error).to.exist;
+    });
+
+    it("should fail when proxy address does not exist", async () => {
+      const { deployer } = await loadFixture(deployResolverProxyFixture);
+      const nonExistentAddress = "0x1234567890123456789012345678901234567890";
+
+      const result = await updateResolverProxyConfig(
+        deployer,
+        nonExistentAddress,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        2,
+        { confirmations: 0 },
+      );
+
+      expect(result.success).to.be.false;
+      expect(result.error).to.exist;
+    });
+  });
+
+  describe("updateResolverProxyResolver", () => {
+    it("should return updateType 'resolver'", async () => {
       const { deployer, proxyAddress, blr, blrAddress, initialVersion, facetAddresses } =
         await loadFixture(deployResolverProxyFixture);
 
@@ -85,53 +136,63 @@ describe("updateResolverProxyConfig - Unit Tests", () => {
       // Create at version 2
       await blr.createConfiguration(altConfigId, facetConfigs);
 
-      const result = await updateResolverProxyConfig(deployer, {
+      const result = await updateResolverProxyResolver(
+        deployer,
         proxyAddress,
-        newVersion: initialVersion + 1,
-        newConfigurationId: altConfigId,
-        newBlrAddress: blrAddress, // Using same BLR for test
-      });
+        blrAddress,
+        altConfigId,
+        initialVersion + 1,
+        { confirmations: 0 },
+      );
 
       expect(result.success).to.be.true;
       expect(result.updateType).to.equal("resolver");
     });
-  });
 
-  describe("Input Validation", () => {
     it("should fail with invalid proxy address format", async () => {
-      const { deployer } = await loadFixture(deployResolverProxyFixture);
+      const { deployer, blrAddress } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyConfig(deployer, {
-        proxyAddress: "0xinvalid",
-        newVersion: 2,
-      });
+      const result = await updateResolverProxyResolver(
+        deployer,
+        "0xinvalid",
+        blrAddress,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        2,
+        { confirmations: 0 },
+      );
 
       expect(result.success).to.be.false;
       expect(result.error).to.exist;
     });
 
-    it("should fail with invalid BLR address format when provided", async () => {
+    it("should fail with invalid BLR address format", async () => {
       const { deployer, proxyAddress } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyConfig(deployer, {
+      const result = await updateResolverProxyResolver(
+        deployer,
         proxyAddress,
-        newVersion: 2,
-        newConfigurationId: "0x0000000000000000000000000000000000000000000000000000000000000001",
-        newBlrAddress: "not-an-address",
-      });
+        "not-an-address",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        2,
+        { confirmations: 0 },
+      );
 
       expect(result.success).to.be.false;
       expect(result.error).to.exist;
     });
 
     it("should fail when proxy address does not exist", async () => {
-      const { deployer } = await loadFixture(deployResolverProxyFixture);
+      const { deployer, blrAddress } = await loadFixture(deployResolverProxyFixture);
       const nonExistentAddress = "0x1234567890123456789012345678901234567890";
 
-      const result = await updateResolverProxyConfig(deployer, {
-        proxyAddress: nonExistentAddress,
-        newVersion: 2,
-      });
+      const result = await updateResolverProxyResolver(
+        deployer,
+        nonExistentAddress,
+        blrAddress,
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        2,
+        { confirmations: 0 },
+      );
 
       expect(result.success).to.be.false;
       expect(result.error).to.exist;
@@ -142,10 +203,7 @@ describe("updateResolverProxyConfig - Unit Tests", () => {
     it("should return all required fields on success", async () => {
       const { deployer, proxyAddress, initialVersion } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyConfig(deployer, {
-        proxyAddress,
-        newVersion: initialVersion + 1,
-      });
+      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
 
       expect(result.success).to.be.true;
       expect(result.proxyAddress).to.equal(proxyAddress);
@@ -162,10 +220,7 @@ describe("updateResolverProxyConfig - Unit Tests", () => {
       const { deployer } = await loadFixture(deployResolverProxyFixture);
       const invalidAddress = "0x1234567890123456789012345678901234567890";
 
-      const result = await updateResolverProxyConfig(deployer, {
-        proxyAddress: invalidAddress,
-        newVersion: 2,
-      });
+      const result = await updateResolverProxyVersion(deployer, invalidAddress, 2, { confirmations: 0 });
 
       expect(result.success).to.be.false;
       expect(result.error).to.exist;
@@ -176,10 +231,7 @@ describe("updateResolverProxyConfig - Unit Tests", () => {
     it("should return previous and new config with correct versions", async () => {
       const { deployer, proxyAddress, initialVersion } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyConfig(deployer, {
-        proxyAddress,
-        newVersion: initialVersion + 1,
-      });
+      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
 
       expect(result.success).to.be.true;
       expect(result.previousConfig?.version).to.equal(BLR_VERSIONS.FIRST);
