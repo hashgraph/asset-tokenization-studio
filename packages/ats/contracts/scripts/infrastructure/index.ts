@@ -114,7 +114,7 @@ export type { DeployProxyOptions, DeployProxyResult } from "./operations/deployP
 
 export { deployTransparentProxy } from "./operations/transparentProxyDeployment";
 
-export { upgradeProxy } from "./operations/upgradeProxy";
+export { upgradeProxy, upgradeMultipleProxies, proxyNeedsUpgrade, prepareUpgrade } from "./operations/upgradeProxy";
 
 export { registerFacets, type RegisterFacetsOptions, type RegisterFacetsResult } from "./operations/registerFacets";
 
