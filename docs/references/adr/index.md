@@ -1,3 +1,9 @@
+---
+id: index
+title: Architecture Decision Records (ADRs)
+sidebar_label: ADRs
+---
+
 # Architecture Decision Records (ADRs)
 
 This directory contains Architecture Decision Records (ADRs) for the Asset Tokenization Studio monorepo.

@@ -158,13 +158,18 @@ Strictly limited to:
 ├── apps/
 │   ├── ats/
 │   ├── mass-payout/
-│   └── docs/                # [NEW] Docusaurus App (User Hub)
+│   └── docs/                # Docusaurus App (Documentation Hub)
 ├── packages/
-├── docs/                    # [NEW] Technical Global Docs
-│   ├── adr/                 # Architecture Decisions (0001-xxx.md)
-│   ├── proposals/           # EPs / Feature Specs (0001-xxx.md)
-│   ├── guides/              # Developer Cookbooks
-│   └── workflows/           # CI/CD explanations
+├── docs/                    # Global Documentation (consumed by Docusaurus)
+│   ├── intro.md             # Documentation landing page
+│   ├── guides/              # Tutorials and How-To Guides
+│   │   ├── developer/       # Developer guides (monorepo, CI/CD, contracts)
+│   │   └── user/            # User manuals and guides
+│   ├── api/                 # API Documentation (auto-generated)
+│   │   └── ats-contracts/   # Solidity contract references
+│   └── references/          # Reference Documentation
+│       ├── adr/             # Architecture Decision Records
+│       └── proposals/       # Enhancement Proposals
 ├── CONTRIBUTING.md          # Dev setup & Branching rules
 └── README.md                # Project Landing Page
 ```
@@ -172,30 +177,35 @@ Strictly limited to:
 #### Naming Conventions
 
 - All documentation files use **kebab-case** (lowercase with hyphens)
-- ADRs: `docs/adr/NNNN-short-description.md` (e.g., `0001-adopt-docs-as-code.md`)
-- EPs: `docs/proposals/NNNN-feature-name.md` (e.g., `0015-staking-rewards.md`)
-- Strict numerical sequence to preserve chronological timeline
-- Scope (ATS vs. Mass Payout) defined in file metadata, not filename
+- ADRs: `docs/references/adr/NNNN-short-description.md` (e.g., `0001-adopt-docs-as-code-philosophy.md`)
+- EPs: `docs/references/proposals/NNNN-feature-name.md` (e.g., `0001-staking-rewards.md`)
+- Developer guides: `docs/guides/developer/topic-name.md`
+- User guides: `docs/guides/user/topic-name.md`
+- Strict numerical sequence for ADRs and EPs to preserve chronological timeline
+- Scope (ATS vs. Mass Payout vs. Global) defined in file frontmatter metadata
 
 #### ADR and EP Process
 
 **ADR Creation:**
 
-1. Copy template: `cp docs/adr/template.md.example docs/adr/NNNN-decision.md`
-2. Fill in context, decision drivers, options, and consequences
-3. Set status: Proposed, Accepted, Rejected, or Superseded
-4. Create PR for review
-5. Merge when approved
+1. Copy template: `cp docs/references/adr/template.md.example docs/references/adr/NNNN-decision.md`
+2. Fill in YAML frontmatter (id, title, status, date, authors, scope)
+3. Complete all sections: context, decision drivers, options, consequences
+4. Set status emoji in visible table: 📝 Proposed / ✅ Accepted / ❌ Rejected / 🔄 Superseded
+5. Create PR for review
+6. Merge when approved
 
 **EP Creation:**
 
-1. Copy template: `cp docs/proposals/template.md.example docs/proposals/NNNN-feature.md`
-2. Fill in summary, motivation, design, implementation details
-3. Create **Draft PR** for community discussion
-4. Iterate based on feedback
-5. Change status to Implementable when approved
-6. Merge and begin implementation
-7. Update status to Implemented when complete
+1. Copy template: `cp docs/references/proposals/template.md.example docs/references/proposals/NNNN-feature.md`
+2. Fill in YAML frontmatter (id, title, status, created, authors, scope)
+3. Complete all sections: summary, motivation, design, implementation details, testing strategy
+4. Set status emoji in visible table: 📝 Draft / 🔍 Provisional / ✅ Implementable / 🚀 Implemented / ❌ Rejected
+5. Create **Draft PR** for community discussion
+6. Iterate based on feedback
+7. Change status to Implementable when approved
+8. Merge and begin implementation
+9. Update status to Implemented when complete
 
 ## Consequences
 
@@ -247,22 +257,41 @@ Strictly limited to:
 
 ## Implementation Status
 
-**Status**: ✅ Implemented (2025-12-16)
+**Status**: ✅ Implemented (2025-12-17)
 
-The following have been created:
+The following have been implemented:
 
-- Documentation directory structure (`docs/adr/`, `docs/proposals/`, `docs/guides/`, `docs/workflows/`)
-- ADR and EP templates
-- Docusaurus application at `apps/docs`
-- Updated root `README.md` with documentation strategy
-- Comprehensive `CONTRIBUTING.md` with ADR/EP processes
-- Documentation scripts in root `package.json`
+- **Directory Structure**:
+  - `docs/guides/developer/` - Developer tutorials and guides (including CI/CD workflows)
+  - `docs/guides/user/` - User manuals and guides
+  - `docs/api/` - API documentation (auto-generated references)
+  - `docs/references/adr/` - Architecture Decision Records
+  - `docs/references/proposals/` - Enhancement Proposals
+- **Templates**: ADR and EP templates with YAML frontmatter
+- **Docusaurus Application**:
+  - Located at `apps/docs`
+  - Configured with proper sidebars and navigation
+  - All documentation files include proper frontmatter metadata
+- **Initial Documentation**:
+  - ADR-0001: Docs-as-Code Philosophy (this document)
+  - Developer guides: Monorepo Migration, ATS Contracts (deployment, adding facets, upgrading, documenting)
+  - Index pages for all major sections
+- **Build Scripts**: Documentation commands in root `package.json` (`docs:dev`, `docs:build`, `docs:serve`)
+
+**Completed Migration Items:**
+
+- ✅ Created structured documentation hierarchy
+- ✅ Migrated ATS contracts guides from package README
+- ✅ Set up Docusaurus with proper navigation
+- ✅ Established ADR and EP processes with templates
+- ✅ Added frontmatter metadata to all documentation files
 
 **Next Steps:**
 
-1. Migrate relevant existing documentation from Confluence
-2. Create initial developer guides for common tasks
-3. Set up automated TypeDoc and solidity-docgen generation
-4. Configure GitHub Pages deployment for docs site
-5. Train team on ADR/EP processes
-6. Create first Enhancement Proposals for upcoming features
+1. Migrate remaining relevant documentation from Confluence
+2. Create user guides for ATS and Mass Payout applications
+3. Document CI/CD workflows in detail
+4. Set up automated TypeDoc and solidity-docgen generation
+5. Configure GitHub Pages deployment for documentation site
+6. Create Enhancement Proposals for upcoming features
+7. Add API documentation for SDKs

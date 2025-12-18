@@ -1,3 +1,9 @@
+---
+id: index
+title: Enhancement Proposals (EPs)
+sidebar_label: Enhancement Proposals
+---
+
 # Enhancement Proposals (EPs)
 
 This directory contains Enhancement Proposals (EPs) for the Asset Tokenization Studio monorepo.

@@ -1430,5 +1430,15 @@ Use the **Factory.getRegulationDetails** method.
 
 ### Add and Remove accounts from Control List
 
-- The account applying the roles must have the _“Control list Role”_ (check Manage Asset Roles)
+- The account applying the roles must have the _"Control list Role"_ (check Manage Asset Roles)
 - Use the **Security.addToControlList** and **Security.removeFromControlList** methods
+
+---
+
+## 📚 Documentation
+
+For more information about the project, see:
+
+- [Guides](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/guides)
+- [API Documentation](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/api)
+- [References](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/references)

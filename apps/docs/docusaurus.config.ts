@@ -39,13 +39,7 @@ const config: Config = {
     [
       "classic",
       {
-        docs: {
-          sidebarPath: "./sidebars.ts",
-          // Link to the GitHub repository for "Edit this page" feature
-          editUrl: "https://github.com/hashgraph/asset-tokenization-studio/tree/main/",
-          // Point to the root docs directory
-          path: "../../docs",
-        },
+        docs: false, // Disable default docs plugin
         blog: false, // Blog disabled
         theme: {
           customCss: "./src/css/custom.css",
@@ -53,6 +47,45 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
+
+  plugins: [
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "ats",
+        path: "../../docs/ats",
+        routeBasePath: "ats",
+        sidebarPath: "./sidebars-ats.ts",
+        editUrl: "https://github.com/hashgraph/asset-tokenization-studio/tree/main/",
+      },
+    ],
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "mass-payout",
+        path: "../../docs/mass-payout",
+        routeBasePath: "mass-payout",
+        sidebarPath: "./sidebars-mass-payout.ts",
+        editUrl: "https://github.com/hashgraph/asset-tokenization-studio/tree/main/",
+      },
+    ],
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "references",
+        path: "../../docs/references",
+        routeBasePath: "references",
+        sidebarPath: "./sidebars-references.ts",
+        editUrl: "https://github.com/hashgraph/asset-tokenization-studio/tree/main/",
+      },
+    ],
+  ],
+
+  markdown: {
+    mermaid: true,
+  },
+
+  themes: ["@docusaurus/theme-mermaid"],
 
   themeConfig: {
     // Social card for link previews (optional)
@@ -68,28 +101,25 @@ const config: Config = {
       },
       items: [
         {
-          type: "docSidebar",
-          sidebarId: "docsSidebar",
+          type: "doc",
+          docId: "intro",
+          docsPluginId: "ats",
           position: "left",
-          label: "Documentation",
+          label: "ATS",
         },
         {
-          type: "docSidebar",
-          sidebarId: "guidesSidebar",
+          type: "doc",
+          docId: "intro",
+          docsPluginId: "mass-payout",
           position: "left",
-          label: "Guides",
+          label: "Mass Payout",
         },
         {
-          type: "docSidebar",
-          sidebarId: "adrSidebar",
+          type: "doc",
+          docId: "index",
+          docsPluginId: "references",
           position: "left",
-          label: "ADRs",
-        },
-        {
-          type: "docSidebar",
-          sidebarId: "proposalsSidebar",
-          position: "left",
-          label: "Enhancement Proposals",
+          label: "References",
         },
         {
           href: "https://github.com/hashgraph/asset-tokenization-studio",
