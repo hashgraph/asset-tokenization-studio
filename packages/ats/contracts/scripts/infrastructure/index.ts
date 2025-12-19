@@ -147,6 +147,20 @@ export {
 } from "./operations/deployResolverProxy";
 
 export {
+  ResolverProxyUpdateType,
+  ResolverProxyUpdateOptions,
+  updateResolverProxyVersion,
+  updateResolverProxyConfig,
+  updateResolverProxyResolver,
+  getResolverProxyConfigInfo,
+  type UpdateResolverProxyVersionOptions,
+  type UpdateResolverProxyConfigOptions,
+  type UpdateResolverProxyResolverOptions,
+  type UpdateResolverProxyConfigResult,
+  type ResolverProxyConfigInfo,
+} from "./operations/updateResolverProxyConfig";
+
+export {
   generateRegistryPipeline,
   DEFAULT_REGISTRY_CONFIG,
   type RegistryGenerationConfig,

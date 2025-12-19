@@ -52,6 +52,7 @@ export * from "./infrastructure/operations/blrDeployment";
 export * from "./infrastructure/operations/proxyAdminDeployment";
 export * from "./infrastructure/operations/facetDeployment";
 export * from "./infrastructure/operations/deployResolverProxy";
+export * from "./infrastructure/operations/updateResolverProxyConfig";
 export * from "./infrastructure/operations/generateRegistryPipeline";
 
 // Infrastructure utilities
