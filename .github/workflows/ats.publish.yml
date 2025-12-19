@@ -31,10 +31,10 @@ jobs:
     # Only run if manual trigger OR tag push (already filtered by v*-ats pattern)
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
     outputs:
-        artifact-name: ${{ steps.prepare-package-data.outputs.artifact-name }}
+      artifact-name: ${{ steps.prepare-package-data.outputs.artifact-name }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
           egress-policy: audit
 
@@ -67,7 +67,7 @@ jobs:
             VERSION=$(jq -r '.version' './package.json')
             PKG_NAME="hashgraph-asset-tokenization-contracts-${VERSION}.tgz"
           echo "::endgroup::"
-          
+
           echo "::group::Build Package"
             echo "Building package: ${PKG_NAME}"
             if ! npm pack; then
@@ -78,7 +78,7 @@ jobs:
             echo "Verify package ${PKG_NAME} created successfully."
             ls -lh ${PKG_NAME}
           echo "::endgroup::"
-          
+
           echo "artifact-name=${PKG_NAME}" >> $GITHUB_OUTPUT
         working-directory: packages/ats/contracts
 
@@ -99,7 +99,7 @@ jobs:
       artifact-name: ${{ steps.prepare-package-data.outputs.artifact-name }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
           egress-policy: audit
 
@@ -134,7 +134,7 @@ jobs:
             VERSION=$(jq -r '.version' './package.json')
             PKG_NAME="hashgraph-asset-tokenization-sdk-${VERSION}.tgz"
           echo "::endgroup::"
-          
+
           echo "::group::Build Package"
             echo "Building package: ${PKG_NAME}"
             if ! npm pack; then
@@ -145,7 +145,7 @@ jobs:
             echo "Verify package ${PKG_NAME} created successfully."
             ls -lh ${PKG_NAME}
           echo "::endgroup::"
-          
+
           echo "artifact-name=${PKG_NAME}" >> $GITHUB_OUTPUT
         working-directory: packages/ats/sdk
 
@@ -163,20 +163,20 @@ jobs:
       - prepare-sdk
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
           egress-policy: audit
 
       - name: Checkout repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          fetch-depth: '1'
+          fetch-depth: "1"
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22.20.0
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install NPM latest
         run: npm install -g npm@11.7.0
@@ -199,14 +199,14 @@ jobs:
               PUBLISH_ARGS="${PUBLISH_ARGS} --dry-run"
             fi
             echo "::endgroup::"
-          
+
           echo "::group::Publish ATS SDK Package ${{ needs.prepare-sdk.outputs.artifact-name }} with args: ${PUBLISH_ARGS}"
             if ! npm publish ./${{ needs.prepare-sdk.outputs.artifact-name }} ${PUBLISH_ARGS}; then
                 echo "❌ Failed to publish ATS SDK package: ${{ needs.prepare-sdk.outputs.artifact-name }}"
                 exit 1
             fi
           echo "::endgroup::"
-          
+
           echo "::group::Publish ATS SDK Package ${{ needs.prepare-sdk.outputs.artifact-name }} with args: ${PUBLISH_ARGS}"
             if ! npm publish ./${{ needs.prepare-sdk.outputs.artifact-name }} ${PUBLISH_ARGS}; then
                 echo "❌ Failed to publish ATS SDK package: ${{ needs.prepare-sdk.outputs.artifact-name }}"
@@ -225,7 +225,7 @@ jobs:
     if: ${{ always() }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
           egress-policy: audit
 
