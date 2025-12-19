@@ -324,7 +324,6 @@ sequenceDiagram
 - **Changesets documentation**: [Changesets Intro](https://github.com/changesets/changesets/blob/main/docs/intro-to-using-changesets.md)
 - **Check pending releases**: `npm run changeset:status`
 - **Preview releases**: `npm run release:preview`
-- **Local development**: See `CLAUDE.md` for complete development setup
 
 ## Quick Commands
 

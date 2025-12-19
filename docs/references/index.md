@@ -33,12 +33,18 @@ EPs enable transparent planning and community input before implementation.
 
 ### API Documentation
 
-Auto-generated API documentation from code:
+Auto-generated API documentation is available within each package:
 
 #### Solidity Contracts
 
-- **ATS Contracts API** - Generated from NatSpec comments _(coming soon)_
-- **Mass Payout Contracts API** - Generated from NatSpec comments _(coming soon)_
+Contract documentation is generated using NatSpec and hardhat-dodoc:
+
+- **ATS Contracts**: Run `npm run doc` in `packages/ats/contracts/`
+  - Output: `packages/ats/contracts/docs/api/`
+- **Mass Payout Contracts**: Run `npm run doc` in `packages/mass-payout/contracts/`
+  - Output: `packages/mass-payout/contracts/docs/api/`
+
+Generated documentation remains in package directories for developer reference during development.
 
 #### TypeScript SDKs
 

@@ -25,9 +25,9 @@ This project is governed by the [Contributor Covenant Code of Conduct](https://g
 
 Before contributing, please:
 
-1. **Read the Documentation**: Familiarize yourself with the project by reading the [README.md](README.md) and browsing the [documentation site](apps/docs).
+1. **Read the Documentation**: Familiarize yourself with the project by reading the [README.md](README.md) and browsing the [complete documentation](https://hashgraph.github.io/asset-tokenization-studio/).
 2. **Check Existing Issues**: Look for existing issues or create a new one to discuss your proposed changes.
-3. **Review Enhancement Proposals**: Check [existing EPs](docs/proposals) to see if similar features are already being discussed.
+3. **Review Enhancement Proposals**: Check [existing EPs](docs/references/proposals/) to see if similar features are already being discussed.
 4. **Join the Community**: Connect with other contributors (see [Community](#community) section).
 
 ## Development Environment Setup
@@ -378,18 +378,18 @@ Document significant architectural decisions.
 
 ```bash
 # Copy the template
-cp docs/adr/template.md.example docs/adr/0001-your-decision.md
+cp docs/references/adr/template.md.example docs/references/adr/0001-your-decision.md
 
 # Edit the ADR with your decision details
 
 # Create a PR for review
 git checkout -b docs/adr-your-decision
-git add docs/adr/0001-your-decision.md
+git add docs/references/adr/0001-your-decision.md
 git commit -m "docs(adr): add ADR for your decision"
 git push origin docs/adr-your-decision
 ```
 
-See [docs/adr/README.md](docs/adr/README.md) for more details.
+See [ADR Index](docs/references/adr/index.md) for more details and the ADR template.
 
 #### 3. Enhancement Proposals (EPs)
 
@@ -406,13 +406,13 @@ Propose new features before implementation.
 
 ```bash
 # Copy the template
-cp docs/proposals/template.md.example docs/proposals/0001-your-feature.md
+cp docs/references/proposals/template.md.example docs/references/proposals/0001-your-feature.md
 
 # Fill in the proposal details
 
 # Create a DRAFT Pull Request
 git checkout -b proposal/your-feature
-git add docs/proposals/0001-your-feature.md
+git add docs/references/proposals/0001-your-feature.md
 git commit -m "docs(ep): propose your feature"
 git push origin proposal/your-feature
 
@@ -422,7 +422,7 @@ git push origin proposal/your-feature
 # Merge when approved
 ```
 
-See [docs/proposals/README.md](docs/proposals/README.md) for more details.
+See [Enhancement Proposals documentation](docs/references/proposals/index.md) for more details.
 
 #### 4. Developer Guides
 
@@ -435,7 +435,7 @@ Step-by-step tutorials for complex tasks.
 - Integrating a custodial wallet
 - Deploying to production
 
-Place guides in `docs/guides/` and follow the format outlined in [docs/guides/README.md](docs/guides/README.md).
+Place product-specific guides in `docs/ats/` or `docs/mass-payout/` directories. For cross-product guides, use `docs/references/guides/`.
 
 #### 5. Documentation Site
 
@@ -645,10 +645,11 @@ Follow the same process, but:
 ## Additional Resources
 
 - [Project README](README.md)
-- [Architecture Decision Records](docs/adr)
-- [Enhancement Proposals](docs/proposals)
-- [Developer Guides](docs/guides)
-- [CLAUDE.md](CLAUDE.md) - Project instructions for Claude Code
+- [Architecture Decision Records](docs/references/adr/)
+- [Enhancement Proposals](docs/references/proposals/)
+- [ATS Documentation](docs/ats/)
+- [Mass Payout Documentation](docs/mass-payout/)
+- [General Guides](docs/references/guides/)
 - [Hedera Documentation](https://docs.hedera.com)
 
 ## Questions?

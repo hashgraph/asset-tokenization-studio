@@ -66,46 +66,29 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
 
 ## Documentation
 
-This project follows a **"Docs-as-Code"** philosophy, treating documentation with the same rigor as software. We maintain three distinct documentation layers:
+📚 **For complete documentation, visit:** [https://hashgraph.github.io/asset-tokenization-studio/](https://hashgraph.github.io/asset-tokenization-studio/)
 
-### Layer 1: Technical Documentation (Target: Developers)
+This project follows a **"Docs-as-Code"** philosophy, treating documentation with the same rigor as software. We maintain comprehensive documentation organized by product:
 
-Located in the repository root and co-located within packages:
+### Product Documentation
 
-- **Root README.md**: High-level project overview
-- **Module READMEs**: Package-specific documentation in `packages/` and `apps/`
-- **CONTRIBUTING.md**: Engineer's handbook covering GitFlow, environment setup, and release processes
-- **Developer Guides** (`docs/guides/`): Step-by-step tutorials for complex tasks
-- **Architecture Decision Records** (`docs/adr/`): Historical record of architectural decisions
-- **Enhancement Proposals** (`docs/proposals/`): Feature specifications and design proposals
+- **[ATS Documentation](docs/ats/)** - Asset Tokenization Studio guides, tutorials, and API references
+  - [Getting Started](docs/ats/getting-started/)
+  - [User Guides](docs/ats/user-guides/)
+  - [Developer Guides](docs/ats/developer-guides/)
 
-### Layer 2: Documentation Hub (Target: All Users)
+- **[Mass Payout Documentation](docs/mass-payout/)** - Scheduler Payment Distribution guides and references
+  - [Getting Started](docs/mass-payout/getting-started/)
+  - [User Guides](docs/mass-payout/user-guides/)
+  - [Developer Guides](docs/mass-payout/developer-guides/)
 
-A public-facing Docusaurus site located at `apps/docs` that aggregates:
+### Reference Documentation
 
-- **Product Manuals**: End-user guides and tutorials
-- **Developer Guides**: Synced from Layer 1
-- **API Reference**: Auto-generated from TypeScript (TypeDoc) and Solidity (solidity-docgen)
-- **Architecture Documentation**: System design and patterns
+- **[Architecture Decision Records (ADRs)](docs/references/adr/)** - Historical record of architectural decisions
+- **[Enhancement Proposals (EPs)](docs/references/proposals/)** - Feature specifications and design proposals
+- **[General Guides](docs/references/guides/)** - Cross-product guides (monorepo, CI/CD workflows)
 
-### Layer 3: Internal Documentation (Target: Employees)
-
-Sensitive information kept in Confluence (restricted access):
-
-- Credentials and client data
-- HR processes and meeting minutes
-- Strategic roadmap discussions (pre-public phase)
-
-### ADRs vs. Enhancement Proposals
-
-We distinguish between two types of decision documents:
-
-- **ADRs (Architecture Decision Records)**: Document decisions **already made**, providing historical context and consequences
-- **EPs (Enhancement Proposals)**: Propose **new features or changes** before implementation, enabling community discussion via Pull Requests
-
-This approach is inspired by industry standards like Kubernetes KEPs, Ethereum EIPs, and Hedera HIPs.
-
-### Documentation Commands
+### Local Documentation Development
 
 ```bash
 # Start documentation site locally
@@ -117,12 +100,6 @@ npm run docs:build
 # Serve built documentation
 npm run docs:serve
 ```
-
-For more details, see:
-
-- [How to Create an ADR](docs/adr/README.md)
-- [How to Submit an Enhancement Proposal](docs/proposals/README.md)
-- [Developer Guides](docs/guides/README.md)
 
 ## Architecture
 

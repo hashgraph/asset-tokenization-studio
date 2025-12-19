@@ -128,9 +128,9 @@ Location: Repository root and co-located within packages
 - **Root README.md**: High-level entry point, monorepo structure overview
 - **Module READMEs**: Package-specific tactical documentation
 - **CONTRIBUTING.md**: Engineer's handbook covering GitFlow, environment setup, release process
-- **Developer Guides** (`docs/guides/`): Step-by-step tutorials for complex tasks
-- **ADRs** (`docs/adr/`): Historical architectural decisions
-- **EPs** (`docs/proposals/`): Feature specifications and proposals
+- **Developer Guides** (`docs/[module]/guides/`): Step-by-step tutorials for complex tasks
+- **ADRs** (`docs/references/adr/`): Historical architectural decisions
+- **EPs** (`docs/references/proposals/`): Feature specifications and proposals
 
 **Layer 2: Documentation Hub (Target: All Users)**
 
@@ -151,36 +151,44 @@ Strictly limited to:
 - HR processes and internal meeting minutes
 - Strategic roadmap discussions (pre-public phase)
 
-#### Directory Structure
+#### Documentation Directory Structure
 
 ```
-/ (root)
-├── apps/
-│   ├── ats/
-│   ├── mass-payout/
-│   └── docs/                # Docusaurus App (Documentation Hub)
-├── packages/
-├── docs/                    # Global Documentation (consumed by Docusaurus)
-│   ├── intro.md             # Documentation landing page
-│   ├── guides/              # Tutorials and How-To Guides
-│   │   ├── developer/       # Developer guides (monorepo, CI/CD, contracts)
-│   │   └── user/            # User manuals and guides
-│   ├── api/                 # API Documentation (auto-generated)
-│   │   └── ats-contracts/   # Solidity contract references
-│   └── references/          # Reference Documentation
-│       ├── adr/             # Architecture Decision Records
-│       └── proposals/       # Enhancement Proposals
-├── CONTRIBUTING.md          # Dev setup & Branching rules
-└── README.md                # Project Landing Page
+docs/                        # Documentation source (consumed by Docusaurus)
+├── ats/                     # ATS product documentation
+│   ├── getting-started/     # Quick start and setup guides
+│   ├── user-guides/         # End-user guides
+│   ├── developer-guides/    # Developer documentation
+│   └── api/                 # API reference documentation
+├── mass-payout/             # Mass Payout product documentation
+│   ├── getting-started/     # Quick start and setup guides
+│   ├── user-guides/         # End-user guides
+│   ├── developer-guides/    # Developer documentation
+│   └── api/                 # API reference documentation
+├── references/              # Cross-product reference documentation
+│   ├── adr/                 # Architecture Decision Records
+│   ├── proposals/           # Enhancement Proposals
+│   └── guides/              # General guides (monorepo, CI/CD)
+└── images/                  # Shared images and assets
 ```
+
+**Location:** `docs/` directory at repository root, consumed by Docusaurus app at `apps/docs/`
+
+**Note on Auto-Generated API Documentation:**
+Contract documentation (NatSpec) is generated locally in `packages/*/contracts/docs/api/` using hardhat-dodoc. Generated files are gitignored and kept close to source code for developer reference, preventing the main documentation site from being bloated with hundreds of auto-generated files.
 
 #### Naming Conventions
 
 - All documentation files use **kebab-case** (lowercase with hyphens)
-- ADRs: `docs/references/adr/NNNN-short-description.md` (e.g., `0001-adopt-docs-as-code-philosophy.md`)
-- EPs: `docs/references/proposals/NNNN-feature-name.md` (e.g., `0001-staking-rewards.md`)
-- Developer guides: `docs/guides/developer/topic-name.md`
-- User guides: `docs/guides/user/topic-name.md`
+- **ADRs:** `docs/references/adr/NNNN-short-description.md` (e.g., `0001-adopt-docs-as-code-philosophy.md`)
+- **EPs:** `docs/references/proposals/NNNN-feature-name.md` (e.g., `0001-staking-rewards.md`)
+- **ATS Guides:**
+  - User guides: `docs/ats/user-guides/topic-name.md` (e.g., `creating-bond.md`)
+  - Developer guides: `docs/ats/developer-guides/topic-name.md` (e.g., `sdk-integration.md`)
+- **Mass Payout Guides:**
+  - User guides: `docs/mass-payout/user-guides/topic-name.md` (e.g., `importing-assets.md`)
+  - Developer guides: `docs/mass-payout/developer-guides/topic-name.md` (e.g., `sdk-integration.md`)
+- **General Guides:** `docs/references/guides/topic-name.md` (e.g., `monorepo-migration.md`, `ci-cd-workflows.md`)
 - Strict numerical sequence for ADRs and EPs to preserve chronological timeline
 - Scope (ATS vs. Mass Payout vs. Global) defined in file frontmatter metadata
 
@@ -254,44 +262,3 @@ Strictly limited to:
 - [Hedera Improvement Proposals (HIPs)](https://hips.hedera.com/)
 - [Architecture Decision Records (ADR) Pattern](https://adr.github.io/)
 - [Docusaurus Documentation](https://docusaurus.io/)
-
-## Implementation Status
-
-**Status**: ✅ Implemented (2025-12-17)
-
-The following have been implemented:
-
-- **Directory Structure**:
-  - `docs/guides/developer/` - Developer tutorials and guides (including CI/CD workflows)
-  - `docs/guides/user/` - User manuals and guides
-  - `docs/api/` - API documentation (auto-generated references)
-  - `docs/references/adr/` - Architecture Decision Records
-  - `docs/references/proposals/` - Enhancement Proposals
-- **Templates**: ADR and EP templates with YAML frontmatter
-- **Docusaurus Application**:
-  - Located at `apps/docs`
-  - Configured with proper sidebars and navigation
-  - All documentation files include proper frontmatter metadata
-- **Initial Documentation**:
-  - ADR-0001: Docs-as-Code Philosophy (this document)
-  - Developer guides: Monorepo Migration, ATS Contracts (deployment, adding facets, upgrading, documenting)
-  - Index pages for all major sections
-- **Build Scripts**: Documentation commands in root `package.json` (`docs:dev`, `docs:build`, `docs:serve`)
-
-**Completed Migration Items:**
-
-- ✅ Created structured documentation hierarchy
-- ✅ Migrated ATS contracts guides from package README
-- ✅ Set up Docusaurus with proper navigation
-- ✅ Established ADR and EP processes with templates
-- ✅ Added frontmatter metadata to all documentation files
-
-**Next Steps:**
-
-1. Migrate remaining relevant documentation from Confluence
-2. Create user guides for ATS and Mass Payout applications
-3. Document CI/CD workflows in detail
-4. Set up automated TypeDoc and solidity-docgen generation
-5. Configure GitHub Pages deployment for documentation site
-6. Create Enhancement Proposals for upcoming features
-7. Add API documentation for SDKs
