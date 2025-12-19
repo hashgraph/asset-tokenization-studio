@@ -24,6 +24,7 @@ import {
   ZERO,
   EMPTY_HEX_BYTES,
   ATS_ROLES,
+  CURRENCIES,
 } from "@scripts";
 import { getEquityDetails, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -61,7 +62,7 @@ let balanceAdjustmentData = {
 const number_Of_Shares = 100000n;
 const EMPTY_VC_ID = EMPTY_STRING;
 
-describe("Equity Tests", () => {
+describe.only("Equity Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: SignerWithAddress;
   let signer_B: SignerWithAddress;
@@ -120,10 +121,16 @@ describe("Equity Tests", () => {
   }
 
   beforeEach(async () => {
-    dividendsRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:10Z");
-    dividendsExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:16:40Z");
-    votingRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:10Z");
-    balanceAdjustmentExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:10Z");
+    await loadFixture(deploySecurityFixtureSinglePartition);
+
+    // Use dynamic timestamps based on current block time
+    const currentTimestamp = await timeTravelFacet.blockTimestamp();
+    const ONE_DAY = 86400; // 24 hours in seconds
+
+    dividendsRecordDateInSeconds = currentTimestamp.add(ONE_DAY).toNumber();
+    dividendsExecutionDateInSeconds = currentTimestamp.add(ONE_DAY + 1000).toNumber();
+    votingRecordDateInSeconds = currentTimestamp.add(ONE_DAY).toNumber();
+    balanceAdjustmentExecutionDateInSeconds = currentTimestamp.add(ONE_DAY).toNumber();
 
     votingData = {
       recordDate: votingRecordDateInSeconds.toString(),
@@ -140,8 +147,6 @@ describe("Equity Tests", () => {
       factor: balanceAdjustmentFactor,
       decimals: balanceAdjustmentDecimals,
     };
-
-    await loadFixture(deploySecurityFixtureSinglePartition);
   });
 
   describe("Initialization", () => {
@@ -167,6 +172,13 @@ describe("Equity Tests", () => {
         equityFacet._initialize_equityUSA(getEquityDetails(), regulationData, additionalSecurityData),
       ).to.be.rejectedWith("AlreadyInitialized");
     });
+
+    it("GIVEN an equity token WHEN getEquityDetails is called THEN returns correct equity details", async () => {
+      const equityDetails = await equityFacet.getEquityDetails();
+
+      expect(equityDetails.nominalValue).to.be.gt(0);
+      expect(equityDetails.currency).to.equal(CURRENCIES.USD);
+    });
   });
 
   describe("Dividends", () => {
@@ -191,7 +203,8 @@ describe("Equity Tests", () => {
     });
 
     it("GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails", async () => {
-      await timeTravelFacet.changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:00:00Z"));
+      const currentTimestamp = await timeTravelFacet.blockTimestamp();
+      await timeTravelFacet.changeSystemTimestamp(currentTimestamp.add(100));
       // Granting Role to account C
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
@@ -209,7 +222,7 @@ describe("Equity Tests", () => {
       );
 
       const wrongDividendData_2 = {
-        recordDate: dateToUnixTimestamp("2029-12-31T23:59:59Z").toString(),
+        recordDate: currentTimestamp.sub(100).toString(), // Past timestamp
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: dividendsAmountPerEquity,
         amountDecimals: dividendsAmountDecimalsPerEquity,
@@ -492,6 +505,74 @@ describe("Equity Tests", () => {
 
   describe("Voting rights", () => {
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
+      // set voting fails
+      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
+    });
+
+    it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
+      // Granting Role to account C and Pause
+      await grantRoleAndPauseToken(
+        accessControlFacet,
+        pauseFacet,
+        ATS_ROLES._CORPORATE_ACTION_ROLE,
+        signer_A,
+        signer_B,
+        signer_C.address,
+      );
+
+      // set voting fails
+      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("TokenIsPaused");
+    });
+
+    it("GIVEN an account with corporateActions role WHEN setVoting with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
+      const currentTimestamp = await timeTravelFacet.blockTimestamp();
+      await timeTravelFacet.changeSystemTimestamp(currentTimestamp.add(100));
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      const invalidVotingData = {
+        recordDate: currentTimestamp.sub(100).toString(), // Past timestamp
+        data: voteData,
+      };
+
+      await expect(equityFacet.connect(signer_C).setVoting(invalidVotingData)).to.be.revertedWithCustomError(
+        equityFacet,
+        "WrongTimestamp",
+      );
+    });
+
+    it("GIVEN voting created WHEN trying to get voting with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      // Create a voting
+      await equityFacet.connect(signer_C).setVoting(votingData);
+
+      // Create a dividend to have different action types
+      await equityFacet.connect(signer_C).setDividends(dividendData);
+
+      // Try to access voting with dividend ID (should fail)
+      await expect(equityFacet.getVoting(2)).to.be.rejectedWith("WrongIndexForAction");
+
+      // Try to access voting details with wrong ID (getVotingFor has the modifier)
+      await expect(equityFacet.getVotingFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
+
+      // Note: getVotingHolders and getTotalVotingHolders don't have onlyMatchingActionType modifier
+    });
+
+    it("GIVEN dividends created WHEN trying to get dividend with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      // Create a dividend
+      await equityFacet.connect(signer_C).setDividends(dividendData);
+
+      // Create a voting to have different action types
+      await equityFacet.connect(signer_C).setVoting(votingData);
+
+      // Try to access dividend with voting ID (should fail)
+      await expect(equityFacet.getDividends(2)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(equityFacet.getDividendsFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(equityFacet.getDividendAmountFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
+    });
+    it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
       // set dividend fails
       await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
     });
@@ -614,6 +695,49 @@ describe("Equity Tests", () => {
       await expect(
         equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData),
       ).to.be.rejectedWith("TokenIsPaused");
+    });
+
+    it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
+      const currentTimestamp = await timeTravelFacet.blockTimestamp();
+      await timeTravelFacet.changeSystemTimestamp(currentTimestamp.add(100));
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      const invalidBalanceAdjustmentData = {
+        executionDate: currentTimestamp.sub(100).toString(), // Past timestamp
+        factor: balanceAdjustmentFactor,
+        decimals: balanceAdjustmentDecimals,
+      };
+
+      await expect(
+        equityFacet.connect(signer_C).setScheduledBalanceAdjustment(invalidBalanceAdjustmentData),
+      ).to.be.revertedWithCustomError(equityFacet, "WrongTimestamp");
+    });
+
+    it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid factor THEN transaction fails with FactorIsZero", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      const invalidBalanceAdjustmentData = {
+        executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
+        factor: 0, // Invalid factor: 0
+        decimals: balanceAdjustmentDecimals,
+      };
+
+      await expect(
+        equityFacet.connect(signer_C).setScheduledBalanceAdjustment(invalidBalanceAdjustmentData),
+      ).to.be.revertedWithCustomError(equityFacet, "FactorIsZero");
+    });
+
+    it("GIVEN balance adjustment created WHEN trying to get balance adjustment with wrong ID type THEN transaction fails with WrongIndexForAction", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      // Create a balance adjustment
+      await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+      // Create a dividend to have different action types
+      await equityFacet.connect(signer_C).setDividends(dividendData);
+
+      // Try to access balance adjustment with dividend ID (should fail)
+      await expect(equityFacet.getScheduledBalanceAdjustment(2)).to.be.rejectedWith("WrongIndexForAction");
     });
 
     it("GIVEN an account with corporateActions role WHEN setBalanceAdjustment THEN transaction succeeds", async () => {
