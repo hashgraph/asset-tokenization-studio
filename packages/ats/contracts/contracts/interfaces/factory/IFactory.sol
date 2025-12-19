@@ -14,6 +14,9 @@ import {
 } from "../../layer_3/constants/regulation.sol";
 import { IFixedRate } from "../../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import {
+    ISustainabilityPerformanceTargetRate
+} from "../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 
 interface IFactory {
     enum SecurityType {
@@ -67,6 +70,14 @@ interface IFactory {
         address kpiOracle;
     }
 
+    struct BondSustainabilityPerformanceTargetRateData {
+        BondData bondData;
+        FactoryRegulationData factoryRegulationData;
+        ISustainabilityPerformanceTargetRate.InterestRate interestRate;
+        ISustainabilityPerformanceTargetRate.ImpactData[] impactData;
+        address[] projects;
+    }
+
     struct BondFixedRateData {
         BondData bondData;
         FactoryRegulationData factoryRegulationData;
@@ -95,6 +106,12 @@ interface IFactory {
         BondKpiLinkedRateData bondKpiLinkedRateData
     );
 
+    event BondSustainabilityPerformanceTargetRateDeployed(
+        address indexed deployer,
+        address bondAddress,
+        BondSustainabilityPerformanceTargetRateData bondSustainabilityPerformanceTargetRateData
+    );
+
     error EmptyResolver(IBusinessLogicResolver resolver);
     error NoInitialAdmins();
 
@@ -118,6 +135,10 @@ interface IFactory {
 
     function deployBondKpiLinkedRate(
         BondKpiLinkedRateData calldata _bondKpiLinkedRateData
+    ) external returns (address bondAddress_);
+
+    function deployBondSustainabilityPerformanceTargetRate(
+        BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
     ) external returns (address bondAddress_);
 
     function getAppliedRegulationData(

@@ -39,6 +39,9 @@ import { validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Common } from "../layer_0/common/Common.sol";
+import {
+    ISustainabilityPerformanceTargetRate
+} from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 
 contract Factory is IFactory, Common {
     modifier checkResolver(IBusinessLogicResolver resolver) {
@@ -170,6 +173,37 @@ contract Factory is IFactory, Common {
         );
 
         emit BondKpiLinkedRateDeployed(_msgSender(), bondAddress_, _bondKpiLinkedRateData);
+    }
+
+    function deployBondSustainabilityPerformanceTargetRate(
+        BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
+    )
+        external
+        checkResolver(_bondSustainabilityPerformanceTargetRateData.bondData.security.resolver)
+        checkISIN(_bondSustainabilityPerformanceTargetRateData.bondData.security.erc20MetadataInfo.isin)
+        checkAdmins(_bondSustainabilityPerformanceTargetRateData.bondData.security.rbacs)
+        checkRegulation(
+            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationType,
+            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationSubType
+        )
+        returns (address bondAddress_)
+    {
+        bondAddress_ = _deployBond(
+            _bondSustainabilityPerformanceTargetRateData.bondData,
+            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData
+        );
+
+        ISustainabilityPerformanceTargetRate(bondAddress_).initialize_SustainabilityPerformanceTargetRate(
+            _bondSustainabilityPerformanceTargetRateData.interestRate,
+            _bondSustainabilityPerformanceTargetRateData.impactData,
+            _bondSustainabilityPerformanceTargetRateData.projects
+        );
+
+        emit BondSustainabilityPerformanceTargetRateDeployed(
+            _msgSender(),
+            bondAddress_,
+            _bondSustainabilityPerformanceTargetRateData
+        );
     }
 
     function getAppliedRegulationData(

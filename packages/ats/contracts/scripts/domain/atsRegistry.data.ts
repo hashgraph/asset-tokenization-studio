@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-18T10:28:57.636Z
+ * Generated: 2025-12-19T10:02:13.053Z
  * Facets: 189
  * Infrastructure: 2
  *
@@ -11315,6 +11315,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x15a15b0a",
       },
       { name: "NotExistingProject", signature: "NotExistingProject(address)", selector: "0x2f850995" },
+      {
+        name: "ProvidedListsLengthMismatch",
+        signature: "ProvidedListsLengthMismatch(uint256,uint256)",
+        selector: "0x4470462b",
+      },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
@@ -11841,6 +11846,12 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         signature:
           "function deployBondKpiLinkedRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData, address kpiOracle) _bondKpiLinkedRateData) returns (address bondAddress_)",
         selector: "0x16a2b067",
+      },
+      {
+        name: "deployBondSustainabilityPerformanceTargetRate",
+        signature:
+          "function deployBondSustainabilityPerformanceTargetRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, tuple(uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) _bondSustainabilityPerformanceTargetRateData) returns (address bondAddress_)",
+        selector: "0x5bdc1ceb",
       },
       {
         name: "deployEquity",

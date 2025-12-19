@@ -18,14 +18,13 @@ contract SustainabilityPerformanceTargetRate is
         InterestRate calldata _interestRate,
         ImpactData[] calldata _impactData,
         address[] calldata _projects
-    ) external override onlyUninitialized(_sustainabilityPerformanceTargetRateStorage().initialized) {
-        _setSPTInterestRate(_interestRate);
-        for (uint256 index = 0; index < _impactData.length; index++) {
-            if (!_isProceedRecipient(_projects[index])) revert NotExistingProject(_projects[index]);
-            _setSPTImpactData(_impactData[index], _projects[index]);
-        }
-
-        _sustainabilityPerformanceTargetRateStorage().initialized = true;
+    )
+        external
+        override
+        onlyUninitialized(_isSustainabilityPerformanceTargetRateInitialized())
+        onlyEqualLength(_impactData.length, _projects.length)
+    {
+        _initialize_SustainabilityPerformanceTargetRate(_interestRate, _impactData, _projects);
     }
 
     function setInterestRate(
@@ -38,7 +37,12 @@ contract SustainabilityPerformanceTargetRate is
     function setImpactData(
         ImpactData[] calldata _newImpactData,
         address[] calldata _projects
-    ) external onlyRole(_INTEREST_RATE_MANAGER_ROLE) onlyUnpaused {
+    )
+        external
+        onlyRole(_INTEREST_RATE_MANAGER_ROLE)
+        onlyUnpaused
+        onlyEqualLength(_newImpactData.length, _projects.length)
+    {
         for (uint256 index = 0; index < _newImpactData.length; index++) {
             if (!_isProceedRecipient(_projects[index])) revert NotExistingProject(_projects[index]);
             _setSPTImpactData(_newImpactData[index], _projects[index]);

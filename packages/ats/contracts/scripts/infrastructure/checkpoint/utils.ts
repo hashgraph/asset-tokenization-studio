@@ -49,7 +49,8 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
     !steps.configurations?.equity ||
     !steps.configurations?.bond ||
     !steps.configurations?.bondFixedRate ||
-    !steps.configurations?.bondKpiLinkedRate
+    !steps.configurations?.bondKpiLinkedRate ||
+    !steps.configurations?.bondSustainabilityPerformanceTargetRate
   ) {
     throw new Error("Checkpoint missing configurations");
   }
@@ -126,6 +127,12 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.bondKpiLinkedRate.facetCount,
         facets: [], // Will be populated in actual workflow
       },
+      bondSustainabilityPerformanceTargetRate: {
+        configId: steps.configurations.bondSustainabilityPerformanceTargetRate.configId,
+        version: steps.configurations.bondSustainabilityPerformanceTargetRate.version,
+        facetCount: steps.configurations.bondSustainabilityPerformanceTargetRate.facetCount,
+        facets: [], // Will be populated in actual workflow
+      },
     },
 
     summary: {
@@ -142,6 +149,7 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
       getBondFacets: () => [],
       getBondFixedRateFacets: () => [],
       getBondKpiLinkedRateFacets: () => [],
+      getBondSustainabilityPerformanceTargetRateFacets: () => [],
     },
   };
 }

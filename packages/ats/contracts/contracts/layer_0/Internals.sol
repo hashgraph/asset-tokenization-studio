@@ -1520,4 +1520,12 @@ abstract contract Internals is Modifiers {
     function _getPreviousCouponInOrderedList(
         uint256 _couponID
     ) internal view virtual returns (uint256 previousCouponID_);
+
+    function _initialize_SustainabilityPerformanceTargetRate(
+        ISustainabilityPerformanceTargetRate.InterestRate calldata _interestRate,
+        ISustainabilityPerformanceTargetRate.ImpactData[] calldata _impactData,
+        address[] calldata _projects
+    ) internal virtual;
+
+    function _isSustainabilityPerformanceTargetRateInitialized() internal view virtual returns (bool);
 }

@@ -46,6 +46,7 @@ import {
   createBondConfiguration,
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
+  createBondSustainabilityPerformanceTargetRateConfiguration,
 } from "@scripts/domain";
 
 import { promises as fs } from "fs";
@@ -135,6 +136,16 @@ export interface DeploymentOutput {
         address: string;
       }>;
     };
+    bondSustainabilityPerformanceTargetRate: {
+      configId: string;
+      version: number;
+      facetCount: number;
+      facets: Array<{
+        facetName: string;
+        key: string;
+        address: string;
+      }>;
+    };
   };
 
   /** Deployment summary */
@@ -173,6 +184,13 @@ export interface DeploymentOutput {
     }>;
 
     getBondKpiLinkedRateFacets(): Array<{
+      name: string;
+      address: string;
+      contractId?: string;
+      key: string;
+    }>;
+
+    getBondSustainabilityPerformanceTargetRateFacets(): Array<{
       name: string;
       address: string;
       contractId?: string;
@@ -746,6 +764,68 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Step 8: Create Bond Sustainability Performance Target Rate configuration
+    let bondSustainabilityPerformanceTargetRateConfig: Awaited<
+      ReturnType<typeof createBondSustainabilityPerformanceTargetRateConfiguration>
+    >;
+
+    if (checkpoint.steps.configurations?.bondSustainabilityPerformanceTargetRate && checkpoint.currentStep >= 6) {
+      info("\n✓ Step 8/9: Bond Sustainability Performance Target Rate configuration already created (resuming)");
+      const bondSustainabilityPerformanceTargetRateConfigData =
+        checkpoint.steps.configurations.bondSustainabilityPerformanceTargetRate;
+      info(
+        `✅ Bond Sustainability Performance Target Rate Config ID: ${bondSustainabilityPerformanceTargetRateConfigData.configId}`,
+      );
+      info(
+        `✅ Bond Sustainability Performance Target Rate Version: ${bondSustainabilityPerformanceTargetRateConfigData.version}`,
+      );
+      info(
+        `✅ Bond Sustainability Performance Target Rate Facets: ${bondSustainabilityPerformanceTargetRateConfigData.facetCount}`,
+      );
+
+      // Use converter to reconstruct full ConfigurationData from checkpoint
+      bondSustainabilityPerformanceTargetRateConfig = toConfigurationData(
+        bondSustainabilityPerformanceTargetRateConfigData,
+      );
+    } else {
+      info("\n🏦 Step 8/9: Creating Bond Sustainability Performance Target Rate configuration...");
+
+      bondSustainabilityPerformanceTargetRateConfig = await createBondSustainabilityPerformanceTargetRateConfiguration(
+        blrContract,
+        facetAddresses,
+        useTimeTravel,
+        partialBatchDeploy,
+        batchSize,
+        confirmations,
+      );
+
+      if (!bondSustainabilityPerformanceTargetRateConfig.success) {
+        throw new Error(
+          `Bond Sustainability Performance Target Rate config creation failed: ${bondSustainabilityPerformanceTargetRateConfig.error} - ${bondSustainabilityPerformanceTargetRateConfig.message}`,
+        );
+      }
+
+      info(
+        `✅ Bond Sustainability Performance Target Rate Config ID: ${bondSustainabilityPerformanceTargetRateConfig.data.configurationId}`,
+      );
+      info(
+        `✅ Bond Sustainability Performance Target Rate Version: ${bondSustainabilityPerformanceTargetRateConfig.data.version}`,
+      );
+      info(
+        `✅ Bond Sustainability Performance Target Rate Facets: ${bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length}`,
+      );
+
+      // Save checkpoint
+      checkpoint.steps.configurations!.bondSustainabilityPerformanceTargetRate = {
+        configId: bondSustainabilityPerformanceTargetRateConfig.data.configurationId,
+        version: bondSustainabilityPerformanceTargetRateConfig.data.version,
+        facetCount: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length,
+        txHash: "", // createBondSustainabilityPerformanceTargetRateConfiguration doesn't return tx hash currently
+      };
+      checkpoint.currentStep = 7;
+      await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
     // Step 8: Deploy Factory
     let factoryResult: Awaited<ReturnType<typeof deployFactory>>;
 
@@ -843,12 +923,21 @@ export async function deploySystemWithNewBlr(
           const bondKpiLinkedRateFacet = isSuccess(bondKpiLinkedRateConfig)
             ? bondKpiLinkedRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
             : undefined;
+          const bondSustainabilityPerformanceTargetRateFacet = isSuccess(bondSustainabilityPerformanceTargetRateConfig)
+            ? bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
+            : undefined;
 
           return {
             name: facetName,
             address: facetAddress,
             contractId: await getContractId(facetAddress),
-            key: equityFacet?.key || bondFacet?.key || bondFixedRateFacet?.key || bondKpiLinkedRateFacet?.key || "",
+            key:
+              equityFacet?.key ||
+              bondFacet?.key ||
+              bondFixedRateFacet?.key ||
+              bondKpiLinkedRateFacet?.key ||
+              bondSustainabilityPerformanceTargetRateFacet?.key ||
+              "",
           };
         }),
       ),
@@ -906,12 +995,25 @@ export async function deploySystemWithNewBlr(
               facetCount: 0,
               facets: [],
             },
+        bondSustainabilityPerformanceTargetRate: isSuccess(bondSustainabilityPerformanceTargetRateConfig)
+          ? {
+              configId: bondSustainabilityPerformanceTargetRateConfig.data.configurationId,
+              version: bondSustainabilityPerformanceTargetRateConfig.data.version,
+              facetCount: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length,
+              facets: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys,
+            }
+          : {
+              configId: "",
+              version: 0,
+              facetCount: 0,
+              facets: [],
+            },
       },
 
       summary: {
         totalContracts: 3, // ProxyAdmin, BLR, Factory
         totalFacets: facetsResult.deployed.size,
-        totalConfigurations: 4, // Equity + Bond + BondFixedRate + BondKpiLinkedRate
+        totalConfigurations: 5, // Equity + Bond + BondFixedRate + BondKpiLinkedRate + BondSustainabilityPerformanceTargetRate
         deploymentTime: Date.now() - startTime,
         gasUsed: totalGasUsed.toString(),
         success: true,
@@ -941,6 +1043,14 @@ export async function deploySystemWithNewBlr(
           if (!isSuccess(bondKpiLinkedRateConfig)) return [];
           const bondKpiLinkedRateKeys = new Set(bondKpiLinkedRateConfig.data.facetKeys.map((f) => f.key));
           return output.facets.filter((facet) => bondKpiLinkedRateKeys.has(facet.key));
+        },
+        getBondSustainabilityPerformanceTargetRateFacets() {
+          // Use type guard to safely access .data property
+          if (!isSuccess(bondSustainabilityPerformanceTargetRateConfig)) return [];
+          const bondSustainabilityPerformanceTargetRateKeys = new Set(
+            bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.map((f) => f.key),
+          );
+          return output.facets.filter((facet) => bondSustainabilityPerformanceTargetRateKeys.has(facet.key));
         },
       },
     };

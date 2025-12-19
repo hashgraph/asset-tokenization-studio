@@ -19,6 +19,28 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
         bool initialized;
     }
 
+    modifier onlyEqualLength(uint256 len1, uint256 len2) {
+        if (len1 != len2) {
+            revert ISustainabilityPerformanceTargetRate.ProvidedListsLengthMismatch(len1, len2);
+        }
+        _;
+    }
+
+    function _initialize_SustainabilityPerformanceTargetRate(
+        ISustainabilityPerformanceTargetRate.InterestRate calldata _interestRate,
+        ISustainabilityPerformanceTargetRate.ImpactData[] calldata _impactData,
+        address[] calldata _projects
+    ) internal override {
+        _setSPTInterestRate(_interestRate);
+        for (uint256 index = 0; index < _impactData.length; index++) {
+            if (!_isProceedRecipient(_projects[index]))
+                revert ISustainabilityPerformanceTargetRate.NotExistingProject(_projects[index]);
+            _setSPTImpactData(_impactData[index], _projects[index]);
+        }
+
+        _sustainabilityPerformanceTargetRateStorage().initialized = true;
+    }
+
     function _setSPTInterestRate(
         ISustainabilityPerformanceTargetRate.InterestRate calldata _newInterestRate
     ) internal override {
@@ -63,6 +85,10 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
         address _project
     ) internal view override returns (ISustainabilityPerformanceTargetRate.ImpactData memory impactData_) {
         return _sustainabilityPerformanceTargetRateStorage().impactDataByProject[_project];
+    }
+
+    function _isSustainabilityPerformanceTargetRateInitialized() internal view override returns (bool) {
+        return _sustainabilityPerformanceTargetRateStorage().initialized;
     }
 
     function _sustainabilityPerformanceTargetRateStorage()
