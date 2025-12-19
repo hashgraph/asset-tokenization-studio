@@ -1,6 +1,12 @@
+---
+id: ci-cd-workflows
+title: CI/CD Workflows
+sidebar_label: CI/CD Workflows
+---
+
 # CI/CD Workflows Documentation
 
-This directory contains documentation for the Continuous Integration and Continuous Deployment (CI/CD) workflows used in the Asset Tokenization Studio monorepo.
+This guide explains the Continuous Integration and Continuous Deployment (CI/CD) workflows used in the Asset Tokenization Studio monorepo.
 
 ## Purpose
 
@@ -112,7 +118,7 @@ When modifying CI/CD workflows:
 
 ## Contributing
 
-If you modify a workflow, update or create the corresponding documentation file. Include:
+If you modify a workflow, update this documentation. Include:
 
 - What changed and why
 - How to test the changes
@@ -122,7 +128,7 @@ If you modify a workflow, update or create the corresponding documentation file.
 
 For workflow-related questions:
 
-1. Check existing documentation in this directory
+1. Check this documentation
 2. Review the actual workflow files in `.github/workflows/`
 3. Ask in the team chat
 4. Create an issue with the `ci/cd` label
