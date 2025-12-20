@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { type ResolverProxy, type Pause, ERC20Permit, ERC20, AccessControl, ControlList } from "@contract-types";
+import { type ResolverProxy, type Pause, ERC20PermitFacet, ERC20, AccessControl, ControlList } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, getDltTimestamp } from "@test";
 
@@ -11,7 +11,7 @@ describe("ERC20Permit Tests", () => {
   let signer_B: SignerWithAddress;
   let signer_C: SignerWithAddress;
 
-  let erc20PermitFacet: ERC20Permit;
+  let erc20PermitFacet: ERC20PermitFacet;
   let erc20Facet: ERC20;
   let pauseFacet: Pause;
   let accessControlFacet: AccessControl;
@@ -37,7 +37,7 @@ describe("ERC20Permit Tests", () => {
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
     controlList = await ethers.getContractAt("ControlList", diamond.address);
 
-    erc20PermitFacet = await ethers.getContractAt("ERC20Permit", diamond.address);
+    erc20PermitFacet = await ethers.getContractAt("ERC20PermitFacet", diamond.address);
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
     erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_A);
   });

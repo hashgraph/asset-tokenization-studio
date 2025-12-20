@@ -13,7 +13,7 @@ abstract contract BondUSA is IBondUSA, Bond {
         IBondRead.BondDetailsData calldata _bondDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) external override onlyUninitialized(_bondStorage().initialized) {
+    ) external override onlyUninitialized(_isBondInitialized()) {
         _initialize_bond(_bondDetailsData);
         _initializeSecurity(_regulationData, _additionalSecurityData);
     }

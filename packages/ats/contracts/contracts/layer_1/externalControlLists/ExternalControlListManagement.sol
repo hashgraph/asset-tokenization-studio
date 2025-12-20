@@ -2,26 +2,16 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalControlListManagement } from "../interfaces/externalControlLists/IExternalControlListManagement.sol";
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { _CONTROL_LIST_MANAGER_ROLE } from "../constants/roles.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
 
-abstract contract ExternalControlListManagement is IExternalControlListManagement, Common {
+abstract contract ExternalControlListManagement is IExternalControlListManagement, Internals {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalControlLists(
         address[] calldata _controlLists
-    ) external override onlyUninitialized(_externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION).initialized) {
-        ExternalListDataStorage storage externalControlListDataStorage = _externalListStorage(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
-        );
-        uint256 length = _controlLists.length;
-        for (uint256 index; index < length; ) {
-            _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        externalControlListDataStorage.initialized = true;
+    ) external override onlyUninitialized(_isExternalControlListInitialized()) {
+        _initialize_ExternalControlLists(_controlLists);
     }
 
     function updateExternalControlLists(

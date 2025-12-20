@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../../layer_1/common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 import {
     IScheduledCrossOrderedTasks
 } from "../../interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
 import { ScheduledTask } from "../../interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Common {
+abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Internals {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function triggerPendingScheduledCrossOrderedTasks() external override onlyUnpaused returns (uint256) {

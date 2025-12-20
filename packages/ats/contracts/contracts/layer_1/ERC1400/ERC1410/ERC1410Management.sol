@@ -4,16 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _CONTROLLER_ROLE, _AGENT_ROLE, _ISSUER_ROLE } from "../../constants/roles.sol";
 import { BasicTransferInfo, OperatorTransferData } from "../../interfaces/ERC1400/IERC1410.sol";
 import { IERC1410Management } from "../../interfaces/ERC1400/IERC1410Management.sol";
-import { Common } from "../../common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 import { IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 
-abstract contract ERC1410Management is IERC1410Management, Common {
+abstract contract ERC1410Management is IERC1410Management, Internals {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410(
-        bool _multiPartition
-    ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
-        _erc1410BasicStorage().multiPartition = _multiPartition;
-        _erc1410BasicStorage().initialized = true;
+    function initialize_ERC1410(bool _multiPartition) external override onlyUninitialized(_isERC1410Initialized()) {
+        _initialize_ERC1410(_multiPartition);
     }
 
     function controllerTransferByPartition(

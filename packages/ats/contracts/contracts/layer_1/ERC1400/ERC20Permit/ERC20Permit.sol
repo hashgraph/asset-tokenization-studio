@@ -2,17 +2,14 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 import { IERC20Permit } from "../../interfaces/ERC1400/IERC20Permit.sol";
 import { _CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT } from "../../constants/values.sol";
 
-abstract contract ERC20Permit is IERC20Permit, Common {
+abstract contract ERC20Permit is IERC20Permit, Internals {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Permit() external override onlyUninitialized(_erc20PermitStorage().initialized) {
-        ERC20PermitStorage storage erc20PermitStorage = _erc20PermitStorage();
-        erc20PermitStorage.initialized = true;
-        erc20PermitStorage.contractName = _CONTRACT_NAME_ERC20PERMIT;
-        erc20PermitStorage.contractVersion = _CONTRACT_VERSION_ERC20PERMIT;
+    function initialize_ERC20Permit() external override onlyUninitialized(_isERC20PermitInitialized()) {
+        _initialize_ERC20Permit();
     }
 
     function permit(
