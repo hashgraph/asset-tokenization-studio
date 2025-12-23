@@ -58,6 +58,54 @@ Before following these guides, make sure you have:
   </div>
 
   <div className="card-box card-info">
+    <h3>📋 Managing External KYC Lists</h3>
+    <p>Configure on-chain KYC lists for investor verification</p>
+    <ul>
+      <li>Create external KYC lists</li>
+      <li>Add verified investors</li>
+      <li>Share KYC across tokens</li>
+      <li>Query verification status</li>
+    </ul>
+    <a href="./managing-external-kyc-lists" className="card-link">Read Guide</a>
+  </div>
+
+  <div className="card-box card-info">
+    <h3>🚫 Managing External Control Lists</h3>
+    <p>Configure whitelists and blacklists for transfer control</p>
+    <ul>
+      <li>Create whitelists and blacklists</li>
+      <li>Manage approved addresses</li>
+      <li>Geographic restrictions</li>
+      <li>Regulatory compliance</li>
+    </ul>
+    <a href="./managing-external-control-lists" className="card-link">Read Guide</a>
+  </div>
+
+  <div className="card-box card-info">
+    <h3>🔐 SSI Integration</h3>
+    <p>Self-Sovereign Identity with Terminal 3 (Optional)</p>
+    <ul>
+      <li>Configure SSI verification</li>
+      <li>Manage credential issuers</li>
+      <li>Set revocation registry</li>
+      <li>Decentralized identity verification</li>
+    </ul>
+    <a href="./ssi-integration" className="card-link">Read Guide</a>
+  </div>
+
+  <div className="card-box card-warning">
+    <h3>👥 Roles and Permissions</h3>
+    <p>Understand and manage access control</p>
+    <ul>
+      <li>Learn about each role</li>
+      <li>Grant and revoke permissions</li>
+      <li>Role combinations</li>
+      <li>Security best practices</li>
+    </ul>
+    <a href="./roles-and-permissions" className="card-link">Read Guide</a>
+  </div>
+
+  <div className="card-box card-info">
     <h3>💼 Corporate Actions</h3>
     <p>Distribute dividends and coupon payments</p>
     <ul>

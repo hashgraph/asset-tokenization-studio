@@ -14,7 +14,9 @@ Quick start guide to run the Asset Tokenization Studio web application.
 - **Node.js**: v20.19.4 or newer
 - **npm**: v10.9.0 or newer
 - **Hedera Account**: Testnet or mainnet account with HBAR
-- **Hedera Wallet**: HashPack, Blade, or WalletConnect-compatible wallet
+- **Hedera Wallet**:
+  - MetaMask (connects directly), or
+  - HashPack, Blade, or other wallets (connect via WalletConnect)
 
 ## Installation
 
@@ -46,12 +48,12 @@ npm run ats:sdk:build
 
 ```bash
 cd apps/ats/web
-cp .env.local.example .env.local
+cp .env.example .env
 ```
 
 ### Configure Environment Variables
 
-Edit `apps/ats/web/.env.local`:
+Edit `apps/ats/web/.env`:
 
 #### Network Configuration
 
@@ -66,12 +68,16 @@ VITE_JSON_RPC_RELAY_URL=https://testnet.hashio.io/api
 VITE_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com
 ```
 
-#### WalletConnect Configuration
+#### WalletConnect Configuration (Optional)
+
+Required only if using HashPack, Blade, or other non-MetaMask wallets:
 
 ```bash
 # Get your project ID from https://cloud.walletconnect.com
 VITE_WALLET_CONNECT_PROJECT_ID=your_project_id_here
 ```
+
+> **Note**: MetaMask connects directly and does not require WalletConnect configuration.
 
 #### Contract Addresses
 
@@ -123,13 +129,18 @@ Once running, you'll see the ATS web application:
 ### 1. Connect Your Wallet
 
 - Click "Connect Wallet" in the top right
-- Select your preferred wallet (HashPack, Blade, etc.)
+- Select your preferred wallet:
+  - **MetaMask**: Click "Connect with MetaMask" (direct connection)
+  - **Other wallets**: Select HashPack, Blade, or other WalletConnect-compatible wallets
 - Approve the connection request
 
 ### 2. Create a Security Token
 
 - Navigate to "Create Token"
 - Choose token type: **Equity** or **Bond**
+
+![Create Security Token](../../images/ats-web-create-security.png)
+
 - Fill in token details (name, symbol, supply)
 - Configure compliance settings (KYC, transfer restrictions)
 - Deploy the token
@@ -140,12 +151,24 @@ Once you've created tokens, you can manage them from the dashboard:
 
 ![ATS Dashboard](/img/screenshots/ats/ats-web-dashboard.png)
 
-From the dashboard you can:
+#### Selecting a Security Token
 
-- View all your tokens
-- Perform corporate actions (dividends, coupon payments)
+To perform operations on a security token, you must first select it:
+
+- **From "See All" button**: Click "See All" to view all your tokens, then select the one you want to work with
+- **From Favorites panel**: If you've marked a token as favorite, you can quickly select it from the favorites panel on the dashboard
+
+#### Available Operations
+
+Once security is selected, you can:
+
+- View all tokens
+- Perform operations
 - Manage token holders and permissions
-- Execute transfers and redemptions
+
+Available operations appear in tabs. The tabs you see depend on your assigned role:
+
+![Available Operations Tabs](../../images/ats-web-tabs.png)
 
 ## Troubleshooting
 
@@ -155,7 +178,7 @@ From the dashboard you can:
 # Kill process on port 5173
 lsof -ti:5173 | xargs kill -9
 
-# Or change port in .env.local
+# Or change port in .env
 VITE_PORT=5174
 ```
 
@@ -171,11 +194,12 @@ npm run ats:build
 
 - Ensure your wallet extension is installed and unlocked
 - Check that you're connected to the correct network (testnet/mainnet)
-- Verify your WalletConnect project ID is valid
+- **MetaMask**: Connects directly without WalletConnect
+- **HashPack/Blade/Other wallets**: Verify your WalletConnect project ID is configured in `.env`
 
 ### Contract Not Found
 
-- Verify contract IDs in `.env.local` are correct
+- Verify contract IDs in `.env` are correct
 - Ensure contracts are deployed to the network you're using
 - Check that the Business Logic Resolver and Factory are properly configured
 
