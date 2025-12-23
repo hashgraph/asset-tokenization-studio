@@ -114,7 +114,7 @@ export type { DeployProxyOptions, DeployProxyResult } from "./operations/deployP
 
 export { deployTransparentProxy } from "./operations/transparentProxyDeployment";
 
-export { upgradeProxy } from "./operations/upgradeProxy";
+export { upgradeProxy, upgradeMultipleProxies, proxyNeedsUpgrade, prepareUpgrade } from "./operations/upgradeProxy";
 
 export { registerFacets, type RegisterFacetsOptions, type RegisterFacetsResult } from "./operations/registerFacets";
 
@@ -145,6 +145,20 @@ export {
   type DeployResolverProxyResult,
   type ResolverProxyRbac,
 } from "./operations/deployResolverProxy";
+
+export {
+  ResolverProxyUpdateType,
+  ResolverProxyUpdateOptions,
+  updateResolverProxyVersion,
+  updateResolverProxyConfig,
+  updateResolverProxyResolver,
+  getResolverProxyConfigInfo,
+  type UpdateResolverProxyVersionOptions,
+  type UpdateResolverProxyConfigOptions,
+  type UpdateResolverProxyResolverOptions,
+  type UpdateResolverProxyConfigResult,
+  type ResolverProxyConfigInfo,
+} from "./operations/updateResolverProxyConfig";
 
 export {
   generateRegistryPipeline,

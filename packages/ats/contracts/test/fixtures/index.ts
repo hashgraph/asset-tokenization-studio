@@ -15,6 +15,10 @@ export { deployAtsInfrastructureFixture } from "./infrastructure.fixture";
 // Integration test fixtures (lighter weight)
 export { deployBlrFixture, registerCommonFacetsFixture } from "./integration.fixture";
 
+// TUP proxy fixtures (TransparentUpgradeableProxy testing)
+export { deployTupProxyFixture, deployTupProxyWithV2Fixture, TUP_VERSIONS } from "./tupProxy.fixture";
+export type { TupProxyFixtureResult } from "./tupProxy.fixture";
+
 // Token fixtures
 export { deployEquityTokenFixture, DEFAULT_EQUITY_PARAMS, getEquityDetails } from "./tokens/equity.fixture";
 
@@ -29,6 +33,16 @@ export {
   getSecurityData,
   getRegulationData,
 } from "./tokens/common.fixture";
+
+// ResolverProxy fixtures
+export {
+  deployResolverProxyFixture,
+  deployResolverProxyWithAltConfigFixture,
+  TEST_CONFIG_ID,
+  ALT_CONFIG_ID,
+  MAX_TEST_VERSION,
+  type ResolverProxyFixtureResult,
+} from "./resolverProxy.fixture";
 
 // T-REX fixtures (legacy support)
 export {
