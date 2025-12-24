@@ -99,8 +99,14 @@ export {
 
 export { getNetworkConfig, getAllNetworks } from "./config";
 
-export { getDeploymentConfig, isLocalNetwork, isInstantMiningNetwork, DEPLOYMENT_CONFIGS } from "./networkConfig";
-export type { DeploymentConfig } from "./networkConfig";
+export {
+  getDeploymentConfig,
+  isLocalNetwork,
+  isInstantMiningNetwork,
+  DEPLOYMENT_CONFIGS,
+  KNOWN_NETWORKS,
+} from "./networkConfig";
+export type { DeploymentConfig, KnownNetwork } from "./networkConfig";
 
 // ============================================================================
 // Operations
@@ -215,6 +221,8 @@ export {
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 
 export { getSelector } from "./utils/selector";
+
+export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
 // ============================================================================
 // Checkpoint System
