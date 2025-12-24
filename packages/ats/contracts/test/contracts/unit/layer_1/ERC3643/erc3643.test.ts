@@ -1461,6 +1461,32 @@ describe("ERC3643 Tests", () => {
           ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
         });
 
+        it("GIVEN paused token WHEN batchSetAddressFrozen THEN fails with TokenIsPaused", async () => {
+          const userAddresses = [signer_D.address, signer_E.address];
+          // grant KYC to signer_A.address
+          await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+
+          await pauseFacet.connect(signer_B).pause();
+
+          // First, freeze the addresses
+          await expect(freezeFacet.batchSetAddressFrozen(userAddresses, [true, true])).to.revertedWithCustomError(
+            pauseFacet,
+            "TokenIsPaused",
+          );
+        });
+
+        it("GIVEN invalid address WHEN batchSetAddressFrozen THEN fails with ZeroAddressNotAllowed", async () => {
+          const userAddresses = [signer_D.address, signer_E.address, ADDRESS_ZERO];
+          // grant KYC to signer_A.address
+          await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+
+          // First, freeze the addresses
+          await expect(freezeFacet.batchSetAddressFrozen(userAddresses, [true, true, true])).to.revertedWithCustomError(
+            freezeFacet,
+            "ZeroAddressNotAllowed",
+          );
+        });
+
         it("GIVEN frozen addresses WHEN batchSetAddressFrozen with false THEN transfers from those addresses succeed", async () => {
           const userAddresses = [signer_D.address, signer_E.address];
           // grant KYC to signer_A.address
@@ -1955,15 +1981,11 @@ describe("ERC3643 Tests", () => {
         await accessControlFacet.grantRole(ProtectedPartitionRole_1, signer_A.address);
         await protectedPartitionsFacet.protectPartitions();
         await expect(
-          erc1410Facet.protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_C.address,
-            signer_B.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          erc1410Facet.protectedTransferFromByPartition(DEFAULT_PARTITION, signer_C.address, signer_B.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
         await protectedPartitionsFacet.unprotectPartitions();
         const operatorTransferData = {
@@ -2017,15 +2039,11 @@ describe("ERC3643 Tests", () => {
         );
         await protectedPartitionsFacet.protectPartitions();
         await expect(
-          erc1410Facet.protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_B.address,
-            signer_C.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          erc1410Facet.protectedTransferFromByPartition(DEFAULT_PARTITION, signer_B.address, signer_C.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
         await protectedPartitionsFacet.unprotectPartitions();
         operatorTransferData.to = signer_C.address;
@@ -2083,14 +2101,11 @@ describe("ERC3643 Tests", () => {
         );
         await protectedPartitionsFacet.protectPartitions();
         await expect(
-          erc1410Facet.protectedRedeemFromByPartition(
-            DEFAULT_PARTITION,
-            signer_C.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          erc1410Facet.protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_C.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
         await protectedPartitionsFacet.unprotectPartitions();
         await expect(

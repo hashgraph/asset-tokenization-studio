@@ -65,12 +65,9 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         address _from,
         address _to,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view {
-        if (!_isTransferSignatureValid(_partition, _from, _to, _amount, _deadline, _nounce, _signature))
-            revert WrongSignature();
+        if (!_isTransferSignatureValid(_partition, _from, _to, _amount, _protectionData)) revert WrongSignature();
     }
 
     function _isTransferSignatureValid(
@@ -78,16 +75,21 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         address _from,
         address _to,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashTransfer(_partition, _from, _to, _amount, _deadline, _nounce);
+        bytes32 functionHash = getMessageHashTransfer(
+            _partition,
+            _from,
+            _to,
+            _amount,
+            _protectionData.deadline,
+            _protectionData.nounce
+        );
         return
             verify(
                 _from,
                 functionHash,
-                _signature,
+                _protectionData.signature,
                 _protectedPartitionsStorage().contractName,
                 _protectedPartitionsStorage().contractVersion,
                 _blockChainid(),
@@ -99,28 +101,29 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view {
-        if (!_isRedeemSignatureValid(_partition, _from, _amount, _deadline, _nounce, _signature))
-            revert WrongSignature();
+        if (!_isRedeemSignatureValid(_partition, _from, _amount, _protectionData)) revert WrongSignature();
     }
 
     function _isRedeemSignatureValid(
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashRedeem(_partition, _from, _amount, _deadline, _nounce);
+        bytes32 functionHash = getMessageHashRedeem(
+            _partition,
+            _from,
+            _amount,
+            _protectionData.deadline,
+            _protectionData.nounce
+        );
         return
             verify(
                 _from,
                 functionHash,
-                _signature,
+                _protectionData.signature,
                 _protectedPartitionsStorage().contractName,
                 _protectedPartitionsStorage().contractVersion,
                 _blockChainid(),

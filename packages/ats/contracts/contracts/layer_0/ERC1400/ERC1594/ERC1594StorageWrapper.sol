@@ -61,7 +61,6 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         ds.initialized = true;
     }
 
-    // TODO: In this case are able to perform that operation another role?
     function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal {
         // Add a function to validate the `_data` parameter
         _mint(_tokenHolder, _value);
