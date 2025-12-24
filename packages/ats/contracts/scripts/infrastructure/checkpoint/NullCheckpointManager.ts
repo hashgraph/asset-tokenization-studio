@@ -13,7 +13,7 @@
  * @module infrastructure/checkpoint/NullCheckpointManager
  */
 
-import type { DeploymentCheckpoint, CheckpointStatus } from "../types/checkpoint";
+import type { DeploymentCheckpoint, CheckpointStatus } from "@scripts/infrastructure";
 import { CheckpointManager } from "./CheckpointManager";
 
 /**
@@ -44,10 +44,13 @@ export class NullCheckpointManager extends CheckpointManager {
   /**
    * Create a null checkpoint manager.
    *
-   * Directory parameter is accepted for API compatibility but ignored.
+   * Network and directory parameters are accepted for API compatibility but ignored.
+   *
+   * @param network - Network name (optional, for API compatibility)
+   * @param checkpointsDir - Directory path (optional, for API compatibility)
    */
-  constructor(checkpointsDir?: string) {
-    super(checkpointsDir);
+  constructor(network?: string, checkpointsDir?: string) {
+    super(network, checkpointsDir);
   }
 
   /**
