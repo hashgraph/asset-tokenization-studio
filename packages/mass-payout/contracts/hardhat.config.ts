@@ -212,6 +212,7 @@ import 'hardhat-contract-sizer';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import Configuration from '@configuration';
+import "hardhat-dependency-compiler";
 
 import 'hardhat/types/config';
 
@@ -287,6 +288,11 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 3_000_000,
+  },
+  dependencyCompiler: {
+    paths: [
+      "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC3643/IERC3643Operations.sol",
+    ],
   },
 };
 

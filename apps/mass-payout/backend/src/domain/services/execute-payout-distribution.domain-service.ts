@@ -214,13 +214,15 @@ import { CreateHoldersDomainService } from "@domain/services/create-holders.doma
 import { UpdateBatchPayoutStatusDomainService } from "@domain/services/update-batch-payout-status.domain-service"
 import { UpdateDistributionStatusDomainService } from "@domain/services/update-distribution-status.domain-service"
 import { ValidateAssetPauseStateDomainService } from "@domain/services/validate-asset-pause-state.domain-service"
-import { Inject, Injectable } from "@nestjs/common"
+import { Inject, Injectable, Logger } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { ExecuteDistributionResponse } from "@domain/ports/execute-distribution-response.interface"
 import { HederaService } from "@domain/ports/hedera.port"
 
 @Injectable()
 export class ExecutePayoutDistributionDomainService extends BasePayoutDomainService {
+  private readonly logger = new Logger(ExecutePayoutDistributionDomainService.name)
+
   constructor(
     @Inject("AssetTokenizationStudioService")
     private readonly assetTokenizationStudioService: AssetTokenizationStudioService,
@@ -253,6 +255,7 @@ export class ExecutePayoutDistributionDomainService extends BasePayoutDomainServ
   }
 
   override async execute(distribution: Distribution): Promise<void> {
+    const start = process.hrtime.bigint()
     distribution.verifyIsPayout()
     await this.validateAssetPauseStateDomainService.validateDomainPauseState(distribution.asset, distribution.id)
 
@@ -266,6 +269,8 @@ export class ExecutePayoutDistributionDomainService extends BasePayoutDomainServ
     }
     const batchPayouts = await this.createBatchPayouts(distributionWithInProgressStatus)
     await this.processBatchPayouts(batchPayouts)
+    const end = process.hrtime.bigint()
+    this.logger.debug(`Payment execution time(s): ${(end - start) / BigInt(1e9)}"`)
   }
 
   protected override async getHoldersCount(distribution: Distribution): Promise<number> {
