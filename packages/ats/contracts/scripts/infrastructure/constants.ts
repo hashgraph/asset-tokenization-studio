@@ -381,3 +381,22 @@ export const EIP1066_CODES = {
   DUPLICATE_OFF_CHAIN_REQUEST: "0xf8",
   OFF_CHAIN_INFO_OR_META: "0xff",
 } as const;
+
+// ============================================================================
+
+// ============================================================================
+// Deployment Workflow Descriptors
+// ============================================================================
+
+import type { WorkflowType } from "./types/checkpoint";
+
+/**
+ * Human-readable names for deployment workflows.
+ * Used for file naming and logging.
+ */
+export const WORKFLOW_DESCRIPTORS: Record<WorkflowType, string> = {
+  newBlr: "newBlr",
+  existingBlr: "existingBlr",
+  upgradeConfigurations: "upgradeConfigurations",
+  upgradeTupProxies: "upgradeTupProxies",
+} as const;

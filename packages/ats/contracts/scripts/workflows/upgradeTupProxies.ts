@@ -108,6 +108,8 @@ import {
   NullCheckpointManager,
   type DeploymentCheckpoint,
   type ResumeOptions,
+  type UpgradeTupProxiesOutputType,
+  type UpgradeProxyResult,
   validateAddress,
   generateTimestamp,
 } from "@scripts/infrastructure";
@@ -185,39 +187,13 @@ export interface UpgradeTupProxiesOptions extends ResumeOptions {
   outputPath?: string;
 }
 
-export interface ProxyUpgradeResult {
-  proxyAddress: string;
-  success: boolean;
-  upgraded: boolean;
-  oldImplementation: string;
-  newImplementation: string;
-  transactionHash?: string;
-  gasUsed?: number;
-  error?: string;
-}
-
 export interface DeployedContract {
   address: string;
   transactionHash: string;
   gasUsed?: number;
 }
 
-export interface UpgradeTupProxiesOutput {
-  network: string;
-  timestamp: string;
-  deployer: string;
-  proxyAdmin: { address: string };
-  implementations?: { blr?: DeployedContract; factory?: DeployedContract };
-  blrUpgrade?: ProxyUpgradeResult;
-  factoryUpgrade?: ProxyUpgradeResult;
-  summary: {
-    proxiesUpgraded: number;
-    proxiesFailed: number;
-    deploymentTime: number;
-    gasUsed: string;
-    success: boolean;
-  };
-}
+export type UpgradeTupProxiesOutput = UpgradeTupProxiesOutputType;
 
 interface ImplementationData {
   name: "blr" | "factory";
@@ -235,7 +211,7 @@ interface UpgradePhaseContext {
   checkpointManager: CheckpointManager | NullCheckpointManager;
   startTime: number;
   totalGasUsed: number;
-  upgradeResults: Map<string, ProxyUpgradeResult>;
+  upgradeResults: Map<string, UpgradeProxyResult>;
   deployedImplementations: Map<string, DeployedContract>;
 }
 
@@ -487,7 +463,7 @@ async function upgradeProxiesPhase(ctx: UpgradePhaseContext): Promise<void> {
         });
 
         if (result.success) {
-          ctx.upgradeResults.set(impl.proxyAddress!, result as ProxyUpgradeResult);
+          ctx.upgradeResults.set(impl.proxyAddress!, result as UpgradeProxyResult);
           ctx.totalGasUsed += result.gasUsed || 0;
 
           if (result.upgraded) {
@@ -497,12 +473,12 @@ async function upgradeProxiesPhase(ctx: UpgradePhaseContext): Promise<void> {
           }
         } else {
           logError(`✗ ${impl.name} proxy upgrade failed: ${result.error}`);
-          ctx.upgradeResults.set(impl.proxyAddress!, result as ProxyUpgradeResult);
+          ctx.upgradeResults.set(impl.proxyAddress!, result as UpgradeProxyResult);
         }
       } catch (err) {
         logError(`✗ ${impl.name} proxy upgrade failed: ${err instanceof Error ? err.message : String(err)}`);
 
-        const errorResult: ProxyUpgradeResult = {
+        const errorResult: UpgradeProxyResult = {
           proxyAddress: impl.proxyAddress!,
           success: false,
           upgraded: false,
