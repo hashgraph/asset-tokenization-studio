@@ -81,17 +81,17 @@ The revocation registry tracks invalidated credentials:
 
 > **Important**: The revocation registry address is provided by your SSI provider (Terminal 3). Contact them to obtain the correct address for your network (testnet/mainnet).
 
-## Step 2: Manage Credential Issuers
+## Step 2: Add an Account as Issuer
 
-### Add Terminal 3 as Trusted Issuer
+### Designate Issuer Accounts
 
-Only trusted issuers can provide valid credentials:
+You need to add accounts that have permission to upload Verifiable Credentials:
 
 1. From **Control** → **SSI Manager**, click **"Add Issuer"**
-2. Enter Terminal 3's issuer address:
-   - **Testnet**: `0x...` (obtain from Terminal 3)
-   - **Mainnet**: `0x...` (obtain from Terminal 3)
+2. Enter the **account address** (Hedera ID or EVM address) that will act as issuer
 3. Confirm the transaction
+
+**Important**: You are adding an **account address** as an issuer, not Terminal 3 itself. This account can then use Terminal 3 or other methods to issue and upload Verifiable Credentials for KYC validation.
 
 ### View Issuer List
 
@@ -228,11 +228,17 @@ See the [Roles and Permissions Guide](./roles-and-permissions.md) for details.
 
 ## Troubleshooting
 
+### "Account does not have Kyc status: Not Granted"
+
+This error means the target account **already has KYC status** (either granted internally or through an external list). You cannot grant KYC to an account that already has a KYC status.
+
+**Solution**: Check if the account is already in an external KYC list or has been previously granted KYC internally.
+
 ### Credential Not Recognized
 
 If an investor's credential is rejected:
 
-- **Issuer not trusted**: Verify Terminal 3 is in the issuer list
+- **Issuer not authorized**: Verify the issuer account is in the issuer list (Control → SSI Manager)
 - **Credential revoked**: Check revocation registry status
 - **Wrong network**: Ensure credential is for the correct network (testnet/mainnet)
 

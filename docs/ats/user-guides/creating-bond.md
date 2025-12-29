@@ -459,7 +459,9 @@ After successful deployment:
 
 ## Managing Your Bond Token
 
-After creation, common operations for bond lifecycle management:
+After creation, you can manage your bond from the dashboard. Select **Admin View (green)** to access administrative operations or **Holder View (blue)** to view balances and transfer tokens.
+
+Common bond lifecycle management operations:
 
 ### Distribute Bonds
 
@@ -541,12 +543,13 @@ After creation, common operations for bond lifecycle management:
 
 ## Next Steps
 
-- [Managing External KYC Lists](./managing-external-kyc-lists.md) - Set up bondholder verification
-- [Managing External Control Lists](./managing-external-control-lists.md) - Configure transfer restrictions
-- [SSI Integration](./ssi-integration.md) - Decentralized identity verification with Terminal 3
-- [Roles and Permissions](./roles-and-permissions.md) - Grant roles to team members
+- [Token Operations](./token-operations.md) - Learn about all available operations for your bond
 - [Corporate Actions](./corporate-actions.md) - Execute coupon payments and maturity redemption
-- [Token Lifecycle](./token-lifecycle.md) - Manage bond operations
+- [Managing KYC & Compliance](./managing-compliance.md) - Set up bondholder verification
+- [Roles and Permissions](./roles-and-permissions.md) - Grant roles to team members
+- [SSI Integration](./ssi-integration.md) - Decentralized identity verification with Terminal 3
+- [Managing External KYC Lists](./managing-external-kyc-lists.md) - Configure external verification
+- [Managing External Control Lists](./managing-external-control-lists.md) - Configure transfer restrictions
 
 ## Related Resources
 

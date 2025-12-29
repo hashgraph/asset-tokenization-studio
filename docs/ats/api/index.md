@@ -16,9 +16,9 @@ Auto-generated documentation for all ATS smart contract interfaces, functions, a
 
 ## SDK Reference
 
-_Coming soon_
+[SDK API Reference →](./sdk-reference.md)
 
-TypeScript SDK classes, methods, and usage examples.
+Complete reference for all SDK request classes to interact with ATS smart contracts.
 
 ## Additional Resources
 

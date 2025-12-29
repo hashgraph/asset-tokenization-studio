@@ -452,7 +452,9 @@ After successful deployment:
 
 ## Managing Your Equity Token
 
-After creation, common operations:
+After creation, you can manage your token from the dashboard. Select **Admin View (green)** to access administrative operations or **Holder View (blue)** to view balances and transfer tokens.
+
+Common administrative operations:
 
 ### Distribute Shares
 
@@ -505,12 +507,13 @@ After creation, common operations:
 
 ## Next Steps
 
-- [Managing External KYC Lists](./managing-external-kyc-lists.md) - Set up investor verification
-- [Managing External Control Lists](./managing-external-control-lists.md) - Configure transfer restrictions
-- [SSI Integration](./ssi-integration.md) - Decentralized identity verification with Terminal 3
+- [Token Operations](./token-operations.md) - Learn about all available operations for your token
+- [Corporate Actions](./corporate-actions.md) - Distribute dividends and manage splits/voting
+- [Managing KYC & Compliance](./managing-compliance.md) - Set up investor verification
 - [Roles and Permissions](./roles-and-permissions.md) - Grant roles to team members
-- [Corporate Actions](./corporate-actions.md) - Distribute dividends
-- [Token Lifecycle](./token-lifecycle.md) - Manage token operations
+- [SSI Integration](./ssi-integration.md) - Decentralized identity verification with Terminal 3
+- [Managing External KYC Lists](./managing-external-kyc-lists.md) - Configure external verification
+- [Managing External Control Lists](./managing-external-control-lists.md) - Configure transfer restrictions
 
 ## Related Resources
 

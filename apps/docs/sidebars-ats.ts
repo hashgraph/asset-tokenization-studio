@@ -6,7 +6,7 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Getting Started",
-      collapsed: false,
+      collapsed: true,
       link: {
         type: "doc",
         id: "getting-started/index",
@@ -16,48 +16,32 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "User Guides",
-      collapsed: false,
+      collapsed: true,
       link: {
         type: "doc",
         id: "user-guides/index",
       },
       items: [
-        {
-          type: "category",
-          label: "Equity Tokens",
-          collapsed: false,
-          items: ["user-guides/creating-equity"],
-        },
-        {
-          type: "category",
-          label: "Bond Tokens",
-          collapsed: false,
-          items: ["user-guides/creating-bond"],
-        },
-        {
-          type: "category",
-          label: "Common Operations",
-          collapsed: false,
-          items: [
-            "user-guides/corporate-actions",
-            "user-guides/managing-compliance",
-            "user-guides/managing-external-kyc-lists",
-            "user-guides/managing-external-control-lists",
-            "user-guides/managing-external-pause-lists",
-            "user-guides/hold-operations",
-            "user-guides/clearing-operations",
-            "user-guides/protected-partitions",
-            "user-guides/ssi-integration",
-            "user-guides/roles-and-permissions",
-            "user-guides/token-lifecycle",
-          ],
-        },
+        "user-guides/creating-equity",
+        "user-guides/creating-bond",
+        "user-guides/token-operations",
+        "user-guides/updating-configuration",
+        "user-guides/corporate-actions",
+        "user-guides/managing-compliance",
+        "user-guides/managing-external-kyc-lists",
+        "user-guides/managing-external-control-lists",
+        "user-guides/managing-external-pause-lists",
+        "user-guides/hold-operations",
+        "user-guides/clearing-operations",
+        "user-guides/protected-partitions",
+        "user-guides/ssi-integration",
+        "user-guides/roles-and-permissions",
       ],
     },
     {
       type: "category",
       label: "Developer Guides",
-      collapsed: false,
+      collapsed: true,
       link: {
         type: "doc",
         id: "developer-guides/index",
@@ -67,11 +51,13 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Smart Contracts",
+          collapsed: true,
           link: {
             type: "doc",
             id: "developer-guides/contracts/index",
           },
           items: [
+            "developer-guides/contracts/deployed-addresses",
             "developer-guides/contracts/deployment",
             "developer-guides/contracts/adding-facets",
             "developer-guides/contracts/upgrading",
@@ -83,15 +69,17 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "API Documentation",
-      collapsed: false,
+      collapsed: true,
       link: {
         type: "doc",
         id: "api/index",
       },
       items: [
+        "api/sdk-reference",
         {
           type: "category",
           label: "Contracts",
+          collapsed: true,
           link: {
             type: "doc",
             id: "api/contracts/index",

@@ -117,16 +117,28 @@ Before following these guides, make sure you have:
     <a href="./corporate-actions" className="card-link">Read Guide</a>
   </div>
 
-  <div className="card-box">
-    <h3>♻️ Token Lifecycle</h3>
-    <p>Pause, freeze, transfer, and redeem tokens</p>
+  <div className="card-box card-info">
+    <h3>⚙️ Token Operations</h3>
+    <p>Manage token operations and controls</p>
     <ul>
-      <li>Transfer tokens between accounts</li>
-      <li>Pause and freeze operations</li>
-      <li>Burn and redeem tokens</li>
-      <li>Update token metadata</li>
+      <li>Mint, transfer, and redeem tokens</li>
+      <li>Freeze accounts and pause tokens</li>
+      <li>Hold, clearing, and partition operations</li>
+      <li>Cap management</li>
     </ul>
-    <a href="./token-lifecycle" className="card-link">Read Guide</a>
+    <a href="./token-operations" className="card-link">Read Guide</a>
+  </div>
+
+  <div className="card-box card-info">
+    <h3>🔧 Updating Configuration</h3>
+    <p>Update token configuration and resolver settings</p>
+    <ul>
+      <li>Set Business Logic Resolver</li>
+      <li>Configure version settings</li>
+      <li>Upgrade token functionality</li>
+      <li>Manage configuration profiles</li>
+    </ul>
+    <a href="./updating-configuration" className="card-link">Read Guide</a>
   </div>
 </div>
 
