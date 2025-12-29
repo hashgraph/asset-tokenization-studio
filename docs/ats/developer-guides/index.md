@@ -18,7 +18,7 @@ Learn about the Diamond Pattern architecture, deploying contracts, adding facets
 
 ### SDK Integration
 
-_Coming soon_
+[SDK Integration →](./sdk-integration.md)
 
 Learn how to integrate the ATS SDK into your project, configure transaction adapters, and interact with smart contracts.
 

@@ -6,7 +6,7 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Getting Started",
-      collapsed: false,
+      collapsed: true,
       link: {
         type: "doc",
         id: "getting-started/index",
@@ -16,7 +16,7 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "User Guides",
-      collapsed: false,
+      collapsed: true,
       link: {
         type: "doc",
         id: "user-guides/index",
@@ -32,7 +32,7 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "Developer Guides",
-      collapsed: false,
+      collapsed: true,
       link: {
         type: "doc",
         id: "developer-guides/index",
@@ -42,7 +42,7 @@ const sidebars: SidebarsConfig = {
     {
       type: "category",
       label: "API Documentation",
-      collapsed: false,
+      collapsed: true,
       link: {
         type: "doc",
         id: "api/index",

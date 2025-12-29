@@ -82,19 +82,19 @@ If **either** the internal pause is enabled **or any** external pause returns `i
 
 ### How External Pause Status Works
 
-When you create an external pause list, it has a simple on/off status:
+When you create an external pause list, it has a simple activated/deactivated status:
 
-**Status: Active (Paused)**
+**Status: Activated**
 
-- All assets linked to this external pause are **paused**
+- All assets linked to this external pause list are **paused**
 - No transfers or operations are allowed on linked assets
-- Toggle to "Inactive" to resume operations
+- Toggle to "Deactivated" to resume operations
 
-**Status: Inactive (Not Paused)**
+**Status: Deactivated**
 
-- All assets linked to this external pause operate **normally**
+- All assets linked to this external pause list operate **normally**
 - Transfers and operations are allowed (subject to other restrictions)
-- Toggle to "Active" to pause all linked assets
+- Toggle to "Activated" to pause all linked assets
 
 ## Prerequisites
 
@@ -124,9 +124,9 @@ Creates a new external pause list by deploying a smart contract automatically.
 2. Provide list details:
    - **List Name**: Descriptive name (e.g., "Platform Maintenance Pause", "Emergency Stop")
    - **Description** (optional): Purpose of this pause mechanism
-3. Configure initial status:
-   - **Active**: Pause is enabled (all linked assets will be paused immediately)
-   - **Inactive**: Pause is disabled (normal operations) - **Recommended for initial setup**
+3. **Configure initial status** - you will be asked to choose:
+   - **Activated**: Anything linked to this pause list will be paused immediately
+   - **Deactivated**: Assets linked to this pause list will operate normally - **Recommended for initial setup**
 4. Click **"Deploy"** or **"Create"**
 5. Approve the transaction in your wallet
 6. The contract is deployed and appears in your External Pause list
@@ -136,9 +136,14 @@ Creates a new external pause list by deploying a smart contract automatically.
 - A new external pause contract is deployed on-chain
 - You become the manager of this pause contract
 - The contract address is displayed (0x... or 0.0.xxxxx)
-- You can now link this pause to your assets
+- You can now link assets to this pause list
 
-> **Tip**: Start with "Inactive" status, link your assets first, then activate when needed.
+**Understanding Activated vs Deactivated:**
+
+- **If created ACTIVATED**: Any asset you link to this pause list will be paused immediately. All operations on those assets will be blocked until you deactivate the pause list.
+- **If created DEACTIVATED**: Assets linked to this pause list will continue to operate normally. You can activate the pause later when needed.
+
+> **Tip**: Start with "Deactivated" status, link your assets first, then activate when needed.
 
 ### Option 2: Import Existing External Pause
 
@@ -147,9 +152,7 @@ Use an existing external pause list by importing its contract ID.
 **Steps:**
 
 1. Click **"Import"** button
-2. Enter the contract information:
-   - **Contract ID**: Hedera contract ID (0.0.xxxxx) or EVM address (0x...)
-   - **List Name** (optional): Give it a recognizable name
+2. Enter the **Contract ID**: Hedera contract ID (0.0.xxxxx) or EVM address (0x...)
 3. Click **"Import"**
 4. Approve the transaction in your wallet
 5. The external pause list appears in your list

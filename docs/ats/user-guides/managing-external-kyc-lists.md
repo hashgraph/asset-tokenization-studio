@@ -72,9 +72,7 @@ Use an existing external KYC list by importing its contract ID.
 **Steps:**
 
 1. Click **"Import"** button
-2. Enter the contract information:
-   - **Contract ID**: Hedera contract ID (0.0.xxxxx) or EVM address (0x...)
-   - **List Name** (optional): Give it a recognizable name
+2. Enter the **Contract ID**: Hedera contract ID (0.0.xxxxx) or EVM address (0x...)
 3. Click **"Import"**
 4. Approve the transaction in your wallet
 5. The external KYC list appears in your list
@@ -105,47 +103,47 @@ After creating or importing an external KYC list, you need to link it to your se
 
 ## Managing KYC List Members
 
-Once you have created or imported a KYC list, you can add investors to it.
+Once you have created or imported a KYC list, you can manage investors in it.
 
-### Adding Members in Bulk
+### Viewing Accounts
 
-For large investor lists:
+To view all accounts in the KYC list:
 
-1. Navigate to the external KYC list details
-2. Click **"Bulk Import"**
-3. Upload CSV file with format:
-   ```csv
-   address
-   0x123...
-   0x456...
-   ```
-4. Review and confirm the import
+1. Navigate to the external KYC list from the sidebar
+2. Select the list you want to view
+3. Click the **magnifying glass icon** (🔍)
+4. View the list of all accounts in this KYC list
+
+### Adding Members
+
+To add an account to the KYC list:
+
+1. Navigate to the external KYC list
+2. Click the **user with plus icon** (👤➕)
+3. Enter the account address (Hedera ID or EVM address)
+4. Click **"Add"**
 5. Approve the transaction
 
 ### Removing Members
 
-1. Navigate to KYC list details
-2. Find the investor in the members list
-3. Click **"Remove"** or **"Revoke KYC"**
-4. Confirm the transaction
+To remove an account from the KYC list:
 
-## Querying KYC Status
+1. Navigate to the external KYC list
+2. Click the **user with minus icon** (👤➖)
+3. Enter the account address to remove
+4. Click **"Remove"**
+5. Approve the transaction
 
-### Check Individual Status
+### Deleting the KYC List
 
-From the token dashboard:
+To delete an entire external KYC list:
 
-1. Navigate to **"Holders"** tab
-2. View KYC status column showing:
-   - ✅ **Verified**: KYC granted (internal or external)
-   - ⏳ **Pending**: KYC not yet verified
-   - ❌ **Revoked**: KYC was revoked
+1. Navigate to the external KYC list
+2. Click the **trash icon** (🗑️)
+3. Confirm the deletion
+4. Approve the transaction
 
-### Export Compliance Report
-
-1. From token details, click **"Reports"**
-2. Select **"Compliance Report"**
-3. Download CSV with all holders and their KYC status
+**Important**: When you delete an external KYC list, it will be automatically removed from all security tokens that are using it. This affects all linked tokens immediately.
 
 ## Managing Multiple KYC Lists
 

@@ -63,10 +63,10 @@ Total Balance = Available Balance + Locked Balance + Held Balance
 
 - You own 1,000 tokens (total balance)
 - You create a hold for 300 tokens
-- Available balance: 700 tokens (can transfer)
-- Held balance: 300 tokens (locked in hold)
-- Total balance: 1,000 tokens (unchanged)
-- Dividends paid on all 1,000 tokens
+- **Available balance**: 700 tokens (can transfer or create new holds)
+- **Held balance**: 300 tokens (locked in hold, controlled by escrow)
+- **Total balance**: 1,000 tokens (unchanged)
+- **Dividends/coupons**: Paid on all 1,000 tokens (total balance includes held balance)
 
 **Hold States:**
 
@@ -75,20 +75,87 @@ Total Balance = Available Balance + Locked Balance + Held Balance
 - **Released**: Hold cancelled, tokens returned to available balance
 - **Expired**: Hold timed out, tokens automatically returned to available balance
 
+## Hold Lifecycle Schema
+
+The following diagram illustrates the complete lifecycle of a hold operation:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         INITIAL STATE                                │
+│  Token Holder: 1,000 tokens (Available Balance)                     │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │
+                             │ 1. CREATE HOLD
+                             │    Amount: 300 tokens
+                             │    Escrow: Account A
+                             │    Destination: Account B (optional)
+                             │    Expiration: 48 hours
+                             ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                         HOLD ORDERED                                 │
+│  Token Holder:                                                       │
+│    - Total Balance: 1,000 tokens (unchanged)                        │
+│    - Available Balance: 700 tokens (reduced)                        │
+│    - Held Balance: 300 tokens (locked)                              │
+│                                                                      │
+│  Escrow Control: Account A can Execute or Release                   │
+│  Dividends: Paid on all 1,000 tokens                                │
+└────────────┬────────────────────────────┬───────────────────────────┘
+             │                            │
+             │ 2a. EXECUTE                │ 2b. RELEASE
+             │    (by Escrow only)        │     (by Escrow only)
+             │                            │
+             ▼                            ▼
+┌──────────────────────────┐    ┌──────────────────────────┐
+│   HOLD EXECUTED          │    │   HOLD RELEASED          │
+│                          │    │                          │
+│ 300 tokens transferred   │    │ 300 tokens returned to   │
+│ to Destination Account   │    │ Original Account         │
+│                          │    │                          │
+│ Token Holder:            │    │ Token Holder:            │
+│  - Total: 700 tokens     │    │  - Total: 1,000 tokens   │
+│  - Available: 700 tokens │    │  - Available: 1,000      │
+│  - Held: 0 tokens        │    │  - Held: 0 tokens        │
+└──────────────────────────┘    └──────────────────────────┘
+
+             │
+             │ 2c. EXPIRATION (if time elapsed)
+             │     Anyone can call Reclaim
+             ▼
+┌──────────────────────────────────────────────────────────┐
+│                    HOLD EXPIRED                           │
+│                                                           │
+│  Automatic or manual reclaim returns tokens:             │
+│    - Total Balance: 1,000 tokens                         │
+│    - Available Balance: 1,000 tokens                     │
+│    - Held Balance: 0 tokens                              │
+└──────────────────────────────────────────────────────────┘
+```
+
+**Key Points:**
+
+1. **Total balance never changes** during hold lifecycle (you always own the tokens)
+2. **Held tokens are locked** but still eligible for dividends/coupons
+3. **Only escrow account** can execute or release (exclusive control)
+4. **Anyone can reclaim** expired holds to return tokens to original holder
+5. **Destination account** (if specified) restricts where tokens can be transferred
+
 ### Important Hold Properties
 
 **Holds Don't Affect:**
 
-- Total token supply (remains constant)
-- Your total balance (still own the tokens)
-- Dividend/coupon payments (calculated on total balance)
-- Corporate action eligibility (based on total balance)
+- **Total token supply**: Remains constant (no tokens are created or destroyed)
+- **Your total balance**: You still own the tokens (total balance unchanged)
+- **Dividend/coupon payments**: Calculated on total balance, which includes held tokens
+- **Corporate action eligibility**: Based on total balance (including held tokens)
+- **Snapshots**: Held balance is included in snapshot totals
 
 **Holds Do Affect:**
 
-- Available balance (reduced by held amount)
-- Your ability to transfer held tokens
-- Token availability for new trades or holds
+- **Available balance**: Reduced by held amount
+- **Your ability to transfer**: Held tokens cannot be transferred by you
+- **Creating new holds**: Can only create holds with available balance
+- **Control by escrow**: Escrow account has exclusive control to execute or release
 
 ## Prerequisites
 
@@ -108,6 +175,7 @@ From this interface, you can:
 
 - **View holds**: See all active, executed, and released holds
 - **Create hold**: Create a new hold operation
+- **Force hold**: Create a hold on behalf of another account (requires CONTROLLER_ROLE)
 - **Manage holds**: Execute or release existing holds
 
 ## Creating a Hold
@@ -119,59 +187,90 @@ From the Hold Operations interface:
 1. Click **"Create Hold"** button
 2. Fill in the hold details form
 
-### Step 2: Configure Hold Details
+### Step 2: Fill Hold Details
 
-**From Account**
+**Original Account\***
 
-- **Format**: Hedera account ID (0.0.xxxxx) or EVM address (0x...)
+- **Auto-filled**: Your connected wallet address
 - **Purpose**: The account from which tokens will be held
-- **Validation**: Must have sufficient balance
+- **Note**: This field is automatically populated and cannot be changed
 
-**To Account** (Optional but Recommended)
+**Destination Account**
 
 - **Format**: Hedera account ID (0.0.xxxxx) or EVM address (0x...)
 - **Purpose**: The account that will receive tokens if hold is executed
+- **Optional but recommended**: Specify the recipient if known
 - **If specified**: Escrow can **only** transfer tokens to this specific account
-- **If left empty**: Escrow can transfer tokens to **any** account (more flexible but less secure)
-- **Recommendation**: Always specify for known transactions
-- **Use cases**:
-  - Specify: Known buyer in marketplace, specific recipient
-  - Leave empty: Escrow needs flexibility, recipient unknown at creation time
+- **If left empty**: Escrow can transfer tokens to **any** account during execution
 
-**Notary** (Optional)
+**Escrow Account\***
 
 - **Format**: Hedera account ID (0.0.xxxxx) or EVM address (0x...)
 - **Purpose**: Third-party that can execute or release the hold
-- **Use case**: Escrow agent, clearinghouse, settlement system
-- **Leave empty**: If only hold creator can manage it
+- **Required**: Must specify an escrow agent
+- **Use cases**: Marketplace escrow, clearinghouse, settlement system, compliance officer
 
-**Amount**
-
-- **Format**: Number of tokens to hold
-- **Validation**: Must not exceed available balance (balance - existing holds)
-- **Decimals**: Respect token decimals configuration
-
-**Expiration Time** (Optional)
+**Expiration Date\***
 
 - **Format**: Date and time (future)
 - **Purpose**: Automatic release if hold is not executed by this time
-- **Recommendation**: Set reasonable expiration (e.g., 24-72 hours)
-- **Leave empty**: For holds without expiration
+- **Required**: Must set an expiration date
+- **Recommendation**: Set reasonable timeframe (e.g., 24-72 hours for trades)
 
-**Lock Hash** (Optional)
+**Amount\***
 
-- **Format**: 32-byte hash (0x...)
-- **Purpose**: Secret that must be revealed to execute the hold
-- **Use case**: Conditional transfers, atomic swaps
-- **Advanced feature**: Leave empty for standard holds
+- **Format**: Number of tokens to hold
+- **Validation**: Must not exceed available balance (total balance - existing holds)
+- **Required**: Must specify amount to hold
 
 ### Step 3: Review and Create
 
 1. Verify all hold details are correct
-2. Check that "from" account has sufficient balance
-3. Click **"Create Hold"**
-4. Approve the transaction in your wallet
-5. Hold is created and tokens are locked
+2. Check that you have sufficient available balance
+3. Ensure you pass all transfer restrictions:
+   - KYC verification (if enabled)
+   - Control list checks (whitelist/blacklist)
+   - Token not paused
+   - Other compliance requirements
+4. Click **"Create Hold"** or **"Submit"**
+5. Approve the transaction in your wallet
+6. Hold is created and tokens are locked from your available balance
+
+> **Important**: Holds can only be created if all transfer restrictions are met, just like regular transfers. The escrow and destination accounts must also pass all compliance checks.
+
+## Force Hold (Controller Only)
+
+Force hold allows accounts with **CONTROLLER_ROLE** to create holds on behalf of other accounts.
+
+### When to Use Force Hold
+
+- **Regulatory holds**: Freeze assets during investigations
+- **Legal orders**: Court-mandated asset freezes
+- **Compliance actions**: Emergency freezes for regulatory compliance
+
+### Key Difference from Regular Hold
+
+The only difference is:
+
+- **Original Account** field is **editable** (not auto-filled)
+- You can specify any account to create a hold on their tokens
+- **Control list restrictions do NOT apply** for controller-created holds
+- All other fields and requirements are identical to Create Hold
+
+### How to Create a Force Hold
+
+1. Click **"Force Hold"** button
+2. Fill in the same form as Create Hold, but now you can edit:
+   - **Original Account\***: Enter the account address to create hold on their tokens
+3. All other fields are the same:
+   - Destination Account (optional)
+   - Escrow Account\* (required)
+   - Expiration Date\* (required)
+   - Amount\* (required)
+4. Click **"Submit"**
+5. Approve the transaction
+
+> **Important**: Requires **CONTROLLER_ROLE**. Force holds bypass control list restrictions but the target account must still have sufficient available balance.
 
 ## Viewing Holds
 
@@ -195,22 +294,6 @@ The Hold Operations interface displays all holds in a table:
 - **By Account**: Filter holds for specific accounts
 - **By Date**: Show holds created in a date range
 
-### Hold Details
-
-Click on a hold to view complete details:
-
-- Hold ID
-- Creator account
-- From account
-- To account
-- Notary (if set)
-- Amount held
-- Current status
-- Creation timestamp
-- Expiration time (if set)
-- Execution/Release timestamp (if applicable)
-- Transaction history
-
 ## Managing Holds
 
 ### Execute a Hold
@@ -220,58 +303,98 @@ Transfer the held tokens to a recipient account.
 **Prerequisites:**
 
 - Hold must be in "Ordered" status
-- Must be authorized to execute (typically the notary/escrow)
+- **Must be the escrow account** specified in the hold
 - Hold must not be expired
 - Recipient must pass KYC and compliance checks
 
-**Important: Destination Account Behavior**
+> **Important**: Only the escrow account can execute a hold. No other account has this permission.
 
-**If "To Account" was specified when creating the hold:**
+**Execute Hold Form Fields:**
 
-- Tokens can **only** be transferred to that specific account
-- Execute button transfers to the predefined account
-- Cannot change destination during execution
+**Hold ID\***
 
-**If "To Account" was left empty:**
+- **Format**: Unique identifier for the hold
+- **Purpose**: Identifies which hold to execute
+- **Required**: Must specify the hold ID
 
-- Escrow can transfer tokens to **any** account
-- Must specify destination account when executing
-- Provides flexibility but requires trust in escrow
+**Original Account**
+
+- **Display only**: Shows the account that created the hold
+- **Cannot edit**: Read-only field for reference
+
+**Destination Account**
+
+- **Display only**: Shows the destination account (if specified during creation)
+- **Cannot edit**: Read-only field for reference
+- **Note**: Tokens will be transferred to this account
+
+**Amount\***
+
+- **Format**: Number of tokens to transfer
+- **Required**: Must specify amount
+- **Validation**: Cannot exceed the amount held
 
 **Steps:**
 
 1. Navigate to the hold in the list
 2. Click **"Execute"** button
-3. **If no "To Account" was set**: Enter the destination account address
-4. If lock hash was set, provide the secret/preimage
-5. Verify recipient passes compliance checks
-6. Confirm the transaction
-7. Approve in your wallet
-8. Tokens are transferred from "from" to destination account
-9. Hold status changes to "Executed"
+3. The form shows:
+   - Hold ID (auto-filled)
+   - Original Account (read-only)
+   - Destination Account (read-only, if specified during creation)
+   - Amount (enter amount to execute)
+4. Enter the amount to execute
+5. Confirm the transaction
+6. Approve in your wallet
+7. Tokens are transferred to the destination account
+8. Hold status changes to "Executed"
 
-> **Security Note**: Holds with predefined "To Account" are more secure as they prevent the escrow from transferring to unintended recipients.
+> **Note**: If a Destination Account was specified when creating the hold, tokens can only be transferred to that account.
 
 ### Release a Hold
 
-Cancel the hold and unlock the tokens (no transfer occurs).
+Cancel the hold and return the tokens to the original account (no transfer to destination).
 
 **Prerequisites:**
 
 - Hold must be in "Ordered" status
-- Must be authorized to release:
-  - Hold creator, OR
-  - Notary (if set), OR
-  - From account owner
+- **Must be the escrow account** specified in the hold
+
+> **Important**: Only the escrow account can release a hold. No other account has this permission.
+
+**Release Hold Form Fields:**
+
+**Hold ID\***
+
+- **Format**: Unique identifier for the hold
+- **Purpose**: Identifies which hold to release
+- **Required**: Must specify the hold ID
+
+**Destination Account**
+
+- **Format**: Account address
+- **Purpose**: Shows destination account (if specified)
+- **Note**: For reference only
+
+**Amount\***
+
+- **Format**: Number of tokens to release
+- **Required**: Must specify amount
+- **Validation**: Cannot exceed the amount held
 
 **Steps:**
 
 1. Navigate to the hold in the list
 2. Click **"Release"** button
-3. Confirm the release action
-4. Approve in your wallet
-5. Tokens are unlocked and available again
-6. Hold status changes to "Released"
+3. The form shows:
+   - Hold ID (auto-filled)
+   - Destination Account (if specified, for reference)
+   - Amount (enter amount to release)
+4. Enter the amount to release
+5. Confirm the release action
+6. Approve in your wallet
+7. Tokens are unlocked and returned to available balance
+8. Hold status changes to "Released"
 
 ### Automatic Expiration
 
@@ -414,18 +537,17 @@ Hold operations require specific roles depending on the action:
 
 Who can execute a hold (transfer tokens to destination):
 
-- Hold creator
-- Notary/escrow (if specified in the hold)
-- Accounts with HOLD_EXECUTOR_ROLE (if configured)
+- **Only the escrow account** specified in the hold
+
+No other accounts can execute a hold, including the hold creator or original account owner.
 
 ### Releasing Holds
 
 Who can release a hold (return tokens to original account):
 
-- Hold creator
-- Notary/escrow (if specified in the hold)
-- Original "from" account owner
-- Accounts with HOLD_RELEASER_ROLE (if configured)
+- **Only the escrow account** specified in the hold
+
+No other accounts can release a hold, including the hold creator or original account owner.
 
 ### Reclaiming Expired Holds
 

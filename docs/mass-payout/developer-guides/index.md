@@ -12,19 +12,19 @@ Technical guides for developers building with or extending Mass Payout.
 
 ### Smart Contracts
 
-_Coming soon_
+[Smart Contracts →](./contracts/index.md)
 
 Learn about the LifeCycle Cash Flow contract, deployment, and customization.
 
 ### SDK Integration
 
-_Coming soon_
+[SDK Integration →](./sdk-integration.md)
 
 Learn how to integrate the Mass Payout SDK for blockchain interactions.
 
 ### Backend API
 
-_Coming soon_
+[Backend API →](./backend/index.md)
 
 Learn about the NestJS backend architecture, domain services, and extending functionality.
 

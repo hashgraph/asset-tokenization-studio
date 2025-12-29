@@ -17,11 +17,17 @@ ATS supports three KYC methods:
 - **External KYC**: Delegate KYC verification to external smart contracts
 - **Both**: Use both internal and external KYC verification
 
-## Step 1: Enable Internal KYC
+---
+
+## Internal KYC Management
+
+Internal KYC uses Verifiable Credentials to validate investor identities on-chain.
+
+### Step 1: Enable Internal KYC
 
 You can enable internal KYC either during token creation or later from the Management section.
 
-### During Token Creation
+**During Token Creation**
 
 When creating an equity or bond token:
 
@@ -32,7 +38,7 @@ When creating an equity or bond token:
    - **External**: Use external KYC lists
    - **Both**: Use both methods
 
-### After Token Creation
+**After Token Creation**
 
 1. Navigate to your token from the dashboard
 2. Select **Admin View (green)**
@@ -43,11 +49,11 @@ When creating an equity or bond token:
 
 **Note**: Once activated, internal KYC cannot be deactivated without redeploying the token.
 
-## Step 2: Configure Issuers
+### Step 2: Configure Issuers
 
 Before you can validate KYC, you need to designate accounts as issuers. Issuers have permission to upload Verifiable Credentials.
 
-### Adding an Issuer
+**Adding an Issuer**
 
 1. Navigate to your token
 2. Select **Admin View (green)**
@@ -59,15 +65,15 @@ Before you can validate KYC, you need to designate accounts as issuers. Issuers 
 
 **Important**: You are adding an **account address** as an issuer, not Terminal 3 itself. This account will then have permission to upload VCs through Terminal 3 or programmatically.
 
-### Viewing Issuers
+**Viewing Issuers**
 
 The issuers list shows all accounts authorized to upload VCs for KYC validation.
 
-## Step 3: Validate KYC for an Account
+### Step 3: Grant KYC to an Account
 
 Once you have issuers configured, you can validate KYC for specific accounts by uploading their Verifiable Credentials.
 
-### Uploading a Verifiable Credential
+**Uploading a Verifiable Credential**
 
 1. Navigate to your token
 2. Select **Admin View (green)**
@@ -80,7 +86,7 @@ Once you have issuers configured, you can validate KYC for specific accounts by 
 
 **Note**: Only accounts designated as issuers (from Step 2) can upload VCs.
 
-### Getting Test Verifiable Credentials
+**Getting Test Verifiable Credentials**
 
 For testing purposes, you can generate test VCs using the hardhat command:
 
@@ -92,46 +98,72 @@ npx hardhat createVC \
 
 **For Production**: Use [Terminal 3](https://terminal3.io/) to issue proper Verifiable Credentials that comply with W3C standards.
 
-## Checking KYC Status
+### Checking KYC Status
 
-### View KYC for a Specific Account
-
-1. Navigate to your token
-2. Go to **Control** → **KYC**
-3. Enter an account address to check their KYC status
-4. View whether they are:
-   - **Granted**: KYC verified
-   - **Not Granted**: KYC not yet verified
-   - **Revoked**: KYC previously granted but now revoked
-
-### View All KYC Accounts
-
-The KYC tab shows a list of all accounts with their KYC status.
-
-## Revoking KYC
-
-To revoke KYC from an account:
-
-1. Navigate to **Control** → **KYC**
-2. Find the account in the list
-3. Click **"Revoke"** or **"Revoke KYC"**
-4. Approve the transaction
-
-Revoked accounts will no longer be able to receive or transfer tokens.
-
-## External KYC Lists
-
-In addition to internal KYC management, you can also use external KYC lists.
-
-### Adding an External KYC List
+To check if an account has internal KYC:
 
 1. Navigate to your token
-2. Go to **Control** → **External KYC Lists**
+2. Select **Admin View (green)**
+3. Go to **Control** → **KYC**
+4. View the list of accounts with their KYC status:
+   - **Valid**: KYC verified
+
+You can also enter a specific account address to check its KYC status.
+
+### Revoking KYC
+
+To revoke internal KYC from an account:
+
+1. Navigate to your token
+2. Select **Admin View (green)**
+3. Go to **Control** → **KYC**
+4. Find the account in the list
+5. Click the **trash/delete icon** (🗑️) next to the account
+6. Approve the transaction
+
+**Effect**: Revoked accounts will no longer be able to receive or transfer tokens.
+
+---
+
+## External KYC Management
+
+External KYC allows you to delegate investor verification to external smart contract lists.
+
+### Viewing External KYC Lists (Token Level)
+
+To see which external KYC lists are associated with your token:
+
+1. Navigate to your token
+2. Select **Admin View (green)**
+3. Go to **Control** → **External KYC**
+4. View the list of external KYC contracts associated with this token
+
+**Note**: This view only shows the lists. To manage (create/edit) external KYC lists, use the External KYC section in the sidebar.
+
+### Managing External KYC Lists (Global)
+
+To create and manage external KYC lists that can be shared across multiple tokens:
+
+1. In the main sidebar, navigate to **External KYC** (outside of any specific token)
+2. Here you can:
+   - Create new external KYC lists
+   - Add/remove addresses to existing lists
+   - View all your external KYC lists
+   - Share lists across multiple tokens
+
+### Adding an External KYC List to Your Token
+
+Once you've created an external KYC list (from the sidebar), you can associate it with your token:
+
+1. Navigate to your token
+2. Go to **Control** → **External KYC**
 3. Click **"Add External List"**
 4. Enter the smart contract address of the external KYC list
 5. Approve the transaction
 
-See [Managing External KYC Lists](./managing-external-kyc-lists.md) for more details.
+See [Managing External KYC Lists](./managing-external-kyc-lists.md) for detailed instructions on creating and managing external KYC lists.
+
+---
 
 ## KYC Enforcement
 

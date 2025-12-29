@@ -33,7 +33,6 @@ const sidebars: SidebarsConfig = {
         "user-guides/managing-external-pause-lists",
         "user-guides/hold-operations",
         "user-guides/clearing-operations",
-        "user-guides/protected-partitions",
         "user-guides/ssi-integration",
         "user-guides/roles-and-permissions",
       ],

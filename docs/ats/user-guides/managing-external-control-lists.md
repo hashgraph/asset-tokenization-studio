@@ -64,7 +64,6 @@ Creates a new external control list by deploying a smart contract automatically.
    - **Blacklist**: Blocked addresses
 3. Provide list details:
    - **List Name**: Descriptive name (e.g., "OFAC Sanctions List")
-   - **Description** (optional): Purpose and coverage
 4. Click **"Deploy"** or **"Create"**
 5. Approve the transaction in your wallet
 6. The contract is deployed and appears in your External Control Lists
@@ -83,9 +82,7 @@ Use an existing external control list by importing its contract ID.
 **Steps:**
 
 1. Click **"Import"** button
-2. Enter the contract information:
-   - **Contract ID**: Hedera contract ID (0.0.xxxxx) or EVM address (0x...)
-   - **List Name** (optional): Give it a recognizable name
+2. Enter the **Contract ID**: Hedera contract ID (0.0.xxxxx) or EVM address (0x...)
 3. Click **"Import"**
 4. Approve the transaction in your wallet
 5. The external control list appears in your list
@@ -116,43 +113,49 @@ After creating or importing an external control list, you need to link it to you
 
 ## Managing Control List Members
 
+Once you have created or imported a control list, you can manage addresses in it.
+
+### Viewing Addresses
+
+To view all addresses in the control list:
+
+1. Navigate to the external control list from the sidebar
+2. Select the list you want to view
+3. Click the **magnifying glass icon** (🔍)
+4. View the list of all addresses in this control list
+
 ### Adding Addresses
 
-For whitelists (approved addresses):
+To add an address to the control list:
 
-1. Navigate to control list details
-2. Enter Hedera account ID or EVM address
-3. Click **"Add"**
-4. Confirm transaction
+1. Navigate to the external control list
+2. Click the **user with plus icon** (👤➕)
+3. Enter the account address (Hedera ID or EVM address)
+4. Click **"Add"**
+5. Approve the transaction
 
-For blacklists (blocked addresses):
-
-1. Navigate to control list details
-2. Enter address to block
-3. Click **"Add"**
-4. Confirm transaction
+**Note**: For whitelists, this approves the address. For blacklists, this blocks the address.
 
 ### Removing Addresses
 
-1. Navigate to control list details
-2. Find the address in the members list
-3. Select checkbox on the left
-4. Click **"Remove selected items"**
-5. Confirm the transaction
+To remove an address from the control list:
 
-### Bulk Operations
+1. Navigate to the external control list
+2. Click the **user with minus icon** (👤➖)
+3. Enter the account address to remove
+4. Click **"Remove"**
+5. Approve the transaction
 
-For large address lists:
+### Deleting the Control List
 
-1. Click **"Bulk Import"**
-2. Upload CSV file with format:
-   ```csv
-   address
-   0x123...
-   0x456...
-   ```
-3. Review and confirm
-4. Approve transaction
+To delete an entire external control list:
+
+1. Navigate to the external control list
+2. Click the **trash icon** (🗑️)
+3. Confirm the deletion
+4. Approve the transaction
+
+**Important**: When you delete an external control list, it will be automatically removed from all security tokens that are using it. This affects all linked tokens immediately.
 
 ## How Control Lists Work
 
