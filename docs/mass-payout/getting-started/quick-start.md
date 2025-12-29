@@ -13,7 +13,7 @@ Quick start guide to run the Mass Payout application for managing large-scale pa
 
 - **Node.js**: v24.0.0 or newer (for backend)
 - **npm**: v10.9.0 or newer
-- **PostgreSQL**: 12 or newer
+- **Docker**: For PostgreSQL database (or install PostgreSQL 12+ manually)
 - **Hedera Account**: Testnet or mainnet account with HBAR
 
 ## Installation
@@ -25,24 +25,23 @@ git clone https://github.com/hashgraph/asset-tokenization-studio.git
 cd asset-tokenization-studio
 ```
 
-### 2. Install Dependencies
+### 2. Setup PostgreSQL Database
+
+#### Option 1: Using Docker (Recommended)
+
+Start PostgreSQL using the included docker-compose:
 
 ```bash
-npm ci
+cd apps/mass-payout/backend
+docker-compose up -d
+cd ../../..
 ```
 
-### 3. Build Contracts and SDK
+This will start PostgreSQL on port 5432 with default credentials (`postgres`/`postgres`).
 
-The Mass Payout application depends on the contracts and SDK:
+#### Option 2: Manual PostgreSQL Installation
 
-```bash
-npm run mass-payout:contracts:build
-npm run mass-payout:sdk:build
-```
-
-### 4. Setup PostgreSQL Database
-
-Create a database for Mass Payout:
+If you have PostgreSQL installed:
 
 ```bash
 # Connect to PostgreSQL
@@ -69,16 +68,20 @@ Edit `apps/mass-payout/backend/.env`:
 
 ##### Database Configuration
 
+If you're using Docker (from Step 2), use these default values:
+
 ```bash
-# PostgreSQL Connection
+# PostgreSQL Connection (Docker defaults)
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
 DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=your_password
-DATABASE_NAME=mass_payout
+DATABASE_PASSWORD=postgres
+DATABASE_NAME=postgres
 DATABASE_SCHEMA=public
 DATABASE_SYNCHRONIZE=true  # Set to false in production
 ```
+
+If you created a custom database, adjust `DATABASE_NAME` accordingly.
 
 ##### Hedera Network Configuration
 
@@ -115,13 +118,13 @@ ATS_FACTORY_CONTRACT_ID=0.0.11111111
 
 ```bash
 # Server Port
-PORT=3001
+PORT=3000
 
 # API Prefix
 API_PREFIX=api
 
-# CORS Origins (comma-separated)
-CORS_ORIGINS=http://localhost:5174,http://localhost:3000
+# CORS Origins (comma-separated list of allowed origins)
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
 ### Frontend Configuration
@@ -139,47 +142,35 @@ Edit `apps/mass-payout/frontend/.env`:
 
 ```bash
 # Backend API URL
-VITE_API_URL=http://localhost:3001
+VITE_API_URL=http://localhost:3000
 
 # Frontend Port (optional)
-VITE_PORT=5174
+VITE_PORT=5173
 ```
 
 ## Running the Application
 
+From the monorepo root, you can start both backend and frontend with simple commands:
+
 ### 1. Start the Backend
 
-From the monorepo root:
-
 ```bash
-npm run mass-payout:backend:dev
+npm run mass-payout:backend:start
 ```
 
-Or from the backend directory:
-
-```bash
-cd apps/mass-payout/backend
-npm run start:dev
-```
-
-The backend API will be available at **http://localhost:3001**
+The backend API will be available at **http://localhost:3000**
 
 ### 2. Start the Frontend
 
-In a new terminal, from the monorepo root:
+In a new terminal:
 
 ```bash
 npm run mass-payout:frontend:dev
 ```
 
-Or from the frontend directory:
+The frontend will be available at **http://localhost:5173**
 
-```bash
-cd apps/mass-payout/frontend
-npm run dev
-```
-
-The frontend will be available at **http://localhost:5174**
+> **Tip**: You can run both in separate terminals to see logs from each service.
 
 ## First Steps
 
@@ -230,10 +221,27 @@ DATABASE_PASSWORD=your_correct_password
 
 ```bash
 # Kill process on backend port
-lsof -ti:3001 | xargs kill -9
+lsof -ti:3000 | xargs kill -9
 
 # Kill process on frontend port
-lsof -ti:5174 | xargs kill -9
+lsof -ti:5173 | xargs kill -9
+```
+
+### Docker Database Issues
+
+```bash
+# Check if PostgreSQL container is running
+docker ps
+
+# View PostgreSQL logs
+cd apps/mass-payout/backend
+docker-compose logs -f
+
+# Restart PostgreSQL container
+docker-compose restart
+
+# Stop and remove container
+docker-compose down
 ```
 
 ### Build Errors

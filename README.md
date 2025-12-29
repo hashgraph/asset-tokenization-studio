@@ -160,17 +160,43 @@ flowchart TD
 From the monorepo root:
 
 ```bash
-
 # Install all dependencies
 npm ci
-```
 
-```bash
 # Build all packages and applications
 npm run setup
 ```
 
 This command will compile contracts, build SDKs, and set up web and backend environments.
+
+### Selective Setup (ATS or Mass Payout only)
+
+You can set up only the product you need without installing all dependencies:
+
+```bash
+# Setup only ATS (contracts, SDK, and web app)
+npm run ats:setup
+
+# Setup only Mass Payout (contracts, SDK, backend, and frontend)
+npm run mass-payout:setup
+```
+
+### Clean Installation
+
+If you had a previous installation and want to start fresh:
+
+```bash
+# Clean install for ATS
+npm run ats:setup:clean
+
+# Clean install for Mass Payout
+npm run mass-payout:setup:clean
+
+# Clean install for everything
+npm run setup:clean
+```
+
+This will remove previous build artifacts and reinstall dependencies before building.
 
 ### Environment Configuration
 

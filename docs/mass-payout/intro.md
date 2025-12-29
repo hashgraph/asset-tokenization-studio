@@ -131,6 +131,8 @@ Admin panel for managing distributions:
 - **Chakra UI**: Modern, accessible component library
 - **React Query**: Efficient data fetching and caching
 
+![Mass Payout Web Interface](../images/mp-web.png)
+
 [Try the web app →](./getting-started/quick-start.md)
 
 ## Use Cases
