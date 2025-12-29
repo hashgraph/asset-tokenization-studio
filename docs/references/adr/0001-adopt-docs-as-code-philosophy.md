@@ -1,7 +1,7 @@
 ---
 id: 0001-adopt-docs-as-code-philosophy
 title: Adopt Docs-as-Code Philosophy for Documentation Management
-status: Accepted
+status: Proposed
 date: 2025-12-16
 authors: [themariofrancia]
 scope: Global
@@ -11,25 +11,45 @@ scope: Global
 
 |             |                                                        |
 | ----------- | ------------------------------------------------------ |
-| **Status**  | ✅ Accepted                                            |
+| **Status**  | 📝 Proposed                                            |
 | **Date**    | 2025-12-16                                             |
 | **Authors** | [@themariofrancia](https://github.com/themariofrancia) |
 | **Scope**   | Global                                                 |
 
 ---
 
+## Knowledge Sharing Philosophy
+
 > "En cuestiones de cultura y de saber, solo se pierde lo que se guarda; solo se gana lo que se da." — Antonio Machado
+
+This ADR applies Open Source principles to documentation.
+
+### Documentation Principles
+
+We apply these characteristics to the documentation:
+
+- **ADRs (Architecture Decision Records)**: Transparent decision-making preserves the "why" for future contributors
+- **EPs (Enhancement Proposals)**: Open proposal process enables community participation in project direction
+- **Co-located Docs**: Version-controlled documentation ensures freedom to fork, adapt, and redistribute
+- **Permissive Licensing**: Apache 2.0 for both code and docs
+
+### Key Principles
+
+1. **Co-location**: Documentation lives with code, preventing drift
+2. **Transparency by Default**: Architectural decisions are public unless security/privacy concerns exist
+3. **Context Preservation**: ADRs capture the "why," not just the "what"
+4. **Community Accessibility**: External contributors access the same context as core team
+5. **Review Culture**: Documentation changes go through PR review like code
+6. **Machine-Readable**: AI-assisted tools can leverage full project context
 
 ## Context and Problem Statement
 
-The Asset Tokenization Studio is a complex monorepo containing two main products (ATS and Mass Payout) with multiple layers: React frontends, TypeScript APIs, SDKs, and Solidity Smart Contracts. Currently, critical documentation resides in internal systems (Confluence), creating information silos that:
+Asset Tokenization Studio is a complex monorepo with two products (ATS and Mass Payout) spanning React frontends, TypeScript SDKs, and Solidity contracts. Critical documentation currently resides in private repositories, creating silos that:
 
-- **Limit community adoption**: External contributors cannot access design specs and architectural context
-- **Hinder external contribution**: Contributors lack visibility into the "why" behind technical decisions
-- **Decouple context from code**: Documentation drifts out of sync with implementation when stored separately
-- **Reduce AI-assisted development effectiveness**: LLM-based coding assistants cannot access full project context
-
-We need a unified strategy to manage both technical documentation (for contributors) and user manuals (for operators) following strict Open Source best practices.
+- Block external contributors from accessing design context
+- Cause documentation drift from implementation
+- Prevent AI-assisted development tools from accessing full project context
+- Hinder community adoption
 
 ## Decision Drivers
 
@@ -45,111 +65,42 @@ We need a unified strategy to manage both technical documentation (for contribut
 
 ### Option 1: Maintain Status Quo (Confluence-only)
 
-Keep all documentation in Confluence with occasional README updates.
+Keep documentation in Confluence.
 
-**Pros:**
+**Cons:** Siloed from code, no version control, inaccessible to external contributors, drifts from implementation.
 
-- No migration effort required
-- Familiar to current team members
-- Rich editing features and collaboration tools
+### Option 2: GitHub Wiki
 
-**Cons:**
+Use GitHub's built-in wiki.
 
-- Documentation remains siloed from codebase
-- External contributors cannot access design context
-- No version control or PR review process
-- Documentation inevitably drifts from code
-- Not compatible with AI-assisted development
+**Cons:** Separate repository, limited customization, difficult to enforce review, poor discoverability.
 
-### Option 2: Move Everything to GitHub Wiki
+### Option 3: Docs-as-Code with Docusaurus ✅
 
-Use GitHub's built-in wiki functionality for all documentation.
+Docs-as-Code using Docusaurus with ADRs and EPs.
 
-**Pros:**
+**Pros:** Co-located with code, PR review, version-controlled, professional docs site, AI-accessible, industry-standard.
 
-- Built into GitHub platform
-- Simple to set up
-- Version controlled
-
-**Cons:**
-
-- Separate git repository from main codebase
-- Limited customization and theming
-- No automated API documentation integration
-- Difficult to enforce review process
-- Not as discoverable or searchable as dedicated docs site
-
-### Option 3: Docs-as-Code with Docusaurus (Chosen)
-
-Adopt a "Docs-as-Code" philosophy using Docusaurus for public documentation, maintaining strict separation between public technical docs and internal sensitive information.
-
-**Pros:**
-
-- Documentation lives with code in same repository
-- Full PR review process for docs changes
-- Version controlled and synchronized with code
-- Automated API documentation generation possible
-- Professional, searchable documentation site
-- Industry-standard approach (Kubernetes, Backstage, etc.)
-- Enables AI-assisted development
-- Community-friendly and transparent
-- Clear distinction between ADRs (decisions made) and EPs (proposals)
-
-**Cons:**
-
-- Requires discipline to keep documentation updated
-- Initial migration effort needed
-- Team must learn new workflow
+**Cons:** Requires discipline, migration effort.
 
 ## Decision Outcome
 
-Chosen option: **Option 3 - Docs-as-Code with Docusaurus**, because it best aligns with Open Source best practices, enables community contribution, maintains documentation synchronization with code, and follows industry standards from major OSS projects.
+**Option 3 - Docs-as-Code with Docusaurus** aligns with Open Software principles and industry standards (Kubernetes, Backstage, Hedera).
 
-We will implement a clear distinction between:
+**Documentation types:**
 
-- **ADRs (Architecture Decision Records)**: Document decisions already made, providing historical context and consequences
-- **EPs (Enhancement Proposals)**: Propose new features or changes before implementation, enabling community discussion
-
-This approach is inspired by:
-
-- Kubernetes Enhancement Proposals (KEPs)
-- Backstage Enhancement Proposals (BEPs)
-- Ethereum Improvement Proposals (EIPs)
-- Hedera Improvement Proposals (HIPs)
+- **ADRs**: Document decisions made, providing historical context
+- **EPs**: Propose features before implementation, enabling community discussion
 
 ### Implementation Strategy
 
-#### Three-Layer Documentation Architecture
+#### Three-Layer Architecture
 
-**Layer 1: Technical Documentation (Target: Developers)**
+**Layer 1 (Developers):** Repository root, module READMEs, CONTRIBUTING.md, developer guides, ADRs, EPs
 
-Location: Repository root and co-located within packages
+**Layer 2 (All Users):** Docusaurus app (`apps/docs`) with user manuals, API reference, searchable site
 
-- **Root README.md**: High-level entry point, monorepo structure overview
-- **Module READMEs**: Package-specific tactical documentation
-- **CONTRIBUTING.md**: Engineer's handbook covering GitFlow, environment setup, release process
-- **Developer Guides** (`docs/[module]/guides/`): Step-by-step tutorials for complex tasks
-- **ADRs** (`docs/references/adr/`): Historical architectural decisions
-- **EPs** (`docs/references/proposals/`): Feature specifications and proposals
-
-**Layer 2: Documentation Hub (Target: All Users)**
-
-Location: `apps/docs` (Docusaurus application)
-
-- Product manuals for end-users
-- Synced developer guides from Layer 1
-- Automated API reference (TypeDoc for TypeScript, solidity-docgen for contracts)
-- Searchable, professional documentation site
-
-**Layer 3: Internal Documentation (Target: Employees)**
-
-Location: Confluence (restricted access)
-
-Strictly limited to:
-
-- Sensitive credentials and client data
-- HR processes and internal meeting minutes
-- Strategic roadmap discussions (pre-public phase)
+**Layer 3 (Internal):** private repositories for sensitive credentials, HR, pre-public discussions
 
 #### Documentation Directory Structure
 
@@ -194,71 +145,44 @@ Contract documentation (NatSpec) is generated locally in `packages/*/contracts/d
 
 #### ADR and EP Process
 
-**ADR Creation:**
+**ADRs:** Copy template → Fill frontmatter → Complete sections → Status (📝 Proposed / ✅ Accepted / ❌ Rejected / 🔄 Superseded) → PR review → Merge
 
-1. Copy template: `cp docs/references/adr/template.md.example docs/references/adr/NNNN-decision.md`
-2. Fill in YAML frontmatter (id, title, status, date, authors, scope)
-3. Complete all sections: context, decision drivers, options, consequences
-4. Set status emoji in visible table: 📝 Proposed / ✅ Accepted / ❌ Rejected / 🔄 Superseded
-5. Create PR for review
-6. Merge when approved
-
-**EP Creation:**
-
-1. Copy template: `cp docs/references/proposals/template.md.example docs/references/proposals/NNNN-feature.md`
-2. Fill in YAML frontmatter (id, title, status, created, authors, scope)
-3. Complete all sections: summary, motivation, design, implementation details, testing strategy
-4. Set status emoji in visible table: 📝 Draft / 🔍 Provisional / ✅ Implementable / 🚀 Implemented / ❌ Rejected
-5. Create **Draft PR** for community discussion
-6. Iterate based on feedback
-7. Change status to Implementable when approved
-8. Merge and begin implementation
-9. Update status to Implemented when complete
+**EPs:** Copy template → Fill frontmatter → Draft PR for discussion → Iterate → Status to Implementable when approved → Merge → Implement → Update to Implemented
 
 ## Consequences
 
 ### Positive
 
-- **Transparency**: Community and team have visibility into architectural decisions and future roadmap
-- **Single Source of Truth**: Documentation lives with code, preventing drift
-- **Review Culture**: Design discussions happen in PRs with line-by-line feedback before implementation
-- **Contextual Sync**: Documentation versioned with code in same commits
-- **AI-Assisted Development**: LLM tools can access full context for better code generation and understanding
-- **Standardization**: Clear process for discussing and approving features across teams/SIGs
-- **Community Adoption**: External contributors can understand project direction and contribute effectively
-- **Historical Context**: ADRs preserve the "why" behind technical decisions for future maintainers
-- **Professional Documentation**: Docusaurus provides searchable, navigable docs site
-- **Automated API Docs**: TypeDoc and solidity-docgen can generate reference documentation
+- Transparency and review culture for design decisions
+- Documentation synchronized with code (single source of truth)
+- AI-accessible full project context
+- Community can participate and contribute effectively
+- ADRs preserve historical "why" for future maintainers
+- Professional, searchable docs site with automated API reference
 
 ### Negative
 
-- **Discipline Required**: Team must consistently update documentation when features change
-- **Learning Curve**: Contributors must learn ADR/EP process and markdown documentation
-- **Migration Effort**: Existing Confluence documentation needs to be migrated (where appropriate)
-- **Maintenance Overhead**: Documentation site requires build and deployment infrastructure
-- **Process Overhead**: Formal EP process may slow down small changes (mitigated by clear guidelines on when EPs are required)
+- Requires discipline to keep docs updated
+- Learning curve for ADR/EP process
+- Migration effort from private repositories
 
 ### Risks and Mitigation
 
-| Risk                                  | Mitigation                                                                       |
-| ------------------------------------- | -------------------------------------------------------------------------------- |
-| Documentation becomes stale           | Make docs updates part of PR review checklist                                    |
-| Contributors skip EP process          | Clear guidelines on when EPs are required; lightweight process for small changes |
-| Confluence still used for public docs | Regular audits; strict policy enforcement; education on proper channels          |
-| Docusaurus maintenance burden         | Use stable versions; automated deployment; community templates                   |
+| Risk                                 | Mitigation                                |
+| ------------------------------------ | ----------------------------------------- |
+| Documentation becomes stale          | Docs updates part of PR review checklist  |
+| Contributors skip EP process         | Clear guidelines on when EPs required     |
+| private repositories used for public | Regular audits; strict policy enforcement |
 
 ## Compliance and Security
 
 - **Smart Contracts**: Security audits and technical specs will be referenced in package READMEs
-- **Licensing**: Apache 2.0 license is visible in documentation site footer
-- **Sensitive Information**: Confluence remains for credentials, HR, and pre-public strategic discussions
+- **Licensing**: Apache 2.0 license is visible in the documentation site footer
+- **Sensitive Information**: private repositories remain for credentials, HR, and pre-public strategic discussions
 - **Access Control**: Documentation site is public; internal docs remain restricted
 
 ## References
 
 - [Kubernetes Enhancement Proposals (KEPs)](https://github.com/kubernetes/enhancements/tree/master/keps)
-- [Backstage Enhancement Proposals (BEPs)](https://github.com/backstage/backstage/tree/master/beps)
-- [Ethereum Improvement Proposals (EIPs)](https://eips.ethereum.org/)
-- [Hedera Improvement Proposals (HIPs)](https://hips.hedera.com/)
 - [Architecture Decision Records (ADR) Pattern](https://adr.github.io/)
 - [Docusaurus Documentation](https://docusaurus.io/)
