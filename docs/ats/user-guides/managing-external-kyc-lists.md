@@ -1,7 +1,7 @@
 ---
 id: managing-external-kyc-lists
 title: Managing External KYC Lists
-sidebar_label: Managing External KYC Lists
+sidebar_label: External KYC Lists
 sidebar_position: 4
 ---
 

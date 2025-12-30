@@ -46,7 +46,12 @@ const sidebars: SidebarsConfig = {
         id: "developer-guides/index",
       },
       items: [
-        "developer-guides/sdk-integration",
+        {
+          type: "category",
+          label: "SDK",
+          collapsed: true,
+          items: ["developer-guides/sdk-integration", "developer-guides/sdk-overview"],
+        },
         {
           type: "category",
           label: "Smart Contracts",
@@ -56,6 +61,7 @@ const sidebars: SidebarsConfig = {
             id: "developer-guides/contracts/index",
           },
           items: [
+            "developer-guides/contracts/overview",
             "developer-guides/contracts/deployed-addresses",
             "developer-guides/contracts/deployment",
             "developer-guides/contracts/adding-facets",
@@ -77,7 +83,7 @@ const sidebars: SidebarsConfig = {
         "api/sdk-reference",
         {
           type: "category",
-          label: "Contracts",
+          label: "Smart Contracts",
           collapsed: true,
           link: {
             type: "doc",

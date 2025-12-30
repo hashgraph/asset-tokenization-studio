@@ -14,7 +14,7 @@ _Coming soon_
 
 Auto-generated documentation for Mass Payout smart contract interfaces and functions.
 
-## SDK Reference
+## SDK
 
 _Coming soon_
 
@@ -22,11 +22,11 @@ TypeScript SDK classes, methods, and usage examples for blockchain interactions.
 
 ## REST API
 
-_Coming soon_
+[REST API →](./rest-api/index.md)
 
 Backend API endpoints, request/response formats, and authentication.
 
-When the backend is running, Swagger documentation is available at: `http://localhost:3001/api/docs`
+When the backend is running, Swagger documentation is available at: `http://localhost:3000/api/docs`
 
 ## Additional Resources
 

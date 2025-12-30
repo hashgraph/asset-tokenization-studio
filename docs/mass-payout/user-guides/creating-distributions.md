@@ -18,7 +18,7 @@ Mass Payout supports multiple execution types for distributions:
 - **Recurring**: Automated recurring distributions (hourly, daily, weekly, monthly)
 - **Automatic**: Event-driven distributions triggered by conditions (e.g., token deposits)
 
-This guide focuses on **equity token distributions** (dividends). For bond-specific distributions (coupons), see [Bond Distributions](./bond-distributions.md).
+This guide covers creating distributions for both equity tokens (dividends) and bond tokens (coupons).
 
 ## Prerequisites
 
@@ -60,7 +60,7 @@ First, select how the distribution will be executed:
   - **Frequency**: Select from hourly, daily, weekly, or monthly
   - **Start time**: When the recurring schedule begins
 - System automatically creates and executes distributions
-- Use for regular dividend payments or coupon distributions
+- Use for regular payments (dividends, coupons, or other recurring distributions)
 
 **Automatic**
 
@@ -73,7 +73,7 @@ First, select how the distribution will be executed:
 
 **Payout Type**
 
-Select the payout calculation method for equity distributions:
+Select the payout calculation method:
 
 - **Fixed**: Fixed amount per token holder
   - All holders receive the same amount regardless of holdings

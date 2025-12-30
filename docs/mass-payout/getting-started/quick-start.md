@@ -83,36 +83,64 @@ DATABASE_SYNCHRONIZE=true  # Set to false in production
 
 If you created a custom database, adjust `DATABASE_NAME` accordingly.
 
-##### Hedera Network Configuration
+##### Blockchain Configuration
 
 ```bash
-# Network (testnet or mainnet)
-HEDERA_NETWORK=testnet
-
-# Mirror Node
-HEDERA_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com/api/v1
-
-# JSON-RPC Relay
-HEDERA_JSON_RPC_RELAY_URL=https://testnet.hashio.io/api
+# Mirror Node and Contract ID
+BLOCKCHAIN_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com
+BLOCKCHAIN_CONTRACT_ID=0.0.429274
+BLOCKCHAIN_TOKEN_DECIMALS=6
+BLOCKCHAIN_LISTENER_POLL_TIMEOUT=10000
+BLOCKCHAIN_LISTENER_START_TIMESTAMP=2025-08-26T00:00:00.000Z
 ```
 
-##### Operator Account (for blockchain operations)
+##### Asset Tokenization Studio (ATS) Integration
 
 ```bash
-# Account that will execute payout transactions
-HEDERA_OPERATOR_ACCOUNT_ID=0.0.12345678
-HEDERA_OPERATOR_PRIVATE_KEY=302e020100300506032b657004220420...
+# ATS Network Configuration
+ATS_NETWORK=testnet
+ATS_MIRROR_URL=https://testnet.mirrornode.hedera.com/api/v1/
+ATS_RPC_URL=https://testnet.hashio.io/api
+
+# ATS Contract Addresses
+ATS_FACTORY_ADDRESS=0.0.123456
+ATS_RESOLVER_ADDRESS=0.0.123457
+
+# Payment Token (USDC)
+HEDERA_USDC_ADDRESS=0.0.429274
 ```
 
-##### Contract Configuration
+##### DFNS Custodial Wallet (Required)
+
+The backend uses DFNS for secure transaction signing. Configure your DFNS wallet:
 
 ```bash
-# LifeCycle Cash Flow Contract ID
-LIFECYCLE_CASH_FLOW_CONTRACT_ID=0.0.87654321
+# Service Account Authentication
+DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN=your_dfns_service_account_token_here
+DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID=cr-xxxxx-xxxxx-xxxxxxxxxxxxxxxxx
+DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH="-----BEGIN EC PRIVATE KEY-----
+your_private_key_here
+-----END EC PRIVATE KEY-----"
 
-# ATS Factory Contract ID (for importing assets)
-ATS_FACTORY_CONTRACT_ID=0.0.11111111
+# DFNS Application Settings
+DFNS_APP_ID=ap-xxxxx-xxxxx-xxxxxxxxxxxxxxxxx
+DFNS_APP_ORIGIN=http://localhost:3000
+DFNS_BASE_URL=https://api.dfns.ninja
+
+# DFNS Wallet Configuration
+DFNS_WALLET_ID=wa-xxxxx-xxxxx-xxxxxxxxxxxxxxxxx
+DFNS_WALLET_PUBLIC_KEY=your_wallet_public_key_here
+DFNS_HEDERA_ACCOUNT_ID=0.0.123456
 ```
+
+:::info
+To obtain DFNS credentials:
+
+1. Create an account at [DFNS](https://www.dfns.co/)
+2. Set up a service account for API access
+3. Create a Hedera wallet in your DFNS dashboard
+4. Copy the credentials to your `.env` file
+   :::
 
 ##### Application Settings
 

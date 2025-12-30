@@ -1,9 +1,10 @@
 ---
 id: index
 title: REST API
+sidebar_label: REST API
 ---
 
-# REST API Documentation
+# REST API
 
 Complete reference for the Mass Payout backend REST API.
 

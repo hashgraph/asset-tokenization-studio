@@ -1,63 +1,12 @@
 ---
 id: index
-title: ATS Contracts API Documentation
-sidebar_label: ATS Contracts
+title: Smart Contracts
+sidebar_label: Smart Contracts
 ---
 
-# ATS Contracts API Documentation
+# Smart Contracts API
 
 Auto-generated API documentation from Solidity smart contract NatSpec comments.
-
-## Overview
-
-This section contains comprehensive API documentation for all ATS smart contracts, automatically extracted from inline NatSpec comments in the source code.
-
-## Documentation Structure
-
-The API documentation is organized by contract hierarchy:
-
-### Layer 0 - Storage Wrappers
-
-Storage access layer contracts that provide type-safe access to Diamond storage:
-
-- ERC1400StorageWrapper
-- KycStorageWrapper
-- CapStorageWrapper
-- And more...
-
-### Layer 1 - Core Implementation
-
-Base implementation contracts for ERC-1400 and ERC-3643 standards:
-
-- ERC1400Implementation
-- AccessControl
-- Freeze
-- Hold
-- ControlList
-
-### Layer 2 - Domain Features
-
-Feature-specific facets for equity and bond operations:
-
-- **Bond Facets**: BondFacet, BondReadFacet
-- **Equity Facets**: EquityFacet
-- **Scheduled Tasks**: ScheduledTasksFacet
-- **Proceed Recipients**: ProceedRecipientsFacet
-
-### Layer 3 - Jurisdiction-Specific
-
-Jurisdiction-specific implementations:
-
-- USA Bond implementations
-- USA Equity implementations
-
-### Infrastructure
-
-Core infrastructure contracts:
-
-- BusinessLogicResolver
-- TREXFactory
-- ProxyAdmin
 
 ## Generating Documentation
 
@@ -78,31 +27,45 @@ This will:
 
 All public contracts, functions, and events should include:
 
-- `@title` - Contract name
-- `@notice` - User-facing description
-- `@dev` - Developer implementation notes
-- `@param` - Parameter descriptions
-- `@return` - Return value descriptions
-
-For detailed guidelines on writing contract documentation, see the [Documenting Contracts Guide](/docs/guides/developer/ats-contracts/documenting-contracts).
+```solidity
+/**
+ * @title Contract name
+ * @notice User-facing description
+ * @dev Developer implementation notes
+ */
+contract MyContract {
+  /**
+   * @notice What this function does (user-facing)
+   * @dev How this function works (developer notes)
+   * @param _param Description of parameter
+   * @return Description of return value
+   */
+  function myFunction(uint256 _param) external returns (bool) {
+    // ...
+  }
+}
+```
 
 ## Finding Documentation
 
-You can navigate the API documentation by:
+Navigate the API documentation by:
 
 - **By Feature**: Look for domain-specific facets (Bond, Equity, etc.)
-- **By Layer**: Explore contracts by their architectural layer
-- **By Interface**: Find interface definitions in the `interfaces/` section
+- **By Layer**: Explore contracts by their architectural layer (0-3)
+- **By Interface**: Find interface definitions in the interfaces section
 - **Search**: Use the search functionality to find specific contracts or functions
 
-## Additional Resources
+## Documentation Structure
 
-- [ATS Contracts Source Code](https://github.com/hashgraph/asset-tokenization-studio/tree/main/packages/ats/contracts)
-- [Deployment Guide](/docs/guides/developer/ats-contracts/deployment)
-- [Adding Facets Guide](/docs/guides/developer/ats-contracts/adding-facets)
-- [Upgrading Guide](/docs/guides/developer/ats-contracts/upgrading)
+The generated API documentation is organized by contract hierarchy:
 
-## Contributing
+- **Layer 0**: Storage Wrappers (ERC1400StorageWrapper, KycStorageWrapper, etc.)
+- **Layer 1**: Core Implementation (ERC1400Implementation, AccessControl, etc.)
+- **Layer 2**: Domain Features (BondFacet, EquityFacet, etc.)
+- **Layer 3**: Jurisdiction-Specific (USA implementations)
+- **Infrastructure**: ProxyAdmin, BusinessLogicResolver, Factory
+
+## Contributing Documentation
 
 When adding new contracts or modifying existing ones:
 
@@ -111,7 +74,13 @@ When adding new contracts or modifying existing ones:
 3. Review the generated output
 4. Commit both code and documentation changes
 
-See the [Documenting Contracts Guide](/docs/guides/developer/ats-contracts/documenting-contracts) for best practices and examples.
+For detailed guidelines on writing contract documentation, see the [Documenting Contracts Guide](../../developer-guides/contracts/documenting-contracts.md).
+
+## Related Guides
+
+- [Contract Overview](../../developer-guides/contracts/overview.md) - Understand contract architecture
+- [Documenting Contracts](../../developer-guides/contracts/documenting-contracts.md) - Write better documentation
+- [Adding Facets](../../developer-guides/contracts/adding-facets.md) - Create new facets
 
 ---
 

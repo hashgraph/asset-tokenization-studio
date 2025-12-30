@@ -1,27 +1,38 @@
 ---
 id: index
 title: Smart Contracts
+sidebar_label: Smart Contracts
 sidebar_position: 1
 ---
 
-# Mass Payout Smart Contracts
+# Smart Contracts
 
-Learn about the LifeCycle Cash Flow contract and deployment.
+Learn about the LifeCycle Cash Flow smart contract for payment distributions.
 
-## Overview
+## What is LifeCycle Cash Flow?
 
-The LifeCycle Cash Flow contract manages payment distributions on the Hedera network.
+The LifeCycle Cash Flow contract is an upgradeable smart contract that manages payment distributions for tokenized securities on Hedera. It handles:
 
-## Deployment
+- Dividend and coupon payments
+- Bond maturity redemptions
+- Snapshot-based distributions
+- Payment token management
 
-_Coming soon_
+## Available Guides
 
-## Contract Functions
+### Contract Deployment
 
-_Coming soon_
+[Contract Deployment →](./deployment.md)
 
-## Integration
+Quick guide to deploy the LifeCycle Cash Flow contract to Hedera.
 
-_Coming soon_
+### Contract Overview
 
-_This guide is under development. More detailed content coming soon._
+[Contract Overview →](./overview.md)
+
+Detailed overview of contract architecture, functions, and integration patterns.
+
+## Quick Links
+
+- [SDK Integration](../sdk-integration.md) - Use the SDK to interact with the contract
+- [Backend Integration](../backend/index.md) - Backend integration patterns

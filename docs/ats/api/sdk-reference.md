@@ -1,10 +1,11 @@
 ---
 id: sdk-reference
-title: SDK API Reference
+title: SDK
+sidebar_label: SDK
 sidebar_position: 1
 ---
 
-# SDK API Reference
+# SDK Reference
 
 Complete reference for the Asset Tokenization Studio SDK request classes and operations.
 

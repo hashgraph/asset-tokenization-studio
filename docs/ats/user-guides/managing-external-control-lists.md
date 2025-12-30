@@ -1,7 +1,7 @@
 ---
 id: managing-external-control-lists
 title: Managing External Control Lists
-sidebar_label: Managing External Control Lists
+sidebar_label: External Control Lists
 sidebar_position: 5
 ---
 
