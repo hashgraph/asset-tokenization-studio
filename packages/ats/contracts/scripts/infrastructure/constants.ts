@@ -388,15 +388,70 @@ export const EIP1066_CODES = {
 // Deployment Workflow Descriptors
 // ============================================================================
 
-import type { WorkflowType } from "./types/checkpoint";
+import type { AtsWorkflowType } from "./types/checkpoint";
 
 /**
- * Human-readable names for deployment workflows.
- * Used for file naming and logging.
+ * Immutable core ATS workflow descriptors.
+ *
+ * These are the official workflow descriptors for ATS core workflows.
+ * Downstream projects should use `registerWorkflowDescriptor()` to add
+ * custom workflow descriptors.
  */
-export const WORKFLOW_DESCRIPTORS: Record<WorkflowType, string> = {
+export const ATS_WORKFLOW_DESCRIPTORS: Record<AtsWorkflowType, string> = {
   newBlr: "newBlr",
   existingBlr: "existingBlr",
   upgradeConfigurations: "upgradeConfigurations",
   upgradeTupProxies: "upgradeTupProxies",
 } as const;
+
+/**
+ * Mutable workflow descriptor registry.
+ *
+ * Starts with core ATS descriptors and can be extended by downstream
+ * projects using `registerWorkflowDescriptor()`.
+ *
+ * @deprecated Direct mutation not recommended. Use `registerWorkflowDescriptor()` instead.
+ */
+export const WORKFLOW_DESCRIPTORS: Record<string, string> = {
+  ...ATS_WORKFLOW_DESCRIPTORS,
+};
+
+/**
+ * Register a custom workflow descriptor for filename generation.
+ *
+ * Allows downstream projects to register custom workflows with optional
+ * shorter descriptor names for cleaner filenames.
+ *
+ * @param workflow - Workflow name
+ * @param descriptor - Optional descriptor for filename (defaults to workflow name)
+ *
+ * @example Basic usage
+ * ```typescript
+ * import { registerWorkflowDescriptor } from '@hashgraph/asset-tokenization-contracts/scripts'
+ *
+ * // Register with custom short descriptor
+ * registerWorkflowDescriptor('gbpInfrastructure', 'gbpInfra')
+ *
+ * // Register with same name (descriptor = workflow)
+ * registerWorkflowDescriptor('gbpUpgrade')
+ *
+ * // Now saveDeploymentOutput works with custom workflows
+ * await saveDeploymentOutput({
+ *   network: 'hedera-testnet',
+ *   workflow: 'gbpInfrastructure',
+ *   data: output
+ * })
+ * // Creates: deployments/hedera-testnet/gbpInfra-{timestamp}.json
+ * ```
+ *
+ * @example Multiple registrations
+ * ```typescript
+ * // Register all custom workflows at startup
+ * registerWorkflowDescriptor('gbpInfrastructure', 'gbpInfra')
+ * registerWorkflowDescriptor('gbpUpgrade', 'gbpUpg')
+ * registerWorkflowDescriptor('gbpMigration', 'gbpMig')
+ * ```
+ */
+export function registerWorkflowDescriptor(workflow: string, descriptor?: string): void {
+  WORKFLOW_DESCRIPTORS[workflow] = descriptor ?? workflow;
+}

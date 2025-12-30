@@ -73,8 +73,10 @@ export type {
   ConfigurationResult,
   CheckpointStatus,
   WorkflowType,
+  AtsWorkflowType,
   ResumeOptions,
 } from "./infrastructure/types/checkpoint";
+export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./infrastructure/types/checkpoint";
 export { CheckpointManager } from "./infrastructure/checkpoint/CheckpointManager";
 export { NullCheckpointManager } from "./infrastructure/checkpoint/NullCheckpointManager";
 export type { CreateCheckpointParams } from "./infrastructure/checkpoint/CheckpointManager";

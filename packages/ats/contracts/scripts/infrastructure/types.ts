@@ -894,7 +894,39 @@ export interface UpgradeTupProxiesOutputType {
 }
 
 /**
- * Union type for all possible deployment outputs.
+ * Union type for all ATS deployment outputs.
+ *
+ * This type represents the core ATS workflow outputs. Downstream projects
+ * can use custom output types through the generic parameter in SaveDeploymentOptions.
+ *
+ * @example Core ATS Usage
+ * ```typescript
+ * const atsOutput: DeploymentOutputType = { ... }
+ *
+ * await saveDeploymentOutput({
+ *   network: 'hedera-testnet',
+ *   workflow: 'newBlr',
+ *   data: atsOutput  // Full type safety and autocomplete
+ * })
+ * ```
+ *
+ * @example Downstream Extension
+ * ```typescript
+ * // In downstream project (e.g., GBP)
+ * interface GbpInfrastructureOutput {
+ *   timestamp: string;
+ *   network: string;
+ *   callableContracts: { ... };
+ *   result: any;
+ * }
+ *
+ * // No type constraint - any type accepted
+ * await saveDeploymentOutput({
+ *   network: 'hedera-testnet',
+ *   workflow: 'gbpInfrastructure',
+ *   data: gbpOutput  // No type assertion needed
+ * })
+ * ```
  */
 export type AnyDeploymentOutput =
   | DeploymentOutputType
@@ -904,8 +936,11 @@ export type AnyDeploymentOutput =
 
 /**
  * Options for saving a deployment output to disk.
+ *
+ * Generic type parameter T allows downstream projects to use custom output types
+ * while preserving type safety for ATS workflows (defaults to AnyDeploymentOutput).
  */
-export interface SaveDeploymentOptions<T extends AnyDeploymentOutput = AnyDeploymentOutput> {
+export interface SaveDeploymentOptions<T = AnyDeploymentOutput> {
   network: string;
   workflow: WorkflowType;
   data: T;

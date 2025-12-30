@@ -59,8 +59,12 @@ export type {
   ConfigurationResult,
   CheckpointStatus,
   WorkflowType,
+  AtsWorkflowType,
   ResumeOptions,
 } from "./types/checkpoint";
+
+// Type guards
+export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./types/checkpoint";
 
 // ============================================================================
 // Constants
@@ -85,7 +89,9 @@ export {
   ENV_VAR_PATTERNS,
   DEPLOYMENT_OUTPUT_DIR,
   DEPLOYMENT_OUTPUT_PATTERN,
+  ATS_WORKFLOW_DESCRIPTORS,
   WORKFLOW_DESCRIPTORS,
+  registerWorkflowDescriptor,
 } from "./constants";
 
 export type { Network } from "./constants";

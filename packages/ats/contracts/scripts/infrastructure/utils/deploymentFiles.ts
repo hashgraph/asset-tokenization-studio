@@ -41,13 +41,37 @@ export function getNetworkDeploymentDir(network: string, deploymentsDir?: string
 /**
  * Generate a deployment filename for the given workflow and timestamp.
  *
+ * Uses registered workflow descriptor if available, otherwise uses workflow name directly.
+ * This allows custom workflows to work without prior registration.
+ *
  * @param workflow - Workflow type
  * @param timestamp - Optional timestamp (uses current time if not provided)
  * @returns Filename in format: {workflow}-{timestamp}.json
+ *
+ * @example Core ATS workflow
+ * ```typescript
+ * generateDeploymentFilename('newBlr')
+ * // Returns: "newBlr-2025-12-30T10-30-45.json"
+ * ```
+ *
+ * @example Custom workflow (unregistered)
+ * ```typescript
+ * generateDeploymentFilename('gbpInfrastructure')
+ * // Returns: "gbpInfrastructure-2025-12-30T10-30-45.json"
+ * ```
+ *
+ * @example Custom workflow (registered with short name)
+ * ```typescript
+ * import { registerWorkflowDescriptor } from '@scripts/infrastructure'
+ *
+ * registerWorkflowDescriptor('gbpInfrastructure', 'gbpInfra')
+ * generateDeploymentFilename('gbpInfrastructure')
+ * // Returns: "gbpInfra-2025-12-30T10-30-45.json"
+ * ```
  */
 export function generateDeploymentFilename(workflow: WorkflowType, timestamp?: string): string {
   const ts = timestamp || new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
-  const workflowName = WORKFLOW_DESCRIPTORS[workflow];
+  const workflowName = WORKFLOW_DESCRIPTORS[workflow] || workflow;
   return `${workflowName}-${ts}.json`;
 }
 
@@ -77,7 +101,7 @@ export function generateDeploymentFilename(workflow: WorkflowType, timestamp?: s
  * }
  * ```
  */
-export async function saveDeploymentOutput<T extends AnyDeploymentOutput>(
+export async function saveDeploymentOutput<T = AnyDeploymentOutput>(
   options: SaveDeploymentOptions<T>,
 ): Promise<SaveResult> {
   try {
@@ -187,7 +211,7 @@ export async function loadDeployment(
  * }
  * ```
  */
-export async function loadDeploymentByWorkflow<T extends AnyDeploymentOutput>(
+export async function loadDeploymentByWorkflow<T = AnyDeploymentOutput>(
   options: LoadDeploymentOptions,
 ): Promise<T | null> {
   try {
