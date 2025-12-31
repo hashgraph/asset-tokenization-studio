@@ -284,5 +284,5 @@ If your token doesn't recognize an external KYC list:
 
 ## Related Resources
 
-- [Developer Guide: External KYC Lists](../developer-guides/contracts/external-kyc-lists.md)
-- [API Reference: IExternalKycListManagement](../../references/index.md)
+- [Developer Guide: Smart Contracts](../developer-guides/contracts/index.md)
+- [API Documentation](../api/index.md)

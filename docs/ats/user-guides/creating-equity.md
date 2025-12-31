@@ -518,4 +518,4 @@ Common administrative operations:
 ## Related Resources
 
 - [Developer Guide: ATS Contracts](../developer-guides/contracts/index.md)
-- [API Reference: Equity Facet](../../references/index.md)
+- [API Documentation](../api/index.md)

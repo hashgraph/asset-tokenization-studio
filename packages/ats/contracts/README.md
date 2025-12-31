@@ -22,7 +22,7 @@ The contracts module contains the code of all Solidity smart contracts deployed 
 **Standards:**
 
 - ERC-1400 for security tokens
-- Partial ERC-3643 (TREX) compatibility (v1.15.0+)
+- Partial ERC-3643 (T-REX) compatibility (v1.15.0+)
 
 **Location:** `packages/ats/contracts` within the monorepo
 
@@ -316,11 +316,10 @@ The ATS contracts implement a **4-layer hierarchical design** using the **Diamon
 
 ### Documentation
 
-For comprehensive architecture documentation and tutorials:
+For comprehensive architecture documentation and tutorials, see the [ATS Developer Guides](../../../docs/ats/developer-guides/contracts/).
 
-- **[Complete Deployment Guide](../../../docs/guides/developer/ats-contracts/deployment.md)**
-- **[Adding New Facets](../../../docs/guides/developer/ats-contracts/adding-facets.md)**
-- **[Upgrading Facets](../../../docs/guides/developer/ats-contracts/upgrading.md)**
+Additional resources:
+
 - **[Scripts Technical Reference](scripts/README.md)**
 - **[Developer Guide](scripts/DEVELOPER_GUIDE.md)**
 
@@ -331,7 +330,7 @@ The platform implements a comprehensive role-based access control system:
 #### Administrative Roles
 
 - **Admin Role**: Full administrative control over the security token
-- **TREX Owner**: Owner of ERC3643 tokens with special privileges for compliance configuration
+- **T-REX Owner**: Owner of ERC3643 tokens with special privileges for compliance configuration
 - **Diamond Owner**: Contract upgrade and facet management permissions
 
 #### Operational Roles
@@ -424,8 +423,4 @@ bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a02
 
 ## 📚 Documentation
 
-For more information about the project, see:
-
-- [Guides](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/guides)
-- [API Documentation](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/api)
-- [References](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/references)
+For more information about the project, see the [Documentation](https://hashgraph.github.io/asset-tokenization-studio/).

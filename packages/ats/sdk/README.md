@@ -68,6 +68,10 @@ npm run ats:build
 
 # Test
 
+The SDK tests are located in the _**tests**_ folder at the root of the sdk module.
+
+Before running the tests you will need to create an ".env" file following the ".env.sample" template.
+
 Run SDK tests:
 
 ```bash
@@ -77,18 +81,6 @@ npm run ats:sdk:test
 # Or locally
 cd packages/ats/sdk
 npm test
-```
-
-# Test
-
-The SDK tests are located in the _**tests**_ folder at the root of the sdk module.
-
-Before running the tests you will need to create an ".env" file following the ".env.sample" template.
-
-Then to execute all the tests run this command from the _sdk_ folder:
-
-```
-npm run test
 ```
 
 # Input Ports
@@ -488,7 +480,7 @@ Freezes or unfreezes multiple addresses. Requires the Freeze Manager role.
 
 #### setCompliance
 
-Sets the compliance module for a security. Requires the TREX Owner role.
+Sets the compliance module for a security. Requires the T-REX Owner role.
 
 - Request
   - securityId: Hedera id of the diamond contract representing the asset
@@ -510,7 +502,7 @@ Returns the configured compliance module address (if any) for a security.
 
 #### setIdentityRegistry
 
-Sets the identity registry for a security. Requires the TREX Owner role.
+Sets the identity registry for a security. Requires the T-REX Owner role.
 
 - Request
   - securityId: Hedera id of the diamond contract representing the asset
@@ -534,7 +526,7 @@ Returns the configured identity registry address (if any) for a security.
 
 #### addAgent
 
-Adds an agent to the security token. Requires the TREX Owner role.
+Adds an agent to the security token. Requires the T-REX Owner role.
 
 - Request
   - securityId: Hedera id of the diamond contract representing the asset
@@ -546,7 +538,7 @@ Adds an agent to the security token. Requires the TREX Owner role.
 
 #### removeAgent
 
-Removes an agent from the security token. Requires the TREX Owner role.
+Removes an agent from the security token. Requires the T-REX Owner role.
 
 - Request
   - securityId: Hedera id of the diamond contract representing the asset
@@ -560,7 +552,7 @@ Removes an agent from the security token. Requires the TREX Owner role.
 
 #### setName
 
-Updates the token name. Requires the TREX Owner role.
+Updates the token name. Requires the T-REX Owner role.
 
 - Request
   - securityId: Hedera id of the diamond contract representing the asset
@@ -572,7 +564,7 @@ Updates the token name. Requires the TREX Owner role.
 
 #### setSymbol
 
-Updates the token symbol. Requires the TREX Owner role.
+Updates the token symbol. Requires the T-REX Owner role.
 
 - Request
   - securityId: Hedera id of the diamond contract representing the asset
@@ -584,7 +576,7 @@ Updates the token symbol. Requires the TREX Owner role.
 
 #### setOnchainID
 
-Sets the on-chain identity for the token. Requires the TREX Owner role.
+Sets the on-chain identity for the token. Requires the T-REX Owner role.
 
 - Request
   - securityId: Hedera id of the diamond contract representing the asset
@@ -1437,8 +1429,4 @@ Use the **Factory.getRegulationDetails** method.
 
 ## 📚 Documentation
 
-For more information about the project, see:
-
-- [Guides](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/guides)
-- [API Documentation](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/api)
-- [References](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/references)
+For more information about the project, see the [Documentation](https://hashgraph.github.io/asset-tokenization-studio/).

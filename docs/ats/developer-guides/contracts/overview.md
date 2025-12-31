@@ -344,7 +344,6 @@ Existing storage preserved
 
 ## Additional Resources
 
-- [Architecture Documentation](https://github.com/hashgraph/asset-tokenization-studio/blob/main/packages/ats/contracts/ARCHITECTURE.md)
 - [Scripts Developer Guide](https://github.com/hashgraph/asset-tokenization-studio/blob/main/packages/ats/contracts/scripts/DEVELOPER_GUIDE.md)
 - [Contracts README](https://github.com/hashgraph/asset-tokenization-studio/blob/main/packages/ats/contracts/README.md)
 

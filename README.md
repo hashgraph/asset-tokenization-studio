@@ -34,7 +34,7 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
   - Gas-optimized operations and proxy-based upgradeable contracts.
 
 - **Enterprise Development Practices**
-  - **Domain-Driven Design (DDD)**, **Hexagonal Architecture**, and **CQS pattern**.
+  - **Domain-Driven Design (DDD)**, **Hexagonal Architecture**, and **CQRS pattern**.
   - Separation of concerns across smart contracts, SDKs, frontends, and backends.
   - Strong CI/CD workflows with conditional builds and tests for each module.
   - Custodian integration at the SDK level (Dfns, Fireblocks, AWS KMS).

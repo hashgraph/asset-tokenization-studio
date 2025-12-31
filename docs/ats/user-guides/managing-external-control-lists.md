@@ -375,5 +375,5 @@ For ERC-3643 tokens:
 
 ## Related Resources
 
-- [Developer Guide: External Control Lists](../developer-guides/contracts/external-control-lists.md)
-- [API Reference: IExternalControlListManagement](../../references/index.md)
+- [Developer Guide: Smart Contracts](../developer-guides/contracts/index.md)
+- [API Documentation](../api/index.md)

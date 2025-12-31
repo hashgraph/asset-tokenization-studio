@@ -85,7 +85,7 @@ VITE_WALLET_CONNECT_PROJECT_ID=your_project_id_here
 # Business Logic Resolver Contract ID
 VITE_BUSINESS_LOGIC_RESOLVER_ID=0.0.12345678
 
-# TREX Factory Contract ID
+# T-REX Factory Contract ID
 VITE_TREX_FACTORY_ID=0.0.87654321
 ```
 
