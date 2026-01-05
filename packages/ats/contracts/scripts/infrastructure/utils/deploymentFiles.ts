@@ -1,39 +1,158 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Deployment file utilities for loading and managing saved deployments.
+ * Deployment file utilities for saving, loading, and managing deployment outputs.
  *
- * Provides functions for loading, listing, and finding deployment output files
- * from the deployments/ directory. These utilities serve as the foundation for
- * the checkpoint system (Phase 2) and deployment registry (Phase 3).
+ * Provides comprehensive functions for managing deployment files with structured
+ * directory organization by network and workflow type. Supports saving deployment
+ * outputs, finding latest deployments, and listing available deployments.
  *
  * @module infrastructure/utils/deploymentFiles
  */
 
 import { promises as fs } from "fs";
-import { join } from "path";
-
-// Import DeploymentOutput type from workflows
-// Note: This creates a dependency from infrastructure->workflows, but it's acceptable
-// for utility functions that work with deployment outputs. The alternative would be
-// to define DeploymentOutput in infrastructure/types, but it's semantically a workflow output.
-import type { DeploymentOutput } from "../../workflows/deploySystemWithNewBlr";
+import { join, dirname, win32, posix } from "path";
+import type { AnyDeploymentOutput, SaveDeploymentOptions, SaveResult, LoadDeploymentOptions } from "../types";
+import type { WorkflowType } from "../types/checkpoint";
+import { WORKFLOW_DESCRIPTORS } from "../constants";
 
 /**
- * Get the deployments directory path.
+ * Get the root deployments directory path.
+ *
  * @returns Absolute path to deployments directory
+ * @internal
  */
-function getDeploymentsDir(): string {
-  // Navigate from this file to deployments directory
-  // scripts/infrastructure/utils/deploymentFiles.ts -> ../../deployments
+export function getDeploymentsDir(): string {
   return join(__dirname, "../../../deployments");
 }
 
 /**
- * Load a specific deployment by network and timestamp.
+ * Get the network-specific deployment directory.
  *
- * @param network - Network name (e.g., 'hedera-testnet', 'hedera-mainnet')
- * @param timestamp - Deployment timestamp in format YYYY-MM-DD_HH-mm-ss
+ * @param network - Network name (e.g., 'hedera-testnet')
+ * @param deploymentsDir - Optional custom deployments directory
+ * @returns Absolute path to network directory
+ */
+export function getNetworkDeploymentDir(network: string, deploymentsDir?: string): string {
+  const baseDir = deploymentsDir || getDeploymentsDir();
+  return join(baseDir, network);
+}
+
+/**
+ * Generate a deployment filename for the given workflow and timestamp.
+ *
+ * Uses registered workflow descriptor if available, otherwise uses workflow name directly.
+ * This allows custom workflows to work without prior registration.
+ *
+ * @param workflow - Workflow type
+ * @param timestamp - Optional timestamp (uses current time if not provided)
+ * @returns Filename in format: {workflow}-{timestamp}.json
+ *
+ * @example Core ATS workflow
+ * ```typescript
+ * generateDeploymentFilename('newBlr')
+ * // Returns: "newBlr-2025-12-30T10-30-45.json"
+ * ```
+ *
+ * @example Custom workflow (unregistered)
+ * ```typescript
+ * generateDeploymentFilename('gbpInfrastructure')
+ * // Returns: "gbpInfrastructure-2025-12-30T10-30-45.json"
+ * ```
+ *
+ * @example Custom workflow (registered with short name)
+ * ```typescript
+ * import { registerWorkflowDescriptor } from '@scripts/infrastructure'
+ *
+ * registerWorkflowDescriptor('gbpInfrastructure', 'gbpInfra')
+ * generateDeploymentFilename('gbpInfrastructure')
+ * // Returns: "gbpInfra-2025-12-30T10-30-45.json"
+ * ```
+ */
+export function generateDeploymentFilename(workflow: WorkflowType, timestamp?: string): string {
+  const ts = timestamp || new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+  const workflowName = WORKFLOW_DESCRIPTORS[workflow] || workflow;
+  return `${workflowName}-${ts}.json`;
+}
+
+/**
+ * Save a deployment output to disk.
+ *
+ * Saves deployment data to the file system with structure:
+ * `deployments/{network}/{workflow}-{timestamp}.json`
+ *
+ * @param options - Save options including network, workflow, and data
+ * @returns Save result (success with filepath or failure with error message)
+ *
+ * @example
+ * ```typescript
+ * import { saveDeploymentOutput } from '@scripts/infrastructure'
+ *
+ * const result = await saveDeploymentOutput({
+ *   network: 'hedera-testnet',
+ *   workflow: 'newBlr',
+ *   data: deploymentOutput,
+ * })
+ *
+ * if (result.success) {
+ *   console.log(`Saved to: ${result.filepath}`)
+ * } else {
+ *   console.error(`Failed: ${result.error}`)
+ * }
+ * ```
+ */
+export async function saveDeploymentOutput<T = AnyDeploymentOutput>(
+  options: SaveDeploymentOptions<T>,
+): Promise<SaveResult> {
+  try {
+    const { network, workflow, data, customPath } = options;
+
+    let filepath: string;
+    let filename: string;
+
+    if (customPath) {
+      filepath = customPath;
+      // Handle both Unix and Windows paths - try Windows first, then Unix
+      const windowsFilename = win32.basename(filepath);
+      const unixFilename = posix.basename(filepath);
+      // Use the shorter one (basename removes path, so shorter = more processing done)
+      filename = windowsFilename.length < unixFilename.length ? windowsFilename : unixFilename;
+    } else {
+      const networkDir = getNetworkDeploymentDir(network);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+      filename = generateDeploymentFilename(workflow, timestamp);
+      filepath = join(networkDir, filename);
+    }
+
+    // Ensure directory exists
+    const dir = dirname(filepath);
+    await fs.mkdir(dir, { recursive: true });
+
+    // Write file
+    const content = JSON.stringify(data, null, 2);
+    await fs.writeFile(filepath, content, "utf-8");
+
+    return {
+      success: true,
+      filepath,
+      filename,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+/**
+ * Load a specific deployment by network, workflow, and timestamp.
+ *
+ * **Breaking change**: Now requires workflow parameter.
+ *
+ * @param network - Network name
+ * @param workflow - Workflow type
+ * @param timestamp - Deployment timestamp
  * @returns Deployment output data
  * @throws Error if deployment file not found or invalid JSON
  *
@@ -41,22 +160,27 @@ function getDeploymentsDir(): string {
  * ```typescript
  * import { loadDeployment } from '@scripts/infrastructure'
  *
- * // Load specific deployment
- * const deployment = await loadDeployment('hedera-testnet', '2025-11-07_18-30-45')
+ * const deployment = await loadDeployment(
+ *   'hedera-testnet',
+ *   'newBlr',
+ *   '2025-01-09T14-30-45'
+ * )
  *
  * console.log(`BLR Proxy: ${deployment.infrastructure.blr.proxy}`)
- * console.log(`Factory: ${deployment.infrastructure.factory.proxy}`)
- * console.log(`Facets: ${deployment.facets.length}`)
  * ```
  */
-export async function loadDeployment(network: string, timestamp: string): Promise<DeploymentOutput> {
-  const deploymentsDir = getDeploymentsDir();
-  const filename = `${network}_${timestamp}.json`;
-  const filepath = join(deploymentsDir, filename);
+export async function loadDeployment(
+  network: string,
+  workflow: WorkflowType,
+  timestamp: string,
+): Promise<AnyDeploymentOutput> {
+  const networkDir = getNetworkDeploymentDir(network);
+  const filename = generateDeploymentFilename(workflow, timestamp);
+  const filepath = join(networkDir, filename);
 
   try {
     const content = await fs.readFile(filepath, "utf-8");
-    return JSON.parse(content) as DeploymentOutput;
+    return JSON.parse(content) as AnyDeploymentOutput;
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       throw new Error(`Deployment file not found: ${filename}`);
@@ -66,83 +190,147 @@ export async function loadDeployment(network: string, timestamp: string): Promis
 }
 
 /**
- * Find and load the latest deployment for a network.
+ * Load a deployment output from disk with flexible options.
  *
- * Searches for deployment files matching the network name and returns
- * the most recent one based on timestamp.
+ * @param options - Load options (can specify network + workflow or full timestamp)
+ * @returns Deployment output data, or null if not found
  *
- * @param network - Network name (e.g., 'hedera-testnet', 'hedera-mainnet')
- * @returns Latest deployment output, or null if no deployments found
+ * @example
+ * ```typescript
+ * import { loadDeploymentByWorkflow } from '@scripts/infrastructure'
+ *
+ * // Load latest deployment for a workflow
+ * const output = await loadDeploymentByWorkflow({
+ *   network: 'hedera-testnet',
+ *   workflow: 'newBlr',
+ *   useLast: true,
+ * })
+ *
+ * if (output) {
+ *   console.log(`Loaded deployment: ${output.timestamp}`)
+ * }
+ * ```
+ */
+export async function loadDeploymentByWorkflow<T = AnyDeploymentOutput>(
+  options: LoadDeploymentOptions,
+): Promise<T | null> {
+  try {
+    const { network, workflow, timestamp, useLast } = options;
+
+    if (timestamp && workflow) {
+      return (await loadDeployment(network, workflow, timestamp)) as T;
+    }
+
+    if (useLast && workflow) {
+      const latest = await findLatestDeployment(network, workflow);
+      return (latest as T) || null;
+    }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Find the latest deployment for a network and workflow type.
+ *
+ * **Breaking change**: Now requires workflow parameter.
+ *
+ * @param network - Network name
+ * @param workflow - Workflow type
+ * @returns Latest deployment output, or null if none found
  *
  * @example
  * ```typescript
  * import { findLatestDeployment } from '@scripts/infrastructure'
  *
- * // Get latest testnet deployment
- * const latest = await findLatestDeployment('hedera-testnet')
+ * const latest = await findLatestDeployment('hedera-testnet', 'newBlr')
  *
  * if (latest) {
- *   console.log(`Latest deployment: ${latest.timestamp}`)
- *   console.log(`Deployer: ${latest.deployer}`)
- * } else {
- *   console.log('No deployments found')
+ *   console.log(`Latest: ${latest.timestamp}`)
  * }
  * ```
  */
-export async function findLatestDeployment(network: string): Promise<DeploymentOutput | null> {
-  const files = await listDeploymentFiles(network);
+export async function findLatestDeployment(
+  network: string,
+  workflow: WorkflowType,
+): Promise<AnyDeploymentOutput | null> {
+  const files = await listDeploymentsByWorkflow(network, workflow);
 
   if (files.length === 0) {
     return null;
   }
 
-  // Files are already sorted newest first
+  const networkDir = getNetworkDeploymentDir(network);
   const latestFile = files[0];
+  const filepath = join(networkDir, latestFile);
 
-  // Extract timestamp from filename: network_timestamp.json
-  const timestamp = latestFile.replace(`${network}_`, "").replace(".json", "");
-
-  return loadDeployment(network, timestamp);
+  try {
+    const content = await fs.readFile(filepath, "utf-8");
+    return JSON.parse(content) as AnyDeploymentOutput;
+  } catch {
+    return null;
+  }
 }
 
 /**
- * List all deployment files for a network.
+ * List all deployment files for a network and optional workflow type.
  *
  * Returns filenames sorted by timestamp (newest first).
  *
- * @param network - Network name (e.g., 'hedera-testnet', 'hedera-mainnet')
- * @returns Array of deployment filenames, sorted newest first
+ * @param network - Network name
+ * @param workflow - Optional workflow type to filter by
+ * @returns Array of filenames, sorted newest first
+ *
+ * @example
+ * ```typescript
+ * import { listDeploymentsByWorkflow } from '@scripts/infrastructure'
+ *
+ * const files = await listDeploymentsByWorkflow('hedera-testnet', 'newBlr')
+ *
+ * console.log(`Found ${files.length} newBlr deployments`)
+ * ```
+ */
+export async function listDeploymentsByWorkflow(network: string, workflow?: WorkflowType): Promise<string[]> {
+  const networkDir = getNetworkDeploymentDir(network);
+
+  try {
+    const files = await fs.readdir(networkDir);
+
+    // Filter by workflow if specified
+    let filtered = files.filter((file) => file.endsWith(".json") && !file.startsWith("."));
+
+    if (workflow) {
+      const workflowName = WORKFLOW_DESCRIPTORS[workflow];
+      filtered = filtered.filter((file) => file.startsWith(`${workflowName}-`));
+    }
+
+    // Sort by timestamp descending (newest first)
+    return filtered.sort().reverse();
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  }
+}
+
+/**
+ * List all deployment files across all workflows for a network.
+ *
+ * @param network - Network name
+ * @returns Array of filenames from all workflows, sorted newest first
+ * @deprecated Use listDeploymentsByWorkflow() instead
  *
  * @example
  * ```typescript
  * import { listDeploymentFiles } from '@scripts/infrastructure'
  *
- * // List all testnet deployments
- * const files = await listDeploymentFiles('hedera-testnet')
- *
- * console.log(`Found ${files.length} deployments:`)
- * files.forEach(file => console.log(`  - ${file}`))
+ * const all = await listDeploymentFiles('hedera-testnet')
+ * console.log(`Total deployments: ${all.length}`)
  * ```
  */
 export async function listDeploymentFiles(network: string): Promise<string[]> {
-  const deploymentsDir = getDeploymentsDir();
-
-  try {
-    const allFiles = await fs.readdir(deploymentsDir);
-
-    // Filter files matching network pattern: network_timestamp.json
-    const networkFiles = allFiles.filter(
-      (file) => file.startsWith(`${network}_`) && file.endsWith(".json") && !file.includes("/."),
-    );
-
-    // Sort by filename (timestamp) in descending order (newest first)
-    // Filename format: network_YYYY-MM-DD_HH-mm-ss.json sorts correctly alphabetically
-    return networkFiles.sort().reverse();
-  } catch (error) {
-    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-      // Deployments directory doesn't exist yet
-      return [];
-    }
-    throw new Error(`Failed to list deployment files: ${error instanceof Error ? error.message : String(error)}`);
-  }
+  return listDeploymentsByWorkflow(network);
 }

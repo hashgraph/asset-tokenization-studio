@@ -40,6 +40,14 @@ export type {
   CreateConfigResult,
   OperationResult,
   SignerOptions,
+  AnyDeploymentOutput,
+  SaveDeploymentOptions,
+  SaveResult,
+  LoadDeploymentOptions,
+  DeploymentOutputType,
+  DeploymentWithExistingBlrOutputType,
+  UpgradeConfigurationsOutputType,
+  UpgradeTupProxiesOutputType,
 } from "./types";
 
 export { ok, err, createSigner, createSignerFromEnv } from "./types";
@@ -51,8 +59,12 @@ export type {
   ConfigurationResult,
   CheckpointStatus,
   WorkflowType,
+  AtsWorkflowType,
   ResumeOptions,
 } from "./types/checkpoint";
+
+// Type guards
+export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./types/checkpoint";
 
 // ============================================================================
 // Constants
@@ -77,6 +89,9 @@ export {
   ENV_VAR_PATTERNS,
   DEPLOYMENT_OUTPUT_DIR,
   DEPLOYMENT_OUTPUT_PATTERN,
+  ATS_WORKFLOW_DESCRIPTORS,
+  WORKFLOW_DESCRIPTORS,
+  registerWorkflowDescriptor,
 } from "./constants";
 
 export type { Network } from "./constants";
@@ -180,7 +195,17 @@ export {
 
 export { validateAddress, validateBytes32 } from "./utils/validation";
 
-export { loadDeployment, findLatestDeployment, listDeploymentFiles } from "./utils/deploymentFiles";
+export {
+  saveDeploymentOutput,
+  loadDeployment,
+  loadDeploymentByWorkflow,
+  findLatestDeployment,
+  listDeploymentsByWorkflow,
+  listDeploymentFiles,
+  getDeploymentsDir,
+  getNetworkDeploymentDir,
+  generateDeploymentFilename,
+} from "./utils/deploymentFiles";
 
 export {
   waitForTransaction,
