@@ -15,8 +15,12 @@
  * @module workflows/upgradeConfigurations
  */
 
+import { promises as fs } from "fs";
+import { dirname } from "path";
+
 import { ContractFactory, Signer } from "ethers";
 import { z } from "zod";
+
 import {
   deployFacets,
   registerFacets,
@@ -34,15 +38,13 @@ import {
   NullCheckpointManager,
   type DeploymentCheckpoint,
   type ResumeOptions,
+  type UpgradeConfigurationsOutputType,
   formatCheckpointStatus,
   getStepName,
   validateAddress,
   generateTimestamp,
 } from "@scripts/infrastructure";
 import { atsRegistry, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
-
-import { promises as fs } from "fs";
-import { dirname } from "path";
 import { BusinessLogicResolver__factory } from "@contract-types";
 
 // ============================================================================
@@ -181,59 +183,9 @@ export interface ProxyUpdateResult {
 
 /**
  * Output of the upgrade configurations workflow.
+ * Re-exported from infrastructure for backward compatibility.
  */
-export interface UpgradeConfigurationsOutput {
-  /** Network name */
-  network: string;
-
-  /** ISO timestamp */
-  timestamp: string;
-
-  /** Deployer address */
-  deployer: string;
-
-  /** BLR information (external) */
-  blr: {
-    address: string;
-    isExternal: true;
-  };
-
-  /** Newly deployed facets */
-  facets: Array<{
-    name: string;
-    address: string;
-    contractId?: string;
-    key: string;
-  }>;
-
-  /** New configuration versions */
-  configurations: {
-    equity?: {
-      configId: string;
-      version: number;
-      facetCount: number;
-    };
-    bond?: {
-      configId: string;
-      version: number;
-      facetCount: number;
-    };
-  };
-
-  /** Proxy update results (if proxyAddresses provided) */
-  proxyUpdates?: ProxyUpdateResult[];
-
-  /** Summary statistics */
-  summary: {
-    totalFacetsDeployed: number;
-    configurationsCreated: number;
-    proxiesUpdated: number;
-    proxiesFailed: number;
-    deploymentTime: number;
-    gasUsed: string;
-    success: boolean;
-  };
-}
+export type UpgradeConfigurationsOutput = UpgradeConfigurationsOutputType;
 
 // ============================================================================
 // Types (Internal)

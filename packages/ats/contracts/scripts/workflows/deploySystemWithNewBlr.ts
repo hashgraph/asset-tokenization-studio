@@ -14,14 +14,12 @@
  *
  * @module workflows/deploySystemWithNewBlr
  */
-
 import { Signer, ContractFactory } from "ethers";
 import {
   deployProxyAdmin,
   deployBlr,
   deployFacets,
   registerFacets,
-  success,
   info,
   warn,
   error as logError,
@@ -30,116 +28,25 @@ import {
   DEFAULT_BATCH_SIZE,
   CheckpointManager,
   NullCheckpointManager,
+  saveDeploymentOutput,
   type DeploymentCheckpoint,
   type ResumeOptions,
+  type DeploymentOutputType,
   formatCheckpointStatus,
   getStepName,
   toDeployBlrResult,
   toConfigurationData,
   convertCheckpointFacets,
   isSuccess,
-  generateTimestamp,
 } from "@scripts/infrastructure";
 import { atsRegistry, deployFactory, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
-
-import { promises as fs } from "fs";
-import { dirname } from "path";
-import { BusinessLogicResolver__factory } from "@contract-types";
+import { BusinessLogicResolver__factory, ProxyAdmin__factory } from "@contract-types";
 
 /**
  * Complete deployment output structure.
+ * Re-exported from infrastructure for backward compatibility.
  */
-export interface DeploymentOutput {
-  /** Network name (testnet, mainnet, etc.) */
-  network: string;
-
-  /** ISO timestamp of deployment */
-  timestamp: string;
-
-  /** Deployer address */
-  deployer: string;
-
-  /** Infrastructure contracts */
-  infrastructure: {
-    proxyAdmin: {
-      address: string;
-      contractId?: string;
-    };
-    blr: {
-      implementation: string;
-      implementationContractId?: string;
-      proxy: string;
-      proxyContractId?: string;
-    };
-    factory: {
-      implementation: string;
-      implementationContractId?: string;
-      proxy: string;
-      proxyContractId?: string;
-    };
-  };
-
-  /** Deployed facets */
-  facets: Array<{
-    name: string;
-    address: string;
-    contractId?: string;
-    key: string;
-  }>;
-
-  /** Token configurations */
-  configurations: {
-    equity: {
-      configId: string;
-      version: number;
-      facetCount: number;
-      facets: Array<{
-        facetName: string;
-        key: string;
-        address: string;
-      }>;
-    };
-    bond: {
-      configId: string;
-      version: number;
-      facetCount: number;
-      facets: Array<{
-        facetName: string;
-        key: string;
-        address: string;
-      }>;
-    };
-  };
-
-  /** Deployment summary */
-  summary: {
-    totalContracts: number;
-    totalFacets: number;
-    totalConfigurations: number;
-    deploymentTime: number;
-    gasUsed: string;
-    success: boolean;
-  };
-
-  /** Convenience helpers for testing */
-  helpers: {
-    /** Get only equity-specific facets for testing */
-    getEquityFacets(): Array<{
-      name: string;
-      address: string;
-      contractId?: string;
-      key: string;
-    }>;
-
-    /** Get only bond-specific facets for testing */
-    getBondFacets(): Array<{
-      name: string;
-      address: string;
-      contractId?: string;
-      key: string;
-    }>;
-  };
-}
+export type DeploymentOutput = DeploymentOutputType;
 
 /**
  * Options for complete system deployment.
@@ -321,7 +228,6 @@ export async function deploySystemWithNewBlr(
     if (checkpoint.steps.proxyAdmin && checkpoint.currentStep >= 0) {
       info("\n✓ Step 1/7: ProxyAdmin already deployed (resuming)");
       // Reconstruct ProxyAdmin from checkpoint - need to reconnect to contract
-      const ProxyAdmin__factory = (await import("@contract-types")).ProxyAdmin__factory;
       proxyAdmin = ProxyAdmin__factory.connect(checkpoint.steps.proxyAdmin.address, signer);
       info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
     } else {
@@ -783,11 +689,18 @@ export async function deploySystemWithNewBlr(
     }
 
     if (saveOutput) {
-      const timestamp = generateTimestamp();
-      const finalOutputPath = outputPath || `deployments/${network}/${network}-deployment-${timestamp}.json`;
+      const result = await saveDeploymentOutput({
+        network,
+        workflow: "newBlr",
+        data: output,
+        customPath: outputPath,
+      });
 
-      await saveDeploymentOutput(output, finalOutputPath);
-      info(`\n💾 Deployment output saved: ${finalOutputPath}`);
+      if (result.success) {
+        info(`\n💾 Deployment output saved: ${result.filepath}`);
+      } else {
+        warn(`\n⚠️  Warning: Could not save deployment output: ${result.error}`);
+      }
     }
 
     info("\n" + "═".repeat(60));
@@ -825,26 +738,5 @@ export async function deploySystemWithNewBlr(
     }
 
     throw error;
-  }
-}
-
-/**
- * Save deployment output to JSON file.
- *
- * @param output - Deployment output
- * @param filePath - File path to save to
- */
-async function saveDeploymentOutput(output: DeploymentOutput, filePath: string): Promise<void> {
-  try {
-    // Ensure directory exists
-    const dir = dirname(filePath);
-    await fs.mkdir(dir, { recursive: true });
-
-    // Write JSON file with pretty formatting
-    await fs.writeFile(filePath, JSON.stringify(output, null, 2), "utf-8");
-
-    success("Deployment output saved", { path: filePath });
-  } catch (error) {
-    warn(`Warning: Could not save deployment output: ${error}`);
   }
 }
