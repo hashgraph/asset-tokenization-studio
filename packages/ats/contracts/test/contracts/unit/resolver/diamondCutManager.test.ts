@@ -15,6 +15,7 @@ import {
   BOND_CONFIG_ID,
   BOND_FIXED_RATE_CONFIG_ID,
   BOND_KPI_LINKED_RATE_CONFIG_ID,
+  BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
   EQUITY_CONFIG_ID,
 } from "@scripts";
 import { deployAtsInfrastructureFixture } from "@test";
@@ -39,6 +40,7 @@ describe("DiamondCutManager", () => {
   let bondFacetIdList: string[] = [];
   let bondFixedRateFacetIdList: string[] = [];
   let bondKpiLinkedRateFacetIdList: string[] = [];
+  let bondSustainabilityPerformanceTargetRateFacetIdList: string[] = [];
   let equityFacetVersionList: number[] = [];
 
   before(async () => {
@@ -59,6 +61,9 @@ describe("DiamondCutManager", () => {
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
     bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
     bondKpiLinkedRateFacetIdList = Object.values(infrastructure.bondKpiLinkedRateFacetKeys);
+    bondSustainabilityPerformanceTargetRateFacetIdList = Object.values(
+      infrastructure.bondSustainabilityPerformanceTargetRateFacetKeys,
+    );
     equityFacetVersionList = Array(equityFacetIdList.length).fill(1);
   });
 
@@ -274,7 +279,9 @@ describe("DiamondCutManager", () => {
             ? bondFixedRateFacetIdList
             : configId == BOND_KPI_LINKED_RATE_CONFIG_ID
               ? bondKpiLinkedRateFacetIdList
-              : null;
+              : configId == BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID
+                ? bondSustainabilityPerformanceTargetRateFacetIdList
+                : null;
 
     if (!expectedFacetIdList) {
       expect.fail("Unknown configId");
@@ -286,7 +293,7 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = (await diamondCutManager.getConfigurationsLength()).toNumber();
-    expect(configLength).to.equal(4);
+    expect(configLength).to.equal(5);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
     expect(configIds).to.have.members([
@@ -294,6 +301,7 @@ describe("DiamondCutManager", () => {
       BOND_CONFIG_ID,
       BOND_FIXED_RATE_CONFIG_ID,
       BOND_KPI_LINKED_RATE_CONFIG_ID,
+      BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
     ]);
 
     for (const configId of configIds) {

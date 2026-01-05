@@ -87,6 +87,12 @@ describe("Checkpoint Utilities", () => {
               facetCount: 47,
               txHash: "0xdef123",
             },
+            bondSustainabilityPerformanceTargetRate: {
+              configId: "0x0000000000000000000000000000000000000000000000000000000000000005",
+              version: 1,
+              facetCount: 47,
+              txHash: "0xghi456",
+            },
           },
           factory: {
             address: "0x5555555555555555555555555555555555555555",
