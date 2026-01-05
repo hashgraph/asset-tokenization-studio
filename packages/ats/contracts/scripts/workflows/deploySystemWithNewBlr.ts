@@ -38,6 +38,7 @@ import {
   toConfigurationData,
   convertCheckpointFacets,
   isSuccess,
+  generateTimestamp,
 } from "@scripts/infrastructure";
 import {
   atsRegistry,
@@ -215,7 +216,7 @@ export interface DeploySystemWithNewBlrOptions extends ResumeOptions {
   /** Batch size for partial deployments */
   batchSize?: number;
 
-  /** Path to save deployment output (default: deployments/{network}-{timestamp}.json) */
+  /** Path to save deployment output (default: deployments/{network}/{network}-deployment-{timestamp}.json) */
   outputPath?: string;
 
   /** Number of confirmations to wait for each deployment (default: 2 for Hedera reliability) */
@@ -313,8 +314,8 @@ export async function deploySystemWithNewBlr(
   // Initialize checkpoint manager
   // Use NullCheckpointManager for tests to eliminate filesystem I/O overhead
   const checkpointManager = ignoreCheckpoint
-    ? new NullCheckpointManager(checkpointDir)
-    : new CheckpointManager(checkpointDir);
+    ? new NullCheckpointManager(network, checkpointDir)
+    : new CheckpointManager(network, checkpointDir);
   let checkpoint: DeploymentCheckpoint | null = null;
 
   // Check for existing checkpoints if not explicitly ignoring
@@ -1067,17 +1068,8 @@ export async function deploySystemWithNewBlr(
     }
 
     if (saveOutput) {
-      // Generate human-readable timestamp: network_yyyy-mm-dd_hh-mm-ss.json
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const seconds = String(now.getSeconds()).padStart(2, "0");
-      const timestamp = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
-
-      const finalOutputPath = outputPath || `deployments/${network}_${timestamp}.json`;
+      const timestamp = generateTimestamp();
+      const finalOutputPath = outputPath || `deployments/${network}/${network}-deployment-${timestamp}.json`;
 
       await saveDeploymentOutput(output, finalOutputPath);
       info(`\n💾 Deployment output saved: ${finalOutputPath}`);

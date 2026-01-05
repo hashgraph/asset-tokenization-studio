@@ -36,6 +36,7 @@ import {
   getStepName,
   toConfigurationData,
   convertCheckpointFacets,
+  generateTimestamp,
 } from "@scripts/infrastructure";
 import {
   atsRegistry,
@@ -289,8 +290,8 @@ export async function deploySystemWithExistingBlr(
   // Initialize checkpoint manager
   // Use NullCheckpointManager for tests to eliminate filesystem I/O overhead
   const checkpointManager = ignoreCheckpoint
-    ? new NullCheckpointManager(checkpointDir)
-    : new CheckpointManager(checkpointDir);
+    ? new NullCheckpointManager(network, checkpointDir)
+    : new CheckpointManager(network, checkpointDir);
   let checkpoint: DeploymentCheckpoint | null = null;
 
   // Check for existing checkpoints if not explicitly ignoring
@@ -1075,7 +1076,9 @@ export async function deploySystemWithExistingBlr(
     }
 
     if (saveOutput) {
-      const finalOutputPath = outputPath || `deployments/${network}-external-blr-${Date.now()}.json`;
+      const timestamp = generateTimestamp();
+      const finalOutputPath =
+        outputPath || `deployments/${network}/${network}-external-blr-deployment-${timestamp}.json`;
 
       await saveDeploymentOutput(output, finalOutputPath);
       info(`\n💾 Deployment output saved: ${finalOutputPath}`);

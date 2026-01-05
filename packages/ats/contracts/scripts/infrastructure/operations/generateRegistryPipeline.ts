@@ -30,7 +30,7 @@
 import * as path from "path";
 import { ContractFile } from "../../tools/scanner/contractFinder";
 import { ContractMetadata } from "../../tools/scanner/metadataExtractor";
-import { LogLevel, configureLogger, section, info, success, warn, table } from "../utils/logging";
+import { LogLevel, configureLogger, section, info, success, warn, table } from "@scripts/infrastructure";
 
 /**
  * Configuration for registry generation pipeline.

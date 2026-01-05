@@ -46,9 +46,31 @@ export {
   getRegulationData,
 } from "./tokens/common.fixture";
 
+// ResolverProxy fixtures
+export {
+  deployResolverProxyFixture,
+  deployResolverProxyWithAltConfigFixture,
+  TEST_CONFIG_ID,
+  ALT_CONFIG_ID,
+  MAX_TEST_VERSION,
+  type ResolverProxyFixtureResult,
+} from "./resolverProxy.fixture";
+
 // T-REX fixtures (legacy support)
 export {
   deployIdentityProxy,
   deployFullSuiteFixture,
   deploySuiteWithModularCompliancesFixture,
 } from "./trex/fullSuite.fixture";
+
+// TUP upgrade fixtures
+export {
+  deployTupUpgradeTestFixture,
+  deployTupInfrastructureOnlyFixture,
+  deployBlrV2Implementation,
+  deployFactoryV2Implementation,
+  createMockImplementation,
+  type TupUpgradeTestFixture,
+  type TupInfrastructureOnlyFixture,
+  type V2ImplementationResult,
+} from "./upgradeTupProxies.fixture";
