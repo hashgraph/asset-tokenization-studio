@@ -19,7 +19,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         uint256 maturityDate;
         bool initialized;
         uint8 nominalValueDecimals;
-        uint256[] counponsOrderedListByIds;
+        uint256[] couponsOrderedListByIds;
     }
 
     /**
@@ -87,7 +87,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     }
 
     function _addToCouponsOrderedList(uint256 _couponID) internal virtual override {
-        _bondStorage().counponsOrderedListByIds.push(_couponID);
+        _bondStorage().couponsOrderedListByIds.push(_couponID);
     }
 
     function _updateCouponRate(
@@ -110,7 +110,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
 
         uint256 actualOrderedListLengthTotal = _getCouponsOrderedListTotal();
 
-        if (_pos < actualOrderedListLengthTotal) return _bondStorage().counponsOrderedListByIds[_pos];
+        if (_pos < actualOrderedListLengthTotal) return _bondStorage().couponsOrderedListByIds[_pos];
 
         uint256 pendingIndexOffset = _pos - actualOrderedListLengthTotal;
 
@@ -137,7 +137,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     }
 
     function _getCouponsOrderedListTotal() internal view override returns (uint256 total_) {
-        return _bondStorage().counponsOrderedListByIds.length;
+        return _bondStorage().couponsOrderedListByIds.length;
     }
 
     function _getPreviousCouponInOrderedList(

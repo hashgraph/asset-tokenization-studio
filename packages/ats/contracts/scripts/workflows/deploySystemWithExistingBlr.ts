@@ -23,20 +23,19 @@ import {
   deployProxyAdmin,
   validateAddress,
   fetchHederaContractId,
-  success,
   info,
   warn,
   error as logError,
   getDeploymentConfig,
   CheckpointManager,
   NullCheckpointManager,
+  saveDeploymentOutput,
   type DeploymentCheckpoint,
   type ResumeOptions,
   formatCheckpointStatus,
   getStepName,
   toConfigurationData,
   convertCheckpointFacets,
-  generateTimestamp,
 } from "@scripts/infrastructure";
 import {
   atsRegistry,
@@ -48,8 +47,6 @@ import {
   createBondSustainabilityPerformanceTargetRateConfiguration,
 } from "@scripts/domain";
 
-import { promises as fs } from "fs";
-import { dirname } from "path";
 import { BusinessLogicResolver__factory } from "@contract-types";
 
 /**
@@ -1076,12 +1073,18 @@ export async function deploySystemWithExistingBlr(
     }
 
     if (saveOutput) {
-      const timestamp = generateTimestamp();
-      const finalOutputPath =
-        outputPath || `deployments/${network}/${network}-external-blr-deployment-${timestamp}.json`;
+      const result = await saveDeploymentOutput({
+        network,
+        workflow: "existingBlr",
+        data: output,
+        customPath: outputPath,
+      });
 
-      await saveDeploymentOutput(output, finalOutputPath);
-      info(`\n💾 Deployment output saved: ${finalOutputPath}`);
+      if (result.success) {
+        info(`\n💾 Deployment output saved: ${result.filepath}`);
+      } else {
+        warn(`\n⚠️  Warning: Could not save deployment output: ${result.error}`);
+      }
     }
 
     info("\n" + "═".repeat(60));
@@ -1122,26 +1125,5 @@ export async function deploySystemWithExistingBlr(
     }
 
     throw error;
-  }
-}
-
-/**
- * Save deployment output to JSON file.
- *
- * @param output - Deployment output
- * @param filePath - File path to save to
- */
-async function saveDeploymentOutput(output: DeploymentWithExistingBlrOutput, filePath: string): Promise<void> {
-  try {
-    // Ensure directory exists
-    const dir = dirname(filePath);
-    await fs.mkdir(dir, { recursive: true });
-
-    // Write JSON file with pretty formatting
-    await fs.writeFile(filePath, JSON.stringify(output, null, 2), "utf-8");
-
-    success("Deployment output saved", { path: filePath });
-  } catch (error) {
-    warn(`Warning: Could not save deployment output: ${error}`);
   }
 }
