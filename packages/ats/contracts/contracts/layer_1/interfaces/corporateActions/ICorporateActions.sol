@@ -8,14 +8,14 @@ interface ICorporateActions {
      * @param operator The caller of the function that emitted the event
      * @param actionType The corporate action's action type (used for classification)
      * @param corporateActionId The corporate action's unique Id
-     * @param corporateActionIndexByType The corporate action's index for its action type
+     * @param corporateActionIdByType The corporate action's id for its action type
      * @param data The corporate action's data (defining the corporate aciton itself)
      */
     event CorporateActionAdded(
         address indexed operator,
         bytes32 indexed actionType,
         bytes32 indexed corporateActionId,
-        uint256 corporateActionIndexByType,
+        uint256 corporateActionIdByType,
         bytes data
     );
 
@@ -24,18 +24,19 @@ interface ICorporateActions {
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
-    ) external returns (bool success_, bytes32 corporateActionId_, uint256 corporateActionIndexByType_);
+    ) external returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
 
     /**
      * @dev Returns a corporate action info
      *
      * @param _corporateActionId The corporate action unique Id
      * @return actionType_ the corproate action type
+     * @return actionTypeIndex_ the corproate action type index
      * @return data_ the corproate action related data (body and anything else)
      */
     function getCorporateAction(
         bytes32 _corporateActionId
-    ) external view returns (bytes32 actionType_, bytes memory data_);
+    ) external view returns (bytes32 actionType_, uint256 actionTypeIndex_, bytes memory data_);
 
     /**
      * @dev Returns the number of corporate actions the token currently has

@@ -4,17 +4,17 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   type ResolverProxy,
-  type Lock,
+  type LockFacet,
   type IERC1410,
-  Pause,
-  Kyc,
-  SsiManagement,
-  AdjustBalances,
+  PauseFacet,
+  KycFacet,
+  SsiManagementFacet,
+  AdjustBalancesFacet,
   AccessControl,
   Cap,
   Equity,
   TimeTravelFacet,
-  Snapshots,
+  SnapshotsFacet,
 } from "@contract-types";
 
 import { deployEquityTokenFixture } from "@test";
@@ -45,13 +45,13 @@ describe("Lock Tests", () => {
   let signer_C: SignerWithAddress;
   let signer_D: SignerWithAddress;
 
-  let lockFacet: Lock;
-  let pauseFacet: Pause;
+  let lockFacet: LockFacet;
+  let pauseFacet: PauseFacet;
   let erc1410Facet: IERC1410;
-  let snapshotFacet: Snapshots;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
-  let adjustBalancesFacet: AdjustBalances;
+  let snapshotFacet: SnapshotsFacet;
+  let kycFacet: KycFacet;
+  let ssiManagementFacet: SsiManagementFacet;
+  let adjustBalancesFacet: AdjustBalancesFacet;
   let accessControlFacet: AccessControl;
   let capFacet: Cap;
   let equityFacet: Equity;
@@ -90,16 +90,16 @@ describe("Lock Tests", () => {
   }
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    lockFacet = await ethers.getContractAt("Lock", diamond.address, signer_C);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_D);
+    lockFacet = await ethers.getContractAt("LockFacet", diamond.address, signer_C);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_D);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
     equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address, signer_A);
     capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
+    snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
 
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
 

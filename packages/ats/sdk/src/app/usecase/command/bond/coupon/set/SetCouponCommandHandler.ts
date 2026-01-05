@@ -225,7 +225,16 @@ export class SetCouponCommandHandler
 
   async execute(command: SetCouponCommand): Promise<SetCouponCommandResponse> {
     try {
-      const { address, recordDate, executionDate, rate, period } = command;
+      const {
+        address,
+        recordDate,
+        executionDate,
+        rate,
+        startDate,
+        endDate,
+        fixingDate,
+        rateStatus,
+      } = command;
       const handler = this.transactionService.getHandler();
 
       const securityEvmAddress =
@@ -236,7 +245,10 @@ export class SetCouponCommandHandler
         BigDecimal.fromString(recordDate),
         BigDecimal.fromString(executionDate),
         BigDecimal.fromString(rate),
-        BigDecimal.fromString(period),
+        BigDecimal.fromString(startDate),
+        BigDecimal.fromString(endDate),
+        BigDecimal.fromString(fixingDate),
+        rateStatus,
         address,
       );
 

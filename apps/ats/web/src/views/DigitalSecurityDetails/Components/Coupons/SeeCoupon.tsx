@@ -227,6 +227,24 @@ export const SeeCoupon = () => {
                 valueToCopy: coupons.executionDate.toDateString(),
               },
               {
+                title: tDetail("startDay"),
+                description: formatDate(coupons.startDate, DATE_TIME_FORMAT),
+                canCopy: true,
+                valueToCopy: coupons.startDate.toDateString(),
+              },
+              {
+                title: tDetail("endDay"),
+                description: formatDate(coupons.endDate, DATE_TIME_FORMAT),
+                canCopy: true,
+                valueToCopy: coupons.endDate.toDateString(),
+              },
+              {
+                title: tDetail("fixingDay"),
+                description: formatDate(coupons.fixingDate, DATE_TIME_FORMAT),
+                canCopy: true,
+                valueToCopy: coupons.fixingDate.toDateString(),
+              },
+              {
                 title: tDetail("balance"),
                 description: formatNumberLocale(couponsFor.tokenBalance, parseFloat(couponsFor.decimals)),
                 canCopy: true,

@@ -5,10 +5,6 @@ import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
 } from "../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
-import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from "../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
 import { LibCommon } from "../../layer_0/common/libraries/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { _CORPORATE_ACTION_STORAGE_POSITION } from "../constants/storagePositions.sol";
@@ -18,12 +14,12 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    modifier validateDates(uint256 _firstDate, uint256 _secondDate) {
+    modifier validateDates(uint256 _firstDate, uint256 _secondDate) override {
         _checkDates(_firstDate, _secondDate);
         _;
     }
 
-    modifier onlyMatchingActionType(bytes32 _actionType, uint256 _index) {
+    modifier onlyMatchingActionType(bytes32 _actionType, uint256 _index) override {
         _checkMatchingActionType(_actionType, _index);
         _;
     }
@@ -32,19 +28,34 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     function _addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
-    ) internal returns (bool success_, bytes32 corporateActionId_, uint256 corporateActionIndexByType_) {
+    ) internal override returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
         CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
         corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
         // TODO: Review when it can return false.
-        success_ =
-            corporateActions_.actions.add(corporateActionId_) &&
-            corporateActions_.actionsByType[_actionType].add(corporateActionId_);
+        bool success = corporateActions_.actions.add(corporateActionId_);
+
+        if (!success) {
+            return (bytes32(0), 0);
+        }
+
+        corporateActions_.actionsByType[_actionType].push(corporateActionId_);
+
+        corporateActionIdByType_ = _getCorporateActionCountByType(_actionType);
+
         corporateActions_.actionsData[corporateActionId_].actionType = _actionType;
         corporateActions_.actionsData[corporateActionId_].data = _data;
-        corporateActionIndexByType_ = _getCorporateActionCountByType(_actionType);
+        corporateActions_.actionsData[corporateActionId_].actionIdByType = corporateActionIdByType_;
     }
 
-    function _updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal {
+    function _updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal override {
+        _corporateActionsStorage().actionsData[_actionId].data = _newData;
+    }
+
+    function _updateCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId,
+        bytes memory newResult
+    ) internal override {
         CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
         bytes[] memory results = corporateActions_.actionsData[actionId].results;
 
@@ -62,52 +73,70 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
 
     function _getCorporateAction(
         bytes32 _corporateActionId
-    ) internal view returns (bytes32 actionType_, bytes memory data_) {
+    ) internal view override returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
         CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
         actionType_ = corporateActions_.actionsData[_corporateActionId].actionType;
         data_ = corporateActions_.actionsData[_corporateActionId].data;
+        actionTypeId_ = corporateActions_.actionsData[_corporateActionId].actionIdByType;
     }
 
-    function _getCorporateActionCount() internal view virtual returns (uint256 corporateActionCount_) {
+    function _getCorporateActionCount() internal view virtual override returns (uint256 corporateActionCount_) {
         return _corporateActionsStorage().actions.length();
     }
 
     function _getCorporateActionIds(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (bytes32[] memory corporateActionIds_) {
+    ) internal view override returns (bytes32[] memory corporateActionIds_) {
         corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
     }
 
-    function _getCorporateActionCountByType(bytes32 _actionType) internal view returns (uint256 corporateActionCount_) {
-        return _corporateActionsStorage().actionsByType[_actionType].length();
+    function _getCorporateActionCountByType(
+        bytes32 _actionType
+    ) internal view override returns (uint256 corporateActionCount_) {
+        return _corporateActionsStorage().actionsByType[_actionType].length;
+    }
+
+    function _getCorporateActionIdByTypeIndex(
+        bytes32 _actionType,
+        uint256 _typeIndex
+    ) internal view override returns (bytes32 corporateActionId_) {
+        return _corporateActionsStorage().actionsByType[_actionType][_typeIndex];
     }
 
     function _getCorporateActionIdsByType(
         bytes32 _actionType,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage().actionsByType[_actionType].getFromSet(_pageIndex, _pageLength);
+    ) internal view override returns (bytes32[] memory corporateActionIds_) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
+
+        corporateActionIds_ = new bytes32[](LibCommon.getSize(start, end, _getCorporateActionCountByType(_actionType)));
+
+        CorporateActionDataStorage storage corporateActions = _corporateActionsStorage();
+
+        for (uint256 i = 0; i < corporateActionIds_.length; i++) {
+            corporateActionIds_[i] = corporateActions.actionsByType[_actionType][start + i];
+        }
     }
 
     function _getCorporateActionResult(
         bytes32 actionId,
         uint256 resultId
-    ) internal view returns (bytes memory result_) {
+    ) internal view override returns (bytes memory result_) {
         if (_getCorporateActionResultCount(actionId) > resultId)
             result_ = _corporateActionsStorage().actionsData[actionId].results[resultId];
     }
 
-    function _getCorporateActionResultCount(bytes32 actionId) internal view returns (uint256) {
+    function _getCorporateActionResultCount(bytes32 actionId) internal view override returns (uint256) {
         return _corporateActionsStorage().actionsData[actionId].results.length;
     }
 
-    function _getCorporateActionData(bytes32 actionId) internal view returns (bytes memory) {
+    function _getCorporateActionData(bytes32 actionId) internal view override returns (bytes memory) {
         return _corporateActionsStorage().actionsData[actionId].data;
     }
 
-    function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view returns (uint256) {
+    function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view override returns (uint256) {
         bytes memory data = _getCorporateActionResult(_actionId, resultId);
 
         uint256 bytesLength = data.length;

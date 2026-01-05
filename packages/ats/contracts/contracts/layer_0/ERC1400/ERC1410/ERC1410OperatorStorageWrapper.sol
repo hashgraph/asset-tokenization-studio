@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC1410_OPERATOR_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { BasicTransferInfo, OperatorTransferData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
+import { BasicTransferInfo, OperatorTransferData } from "contracts/layer_1/interfaces/ERC1400/IERC1410.sol";
 import { ERC1410BasicStorageWrapper } from "./ERC1410BasicStorageWrapper.sol";
 
 abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
@@ -13,34 +13,34 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         mapping(address => mapping(address => bool)) approvals;
     }
 
-    modifier onlyOperator(bytes32 _partition, address _from) {
+    modifier onlyOperator(bytes32 _partition, address _from) override {
         _checkOperator(_partition, _from);
         _;
     }
 
-    function _authorizeOperator(address _operator) internal {
+    function _authorizeOperator(address _operator) internal override {
         _erc1410operatorStorage().approvals[_msgSender()][_operator] = true;
         emit AuthorizedOperator(_operator, _msgSender());
     }
 
-    function _revokeOperator(address _operator) internal {
+    function _revokeOperator(address _operator) internal override {
         _erc1410operatorStorage().approvals[_msgSender()][_operator] = false;
         emit RevokedOperator(_operator, _msgSender());
     }
 
-    function _authorizeOperatorByPartition(bytes32 _partition, address _operator) internal {
+    function _authorizeOperatorByPartition(bytes32 _partition, address _operator) internal override {
         _erc1410operatorStorage().partitionApprovals[_msgSender()][_partition][_operator] = true;
         emit AuthorizedOperatorByPartition(_partition, _operator, _msgSender());
     }
 
-    function _revokeOperatorByPartition(bytes32 _partition, address _operator) internal {
+    function _revokeOperatorByPartition(bytes32 _partition, address _operator) internal override {
         _erc1410operatorStorage().partitionApprovals[_msgSender()][_partition][_operator] = false;
         emit RevokedOperatorByPartition(_partition, _operator, _msgSender());
     }
 
     function _operatorTransferByPartition(
         OperatorTransferData calldata _operatorTransferData
-    ) internal returns (bytes32) {
+    ) internal override returns (bytes32) {
         return
             _transferByPartition(
                 _operatorTransferData.from,
@@ -52,7 +52,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
             );
     }
 
-    function _isOperator(address _operator, address _tokenHolder) internal view returns (bool) {
+    function _isOperator(address _operator, address _tokenHolder) internal view override returns (bool) {
         return _erc1410operatorStorage().approvals[_tokenHolder][_operator];
     }
 
@@ -60,15 +60,19 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         bytes32 _partition,
         address _operator,
         address _tokenHolder
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         return _erc1410operatorStorage().partitionApprovals[_tokenHolder][_partition][_operator];
     }
 
-    function _isAuthorized(bytes32 _partition, address _operator, address _tokenHolder) internal view returns (bool) {
+    function _isAuthorized(
+        bytes32 _partition,
+        address _operator,
+        address _tokenHolder
+    ) internal view override returns (bool) {
         return _isOperator(_operator, _tokenHolder) || _isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 
-    function _checkOperator(bytes32 _partition, address _from) internal view {
+    function _checkOperator(bytes32 _partition, address _from) internal view override {
         if (!_isAuthorized(_partition, _msgSender(), _from)) revert Unauthorized(_msgSender(), _from, _partition);
     }
 

@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Hold, HoldIdentifier } from "../interfaces/hold/IHold.sol";
 import { IHoldTokenHolder } from "../interfaces/hold/IHoldTokenHolder.sol";
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
 
-abstract contract HoldTokenHolder is IHoldTokenHolder, Common {
+abstract contract HoldTokenHolder is IHoldTokenHolder, Internals {
     function createHoldByPartition(
         bytes32 _partition,
         Hold calldata _hold

@@ -68,6 +68,14 @@ task("erc3643-clone-interfaces", async (_, hre) => {
       original: "contracts/layer_1/interfaces/ERC1400/IERC20.sol:IERC20",
       removeImports: false,
     },
+    // Coupon Interest Rates interfaces
+    { original: "IFixedRate" },
+    { original: "IKpi" },
+    { original: "IKpiLinkedRate" },
+    {
+      original: "IScheduledCouponListing",
+      removeImports: false,
+    },
   ];
 
   const normalized = interfacesToClone.map((i) => ({
@@ -80,6 +88,10 @@ task("erc3643-clone-interfaces", async (_, hre) => {
   const constants = [
     { src: "layer_3/constants/regulation", dst: "regulation" },
     { src: "layer_1/constants/roles", dst: "roles" },
+    {
+      src: "layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon",
+      dst: "IScheduledTasksCommon",
+    },
   ];
 
   function rewriteImports(source: string): string {

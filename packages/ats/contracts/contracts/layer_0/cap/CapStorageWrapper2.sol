@@ -6,40 +6,40 @@ import { LockStorageWrapper2 } from "../lock/LockStorageWrapper2.sol";
 
 abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 {
     // modifiers
-    modifier onlyWithinMaxSupply(uint256 _amount) {
+    modifier onlyWithinMaxSupply(uint256 _amount) override {
         _checkWithinMaxSupply(_amount);
         _;
     }
 
-    modifier onlyWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount) {
+    modifier onlyWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount) override {
         _checkWithinMaxSupplyByPartition(_partition, _amount);
         _;
     }
 
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
+    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) override {
         _checkNewMaxSupply(_newMaxSupply);
         _;
     }
 
-    modifier onlyValidNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) {
+    modifier onlyValidNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) override {
         _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
         _;
     }
 
     // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
+    function _setMaxSupply(uint256 _maxSupply) internal override {
         uint256 previousMaxSupply = _getMaxSupply();
         _capStorage().maxSupply = _maxSupply;
         emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
     }
 
-    function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal {
+    function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal override {
         uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(_partition);
         _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
         emit MaxSupplyByPartitionSet(_msgSender(), _partition, _maxSupply, previousMaxSupplyByPartition);
     }
 
-    function _checkNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) internal view {
+    function _checkNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) internal view override {
         if (_newMaxSupply == 0) return;
         uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(_partition);
         if (totalSupplyForPartition > _newMaxSupply) {
@@ -51,7 +51,7 @@ abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 
         }
     }
 
-    function _checkWithinMaxSupply(uint256 _amount) internal view {
+    function _checkWithinMaxSupply(uint256 _amount) internal view override {
         uint256 maxSupply = _getMaxSupply();
         if (!_isCorrectMaxSupply(_totalSupply() + _amount, maxSupply)) {
             revert ICapStorageWrapper.MaxSupplyReached(maxSupply);

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { IFreeze } from "../interfaces/freeze/IFreeze.sol";
 
 import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../layer_0/constants/values.sol";
 
-abstract contract Freeze is IFreeze, Common {
+abstract contract Freeze is IFreeze, Internals {
     // ====== External functions (state-changing) ======
 
     function setAddressFrozen(

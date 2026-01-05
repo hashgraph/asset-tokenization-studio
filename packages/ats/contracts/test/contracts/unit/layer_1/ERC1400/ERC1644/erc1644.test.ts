@@ -3,12 +3,12 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type ERC1644,
-  type Pause,
+  type ERC1644Facet,
+  type PauseFacet,
   type AccessControl,
   type IERC1410,
-  SsiManagement,
-  Kyc,
+  SsiManagementFacet,
+  KycFacet,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../../common";
@@ -28,12 +28,12 @@ describe("ERC1644 Tests", () => {
   let signer_D: SignerWithAddress;
   let signer_E: SignerWithAddress;
 
-  let erc1644Facet: ERC1644;
+  let erc1644Facet: ERC1644Facet;
   let accessControlFacet: AccessControl;
-  let pauseFacet: Pause;
+  let pauseFacet: PauseFacet;
   let erc1410Facet: IERC1410;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
+  let kycFacet: KycFacet;
+  let ssiManagementFacet: SsiManagementFacet;
 
   describe("single partition", () => {
     async function deploySecurityFixtureSinglePartition() {
@@ -70,13 +70,13 @@ describe("ERC1644 Tests", () => {
 
       accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
 
-      erc1644Facet = await ethers.getContractAt("ERC1644", diamond.address);
+      erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address);
 
-      pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
 
       erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-      kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-      ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
     }
 
     beforeEach(async () => {
@@ -236,9 +236,9 @@ describe("ERC1644 Tests", () => {
 
       accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
 
-      erc1644Facet = await ethers.getContractAt("ERC1644", diamond.address);
+      erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address);
 
-      pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
     }
 
     beforeEach(async () => {
