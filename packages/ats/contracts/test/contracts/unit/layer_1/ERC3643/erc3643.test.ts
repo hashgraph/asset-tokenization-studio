@@ -120,6 +120,7 @@ describe("ERC3643 Tests", () => {
             erc20MetadataInfo: { name, symbol, decimals, isin },
           },
         },
+        useLoadFixture: false, // Avoid nested loadFixture to prevent mock state pollution
       });
       diamond = base.diamond;
       signer_A = base.deployer;

@@ -10,6 +10,7 @@ import { DeployBondFromFactoryParams, deployBondFromFactory } from "@scripts/dom
 import { BondDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
 import { getDltTimestamp } from "@test";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 /**
  * Default bond token parameters.
@@ -53,11 +54,15 @@ export async function getBondDetails(params?: DeepPartial<BondDetailsDataParams>
 export async function deployBondTokenFixture({
   bondDataParams,
   regulationTypeParams,
+  useLoadFixture = true,
 }: {
   bondDataParams?: DeepPartial<DeployBondFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
+  useLoadFixture?: boolean;
 } = {}) {
-  const infrastructure = await deployAtsInfrastructureFixture();
+  const infrastructure = useLoadFixture
+    ? await loadFixture(deployAtsInfrastructureFixture)
+    : await deployAtsInfrastructureFixture();
   const { factory, blr, deployer } = infrastructure;
 
   const securityData = getSecurityData(blr, {

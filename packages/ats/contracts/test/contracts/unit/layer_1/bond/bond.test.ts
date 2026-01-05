@@ -1042,5 +1042,55 @@ describe("Bond Tests", () => {
       expect(coupon.coupon.rateDecimals).to.equal(couponRateDecimals);
       expect(coupon.coupon.period).to.equal(couponPeriod);
     });
+
+    it("GIVEN a non-coupon corporate action WHEN getCouponFor is called THEN transaction fails with WrongActionType", async () => {
+      await deploySecurityFixture(true);
+
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+
+      couponRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:01Z");
+      couponExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:02Z");
+
+      const couponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        period: couponPeriod,
+      };
+
+      await bondFacet.connect(signer_A).setCoupon(couponData);
+
+      // Try to access with invalid coupon ID (0 would be invalid or different action type)
+      await expect(bondReadFacet.getCouponFor(999, signer_A.address)).to.be.revertedWithCustomError(
+        bondReadFacet,
+        "WrongIndexForAction",
+      );
+    });
+
+    it("GIVEN a non-coupon corporate action WHEN getCouponAmountFor is called THEN transaction fails with WrongActionType", async () => {
+      await deploySecurityFixture(true);
+
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+
+      couponRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:01Z");
+      couponExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:02Z");
+
+      const couponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        period: couponPeriod,
+      };
+
+      await bondFacet.connect(signer_A).setCoupon(couponData);
+
+      // Try to access with invalid coupon ID
+      await expect(bondReadFacet.getCouponAmountFor(999, signer_A.address)).to.be.revertedWithCustomError(
+        bondReadFacet,
+        "WrongIndexForAction",
+      );
+    });
   });
 });

@@ -375,7 +375,7 @@ describe("ProtectedPartitions Tests", () => {
   }
 
   async function deploySecurityFixtureUnprotectedPartitions() {
-    const base = await deployEquityTokenFixture();
+    const base = await deployEquityTokenFixture({ useLoadFixture: false });
     diamond_UnprotectedPartitions = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;
@@ -398,6 +398,7 @@ describe("ProtectedPartitions Tests", () => {
           compliance: complianceMockAddress,
         },
       },
+      useLoadFixture: false,
     });
 
     diamond_ProtectedPartitions = base.diamond;

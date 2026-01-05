@@ -62,7 +62,7 @@ let balanceAdjustmentData = {
 const number_Of_Shares = 100000n;
 const EMPTY_VC_ID = EMPTY_STRING;
 
-describe.only("Equity Tests", () => {
+describe("Equity Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: SignerWithAddress;
   let signer_B: SignerWithAddress;
@@ -182,6 +182,97 @@ describe.only("Equity Tests", () => {
   });
 
   describe("Dividends", () => {
+    it("GIVEN dividend with executed snapshot WHEN getting dividend holders THEN returns holders from snapshot", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await kycFacet.grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: 1000n,
+        data: "0x",
+      });
+
+      await expect(equityFacet.connect(signer_C).setDividends(dividendData))
+        .to.emit(equityFacet, "DividendSet")
+        .withArgs(
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          1,
+          signer_C.address,
+          dividendsRecordDateInSeconds,
+          dividendsExecutionDateInSeconds,
+          dividendsAmountPerEquity,
+          dividendsAmountDecimalsPerEquity,
+        );
+
+      await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
+
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: 500n,
+        data: "0x",
+      });
+
+      const dividend = await equityFacet.getDividends(1);
+      expect(dividend.snapshotId).to.not.equal(0);
+
+      // Verify getDividendHolders returns holders from snapshot (line 211-212)
+      const dividendHolders = await equityFacet.getDividendHolders(1, 0, 99);
+      expect(dividendHolders).to.have.members([signer_A.address]);
+
+      // Verify getTotalDividendHolders returns count from snapshot (line 222)
+      const totalHolders = await equityFacet.getTotalDividendHolders(1);
+      expect(totalHolders).to.equal(1);
+
+      const dividendFor = await equityFacet.getDividendsFor(1, signer_A.address);
+      expect(dividendFor.tokenBalance).to.equal(1000n);
+      expect(dividendFor.recordDateReached).to.equal(true);
+    });
+
+    it("GIVEN dividend without executed snapshot WHEN getting total dividend holders THEN returns current total holders", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+
+      // Issue tokens before creating dividend
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: 1000n,
+        data: "0x",
+      });
+
+      // Create dividend (schedules a snapshot for recordDate)
+      await expect(equityFacet.connect(signer_C).setDividends(dividendData))
+        .to.emit(equityFacet, "DividendSet")
+        .withArgs(
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          1,
+          signer_C.address,
+          dividendsRecordDateInSeconds,
+          dividendsExecutionDateInSeconds,
+          dividendsAmountPerEquity,
+          dividendsAmountDecimalsPerEquity,
+        );
+
+      // Travel to after recordDate BUT DON'T trigger any operation
+      // This keeps snapshotId at 0
+      await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
+
+      // Verify snapshot was NOT executed (snapshotId == 0)
+      const dividend = await equityFacet.getDividends(1);
+      expect(dividend.snapshotId).to.equal(0);
+
+      // Get total dividend holders using _getTotalTokenHolders (line 224 in EquityStorageWrapper.sol)
+      const totalHolders = await equityFacet.getTotalDividendHolders(1);
+      expect(totalHolders).to.equal(1);
+
+      // Also verify getDividendHolders returns current holders (line 214)
+      const holders = await equityFacet.getDividendHolders(1, 0, 99);
+      expect(holders).to.have.members([signer_A.address]);
+    });
+
     it("GIVEN an account without corporateActions role WHEN setDividends THEN transaction fails with AccountHasNoRole", async () => {
       // set dividend fails
       await expect(equityFacet.connect(signer_C).setDividends(dividendData)).to.be.rejectedWith("AccountHasNoRole");
@@ -504,6 +595,93 @@ describe.only("Equity Tests", () => {
   });
 
   describe("Voting rights", () => {
+    it("GIVEN voting with executed snapshot WHEN getting voting holders THEN returns holders from snapshot", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+      await kycFacet.grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: 1000n,
+        data: "0x",
+      });
+
+      await expect(equityFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(equityFacet, "VotingSet")
+        .withArgs(
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          1,
+          signer_C.address,
+          votingRecordDateInSeconds,
+          voteData,
+        );
+
+      await timeTravelFacet.changeSystemTimestamp(votingRecordDateInSeconds + 1);
+
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: 500n,
+        data: "0x",
+      });
+
+      const voting = await equityFacet.getVoting(1);
+      expect(voting.snapshotId).to.not.equal(0);
+
+      // Verify getVotingHolders returns holders from snapshot (line 279)
+      const votingHolders = await equityFacet.getVotingHolders(1, 0, 99);
+      expect(votingHolders).to.have.members([signer_A.address]);
+
+      // Verify getTotalVotingHolders returns count from snapshot (line 292)
+      const totalHolders = await equityFacet.getTotalVotingHolders(1);
+      expect(totalHolders).to.equal(1);
+
+      const votingFor = await equityFacet.getVotingFor(1, signer_A.address);
+      expect(votingFor.tokenBalance).to.equal(1000n);
+      expect(votingFor.recordDateReached).to.equal(true);
+    });
+
+    it("GIVEN voting without executed snapshot WHEN getting total voting holders THEN returns current total holders", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+
+      // Issue tokens before creating voting
+      await erc1410Facet.connect(signer_C).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: 1000n,
+        data: "0x",
+      });
+
+      // Create voting (schedules a snapshot for recordDate)
+      await expect(equityFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(equityFacet, "VotingSet")
+        .withArgs(
+          "0x0000000000000000000000000000000000000000000000000000000000000001",
+          1,
+          signer_C.address,
+          votingRecordDateInSeconds,
+          voteData,
+        );
+
+      // Travel to after recordDate BUT DON'T trigger any operation
+      // This keeps snapshotId at 0
+      await timeTravelFacet.changeSystemTimestamp(votingRecordDateInSeconds + 1);
+
+      // Verify snapshot was NOT executed (snapshotId == 0)
+      const voting = await equityFacet.getVoting(1);
+      expect(voting.snapshotId).to.equal(0);
+
+      // Get total voting holders using _getTotalTokenHolders (line 294 in EquityStorageWrapper.sol)
+      const totalHolders = await equityFacet.getTotalVotingHolders(1);
+      expect(totalHolders).to.equal(1);
+
+      // Also verify getVotingHolders returns current holders (line 281)
+      const holders = await equityFacet.getVotingHolders(1, 0, 99);
+      expect(holders).to.have.members([signer_A.address]);
+    });
+
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
       // set voting fails
       await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
