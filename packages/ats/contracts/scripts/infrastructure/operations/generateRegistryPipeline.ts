@@ -39,6 +39,9 @@ export interface RegistryGenerationConfig {
   /** Path to contracts directory (required) */
   contractsPath: string;
 
+  /** Path to artifacts directory (required) */
+  artifactPath: string;
+
   /** Glob patterns to include (default: ['**\/*.sol']) */
   includePaths?: string[];
 
@@ -163,6 +166,7 @@ export const DEFAULT_REGISTRY_CONFIG: Required<
   Omit<RegistryGenerationConfig, "categoryDetector" | "layerDetector" | "mockContractPaths">
 > & { mockContractPaths: string[] } = {
   contractsPath: "./contracts",
+  artifactPath: "./artifacts/contracts",
   includePaths: ["**/*.sol"],
   excludePaths: ["**/test/**", "**/tests/**", "**/mocks/**", "**/mock/**", "**/*.t.sol", "**/*.s.sol"],
   resolverKeyPaths: ["**/constants/resolverKeys.sol", "**/layer_*/constants/resolverKeys.sol"],
@@ -268,9 +272,14 @@ export async function generateRegistryPipeline(
     ? fullConfig.contractsPath
     : path.resolve(process.cwd(), fullConfig.contractsPath);
 
+  info(`Scanning: ${fullConfig.artifactPath}`);
+  const artifactDir = path.isAbsolute(fullConfig.artifactPath)
+    ? fullConfig.artifactPath
+    : path.resolve(process.cwd(), fullConfig.artifactPath);
+
   // Step 1: Find all contracts
   info("Step 1: Discovering contracts...");
-  const allContracts = findAllContracts(contractsDir);
+  const allContracts = findAllContracts(contractsDir, artifactDir);
   info(`  Found ${allContracts.length} contract files`);
 
   // Step 2: Categorize contracts
@@ -366,31 +375,8 @@ export async function generateRegistryPipeline(
 
   if (fullConfig.includeStorageWrappers) {
     info("Step 5.5: Extracting Storage Wrapper metadata...");
-    const storageWrapperFiles = allSolidityFiles.filter((filePath) => filePath.endsWith("StorageWrapper.sol"));
-
-    const storageWrapperContracts = storageWrapperFiles
-      .map((filePath) => {
-        const source = readFile(filePath);
-        const contractNames = allContracts.find((c) => c.filePath === filePath)?.contractNames;
-        if (!contractNames || contractNames.length === 0) return null;
-
-        const primaryContract = contractNames.find((name) => name.endsWith("StorageWrapper")) || contractNames[0];
-
-        // Filter out interface StorageWrappers
-        if (primaryContract.startsWith("I") && primaryContract.endsWith("StorageWrapper")) {
-          return null;
-        }
-
-        return {
-          filePath,
-          relativePath: filePath.replace(contractsDir + "/", ""),
-          directory: path.dirname(filePath),
-          fileName: path.basename(filePath, ".sol"),
-          contractNames,
-          primaryContract,
-          source,
-        };
-      })
+    const storageWrapperContracts = allContracts
+      .filter((contract) => contract.filePath.endsWith("StorageWrapper.sol"))
       .filter((c): c is NonNullable<typeof c> => c !== null);
 
     storageWrapperMetadata = storageWrapperContracts.map((contract) =>

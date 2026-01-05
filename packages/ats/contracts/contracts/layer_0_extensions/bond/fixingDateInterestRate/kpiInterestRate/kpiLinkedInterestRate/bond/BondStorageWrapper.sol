@@ -1,0 +1,139 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { IKpi } from "contracts/layer_2/interfaces/interestRates/kpiLinkedRate/IKpi.sol";
+import { IKpiLinkedRate } from "contracts/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { LowLevelCall } from "contracts/layer_0/common/libraries/LowLevelCall.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
+import { InternalsKpiLinkedInterestRate } from "../Internals.sol";
+import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
+import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
+
+abstract contract BondStorageWrapperKpiLinkedInterestRate is
+    InternalsKpiLinkedInterestRate,
+    BondStorageWrapperFixingDateInterestRate
+{
+    using LowLevelCall for address;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    error InterestRateIsKpiLinked();
+
+    function _setCoupon(
+        IBondRead.Coupon memory _newCoupon
+    ) internal virtual override(Internals, BondStorageWrapper) returns (bytes32 corporateActionId_, uint256 couponID_) {
+        _checkCoupon(_newCoupon, InterestRateIsKpiLinked.selector, "");
+
+        return super._setCoupon(_newCoupon);
+    }
+
+    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, BondStorageWrapper) {
+        super._addToCouponsOrderedList(_couponID);
+        _setKpiLinkedInterestRate(_couponID);
+    }
+
+    function _setKpiLinkedInterestRate(uint256 _couponID) internal override {
+        IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
+
+        (uint256 rate, uint8 rateDecimals) = _calculateKpiLinkedInterestRate(_couponID, coupon);
+
+        _updateCouponRate(_couponID, coupon, rate, rateDecimals);
+    }
+
+    function _getCoupon(
+        uint256 _couponID
+    )
+        internal
+        view
+        virtual
+        override(Internals, BondStorageWrapper)
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
+    {
+        return _getCouponAdjusted(_couponID, _calculateKpiLinkedInterestRate);
+    }
+
+    function _calculateKpiLinkedInterestRate(
+        uint256 _couponID,
+        IBondRead.Coupon memory _coupon
+    ) internal view override returns (uint256 rate_, uint8 rateDecimals) {
+        KpiLinkedRateDataStorage memory kpiLinkedRateStorage = _kpiLinkedRateStorage();
+
+        if (_coupon.fixingDate < kpiLinkedRateStorage.startPeriod) {
+            return (kpiLinkedRateStorage.startRate, kpiLinkedRateStorage.rateDecimals);
+        }
+
+        if (kpiLinkedRateStorage.kpiOracle == address(0)) {
+            return (kpiLinkedRateStorage.baseRate, kpiLinkedRateStorage.rateDecimals);
+        }
+
+        (uint256 impactData, bool reportFound) = abi.decode(
+            kpiLinkedRateStorage.kpiOracle.functionStaticCall(
+                abi.encodeWithSelector(
+                    IKpi.getKpiData.selector,
+                    _coupon.fixingDate - kpiLinkedRateStorage.reportPeriod,
+                    _coupon.fixingDate
+                ),
+                IKpiLinkedRate.KpiOracleCalledFailed.selector
+            ),
+            (uint256, bool)
+        );
+
+        uint256 rate;
+
+        if (!reportFound) {
+            (uint256 previousRate, uint8 previousRateDecimals) = _previousRate(_couponID);
+
+            previousRate = DecimalsLib.calculateDecimalsAdjustment(
+                previousRate,
+                previousRateDecimals,
+                kpiLinkedRateStorage.rateDecimals
+            );
+
+            rate = previousRate + kpiLinkedRateStorage.missedPenalty;
+
+            if (rate > kpiLinkedRateStorage.maxRate) rate = kpiLinkedRateStorage.maxRate;
+
+            return (rate, kpiLinkedRateStorage.rateDecimals);
+        }
+
+        uint256 impactDeltaRate;
+        uint256 factor = 10 ** kpiLinkedRateStorage.adjustmentPrecision;
+
+        if (kpiLinkedRateStorage.baseLine > impactData) {
+            impactDeltaRate =
+                (factor * (kpiLinkedRateStorage.baseLine - impactData)) /
+                (kpiLinkedRateStorage.baseLine - kpiLinkedRateStorage.maxDeviationFloor);
+            if (impactDeltaRate > factor) impactDeltaRate = factor;
+            rate =
+                kpiLinkedRateStorage.baseRate -
+                (((kpiLinkedRateStorage.baseRate - kpiLinkedRateStorage.minRate) * impactDeltaRate) / factor);
+        } else {
+            impactDeltaRate =
+                (factor * (impactData - kpiLinkedRateStorage.baseLine)) /
+                (kpiLinkedRateStorage.maxDeviationCap - kpiLinkedRateStorage.baseLine);
+            if (impactDeltaRate > factor) impactDeltaRate = factor;
+            rate =
+                kpiLinkedRateStorage.baseRate +
+                (((kpiLinkedRateStorage.maxRate - kpiLinkedRateStorage.baseRate) * impactDeltaRate) / factor);
+        }
+
+        return (rate, kpiLinkedRateStorage.rateDecimals);
+    }
+
+    function _previousRate(uint256 _couponID) internal view returns (uint256 rate_, uint8 rateDecimals_) {
+        uint256 previousCouponId = _getPreviousCouponInOrderedList(_couponID);
+
+        if (previousCouponId == 0) {
+            return (0, 0);
+        }
+
+        IBondRead.Coupon memory previousCoupon = _getCoupon(previousCouponId).coupon;
+
+        if (previousCoupon.rateStatus != IBondRead.RateCalculationStatus.SET) {
+            return _calculateKpiLinkedInterestRate(previousCouponId, previousCoupon);
+        }
+        return (previousCoupon.rate, previousCoupon.rateDecimals);
+    }
+}

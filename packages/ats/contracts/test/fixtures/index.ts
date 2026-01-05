@@ -24,6 +24,18 @@ export { deployEquityTokenFixture, DEFAULT_EQUITY_PARAMS, getEquityDetails } fro
 
 export { deployBondTokenFixture, DEFAULT_BOND_PARAMS, getBondDetails } from "./tokens/bond.fixture";
 
+export { deployBondFixedRateTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
+
+export {
+  deployBondKpiLinkedRateTokenFixture,
+  DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
+} from "./tokens/bondKpiLinkedRate.fixture";
+
+export {
+  deployBondSustainabilityPerformanceTargetRateTokenFixture,
+  DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS,
+} from "./tokens/bondSustainabilityPerformanceTargetRate.fixture";
+
 // Common token utilities
 export {
   MAX_UINT256,

@@ -8,11 +8,7 @@ import { createColumnHelper } from '@tanstack/table-core';
 import { Table, Text } from 'io-bricks-ui';
 import { useTranslation } from 'react-i18next';
 import { DATE_TIME_FORMAT } from '../../../../utils/constants';
-import {
-  formatDate,
-  formatCouponPeriod,
-  formatNumberLocale,
-} from '../../../../utils/format';
+import { formatDate, formatNumberLocale } from '../../../../utils/format';
 
 export const CouponsList = () => {
   const { id } = useParams();
@@ -54,9 +50,19 @@ export const CouponsList = () => {
         `${formatNumberLocale(row.getValue(), row.row.original.rateDecimals ?? 0)}%`,
       enableSorting: false,
     }),
-    columnHelper.accessor('period', {
-      header: t('columns.period'),
-      cell: (row) => formatCouponPeriod(row.getValue()),
+    columnHelper.accessor('startDate', {
+      header: t('columns.startDate'),
+      cell: (row) => formatDate(row.getValue(), DATE_TIME_FORMAT),
+      enableSorting: false,
+    }),
+    columnHelper.accessor('endDate', {
+      header: t('columns.endDate'),
+      cell: (row) => formatDate(row.getValue(), DATE_TIME_FORMAT),
+      enableSorting: false,
+    }),
+    columnHelper.accessor('fixingDate', {
+      header: t('columns.fixingDate'),
+      cell: (row) => formatDate(row.getValue(), DATE_TIME_FORMAT),
       enableSorting: false,
     }),
     columnHelper.accessor('snapshotId', {

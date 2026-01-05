@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { IClearingHoldCreation } from "../interfaces/clearing/IClearingHoldCreation.sol";
 import { Hold } from "../interfaces/hold/IHold.sol";
 import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
 
-abstract contract ClearingHoldCreation is IClearingHoldCreation, Common {
+abstract contract ClearingHoldCreation is IClearingHoldCreation, Internals {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         Hold calldata _hold

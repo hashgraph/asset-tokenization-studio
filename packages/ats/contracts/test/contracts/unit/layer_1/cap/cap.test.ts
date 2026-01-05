@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type Cap,
+  type CapFacet,
   type IERC1410,
   AccessControl,
   Pause,
@@ -38,7 +38,7 @@ describe("Cap Tests", () => {
   let signer_B: SignerWithAddress;
   let signer_C: SignerWithAddress;
 
-  let capFacet: Cap;
+  let capFacet: CapFacet;
   let accessControlFacet: AccessControl;
   let pauseFacet: Pause;
   let erc1410Facet: IERC1410;
@@ -81,7 +81,7 @@ describe("Cap Tests", () => {
       },
     ]);
 
-    capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
+    capFacet = await ethers.getContractAt("CapFacet", diamond.address, signer_A);
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);

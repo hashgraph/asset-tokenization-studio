@@ -14,7 +14,7 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is ERC1644StorageWrap
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal {
+    ) internal override {
         checkNounceAndDeadline(_nounce, _from, _getNounceFor(_from), _deadline, _blockTimestamp());
 
         _checkTransferSignature(_partition, _from, _to, _amount, _deadline, _nounce, _signature);
@@ -31,7 +31,7 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is ERC1644StorageWrap
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal {
+    ) internal override {
         checkNounceAndDeadline(_nounce, _from, _getNounceFor(_from), _deadline, _blockTimestamp());
 
         _checkRedeemSignature(_partition, _from, _amount, _deadline, _nounce, _signature);

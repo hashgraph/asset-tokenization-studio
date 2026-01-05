@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../../layer_1/common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 import { IScheduledSnapshots } from "../../interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol";
 import { ScheduledTask } from "../../interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-abstract contract ScheduledSnapshots is IScheduledSnapshots, Common {
+abstract contract ScheduledSnapshots is IScheduledSnapshots, Internals {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function scheduledSnapshotCount() external view override returns (uint256) {
