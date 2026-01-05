@@ -65,3 +65,13 @@ npm run test
 # Run tests with coverage
 npm run test:cov
 ```
+
+---
+
+## 📚 Documentation
+
+For more information about the project, see:
+
+- [Guides](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/guides)
+- [API Documentation](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/api)
+- [References](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/references)

@@ -34,7 +34,7 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
   - Gas-optimized operations and proxy-based upgradeable contracts.
 
 - **Enterprise Development Practices**
-  - **Domain-Driven Design (DDD)**, **Hexagonal Architecture**, and **CQS pattern**.
+  - **Domain-Driven Design (DDD)**, **Hexagonal Architecture**, and **CQRS pattern**.
   - Separation of concerns across smart contracts, SDKs, frontends, and backends.
   - Strong CI/CD workflows with conditional builds and tests for each module.
   - Custodian integration at the SDK level (Dfns, Fireblocks, AWS KMS).
@@ -52,10 +52,53 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
 ├── apps/
 │ ├── ats/
 │ │ └── web # Frontend dApp for Asset Tokenization Studio
-│ └── mass-payout/
-│ ├── backend # API backend for payout orchestration
-│ └── frontend # Admin panel for managing payouts
+│ ├── mass-payout/
+│ │ ├── backend # API backend for payout orchestration
+│ │ └── frontend # Admin panel for managing payouts
+│ └── docs # Documentation site (Docusaurus)
+├── docs/ # Technical documentation
+│ ├── adr/ # Architecture Decision Records
+│ ├── proposals/ # Enhancement Proposals
+│ ├── guides/ # Developer Guides
+│ └── workflows/ # CI/CD Documentation
 └── package.json # Workspace configuration and root scripts
+```
+
+## Documentation
+
+📚 **For complete documentation, visit:** [https://hashgraph.github.io/asset-tokenization-studio/](https://hashgraph.github.io/asset-tokenization-studio/)
+
+This project follows a **"Docs-as-Code"** philosophy, treating documentation with the same rigor as software. We maintain comprehensive documentation organized by product:
+
+### Product Documentation
+
+- **[ATS Documentation](docs/ats/)** - Asset Tokenization Studio guides, tutorials, and API references
+  - [Getting Started](docs/ats/getting-started/)
+  - [User Guides](docs/ats/user-guides/)
+  - [Developer Guides](docs/ats/developer-guides/)
+
+- **[Mass Payout Documentation](docs/mass-payout/)** - Scheduler Payment Distribution guides and references
+  - [Getting Started](docs/mass-payout/getting-started/)
+  - [User Guides](docs/mass-payout/user-guides/)
+  - [Developer Guides](docs/mass-payout/developer-guides/)
+
+### Reference Documentation
+
+- **[Architecture Decision Records (ADRs)](docs/references/adr/)** - Historical record of architectural decisions
+- **[Enhancement Proposals (EPs)](docs/references/proposals/)** - Feature specifications and design proposals
+- **[General Guides](docs/references/guides/)** - Cross-product guides (monorepo, CI/CD workflows)
+
+### Local Documentation Development
+
+```bash
+# Start documentation site locally
+npm run docs:dev
+
+# Build documentation site
+npm run docs:build
+
+# Serve built documentation
+npm run docs:serve
 ```
 
 ## Architecture
@@ -117,17 +160,43 @@ flowchart TD
 From the monorepo root:
 
 ```bash
-
 # Install all dependencies
 npm ci
-```
 
-```bash
 # Build all packages and applications
 npm run setup
 ```
 
 This command will compile contracts, build SDKs, and set up web and backend environments.
+
+### Selective Setup (ATS or Mass Payout only)
+
+You can set up only the product you need without installing all dependencies:
+
+```bash
+# Setup only ATS (contracts, SDK, and web app)
+npm run ats:setup
+
+# Setup only Mass Payout (contracts, SDK, backend, and frontend)
+npm run mass-payout:setup
+```
+
+### Clean Installation
+
+If you had a previous installation and want to start fresh:
+
+```bash
+# Clean install for ATS
+npm run ats:setup:clean
+
+# Clean install for Mass Payout
+npm run mass-payout:setup:clean
+
+# Clean install for everything
+npm run setup:clean
+```
+
+This will remove previous build artifacts and reinstall dependencies before building.
 
 ### Environment Configuration
 
