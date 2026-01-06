@@ -47,7 +47,7 @@
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8",
     "swagger-ui-express": "^5.0.1",
-    "typeorm": "0.3.24"
+    "typeorm": "0.3.26"
   },
   "devDependencies": {
     "@babel/preset-env": "7.28.3",
