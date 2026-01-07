@@ -155,3 +155,5 @@ export const CURRENCIES = {
   CHF: "0x434846", // Swiss Franc
   JPY: "0x4a5059", // Japanese Yen
 } as const;
+
+export const FACET_REGISTRATION_BATCH_SIZE = 20;
