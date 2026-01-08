@@ -204,7 +204,7 @@
 */
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.18;
+pragma solidity 0.8.22;
 
 // solhint-disable no-unused-import
 // solhint-disable no-empty-blocks

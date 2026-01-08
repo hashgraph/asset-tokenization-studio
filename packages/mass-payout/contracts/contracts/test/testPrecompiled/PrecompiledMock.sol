@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // solhint-disable one-contract-per-file
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity 0.8.22;
 
 import {
     HederaResponseCodes

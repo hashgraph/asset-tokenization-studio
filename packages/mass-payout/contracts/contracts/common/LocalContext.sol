@@ -203,7 +203,7 @@
 
 */
 
-pragma solidity 0.8.18;
+pragma solidity 0.8.22;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";

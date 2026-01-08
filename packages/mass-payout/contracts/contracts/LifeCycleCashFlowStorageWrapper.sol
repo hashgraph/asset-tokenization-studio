@@ -203,7 +203,7 @@
 
 */
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+pragma solidity 0.8.22;
 
 // solhint-disable max-line-length
 
@@ -215,6 +215,7 @@ import { Pause } from "./core/Pause.sol";
 import { AccessControl } from "./core/AccessControl.sol";
 import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
 import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {
     ISnapshots
 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/snapshots/ISnapshots.sol";
@@ -226,6 +227,8 @@ import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 
 abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaTokenService, Pause, AccessControl {
+    using SafeERC20 for OZ_IERC20;
+
     struct LifeCycleCashFlowStorage {
         address asset;
         ILifeCycleCashFlow.AssetType assetType;
@@ -454,11 +457,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             revert ILifeCycleCashFlow.NotEnoughBalance(_amount);
         }
 
-        try paymentToken.transfer(_to, _amount) returns (bool result) {
-            if (!result) {
-                revert ILifeCycleCashFlow.TransferERC20TokenFailed(_to, _amount);
-            }
-        } catch {
+        if (!paymentToken.trySafeTransfer(_to, _amount)) {
             revert ILifeCycleCashFlow.TransferERC20TokenFailed(_to, _amount);
         }
     }
@@ -851,14 +850,12 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             return true;
         }
 
-        try _paymentToken.transfer(_holder, _amount) returns (bool result) {
-            if (result) {
-                _setDistributionHolderPaid(_distributionID, _holder);
-            }
-            return result;
-        } catch {
-            return false;
+        if (_paymentToken.trySafeTransfer(_holder, _amount)) {
+            _setDistributionHolderPaid(_distributionID, _holder);
+            return true;
         }
+
+        return false;
     }
 
     /*
@@ -886,14 +883,12 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             return true;
         }
 
-        try _paymentToken.transfer(_holder, _amount) returns (bool result) {
-            if (result) {
-                _setSnapshotHolderPaid(_snapshotID, _holder);
-            }
-            return result;
-        } catch {
-            return false;
+        if (_paymentToken.trySafeTransfer(_holder, _amount)) {
+            _setSnapshotHolderPaid(_snapshotID, _holder);
+            return true;
         }
+
+        return false;
     }
 
     /*
@@ -914,11 +909,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
             return true;
         }
 
-        try _paymentToken.transfer(_holder, _amount) returns (bool result) {
-            return result;
-        } catch {
-            return false;
-        }
+        return _paymentToken.trySafeTransfer(_holder, _amount);
     }
 
     /*

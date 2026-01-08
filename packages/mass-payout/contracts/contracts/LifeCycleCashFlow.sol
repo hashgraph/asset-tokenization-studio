@@ -203,15 +203,15 @@
 
 */
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+pragma solidity 0.8.22;
 
 // solhint-disable max-line-length
 
 import { ILifeCycleCashFlow } from "./interfaces/ILifeCycleCashFlow.sol";
 import { LifeCycleCashFlowStorageWrapper } from "./LifeCycleCashFlowStorageWrapper.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
+import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { ERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/ERC1400/ERC20/ERC20.sol";
 import { _PAYOUT_ROLE, _CASHOUT_ROLE, _TRANSFERER_ROLE, _PAYMENT_TOKEN_MANAGER_ROLE } from "./constants/roles.sol";
 
 contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
@@ -221,7 +221,7 @@ contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
         Rbac[] memory _rbac
     ) public initializer onlyValidPaymentToken(_paymentToken) {
         _setAsset(_asset);
-        _setAssetType(ILifeCycleCashFlow.AssetType(uint8(ERC20(_asset).getERC20Metadata().securityType)));
+        _setAssetType(ILifeCycleCashFlow.AssetType(uint8(IERC20(_asset).getERC20Metadata().securityType)));
         _updatePaymentToken(_paymentToken);
         _assignRbacRoles(_rbac);
     }
@@ -547,7 +547,7 @@ contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
      *
      * @returns The payment token
      */
-    function getPaymentToken() external view returns (IERC20) {
+    function getPaymentToken() external view returns (OZ_IERC20) {
         return _getPaymentToken();
     }
 
