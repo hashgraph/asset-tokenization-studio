@@ -250,7 +250,7 @@ export async function deployLifeCycleCashFlowContracts({
     new DeployContractCommand({
       name: "ProxyAdmin",
       signer,
-      args: [signer.address],
+      args: [signer.getAddress()],
     }),
   );
 
