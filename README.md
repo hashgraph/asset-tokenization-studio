@@ -225,6 +225,8 @@ Tests are automatically triggered only when relevant files are modified, improvi
 If you have a question on how to use the product, please see our
 [support guide](https://github.com/hashgraph/.github/blob/main/SUPPORT.md).
 
+- **Instrucciones para agentes AI:** `/.github/copilot-instructions.md` contiene guías y comandos útiles para editar/ejecutar el monorepo.
+
 ## Contributing
 
 Contributions are welcome. Please see the
