@@ -26,26 +26,26 @@ import { ILock } from "../layer_1/interfaces/lock/ILock.sol";
 import { ISecurity } from "../layer_3/interfaces/ISecurity.sol";
 import { IBondRead } from "../layer_2/interfaces/bond/IBondRead.sol";
 import { RegulationData, AdditionalSecurityData } from "../layer_3/constants/regulation.sol";
-import { ICap } from "contracts/layer_1/interfaces/cap/ICap.sol";
+import { ICap } from "../layer_1/interfaces/cap/ICap.sol";
 import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
 } from "../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
 import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
-import { IEquity } from "contracts/layer_2/interfaces/equity/IEquity.sol";
-import { IKpiLinkedRate } from "contracts/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IEquity } from "../layer_2/interfaces/equity/IEquity.sol";
+import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
 import { ITransferAndLock } from "../layer_3/interfaces/ITransferAndLock.sol";
 import {
     ISustainabilityPerformanceTargetRate
-} from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "contracts/layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
-import { IssueData, OperatorTransferData, BasicTransferInfo } from "contracts/layer_1/interfaces/ERC1400/IERC1410.sol";
-import { IIdentityRegistry } from "contracts/layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
-import { ICompliance } from "contracts/layer_1/interfaces/ERC3643/ICompliance.sol";
+} from "../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { IssueData, OperatorTransferData, BasicTransferInfo } from "../layer_1/interfaces/ERC1400/IERC1410.sol";
+import { IIdentityRegistry } from "../layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
+import { ICompliance } from "../layer_1/interfaces/ERC3643/ICompliance.sol";
 
 abstract contract Internals is Modifiers {
     function _CLOCK_MODE() internal view virtual returns (string memory);
@@ -908,12 +908,19 @@ abstract contract Internals is Modifiers {
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
     ) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_Cap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ControlList(bool _isWhiteList) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1594() internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC20(IERC20.ERC20Metadata calldata erc20Metadata) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC20Permit() internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC20Votes(bool _activated) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC3643(address _compliance, address _identityRegistry) internal virtual;
     function _initialize_bond(IBondRead.BondDetailsData calldata _bondDetailsData) internal virtual;
     function _isAbleToAccess(address _account) internal view virtual returns (bool);

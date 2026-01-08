@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { LocalContext } from "./context/LocalContext.sol";
 import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
-import { IClearing } from "contracts/layer_1/interfaces/clearing/IClearing.sol";
+import { IClearing } from "../layer_1/interfaces/clearing/IClearing.sol";
 import { HoldIdentifier } from "../layer_1/interfaces/hold/IHold.sol";
 
 abstract contract Modifiers is LocalContext {
