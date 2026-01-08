@@ -48,7 +48,9 @@ import { IIdentityRegistry } from "../layer_1/interfaces/ERC3643/IIdentityRegist
 import { ICompliance } from "../layer_1/interfaces/ERC3643/ICompliance.sol";
 
 abstract contract Internals is Modifiers {
+    // solhint-disable-next-line func-name-mixedcase
     function _CLOCK_MODE() internal view virtual returns (string memory);
+    // solhint-disable-next-line func-name-mixedcase
     function _DOMAIN_SEPARATOR() internal view virtual returns (bytes32);
     function _abafAtSnapshot(uint256 _snapshotID) internal view virtual returns (uint256 abaf_);
     function _add(uint256 a, uint256 b) internal pure virtual returns (uint256);
@@ -922,6 +924,7 @@ abstract contract Internals is Modifiers {
     function _initialize_ERC20Votes(bool _activated) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC3643(address _compliance, address _identityRegistry) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_bond(IBondRead.BondDetailsData calldata _bondDetailsData) internal virtual;
     function _isAbleToAccess(address _account) internal view virtual returns (bool);
     function _isAbleToRedeemFromByPartition(
@@ -1469,11 +1472,13 @@ abstract contract Internals is Modifiers {
     function _valueAt(uint256 snapshotId, Snapshots storage snapshots) internal view virtual returns (bool, uint256);
     function _verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view virtual returns (bool);
     function _version() internal view virtual returns (string memory);
+    // solhint-disable-next-line func-name-mixedcase
     function _initializeClearing(bool _clearingActive) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ProtectedPartitions(bool _protectPartition) internal virtual returns (bool success_);
-
+    // solhint-disable-next-line func-name-mixedcase
     function _isProtectedPartitionInitialized() internal view virtual returns (bool);
-
+    // solhint-disable-next-line func-name-mixedcase
     function _initializeInternalKyc(bool _internalKycActivated) internal virtual;
 
     function _isKycInitialized() internal view virtual returns (bool);
