@@ -120,3 +120,34 @@ Notas rápidas
 - Asegúrate de copiar/llenar los `.env` apropiados antes de ejecutar (ver `apps/ats/web/.env.local`, `apps/mass-payout/backend/.env`).
 - Para reproducir CI localmente usa los scripts `:*:ci` (ej. `npm run ats:test:ci`).
 - Si tocas `tsconfig` o alias de paths, ejecutar `tsc-alias` (scripts de build ya lo hacen).
+
+Plantillas de PR y flujo de revisión
+- Formato mínimo de título: `type(scope): short description` (ej. `docs(copilot): add instructions and env samples`).
+- Ejemplo de cuerpo de PR (copiar/pegar):
+
+	```
+	Resumen: Añade `.github/copilot-instructions.md` y `.env.sample` para desarrollo local.
+
+	Cambios principales:
+	- .github/copilot-instructions.md: guía para agentes AI
+	- apps/ats/web/.env.sample: variables de ejemplo
+	- apps/mass-payout/backend/.env.sample: variables de ejemplo
+	- packages/ats/contracts/.env.sample: variables de ejemplo
+
+	Checklist (antes de pedir review):
+	- [ ] `npm ci` y `npm run ats:build` pasan localmente donde aplica
+	- [ ] `npm run ats:contracts:test` pasa (o marcar si requiere infra)
+	- [ ] `npm run lint` y `npm run format:check` pasan
+	- [ ] Añadido `changeset` si el cambio afecta paquetes publicados
+	```
+
+- Verificaciones CI esperadas (GitHub Actions):
+	- `ats/tests` — corre tests y lint de `packages/ats/*` y `apps/ats/*`.
+	- `mass-payout/tests` — corre tests y lint de `packages/mass-payout/*` y `apps/mass-payout/*`.
+	- `format/lint` — comprobación global de Prettier/ESLint.
+
+- Flujo de revisión recomendado para agentes:
+	- Ejecutar localmente los scripts relevantes (`npm run ats:contracts:test`, `npm run ats:sdk:test`, `npm run ats:web:test`).
+	- Añadir `changeset` si se modifica código publicado; no publicar manualmente.
+	- Pedir review a los propietarios de los paquetes (mentionar `@hashgraph/maintainers` o los responsables en el OWNERS file si existe).
+
