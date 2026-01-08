@@ -309,7 +309,7 @@ import {
 import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
 import NetworkService from '@service/network/NetworkService';
 import MetamaskService from '@service/wallet/metamask/MetamaskService';
-import { RateStatus } from '@domain/context/bond/RateStatus';
+import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
@@ -868,6 +868,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
       rate : ${rate},
+      rateStatus : ${rateStatus},
       startDate: ${startDate},
       endDate: ${endDate},
       fixingDate: ${fixingDate}`,
@@ -880,7 +881,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       startDate: startDate.toBigNumber(),
       endDate: endDate.toBigNumber(),
       fixingDate: fixingDate.toBigNumber(),
-      rateStatus: rateStatus,
+      rateStatus: CastRateStatus.toNumber(rateStatus),
     };
 
     return this.executeTransaction(

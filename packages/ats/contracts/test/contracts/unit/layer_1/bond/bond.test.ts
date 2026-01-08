@@ -596,7 +596,7 @@ describe("Bond Tests", () => {
         );
         expect(couponAmountFor.denominator).to.equal(
           BigNumber.from(
-            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals),
+            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals + 2),
           ).mul(YEAR_SECONDS),
         );
       });
@@ -662,7 +662,7 @@ describe("Bond Tests", () => {
         );
         expect(couponAmountFor.denominator).to.equal(
           BigNumber.from(
-            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals),
+            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals + 2),
           ).mul(YEAR_SECONDS),
         );
       });
@@ -827,7 +827,7 @@ describe("Bond Tests", () => {
         );
         expect(couponAmountForAfter.denominator).to.equal(
           BigNumber.from(
-            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals),
+            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals + 2),
           ).mul(YEAR_SECONDS),
         );
       });
