@@ -11,8 +11,10 @@
 
 import { promises as fs } from "fs";
 import { join } from "path";
-import type { DeploymentCheckpoint, CheckpointStatus, WorkflowType } from "@scripts/infrastructure";
-import { warn } from "@scripts/infrastructure";
+// Import directly from source files to avoid circular dependency with NullCheckpointManager
+// (barrel export @scripts/infrastructure includes NullCheckpointManager which imports CheckpointManager)
+import type { DeploymentCheckpoint, CheckpointStatus, WorkflowType } from "../types/checkpoint";
+import { warn } from "../utils/logging";
 
 /**
  * Parameters for creating a new checkpoint.
