@@ -214,7 +214,7 @@ import { useParams } from "react-router-dom";
 import { useCoupons } from "../../../../hooks/queries/useCoupons";
 import { useGetBondDetails } from "../../../../hooks/queries/useGetSecurityDetails";
 import { dateToUnixTimestamp } from "../../../../utils/format";
-import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+import { DATE_TIME_FORMAT, RATE_MAX_DECIMALS } from "../../../../utils/constants";
 import { isBeforeDate } from "../../../../utils/helpers";
 
 interface ProgramCouponFormValues {
@@ -249,7 +249,7 @@ export const ProgramCoupon = () => {
   const submit: SubmitHandler<ProgramCouponFormValues> = (params) => {
     const request = new SetCouponRequest({
       securityId: id ?? "",
-      rate: params.rate.toString(),
+      rate: (params.rate / 100).toFixed(RATE_MAX_DECIMALS + 2),
       recordTimestamp: dateToUnixTimestamp(params.recordTimestamp),
       executionTimestamp: dateToUnixTimestamp(params.executionTimestamp),
       startTimestamp: dateToUnixTimestamp(params.startTimestamp),
@@ -394,7 +394,7 @@ export const ProgramCoupon = () => {
               id="rate"
               rules={{ required, min: min(0) }}
               placeholder={tForm("rate.placeholder")}
-              decimalScale={3}
+              decimalScale={RATE_MAX_DECIMALS}
               fixedDecimalScale={true}
               suffix="%"
               thousandSeparator=","

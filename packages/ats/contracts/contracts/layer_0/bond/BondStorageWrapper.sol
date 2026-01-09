@@ -224,7 +224,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
 
         couponAmountFor_.numerator = couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period;
         couponAmountFor_.denominator =
-            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals + 2) *
+            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
             365 days;
     }
 
