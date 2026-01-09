@@ -13,7 +13,9 @@
  * @module infrastructure/checkpoint/NullCheckpointManager
  */
 
-import type { DeploymentCheckpoint, CheckpointStatus } from "@scripts/infrastructure";
+// Import directly from source files to avoid circular dependency
+// (barrel export @scripts/infrastructure includes this file, creating circular import)
+import type { DeploymentCheckpoint, CheckpointStatus } from "../types/checkpoint";
 import { CheckpointManager } from "./CheckpointManager";
 
 /**
