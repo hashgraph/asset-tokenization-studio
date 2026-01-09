@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
           egress-policy: audit
 
@@ -47,65 +47,52 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate Mass Payout changesets exist
+      - name: Validate Mass Payout version
         id: validate
         run: |
-          echo "📋 Getting changeset status..."
-          npx changeset status --output=changeset-status.json
+          echo "📋 Validating Mass Payout package versions..."
 
-          MP_PACKAGES_TO_BUMP=$(jq -r '.releases[] | select(.name | test("@hashgraph/mass-payout")) | .name' changeset-status.json | wc -l)
-
-          echo "mp-packages-to-bump=${MP_PACKAGES_TO_BUMP}" >> "${GITHUB_OUTPUT}"
-
-          if [ "${MP_PACKAGES_TO_BUMP}" -eq 0 ]; then
-            echo "❌ No Mass Payout packages found to be bumped"
-            echo "📋 Current changeset status:"
-            npx changeset status
+          # Check if there are uncommitted changes (version bump should already be committed)
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "❌ Uncommitted changes detected. Please commit version changes before running release."
+            echo "Uncommitted files:"
+            git status --short
             exit 1
           fi
 
-          echo "✅ Found ${MP_PACKAGES_TO_BUMP} Mass Payout package(s) ready for release"
+          # Get current Mass Payout version
+          MP_VERSION=$(node -p "require('./packages/mass-payout/contracts/package.json').version")
+          echo "mp-version=${MP_VERSION}" >> "${GITHUB_OUTPUT}"
 
-          echo "📦 Mass Payout packages to be released:"
-          jq -r '.releases[] | select(.name | test("@hashgraph/mass-payout")) | "  - \(.name) (\(.oldVersion) → \(.newVersion))"' changeset-status.json
+          # Check if tag already exists
+          TAG_NAME="v${MP_VERSION}-mp"
+          if git rev-parse "${TAG_NAME}" >/dev/null 2>&1; then
+            echo "❌ Tag ${TAG_NAME} already exists. Version bump may not have been performed."
+            exit 1
+          fi
+
+          echo "✅ Mass Payout version validated: ${MP_VERSION}"
+          echo "✅ Tag ${TAG_NAME} does not exist yet - ready to release"
 
       - name: Preview Mass Payout release
         if: ${{ inputs.release-type == 'preview' }}
         run: |
+          MP_VERSION="${{ steps.validate.outputs.mp-version }}"
+          TAG_NAME="v${MP_VERSION}-mp"
+
           echo "🔍 PREVIEW MODE - What would be released for Mass Payout packages:"
           echo ""
-          echo "📋 Current changeset status:"
-          npx changeset status
+          echo "📦 Mass Payout Version: ${MP_VERSION}"
+          echo "🏷️  Tag to create: ${TAG_NAME}"
+          echo "📋 GitHub Release: Would be created with auto-generated notes"
           echo ""
-          echo "🚫 ATS packages would be ignored during Mass Payout release"
-          echo "🎯 Only @hashgraph/mass-payout* packages would be processed"
+          echo "⚠️  IMPORTANT: Version bump must be done manually before running release:"
+          echo "   1. Run: npx changeset version --ignore '@hashgraph/asset-tokenization-*'"
+          echo "   2. Review and commit changes (with GPG signature)"
+          echo "   3. Push to remote"
+          echo "   4. Run this workflow with 'release' option"
           echo ""
           echo "To proceed with actual release, run this workflow with 'release' option."
-
-      - name: Version Mass Payout packages
-        if: ${{ inputs.release-type == 'release' }}
-        run: |
-          echo "🚀 Releasing Mass Payout packages only (ignoring ATS packages)"
-
-          npx changeset version --ignore "@hashgraph/asset-tokenization-*"
-
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "✅ Version bump completed for Mass Payout packages"
-          else
-            echo "❌ No version changes detected"
-            exit 1
-          fi
-
-      - name: Commit version changes
-        if: ${{ inputs.release-type == 'release' }}
-        run: |
-          git add .
-
-          if git commit --signoff -S -m "chore: release Mass Payout packages"; then
-            echo "✅ Version changes committed"
-          else
-            echo "ℹ️ No changes to commit"
-          fi
 
       - name: Create Mass Payout release
         id: create-mp-release-tag
@@ -113,10 +100,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          MP_VERSION=$(node -p "require('./packages/mass-payout/core/package.json').version" 2>/dev/null || echo "1.0.0")
+          MP_VERSION="${{ steps.validate.outputs.mp-version }}"
           TAG_NAME="v${MP_VERSION}-mp"
-          echo "📦 Creating Mass Payout release: ${TAG_NAME}"
-          git tag -s -a "${TAG_NAME}" -m "Creating Mass Payout Release with tag: ${TAG_NAME}"
+          echo "📦 Creating Mass Payout release tag: ${TAG_NAME}"
+          git tag "${TAG_NAME}"
           git push origin "${TAG_NAME}"
 
           echo "release-tag=${TAG_NAME}" >> "${GITHUB_OUTPUT}"
@@ -137,18 +124,30 @@ jobs:
           if [ "${{ inputs.release-type }}" = "preview" ]; then
             echo "## 🔍 Mass Payout Release Preview Completed" >> "${GITHUB_STEP_SUMMARY}"
             echo "Preview mode was selected. No actual release was created." >> "${GITHUB_STEP_SUMMARY}"
+            echo "" >> "${GITHUB_STEP_SUMMARY}"
+            echo "**To create the release:**" >> "${GITHUB_STEP_SUMMARY}"
+            echo "1. Run \`npx changeset version --ignore '@hashgraph/asset-tokenization-*'\`" >> "${GITHUB_STEP_SUMMARY}"
+            echo "2. Review and commit changes with GPG signature: \`git commit -S -m 'chore: release Mass Payout packages'\`" >> "${GITHUB_STEP_SUMMARY}"
+            echo "3. Push to remote: \`git push\`" >> "${GITHUB_STEP_SUMMARY}"
+            echo "4. Run this workflow again with 'release' option" >> "${GITHUB_STEP_SUMMARY}"
           elif [ "${{ job.status }}" = "success" ]; then
-            MP_VERSION=$(node -p "require('./packages/mass-payout/core/package.json').version" 2>/dev/null || echo "unknown")
-            echo "## ✅ Mass Payout Release v${MP_VERSION} Completed Successfully" >> "${GITHUB_STEP_SUMMARY}"
-            echo "| Package | Status |" >> "${GITHUB_STEP_SUMMARY}"
+            MP_VERSION="${{ steps.validate.outputs.mp-version }}"
+            TAG_NAME="${{ steps.create-mp-release-tag.outputs.release-tag }}"
+            echo "## ✅ Mass Payout Release ${TAG_NAME} Completed Successfully" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| Component | Status |" >> "${GITHUB_STEP_SUMMARY}"
             echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"
-            echo "| Mass Payout Packages | ✅ Released |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| Version | ${MP_VERSION} |" >> "${GITHUB_STEP_SUMMARY}"
+            echo "| Tag | ${TAG_NAME} |" >> "${GITHUB_STEP_SUMMARY}"
             echo "| GitHub Release | ✅ Created |" >> "${GITHUB_STEP_SUMMARY}"
             echo "" >> "${GITHUB_STEP_SUMMARY}"
             echo "**Next Steps:**" >> "${GITHUB_STEP_SUMMARY}"
             echo "- NPM publishing will be triggered automatically via mp.publish.yml" >> "${GITHUB_STEP_SUMMARY}"
-            echo "- ATS packages were ignored and remain available for separate release" >> "${GITHUB_STEP_SUMMARY}"
           else
             echo "## ❌ Mass Payout Release Failed" >> "${GITHUB_STEP_SUMMARY}"
             echo "Check the logs above for details on what went wrong." >> "${GITHUB_STEP_SUMMARY}"
+            echo "" >> "${GITHUB_STEP_SUMMARY}"
+            echo "**Common issues:**" >> "${GITHUB_STEP_SUMMARY}"
+            echo "- Version bump not committed and pushed before running release" >> "${GITHUB_STEP_SUMMARY}"
+            echo "- Tag already exists for current version" >> "${GITHUB_STEP_SUMMARY}"
+            echo "- Uncommitted changes in repository" >> "${GITHUB_STEP_SUMMARY}"
           fi
