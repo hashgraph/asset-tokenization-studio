@@ -45,7 +45,13 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
   if (!steps.facets || steps.facets.size === 0) {
     throw new Error("Checkpoint missing facet deployments");
   }
-  if (!steps.configurations?.equity || !steps.configurations?.bond) {
+  if (
+    !steps.configurations?.equity ||
+    !steps.configurations?.bond ||
+    !steps.configurations?.bondFixedRate ||
+    !steps.configurations?.bondKpiLinkedRate ||
+    !steps.configurations?.bondSustainabilityPerformanceTargetRate
+  ) {
     throw new Error("Checkpoint missing configurations");
   }
 
@@ -109,12 +115,30 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
         facetCount: steps.configurations.bond.facetCount,
         facets: [], // Will be populated in actual workflow
       },
+      bondFixedRate: {
+        configId: steps.configurations.bondFixedRate.configId,
+        version: steps.configurations.bondFixedRate.version,
+        facetCount: steps.configurations.bondFixedRate.facetCount,
+        facets: [], // Will be populated in actual workflow
+      },
+      bondKpiLinkedRate: {
+        configId: steps.configurations.bondKpiLinkedRate.configId,
+        version: steps.configurations.bondKpiLinkedRate.version,
+        facetCount: steps.configurations.bondKpiLinkedRate.facetCount,
+        facets: [], // Will be populated in actual workflow
+      },
+      bondSustainabilityPerformanceTargetRate: {
+        configId: steps.configurations.bondSustainabilityPerformanceTargetRate.configId,
+        version: steps.configurations.bondSustainabilityPerformanceTargetRate.version,
+        facetCount: steps.configurations.bondSustainabilityPerformanceTargetRate.facetCount,
+        facets: [], // Will be populated in actual workflow
+      },
     },
 
     summary: {
       totalContracts: 3 + steps.facets.size, // ProxyAdmin + BLR + Factory + facets
       totalFacets: steps.facets.size,
-      totalConfigurations: 2,
+      totalConfigurations: 3,
       deploymentTime: endTime - start,
       gasUsed: totalGasUsed.toString(),
       success: checkpoint.status === "completed",
@@ -123,6 +147,9 @@ export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): 
     helpers: {
       getEquityFacets: () => [],
       getBondFacets: () => [],
+      getBondFixedRateFacets: () => [],
+      getBondKpiLinkedRateFacets: () => [],
+      getBondSustainabilityPerformanceTargetRateFacets: () => [],
     },
   };
 }
@@ -158,6 +185,10 @@ export function getStepName(step: number, workflowType: WorkflowType = "newBlr")
       case 5:
         return "Bond Configuration";
       case 6:
+        return "Bond Fixed Rate Configuration";
+      case 7:
+        return "Bond KpiLinked Rate Configuration";
+      case 8:
         return "Factory";
       default:
         return `Unknown Step ${step}`;
@@ -208,6 +239,10 @@ export function getStepName(step: number, workflowType: WorkflowType = "newBlr")
       case 4:
         return "Bond Configuration";
       case 5:
+        return "Bond Fixed Rate Configuration";
+      case 6:
+        return "Bond KpiLinked Rate Configuration";
+      case 7:
         return "Factory";
       default:
         return `Unknown Step ${step}`;
@@ -224,13 +259,13 @@ export function getStepName(step: number, workflowType: WorkflowType = "newBlr")
 export function getTotalSteps(workflowType: WorkflowType = "newBlr"): number {
   switch (workflowType) {
     case "newBlr":
-      return 7;
+      return 8;
     case "existingBlr":
-      return 6;
+      return 7;
     case "upgradeConfigurations":
       return 5; // Facets, Register, Equity, Bond, Proxy Updates
     default:
-      return 7;
+      return 8;
   }
 }
 

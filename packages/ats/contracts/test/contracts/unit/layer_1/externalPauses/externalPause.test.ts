@@ -4,14 +4,14 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, GAS_LIMIT } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
-import { ResolverProxy, ExternalPauseManagement, MockedExternalPause } from "@contract-types";
+import { ResolverProxy, ExternalPauseManagementFacet, MockedExternalPause } from "@contract-types";
 
 describe("ExternalPause Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: SignerWithAddress;
   let signer_B: SignerWithAddress;
 
-  let externalPauseManagement: ExternalPauseManagement;
+  let externalPauseManagement: ExternalPauseManagementFacet;
   let externalPauseMock1: MockedExternalPause;
   let externalPauseMock2: MockedExternalPause;
   let externalPauseMock3: MockedExternalPause;
@@ -28,7 +28,7 @@ describe("ExternalPause Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
 
-    externalPauseManagement = await ethers.getContractAt("ExternalPauseManagement", diamond.address, signer_A);
+    externalPauseManagement = await ethers.getContractAt("ExternalPauseManagementFacet", diamond.address, signer_A);
 
     await base.accessControlFacet.grantRole(ATS_ROLES._PAUSE_MANAGER_ROLE, signer_A.address);
 

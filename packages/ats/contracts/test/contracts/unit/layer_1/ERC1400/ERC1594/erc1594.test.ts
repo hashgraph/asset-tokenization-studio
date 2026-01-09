@@ -3,14 +3,14 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type Pause,
-  type ERC1594,
+  type PauseFacet,
+  type ERC1594Facet,
   type AccessControl,
   type ControlList,
   type IERC1410,
-  ERC20,
-  Kyc,
-  SsiManagement,
+  ERC20Facet,
+  KycFacet,
+  SsiManagementFacet,
   ClearingActionsFacet,
 } from "@contract-types";
 import { deployEquityTokenFixture } from "@test";
@@ -32,12 +32,12 @@ describe("ERC1594 Tests", () => {
   let signer_D: SignerWithAddress;
   let signer_E: SignerWithAddress;
 
-  let erc1594Facet: ERC1594;
+  let erc1594Facet: ERC1594Facet;
   let accessControlFacet: AccessControl;
-  let pauseFacet: Pause;
+  let pauseFacet: PauseFacet;
   let controlList: ControlList;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
+  let kycFacet: KycFacet;
+  let ssiManagementFacet: SsiManagementFacet;
   let clearingActionsFacet: ClearingActionsFacet;
 
   describe("Multi partition mode", () => {
@@ -73,14 +73,14 @@ describe("ERC1594 Tests", () => {
       ]);
       accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
 
-      erc1594Facet = await ethers.getContractAt("ERC1594", diamond.address);
+      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
 
-      pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
 
       controlList = await ethers.getContractAt("ControlList", diamond.address);
 
       clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
-      kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
 
       accessControlFacet = accessControlFacet.connect(signer_A);
       await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
@@ -152,11 +152,11 @@ describe("ERC1594 Tests", () => {
   });
 
   describe("Single partition mode", () => {
-    let erc1594Issuer: ERC1594;
-    let erc1594Transferor: ERC1594;
-    let erc1594Approved: ERC1594;
+    let erc1594Issuer: ERC1594Facet;
+    let erc1594Transferor: ERC1594Facet;
+    let erc1594Approved: ERC1594Facet;
     let erc1410SnapshotFacet: IERC1410;
-    let erc20Facet: ERC20;
+    let erc20Facet: ERC20Facet;
 
     async function deploySecurityFixtureSinglePartition() {
       const base = await deployEquityTokenFixture({
@@ -198,19 +198,19 @@ describe("ERC1594 Tests", () => {
 
       accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
 
-      erc1594Facet = await ethers.getContractAt("ERC1594", diamond.address);
+      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
       erc1594Issuer = erc1594Facet.connect(signer_C);
       erc1594Transferor = erc1594Facet.connect(signer_E);
       erc1594Approved = erc1594Facet.connect(signer_D);
-      erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_E);
+      erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_E);
       erc1410SnapshotFacet = await ethers.getContractAt("IERC1410", diamond.address);
 
-      pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
 
       controlList = await ethers.getContractAt("ControlList", diamond.address);
 
-      kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-      ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
 
       accessControlFacet = accessControlFacet.connect(signer_A);
       await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);

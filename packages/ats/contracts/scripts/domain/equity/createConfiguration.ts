@@ -79,7 +79,6 @@ const EQUITY_FACETS = [
   // Advanced Features (9)
   "AdjustBalancesFacet",
   "LockFacet",
-  "ProceedRecipientsFacet",
   "ProtectedPartitionsFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",

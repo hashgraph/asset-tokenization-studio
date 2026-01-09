@@ -3,6 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "./IBondRead.sol";
 interface IBond {
+    event MaturityDateUpdated(
+        address indexed bondId,
+        uint256 indexed maturityDate,
+        uint256 indexed previousMaturityDate
+    );
+
     /**
      * @notice Redeems all bonds at maturity from a token holder (all partitions considered)
      * @param _tokenHolder The address of the token holder redeeming the bonds.
@@ -21,7 +27,7 @@ interface IBond {
      * @notice Sets a new coupon for the bond
      * @param _newCoupon The new coupon to be set
      */
-    function setCoupon(IBondRead.Coupon calldata _newCoupon) external returns (bool success_, uint256 couponID_);
+    function setCoupon(IBondRead.Coupon calldata _newCoupon) external returns (uint256 couponID_);
 
     /**
      * @notice Updates the maturity date of the bond.

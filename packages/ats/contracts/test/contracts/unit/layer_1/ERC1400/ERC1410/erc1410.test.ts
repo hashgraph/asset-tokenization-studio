@@ -4,20 +4,20 @@ import { BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type Pause,
+  type PauseFacet,
   type AccessControl,
   type Equity,
   type ControlList,
   type IERC1410,
-  Kyc,
-  SsiManagement,
-  ERC20,
-  ERC1594,
-  ERC1644,
-  AdjustBalances,
+  KycFacet,
+  SsiManagementFacet,
+  ERC20Facet,
+  ERC1594Facet,
+  ERC1644Facet,
+  AdjustBalancesFacet,
   Cap,
   IClearing,
-  ISnapshots,
+  SnapshotsFacet,
   TimeTravelFacet,
 } from "@contract-types";
 import { grantRoleAndPauseToken } from "@test";
@@ -86,18 +86,18 @@ describe("ERC1410 Tests", () => {
 
   let erc1410Facet: IERC1410;
   let accessControlFacet: AccessControl;
-  let pauseFacet: Pause;
+  let pauseFacet: PauseFacet;
   let equityFacet: Equity;
   let controlList: ControlList;
   let capFacet: Cap;
-  let erc20Facet: ERC20;
-  let erc1594Facet: ERC1594;
-  let erc1644Facet: ERC1644;
-  let adjustBalancesFacet: AdjustBalances;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
+  let erc20Facet: ERC20Facet;
+  let erc1594Facet: ERC1594Facet;
+  let erc1644Facet: ERC1644Facet;
+  let adjustBalancesFacet: AdjustBalancesFacet;
+  let kycFacet: KycFacet;
+  let ssiManagementFacet: SsiManagementFacet;
   let clearingActionsFacet: ClearingActionsFacet;
-  let snapshotsFacet: ISnapshots;
+  let snapshotsFacet: SnapshotsFacet;
   let timeTravelFacet: TimeTravelFacet;
 
   async function setPreBalanceAdjustment(singlePartition?: boolean) {
@@ -339,18 +339,18 @@ describe("ERC1410 Tests", () => {
 
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
 
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address);
-    capFacet = await ethers.getContractAt("Cap", diamond.address);
-    erc20Facet = await ethers.getContractAt("ERC20", diamond.address);
-    erc1594Facet = await ethers.getContractAt("ERC1594", diamond.address);
-    erc1644Facet = await ethers.getContractAt("ERC1644", diamond.address);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
+    capFacet = await ethers.getContractAt("CapFacet", diamond.address);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address);
+    erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
+    erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address);
     equityFacet = await ethers.getContractAt("Equity", diamond.address);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address);
     controlList = await ethers.getContractAt("ControlList", diamond.address, signer_A);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
-    snapshotsFacet = await ethers.getContractAt("ISnapshots", diamond.address);
+    snapshotsFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
 
     capFacet = await ethers.getContractAt("Cap", diamond.address);
 
@@ -1059,7 +1059,7 @@ describe("ERC1410 Tests", () => {
       // transfer
       await expect(erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data))
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 1);
+        .withArgs(1);
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
       dividend = await equityFacet.getDividends(2);
@@ -1085,7 +1085,7 @@ describe("ERC1410 Tests", () => {
       // transfer From
       await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData))
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 2);
+        .withArgs(2);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1196,7 +1196,7 @@ describe("ERC1410 Tests", () => {
         }),
       )
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_A.address, 1);
+        .withArgs(1);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1285,7 +1285,7 @@ describe("ERC1410 Tests", () => {
       // transfer
       await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data))
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 1);
+        .withArgs(1);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1303,7 +1303,7 @@ describe("ERC1410 Tests", () => {
           .operatorRedeemByPartition(_PARTITION_ID_1, signer_E.address, amount, data, operatorData),
       )
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 2);
+        .withArgs(2);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1543,7 +1543,7 @@ describe("ERC1410 Tests", () => {
           ),
       )
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 1);
+        .withArgs(1);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
@@ -1561,7 +1561,7 @@ describe("ERC1410 Tests", () => {
           .controllerRedeemByPartition(_PARTITION_ID_1, signer_D.address, amount, data, operatorData),
       )
         .to.emit(snapshotsFacet, "SnapshotTriggered")
-        .withArgs(signer_C.address, 2);
+        .withArgs(2);
 
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);

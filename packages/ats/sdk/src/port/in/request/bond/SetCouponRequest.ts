@@ -207,26 +207,36 @@ import ValidatedRequest from '@core/validation/ValidatedArgs';
 import FormatValidation from '../FormatValidation';
 
 import { SecurityDate } from '@domain/context/shared/SecurityDate';
+import { Bond } from '@domain/context/bond/Bond';
 
 export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest> {
   securityId: string;
   rate: string;
   recordTimestamp: string;
   executionTimestamp: string;
-  period: string;
+  startTimestamp: string;
+  endTimestamp: string;
+  fixingTimestamp: string;
+  rateStatus: number;
 
   constructor({
     securityId,
     rate,
     recordTimestamp,
     executionTimestamp,
-    period,
+    startTimestamp,
+    endTimestamp,
+    fixingTimestamp,
+    rateStatus,
   }: {
     securityId: string;
     rate: string;
     recordTimestamp: string;
     executionTimestamp: string;
-    period: string;
+    startTimestamp: string;
+    endTimestamp: string;
+    fixingTimestamp: string;
+    rateStatus: number;
   }) {
     super({
       rate: FormatValidation.checkAmount(true),
@@ -245,13 +255,32 @@ export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest>
         );
       },
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      period: FormatValidation.checkAmount(),
+      endTimestamp: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          parseInt(this.startTimestamp),
+          undefined,
+        );
+      },
+      fixingTimestamp: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          undefined,
+          parseInt(this.executionTimestamp),
+        );
+      },
+      rateStatus: (val) => {
+        return Bond.checkRateStatus(val);
+      },
     });
 
     this.securityId = securityId;
     this.rate = rate;
     this.recordTimestamp = recordTimestamp;
     this.executionTimestamp = executionTimestamp;
-    this.period = period;
+    this.startTimestamp = startTimestamp;
+    this.endTimestamp = endTimestamp;
+    this.fixingTimestamp = fixingTimestamp;
+    this.rateStatus = rateStatus;
   }
 }

@@ -78,6 +78,7 @@ async function main(): Promise<void> {
   const result = await generateRegistryPipeline(
     {
       contractsPath: path.join(__dirname, "../../contracts"),
+      artifactPath: path.join(__dirname, "../../artifacts/contracts"),
       outputPath: options.output,
       facetsOnly: options.facetsOnly,
       logLevel: logLevelStr as any,

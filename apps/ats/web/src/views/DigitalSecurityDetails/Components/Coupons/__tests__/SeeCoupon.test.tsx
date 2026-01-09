@@ -32,7 +32,15 @@ const mockCouponsForData = {
 };
 
 const mockCouponsData = {
+  couponId: 1,
   executionDate: new Date("2024-06-15T10:00:00Z"),
+  startDate: new Date("2024-01-01T00:00:00Z"),
+  endDate: new Date("2024-06-15T10:00:00Z"),
+  fixingDate: new Date("2024-06-15T10:00:00Z"),
+  recordDate: new Date("2024-01-01T00:00:00Z"),
+  rate: "5.01",
+  rateDecimals: 2,
+  rateStatus: 1,
 };
 
 const mockCouponsAmountForData = {

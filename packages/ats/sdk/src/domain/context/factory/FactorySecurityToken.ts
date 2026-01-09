@@ -221,7 +221,6 @@ export class FactoryEquityToken {
 export class FactoryBondToken {
   public security: SecurityData;
   public bondDetails: BondDetailsData;
-
   public proceedRecipients: string[];
   public proceedRecipientsData: string[];
 

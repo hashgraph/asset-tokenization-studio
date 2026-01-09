@@ -2,6 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface ILock {
+    struct LockData {
+        uint256 id;
+        uint256 amount;
+        uint256 expirationTimestamp;
+    }
+
     event LockedByPartition(
         address indexed operator,
         address indexed tokenHolder,

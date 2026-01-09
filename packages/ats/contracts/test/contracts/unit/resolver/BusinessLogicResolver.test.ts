@@ -119,14 +119,6 @@ describe("BusinessLogicResolver", () => {
       );
     });
 
-    it("GIVEN a list of logics WHEN registerBusinessLogics THEN Fails if some key is not informed with AllBusinessLogicKeysMustBeenInformed", async () => {
-      await businessLogicResolver.registerBusinessLogics([BUSINESS_LOGIC_KEYS[0]]);
-
-      await expect(businessLogicResolver.registerBusinessLogics([BUSINESS_LOGIC_KEYS[1]])).to.be.rejectedWith(
-        "AllBusinessLogicKeysMustBeenInformed",
-      );
-    });
-
     it("GIVEN an empty registry WHEN registerBusinessLogics THEN queries responds with correct values", async () => {
       const LATEST_VERSION = 1;
       const BUSINESS_LOGICS_TO_REGISTER = BUSINESS_LOGIC_KEYS.slice(0, 2);
@@ -157,6 +149,16 @@ describe("BusinessLogicResolver", () => {
       expect(await businessLogicResolver.getBusinessLogicCount()).is.equal(BUSINESS_LOGICS_TO_REGISTER.length);
       expect(await businessLogicResolver.getBusinessLogicKeys(0, 10)).is.deep.equal(
         BUSINESS_LOGICS_TO_REGISTER.map((businessLogic) => businessLogic.businessLogicKey),
+      );
+    });
+
+    it("GIVEN a list of logics WHEN registerBusinessLogics in batch THEN success", async () => {
+      await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2));
+      await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(2, BUSINESS_LOGIC_KEYS.length));
+
+      expect(await businessLogicResolver.getBusinessLogicCount()).is.equal(BUSINESS_LOGIC_KEYS.length);
+      expect(await businessLogicResolver.getBusinessLogicKeys(0, BUSINESS_LOGIC_KEYS.length)).is.deep.equal(
+        BUSINESS_LOGIC_KEYS.map((businessLogic) => businessLogic.businessLogicKey),
       );
     });
 
