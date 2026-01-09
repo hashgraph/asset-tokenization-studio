@@ -16,7 +16,6 @@ abstract contract AccessControlStorageWrapper is
     LocalContext,
     BusinessLogicResolverWrapper
 {
-    // TODO: Check if it's possible to use only one dependency of AddressSet and Bytes32Set
     using LibCommon for EnumerableSet.AddressSet;
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;

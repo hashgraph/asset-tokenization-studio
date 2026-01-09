@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { ProceedRecipients, ResolverProxy, AccessControl, Pause } from "@contract-types";
-import { GAS_LIMIT, ATS_ROLES } from "@scripts";
+import { GAS_LIMIT, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
 import { deployBondTokenFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -105,6 +105,14 @@ describe("Proceed Recipients Tests", () => {
         PROCEED_RECIPIENT_1,
       ]);
     });
+
+    it("GIVEN an invalid address WHEN adding it THEN it reverts with ZeroAddressNotAllowed", async () => {
+      await expect(
+        proceedRecipientsFacet.addProceedRecipient(ADDRESS_ZERO, PROCEED_RECIPIENT_1_DATA, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(proceedRecipientsFacet, "ZeroAddressNotAllowed");
+    });
   });
 
   describe("Remove Tests", () => {
@@ -151,6 +159,14 @@ describe("Proceed Recipients Tests", () => {
   });
 
   describe("Update Data Tests", () => {
+    it("GIVEN invalid address WHEN updated THEN it reverts with ZeroAddressNotAllowed", async () => {
+      await expect(
+        proceedRecipientsFacet.updateProceedRecipientData(ADDRESS_ZERO, "0x", {
+          gasLimit: GAS_LIMIT.high,
+        }),
+      ).to.be.revertedWithCustomError(proceedRecipientsFacet, "ZeroAddressNotAllowed");
+    });
+
     it("GIVEN a listed proceed recipient WHEN unauthorized user updates its data THEN it reverts with AccountHasNoRole", async () => {
       await expect(
         proceedRecipientsFacet

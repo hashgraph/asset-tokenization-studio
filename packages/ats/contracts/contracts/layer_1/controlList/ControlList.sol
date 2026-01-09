@@ -6,7 +6,6 @@ import { Common } from "../common/Common.sol";
 import { _CONTROL_LIST_ROLE } from "../constants/roles.sol";
 
 abstract contract ControlList is IControlList, Common {
-    // TODO: UNPAUSED
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ControlList(
         bool _isWhiteList
