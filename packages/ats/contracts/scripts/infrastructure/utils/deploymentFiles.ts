@@ -15,6 +15,7 @@ import { join, dirname, win32, posix } from "path";
 import type { AnyDeploymentOutput, SaveDeploymentOptions, SaveResult, LoadDeploymentOptions } from "../types";
 import type { WorkflowType } from "../types/checkpoint";
 import { WORKFLOW_DESCRIPTORS } from "../constants";
+import { generateTimestamp } from "./time";
 
 /**
  * Get the root deployments directory path.
@@ -70,7 +71,7 @@ export function getNetworkDeploymentDir(network: string, deploymentsDir?: string
  * ```
  */
 export function generateDeploymentFilename(workflow: WorkflowType, timestamp?: string): string {
-  const ts = timestamp || new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+  const ts = timestamp || generateTimestamp();
   const workflowName = WORKFLOW_DESCRIPTORS[workflow] || workflow;
   return `${workflowName}-${ts}.json`;
 }
@@ -119,7 +120,7 @@ export async function saveDeploymentOutput<T = AnyDeploymentOutput>(
       filename = windowsFilename.length < unixFilename.length ? windowsFilename : unixFilename;
     } else {
       const networkDir = getNetworkDeploymentDir(network);
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+      const timestamp = generateTimestamp();
       filename = generateDeploymentFilename(workflow, timestamp);
       filepath = join(networkDir, filename);
     }
