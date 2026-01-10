@@ -1980,7 +1980,9 @@ describe("ERC1410 Tests", () => {
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         // Transaction Partition 1
-        await erc1594Facet.connect(signer_A).transferWithData(signer_B.address, amount, "0x");
+        await expect(erc1594Facet.connect(signer_A).transferWithData(signer_B.address, amount, "0x"))
+          .to.emit(erc1594Facet, "TransferWithData")
+          .withArgs(signer_A.address, signer_B.address, amount, "0x");
 
         // After Transaction Partition 1 Values
         const after = await getBalanceAdjustedValues();
@@ -2000,8 +2002,11 @@ describe("ERC1410 Tests", () => {
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         // Transaction Partition 1
-        await erc1594Facet.connect(signer_A).transferFromWithData(signer_A.address, signer_B.address, amount, "0x");
-
+        await expect(
+          erc1594Facet.connect(signer_A).transferFromWithData(signer_A.address, signer_B.address, amount, "0x"),
+        )
+          .to.emit(erc1594Facet, "TransferFromWithData")
+          .withArgs(signer_A.address, signer_A.address, signer_B.address, amount, "0x");
         // After Transaction Partition 1 Values
         const after = await getBalanceAdjustedValues();
 

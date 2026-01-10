@@ -9,7 +9,6 @@ import { IDiamondLoupe } from "../../../interfaces/resolver/resolverProxy/IDiamo
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { _DIAMOND_LOUPE_RESOLVER_KEY } from "../../../layer_1/constants/resolverKeys.sol";
 
-// HACK: I think that Loupe and Cut implementation should be only one contract.
 contract DiamondLoupeFacet is IDiamondLoupe, IERC165, ResolverProxyUnstructured {
     function getFacets() external view override returns (Facet[] memory facets_) {
         ResolverProxyStorage storage ds = _resolverProxyStorage();

@@ -17,6 +17,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Commo
         );
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
+            _checkValidAddress(_kycLists[index]);
             _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
             unchecked {
                 ++index;
@@ -45,7 +46,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Commo
 
     function addExternalKycList(
         address _kycLists
-    ) external override onlyRole(_KYC_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+    ) external override onlyRole(_KYC_MANAGER_ROLE) onlyUnpaused validateAddress(_kycLists) returns (bool success_) {
         success_ = _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);

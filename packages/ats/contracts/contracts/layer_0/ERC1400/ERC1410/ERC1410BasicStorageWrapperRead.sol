@@ -240,10 +240,6 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         }
     }
 
-    function _checkValidAddress(address account) internal pure {
-        if (account == address(0)) revert ZeroAddressNotAllowed();
-    }
-
     function _adjustTotalBalanceFor(ERC1410BasicStorage storage basicStorage, uint256 abaf, address account) private {
         uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
         basicStorage.balances[account] *= factor;
