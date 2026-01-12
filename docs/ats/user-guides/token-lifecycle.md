@@ -19,7 +19,7 @@ Token lifecycle operations:
 - **Burn/Redeem**: Remove tokens from circulation
 - **Mint**: Issue additional tokens (if configured)
 
-![ATS Dashboard](/img/screenshots/ats/ats-web-dashboard.png)
+![ATS Dashboard](../../images/ats-web-dashboard.png)
 
 ## Token Transfers
 

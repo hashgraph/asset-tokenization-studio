@@ -122,7 +122,7 @@ The application will be available at **http://localhost:5173**
 
 Once running, you'll see the ATS web application:
 
-![ATS Web Application Home](/img/screenshots/ats/ats-web.png)
+![ATS Web Application Home](../../images/ats-web.png)
 
 ## First Steps
 
@@ -158,7 +158,7 @@ You can switch between views from the dashboard by clicking the view selector.
 
 Once you've created tokens, you can manage them from the dashboard:
 
-![ATS Dashboard](/img/screenshots/ats/ats-web-dashboard.png)
+![ATS Dashboard](../../images/ats-web-dashboard.png)
 
 #### Selecting a Security Token
 

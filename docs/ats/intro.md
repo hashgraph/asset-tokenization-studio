@@ -150,7 +150,7 @@ React-based dApp for end users:
 - **Token Management**: Transfer, freeze, pause, and redeem tokens
 - **Wallet Integration**: HashPack, Blade, and WalletConnect support
 
-![ATS Web Application](/img/screenshots/ats/ats-web.png)
+![ATS Web Application](../images/ats-web.png)
 
 [Try the web app →](./getting-started/quick-start.md)
 

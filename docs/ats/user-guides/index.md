@@ -8,7 +8,7 @@ sidebar_position: 3
 
 Step-by-step guides for using the Asset Tokenization Studio web application.
 
-![ATS Web Application](/img/screenshots/ats/ats-web-dashboard.png)
+![ATS Web Application](../../images/ats-web-dashboard.png)
 
 ## Getting Started
 
