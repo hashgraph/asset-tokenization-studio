@@ -54,7 +54,7 @@
     "ats:setup": "npm ci && npm run ats:build",
     "ats:setup:clean": "npm run ats:clean && npm install && npm run ats:build",
     "ats:build": "npm run ats:contracts:build && npm run ats:sdk:build && npm run ats:web:build",
-    "ats:test": "npm run ats:contracts:test && npm run ats:sdk:test && npm run ats:web:test",
+    "ats:test": "npm run ats:sdk:test && npm run ats:contracts:test && npm run ats:web:test",
     "ats:test:ci": "npm run ats:contracts:test:ci && npm run ats:sdk:test:ci && npm run ats:web:test:ci",
     "ats:lint": "npm run ats:lint:js && npm run ats:lint:sol",
     "ats:lint:js": "eslint '*.{js,mjs,cjs,ts,tsx,mts,json}' 'packages/ats/**/*' 'apps/ats/**/*' --cache",

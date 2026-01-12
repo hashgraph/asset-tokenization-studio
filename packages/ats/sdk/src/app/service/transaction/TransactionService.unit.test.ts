@@ -219,8 +219,8 @@ import { ADDRESS_LENGTH, BYTES_32_LENGTH } from "@core/Constants";
 
 describe("TransactioNService", () => {
   let service: TransactionService;
-  const position = 0;
-  const numberOfResultsItems = 1;
+  const position = 1;
+  const numberOfResultsItems = 2;
 
   const mirrorNodeAdapterMock = createMock<MirrorNodeAdapter>();
   const transactionResponse = TransactionResponseFixture.create();

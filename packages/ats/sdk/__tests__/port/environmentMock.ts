@@ -243,7 +243,7 @@ import {
   ClearingTransfer,
 } from "@domain/context/security/Clearing";
 import { HoldDetails } from "@domain/context/security/Hold";
-import { RateStatus } from '@domain/context/bond/RateStatus';
+import { RateStatus } from "@domain/context/bond/RateStatus";
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -509,8 +509,7 @@ function createBondMockImplementation(
   const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
 
   for (let i = 0; i < numberOfCoupons; i++) {
-    const timeStamp =
-      couponInfo.firstCouponDate + couponInfo.couponFrequency * i;
+    const timeStamp = couponInfo.firstCouponDate + couponInfo.couponFrequency * i;
     const coupon = new Coupon(
       timeStamp,
       timeStamp,
@@ -2464,7 +2463,8 @@ jest.mock("@port/out/mirror/MirrorNodeAdapter", () => {
 
   MirrorNodeAdapterMock.getContractResults = jest.fn(
     async (transactionId: string, numberOfResultItems: number, timeout = 15, requestInterval = 2) => {
-      return ["123", "1"];
+      if (numberOfResultItems == 1) return ["1"];
+      else return ["123", "1"];
     },
   );
 
