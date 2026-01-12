@@ -43,62 +43,39 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
 
 ```
 ├── packages/
-│ ├── ats/
-│ │ ├── contracts # Solidity smart contracts for ATS
-│ │ └── sdk # TypeScript SDK for ATS contracts
-│ └── mass-payout/
-│ ├── contracts # Solidity smart contracts for payout flows
-│ └── sdk # TypeScript SDK for payout flows
+│   ├── ats/
+│   │   ├── contracts         # Solidity smart contracts for ATS
+│   │   └── sdk               # TypeScript SDK for ATS contracts
+│   └── mass-payout/
+│       ├── contracts         # Solidity smart contracts for payout flows
+│       └── sdk               # TypeScript SDK for payout flows
 ├── apps/
-│ ├── ats/
-│ │ └── web # Frontend dApp for Asset Tokenization Studio
-│ ├── mass-payout/
-│ │ ├── backend # API backend for payout orchestration
-│ │ └── frontend # Admin panel for managing payouts
-│ └── docs # Documentation site (Docusaurus)
-├── docs/ # Technical documentation
-│ ├── adr/ # Architecture Decision Records
-│ ├── proposals/ # Enhancement Proposals
-│ ├── guides/ # Developer Guides
-│ └── workflows/ # CI/CD Documentation
-└── package.json # Workspace configuration and root scripts
+│   ├── ats/
+│   │   └── web               # Frontend dApp for Asset Tokenization Studio
+│   ├── mass-payout/
+│   │   ├── backend           # API backend for payout orchestration
+│   │   └── frontend          # Admin panel for managing payouts
+│   └── docs                  # Documentation site (Docusaurus)
+├── docs/                     # Technical documentation
+│   ├── ats/                  # ATS documentation
+│   ├── mass-payout/          # Mass Payout documentation
+│   └── references/           # Cross-product documentation
+│       ├── adr/              # Architecture Decision Records
+│       ├── proposals/        # Enhancement Proposals
+│       └── guides/           # General Guides
+└── package.json              # Workspace configuration and root scripts
 ```
 
 ## Documentation
 
-📚 **For complete documentation, visit:** [https://hashgraph.github.io/asset-tokenization-studio/](https://hashgraph.github.io/asset-tokenization-studio/)
+**Complete documentation:** [docs/index.md](docs/index.md)
 
-This project follows a **"Docs-as-Code"** philosophy, treating documentation with the same rigor as software. We maintain comprehensive documentation organized by product:
+This project follows a **"Docs-as-Code"** philosophy, treating documentation with the same rigor as software. We maintain comprehensive documentation organized by product.
 
-### Product Documentation
-
-- **[ATS Documentation](docs/ats/)** - Asset Tokenization Studio guides, tutorials, and API references
-  - [Getting Started](docs/ats/getting-started/)
-  - [User Guides](docs/ats/user-guides/)
-  - [Developer Guides](docs/ats/developer-guides/)
-
-- **[Mass Payout Documentation](docs/mass-payout/)** - Scheduler Payment Distribution guides and references
-  - [Getting Started](docs/mass-payout/getting-started/)
-  - [User Guides](docs/mass-payout/user-guides/)
-  - [Developer Guides](docs/mass-payout/developer-guides/)
-
-### Reference Documentation
-
-- **[Architecture Decision Records (ADRs)](docs/references/adr/)** - Historical record of architectural decisions
-- **[Enhancement Proposals (EPs)](docs/references/proposals/)** - Feature specifications and design proposals
-- **[General Guides](docs/references/guides/)** - Cross-product guides (monorepo, CI/CD workflows)
-
-### Local Documentation Development
+You can also run the documentation site locally:
 
 ```bash
-# Start documentation site locally
 npm run docs:dev
-
-# Build documentation site
-npm run docs:build
-
-# Serve built documentation
-npm run docs:serve
 ```
 
 ## Architecture
