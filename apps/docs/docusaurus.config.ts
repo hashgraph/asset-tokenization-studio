@@ -135,20 +135,20 @@ const config: Config = {
           title: "Documentation",
           items: [
             {
-              label: "Getting Started",
-              to: "/docs",
+              label: "ATS Getting Started",
+              to: "/asset-tokenization-studio/ats/getting-started/quick-start",
             },
             {
-              label: "Developer Guides",
-              to: "/docs/guides",
+              label: "MP Getting Started",
+              to: "/asset-tokenization-studio/mass-payout/getting-started/quick-start",
             },
             {
               label: "Architecture Decisions",
-              to: "/docs/adr",
+              to: "/asset-tokenization-studio/references/adr/",
             },
             {
               label: "Enhancement Proposals",
-              to: "/docs/proposals",
+              to: "/asset-tokenization-studio/references/proposals/",
             },
           ],
         },
