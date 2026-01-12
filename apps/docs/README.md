@@ -14,7 +14,7 @@ npm ci
 npm start
 ```
 
-This command starts a local development server and opens up a browser window at `http://localhost:3000/asset-tokenization-studio/`. Most changes are reflected live without having to restart the server.
+This command starts a local development server and opens up a browser window at `http://localhost:3010/asset-tokenization-studio/`. Most changes are reflected live without having to restart the server.
 
 ## Build
 
