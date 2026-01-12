@@ -170,7 +170,7 @@ exports[`Coupons should render correctly 1`] = `
                         <div
                           class="css-zvlevn"
                         >
-                          details.coupons.list.columns.startDate
+                          Start Date
                         </div>
                       </div>
                     </th>
@@ -183,7 +183,7 @@ exports[`Coupons should render correctly 1`] = `
                         <div
                           class="css-zvlevn"
                         >
-                          details.coupons.list.columns.endDate
+                          End Date
                         </div>
                       </div>
                     </th>
@@ -196,7 +196,7 @@ exports[`Coupons should render correctly 1`] = `
                         <div
                           class="css-zvlevn"
                         >
-                          details.coupons.list.columns.fixingDate
+                          Fixing Date
                         </div>
                       </div>
                     </th>
