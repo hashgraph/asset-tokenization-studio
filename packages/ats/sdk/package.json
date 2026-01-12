@@ -23,7 +23,7 @@
     "build": "rimraf build && tsc -p tsconfig.json && tsc-alias -p tsconfig.json && tsc -p tsconfig.cjs.json && tsc-alias -p tsconfig.cjs.json",
     "test": "NODE_OPTIONS=--max-old-space-size=16384 npx jest --ci --runInBand --detectOpenHandles --forceExit",
     "test:coverage": "npm run test --coverage",
-    "test:ci": "npm run test:coverage",
+    "test:ci": "npm run test --coverage",
     "clean": "npm run clean:build && npm run clean:cache && npm run clean:coverage",
     "prepack": "npm run build",
     "clean:build": "npx --yes rimraf build",
