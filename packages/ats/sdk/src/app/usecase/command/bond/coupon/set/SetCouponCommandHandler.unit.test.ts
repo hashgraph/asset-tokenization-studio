@@ -203,24 +203,24 @@
 
 */
 
-import { SetCouponCommand, SetCouponCommandResponse } from './SetCouponCommand';
-import { SetCouponCommandHandler } from './SetCouponCommandHandler';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { SetCouponCommandFixture } from '@test/fixtures/bond/BondFixture';
-import { createMock } from '@golevelup/ts-jest';
-import TransactionService from '@service/transaction/TransactionService';
+import { SetCouponCommand, SetCouponCommandResponse } from "./SetCouponCommand";
+import { SetCouponCommandHandler } from "./SetCouponCommandHandler";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { SetCouponCommandFixture } from "@test/fixtures/bond/BondFixture";
+import { createMock } from "@golevelup/ts-jest";
+import TransactionService from "@service/transaction/TransactionService";
 import {
   CouponIdFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { SetCouponCommandError } from './error/SetCouponCommandError';
-import { ErrorCode } from '@core/error/BaseError';
+} from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { SetCouponCommandError } from "./error/SetCouponCommandError";
+import { ErrorCode } from "@core/error/BaseError";
 
-describe('SetCouponCommandHandler', () => {
+describe("SetCouponCommandHandler", () => {
   let handler: SetCouponCommandHandler;
   let command: SetCouponCommand;
   const transactionServiceMock = createMock<TransactionService>();
@@ -232,10 +232,7 @@ describe('SetCouponCommandHandler', () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new SetCouponCommandHandler(
-      transactionServiceMock,
-      contractServiceMock,
-    );
+    handler = new SetCouponCommandHandler(transactionServiceMock, contractServiceMock);
     command = SetCouponCommandFixture.create();
   });
 
@@ -243,29 +240,25 @@ describe('SetCouponCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws SetCouponCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws SetCouponCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          SetCouponCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(SetCouponCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while setting the coupon: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while setting the coupon: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('successfully sets coupon', async () => {
+    describe("success cases", () => {
+      it("successfully sets coupon", async () => {
         setupContractEvmAddressMock();
         setupSuccessfulTransactionMock();
         setupSuccesfulTransactionResultMock();
@@ -274,12 +267,8 @@ describe('SetCouponCommandHandler', () => {
 
         expectSuccessfulResponse(result);
         expectTransactionServiceCall(command, evmAddress);
-        expect(
-          transactionServiceMock.getHandler().setCoupon,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().setCoupon).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -328,8 +317,8 @@ describe('SetCouponCommandHandler', () => {
         },
         result: couponId,
         className: SetCouponCommandHandler.name,
-        position: 1,
-        numberOfResultsItems: 2,
+        position: 0,
+        numberOfResultsItems: 1,
       }),
     );
   }
