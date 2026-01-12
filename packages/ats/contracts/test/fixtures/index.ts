@@ -50,3 +50,15 @@ export {
   deployFullSuiteFixture,
   deploySuiteWithModularCompliancesFixture,
 } from "./trex/fullSuite.fixture";
+
+// TUP upgrade fixtures
+export {
+  deployTupUpgradeTestFixture,
+  deployTupInfrastructureOnlyFixture,
+  deployBlrV2Implementation,
+  deployFactoryV2Implementation,
+  createMockImplementation,
+  type TupUpgradeTestFixture,
+  type TupInfrastructureOnlyFixture,
+  type V2ImplementationResult,
+} from "./upgradeTupProxies.fixture";

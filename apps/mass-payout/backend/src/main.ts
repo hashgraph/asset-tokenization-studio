@@ -215,13 +215,17 @@ function getLogLevels(minLogLevel: LogLevel): LogLevel[] {
 
 function setupSwagger(app: any) {
   const config = new DocumentBuilder()
-    .setTitle("API Docs")
-    .setDescription("The API description")
+    .setTitle("Scheduler Payment Distribution ServiceAPI Docs")
+    .setDescription("The Scheduler Payment Distribution Service API description")
     .setVersion("1.0")
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup("swagger", app, document)
+  SwaggerModule.setup("swagger", app, document, {
+    swaggerOptions: {
+      defaultModelsExpandDepth: -1, // 🔥 Hide entire "Schemas" section
+    },
+  })
 }
 
 async function bootstrap() {

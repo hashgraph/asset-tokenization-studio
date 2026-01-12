@@ -282,9 +282,12 @@ The project uses separate GitHub Actions workflows for different components:
 
 - **ATS Tests** (`.github/workflows/test-ats.yml`): Runs when ATS-related files change
 - **Mass Payout Tests** (`.github/workflows/test-mp.yml`): Runs when Mass Payout files change
-- **Publishing** (`.github/workflows/publish.yml`): Handles publishing to npm with conditional logic based on release tags
+- **ATS Release** (`.github/workflows/ats.release.yml`): Semi-automated release workflow (manual version bump + automated tag/release)
+- **Mass Payout Release** (`.github/workflows/mp.release.yml`): Semi-automated release workflow (manual version bump + automated tag/release)
+- **ATS Publish** (`.github/workflows/ats.publish.yml`): Automatically publishes ATS packages to npm when release tags are pushed
+- **Mass Payout Publish** (`.github/workflows/mp.publish.yml`): Automatically publishes Mass Payout packages to npm when release tags are pushed
 
-Tests are automatically triggered only when relevant files are modified, improving CI efficiency.
+Tests are automatically triggered only when relevant files are modified, improving CI efficiency. For detailed release process documentation, see [`.github/WORKFLOWS.md`](.github/WORKFLOWS.md).
 
 ## Support
 

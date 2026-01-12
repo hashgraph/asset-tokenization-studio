@@ -13,6 +13,31 @@
 import type { RetryOptions } from "./utils/transaction";
 
 /**
+ * Known network names with IDE autocomplete support.
+ * Import and use for type-safe network parameters in workflows.
+ *
+ * @example
+ * ```typescript
+ * import { KNOWN_NETWORKS } from '@scripts/infrastructure';
+ * await upgradeConfigurations(signer, KNOWN_NETWORKS.HEDERA_TESTNET, options);
+ * ```
+ */
+export const KNOWN_NETWORKS = {
+  HARDHAT: "hardhat",
+  LOCAL: "local",
+  HEDERA_LOCAL: "hedera-local",
+  HEDERA_PREVIEWNET: "hedera-previewnet",
+  HEDERA_TESTNET: "hedera-testnet",
+  HEDERA_MAINNET: "hedera-mainnet",
+} as const;
+
+/**
+ * Type representing known network names.
+ * Use with KNOWN_NETWORKS constant for autocomplete.
+ */
+export type KnownNetwork = (typeof KNOWN_NETWORKS)[keyof typeof KNOWN_NETWORKS];
+
+/**
  * Network-specific deployment configuration.
  * Different from NetworkConfig in types.ts which contains RPC endpoints.
  */
