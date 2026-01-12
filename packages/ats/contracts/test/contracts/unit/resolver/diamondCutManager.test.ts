@@ -1,6 +1,5 @@
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { expect } from "chai";
-import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   AccessControl,
@@ -9,6 +8,9 @@ import {
   DiamondCutManager,
   IDiamondCutManager,
   IDiamondLoupe,
+  DiamondCutManager__factory,
+  AccessControlFacet__factory,
+  Pause__factory,
 } from "@contract-types";
 import {
   ATS_ROLES,
@@ -51,12 +53,13 @@ describe("DiamondCutManager", () => {
     signer_A = infrastructure.deployer;
     signer_B = infrastructure.user2;
 
-    accessControl = await ethers.getContractAt("AccessControlFacet", businessLogicResolver.address, signer_A);
+    // Use TypeChain factories instead of ethers.getContractAt for proper ABI resolution
+    accessControl = AccessControlFacet__factory.connect(businessLogicResolver.address, signer_A);
     await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
 
-    pause = await ethers.getContractAt("Pause", businessLogicResolver.address, signer_A);
+    pause = Pause__factory.connect(businessLogicResolver.address, signer_A);
 
-    diamondCutManager = await ethers.getContractAt("DiamondCutManager", businessLogicResolver.address, signer_A);
+    diamondCutManager = DiamondCutManager__factory.connect(businessLogicResolver.address, signer_A);
     equityFacetIdList = Object.values(infrastructure.equityFacetKeys);
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
     bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
@@ -427,7 +430,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_A).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations),
-    ).to.be.rejectedWith("DuplicatedFacetInConfiguration");
+    ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
   it("GIVEN a batch deploying WHEN run cancelBatchConfiguration THEN all the related information is removed", async () => {
@@ -435,18 +438,10 @@ describe("DiamondCutManager", () => {
 
     const batchBusinessLogicResolver = batchInfrastructure.blr;
 
-    const batchAccessControl = await ethers.getContractAt(
-      "AccessControlFacet",
-      batchBusinessLogicResolver.address,
-      signer_A,
-    );
+    const batchAccessControl = AccessControlFacet__factory.connect(batchBusinessLogicResolver.address, signer_A);
     await batchAccessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
 
-    const batchDiamondCutManager = await ethers.getContractAt(
-      "DiamondCutManager",
-      batchBusinessLogicResolver.address,
-      signer_A,
-    );
+    const batchDiamondCutManager = DiamondCutManager__factory.connect(batchBusinessLogicResolver.address, signer_A);
 
     const configLength = (await batchDiamondCutManager.getConfigurationsLength()).toNumber();
     expect(configLength).to.equal(0);
@@ -559,7 +554,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_A).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false),
-    ).to.be.rejectedWith("DuplicatedFacetInConfiguration");
+    ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
   it("GIVEN a resolver WHEN a selector is blacklisted THEN transaction fails with SelectorBlacklisted", async () => {

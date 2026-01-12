@@ -16,6 +16,7 @@ import {
   findLatestDeployment,
   listDeploymentFiles,
   saveDeploymentOutput,
+  generateTimestamp,
   type DeploymentOutputType,
 } from "@scripts/infrastructure";
 
@@ -143,9 +144,10 @@ describe("Deployment File Utilities", () => {
   });
 
   describe("loadDeployment", () => {
-    const timestamp = "2025-11-08_10-30-45";
+    let timestamp: string;
 
     before(async () => {
+      timestamp = generateTimestamp();
       await createTestDeployment(timestamp);
     });
 
@@ -206,13 +208,13 @@ describe("Deployment File Utilities", () => {
     });
 
     it("should throw error for missing file", async () => {
-      await expect(loadDeployment(TEST_NETWORK, TEST_WORKFLOW, "2025-01-01_00-00-00")).to.be.rejectedWith(
+      await expect(loadDeployment(TEST_NETWORK, TEST_WORKFLOW, "2025-01-01T00-00-00")).to.be.rejectedWith(
         "Deployment file not found",
       );
     });
 
     it("should throw error for invalid JSON", async () => {
-      const invalidTimestamp = "2025-11-08_11-00-00";
+      const invalidTimestamp = generateTimestamp();
       const networkDir = join(TEST_DEPLOYMENTS_DIR, TEST_NETWORK);
       const filename = `${TEST_WORKFLOW}-${invalidTimestamp}.json`;
       const filepath = join(networkDir, filename);
@@ -234,7 +236,7 @@ describe("Deployment File Utilities", () => {
   });
 
   describe("findLatestDeployment", () => {
-    const timestamps = ["2025-11-08_10-00-00", "2025-11-08_11-00-00", "2025-11-08_12-00-00"];
+    const timestamps = ["2025-11-08T10-00-00", "2025-11-08T11-00-00", "2025-11-08T12-00-00"];
 
     before(async () => {
       // Create multiple test deployments
@@ -250,7 +252,7 @@ describe("Deployment File Utilities", () => {
       const latest = await findLatestDeployment(TEST_NETWORK, TEST_WORKFLOW);
 
       expect(latest).to.not.be.null;
-      expect(latest!.timestamp).to.equal("2025-11-08_12-00-00"); // Most recent
+      expect(latest!.timestamp).to.equal("2025-11-08T12-00-00"); // Most recent
       expect(latest!.network).to.equal(TEST_NETWORK);
     });
 
@@ -261,7 +263,7 @@ describe("Deployment File Utilities", () => {
   });
 
   describe("listDeploymentFiles", () => {
-    const timestamps = ["2025-11-08_10-00-00", "2025-11-08_11-00-00", "2025-11-08_12-00-00"];
+    const timestamps = ["2025-11-08T10-00-00", "2025-11-08T11-00-00", "2025-11-08T12-00-00"];
 
     before(async () => {
       // Create multiple test deployments
@@ -301,7 +303,7 @@ describe("Deployment File Utilities", () => {
     it("should filter files by network correctly", async () => {
       // Create deployment for different network
       const otherNetwork = "other-network";
-      const otherTimestamp = "2025-11-08_13-00-00";
+      const otherTimestamp = generateTimestamp();
 
       await createTestDeployment(otherTimestamp);
 
@@ -433,7 +435,7 @@ describe("Deployment File Utilities", () => {
   });
 
   describe("Integration", () => {
-    const timestamps = ["2025-11-08_14-00-00", "2025-11-08_15-00-00"];
+    const timestamps = ["2025-11-08T14-00-00", "2025-11-08T15-00-00"];
 
     before(async () => {
       await Promise.all(timestamps.map((ts) => createTestDeployment(ts)));
