@@ -24,10 +24,10 @@
  * ```
  */
 
-// Domain registry data (auto-generated) - MUST be first, others depend on it
+// Domain registry data (auto-generated)
 export * from "./atsRegistry.data";
 
-// Domain constants (depends on ROLES from registry.data)
+// Domain constants
 export * from "./constants";
 
 // Domain registry (ATS-specific contract registry helpers)

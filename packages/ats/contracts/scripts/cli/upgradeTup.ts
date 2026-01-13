@@ -29,7 +29,7 @@
  */
 
 import { upgradeTupProxies } from "../workflows/upgradeTupProxies";
-import { getAllNetworks, getNetworkConfig } from "@scripts/infrastructure";
+import { getAllNetworks, getNetworkConfig, info, success, error } from "@scripts/infrastructure";
 import { Wallet, providers, ethers } from "ethers";
 
 async function main() {
@@ -45,30 +45,30 @@ async function main() {
   const blrInitData = process.env.BLR_INIT_DATA;
   const factoryInitData = process.env.FACTORY_INIT_DATA;
 
-  console.log(`🔄 Starting TUP Proxy Upgrade`);
-  console.log("=".repeat(60));
-  console.log(`📡 Network: ${network}`);
-  console.log(`🔐 ProxyAdmin: ${proxyAdminAddress || "NOT PROVIDED"}`);
+  info(`🔄 Starting TUP Proxy Upgrade`);
+  info("---");
+  info(`📡 Network: ${network}`);
+  info(`🔑 ProxyAdmin: ${proxyAdminAddress || "NOT PROVIDED"}`);
   if (blrProxyAddress) {
-    console.log(`  BLR Proxy: ${blrProxyAddress}`);
-    console.log(`  Deploy: ${deployNewBlrImpl}, Implementation: ${blrImplementationAddress || "None"}`);
+    info(`  BLR Proxy: ${blrProxyAddress}`);
+    info(`  Deploy: ${deployNewBlrImpl}, Implementation: ${blrImplementationAddress || "None"}`);
   }
   if (factoryProxyAddress) {
-    console.log(`  Factory Proxy: ${factoryProxyAddress}`);
-    console.log(`  Deploy: ${deployNewFactoryImpl}, Implementation: ${factoryImplementationAddress || "None"}`);
+    info(`  Factory Proxy: ${factoryProxyAddress}`);
+    info(`  Deploy: ${deployNewFactoryImpl}, Implementation: ${factoryImplementationAddress || "None"}`);
   }
-  console.log("=".repeat(60));
+  info("---");
 
   // Validate required address
   if (!proxyAdminAddress) {
-    console.error(`❌ Missing PROXY_ADMIN_ADDRESS environment variable`);
-    console.error(`   Usage: PROXY_ADMIN_ADDRESS=0x123... npm run upgrade:tup:${network.replace("hedera-", "")}`);
+    error(`❌ Missing PROXY_ADMIN_ADDRESS environment variable`);
+    error(`Usage: PROXY_ADMIN_ADDRESS=0x123... npm run upgrade:tup:${network.replace("hedera-", "")}`);
     process.exit(1);
   }
 
   if (!ethers.utils.isAddress(proxyAdminAddress)) {
-    console.error(`❌ Invalid ProxyAdmin address: ${proxyAdminAddress}`);
-    console.error(`   Must be a valid Ethereum address (0x...)`);
+    error(`❌ Invalid ProxyAdmin address: ${proxyAdminAddress}`);
+    error(`Must be a valid Ethereum address (0x...)`);
     process.exit(1);
   }
 
@@ -90,8 +90,8 @@ async function main() {
 
   for (const [addr, name] of addressesToValidate) {
     if (!ethers.utils.isAddress(addr)) {
-      console.error(`❌ Invalid ${name} address: ${addr}`);
-      console.error(`   All addresses must be valid Ethereum addresses (0x...)`);
+      error(`❌ Invalid ${name} address: ${addr}`);
+      error(`All addresses must be valid Ethereum addresses (0x...)`);
       process.exit(1);
     }
   }
@@ -99,8 +99,8 @@ async function main() {
   // Validate network configuration
   const availableNetworks = getAllNetworks();
   if (!availableNetworks.includes(network)) {
-    console.error(`❌ Network '${network}' not configured in Configuration.ts`);
-    console.log(`Available networks: ${availableNetworks.join(", ")}`);
+    error(`❌ Network '${network}' not configured in Configuration.ts`);
+    info(`Available networks: ${availableNetworks.join(", ")}`);
     process.exit(1);
   }
 
@@ -111,15 +111,15 @@ async function main() {
   const privateKey = process.env[privateKeyEnvVar];
 
   if (!privateKey) {
-    console.error(`❌ Missing private key environment variable: ${privateKeyEnvVar}`);
-    console.error(`   Set it with: export ${privateKeyEnvVar}=0x...`);
+    error(`❌ Missing private key environment variable: ${privateKeyEnvVar}`);
+    error(`Set it with: export ${privateKeyEnvVar}=0x...`);
     process.exit(1);
   }
 
   const provider = new providers.JsonRpcProvider(networkConfig.jsonRpcUrl);
   const signer = new Wallet(privateKey, provider);
 
-  console.log(`\n👤 Deployer: ${await signer.getAddress()}\n`);
+  info(`👤 Deployer: ${await signer.getAddress()}`);
 
   try {
     const result = await upgradeTupProxies(signer, network, {
@@ -134,33 +134,33 @@ async function main() {
       factoryInitData,
     });
 
-    console.log(`\n✓ Upgrade completed successfully!`);
-    console.log(`  Proxies upgraded: ${result.summary.proxiesUpgraded}`);
-    console.log(`  Proxies failed: ${result.summary.proxiesFailed}`);
-    console.log(`  Total time: ${(result.summary.deploymentTime / 1000).toFixed(2)}s`);
-    console.log(`  Total gas: ${result.summary.gasUsed}`);
+    success(`✅ Upgrade completed successfully!`);
+    info("📋 Summary:");
+    info(`   Proxies upgraded: ${result.summary.proxiesUpgraded}`);
+    info(`   Proxies failed: ${result.summary.proxiesFailed}`);
+    info(`   Total time: ${(result.summary.deploymentTime / 1000).toFixed(2)}s`);
+    info(`   Total gas: ${result.summary.gasUsed}`);
 
     if (result.blrUpgrade) {
-      console.log(`\n  BLR: ${result.blrUpgrade.upgraded ? "upgraded" : "unchanged"}`);
+      info(`📦 BLR: ${result.blrUpgrade.upgraded ? "✅ upgraded" : "unchanged"}`);
       if (result.blrUpgrade.transactionHash) {
-        console.log(`    TX: ${result.blrUpgrade.transactionHash}`);
+        info(`   TX: ${result.blrUpgrade.transactionHash}`);
       }
     }
 
     if (result.factoryUpgrade) {
-      console.log(`  Factory: ${result.factoryUpgrade.upgraded ? "upgraded" : "unchanged"}`);
+      info(`🏭 Factory: ${result.factoryUpgrade.upgraded ? "✅ upgraded" : "unchanged"}`);
       if (result.factoryUpgrade.transactionHash) {
-        console.log(`    TX: ${result.factoryUpgrade.transactionHash}`);
+        info(`   TX: ${result.factoryUpgrade.transactionHash}`);
       }
     }
 
     process.exit(0);
-  } catch (error) {
-    console.error(`\n❌ Upgrade failed: ${error instanceof Error ? error.message : String(error)}`);
+  } catch (err) {
+    error(`❌ Upgrade failed: ${err instanceof Error ? err.message : String(err)}`);
 
-    if (error instanceof Error && error.stack) {
-      console.error(`\nStack trace:`);
-      console.error(error.stack);
+    if (err instanceof Error && err.stack) {
+      error(`Stack trace:\n${err.stack}`);
     }
 
     process.exit(1);
@@ -168,6 +168,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("Fatal error:", err);
+  error("❌ Fatal error:", err);
   process.exit(1);
 });

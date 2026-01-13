@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { AtsRoleName, AtsRoleHash } from "@scripts/domain";
+import { AtsRoleName, AtsRoleHash } from "../constants";
 export interface Rbac {
   role: AtsRoleName | AtsRoleHash;
   members: string[];
