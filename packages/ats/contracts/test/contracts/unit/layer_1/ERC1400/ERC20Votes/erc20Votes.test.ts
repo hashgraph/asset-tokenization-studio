@@ -107,6 +107,28 @@ describe("ERC20Votes Tests", () => {
         "AlreadyInitialized",
       );
     });
+
+    it("GIVEN ERC20Votes activated WHEN calling isActivated THEN returns true", async () => {
+      const isActivated = await erc20VotesFacet.isActivated();
+      expect(isActivated).to.equal(true);
+    });
+
+    it("GIVEN ERC20Votes not activated WHEN calling isActivated THEN returns false", async () => {
+      // Deploy new fixture with erc20VotesActivated = false
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: true,
+            internalKycActivated: false,
+            erc20VotesActivated: false,
+          },
+        },
+      });
+
+      const erc20VotesFacetInactive = await ethers.getContractAt("ERC20Votes", base.diamond.address);
+      const isActivated = await erc20VotesFacetInactive.isActivated();
+      expect(isActivated).to.equal(false);
+    });
   });
 
   describe("Clock and Clock Mode", () => {
