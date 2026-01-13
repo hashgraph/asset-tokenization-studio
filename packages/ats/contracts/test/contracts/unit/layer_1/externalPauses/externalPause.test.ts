@@ -17,10 +17,20 @@ describe("ExternalPause Tests", () => {
   let externalPauseMock3: MockedExternalPause;
 
   async function deploySecurityFixture() {
+    const [tempSigner] = await ethers.getSigners();
+    const initMock1 = await (await ethers.getContractFactory("MockedExternalPause", tempSigner)).deploy();
+    await initMock1.deployed();
+    await initMock1.setPaused(false);
+
+    const initMock2 = await (await ethers.getContractFactory("MockedExternalPause", tempSigner)).deploy();
+    await initMock2.deployed();
+    await initMock2.setPaused(false);
+
     const base = await deployEquityTokenFixture({
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
+          externalPauses: [initMock1.address, initMock2.address], // These trigger the for loop in initialize_ExternalPauses
         },
       },
     });
@@ -143,7 +153,7 @@ describe("ExternalPause Tests", () => {
       expect(await externalPauseManagement.isExternalPause(externalPauseMock2.address)).to.be.true;
       expect(await externalPauseManagement.isExternalPause(externalPauseMock3.address)).to.be.false;
       const initialCount = await externalPauseManagement.getExternalPausesCount();
-      expect(initialCount).to.equal(2);
+      expect(initialCount).to.equal(4); // 2 from init + 2 added in fixture
 
       const pausesToUpdate = [externalPauseMock2.address, externalPauseMock3.address];
       const activesToUpdate = [false, true]; // Corresponds to removing mock2, adding mock3
@@ -160,7 +170,7 @@ describe("ExternalPause Tests", () => {
       expect(await externalPauseManagement.isExternalPause(externalPauseMock1.address)).to.be.true; // mock1 untouched
       expect(await externalPauseManagement.isExternalPause(externalPauseMock2.address)).to.be.false; // mock2 removed
       expect(await externalPauseManagement.isExternalPause(externalPauseMock3.address)).to.be.true; // mock3 added
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount.sub(1).add(1)); // 2 - 1 + 1 = 2
+      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount.sub(1).add(1)); // 4 - 1 + 1 = 4
     });
 
     it("GIVEN duplicate addresses with conflicting actives (true then false) WHEN updated THEN it reverts with ContradictoryValuesInArray", async () => {
@@ -218,44 +228,51 @@ describe("ExternalPause Tests", () => {
 
     it("GIVEN external pauses WHEN getExternalPausesCount is called THEN it returns the current count", async () => {
       const initialCount = await externalPauseManagement.getExternalPausesCount();
-      expect(initialCount).to.equal(2); // From beforeEach
+      expect(initialCount).to.equal(4); // 2 from init + 2 from beforeEach
       await externalPauseManagement.addExternalPause(externalPauseMock3.address);
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount.add(1)); // 3
+      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount.add(1)); // 5
       await externalPauseManagement.removeExternalPause(externalPauseMock1.address);
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount); // 2
+      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(initialCount); // 4
       await externalPauseManagement.removeExternalPause(externalPauseMock2.address);
       await externalPauseManagement.removeExternalPause(externalPauseMock3.address);
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(0);
+      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(2); // 2 from init remain
     });
 
     it("GIVEN external pauses WHEN getExternalPausesMembers is called THEN it returns paginated members", async () => {
-      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(2); // From beforeEach
+      expect(await externalPauseManagement.getExternalPausesCount()).to.equal(4); // 2 from init + 2 from beforeEach
+
+      // Test pagination - get first member
       let membersPage = await externalPauseManagement.getExternalPausesMembers(0, 1);
       expect(membersPage).to.have.lengthOf(1);
-      expect([externalPauseMock1.address, externalPauseMock2.address]).to.include(membersPage[0]);
+      const firstMember = membersPage[0];
+
+      // Test pagination - get second member (should be different from first)
       membersPage = await externalPauseManagement.getExternalPausesMembers(1, 1);
       expect(membersPage).to.have.lengthOf(1);
-      expect([externalPauseMock1.address, externalPauseMock2.address]).to.include(membersPage[0]);
-      expect(membersPage[0]).to.not.equal((await externalPauseManagement.getExternalPausesMembers(0, 1))[0]);
-      let allMembers = await externalPauseManagement.getExternalPausesMembers(0, 2);
-      expect(allMembers).to.have.lengthOf(2);
+      expect(membersPage[0]).to.not.equal(firstMember);
+
+      // Get all 4 members
+      let allMembers = await externalPauseManagement.getExternalPausesMembers(0, 4);
+      expect(allMembers).to.have.lengthOf(4);
       expect(allMembers).to.contain(externalPauseMock1.address);
       expect(allMembers).to.contain(externalPauseMock2.address);
       await externalPauseManagement.addExternalPause(externalPauseMock3.address);
-      allMembers = await externalPauseManagement.getExternalPausesMembers(0, 3);
-      expect(allMembers).to.have.lengthOf(3);
+      allMembers = await externalPauseManagement.getExternalPausesMembers(0, 5);
+      expect(allMembers).to.have.lengthOf(5);
       expect(allMembers).to.contain(externalPauseMock1.address);
       expect(allMembers).to.contain(externalPauseMock2.address);
       expect(allMembers).to.contain(externalPauseMock3.address);
-      membersPage = await externalPauseManagement.getExternalPausesMembers(1, 2);
-      expect(membersPage).to.have.lengthOf(1);
-      membersPage = await externalPauseManagement.getExternalPausesMembers(3, 1);
+
+      membersPage = await externalPauseManagement.getExternalPausesMembers(1, 3);
+      expect(membersPage).to.have.lengthOf(2);
+
+      membersPage = await externalPauseManagement.getExternalPausesMembers(5, 1);
       expect(membersPage).to.have.lengthOf(0);
       await externalPauseManagement.removeExternalPause(externalPauseMock1.address);
       await externalPauseManagement.removeExternalPause(externalPauseMock2.address);
       await externalPauseManagement.removeExternalPause(externalPauseMock3.address);
       allMembers = await externalPauseManagement.getExternalPausesMembers(0, 5);
-      expect(allMembers).to.have.lengthOf(0);
+      expect(allMembers).to.have.lengthOf(2); // 2 from init remain
     });
   });
 
@@ -369,6 +386,15 @@ describe("ExternalPause Tests", () => {
         .withArgs(signer_A.address, pauses, actives);
       expect(await externalPauseManagement.isExternalPause(externalPauseMock1.address)).to.be.false;
       expect(await externalPauseManagement.isExternalPause(externalPauseMock2.address)).to.be.true;
+    });
+  });
+
+  describe("Initialize Tests", () => {
+    it("GIVEN already initialized WHEN initialize_ExternalPauses is called again THEN it reverts with AlreadyInitialized", async () => {
+      await expect(externalPauseManagement.initialize_ExternalPauses([])).to.be.revertedWithCustomError(
+        externalPauseManagement,
+        "AlreadyInitialized",
+      );
     });
   });
 });
