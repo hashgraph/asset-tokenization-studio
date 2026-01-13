@@ -1,4 +1,3 @@
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
@@ -21,6 +20,7 @@ import {
   EQUITY_CONFIG_ID,
 } from "@scripts";
 import { deployAtsInfrastructureFixture } from "@test";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 // Test-specific configuration IDs for negative test cases
 // These are separate from EQUITY_CONFIG_ID/BOND_CONFIG_ID to avoid conflicts
@@ -45,8 +45,12 @@ describe("DiamondCutManager", () => {
   let bondSustainabilityPerformanceTargetRateFacetIdList: string[] = [];
   let equityFacetVersionList: number[] = [];
 
+  async function atsInfrastructureFixture() {
+    return await deployAtsInfrastructureFixture();
+  }
+
   beforeEach(async () => {
-    const infrastructure = await deployAtsInfrastructureFixture();
+    const infrastructure = await loadFixture(atsInfrastructureFixture);
 
     businessLogicResolver = infrastructure.blr;
 

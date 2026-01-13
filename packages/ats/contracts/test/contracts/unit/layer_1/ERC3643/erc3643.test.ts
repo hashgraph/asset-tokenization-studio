@@ -1821,6 +1821,26 @@ describe("ERC3643 Tests", () => {
         );
       });
 
+      it("GIVEN a paused token WHEN batchFreezePartialTokens THEN transactions revert with TokenIsPaused error", async () => {
+        const userAddresses = [signer_D.address, signer_E.address];
+        const amounts = [100, 100];
+
+        await expect(freezeFacet.batchFreezePartialTokens(userAddresses, amounts)).to.be.revertedWithCustomError(
+          pauseFacet,
+          "TokenIsPaused",
+        );
+      });
+
+      it("GIVEN a paused token WHEN batchUnfreezePartialTokens THEN transactions revert with TokenIsPaused error", async () => {
+        const userAddresses = [signer_D.address, signer_E.address];
+        const amounts = [100, 100];
+
+        await expect(freezeFacet.batchUnfreezePartialTokens(userAddresses, amounts)).to.be.revertedWithCustomError(
+          pauseFacet,
+          "TokenIsPaused",
+        );
+      });
+
       it("GIVEN a paused token WHEN attempting to addAgent THEN transactions revert with TokenIsPaused error", async () => {
         await expect(erc3643Facet.addAgent(signer_A.address)).to.be.rejectedWith("TokenIsPaused");
       });

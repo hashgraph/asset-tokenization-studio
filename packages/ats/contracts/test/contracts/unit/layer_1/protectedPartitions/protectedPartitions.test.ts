@@ -398,7 +398,7 @@ describe("ProtectedPartitions Tests", () => {
           compliance: complianceMockAddress,
         },
       },
-      useLoadFixture: false,
+      useLoadFixture: false, // CRITICAL: avoid nested loadFixture that would erase ComplianceMock
     });
 
     diamond_ProtectedPartitions = base.diamond;
@@ -411,7 +411,7 @@ describe("ProtectedPartitions Tests", () => {
   }
 
   beforeEach(async () => {
-    await loadFixture(deploySecurityFixtureUnprotectedPartitions);
+    // await loadFixture(deploySecurityFixtureUnprotectedPartitions);
     await loadFixture(deploySecurityFixtureProtectedPartitions);
 
     const expirationTimestamp = MAX_UINT256;
@@ -790,6 +790,16 @@ describe("ProtectedPartitions Tests", () => {
 
       const partitionsProtectedStatus = await protectedPartitionsFacet.arePartitionsProtected();
       expect(partitionsProtectedStatus).to.be.false;
+    });
+
+    it("GIVEN an account WHEN retrieving nounce THEN returns correct nounce value", async () => {
+      const nounce = await protectedPartitionsFacet.getNounceFor(signer_A.address);
+      expect(nounce).to.equal(0);
+    });
+
+    it("GIVEN a partition WHEN calculating role for partition THEN returns correct role", async () => {
+      const role = await protectedPartitionsFacet.calculateRoleForPartition(DEFAULT_PARTITION);
+      expect(role).to.equal(ProtectedPartitionRole_1);
     });
 
     describe("Transfer Tests", () => {
