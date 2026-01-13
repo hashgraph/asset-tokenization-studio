@@ -54,10 +54,10 @@
  *       the copyright owner. For the purposes of this definition, "submitted"
  *       means any form of electronic, verbal, or written communication sent
  *       to the Licensor or its representatives, including but not limited to
- *       communication on electronic mailing lists, source code control systems,
- *       and issue tracking systems that are managed by, or on behalf of, the
- *       Licensor for the purpose of discussing and improving the Work, but
- *       excluding communication that is conspicuously marked or otherwise
+ *       communication on electronic mailing lists, source code control
+ *       systems, and issue tracking systems that are managed by, or on behalf
+ *       of, the Licensor for the purpose of discussing and improving the Work,
+ *       but excluding communication that is conspicuously marked or otherwise
  *       designated in writing by the copyright owner as "Not a Contribution."
  *
  *       "Contributor" shall mean Licensor and any individual or Legal Entity
@@ -67,9 +67,13 @@
  *    2. Grant of Copyright License. Subject to the terms and conditions of
  *       this License, each Contributor hereby grants to You a perpetual,
  *       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
- *       copyright license to reproduce, prepare Derivative Works of,
- *       publicly display, publicly perform, sublicense, and distribute the
- *       Work and such Derivative Works in Source or Object form.
+ *       copyright license to use, reproduce, modify, distribute, and perform
+ *       the Work and to prepare Derivative Works based upon the Work, and to
+ *       permit persons to whom the Work is furnished to do so, subject to the
+ *       following conditions:
+ *
+ *       The above copyright notice and this permission notice shall be
+ *       included in all copies or substantial portions of the Work.
  *
  *    3. Grant of Patent License. Subject to the terms and conditions of
  *       this License, each Contributor hereby grants to You a perpetual,
@@ -99,8 +103,8 @@
  *           stating that You changed the files; and
  *
  *       (c) You must retain, in the Source form of any Derivative Works
- *           that You distribute, all copyright, patent, trademark, and
- *           attribution notices from the Source form of the Work,
+ *           that You distribute, all copyright, trademark, patent,
+ *           attribution and other notices from the Source form of the Work,
  *           excluding those notices that do not pertain to any part of
  *           the Derivative Works; and
  *
@@ -121,7 +125,7 @@
  *           that such additional attribution notices cannot be construed
  *           as modifying the License.
  *
- *       You may add Your own copyright statement to Your modifications and
+ *       You may add Your own copyright notice to Your modifications and
  *       may provide additional or different license terms and conditions
  *       for use, reproduction, or distribution of Your modifications, or
  *       for any such Derivative Works as a whole, provided Your use,
@@ -163,7 +167,7 @@
  *       other commercial damages or losses), even if such Contributor
  *       has been advised of the possibility of such damages.
  *
- *    9. Accepting Warranty or Additional Liability. While redistributing
+ *    9. Accepting Warranty or Additional Liability. When redistributing
  *       the Work or Derivative Works thereof, You may choose to offer,
  *       and charge a fee for, acceptance of support, warranty, indemnity,
  *       or other liability obligations and/or rights consistent with this
@@ -187,7 +191,7 @@
  *       same "printed page" as the copyright notice for easier
  *       identification within third-party archives.
  *
- *    Copyright 2025 Hedera Hashgraph LLC
+ *    Copyright [yyyy] [name of copyright owner]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -202,25 +206,84 @@
  *    limitations under the License.
  */
 
-/* eslint-disable max-len */
-export { MassPayoutSDK } from "./sdk.module";
-export { default as InitializationRequest } from "@port/in/request/network/InitializationRequest";
-export { Network } from "@port/in/network/Network";
-export { SupportedWallets } from "@domain/network/Wallet";
-export { default as ConnectRequest } from "@port/in/request/network/ConnectRequest";
-export { LifeCycleCashFlow } from "@port/in/lifeCycleCashFlow/LifeCycleCashFlow";
-export { default as DeployRequest } from "@port/in/request/lifeCycleCashFlow/DeployRequest";
-export { default as RbacRequest } from "@port/in/request/lifeCycleCashFlow/RbacRequest";
-export { default as PauseRequest } from "@port/in/request/lifeCycleCashFlow/PauseRequest";
-export { default as UnpauseRequest } from "@port/in/request/lifeCycleCashFlow/UnpauseRequest";
-export { default as IsPausedRequest } from "@port/in/request/lifeCycleCashFlow/IsPausedRequest";
-export { default as GetPaymentTokenRequest } from "@port/in/request/lifeCycleCashFlow/GetPaymentTokenRequest";
-export { default as GetPaymentTokenDecimalsRequest } from "@port/in/request/lifeCycleCashFlow/GetPaymentTokenDecimalsRequest";
-export { default as ExecuteDistributionRequest } from "@port/in/request/lifeCycleCashFlow/ExecuteDistributionRequest";
-export { default as ExecuteDistributionByAddressesRequest } from "@port/in/request/lifeCycleCashFlow/ExecuteDistributionByAddressesRequest";
-export { default as ExecuteBondCashOutRequest } from "@port/in/request/lifeCycleCashFlow/ExecuteBondCashOutRequest";
-export { default as ExecuteBondCashOutByAddressesRequest } from "@port/in/request/lifeCycleCashFlow/ExecuteBondCashOutByAddressesRequest";
-export { default as ExecuteAmountSnapshotRequest } from "@port/in/request/lifeCycleCashFlow/ExecuteAmountSnapshotRequest";
-export { default as ExecuteAmountSnapshotByAddressesRequest } from "@port/in/request/lifeCycleCashFlow/ExecuteAmountSnapshotByAddressesRequest";
-export { default as ExecutePercentageSnapshotRequest } from "@port/in/request/lifeCycleCashFlow/ExecutePercentageSnapshotRequest";
-export { default as ExecutePercentageSnapshotByAddressesRequest } from "@port/in/request/lifeCycleCashFlow/ExecutePercentageSnapshotByAddressesRequest";
+import { Test, TestingModule } from "@nestjs/testing"
+import { LifeCycleCashFlowSdkService } from "@infrastructure/adapters/life-cycle-cash-flow-sdk.service"
+import { LifeCycleCashFlow } from "@mass-payout/sdk"
+import { HederaService } from "@domain/ports/hedera.port"
+import { ConfigService } from "@nestjs/config"
+import { LifeCycleCashFlowAddress } from "@domain/model/life-cycle-cash-flow-address.value-object"
+import { RbacRequest } from "@mass-payout/sdk"
+
+describe("LifeCycleCashFlowSdkService", () => {
+  let service: LifeCycleCashFlowSdkService
+  let lifeCycleCashFlow: jest.Mocked<LifeCycleCashFlow>
+  let hederaService: jest.Mocked<HederaService>
+  let configService: jest.Mocked<ConfigService>
+
+  beforeEach(async () => {
+    // Create mocks
+    const lifeCycleCashFlowMock = {
+      deploy: jest.fn(),
+    } as unknown as jest.Mocked<LifeCycleCashFlow>
+
+    const hederaServiceMock = {
+      getHederaAddressFromEvm: jest.fn(),
+    } as unknown as jest.Mocked<HederaService>
+
+    const configServiceMock = {
+      get: jest.fn(),
+    } as unknown as jest.Mocked<ConfigService>
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        LifeCycleCashFlowSdkService,
+        { provide: LifeCycleCashFlow, useValue: lifeCycleCashFlowMock },
+        { provide: "HederaService", useValue: hederaServiceMock },
+        { provide: ConfigService, useValue: configServiceMock },
+      ],
+    }).compile()
+
+    service = module.get(LifeCycleCashFlowSdkService)
+    lifeCycleCashFlow = module.get(LifeCycleCashFlow)
+    hederaService = module.get("HederaService")
+    configService = module.get(ConfigService)
+  })
+
+  it("should deploy contract and return LifeCycleCashFlowAddress", async () => {
+    const hederaAsset = "0.0.12345"
+    const hederaToken = "0.0.54321"
+    const evmAddress = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    const hederaAddress = "0.0.98765"
+
+    // Config mock returns a default account ID
+    configService.get.mockReturnValue("0.0.99999")
+
+    // LifeCycleCashFlow.deploy mock returns a payload
+    lifeCycleCashFlow.deploy.mockResolvedValue({ payload: evmAddress })
+
+    // HederaService mock converts evm -> hedera
+    hederaService.getHederaAddressFromEvm.mockResolvedValue(hederaAddress)
+
+    const result = await service.deployContract(hederaAsset, hederaToken)
+
+    // Check result is correct
+    expect(result.evmAddress).toBe(evmAddress)
+    expect(result.hederaAddress).toBe(hederaAddress)
+
+    // Check that deploy was called with correct DeployRequest
+    expect(lifeCycleCashFlow.deploy).toHaveBeenCalledTimes(1)
+    const deployArg = lifeCycleCashFlow.deploy.mock.calls[0][0]
+
+    expect(deployArg.asset).toBe(hederaAsset)
+    expect(deployArg.paymentToken).toBe(hederaToken)
+    expect(deployArg.rbac).toMatchObject(
+      service.lifeCycleCashFlowRoles.map((role) => ({
+        role,
+        members: ["0.0.99999"],
+      })),
+    )
+
+    // Check HederaService called
+    expect(hederaService.getHederaAddressFromEvm).toHaveBeenCalledWith(evmAddress)
+  })
+})
