@@ -137,7 +137,7 @@ Admin panel for managing distributions:
 
 ## Use Cases
 
-<div className="card-grid card-grid-2">
+<div className="card-grid card-grid-3">
   <div className="card-box card-tip">
     <h3>💵 Dividend Distributions</h3>
     <p>Distribute earnings to equity token holders</p>
@@ -147,7 +147,7 @@ Admin panel for managing distributions:
       <li>Execute batch payments</li>
       <li>Track history and reporting</li>
     </ul>
-    <a href="./user-guides/creating-distributions" className="card-link">Learn more</a>
+    <a href="./user-guides/creating-distributions.md" className="card-link">Learn more</a>
   </div>
 
   <div className="card-box card-tip">
@@ -159,7 +159,7 @@ Admin panel for managing distributions:
       <li>Auto-execute on schedule</li>
       <li>Handle proration</li>
     </ul>
-    <a href="./user-guides/scheduled-payouts" className="card-link">Learn more</a>
+    <a href="./user-guides/creating-distributions.md" className="card-link">Learn more</a>
   </div>
 
   <div className="card-box card-tip">
@@ -169,21 +169,9 @@ Admin panel for managing distributions:
       <li>Cron-based schedules</li>
       <li>Auto snapshot capturing</li>
       <li>Automatic retry on failure</li>
-      <li>Email notifications</li>
-    </ul>
-    <a href="./user-guides/scheduled-payouts" className="card-link">Learn more</a>
-  </div>
-
-  <div className="card-box card-tip">
-    <h3>📊 Large-Scale Payouts</h3>
-    <p>Process payments to thousands of holders</p>
-    <ul>
-      <li>Efficient batch processing</li>
-      <li>Pagination support</li>
       <li>Real-time progress tracking</li>
-      <li>Detailed transaction logs</li>
     </ul>
-    <a href="./user-guides/managing-payouts" className="card-link">Learn more</a>
+    <a href="./user-guides/creating-distributions.md" className="card-link">Learn more</a>
   </div>
 </div>
 
@@ -220,9 +208,10 @@ You can use Mass Payout independently if you have existing tokens on Hedera.
 <div className="card-grid card-grid-2">
   <div className="card-box card-info">
     <h3>👤 For End Users</h3>
-    <p>Try the Mass Payout web application</p>
+    <p>Want to try the Mass Payout web application and distribute payments?</p>
     <ul>
       <li>Quick start in minutes</li>
+      <li>No coding required</li>
       <li>Import assets from ATS</li>
       <li>Create and manage distributions</li>
       <li>Monitor payout status</li>
@@ -232,12 +221,13 @@ You can use Mass Payout independently if you have existing tokens on Hedera.
 
   <div className="card-box card-info">
     <h3>👨‍💻 For Developers</h3>
-    <p>Integrate Mass Payout or contribute</p>
+    <p>Integrate Mass Payout or contribute to the codebase</p>
     <ul>
       <li>Full development environment</li>
       <li>Backend + Frontend setup</li>
       <li>SDK integration</li>
       <li>Contract deployment</li>
+      <li>Custom integrations</li>
     </ul>
     <a href="./getting-started/full-setup" className="card-link">Full Development Setup</a>
   </div>
@@ -248,12 +238,12 @@ You can use Mass Payout independently if you have existing tokens on Hedera.
 <div className="card-grid card-grid-3">
   <div className="card-box">
     <h3>📚 User Guides</h3>
-    <p>Step-by-step guides for the application</p>
+    <p>Step-by-step guides for using the Mass Payout web application</p>
     <ul>
-      <li>Importing assets</li>
+      <li>Importing assets from ATS</li>
       <li>Creating distributions</li>
-      <li>Managing payouts</li>
-      <li>Scheduled distributions</li>
+      <li>Managing payouts and holders</li>
+      <li>Scheduled and recurring distributions</li>
     </ul>
     <a href="./user-guides/" className="card-link">View Guides</a>
   </div>
@@ -263,8 +253,8 @@ You can use Mass Payout independently if you have existing tokens on Hedera.
     <p>Technical guides for developers</p>
     <ul>
       <li>Smart contract deployment</li>
-      <li>SDK integration</li>
-      <li>Backend API extension</li>
+      <li>SDK integration and usage</li>
+      <li>Backend architecture patterns</li>
       <li>Frontend customization</li>
     </ul>
     <a href="./developer-guides/" className="card-link">View Guides</a>
@@ -272,12 +262,12 @@ You can use Mass Payout independently if you have existing tokens on Hedera.
 
   <div className="card-box">
     <h3>📖 API Documentation</h3>
-    <p>Technical reference documentation</p>
+    <p>Technical reference for contracts, SDK, and REST API</p>
     <ul>
       <li>Smart contract functions</li>
-      <li>SDK methods</li>
+      <li>SDK classes and methods</li>
       <li>REST API endpoints</li>
-      <li>WebSocket events</li>
+      <li>Code examples</li>
     </ul>
     <a href="./api/" className="card-link">View API Docs</a>
   </div>

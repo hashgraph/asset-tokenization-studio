@@ -236,6 +236,6 @@ Access past distributions:
 
 ## Next Steps
 
-- [Managing Payouts](./managing-payouts.md) - Monitor and track distributions
-- [Scheduled Payouts](./scheduled-payouts.md) - Learn more about recurring distributions
-- [Holders Management](./holders-management.md) - Manage token holders
+- [Managing Payouts](./index.md#managing-payouts) - Monitor and track distributions
+- [Importing Assets](./importing-assets.md) - Import and manage token holders
+- [Developer Guides](../developer-guides/index.md) - Technical documentation and integration guides

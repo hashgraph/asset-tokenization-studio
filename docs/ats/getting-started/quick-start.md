@@ -101,7 +101,7 @@ VITE_BUSINESS_LOGIC_RESOLVER_ID=0.0.12345678
 VITE_TREX_FACTORY_ID=0.0.87654321
 ```
 
-> **Note**: Replace the contract IDs with your deployed contract addresses. See the [Deployment Guide](../developer-guides/contracts/deployment.md) for instructions on deploying contracts.
+> **Note**: Replace the contract IDs with your deployed contract addresses. See the [Deployed Addresses](../developer-guides/contracts/deployed-addresses.md) for testnet/mainnet addresses, or the [Deployment Guide](../developer-guides/contracts/deployment.md) for instructions on deploying your own contracts.
 
 #### Optional Configuration
 
