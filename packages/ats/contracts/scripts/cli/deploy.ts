@@ -2,39 +2,47 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Standalone CLI entry point for ATS deployment.
+ * CLI entry point for ATS deployment.
  *
  * This script provides a non-interactive command-line interface for deploying
  * the complete ATS system using plain ethers.js without requiring Hardhat.
  *
  * Configuration via environment variables:
- *   NETWORK - Target network name (default: hedera-testnet)
+ *   NETWORK - Target network name (required)
  *   {NETWORK}_PRIVATE_KEY_0 - Private key for deployer account
  *   USE_TIMETRAVEL - Enable TimeTravel mode (default: false)
  *
  * Usage:
- *   npm run deploy
+ *   NETWORK=hedera-testnet npm run deploy
  *   or
  *   npm run deploy:hedera:testnet
  *
- * @module cli/standalone
+ * @module cli/deploy
  */
 
 import { deploySystemWithNewBlr } from "../workflows/deploySystemWithNewBlr";
-import { getAllNetworks, getNetworkConfig, DEFAULT_BATCH_SIZE, info, success, error } from "@scripts/infrastructure";
-import { Wallet, providers } from "ethers";
+import { getAllNetworks, DEFAULT_BATCH_SIZE, info, success, error, createNetworkSigner } from "@scripts/infrastructure";
 
 /**
  * Main deployment function for standalone environment.
  */
 async function main() {
-  // Get network from environment
-  const network = process.env.NETWORK || "hedera-testnet";
+  // Get network from environment (required)
+  const network = process.env.NETWORK;
+
+  if (!network) {
+    error("❌ Missing NETWORK environment variable.");
+    error("Usage: NETWORK=hedera-testnet npm run deploy");
+    const availableNetworks = getAllNetworks();
+    info(`Available networks: ${availableNetworks.join(", ")}`);
+    process.exit(1);
+  }
+
   const useTimeTravel = process.env.USE_TIMETRAVEL === "true";
   const partialBatchDeploy = process.env.PARTIAL_BATCH_DEPLOY === "true";
   const batchSize = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : DEFAULT_BATCH_SIZE;
 
-  info(`🚀 Starting ATS deployment (standalone mode)`);
+  info(`🚀 Starting ATS deployment`);
   info("---");
   info(`📡 Network: ${network}`);
   info(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
@@ -51,25 +59,9 @@ async function main() {
   }
 
   try {
-    // Get network configuration
-    const networkConfig = getNetworkConfig(network);
-
-    // Get private key from environment
-    const networkPrefix = network.toUpperCase().replace(/-/g, "_");
-    const privateKey = process.env[`${networkPrefix}_PRIVATE_KEY_0`];
-
-    if (!privateKey) {
-      error(
-        `❌ Missing private key for network '${network}'. Set ${networkPrefix}_PRIVATE_KEY_0 environment variable.`,
-      );
-      process.exit(1);
-    }
-
-    // Create provider and signer
-    const provider = new providers.JsonRpcProvider(networkConfig.jsonRpcUrl);
-    const signer = new Wallet(privateKey, provider);
-
-    info(`👤 Deployer: ${await signer.getAddress()}`);
+    // Create signer from network configuration
+    const { signer, address } = await createNetworkSigner(network);
+    info(`👤 Deployer: ${address}`);
 
     // Deploy system with new BLR
     const output = await deploySystemWithNewBlr(signer, network, {
