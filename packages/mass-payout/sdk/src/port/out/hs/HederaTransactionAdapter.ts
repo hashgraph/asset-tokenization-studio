@@ -235,7 +235,7 @@ import {
   FileAppendTransaction,
   FileCreateTransaction,
   ContractCreateTransaction,
-  ContractExecuteTransaction,
+  ContractExecuteTransaction
 } from "@hashgraph/sdk"
 import { Interface } from "ethers/lib/utils.js"
 import TransactionAdapter from "../TransactionAdapter"
@@ -245,10 +245,12 @@ import TransactionResponse from "@domain/transaction/TransactionResponse"
 import { MirrorNodes } from "@domain/network/MirrorNode"
 import { JsonRpcRelays } from "@domain/network/JsonRpcRelay"
 import { TransactionType } from "../TransactionResponseEnums"
+import Account from "@domain/account/Account"
 import EvmAddress from "@domain/contract/EvmAddress"
 import BigDecimal from "@domain/shared/BigDecimal"
+import RbacPort from "./types/RbacPort"
 import { ethers, BaseContract, ContractTransaction } from "ethers"
-import {LifeCycleCashFlow__factory, ProxyAdmin__factory, TransparentUpgradeableProxy__factory} from "@mass-payout/contracts"
+import { LifeCycleCashFlow__factory, ProxyAdmin__factory, TransparentUpgradeableProxy__factory } from "@mass-payout/contracts"
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   protected readonly logger = new Logger(HederaTransactionAdapter.name)
@@ -337,7 +339,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     throw new Error("Method not implemented.")
   }
 
-  async deploy(asset: EvmAddress, paymentToken: EvmAddress): Promise<string> {
+  async deploy(asset: EvmAddress, paymentToken: EvmAddress, rbac: RbacPort[]): Promise<string> {
     const lifeCycleCashFlowBytecodeHex =
       LifeCycleCashFlow__factory.bytecode.startsWith("0x")
         ? LifeCycleCashFlow__factory.bytecode.slice(2)
@@ -358,24 +360,29 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       lifeCycleCashFlowContractAddress
     )
 
-    const ProxyAdminBytecodeHex = ProxyAdmin__factory.bytecode.startsWith("0x")
+    const proxyAdminBytecodeHex = ProxyAdmin__factory.bytecode.startsWith("0x")
       ? ProxyAdmin__factory.bytecode.slice(2)
       : ProxyAdmin__factory.bytecode
 
-    const ProxyAdminBytecode = Uint8Array.from(
-      Buffer.from(ProxyAdminBytecodeHex, "hex")
+    const initialOwnerEvmAddress = this.getAccount().evmAddress
+    const abiCoder = new ethers.utils.AbiCoder()
+    const constructorParamsProxyAdminHex = abiCoder.encode(
+      ["address"], [initialOwnerEvmAddress]
     )
 
-    const ProxyAdminTransaction = new ContractCreateTransaction()
-      .setBytecode(ProxyAdminBytecode)
+    const fullBytecodeProxyAdminHex =
+      "0x" + proxyAdminBytecodeHex + constructorParamsProxyAdminHex.slice(2)
+    const fullBytecodeProxyAdmin = Uint8Array.from(
+      Buffer.from(fullBytecodeProxyAdminHex.slice(2), "hex")
+    )
+
+    const proxyAdminTransaction = new ContractCreateTransaction()
+      .setBytecode(fullBytecodeProxyAdmin)
       .setGas(PROXY_ADMIN_DEPLOYMENT_GAS)
 
-    const resProxyAdmin = await this.signAndSendTransactionForDeployment(
-      ProxyAdminTransaction
-    )
-    const proxyAdminAddress = "0x".concat(
-      resProxyAdmin.contractId.toSolidityAddress()
-    )
+    const resProxyAdmin =
+      await this.signAndSendTransactionForDeployment(proxyAdminTransaction)
+    const proxyAdminAddress = "0x".concat(resProxyAdmin.contractId.toSolidityAddress())
 
     this.logger.log("ProxyAdmin:", resProxyAdmin.contractId, proxyAdminAddress)
 
@@ -390,28 +397,28 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const callDataHex = iface.encodeFunctionData("initialize", [
       asset.value,
       paymentToken.value.slice(2),
+      rbac
     ])
     const callDataBytes = Uint8Array.from(
       Buffer.from(callDataHex.slice(2), "hex")
     )
 
-    const abiCoder = new ethers.utils.AbiCoder()
-    const constructorParamsHex = abiCoder.encode(
+    const constructorParamsProxyHex = abiCoder.encode(
       ["address", "address", "bytes"],
       [lifeCycleCashFlowContractAddress, proxyAdminAddress, callDataHex]
     )
-    const fullBytecodeHex =
-      "0x" + proxyBytecodeHex + constructorParamsHex.slice(2)
-    const fullBytecode = Uint8Array.from(
-      Buffer.from(fullBytecodeHex.slice(2), "hex")
+    const fullBytecodeProxyHex =
+      "0x" + proxyBytecodeHex + constructorParamsProxyHex.slice(2)
+    const fullBytecodeProxy = Uint8Array.from(
+      Buffer.from(fullBytecodeProxyHex.slice(2), "hex")
     )
 
-    const ProxyTransaction = new ContractCreateTransaction()
-      .setBytecode(fullBytecode)
+    const proxyTransaction = new ContractCreateTransaction()
+      .setBytecode(fullBytecodeProxy)
       .setGas(PROXY_DEPLOYMENT_GAS)
 
     const resProxy =
-      await this.signAndSendTransactionForDeployment(ProxyTransaction)
+      await this.signAndSendTransactionForDeployment(proxyTransaction)
     const proxyAddress = "0x".concat(resProxy.contractId.toSolidityAddress())
 
     this.logger.log("Proxy:", resProxy.contractId, proxyAddress)
@@ -715,4 +722,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   abstract signAndSendTransactionForDeployment(
     transaction: Transaction
   ): Promise<TransactionReceipt>
+
+  abstract getAccount(): Account
 }

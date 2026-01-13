@@ -273,6 +273,7 @@ describe("CustodialTransactionAdapter", () => {
     it("should register and emit walletPaired", async () => {
       mockMirrorNodeAdapter.getAccountInfo.mockResolvedValueOnce({
         publicKey: { key: "fakePublicKey" },
+        evmAddress: "0xFakeEvmAddress",
       })
 
       const settings = { hederaAccountId: "0.0.123" } as DfnsSettings
