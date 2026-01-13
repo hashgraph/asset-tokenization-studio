@@ -25,7 +25,7 @@ describe("ExternalControlList Management Tests", () => {
   let externalBlacklistMock1: MockedBlacklist;
   let externalWhitelistMock2: MockedWhitelist;
 
-  async function deployTokenSecurity() {
+  async function deployExternalControlListTokenSecurity() {
     const [deployer] = await ethers.getSigners();
     initMock1 = await (await ethers.getContractFactory("MockedWhitelist", deployer)).deploy();
     await initMock1.deployed();
@@ -33,6 +33,7 @@ describe("ExternalControlList Management Tests", () => {
     await initMock2.deployed();
 
     const base = await deployEquityTokenFixture({
+      useLoadFixture: false,
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
@@ -72,7 +73,7 @@ describe("ExternalControlList Management Tests", () => {
   }
 
   beforeEach(async () => {
-    await loadFixture(deployTokenSecurity);
+    await loadFixture(deployExternalControlListTokenSecurity);
   });
 
   describe("Add Tests", () => {

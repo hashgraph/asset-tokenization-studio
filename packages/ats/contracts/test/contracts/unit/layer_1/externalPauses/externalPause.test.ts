@@ -16,17 +16,17 @@ describe("ExternalPause Tests", () => {
   let externalPauseMock2: MockedExternalPause;
   let externalPauseMock3: MockedExternalPause;
 
-  async function deploySecurityFixture() {
+  async function deployExternalPauseSecurityFixture() {
     const [tempSigner] = await ethers.getSigners();
     const initMock1 = await (await ethers.getContractFactory("MockedExternalPause", tempSigner)).deploy();
     await initMock1.deployed();
-    await initMock1.setPaused(false);
 
     const initMock2 = await (await ethers.getContractFactory("MockedExternalPause", tempSigner)).deploy();
     await initMock2.deployed();
-    await initMock2.setPaused(false);
-
+    console.log(initMock1.address, await initMock1.isPaused());
+    console.log(initMock2.address, await initMock2.isPaused());
     const base = await deployEquityTokenFixture({
+      useLoadFixture: false,
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
@@ -71,7 +71,7 @@ describe("ExternalPause Tests", () => {
   }
 
   beforeEach(async () => {
-    await loadFixture(deploySecurityFixture);
+    await loadFixture(deployExternalPauseSecurityFixture);
   });
 
   describe("Add Tests", () => {

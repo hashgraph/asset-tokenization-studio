@@ -19,7 +19,8 @@ describe("ExternalKycList Management Tests", () => {
   let externalKycListMock1: MockedExternalKycList;
   let externalKycListMock2: MockedExternalKycList;
   let externalKycListMock3: MockedExternalKycList;
-  async function deploySecurityFixture() {
+
+  async function deployExternalKycSecurityFixture() {
     const [deployer] = await ethers.getSigners();
     initMock1 = await (await ethers.getContractFactory("MockedExternalKycList", deployer)).deploy();
     await initMock1.deployed();
@@ -27,6 +28,7 @@ describe("ExternalKycList Management Tests", () => {
     await initMock2.deployed();
 
     const base = await deployEquityTokenFixture({
+      useLoadFixture: false,
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
@@ -57,7 +59,7 @@ describe("ExternalKycList Management Tests", () => {
   }
 
   beforeEach(async () => {
-    await loadFixture(deploySecurityFixture);
+    await loadFixture(deployExternalKycSecurityFixture);
   });
 
   describe("Add Tests", () => {
