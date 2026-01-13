@@ -36,8 +36,6 @@ export type {
   DeploymentResult,
   UpgradeProxyOptions,
   UpgradeProxyResult,
-  CreateConfigOptions,
-  CreateConfigResult,
   OperationResult,
   SignerOptions,
   AnyDeploymentOutput,
@@ -88,7 +86,6 @@ export {
   PROXY_CONTRACTS,
   ENV_VAR_PATTERNS,
   DEPLOYMENT_OUTPUT_DIR,
-  DEPLOYMENT_OUTPUT_PATTERN,
   ATS_WORKFLOW_DESCRIPTORS,
   WORKFLOW_DESCRIPTORS,
   registerWorkflowDescriptor,
@@ -143,7 +140,6 @@ export { registerAdditionalFacets, type RegisterAdditionalFacetsOptions } from "
 
 export {
   createBatchConfiguration,
-  type FacetConfiguration,
   type CreateBlrConfigurationResult,
   type ConfigurationData,
   type ConfigurationError,

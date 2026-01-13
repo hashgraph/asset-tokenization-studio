@@ -16,7 +16,10 @@ import { BusinessLogicResolver } from "@contract-types";
 import {
   DEFAULT_TRANSACTION_TIMEOUT,
   DEFAULT_BATCH_SIZE,
+  GAS_LIMIT,
   OperationResult,
+  ok,
+  err,
   validateBytes32,
   extractRevertReason,
   info,
@@ -27,17 +30,6 @@ import {
   waitForTransaction,
   isInstantMiningNetwork,
 } from "@scripts/infrastructure";
-
-/**
- * Facet configuration for BLR.
- */
-export interface FacetConfiguration {
-  /** Facet name */
-  facetName: string;
-
-  /** Function selectors this facet handles */
-  selectors: string[];
-}
 
 /**
  * Batch facet configuration structure for contract calls.
@@ -212,6 +204,7 @@ function createBatchFacetConfigurations(facetIdList: string[], facetVersionList:
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE). Smaller batches = lower gas per transaction.
  * @param gasLimit - Optional gas limit override
  * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
+ * @param network - Network name for instant mining detection (optional)
  * @returns Promise that resolves when all batches are processed
  *
  * @example
@@ -242,15 +235,10 @@ export async function processFacetLists(
   batchSize: number = DEFAULT_BATCH_SIZE,
   gasLimit?: number,
   confirmations: number = 0,
+  network?: string,
 ): Promise<void> {
-  // Get network name for instant mining check
-  let networkName = "unknown";
-  try {
-    const hre = require("hardhat");
-    networkName = hre?.network?.name || "unknown";
-  } catch {
-    // Not in Hardhat context
-  }
+  // Use provided network parameter, default to "unknown" if not provided
+  const networkName = network || "unknown";
 
   // On instant-mining networks, use larger batches but cap at 20 to avoid gas limit issues
   // On real networks, use configured batch size (default 15)
@@ -342,9 +330,6 @@ export async function sendBatchConfiguration(
   info(`  Confirmations to wait: ${confirmations}`);
 
   try {
-    // Import GAS_LIMIT constants
-    const { GAS_LIMIT } = await import("@scripts/infrastructure");
-
     const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
       gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
     });
@@ -404,7 +389,8 @@ export async function sendBatchConfiguration(
  * const result = await createBatchConfiguration(blr, {
  *   configurationId: '0x123...',
  *   facets: facetsWithKeys,
- *   partialBatchDeploy: true  // All batches marked as non-final
+ *   partialBatchDeploy: true,  // All batches marked as non-final
+ *   network: 'hardhat'  // Optional network name for instant mining detection
  * })
  * ```
  */
@@ -442,6 +428,9 @@ export async function createBatchConfiguration(
 
     /** Number of confirmations to wait for (default: 0 for test environments) */
     confirmations?: number;
+
+    /** Network name for instant mining detection (optional) */
+    network?: string;
   },
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   const {
@@ -451,10 +440,8 @@ export async function createBatchConfiguration(
     batchSize = DEFAULT_BATCH_SIZE,
     gasLimit,
     confirmations = 0,
+    network,
   } = options;
-
-  const { info } = await import("@scripts/infrastructure");
-  const { ok, err } = await import("@scripts/infrastructure");
 
   if (facets.length === 0) {
     return err("EMPTY_FACET_LIST", "At least one facet is required for configuration");
@@ -507,14 +494,14 @@ export async function createBatchConfiguration(
       batchSize,
       gasLimit,
       confirmations,
+      network,
     );
 
     // Query the actual configuration-specific version after batch processing
     const configVersion = await blrContract.getLatestVersionByConfiguration(configurationId);
     const actualVersion = configVersion.toNumber();
 
-    const { success: logSuccess } = await import("../utils/logging");
-    logSuccess("Batch configuration completed successfully", {
+    success("Batch configuration completed successfully", {
       configurationId,
       facets: facetKeys.length,
       partialDeploy: partialBatchDeploy,
@@ -529,7 +516,6 @@ export async function createBatchConfiguration(
       blockNumber: 0,
     });
   } catch (error) {
-    const { error: logError } = await import("../utils/logging");
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     logError("Failed to create batch configuration", {
