@@ -11,7 +11,7 @@
       "zustand": "4.4.1",
       "@phosphor-icons/react": "2.0.9"
     },
-    "@mass-payout/frontend": {
+    "@hashgraph/mass-payout-frontend": {
       "i18next": "23.10.1",
       "i18next-browser-languagedetector": "7.2.0",
       "zustand": "4.5.2",
@@ -145,8 +145,6 @@
     "mass-payout:backend:build": "npm run build --workspace=apps/mass-payout/backend",
     "mass-payout:backend:test": "npm run test --workspace=apps/mass-payout/backend",
     "mass-payout:backend:test:ci": "npm run test:ci --workspace=apps/mass-payout/backend --if-present || npm run test --workspace=apps/mass-payout/backend",
-    "mass-payout:backend:dev": "npm run start:dev --workspace=apps/mass-payout/backend",
-    "mass-payout:backend:start": "npm run start --workspace=apps/mass-payout/backend",
     "mass-payout:backend:clean": "npm run clean --workspace=apps/mass-payout/backend",
     "mass-payout:frontend:build": "npm run build --workspace=apps/mass-payout/frontend",
     "mass-payout:frontend:test": "npm run test --workspace=apps/mass-payout/frontend",

@@ -11,7 +11,7 @@ Quick guide to integrate the Mass Payout SDK in your project.
 ## Installation
 
 ```bash
-npm install @mass-payout/sdk @mass-payout/contracts
+npm install @hashgraph/mass-payout-sdk @hashgraph/mass-payout-contracts
 ```
 
 Peer dependencies:
@@ -25,7 +25,7 @@ npm install @nestjs/config joi
 ```typescript
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { MassPayoutSdkModule } from "@mass-payout/sdk";
+import { MassPayoutSdkModule } from "@hashgraph/mass-payout-sdk";
 
 @Module({
   imports: [
@@ -45,7 +45,7 @@ export class AppModule {}
 The SDK requires [DFNS](https://www.dfns.co/) for transaction signing.
 
 ```typescript
-import { Network } from "@mass-payout/sdk";
+import { Network } from "@hashgraph/mass-payout-sdk";
 
 const network = new Network();
 await network.connect({
@@ -83,7 +83,7 @@ DFNS_HEDERA_ACCOUNT_ID=0.0.123456
 ### Deploy Contract
 
 ```typescript
-import { DeployCommand } from "@mass-payout/sdk";
+import { DeployCommand } from "@hashgraph/mass-payout-sdk";
 
 const command = new DeployCommand({
   tokenAddress: "0.0.789012",
@@ -96,7 +96,7 @@ const result = await commandBus.execute(command);
 ### Execute Distribution
 
 ```typescript
-import { ExecuteDistributionCommand } from "@mass-payout/sdk";
+import { ExecuteDistributionCommand } from "@hashgraph/mass-payout-sdk";
 
 const command = new ExecuteDistributionCommand({
   contractId: "0.0.123456",
@@ -112,7 +112,7 @@ await commandBus.execute(command);
 ### Query Contract
 
 ```typescript
-import { GetPaymentTokenQuery } from "@mass-payout/sdk";
+import { GetPaymentTokenQuery } from "@hashgraph/mass-payout-sdk";
 
 const paymentToken = await queryBus.execute(new GetPaymentTokenQuery({ contractId: "0.0.123456" }));
 ```

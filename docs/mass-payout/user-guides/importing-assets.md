@@ -119,6 +119,3 @@ View comprehensive information:
 ## Next Steps
 
 - [Create Distributions](./creating-distributions.md) - Set up payouts for imported assets
-- [Manage Holders](./holders-management.md) - View and manage holder information
-
-_This guide is under development. More detailed content coming soon._

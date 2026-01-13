@@ -49,9 +49,6 @@ Documentation for managing large-scale batch payment distributions on Hedera.
 
 - [Importing Assets](mass-payout/user-guides/importing-assets.md)
 - [Creating Distributions](mass-payout/user-guides/creating-distributions.md)
-- [Managing Payouts](mass-payout/user-guides/managing-payouts.md)
-- [Scheduled Payouts](mass-payout/user-guides/scheduled-payouts.md)
-- [Holders Management](mass-payout/user-guides/holders-management.md)
 
 ### Developer Guides
 

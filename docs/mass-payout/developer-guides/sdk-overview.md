@@ -77,7 +77,7 @@ Queries read contract state without transactions:
 ### Deploy a Contract
 
 ```typescript
-import { DeployCommand } from "@mass-payout/sdk";
+import { DeployCommand } from "@hashgraph/mass-payout-sdk";
 
 const command = new DeployCommand({
   tokenAddress: "0.0.789012", // Asset token address
@@ -91,7 +91,7 @@ console.log("Contract deployed at:", result.contractId);
 ### Execute a Distribution
 
 ```typescript
-import { ExecuteDistributionCommand } from "@mass-payout/sdk";
+import { ExecuteDistributionCommand } from "@hashgraph/mass-payout-sdk";
 
 const command = new ExecuteDistributionCommand({
   contractId: "0.0.123456",
@@ -108,7 +108,7 @@ console.log("Distribution executed:", receipt.transactionId);
 ### Create a Snapshot (Fixed Amount)
 
 ```typescript
-import { ExecuteAmountSnapshotCommand } from "@mass-payout/sdk";
+import { ExecuteAmountSnapshotCommand } from "@hashgraph/mass-payout-sdk";
 
 const command = new ExecuteAmountSnapshotCommand({
   contractId: "0.0.123456",
@@ -124,7 +124,7 @@ await commandBus.execute(command);
 ### Create a Snapshot (Percentage-based)
 
 ```typescript
-import { ExecutePercentageSnapshotCommand } from "@mass-payout/sdk";
+import { ExecutePercentageSnapshotCommand } from "@hashgraph/mass-payout-sdk";
 
 const command = new ExecutePercentageSnapshotCommand({
   contractId: "0.0.123456",
@@ -141,7 +141,7 @@ await commandBus.execute(command);
 ### Execute Bond Cash-Out
 
 ```typescript
-import { ExecuteBondCashOutCommand } from "@mass-payout/sdk";
+import { ExecuteBondCashOutCommand } from "@hashgraph/mass-payout-sdk";
 
 const command = new ExecuteBondCashOutCommand({
   contractId: "0.0.123456",
@@ -157,7 +157,7 @@ await commandBus.execute(command);
 ### Query Contract State
 
 ```typescript
-import { GetPaymentTokenQuery, IsPausedQuery } from "@mass-payout/sdk";
+import { GetPaymentTokenQuery, IsPausedQuery } from "@hashgraph/mass-payout-sdk";
 
 // Get payment token
 const paymentToken = await queryBus.execute(new GetPaymentTokenQuery({ contractId: "0.0.123456" }));
@@ -169,7 +169,7 @@ const isPaused = await queryBus.execute(new IsPausedQuery({ contractId: "0.0.123
 ### Pause/Unpause Contract
 
 ```typescript
-import { PauseCommand, UnpauseCommand } from "@mass-payout/sdk";
+import { PauseCommand, UnpauseCommand } from "@hashgraph/mass-payout-sdk";
 
 // Emergency pause
 await commandBus.execute(new PauseCommand({ contractId: "0.0.123456" }));
@@ -211,7 +211,7 @@ For small lists, use the `ByAddresses` variants which don't require pagination.
 ## Error Handling
 
 ```typescript
-import { CommandError } from "@mass-payout/sdk";
+import { CommandError } from "@hashgraph/mass-payout-sdk";
 
 try {
   await commandBus.execute(command);

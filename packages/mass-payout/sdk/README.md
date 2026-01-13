@@ -17,13 +17,13 @@ The Mass Payout SDK provides a simple and efficient way to execute bulk payment 
 ## Installation
 
 ```bash
-npm install @mass-payout/sdk
+npm install @hashgraph/mass-payout-sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { MassPayoutSDK } from "@mass-payout/sdk";
+import { MassPayoutSDK } from "@hashgraph/mass-payout-sdk";
 
 // Initialize the SDK
 const sdk = new MassPayoutSDK({

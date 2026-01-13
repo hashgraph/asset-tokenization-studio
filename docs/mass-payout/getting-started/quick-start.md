@@ -25,7 +25,36 @@ git clone https://github.com/hashgraph/asset-tokenization-studio.git
 cd asset-tokenization-studio
 ```
 
-### 2. Setup PostgreSQL Database
+### 2. Setup Mass Payout
+
+You have two options:
+
+#### Option A: Quick Setup (Recommended)
+
+Run this single command from the monorepo root to install dependencies and build everything:
+
+```bash
+npm run mass-payout:setup
+```
+
+This will automatically install dependencies, build contracts, SDK, backend, and frontend.
+
+#### Option B: Manual Setup
+
+If you prefer to run each step manually:
+
+```bash
+# Install dependencies
+npm ci
+
+# Build contracts and SDKs
+npm run mass-payout:contracts:build
+npm run mass-payout:sdk:build
+npm run mass-payout:backend:build
+npm run mass-payout:frontend:build
+```
+
+### 3. Setup PostgreSQL Database
 
 #### Option 1: Using Docker (Recommended)
 
@@ -178,19 +207,24 @@ VITE_PORT=5173
 
 ## Running the Application
 
-From the monorepo root, you can start both backend and frontend with simple commands:
+> **Important**: Ensure PostgreSQL is running via Docker Compose (see step 3) or your local PostgreSQL installation before starting the backend.
 
 ### 1. Start the Backend
 
+The backend must be started from its own directory to properly load environment variables:
+
 ```bash
-npm run mass-payout:backend:start
+cd apps/mass-payout/backend
+npm run start:dev
 ```
 
 The backend API will be available at **http://localhost:3000**
 
+> **Note**: The backend loads the `.env` file from its current working directory, so it must be run from `apps/mass-payout/backend/`.
+
 ### 2. Start the Frontend
 
-In a new terminal:
+In a new terminal, from the monorepo root:
 
 ```bash
 npm run mass-payout:frontend:dev
@@ -198,7 +232,7 @@ npm run mass-payout:frontend:dev
 
 The frontend will be available at **http://localhost:5173**
 
-> **Tip**: You can run both in separate terminals to see logs from each service.
+> **Tip**: Keep both terminals open to see logs from each service.
 
 ## First Steps
 

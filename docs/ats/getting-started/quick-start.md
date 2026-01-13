@@ -27,17 +27,29 @@ git clone https://github.com/hashgraph/asset-tokenization-studio.git
 cd asset-tokenization-studio
 ```
 
-### 2. Install Dependencies
+### 2. Setup ATS
+
+You have two options:
+
+#### Option A: Quick Setup (Recommended)
+
+Run this single command from the monorepo root to install dependencies and build everything:
 
 ```bash
-npm ci
+npm run ats:setup
 ```
 
-### 3. Build Contracts and SDK
+This will automatically install dependencies, build contracts, and build the SDK.
 
-The ATS web application depends on the contracts and SDK:
+#### Option B: Manual Setup
+
+If you prefer to run each step manually:
 
 ```bash
+# Install dependencies
+npm ci
+
+# Build contracts and SDK
 npm run ats:contracts:build
 npm run ats:sdk:build
 ```

@@ -21,13 +21,7 @@ const sidebars: SidebarsConfig = {
         type: "doc",
         id: "user-guides/index",
       },
-      items: [
-        "user-guides/importing-assets",
-        "user-guides/creating-distributions",
-        "user-guides/managing-payouts",
-        "user-guides/scheduled-payouts",
-        "user-guides/holders-management",
-      ],
+      items: ["user-guides/importing-assets", "user-guides/creating-distributions"],
     },
     {
       type: "category",

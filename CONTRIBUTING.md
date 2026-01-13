@@ -106,6 +106,32 @@ git commit -m "fix(mp:backend): resolve payout calculation error"
 git commit -m "docs: update quick start guide"
 ```
 
+## Creating a Changeset (Required)
+
+**All changes to packages must include a changeset.** This is required for version management and changelog generation.
+
+```bash
+npm run changeset
+```
+
+Follow the prompts to:
+
+1. Select which packages changed
+2. Choose version bump type:
+   - **patch** (1.0.x): Bug fixes, minor improvements
+   - **minor** (1.x.0): New features, non-breaking changes
+   - **major** (x.0.0): Breaking changes
+3. Describe your changes (this will appear in the changelog)
+
+Commit the generated changeset file:
+
+```bash
+git add .changeset/*.md
+git commit -m "chore: add changeset"
+```
+
+> **Note**: Changesets accumulate in the `.changeset` folder. During the release process (when creating a PR from `develop` to `main`), these changesets are consumed to automatically calculate the new version and update the changelog.
+
 ## Pull Requests
 
 ### Before Submitting
@@ -113,7 +139,8 @@ git commit -m "docs: update quick start guide"
 1. Ensure code builds and tests pass
 2. Run `npm run lint:fix`
 3. Update relevant documentation
-4. Create meaningful commit messages
+4. **Create a changeset** (required for all package changes)
+5. Create meaningful commit messages
 
 ### Submitting
 
@@ -166,18 +193,16 @@ npm run docs:dev
 
 ## Release Process (Maintainers Only)
 
-When making changes to packages, create a changeset:
+Releases follow this workflow:
 
-```bash
-npm run changeset
-```
-
-Follow the prompts to document your changes. Commit the generated changeset file:
-
-```bash
-git add .changeset/*.md
-git commit -m "chore: add changeset for feature"
-```
+1. **Accumulation Phase**: Contributors add changesets with their PRs to `develop` branch
+2. **Release Preparation**: When ready to release, run:
+   ```bash
+   npm run changeset:version
+   ```
+   This consumes all changesets, updates package versions, and generates changelogs
+3. **Release PR**: Create a PR from `develop` to `main` with the version changes
+4. **Merge and Tag**: After approval, merge the PR and the release workflow will create tags and publish to npm
 
 ## Getting Help
 

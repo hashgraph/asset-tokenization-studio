@@ -137,14 +137,10 @@ flowchart TD
 From the monorepo root:
 
 ```bash
-# Install all dependencies
-npm ci
-
-# Build all packages and applications
 npm run setup
 ```
 
-This command will compile contracts, build SDKs, and set up web and backend environments.
+This command will install dependencies, compile contracts, build SDKs, and set up web and backend environments.
 
 ### Selective Setup (ATS or Mass Payout only)
 
@@ -208,14 +204,17 @@ npm run ats:test        # Run tests for all ATS modules
 
 ```bash
 npm run mass-payout:build         # Build contracts, SDK, backend, and frontend
-npm run mass-payout:backend:dev   # Start backend in dev mode
 npm run mass-payout:frontend:dev  # Start frontend in dev mode
 npm run mass-payout:test          # Run all payout-related tests
+
+# Backend must be started from its directory:
+cd apps/mass-payout/backend
+npm run start:dev                  # Start backend in dev mode
 ```
 
 - Contracts (packages/mass-payout/contracts) → Solidity payout contracts
 - SDK (packages/mass-payout/sdk) → TypeScript SDK for payout execution
-- Backend (apps/mass-payout/backend) → API with PostgreSQL
+- Backend (apps/mass-payout/backend) → API with PostgreSQL (must run from its directory)
 - Frontend (apps/mass-payout/frontend) → Admin panel in React + Chakra UI
 
 ## Testing

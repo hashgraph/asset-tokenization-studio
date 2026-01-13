@@ -32,7 +32,12 @@ This guide covers creating distributions for both equity tokens (dividends) and 
 
 1. Navigate to "Assets" dashboard
 2. Click on the asset for distribution
-3. Select "New Distribution"
+3. Go to the "Distributions" tab
+4. **Toggle "Import Corporate Actions"** (optional):
+   - **Enabled**: Imports existing corporate actions (dividends, coupon payments) from the token contract into the system
+   - **Disabled**: Start fresh without importing historical corporate actions
+   - This setting only affects whether historical data is imported, not the creation of new distributions
+5. Click "New Distribution" to create a new distribution
 
 ### Step 2: Configure Distribution
 

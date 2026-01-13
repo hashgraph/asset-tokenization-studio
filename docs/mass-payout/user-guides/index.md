@@ -44,42 +44,28 @@ Before following these guides, make sure you have:
     <a href="./creating-distributions" className="card-link">Read Guide</a>
   </div>
 
-  <div className="card-box card-info">
-    <h3>📊 Managing Payouts</h3>
-    <p>Execute, monitor, and track payment distributions</p>
-    <ul>
-      <li>Monitor active distributions</li>
-      <li>Handle failed payments</li>
-      <li>View transaction history</li>
-      <li>Generate reports</li>
-    </ul>
-    <a href="./managing-payouts" className="card-link">Read Guide</a>
-  </div>
-
-  <div className="card-box card-info">
-    <h3>📅 Scheduled Payouts</h3>
-    <p>Set up automatic recurring distributions</p>
-    <ul>
-      <li>Create schedules</li>
-      <li>Configure cron expressions</li>
-      <li>Monitor executions</li>
-      <li>Manage failures</li>
-    </ul>
-    <a href="./scheduled-payouts" className="card-link">Read Guide</a>
-  </div>
-
-  <div className="card-box">
-    <h3>👥 Managing Holders</h3>
-    <p>View and manage token holder information</p>
-    <ul>
-      <li>View holder registry</li>
-      <li>Sync balances</li>
-      <li>Create snapshots</li>
-      <li>Export holder data</li>
-    </ul>
-    <a href="./holders-management" className="card-link">Read Guide</a>
-  </div>
 </div>
+
+## Managing Payouts
+
+After creating distributions, you can manage them through the web interface. Payouts are organized into three categories:
+
+- **Upcoming**: Distributions that are scheduled but not yet executed
+  - You can cancel distributions from this view if needed
+  - View scheduled execution dates
+  - Review distribution details before execution
+
+- **Ongoing**: Distributions currently being processed
+  - Monitor real-time execution progress
+  - View transaction status
+  - Track payment confirmations
+
+- **Completed**: Successfully executed distributions
+  - View payment history
+  - Check transaction records
+  - Generate reports
+
+> **Note**: Only distributions in the "Upcoming" status can be cancelled. Once a distribution moves to "Ongoing" or "Completed", it cannot be cancelled.
 
 ## Need Help?
 
