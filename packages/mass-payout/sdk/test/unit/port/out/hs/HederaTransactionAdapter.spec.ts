@@ -207,6 +207,7 @@ import { ContractId, TransactionReceipt } from "@hashgraph/sdk"
 import TransactionResponse from "@domain/transaction/TransactionResponse"
 import EvmAddress from "@domain/contract/EvmAddress"
 import BigDecimal from "@domain/shared/BigDecimal"
+import Account from "@domain/account/Account"
 
 import { HederaTransactionAdapter } from "@port/out/hs/HederaTransactionAdapter"
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter"
@@ -220,6 +221,7 @@ import {
 class TestHederaTransactionAdapter extends HederaTransactionAdapter {
   public mockSignAndSendTransaction = jest.fn()
   public mockSignAndSendTransactionForDeployment = jest.fn()
+  public mockGetAccount = jest.fn()
 
   async signAndSendTransaction(): Promise<TransactionResponse> {
     return this.mockSignAndSendTransaction()
@@ -227,6 +229,10 @@ class TestHederaTransactionAdapter extends HederaTransactionAdapter {
 
   async signAndSendTransactionForDeployment(): Promise<TransactionReceipt> {
     return this.mockSignAndSendTransactionForDeployment()
+  }
+
+  getAccount(): Account {
+    return this.mockGetAccount()
   }
 }
 
@@ -264,6 +270,108 @@ describe("HederaTransactionAdapter", () => {
       const mockRelays = { relay: "http://rpc.test" } as any
       adapter.setJsonRpcRelays(mockRelays)
       expect(adapter.jsonRpcRelays).toBe(mockRelays)
+    })
+  })
+
+  describe("deploy", () => {
+    it("should deploy lifecycle without rbac, proxy admin, proxy and return proxy address", async () => {
+      const asset = new EvmAddress(EvmAddressPropsFixture.create().value)
+      const paymentToken = new EvmAddress(EvmAddressPropsFixture.create().value)
+
+      // --- mocks ---
+      const lifecycleContractId = ContractId.fromString("0.0.1001")
+      const proxyAdminContractId = ContractId.fromString("0.0.1002")
+      const proxyContractId = ContractId.fromString("0.0.1003")
+
+      jest
+        .spyOn(adapter as any, "deployLifeCycleCashFlow")
+        .mockResolvedValue(lifecycleContractId)
+
+      mirrorNodeAdapter.getContractInfo.mockResolvedValue({
+        evmAddress: "0x1111111111111111111111111111111111111111",
+      } as any)
+
+      adapter.mockGetAccount.mockReturnValue({
+        evmAddress: "0x2222222222222222222222222222222222222222",
+      } as any)
+
+      adapter.mockSignAndSendTransactionForDeployment
+        .mockResolvedValueOnce({
+          contractId: proxyAdminContractId,
+        } as any)
+        .mockResolvedValueOnce({
+          contractId: proxyContractId,
+        } as any)
+
+      // --- execute ---
+      const result = await adapter.deploy(asset, paymentToken, [])
+
+      // --- assertions ---
+      expect(mirrorNodeAdapter.getContractInfo).toHaveBeenCalledWith(
+        lifecycleContractId.toString()
+      )
+
+      expect(adapter.mockSignAndSendTransactionForDeployment).toHaveBeenCalledTimes(
+        2
+      )
+
+      expect(result).toBe(
+        "0x" + proxyContractId.toSolidityAddress()
+      )
+    })
+
+    it("should deploy lifecycle with rbac, proxy admin, proxy and return proxy address", async () => {
+      const asset = new EvmAddress(EvmAddressPropsFixture.create().value)
+      const paymentToken = new EvmAddress(EvmAddressPropsFixture.create().value)
+      const rbac = [
+        {
+          role: "0x0000000000000000000000000000000000000000000000000000000000000001",
+          members: [
+            "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ]
+        }
+      ];
+
+      // --- mocks ---
+      const lifecycleContractId = ContractId.fromString("0.0.1001")
+      const proxyAdminContractId = ContractId.fromString("0.0.1002")
+      const proxyContractId = ContractId.fromString("0.0.1003")
+
+      jest
+        .spyOn(adapter as any, "deployLifeCycleCashFlow")
+        .mockResolvedValue(lifecycleContractId)
+
+      mirrorNodeAdapter.getContractInfo.mockResolvedValue({
+        evmAddress: "0x1111111111111111111111111111111111111111",
+      } as any)
+
+      adapter.mockGetAccount.mockReturnValue({
+        evmAddress: "0x2222222222222222222222222222222222222222",
+      } as any)
+
+      adapter.mockSignAndSendTransactionForDeployment
+        .mockResolvedValueOnce({
+          contractId: proxyAdminContractId,
+        } as any)
+        .mockResolvedValueOnce({
+          contractId: proxyContractId,
+        } as any)
+
+      // --- execute ---
+      const result = await adapter.deploy(asset, paymentToken, rbac)
+
+      // --- assertions ---
+      expect(mirrorNodeAdapter.getContractInfo).toHaveBeenCalledWith(
+        lifecycleContractId.toString()
+      )
+
+      expect(adapter.mockSignAndSendTransactionForDeployment).toHaveBeenCalledTimes(
+        2
+      )
+
+      expect(result).toBe(
+        "0x" + proxyContractId.toSolidityAddress()
+      )
     })
   })
 

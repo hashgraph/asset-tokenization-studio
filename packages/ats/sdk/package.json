@@ -1,7 +1,8 @@
 {
   "name": "@hashgraph/asset-tokenization-sdk",
   "description": "Asset Tokenization SDK for Hedera",
-  "version": "1.17.0",
+  "version": "3.0.0",
+  "repository": "https://github.com/hashgraph/asset-tokenization-studio",
   "main": "./build/cjs/src/index.js",
   "module": "./build/esm/src/index.js",
   "types": "./build/esm/src/index.d.ts",
@@ -21,6 +22,8 @@
   "scripts": {
     "build": "rimraf build && tsc -p tsconfig.json && tsc-alias -p tsconfig.json && tsc -p tsconfig.cjs.json && tsc-alias -p tsconfig.cjs.json",
     "test": "NODE_OPTIONS=--max-old-space-size=16384 npx jest --ci --runInBand --detectOpenHandles --forceExit",
+    "test:coverage": "npm run test --coverage",
+    "test:ci": "NODE_OPTIONS=--max-old-space-size=16384 npx jest --ci --runInBand --detectOpenHandles --forceExit --coverage",
     "clean": "npm run clean:build && npm run clean:cache && npm run clean:coverage",
     "prepack": "npm run build",
     "clean:build": "npx --yes rimraf build",

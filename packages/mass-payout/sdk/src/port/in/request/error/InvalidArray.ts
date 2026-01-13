@@ -202,52 +202,11 @@
    limitations under the License.
 
 */
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
 
-interface ILifeCycleCashFlowStorageWrapper {
-    /*
-     * @dev Emitted when a token is associated with an account
-     *
-     * @param token The token the account is associated with
-     */
-    event TokenAssociated(address token);
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
-    /**
-     * @notice Error thrown when attempting to execute a payment for an asset not managed by the contract
-     *
-     * @param asset The address of the asset that is being tried to operate with
-     */
-    error InvalidAsset(address asset);
-
-    /**
-     * @notice Error thrown when attempting to execute a payment a date does not corresponds to the payment date
-     * @param paymentDateInit The initial execution date
-     * @param requestedDate The date a certain operation is requested to be made
-     */
-    error NotPaymentDate(uint256 paymentDateInit, uint256 requestedDate);
-
-    /**
-     * @notice Error thrown when the token association failed
-     */
-    error AssociateTokenFailed();
-
-    /**
-     * @notice Error thrown when a ERC20 token transfer fails
-     * @param to The address for the ERC20 token to be transferred to
-     * @param amount The amount of ERC20 token to be transferred
-     */
-    error TransferERC20TokenFailed(address to, uint256 amount);
-
-    /**
-     * @notice Error thrown when transfer an ERC20 token amount higher than the balance
-     * @param amount The amount of ERC20 token to be transferred
-     */
-    error NotEnoughBalance(uint256 amount);
-
-    /**
-     * @notice Error thrown when percentage exceeds 100
-     * @param percentage The percentage
-     */
-    error InvalidPercentage(uint256 percentage);
+export class InvalidArray extends BaseError {
+  constructor(value: string) {
+    super(ErrorCode.InvalidArray, `Value ${value} is not valid`);
+  }
 }
