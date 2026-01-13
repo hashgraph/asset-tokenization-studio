@@ -80,7 +80,7 @@ export const ATS_CONTRACTS = {
  *
  * These types provide type-safe access to roles from the auto-generated registry.
  */
-import { ROLES } from "@scripts/domain";
+import { ROLES } from "./atsRegistry.data";
 
 export type AtsRoleName = keyof typeof ROLES;
 export type AtsRoleHash = (typeof ROLES)[AtsRoleName];

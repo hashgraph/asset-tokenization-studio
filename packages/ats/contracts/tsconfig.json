@@ -21,6 +21,7 @@
       "@scripts": ["./scripts/index.ts"],
       "@scripts/infrastructure": ["./scripts/infrastructure/index.ts"],
       "@scripts/domain": ["./scripts/domain/index.ts"],
+      "@scripts/tools": ["./scripts/tools/index.ts"],
       "@tasks": ["./tasks/index.ts"],
       "@test": ["./test/index.ts"]
     }

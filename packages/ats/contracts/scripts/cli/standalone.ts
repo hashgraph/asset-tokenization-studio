@@ -21,7 +21,7 @@
  */
 
 import { deploySystemWithNewBlr } from "../workflows/deploySystemWithNewBlr";
-import { getAllNetworks, getNetworkConfig, DEFAULT_BATCH_SIZE } from "@scripts/infrastructure";
+import { getAllNetworks, getNetworkConfig, DEFAULT_BATCH_SIZE, info, success, error } from "@scripts/infrastructure";
 import { Wallet, providers } from "ethers";
 
 /**
@@ -34,19 +34,19 @@ async function main() {
   const partialBatchDeploy = process.env.PARTIAL_BATCH_DEPLOY === "true";
   const batchSize = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : DEFAULT_BATCH_SIZE;
 
-  console.log(`🚀 Starting ATS deployment (standalone mode)`);
-  console.log("=".repeat(60));
-  console.log(`📡 Network: ${network}`);
-  console.log(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
-  console.log(`📦 PartialBatchDeploy: ${partialBatchDeploy ? "enabled" : "disabled"}`);
-  console.log(`🔢 Batch Size: ${batchSize}`);
-  console.log("=".repeat(60));
+  info(`🚀 Starting ATS deployment (standalone mode)`);
+  info("---");
+  info(`📡 Network: ${network}`);
+  info(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
+  info(`📦 PartialBatchDeploy: ${partialBatchDeploy ? "enabled" : "disabled"}`);
+  info(`📊 Batch Size: ${batchSize}`);
+  info("---");
 
   // Validate network configuration
   const availableNetworks = getAllNetworks();
   if (!availableNetworks.includes(network)) {
-    console.error(`❌ Network '${network}' not configured in Configuration.ts`);
-    console.log(`Available networks: ${availableNetworks.join(", ")}`);
+    error(`❌ Network '${network}' not configured in Configuration.ts`);
+    info(`Available networks: ${availableNetworks.join(", ")}`);
     process.exit(1);
   }
 
@@ -59,7 +59,7 @@ async function main() {
     const privateKey = process.env[`${networkPrefix}_PRIVATE_KEY_0`];
 
     if (!privateKey) {
-      console.error(
+      error(
         `❌ Missing private key for network '${network}'. Set ${networkPrefix}_PRIVATE_KEY_0 environment variable.`,
       );
       process.exit(1);
@@ -69,7 +69,7 @@ async function main() {
     const provider = new providers.JsonRpcProvider(networkConfig.jsonRpcUrl);
     const signer = new Wallet(privateKey, provider);
 
-    console.log(`👤 Deployer: ${await signer.getAddress()}`);
+    info(`👤 Deployer: ${await signer.getAddress()}`);
 
     // Deploy system with new BLR
     const output = await deploySystemWithNewBlr(signer, network, {
@@ -79,30 +79,29 @@ async function main() {
       saveOutput: true,
     });
 
-    console.log("\n" + "=".repeat(60));
-    console.log("✅ Deployment completed successfully!");
-    console.log("=".repeat(60));
-    console.log("\n📋 Deployment Summary:");
-    console.log(`   ProxyAdmin: ${output.infrastructure.proxyAdmin.address}`);
-    console.log(`   BLR Proxy: ${output.infrastructure.blr.proxy}`);
-    console.log(`   Factory Proxy: ${output.infrastructure.factory.proxy}`);
-    console.log(`   Total Facets: ${output.facets.length}`);
-    console.log(`   Equity Config Version: ${output.configurations.equity.version}`);
-    console.log(`   Bond Config Version: ${output.configurations.bond.version}`);
-    console.log(`   Total Contracts: ${output.summary.totalContracts}`);
+    info("---");
+    success("✅ Deployment completed successfully!");
+    info("---");
+    info("📋 Deployment Summary:");
+    info(`   ProxyAdmin: ${output.infrastructure.proxyAdmin.address}`);
+    info(`   BLR Proxy: ${output.infrastructure.blr.proxy}`);
+    info(`   Factory Proxy: ${output.infrastructure.factory.proxy}`);
+    info(`   Total Facets: ${output.facets.length}`);
+    info(`   Equity Config Version: ${output.configurations.equity.version}`);
+    info(`   Bond Config Version: ${output.configurations.bond.version}`);
+    info(`   Total Contracts: ${output.summary.totalContracts}`);
 
     process.exit(0);
-  } catch (error) {
-    console.error("\n❌ Deployment failed:");
-    console.error(error);
+  } catch (err) {
+    error("❌ Deployment failed:", err);
     process.exit(1);
   }
 }
 
 // Run if called directly
 if (require.main === module) {
-  main().catch((error) => {
-    console.error(error);
+  main().catch((err) => {
+    error("❌ Fatal error:", err);
     process.exit(1);
   });
 }

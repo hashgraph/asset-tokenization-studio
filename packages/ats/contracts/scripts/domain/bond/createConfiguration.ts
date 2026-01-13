@@ -20,7 +20,8 @@ import {
   OperationResult,
   DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
-import { BOND_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import { BOND_CONFIG_ID } from "../constants";
+import { atsRegistry } from "../atsRegistry";
 
 /**
  * Bond-specific facets list (41 facets total).
