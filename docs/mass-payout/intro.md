@@ -203,6 +203,26 @@ graph LR
 
 You can use Mass Payout independently if you have existing tokens on Hedera.
 
+### ATS Integration Requirements
+
+When using Mass Payout with ATS tokens, ensure the following:
+
+**Required Permissions**:
+
+- The Mass Payout operator account (DFNS account configured in backend) must have the **SNAPSHOT_ROLE** granted in the ATS token contract
+- This role is required for manual payments that capture balance snapshots
+- Grant roles in ATS: Token Settings → Roles → Grant SNAPSHOT_ROLE
+- See [ATS Roles and Permissions](../ats/user-guides/roles-and-permissions.md#snapshot_role) for details
+
+**Token Holders**:
+
+- In ATS, creating accounts or "holder records" doesn't make them on-chain holders
+- Tokens must be **minted** to addresses before they become actual holders
+- Mass Payout only distributes payments to addresses with non-zero token balances
+- Always verify holder balances in ATS before creating distributions
+
+For troubleshooting common integration issues, see [Creating Distributions - Troubleshooting](./user-guides/creating-distributions.md#troubleshooting).
+
 ## Getting Started
 
 <div className="card-grid card-grid-2">

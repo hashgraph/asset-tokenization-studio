@@ -234,6 +234,52 @@ Access past distributions:
 - Review excluded addresses (if any)
 - For Recurring distributions, ensure holder list is refreshed regularly
 
+## Troubleshooting
+
+### Manual Payment Fails with Role Error
+
+**Error**: "The account trying to perform the operation doesn't have the needed role (0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da)"
+
+**Cause**: When executing manual payments that require balance snapshots, the Mass Payout operator account (DFNS account configured in backend) needs the `SNAPSHOT_ROLE` in the ATS token contract.
+
+**Solution**:
+
+1. Navigate to the ATS web application
+2. Go to token **Settings** → **Roles**
+3. Grant `SNAPSHOT_ROLE` to the DFNS account address configured in Mass Payout backend
+4. The role hash is: `0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da`
+5. Confirm the transaction
+
+For more details on roles, see [ATS Roles and Permissions](../../ats/user-guides/roles-and-permissions.md#snapshot_role).
+
+### No Holders Found or Payment Fails
+
+**Error**: Distribution fails because the security token has no holders
+
+**Cause**: In ATS, creating a "holder" record in the system doesn't make them an actual on-chain token holder. Holders only become real holders after tokens are minted to their addresses.
+
+**Solution**:
+
+1. Verify tokens have been minted to holder addresses in ATS
+2. In ATS web application, go to token details and check holder balances
+3. Ensure at least one address has a non-zero token balance
+4. Re-sync holder information in Mass Payout: Asset Details → "Sync Holders"
+5. Verify holder count is updated before creating distribution
+
+### Distribution Preview Shows Zero Holders
+
+- Sync holder balances from blockchain
+- Check that tokens have been minted in ATS
+- Verify token contract address is correct
+- Review backend logs for sync errors
+
+### Payment Transactions Failing
+
+- Verify operator account has sufficient payment token balance
+- Check gas (HBAR) balance for transaction fees
+- Ensure payment token contract is valid
+- Review holder addresses are valid Hedera accounts
+
 ## Next Steps
 
 - [Managing Payouts](./index.md#managing-payouts) - Monitor and track distributions

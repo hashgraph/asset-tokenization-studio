@@ -116,6 +116,36 @@ View comprehensive information:
 - Verify Mirror Node connection
 - Review backend logs for errors
 
+### Asset Imported But Shows Zero Holders
+
+**Cause**: In ATS, creating accounts or "holder records" in the system doesn't make them actual on-chain token holders. An address only becomes a holder after tokens are minted to it.
+
+**Important**: When you create a security token in ATS, even if you set up holder accounts, they won't appear as holders in Mass Payout until you mint tokens to their addresses.
+
+**Solution**:
+
+1. **Mint Tokens in ATS**:
+   - Go to ATS web application
+   - Navigate to your token
+   - Use the mint function to issue tokens to holder addresses
+   - Confirm at least one address has a non-zero balance
+
+2. **Verify in ATS**:
+   - Check token details page in ATS
+   - View holder list and balances
+   - Ensure holders appear with balances > 0
+
+3. **Re-sync in Mass Payout**:
+   - Navigate to asset details in Mass Payout
+   - Click "Sync Holders"
+   - Holder count should update to reflect on-chain balances
+
+4. **Create Distribution**:
+   - Now you can create distributions
+   - Payments will only go to addresses with actual token balances
+
+**Note**: This is a common issue when first setting up ATS tokens. Always mint tokens before attempting to create distributions in Mass Payout.
+
 ## Next Steps
 
 - [Create Distributions](./creating-distributions.md) - Set up payouts for imported assets
