@@ -8,7 +8,7 @@
  * proxy implementations without redeploying the ProxyAdmin itself.
  *
  * Configuration via environment variables:
- *   NETWORK - Target network name (default: hedera-testnet)
+ *   NETWORK - Target network name (required)
  *   {NETWORK}_PRIVATE_KEY_0 - Private key for deployer account
  *   PROXY_ADMIN_ADDRESS - Address of ProxyAdmin contract (required)
  *   BLR_PROXY - Address of BLR proxy (optional if only upgrading Factory)
@@ -21,20 +21,29 @@
  *   FACTORY_INIT_DATA - Initialization data for Factory upgradeAndCall (optional)
  *
  * Usage:
- *   PROXY_ADMIN_ADDRESS=0x123... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:testnet
- *   PROXY_ADMIN_ADDRESS=0x123... BLR_IMPLEMENTATION=0xabc... npm run upgrade:tup:testnet
- *   PROXY_ADMIN_ADDRESS=0x123... BLR_PROXY=0x111... FACTORY_PROXY=0x222... npm run upgrade:tup:testnet
+ *   NETWORK=hedera-testnet PROXY_ADMIN_ADDRESS=0x123... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup
+ *   NETWORK=hedera-testnet PROXY_ADMIN_ADDRESS=0x123... BLR_IMPLEMENTATION=0xabc... npm run upgrade:tup
+ *   NETWORK=hedera-testnet PROXY_ADMIN_ADDRESS=0x123... BLR_PROXY=0x111... FACTORY_PROXY=0x222... npm run upgrade:tup
  *
  * @module cli/upgradeTup
  */
 
 import { upgradeTupProxies } from "../workflows/upgradeTupProxies";
-import { getAllNetworks, getNetworkConfig, info, success, error } from "@scripts/infrastructure";
-import { Wallet, providers, ethers } from "ethers";
+import { getAllNetworks, info, success, error, createNetworkSigner } from "@scripts/infrastructure";
+import { ethers } from "ethers";
 
 async function main() {
-  // Get configuration from environment
-  const network = process.env.NETWORK || "hedera-testnet";
+  // Get configuration from environment (network is required)
+  const network = process.env.NETWORK;
+
+  if (!network) {
+    error("❌ Missing NETWORK environment variable.");
+    error("Usage: NETWORK=hedera-testnet PROXY_ADMIN_ADDRESS=0x123... npm run upgrade:tup");
+    const availableNetworks = getAllNetworks();
+    info(`Available networks: ${availableNetworks.join(", ")}`);
+    process.exit(1);
+  }
+
   const proxyAdminAddress = process.env.PROXY_ADMIN_ADDRESS;
   const blrProxyAddress = process.env.BLR_PROXY;
   const factoryProxyAddress = process.env.FACTORY_PROXY;
@@ -62,7 +71,7 @@ async function main() {
   // Validate required address
   if (!proxyAdminAddress) {
     error(`❌ Missing PROXY_ADMIN_ADDRESS environment variable`);
-    error(`Usage: PROXY_ADMIN_ADDRESS=0x123... npm run upgrade:tup:${network.replace("hedera-", "")}`);
+    error(`Usage: NETWORK=${network} PROXY_ADMIN_ADDRESS=0x123... npm run upgrade:tup`);
     process.exit(1);
   }
 
@@ -104,22 +113,9 @@ async function main() {
     process.exit(1);
   }
 
-  // Get network config and create signer
-  const networkConfig = getNetworkConfig(network);
-
-  const privateKeyEnvVar = `${network.toUpperCase().replace(/-/g, "_")}_PRIVATE_KEY_0`;
-  const privateKey = process.env[privateKeyEnvVar];
-
-  if (!privateKey) {
-    error(`❌ Missing private key environment variable: ${privateKeyEnvVar}`);
-    error(`Set it with: export ${privateKeyEnvVar}=0x...`);
-    process.exit(1);
-  }
-
-  const provider = new providers.JsonRpcProvider(networkConfig.jsonRpcUrl);
-  const signer = new Wallet(privateKey, provider);
-
-  info(`👤 Deployer: ${await signer.getAddress()}`);
+  // Create signer from network configuration
+  const { signer, address } = await createNetworkSigner(network);
+  info(`👤 Deployer: ${address}`);
 
   try {
     const result = await upgradeTupProxies(signer, network, {

@@ -59,7 +59,7 @@
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
     "generate:registry": "npx ts-node scripts/tools/generateRegistry.ts",
-    "deploy": "npm run build && npx ts-node -r tsconfig-paths/register scripts/cli/standalone.ts",
+    "deploy": "npm run build && npx ts-node -r tsconfig-paths/register scripts/cli/deploy.ts",
     "deploy:local": "NETWORK=local npm run deploy",
     "deploy:local:auto": "npx hardhat node > hardhat-node.log 2>&1 & sleep 3 && npm run deploy:local; kill $!",
     "deploy:hedera:local": "NETWORK=hedera-local npm run deploy",

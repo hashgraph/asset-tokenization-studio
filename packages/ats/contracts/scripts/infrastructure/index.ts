@@ -109,7 +109,14 @@ export {
 // Configuration
 // ============================================================================
 
-export { getNetworkConfig, getAllNetworks } from "./config";
+export { getNetworkConfig, getAllNetworks, getPrivateKey, getPrivateKeys } from "./config";
+
+// ============================================================================
+// Signer
+// ============================================================================
+
+export { createNetworkSigner } from "./signer";
+export type { NetworkSignerResult } from "./signer";
 
 export {
   getDeploymentConfig,

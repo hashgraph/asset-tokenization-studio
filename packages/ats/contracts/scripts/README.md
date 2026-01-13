@@ -17,21 +17,19 @@ This README provides comprehensive reference documentation for the deployment sy
 
 **Before deploying:**
 
-- **🔴 Network flag required**: Must explicitly specify `--network <name>` when using Hardhat deployment
-- **🔴 Double dash required**: Use `--` before network flag when using npm scripts (e.g., `npm run deploy:hardhat -- --network hedera-testnet`)
+- **🔴 NETWORK required**: Must set `NETWORK` environment variable (no default fallback)
 - **🔴 Environment setup**: Real networks require `.env` configuration (RPC endpoint + private key)
 - **🔴 Gas costs**: Full deployment costs ~$20-50 on testnet, ensure sufficient balance
 - **🔴 Time commitment**: Real network deployments take 5-10 minutes due to transaction confirmations
 
 **Quick Command Reference:**
 
-| Command                                              | Use Case                 | Requirements                |
-| ---------------------------------------------------- | ------------------------ | --------------------------- |
-| `npm run deploy:hardhat -- --network hardhat`        | In-memory testing        | Hardhat project             |
-| `npm run deploy:hardhat -- --network hedera-testnet` | Testnet deployment       | Hardhat + `.env`            |
-| `npm run deploy`                                     | Standalone deployment    | Compiled artifacts + `.env` |
-| `npm run deploy:hedera:testnet`                      | Testnet shortcut         | `.env` configured           |
-| `npm run generate:registry`                          | Update contract metadata | Contracts compiled          |
+| Command                         | Use Case                 | Requirements         |
+| ------------------------------- | ------------------------ | -------------------- |
+| `npm run deploy:local`          | Local testing            | Hardhat node running |
+| `npm run deploy:hedera:testnet` | Testnet deployment       | `.env` configured    |
+| `npm run deploy:hedera:mainnet` | Mainnet deployment       | `.env` configured    |
+| `npm run generate:registry`     | Update contract metadata | Contracts compiled   |
 
 ---
 
@@ -445,8 +443,6 @@ import type { DeploymentResult } from "@scripts/infrastructure";
 
 ## Quick Start
 
-> **Note**: We'll use Hardhat deployment as the primary example. For standalone deployment (no Hardhat runtime), see [Usage Modes](#usage-modes).
-
 ### Step 1: Setup Environment
 
 **From contracts directory** (`packages/ats/contracts/`):
@@ -455,10 +451,13 @@ import type { DeploymentResult } from "@scripts/infrastructure";
 cp .env.sample .env
 ```
 
-**For in-memory testing** (hardhat network):
+**For local testing** (local Hardhat node):
 
-- No `.env` configuration needed
-- Uses Hardhat's built-in accounts
+```bash
+# Uses test accounts, minimal .env configuration
+LOCAL_JSON_RPC_ENDPOINT='http://127.0.0.1:8545'
+LOCAL_PRIVATE_KEY_0='0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+```
 
 **For real networks** (testnet/mainnet), edit `.env`:
 
@@ -471,21 +470,21 @@ HEDERA_TESTNET_MIRROR_NODE_ENDPOINT='https://testnet.mirrornode.hedera.com'
 HEDERA_TESTNET_PRIVATE_KEY_0='0x...'
 
 # Optional: TimeTravel mode (testing only)
-USE_TIME_TRAVEL=false
+USE_TIMETRAVEL=false
 ```
 
 ### Step 2: Deploy
 
 ```bash
-# In-memory test network (fast, no .env needed)
-npm run deploy:hardhat -- --network hardhat
+# Local test network (requires running Hardhat node)
+npm run deploy:local
 
 # Testnet (requires .env configuration)
-npm run deploy:hardhat -- --network hedera-testnet
+npm run deploy:hedera:testnet
 
 # Other networks
-npm run deploy:hardhat -- --network hedera-mainnet
-npm run deploy:hardhat -- --network hedera-previewnet
+npm run deploy:hedera:mainnet
+npm run deploy:hedera:previewnet
 ```
 
 ### Step 3: Verify Deployment
@@ -524,7 +523,7 @@ rm deployments/{network}/.checkpoints/*.json
 # Deploy fresh (adjust network as needed)
 npm run deploy:hedera:testnet
 npm run deploy:hedera:mainnet
-npm run deploy:hardhat -- --network hardhat
+npm run deploy:local
 ```
 
 **Why?** Partial configurations can't be resumed reliably. See [Troubleshooting](#when-deployment-fails) for details.
@@ -533,13 +532,12 @@ npm run deploy:hardhat -- --network hardhat
 
 ## Usage Modes
 
-The deployment system supports three modes:
+The deployment system provides a unified CLI:
 
-| Mode           | Entry Point                            | Signer Source         | Use Case                                  | Command                                             |
-| -------------- | -------------------------------------- | --------------------- | ----------------------------------------- | --------------------------------------------------- |
-| **Hardhat**    | [cli/hardhat.ts](cli/hardhat.ts)       | `ethers.getSigners()` | Hardhat project deployment                | `npm run deploy:hardhat -- --network <name>`        |
-| **Standalone** | [cli/standalone.ts](cli/standalone.ts) | `ethers.Wallet`       | No Hardhat dependency, ~3x faster startup | `npm run deploy` or `npm run deploy:hedera:testnet` |
-| **Module**     | Import in your code                    | Any ethers.js Signer  | Custom scripts, programmatic deployment   | See example below                                   |
+| Mode       | Entry Point                    | Signer Source        | Use Case                                | Command                         |
+| ---------- | ------------------------------ | -------------------- | --------------------------------------- | ------------------------------- |
+| **Deploy** | [cli/deploy.ts](cli/deploy.ts) | `ethers.Wallet`      | Full deployment                         | `npm run deploy:hedera:testnet` |
+| **Module** | Import in your code            | Any ethers.js Signer | Custom scripts, programmatic deployment | See example below               |
 
 ### Import as Module
 
@@ -882,10 +880,7 @@ scripts/
 │   ├── config.ts               # Network configuration
 │   ├── registryFactory.ts      # Registry helpers factory
 │   │
-│   ├── providers/              # Framework adapters
-│   │   ├── index.ts
-│   │   ├── hardhatProvider.ts
-│   │   └── standaloneProvider.ts
+│   ├── signer.ts               # Network signer utilities
 │   │
 │   ├── operations/             # Atomic deployment operations
 │   │   ├── deployContract.ts
@@ -926,8 +921,9 @@ scripts/
 │   └── deploySystemWithExistingBlr.ts
 │
 ├── cli/                         # Command-line entry points
-│   ├── hardhat.ts              # Hardhat-based deployment CLI
-│   └── standalone.ts           # Standalone deployment CLI
+│   ├── deploy.ts               # Main deployment CLI
+│   ├── upgrade.ts              # Configuration upgrade CLI
+│   └── upgradeTup.ts           # TUP proxy upgrade CLI
 │
 ├── tools/                       # Code generation tools
 │   ├── generateRegistry.ts     # Registry generation CLI
@@ -941,30 +937,29 @@ scripts/
 
 ---
 
-### 1. Providers
+### 1. Network Signer
 
-Providers abstract framework-specific deployment logic.
-
-**HardhatProvider** (Hardhat-dependent):
+The `createNetworkSigner` function creates an ethers.js Signer from network configuration:
 
 ```typescript
-import { HardhatProvider } from "./core/providers";
+import { createNetworkSigner } from "@scripts/infrastructure";
 
-const provider = new HardhatProvider();
-const signer = await provider.getSigner();
-const factory = await provider.getFactory("AccessControlFacet");
+// Creates signer using getNetworkConfig() for RPC URL
+// and getPrivateKey() for private key from environment
+const { signer, address } = await createNetworkSigner("hedera-testnet");
+
+console.log(`Deployer: ${address}`);
 ```
 
-**StandaloneProvider** (Framework-agnostic):
+Environment variables follow the pattern:
 
-```typescript
-import { StandaloneProvider } from "./core/providers";
+- `{NETWORK}_JSON_RPC_ENDPOINT` - RPC URL
+- `{NETWORK}_PRIVATE_KEY_0` - Deployer private key
 
-const provider = new StandaloneProvider({
-  rpcUrl: "https://testnet.hashio.io/api",
-  privateKey: "0x...",
-  artifactsPath: "./artifacts", // optional
-});
+```bash
+# .env
+HEDERA_TESTNET_JSON_RPC_ENDPOINT='https://testnet.hashio.io/api'
+HEDERA_TESTNET_PRIVATE_KEY_0='0x...'
 ```
 
 ### 2. Contract Instance Pattern
@@ -1230,18 +1225,14 @@ npm run compile
 
 ### "No signers available"
 
-**In Hardhat context**, ensure you're running in Hardhat context:
+Ensure you have configured the correct private key in your `.env` file:
 
 ```bash
-npx hardhat run scripts/cli/hardhat.ts
-```
+# For testnet
+HEDERA_TESTNET_PRIVATE_KEY_0='0x...'
 
-**In Standalone context**, provide a valid private key:
-
-```typescript
-import { ethers } from "ethers";
-const provider = new ethers.providers.JsonRpcProvider("...");
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider); // Must be valid hex private key
+# For local
+LOCAL_PRIVATE_KEY_0='0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 ```
 
 ### When Deployment Fails
@@ -1257,7 +1248,7 @@ rm deployments/{network}/.checkpoints/*.json
 # 2. Deploy with new contracts (adjust for your network)
 npm run deploy:hedera:testnet
 npm run deploy:hedera:mainnet
-npm run deploy:hardhat -- --network hardhat
+npm run deploy:local
 ```
 
 This will deploy:

@@ -9,7 +9,7 @@
  * without redeploying the entire infrastructure.
  *
  * Configuration via environment variables:
- *   NETWORK - Target network name (default: hedera-testnet)
+ *   NETWORK - Target network name (required)
  *   {NETWORK}_PRIVATE_KEY_0 - Private key for deployer account
  *   BLR_ADDRESS - Address of existing BusinessLogicResolver (required)
  *   PROXY_ADDRESSES - Comma-separated list of proxy addresses to update (optional)
@@ -17,9 +17,9 @@
  *   USE_TIMETRAVEL - Enable TimeTravel mode (default: false)
  *
  * Usage:
- *   BLR_ADDRESS=0x123... npm run upgrade:testnet
- *   BLR_ADDRESS=0x123... PROXY_ADDRESSES=0xabc...,0xdef... npm run upgrade:testnet
- *   BLR_ADDRESS=0x123... CONFIGURATIONS=equity npm run upgrade:testnet
+ *   NETWORK=hedera-testnet BLR_ADDRESS=0x123... npm run upgrade
+ *   NETWORK=hedera-testnet BLR_ADDRESS=0x123... PROXY_ADDRESSES=0xabc...,0xdef... npm run upgrade
+ *   NETWORK=hedera-testnet BLR_ADDRESS=0x123... CONFIGURATIONS=equity npm run upgrade
  *
  * @module cli/upgrade
  */
@@ -27,21 +27,30 @@
 import { upgradeConfigurations } from "../workflows/upgradeConfigurations";
 import {
   getAllNetworks,
-  getNetworkConfig,
   DEFAULT_BATCH_SIZE,
   info,
   success,
   error,
   warn,
+  createNetworkSigner,
 } from "@scripts/infrastructure";
-import { Wallet, providers, ethers } from "ethers";
+import { ethers } from "ethers";
 
 /**
  * Main upgrade function for standalone environment.
  */
 async function main() {
-  // Get configuration from environment
-  const network = process.env.NETWORK || "hedera-testnet";
+  // Get configuration from environment (network is required)
+  const network = process.env.NETWORK;
+
+  if (!network) {
+    error("❌ Missing NETWORK environment variable.");
+    error("Usage: NETWORK=hedera-testnet BLR_ADDRESS=0x123... npm run upgrade");
+    const availableNetworks = getAllNetworks();
+    info(`Available networks: ${availableNetworks.join(", ")}`);
+    process.exit(1);
+  }
+
   const blrAddress = process.env.BLR_ADDRESS;
   const proxyAddressesStr = process.env.PROXY_ADDRESSES;
   const configurationsStr = process.env.CONFIGURATIONS || "both";
@@ -79,7 +88,7 @@ async function main() {
   // Validate BLR address
   if (!blrAddress) {
     error(`❌ Missing BLR_ADDRESS environment variable`);
-    error(`Usage: BLR_ADDRESS=0x123... npm run upgrade:${network.replace("hedera-", "")}`);
+    error(`Usage: NETWORK=${network} BLR_ADDRESS=0x123... npm run upgrade`);
     process.exit(1);
   }
 
@@ -109,26 +118,10 @@ async function main() {
   }
 
   try {
-    // Get network configuration
-    const networkConfig = getNetworkConfig(network);
-
-    // Get private key from environment
-    const networkPrefix = network.toUpperCase().replace(/-/g, "_");
-    const privateKey = process.env[`${networkPrefix}_PRIVATE_KEY_0`];
-
-    if (!privateKey) {
-      error(
-        `❌ Missing private key for network '${network}'. Set ${networkPrefix}_PRIVATE_KEY_0 environment variable.`,
-      );
-      process.exit(1);
-    }
-
-    // Create provider and signer
-    const provider = new providers.JsonRpcProvider(networkConfig.jsonRpcUrl);
-    const signer = new Wallet(privateKey, provider);
-
-    info(`👤 Deployer: ${await signer.getAddress()}`);
-    info(`💰 Balance: ${ethers.utils.formatEther(await provider.getBalance(await signer.getAddress()))} ETH`);
+    // Create signer from network configuration
+    const { signer, address } = await createNetworkSigner(network);
+    info(`👤 Deployer: ${address}`);
+    info(`💰 Balance: ${ethers.utils.formatEther(await signer.provider!.getBalance(address))} ETH`);
 
     // Upgrade configurations
     const output = await upgradeConfigurations(signer, network, {
