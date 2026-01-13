@@ -202,12 +202,12 @@
    limitations under the License.
 
 */
-export const COMMAND_METADATA = '__command__';
-export const COMMAND_HANDLER_METADATA = '__commandHandler__';
-export const QUERY_METADATA = '__query__';
-export const QUERY_HANDLER_METADATA = '__queryHandler__';
+export const COMMAND_METADATA = "__command__";
+export const COMMAND_HANDLER_METADATA = "__commandHandler__";
+export const QUERY_METADATA = "__query__";
+export const QUERY_HANDLER_METADATA = "__queryHandler__";
 export const LIFE_CYCLE_CASH_FLOW_DEPLOYMENT_GAS = 3_800_000;
-export const PROXY_ADMIN_DEPLOYMENT_GAS = 450_000;
+export const PROXY_ADMIN_DEPLOYMENT_GAS = 850_000;
 export const PROXY_DEPLOYMENT_GAS = 2_500_000;
 export const PAUSE_GAS = 15000000;
 export const UNPAUSE_GAS = 650000;
@@ -220,13 +220,13 @@ export const EXECUTE_AMOUNT_SNAPSHOT_BY_ADDRESSES_GAS = 650000;
 export const EXECUTE_PERCENTAGE_SNAPSHOT_GAS = 650000;
 export const EXECUTE_PERCENTAGE_SNAPSHOT_BY_ADDRESSES_GAS = 650000;
 
-export const EVM_ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+export const EVM_ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 // * Generic
 export const BYTES_32_LENGTH = 32 * 2;
 export const ADDRESS_LENGTH = 40;
 
 export const TOKENS = {
-  COMMAND_HANDLER: Symbol('CommandHandler'),
-  QUERY_HANDLER: Symbol('QueryHandler'),
+  COMMAND_HANDLER: Symbol("CommandHandler"),
+  QUERY_HANDLER: Symbol("QueryHandler"),
 };

@@ -213,6 +213,7 @@ import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings"
 import EvmAddress from "@domain/contract/EvmAddress"
 import BigDecimal from "@domain/shared/BigDecimal"
 import TransactionResponse from "@domain/transaction/TransactionResponse"
+import RbacPort from "./hs/types/RbacPort"
 
 export interface InitializationData {
   account?: Account;
@@ -233,7 +234,7 @@ interface ITransactionAdapter {
   register(input?: Account | DfnsSettings): Promise<InitializationData>;
   stop(): Promise<boolean>;
   importAsset(asset: EvmAddress, paymentToken: EvmAddress): Promise<EvmAddress>;
-  deploy(asset: EvmAddress, paymentToken: EvmAddress): Promise<string>;
+  deploy(asset: EvmAddress, paymentToken: EvmAddress, rbac: RbacPort[]): Promise<string>;
   pause(
     lifeCycleCashFlow: EvmAddress,
     lifeCycleCashFlowId: ContractId | string
@@ -343,7 +344,7 @@ export default abstract class TransactionAdapter
     throw new Error("Method not implemented.")
   }
 
-  deploy(asset: EvmAddress, paymentToken: EvmAddress): Promise<string> {
+  deploy(asset: EvmAddress, paymentToken: EvmAddress, rbac: RbacPort[]): Promise<string> {
     throw new Error("Method not implemented.")
   }
 
