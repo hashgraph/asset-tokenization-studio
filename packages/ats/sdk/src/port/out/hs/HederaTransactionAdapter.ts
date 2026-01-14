@@ -214,7 +214,7 @@ import {
   ContractId,
   Signer,
   Transaction,
-} from '@hashgraph/sdk';
+} from '@hiero-ledger/sdk';
 import {
   AccessControlFacet__factory,
   Bond__factory,

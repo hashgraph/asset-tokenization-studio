@@ -236,7 +236,7 @@ import {
   FileCreateTransaction,
   ContractCreateTransaction,
   ContractExecuteTransaction
-} from "@hashgraph/sdk"
+} from "@hiero-ledger/sdk"
 import { Interface } from "ethers/lib/utils.js"
 import TransactionAdapter from "../TransactionAdapter"
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter"

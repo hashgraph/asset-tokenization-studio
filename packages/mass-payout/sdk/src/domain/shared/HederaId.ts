@@ -203,14 +203,13 @@
 
 */
 
-import { AccountId } from '@hashgraph/sdk';
-import { InvalidIdFormat } from './error/InvalidIdFormat';
+import { AccountId } from "@hiero-ledger/sdk";
+import { InvalidIdFormat } from "./error/InvalidIdFormat";
 
-export const HEDERA_FORMAT_ID_REGEX =
-  /^(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))(?:-([a-z]{5}))?$/;
+export const HEDERA_FORMAT_ID_REGEX = /^(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))(?:-([a-z]{5}))?$/;
 
 export class HederaId {
-  public static readonly NULL: HederaId = new HederaId('0.0.0');
+  public static readonly NULL: HederaId = new HederaId("0.0.0");
 
   value: string;
   constructor(value: string) {
@@ -221,7 +220,7 @@ export class HederaId {
   }
 
   static from(value?: string): HederaId {
-    return new HederaId(value ?? '');
+    return new HederaId(value ?? "");
   }
 
   toHederaAddress(): AccountId {
@@ -233,6 +232,6 @@ export class HederaId {
   }
 
   isNull(): boolean {
-    return this.value == '0.0.0';
+    return this.value == "0.0.0";
   }
 }

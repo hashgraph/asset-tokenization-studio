@@ -209,7 +209,7 @@ import {
   Transaction,
   TransactionReceipt,
   TransactionResponse as HTransactionResponse,
-} from "@hashgraph/sdk"
+} from "@hiero-ledger/sdk"
 import {
   CustodialWalletService,
   SignatureRequest,
