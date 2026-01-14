@@ -2,17 +2,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IControlList } from "../interfaces/controlList/IControlList.sol";
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { _CONTROL_LIST_ROLE } from "../constants/roles.sol";
 
-abstract contract ControlList is IControlList, Common {
+abstract contract ControlList is IControlList, Internals {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ControlList(
         bool _isWhiteList
-    ) external override onlyUninitialized(_controlListStorage().initialized) {
-        ControlListStorage storage controlListStorage = _controlListStorage();
-        controlListStorage.isWhiteList = _isWhiteList;
-        controlListStorage.initialized = true;
+    ) external override onlyUninitialized(_isControlListInitialized()) {
+        _initialize_ControlList(_isWhiteList);
     }
 
     function addToControlList(

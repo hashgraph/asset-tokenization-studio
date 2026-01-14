@@ -5,13 +5,12 @@ import { _DEFAULT_PARTITION } from "../../layer_0/constants/values.sol";
 import { _LOCKER_ROLE } from "../../layer_1/constants/roles.sol";
 import { ITransferAndLock } from "../interfaces/ITransferAndLock.sol";
 import { BasicTransferInfo } from "../../layer_1/interfaces/ERC1400/IERC1410.sol";
-import { Common } from "../../layer_1/common/Common.sol";
-import { ITransferAndLock } from "../interfaces/ITransferAndLock.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
-abstract contract TransferAndLock is ITransferAndLock, Common {
+abstract contract TransferAndLock is ITransferAndLock, Internals {
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,

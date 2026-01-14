@@ -312,6 +312,7 @@ import {
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { BaseContract, Contract, ContractTransaction } from 'ethers';
+import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
 import { ProtectionData } from '@domain/context/factory/ProtectionData';
 
 
@@ -1095,7 +1096,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-    period: BigDecimal,
+    startDate: BigDecimal,
+    endDate: BigDecimal,
+    fixingDate: BigDecimal,
+    rateStatus: RateStatus,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(
@@ -1103,7 +1107,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
       rate : ${rate},
-      period: ${period}`,
+       startDate: ${startDate},
+      endDate: ${endDate},
+      fixingDate: ${fixingDate},
+      rateStatus: ${rateStatus}`,
     );
 
     const coupon = {
@@ -1111,7 +1118,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       executionDate: executionDate.toHexString(),
       rate: rate.toHexString(),
       rateDecimals: rate.decimals,
-      period: period.toHexString(),
+      startDate: startDate.toBigNumber(),
+      endDate: endDate.toBigNumber(),
+      fixingDate: fixingDate.toBigNumber(),
+      rateStatus: CastRateStatus.toNumber(rateStatus),
     };
     return this.executeWithArgs(
       new BondUSAFacet__factory().attach(security.toString()),

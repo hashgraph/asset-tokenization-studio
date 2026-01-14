@@ -3,16 +3,17 @@ import { ethers, network } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type Pause,
-  AccessControl,
-  ProtectedPartitions,
+  type PauseFacet,
+  type AccessControl,
+  type ProtectedPartitionsFacet,
   type IERC1410,
-  ERC1594,
-  TransferAndLock,
-  ERC20,
-  ControlList,
-  Kyc,
-  SsiManagement,
+  type ERC1594Facet,
+  type TransferAndLockFacet,
+  type ERC20Facet,
+  type ControlListFacet,
+  type KycFacet,
+  type SsiManagementFacet,
+  type IHold,
   ComplianceMock,
 } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
@@ -208,17 +209,17 @@ describe("ProtectedPartitions Tests", () => {
   let signer_B: SignerWithAddress;
   let signer_C: SignerWithAddress;
 
-  let protectedPartitionsFacet: ProtectedPartitions;
-  let pauseFacet: Pause;
+  let protectedPartitionsFacet: ProtectedPartitionsFacet;
+  let pauseFacet: PauseFacet;
   let erc1410Facet: IERC1410;
-  let erc1594Facet: ERC1594;
-  let erc20Facet: ERC20;
-  let transferAndLockFacet: TransferAndLock;
-  let controlListFacet: ControlList;
+  let erc1594Facet: ERC1594Facet;
+  let erc20Facet: ERC20Facet;
+  let transferAndLockFacet: TransferAndLockFacet;
+  let controlListFacet: ControlListFacet;
   let accessControlFacet: AccessControl;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
-  let holdFacet: Contract;
+  let kycFacet: KycFacet;
+  let ssiManagementFacet: SsiManagementFacet;
+  let holdFacet: IHold;
   let clearingFacet: Contract;
   let protectedHold: ProtectedHoldData;
   let hold: HoldData;
@@ -269,16 +270,16 @@ describe("ProtectedPartitions Tests", () => {
 
     holdFacet = new Contract(address, uniqueFragmentsHold, signer_A);
 
-    protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", address);
-    pauseFacet = await ethers.getContractAt("Pause", address);
+    protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", address);
+    pauseFacet = await ethers.getContractAt("PauseFacet", address);
     erc1410Facet = await ethers.getContractAt("IERC1410", address);
-    erc1594Facet = await ethers.getContractAt("ERC1594", address);
-    erc20Facet = await ethers.getContractAt("ERC20", address);
-    transferAndLockFacet = await ethers.getContractAt("TransferAndLock", address);
-    controlListFacet = await ethers.getContractAt("ControlList", address);
+    erc1594Facet = await ethers.getContractAt("ERC1594Facet", address);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", address);
+    transferAndLockFacet = await ethers.getContractAt("TransferAndLockFacet", address);
+    controlListFacet = await ethers.getContractAt("ControlListFacet", address);
     accessControlFacet = await ethers.getContractAt("AccessControl", address);
-    kycFacet = await ethers.getContractAt("Kyc", address);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", address);
+    kycFacet = await ethers.getContractAt("KycFacet", address);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", address);
     const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", address, signer_A);
 
     const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", address, signer_A);

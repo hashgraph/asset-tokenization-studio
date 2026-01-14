@@ -21,7 +21,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         bool initialized;
     }
 
-    modifier onlyIssuable() {
+    modifier onlyIssuable() override {
         _checkIssuable();
         _;
     }
@@ -33,57 +33,59 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory,
         bytes memory
-    ) {
+    ) override {
         _checkCanTransferFromByPartition(_from, _to, _partition, _value, EMPTY_BYTES, EMPTY_BYTES);
         _;
     }
 
     modifier onlyCanRedeemFromByPartition(address _from, bytes32 _partition, uint256 _value, bytes memory, bytes memory)
+        override
     {
         _checkCanRedeemFromByPartition(_from, _partition, _value, EMPTY_BYTES, EMPTY_BYTES);
         _;
     }
 
-    modifier onlyIdentified(address _from, address _to) {
+    modifier onlyIdentified(address _from, address _to) override {
         _checkIdentity(_from, _to);
         _;
     }
 
-    modifier onlyCompliant(address _from, address _to, bool _checkSender) {
+    modifier onlyCompliant(address _from, address _to, bool _checkSender) override {
         _checkCompliance(_from, _to, _checkSender);
         _;
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC1594() internal {
+    function _initialize_ERC1594() internal override {
         ERC1594Storage storage ds = _erc1594Storage();
         ds.issuance = true;
         ds.initialized = true;
     }
 
-    function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal {
+    // TODO: In this case are able to perform that operation another role?
+    function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal override {
         // Add a function to validate the `_data` parameter
         _mint(_tokenHolder, _value);
         emit Issued(_msgSender(), _tokenHolder, _value, _data);
     }
 
-    function _redeem(uint256 _value, bytes memory _data) internal {
+    function _redeem(uint256 _value, bytes memory _data) internal override {
         // Add a function to validate the `_data` parameter
         _burn(_msgSender(), _value);
         emit Redeemed(address(0), _msgSender(), _value, _data);
     }
 
-    function _redeemFrom(address _tokenHolder, uint256 _value, bytes memory _data) internal {
+    function _redeemFrom(address _tokenHolder, uint256 _value, bytes memory _data) internal override {
         // Add a function to validate the `_data` parameter
         _burnFrom(_tokenHolder, _value);
         emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
     }
 
-    function _isIssuable() internal view returns (bool) {
+    function _isIssuable() internal view override returns (bool) {
         return _erc1594Storage().issuance;
     }
 
-    function _checkIssuable() internal view {
+    function _checkIssuable() internal view override {
         if (!_isIssuable()) revert IssuanceIsClosed();
     }
 
@@ -93,7 +95,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory,
         bytes memory
-    ) internal view {
+    ) internal view override {
         (bool isAbleToRedeemFrom, , bytes32 reasonCode, bytes memory details) = _isAbleToRedeemFromByPartition(
             _from,
             _partition,
@@ -112,7 +114,12 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view returns (bool isAbleToRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+    )
+        internal
+        view
+        override
+        returns (bool isAbleToRedeemFrom, bytes1 statusCode, bytes32 reasonCode, bytes memory details)
+    {
         (isAbleToRedeemFrom, statusCode, reasonCode, details) = _genericChecks();
         if (!isAbleToRedeemFrom) {
             return (isAbleToRedeemFrom, statusCode, reasonCode, details);
@@ -148,7 +155,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view {
+    ) internal view override {
         (bool isAbleToTransfer, , bytes32 reasonCode, bytes memory details) = _isAbleToTransferFromByPartition(
             _from,
             _to,
@@ -169,7 +176,12 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         uint256 _value,
         bytes memory /*_data*/,
         bytes memory /*_operatorData*/
-    ) internal view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
+    )
+        internal
+        view
+        override
+        returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details)
+    {
         (isAbleToTransfer, statusCode, reasonCode, details) = _genericChecks();
         if (!isAbleToTransfer) {
             return (isAbleToTransfer, statusCode, reasonCode, details);
@@ -391,5 +403,9 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         }
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+
+    function _isERC1594Initialized() internal view override returns (bool) {
+        return _erc1594Storage().initialized;
     }
 }

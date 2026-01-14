@@ -309,6 +309,7 @@ import {
 import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
 import NetworkService from '@service/network/NetworkService';
 import MetamaskService from '@service/wallet/metamask/MetamaskService';
+import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
 import { ProtectionData } from '@domain/context/factory/ProtectionData';
 
 @singleton()
@@ -857,7 +858,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-    period: BigDecimal,
+    startDate: BigDecimal,
+    endDate: BigDecimal,
+    fixingDate: BigDecimal,
+    rateStatus: RateStatus,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
@@ -865,14 +869,20 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
       rate : ${rate},
-      period: ${period}`,
+      rateStatus : ${rateStatus},
+      startDate: ${startDate},
+      endDate: ${endDate},
+      fixingDate: ${fixingDate}`,
     );
     const couponStruct: IBondRead.CouponStruct = {
       recordDate: recordDate.toBigNumber(),
       executionDate: executionDate.toBigNumber(),
       rate: rate.toBigNumber(),
       rateDecimals: rate.decimals,
-      period: period.toBigNumber(),
+      startDate: startDate.toBigNumber(),
+      endDate: endDate.toBigNumber(),
+      fixingDate: fixingDate.toBigNumber(),
+      rateStatus: CastRateStatus.toNumber(rateStatus),
     };
 
     return this.executeTransaction(

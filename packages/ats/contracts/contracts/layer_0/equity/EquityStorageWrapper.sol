@@ -33,7 +33,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint8 nominalValueDecimals;
     }
 
-    function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal {
+    function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal override {
         _equityStorage().votingRight = _equityDetailsData.votingRight;
         _equityStorage().informationRight = _equityDetailsData.informationRight;
         _equityStorage().liquidationRight = _equityDetailsData.liquidationRight;
@@ -49,16 +49,16 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _setDividends(
         IEquity.Dividend calldata _newDividend
-    ) internal returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_) {
+    ) internal override returns (bytes32 corporateActionId_, uint256 dividendId_) {
         bytes memory data = abi.encode(_newDividend);
 
-        (success_, corporateActionId_, dividendId_) = _addCorporateAction(DIVIDEND_CORPORATE_ACTION_TYPE, data);
+        (corporateActionId_, dividendId_) = _addCorporateAction(DIVIDEND_CORPORATE_ACTION_TYPE, data);
 
-        _initDividend(success_, corporateActionId_, data);
+        _initDividend(corporateActionId_, data);
     }
 
-    function _initDividend(bool _success, bytes32 _actionId, bytes memory _data) internal {
-        if (!_success) {
+    function _initDividend(bytes32 _actionId, bytes memory _data) internal override {
+        if (_actionId == bytes32(0)) {
             revert IEquityStorageWrapper.DividendCreationFailed();
         }
 
@@ -70,16 +70,16 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _setVoting(
         IEquity.Voting calldata _newVoting
-    ) internal returns (bool success_, bytes32 corporateActionId_, uint256 voteID_) {
+    ) internal override returns (bytes32 corporateActionId_, uint256 voteID_) {
         bytes memory data = abi.encode(_newVoting);
 
-        (success_, corporateActionId_, voteID_) = _addCorporateAction(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, data);
+        (corporateActionId_, voteID_) = _addCorporateAction(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, data);
 
-        _initVotingRights(success_, corporateActionId_, data);
+        _initVotingRights(corporateActionId_, data);
     }
 
-    function _initVotingRights(bool _success, bytes32 _actionId, bytes memory _data) internal {
-        if (!_success) {
+    function _initVotingRights(bytes32 _actionId, bytes memory _data) internal override {
+        if (_actionId == bytes32(0)) {
             revert IEquityStorageWrapper.VotingRightsCreationFailed();
         }
 
@@ -91,19 +91,19 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _setScheduledBalanceAdjustment(
         IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) internal returns (bool success_, bytes32 corporateActionId_, uint256 balanceAdjustmentID_) {
+    ) internal override returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_) {
         bytes memory data = abi.encode(_newBalanceAdjustment);
 
-        (success_, corporateActionId_, balanceAdjustmentID_) = _addCorporateAction(
+        (corporateActionId_, balanceAdjustmentID_) = _addCorporateAction(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             data
         );
 
-        _initBalanceAdjustment(success_, corporateActionId_, data);
+        _initBalanceAdjustment(corporateActionId_, data);
     }
 
-    function _initBalanceAdjustment(bool _success, bytes32 _actionId, bytes memory _data) internal {
-        if (!_success) {
+    function _initBalanceAdjustment(bytes32 _actionId, bytes memory _data) internal override {
+        if (_actionId == bytes32(0)) {
             revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
         }
 
@@ -116,7 +116,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, abi.encode(_actionId));
     }
 
-    function _getEquityDetails() internal view returns (IEquity.EquityDetailsData memory equityDetails_) {
+    function _getEquityDetails() internal view override returns (IEquity.EquityDetailsData memory equityDetails_) {
         equityDetails_ = IEquity.EquityDetailsData({
             votingRight: _equityStorage().votingRight,
             informationRight: _equityStorage().informationRight,
@@ -140,10 +140,10 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
      */
     function _getDividends(
         uint256 _dividendID
-    ) internal view returns (IEquity.RegisteredDividend memory registeredDividend_) {
-        bytes32 actionId = _corporateActionsStorage().actionsByType[DIVIDEND_CORPORATE_ACTION_TYPE].at(_dividendID - 1);
+    ) internal view override returns (IEquity.RegisteredDividend memory registeredDividend_) {
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
 
-        (, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
@@ -161,7 +161,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     function _getDividendsFor(
         uint256 _dividendID,
         address _account
-    ) internal view returns (IEquity.DividendFor memory dividendFor_) {
+    ) internal view override returns (IEquity.DividendFor memory dividendFor_) {
         IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
 
         dividendFor_.amount = registeredDividend.dividend.amount;
@@ -183,7 +183,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     function _getDividendAmountFor(
         uint256 _dividendID,
         address _account
-    ) internal view returns (IEquity.DividendAmountFor memory dividendAmountFor_) {
+    ) internal view override returns (IEquity.DividendAmountFor memory dividendAmountFor_) {
         IEquity.DividendFor memory dividendFor = _getDividendsFor(_dividendID, _account);
 
         if (!dividendFor.recordDateReached) return dividendAmountFor_;
@@ -195,7 +195,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         dividendAmountFor_.denominator = 10 ** (dividendFor.decimals + dividendFor.amountDecimals);
     }
 
-    function _getDividendsCount() internal view returns (uint256 dividendCount_) {
+    function _getDividendsCount() internal view override returns (uint256 dividendCount_) {
         return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
     }
 
@@ -203,7 +203,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint256 _dividendID,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory holders_) {
+    ) internal view override returns (address[] memory holders_) {
         IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
 
         if (registeredDividend.dividend.recordDate >= _blockTimestamp()) return new address[](0);
@@ -214,7 +214,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         return _getTokenHolders(_pageIndex, _pageLength);
     }
 
-    function _getTotalDividendHolders(uint256 _dividendID) internal view returns (uint256) {
+    function _getTotalDividendHolders(uint256 _dividendID) internal view override returns (uint256) {
         IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
 
         if (registeredDividend.dividend.recordDate >= _blockTimestamp()) return 0;
@@ -224,12 +224,12 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         return _getTotalTokenHolders();
     }
 
-    function _getVoting(uint256 _voteID) internal view returns (IEquity.RegisteredVoting memory registeredVoting_) {
-        bytes32 actionId = _corporateActionsStorage().actionsByType[VOTING_RIGHTS_CORPORATE_ACTION_TYPE].at(
-            _voteID - 1
-        );
+    function _getVoting(
+        uint256 _voteID
+    ) internal view override returns (IEquity.RegisteredVoting memory registeredVoting_) {
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
 
-        (, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
@@ -248,7 +248,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     function _getVotingFor(
         uint256 _voteID,
         address _account
-    ) internal view returns (IEquity.VotingFor memory votingFor_) {
+    ) internal view override returns (IEquity.VotingFor memory votingFor_) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
         votingFor_.recordDate = registeredVoting.voting.recordDate;
@@ -265,7 +265,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         );
     }
 
-    function _getVotingCount() internal view returns (uint256 votingCount_) {
+    function _getVotingCount() internal view override returns (uint256 votingCount_) {
         return _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
     }
 
@@ -273,7 +273,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint256 _voteID,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory holders_) {
+    ) internal view override returns (address[] memory holders_) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
         if (registeredVoting.voting.recordDate >= _blockTimestamp()) return new address[](0);
@@ -284,7 +284,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         return _getTokenHolders(_pageIndex, _pageLength);
     }
 
-    function _getTotalVotingHolders(uint256 _voteID) internal view returns (uint256) {
+    function _getTotalVotingHolders(uint256 _voteID) internal view override returns (uint256) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
         if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
@@ -296,19 +296,20 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) internal view returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        bytes32 actionId = _corporateActionsStorage().actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE].at(
+    ) internal view override returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
+        bytes32 actionId = _getCorporateActionIdByTypeIndex(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             _balanceAdjustmentID - 1
         );
 
-        (, bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data) = _getCorporateAction(actionId);
 
         if (data.length > 0) {
             (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));
         }
     }
 
-    function _getScheduledBalanceAdjustmentsCount() internal view returns (uint256 balanceAdjustmentCount_) {
+    function _getScheduledBalanceAdjustmentsCount() internal view override returns (uint256 balanceAdjustmentCount_) {
         return _getCorporateActionCountByType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE);
     }
 
@@ -316,7 +317,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint256 _date,
         uint256 _snapshotId,
         address _account
-    ) internal view returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
+    ) internal view override returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
         if (_date < _blockTimestamp()) {
             dateReached_ = true;
 

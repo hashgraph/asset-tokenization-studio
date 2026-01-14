@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { ExternalControlListManagement, MockedWhitelist, MockedBlacklist, ResolverProxy } from "@contract-types";
+import { ExternalControlListManagementFacet, MockedWhitelist, MockedBlacklist, ResolverProxy } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
@@ -11,7 +11,7 @@ describe("ExternalControlList Management Tests", () => {
   let signer_B: SignerWithAddress;
 
   let diamond: ResolverProxy;
-  let externalControlListManagement: ExternalControlListManagement;
+  let externalControlListManagement: ExternalControlListManagementFacet;
   let externalWhitelistMock1: MockedWhitelist;
   let externalBlacklistMock1: MockedBlacklist;
   let externalWhitelistMock2: MockedWhitelist;
@@ -29,7 +29,7 @@ describe("ExternalControlList Management Tests", () => {
     signer_B = base.user1;
 
     externalControlListManagement = await ethers.getContractAt(
-      "ExternalControlListManagement",
+      "ExternalControlListManagementFacet",
       diamond.address,
       signer_A,
     );

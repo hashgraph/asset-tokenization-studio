@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { IClearingActions } from "../interfaces/clearing/IClearingActions.sol";
 import { IClearing } from "../interfaces/clearing/IClearing.sol";
 import { _CLEARING_VALIDATOR_ROLE } from "../constants/roles.sol";
 import { _CLEARING_ROLE } from "../constants/roles.sol";
 
-abstract contract ClearingActions is IClearingActions, Common {
-    function initializeClearing(bool _clearingActive) external onlyUninitialized(_clearingStorage().initialized) {
-        IClearing.ClearingDataStorage storage clearingStorage = _clearingStorage();
-        clearingStorage.initialized = true;
-        clearingStorage.activated = _clearingActive;
+abstract contract ClearingActions is IClearingActions, Internals {
+    function initializeClearing(bool _clearingActive) external onlyUninitialized(_isClearingInitialized()) {
+        _initializeClearing(_clearingActive);
     }
 
     function activateClearing() external onlyRole(_CLEARING_ROLE) onlyUnpaused returns (bool success_) {

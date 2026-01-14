@@ -69,7 +69,7 @@
     "ats:contracts:format:check": "npm run format:check --workspace=packages/ats/contracts",
     "ats:contracts:lint": "npm run lint --workspace=packages/ats/contracts",
     "ats:contracts:lint:fix": "npm run lint:fix --workspace=packages/ats/contracts",
-    "ats:contracts:build": "npm run build --workspace=packages/ats/contracts",
+    "ats:contracts:build": "NODE_OPTIONS='--max-old-space-size=8192' npm run build --workspace=packages/ats/contracts",
     "ats:contracts:compile": "npm run compile --workspace=packages/ats/contracts",
     "ats:contracts:test": "npm run test --workspace=packages/ats/contracts",
     "ats:contracts:test:parallel": "npm run test:parallel --workspace=packages/ats/contracts",
@@ -110,7 +110,7 @@
     "ats:sdk:clean": "npm run clean --workspace=packages/ats/sdk",
     "ats:sdk:publish": "npm run publish --workspace=packages/ats/sdk",
     "ats:web:build": "npm run build --workspace=apps/ats/web",
-    "ats:web:test": "npm run test --workspace=apps/ats/web",
+    "ats:web:test": "NODE_OPTIONS='--max-old-space-size=8192' npm run test --workspace=apps/ats/web",
     "ats:web:test:update": "npm run test:update --workspace=apps/ats/web",
     "ats:web:test:ci": "npm run test:ci --workspace=apps/ats/web",
     "ats:web:dev": "npm run dev --workspace=apps/ats/web",
@@ -181,5 +181,6 @@
     "*.sol": ["npm run lint:staged:sol --", "npm run format:staged --"],
     "*.{js,mjs,cjs,ts,tsx,mts}": ["npm run lint:staged:js -- --fix", "npm run format:staged --"],
     "*.{json,md,yml,yaml}": ["npm run format:staged --"]
-  }
+  },
+  "packageManager": "yarn@4.9.2+sha512.1fc009bc09d13cfd0e19efa44cbfc2b9cf6ca61482725eb35bbc5e257e093ebf4130db6dfe15d604ff4b79efd8e1e8e99b25fa7d0a6197c9f9826358d4d65c3c"
 }

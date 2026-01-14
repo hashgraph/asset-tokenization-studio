@@ -200,11 +200,8 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
     function _checkValidKeys(
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
     ) private view {
-        BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
-
         // Check all previously activated keys are in the array.this
         // Check non duplicated keys.
-        uint256 activesBusinessLogicsKeys;
         bytes32 currentKey;
         uint256 length = _businessLogicsRegistryDatas.length;
         uint256 innerIndex;
@@ -212,7 +209,6 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
             if (uint256(currentKey) == 0) revert ZeroKeyNotValidForBusinessLogic();
 
-            if (businessLogicResolverDataStorage.businessLogicActive[currentKey]) ++activesBusinessLogicsKeys;
             unchecked {
                 innerIndex = index + 1;
             }
@@ -227,7 +223,5 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
                 ++index;
             }
         }
-        if (activesBusinessLogicsKeys != businessLogicResolverDataStorage.activeBusinessLogics.length)
-            revert AllBusinessLogicKeysMustBeenInformed();
     }
 }

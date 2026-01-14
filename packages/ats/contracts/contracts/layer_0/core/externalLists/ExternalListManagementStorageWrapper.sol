@@ -20,7 +20,7 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         bytes32 _position,
         address[] calldata _lists,
         bool[] calldata _actives
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_) {
         uint256 length = _lists.length;
         for (uint256 index; index < length; ) {
             _checkValidAddress(_lists[index]);
@@ -43,19 +43,19 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         success_ = true;
     }
 
-    function _addExternalList(bytes32 _position, address _list) internal returns (bool success_) {
+    function _addExternalList(bytes32 _position, address _list) internal override returns (bool success_) {
         success_ = _externalListStorage(_position).list.add(_list);
     }
 
-    function _removeExternalList(bytes32 _position, address _list) internal returns (bool success_) {
+    function _removeExternalList(bytes32 _position, address _list) internal override returns (bool success_) {
         success_ = _externalListStorage(_position).list.remove(_list);
     }
 
-    function _isExternalList(bytes32 _position, address _list) internal view returns (bool) {
+    function _isExternalList(bytes32 _position, address _list) internal view override returns (bool) {
         return _externalListStorage(_position).list.contains(_list);
     }
 
-    function _getExternalListsCount(bytes32 _position) internal view returns (uint256 count_) {
+    function _getExternalListsCount(bytes32 _position) internal view override returns (uint256 count_) {
         count_ = _externalListStorage(_position).list.length();
     }
 
@@ -63,12 +63,12 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         bytes32 _position,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
+    ) internal view override returns (address[] memory members_) {
         members_ = _externalListStorage(_position).list.getFromSet(_pageIndex, _pageLength);
     }
 
-    function _checkValidAddress(address account) internal pure {
-        if (account == address(0)) revert ZeroAddressNotAllowed();
+    function _setExternalListInitialized(bytes32 _position) internal override {
+        _externalListStorage(_position).initialized = true;
     }
 
     function _externalListStorage(

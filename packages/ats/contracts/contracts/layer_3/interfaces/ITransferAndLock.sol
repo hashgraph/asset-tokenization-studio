@@ -6,6 +6,16 @@ import {
 } from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
 interface ITransferAndLock {
+    event PartitionTransferredAndLocked(
+        bytes32 indexed partition,
+        address indexed from,
+        address to,
+        uint256 value,
+        bytes data,
+        uint256 expirationTimestamp,
+        uint256 lockId
+    );
+
     struct TransferAndLockStruct {
         address from;
         address to;

@@ -5,9 +5,9 @@ import { _AGENT_ROLE } from "../constants/roles.sol";
 import { IERC3643Read } from "../interfaces/ERC3643/IERC3643Read.sol";
 import { ICompliance } from "../interfaces/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../interfaces/ERC3643/IIdentityRegistry.sol";
-import { Common } from "../common/Common.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 
-abstract contract ERC3643Read is IERC3643Read, Common {
+abstract contract ERC3643Read is IERC3643Read, Internals {
     function isAgent(address _agent) external view returns (bool) {
         return _hasRole(_AGENT_ROLE, _agent);
     }

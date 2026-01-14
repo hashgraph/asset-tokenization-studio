@@ -15,7 +15,7 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is ERC1644StorageWrap
         address _to,
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal returns (bytes32) {
+    ) internal override returns (bytes32) {
         checkNounceAndDeadline(
             _protectionData.nounce,
             _from,
@@ -36,7 +36,7 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is ERC1644StorageWrap
         address _from,
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal {
+    ) internal override {
         checkNounceAndDeadline(
             _protectionData.nounce,
             _from,
