@@ -254,6 +254,15 @@ describe("ERC3643 Tests", () => {
       expect(parsed["Config ID"].toLowerCase()).to.equal(configId.toLowerCase());
       expect(parsed["Version"]).to.equal(configVersion.toString());
     });
+
+    describe("initialize", () => {
+      it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+        await expect(
+          erc3643Facet.initialize_ERC3643(complianceMock.address, identityRegistryMock.address),
+        ).to.be.rejectedWith("AlreadyInitialized");
+      });
+    });
+
     describe("mint", () => {
       it("GIVEN an account with issuer role WHEN mint THEN transaction succeeds", async () => {
         // issue succeeds
@@ -1320,6 +1329,19 @@ describe("ERC3643 Tests", () => {
 
           await expect(erc3643Facet.batchMint(toList, amounts)).to.be.rejectedWith("InputAmountsArrayLengthMismatch");
         });
+
+        it("GIVEN a paused token WHEN batchMint THEN transaction fails with TokenIsPaused", async () => {
+          await pauseFacet.pause();
+
+          const mintAmount = AMOUNT / 2;
+          const toList = [signer_D.address];
+          const amounts = [mintAmount];
+
+          await expect(erc3643Facet.batchMint(toList, amounts)).to.be.revertedWithCustomError(
+            pauseFacet,
+            "TokenIsPaused",
+          );
+        });
       });
 
       describe("batchTransfer", () => {
@@ -1368,6 +1390,67 @@ describe("ERC3643 Tests", () => {
 
           await expect(erc3643Facet.batchTransfer(toList, amounts)).to.be.rejectedWith(
             "InputAmountsArrayLengthMismatch",
+          );
+        });
+
+        it("GIVEN a paused token WHEN batchTransfer THEN transaction fails with TokenIsPaused", async () => {
+          await pauseFacet.pause();
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            pauseFacet,
+            "TokenIsPaused",
+          );
+        });
+
+        it("GIVEN clearing is activated WHEN batchTransfer THEN transaction fails with ClearingIsActivated", async () => {
+          await clearingActionsFacet.activateClearing();
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            clearingFacet,
+            "ClearingIsActivated",
+          );
+        });
+
+        it("GIVEN protected partitions without wildcard role WHEN batchTransfer THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+          await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+          await protectedPartitionsFacet.protectPartitions();
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            clearingFacet,
+            "PartitionsAreProtectedAndNoRole",
+          );
+        });
+
+        it("GIVEN non-verified sender WHEN batchTransfer THEN transaction fails with AddressNotVerified", async () => {
+          await identityRegistryMock.setFlags(false, false);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            erc3643Facet,
+            "AddressNotVerified",
+          );
+        });
+
+        it("GIVEN compliance returns false WHEN batchTransfer THEN transaction fails with ComplianceNotAllowed", async () => {
+          await complianceMock.setFlags(false, false);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            erc3643Facet,
+            "ComplianceNotAllowed",
           );
         });
       });
@@ -1423,6 +1506,29 @@ describe("ERC3643 Tests", () => {
             "InputAmountsArrayLengthMismatch",
           );
         });
+
+        it("GIVEN toList and amounts with different lengths WHEN batchForcedTransfer THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
+          const mintAmount = AMOUNT / 2;
+          const fromList = [signer_A.address, signer_F.address];
+          const toList = [signer_D.address, signer_E.address];
+          const amounts = [mintAmount];
+
+          await expect(erc3643Facet.batchForcedTransfer(fromList, toList, amounts)).to.be.rejectedWith(
+            "InputAmountsArrayLengthMismatch",
+          );
+        });
+
+        it("GIVEN a paused token WHEN batchForcedTransfer THEN transaction fails with TokenIsPaused", async () => {
+          await pauseFacet.pause();
+
+          const fromList = [signer_F.address];
+          const toList = [signer_E.address];
+          const amounts = [transferAmount];
+
+          await expect(
+            erc3643Facet.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
+          ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        });
       });
 
       describe("batchBurn", () => {
@@ -1457,12 +1563,23 @@ describe("ERC3643 Tests", () => {
         });
 
         it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const amounts = [mintAmount, mintAmount];
+          const userAddresses = [signer_D.address];
+          const amounts = [burnAmount, burnAmount];
 
-          await expect(erc3643Facet.batchTransfer(toList, amounts)).to.be.rejectedWith(
+          await expect(erc3643Facet.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.rejectedWith(
             "InputAmountsArrayLengthMismatch",
+          );
+        });
+
+        it("GIVEN a paused token WHEN batchBurn THEN transaction fails with TokenIsPaused", async () => {
+          await pauseFacet.pause();
+
+          const userAddresses = [signer_D.address];
+          const amounts = [burnAmount];
+
+          await expect(erc3643Facet.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
+            pauseFacet,
+            "TokenIsPaused",
           );
         });
       });
@@ -1764,7 +1881,6 @@ describe("ERC3643 Tests", () => {
         ).to.be.rejectedWith("AccountHasNoRole");
       });
       it("GIVEN an account without TREX_OWNER role WHEN setCompliance THEN transaction fails with AccountHasNoRole", async () => {
-        // set compliance fails
         await expect(erc3643Facet.connect(signer_C).setCompliance(complianceMock.address)).to.be.rejectedWith(
           "AccountHasNoRole",
         );
@@ -1788,9 +1904,16 @@ describe("ERC3643 Tests", () => {
         );
       });
 
-      it("GIVEN an account without admin role WHEN addAgent THEN transaction fails with AccountHasNoRole", async () => {
-        // add agent fails
+      it("GIVEN an account without admin role WHEN addAgent or removeAgent THEN transaction fails with AccountHasNoRole", async () => {
         await expect(erc3643Facet.connect(signer_C).addAgent(signer_A.address)).to.be.rejectedWith("AccountHasNoRole");
+        await expect(erc3643Facet.connect(signer_C).removeAgent(signer_A.address)).to.be.rejectedWith(
+          "AccountHasNoRole",
+        );
+      });
+      it("GIVEN an account without AGENT_ROLE role WHEN recoveryAddress THEN transaction fails with AccountHasNoRole", async () => {
+        await expect(
+          erc3643Facet.connect(signer_C).recoveryAddress(signer_A.address, signer_B.address, signer_C.address),
+        ).to.be.rejectedWith("AccountHasNoRole");
       });
     });
 
@@ -1841,13 +1964,14 @@ describe("ERC3643 Tests", () => {
         );
       });
 
-      it("GIVEN a paused token WHEN attempting to addAgent THEN transactions revert with TokenIsPaused error", async () => {
+      it("GIVEN a paused token WHEN attempting to addAgent or removeAgent THEN transactions revert with TokenIsPaused error", async () => {
         await expect(erc3643Facet.addAgent(signer_A.address)).to.be.rejectedWith("TokenIsPaused");
+        await expect(erc3643Facet.removeAgent(signer_A.address)).to.be.rejectedWith("TokenIsPaused");
       });
 
       it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
         await expect(erc3643Facet.setName(newName)).to.be.rejectedWith("TokenIsPaused");
-        await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith("TokenIsPaused");
+        await expect(erc3643Facet.setSymbol(newSymbol)).to.be.rejectedWith("TokenIsPaused");
         await expect(erc3643Facet.setOnchainID(onchainId)).to.be.rejectedWith("TokenIsPaused");
         await expect(erc3643Facet.setIdentityRegistry(identityRegistryMock.address)).to.be.rejectedWith(
           "TokenIsPaused",
@@ -2633,6 +2757,13 @@ describe("ERC3643 Tests", () => {
           "WalletRecovered",
         );
       });
+      it("GIVEN a recovered wallet WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
+        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(
+          erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+      });
     });
   });
 
@@ -2760,6 +2891,90 @@ describe("ERC3643 Tests", () => {
           freezeFacet.batchUnfreezePartialTokens([signer_A.address], [AMOUNT]),
         ).to.be.revertedWithCustomError(erc1410Facet, "NotAllowedInMultiPartitionMode");
       });
+    });
+  });
+
+  describe("Token is controllable", () => {
+    async function deployERC3643TokenIsControllableFixture() {
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isControllable: false,
+            maxSupply: MAX_SUPPLY,
+          },
+        },
+      });
+      diamond = base.diamond;
+      await executeRbac(base.accessControlFacet, [
+        {
+          role: ATS_ROLES._CONTROLLER_ROLE,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES._ISSUER_ROLE,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES._KYC_ROLE,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES._SSI_MANAGER_ROLE,
+          members: [signer_A.address],
+        },
+      ]);
+      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+
+      pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+
+      controlList = await ethers.getContractAt("ControlList", diamond.address);
+
+      erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
+      erc1594Facet = await ethers.getContractAt("ERC1594", diamond.address);
+
+      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
+      freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address);
+      kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_A);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+      await ssiManagementFacet.addIssuer(signer_A.address);
+      await kycFacet.grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await kycFacet.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+      await erc3643Facet.mint(signer_D.address, AMOUNT);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployERC3643TokenIsControllableFixture);
+    });
+
+    it("GIVEN token is not controllable WHEN batchBurn THEN transaction fails with TokenIsNotControllable", async () => {
+      const userAddresses = [signer_D.address];
+      const amounts = [AMOUNT];
+
+      await expect(erc3643Facet.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
+        erc1594Facet,
+        "TokenIsNotControllable",
+      );
+    });
+    it("GIVEN token is not controllable WHEN batchForcedTransfer THEN transaction fails with TokenIsNotControllable", async () => {
+      const fromList = [signer_F.address];
+      const toList = [signer_E.address];
+      const amounts = [AMOUNT];
+
+      await expect(
+        erc3643Facet.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
+      ).to.be.revertedWithCustomError(erc1594Facet, "TokenIsNotControllable");
+    });
+    it("GIVEN token is controllable WHEN burning THEN transaction fails with TokenIsNotControllable", async () => {
+      await expect(erc3643Facet.burn(signer_E.address, AMOUNT)).to.be.revertedWithCustomError(
+        erc1594Facet,
+        "TokenIsNotControllable",
+      );
+    });
+    it("GIVEN token is controllable WHEN forcedTransfer THEN transaction fails with TokenIsNotControllable", async () => {
+      await expect(
+        erc3643Facet.forcedTransfer(signer_E.address, signer_D.address, AMOUNT),
+      ).to.be.revertedWithCustomError(erc1594Facet, "TokenIsNotControllable");
     });
   });
 });
