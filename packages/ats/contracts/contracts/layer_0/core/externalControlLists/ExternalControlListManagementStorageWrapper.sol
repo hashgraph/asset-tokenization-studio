@@ -14,6 +14,7 @@ abstract contract ExternalControlListManagementStorageWrapper is ProtectedPartit
     function _initialize_ExternalControlLists(address[] calldata _controlLists) internal override {
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
+            _checkValidAddress(_controlLists[index]);
             _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
             unchecked {
                 ++index;

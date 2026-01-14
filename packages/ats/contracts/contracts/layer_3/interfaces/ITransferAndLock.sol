@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+
 interface ITransferAndLock {
     event PartitionTransferredAndLocked(
         bytes32 indexed partition,
@@ -56,16 +60,12 @@ interface ITransferAndLock {
      * @dev Can only be called by an account with the protected partitions role
      * @param _partition The partition from which tokens will be transferred and locked
      * @param _transferAndLockData The struct containing the transfer and lock data
-     * @param _deadline The deadline timestamp for the signature to be valid
-     * @param _nounce The nounce for the signature to be valid
-     * @param _signature The signature of the transfer and lock data
+     * @param _protectionData The protection dataure to be valid
      */
     function protectedTransferAndLockByPartition(
         bytes32 _partition,
         TransferAndLockStruct calldata _transferAndLockData,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) external returns (bool success_, uint256 lockId_);
 
     /**
@@ -73,14 +73,10 @@ interface ITransferAndLock {
      *         timestamp using the default partition
      * @dev Can only be called by an account with the protected partitions role
      * @param _transferAndLockData The struct containing the transfer and lock data
-     * @param _deadline The deadline timestamp for the signature to be valid
-     * @param _nounce The nounce for the signature to be valid
-     * @param _signature The signature of the transfer and lock data
+     * @param _protectionData The protection dataure to be valid
      */
     function protectedTransferAndLock(
         TransferAndLockStruct calldata _transferAndLockData,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) external returns (bool success_, uint256 lockId_);
 }

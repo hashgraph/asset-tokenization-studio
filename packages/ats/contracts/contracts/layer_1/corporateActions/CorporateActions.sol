@@ -54,4 +54,8 @@ abstract contract CorporateActions is ICorporateActions, Internals {
     ) external view override returns (bytes32[] memory corporateActionIds_) {
         corporateActionIds_ = _getCorporateActionIdsByType(_actionType, _pageIndex, _pageLength);
     }
+
+    function actionContentHashExists(bytes32 _contentHash) external view returns (bool) {
+        return _actionContentHashExists(_contentHash);
+    }
 }

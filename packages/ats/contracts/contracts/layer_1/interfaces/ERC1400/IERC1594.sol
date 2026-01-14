@@ -2,6 +2,16 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IERC1594 {
+    event TransferWithData(address indexed sender, address indexed to, uint256 amount, bytes data);
+
+    event TransferFromWithData(
+        address indexed sender,
+        address indexed from,
+        address indexed to,
+        uint256 amount,
+        bytes data
+    );
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594() external;
 

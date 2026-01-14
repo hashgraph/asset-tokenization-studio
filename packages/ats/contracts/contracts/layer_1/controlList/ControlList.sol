@@ -6,7 +6,6 @@ import { Internals } from "contracts/layer_0/Internals.sol";
 import { _CONTROL_LIST_ROLE } from "../constants/roles.sol";
 
 abstract contract ControlList is IControlList, Internals {
-    // TODO: UNPAUSED
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ControlList(
         bool _isWhiteList

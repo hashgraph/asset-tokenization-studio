@@ -60,7 +60,7 @@ abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20Sto
 
         _afterTokenTransfer(_partition, _from, _basicTransferInfo.to, _basicTransferInfo.value);
 
-        return bytes32(0);
+        return _partition;
     }
 
     function _isERC1410Initialized() internal view override returns (bool) {

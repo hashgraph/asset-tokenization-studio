@@ -6,6 +6,9 @@ import { BasicTransferInfo, OperatorTransferData } from "../../interfaces/ERC140
 import { IERC1410Management } from "../../interfaces/ERC1400/IERC1410Management.sol";
 import { Internals } from "../../../layer_0/Internals.sol";
 import { IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../../interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Internals {
     // solhint-disable-next-line func-name-mixedcase
@@ -20,14 +23,22 @@ abstract contract ERC1410Management is IERC1410Management, Internals {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) onlyControllable {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyControllable
+        returns (bytes32)
+    {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
             _checkAnyRole(roles, _msgSender());
         }
-        _transferByPartition(_from, BasicTransferInfo(_to, _value), _partition, _data, _msgSender(), _operatorData);
+        return
+            _transferByPartition(_from, BasicTransferInfo(_to, _value), _partition, _data, _msgSender(), _operatorData);
     }
 
     function controllerRedeemByPartition(
@@ -92,26 +103,23 @@ abstract contract ERC1410Management is IERC1410Management, Internals {
         address _from,
         address _to,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     )
         external
         override
         onlyRole(_protectedPartitionsRole(_partition))
         onlyProtectedPartitions
         onlyCanTransferFromByPartition(_from, _to, _partition, _amount, "", "")
+        returns (bytes32)
     {
-        _protectedTransferFromByPartition(_partition, _from, _to, _amount, _deadline, _nounce, _signature);
+        return _protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
     }
 
     function protectedRedeemFromByPartition(
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     )
         external
         override
@@ -119,6 +127,6 @@ abstract contract ERC1410Management is IERC1410Management, Internals {
         onlyProtectedPartitions
         onlyCanRedeemFromByPartition(_from, _partition, _amount, "", "")
     {
-        _protectedRedeemFromByPartition(_partition, _from, _amount, _deadline, _nounce, _signature);
+        _protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
     }
 }

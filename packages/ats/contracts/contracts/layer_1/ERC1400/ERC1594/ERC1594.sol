@@ -15,7 +15,7 @@ abstract contract ERC1594 is IERC1594, Internals {
     function transferWithData(
         address _to,
         uint256 _value,
-        bytes calldata /*_data*/
+        bytes calldata _data // ignored in the current implementation
     )
         external
         override
@@ -25,13 +25,14 @@ abstract contract ERC1594 is IERC1594, Internals {
     {
         // Add a function to validate the `_data` parameter
         _transfer(_msgSender(), _to, _value);
+        emit TransferWithData(_msgSender(), _to, _value, _data);
     }
 
     function transferFromWithData(
         address _from,
         address _to,
         uint256 _value,
-        bytes calldata /*_data*/
+        bytes calldata _data // ignored in the current implementation
     )
         external
         override
@@ -46,6 +47,7 @@ abstract contract ERC1594 is IERC1594, Internals {
         }
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
+        emit TransferFromWithData(_msgSender(), _from, _to, _value, _data);
     }
 
     function issue(

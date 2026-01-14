@@ -6,6 +6,9 @@ import { _LOCKER_ROLE } from "../../layer_1/constants/roles.sol";
 import { ITransferAndLock } from "../interfaces/ITransferAndLock.sol";
 import { BasicTransferInfo } from "../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { Internals } from "../../layer_0/Internals.sol";
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract TransferAndLock is ITransferAndLock, Internals {
     function transferAndLockByPartition(
@@ -75,9 +78,7 @@ abstract contract TransferAndLock is ITransferAndLock, Internals {
     function protectedTransferAndLockByPartition(
         bytes32 _partition,
         TransferAndLockStruct calldata _transferAndLockData,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     )
         external
         override
@@ -89,14 +90,12 @@ abstract contract TransferAndLock is ITransferAndLock, Internals {
         onlyProtectedPartitions
         returns (bool success_, uint256 lockId_)
     {
-        return _protectedTransferAndLockByPartition(_partition, _transferAndLockData, _deadline, _nounce, _signature);
+        return _protectedTransferAndLockByPartition(_partition, _transferAndLockData, _protectionData);
     }
 
     function protectedTransferAndLock(
         TransferAndLockStruct calldata _transferAndLockData,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     )
         external
         override
@@ -108,6 +107,6 @@ abstract contract TransferAndLock is ITransferAndLock, Internals {
         onlyProtectedPartitions
         returns (bool success_, uint256 lockId_)
     {
-        return _protectedTransferAndLock(_transferAndLockData, _deadline, _nounce, _signature);
+        return _protectedTransferAndLock(_transferAndLockData, _protectionData);
     }
 }

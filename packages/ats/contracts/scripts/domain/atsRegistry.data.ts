@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2025-12-19T10:02:13.053Z
+ * Generated: 2026-01-14T08:23:45.165Z
  * Facets: 189
  * Infrastructure: 2
  *
@@ -1669,7 +1669,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "approveClearingOperationByPartition",
         signature:
-          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
         selector: "0xd849cea2",
       },
       {
@@ -1748,7 +1748,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "approveClearingOperationByPartition",
         signature:
-          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
         selector: "0xd849cea2",
       },
       {
@@ -1832,7 +1832,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "approveClearingOperationByPartition",
         signature:
-          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
         selector: "0xd849cea2",
       },
       {
@@ -1916,7 +1916,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "approveClearingOperationByPartition",
         signature:
-          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
         selector: "0xd849cea2",
       },
       {
@@ -3052,6 +3052,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["CorporateActionsFacetBase", "Common"],
     methods: [
       {
+        name: "actionContentHashExists",
+        signature: "function actionContentHashExists(bytes32 _contentHash) view returns (bool)",
+        selector: "0x14f1d784",
+      },
+      {
         name: "addCorporateAction",
         signature:
           "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
@@ -3114,6 +3119,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["CorporateActionsFacetBase", "CommonFixedInterestRate"],
     methods: [
+      {
+        name: "actionContentHashExists",
+        signature: "function actionContentHashExists(bytes32 _contentHash) view returns (bool)",
+        selector: "0x14f1d784",
+      },
       {
         name: "addCorporateAction",
         signature:
@@ -3181,6 +3191,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["CorporateActionsFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
       {
+        name: "actionContentHashExists",
+        signature: "function actionContentHashExists(bytes32 _contentHash) view returns (bool)",
+        selector: "0x14f1d784",
+      },
+      {
         name: "addCorporateAction",
         signature:
           "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
@@ -3246,6 +3261,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["CorporateActionsFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
+      {
+        name: "actionContentHashExists",
+        signature: "function actionContentHashExists(bytes32 _contentHash) view returns (bool)",
+        selector: "0x14f1d784",
+      },
       {
         name: "addCorporateAction",
         signature:
@@ -3790,7 +3810,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "controllerTransferByPartition",
         signature:
-          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData) returns (bytes32)",
         selector: "0xfb78befa",
       },
       {
@@ -3813,14 +3833,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedRedeemFromByPartition",
         signature:
-          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
-        selector: "0xc98d9723",
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
+        selector: "0x7756e22e",
       },
       {
         name: "protectedTransferFromByPartition",
         signature:
-          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
-        selector: "0x12e41c0a",
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
+        selector: "0x99b5ef4a",
       },
     ],
     errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
@@ -3847,7 +3867,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "controllerTransferByPartition",
         signature:
-          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData) returns (bytes32)",
         selector: "0xfb78befa",
       },
       {
@@ -3870,14 +3890,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedRedeemFromByPartition",
         signature:
-          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
-        selector: "0xc98d9723",
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
+        selector: "0x7756e22e",
       },
       {
         name: "protectedTransferFromByPartition",
         signature:
-          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
-        selector: "0x12e41c0a",
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
+        selector: "0x99b5ef4a",
       },
     ],
     errors: [
@@ -3907,7 +3927,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "controllerTransferByPartition",
         signature:
-          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData) returns (bytes32)",
         selector: "0xfb78befa",
       },
       {
@@ -3930,14 +3950,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedRedeemFromByPartition",
         signature:
-          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
-        selector: "0xc98d9723",
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
+        selector: "0x7756e22e",
       },
       {
         name: "protectedTransferFromByPartition",
         signature:
-          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
-        selector: "0x12e41c0a",
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
+        selector: "0x99b5ef4a",
       },
     ],
     errors: [
@@ -3967,7 +3987,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "controllerTransferByPartition",
         signature:
-          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData)",
+          "function controllerTransferByPartition(bytes32 _partition, address _from, address _to, uint256 _value, bytes _data, bytes _operatorData) returns (bytes32)",
         selector: "0xfb78befa",
       },
       {
@@ -3990,14 +4010,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedRedeemFromByPartition",
         signature:
-          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
-        selector: "0xc98d9723",
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
+        selector: "0x7756e22e",
       },
       {
         name: "protectedTransferFromByPartition",
         signature:
-          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, uint256 _deadline, uint256 _nounce, bytes _signature)",
-        selector: "0x12e41c0a",
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
+        selector: "0x99b5ef4a",
       },
     ],
     errors: [
@@ -4529,13 +4549,25 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "transferFromWithData",
-        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes)",
+        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes _data)",
         selector: "0xee532f31",
       },
       {
         name: "transferWithData",
-        signature: "function transferWithData(address _to, uint256 _value, bytes)",
+        signature: "function transferWithData(address _to, uint256 _value, bytes _data)",
         selector: "0x2535f762",
+      },
+    ],
+    events: [
+      {
+        name: "TransferFromWithData",
+        signature: "TransferFromWithData(address,address,address,uint256,bytes)",
+        topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
+      },
+      {
+        name: "TransferWithData",
+        signature: "TransferWithData(address,address,uint256,bytes)",
+        topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
       },
     ],
     errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
@@ -4578,13 +4610,25 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "transferFromWithData",
-        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes)",
+        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes _data)",
         selector: "0xee532f31",
       },
       {
         name: "transferWithData",
-        signature: "function transferWithData(address _to, uint256 _value, bytes)",
+        signature: "function transferWithData(address _to, uint256 _value, bytes _data)",
         selector: "0x2535f762",
+      },
+    ],
+    events: [
+      {
+        name: "TransferFromWithData",
+        signature: "TransferFromWithData(address,address,address,uint256,bytes)",
+        topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
+      },
+      {
+        name: "TransferWithData",
+        signature: "TransferWithData(address,address,uint256,bytes)",
+        topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
       },
     ],
     errors: [
@@ -4630,13 +4674,25 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "transferFromWithData",
-        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes)",
+        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes _data)",
         selector: "0xee532f31",
       },
       {
         name: "transferWithData",
-        signature: "function transferWithData(address _to, uint256 _value, bytes)",
+        signature: "function transferWithData(address _to, uint256 _value, bytes _data)",
         selector: "0x2535f762",
+      },
+    ],
+    events: [
+      {
+        name: "TransferFromWithData",
+        signature: "TransferFromWithData(address,address,address,uint256,bytes)",
+        topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
+      },
+      {
+        name: "TransferWithData",
+        signature: "TransferWithData(address,address,uint256,bytes)",
+        topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
       },
     ],
     errors: [
@@ -4684,13 +4740,25 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "transferFromWithData",
-        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes)",
+        signature: "function transferFromWithData(address _from, address _to, uint256 _value, bytes _data)",
         selector: "0xee532f31",
       },
       {
         name: "transferWithData",
-        signature: "function transferWithData(address _to, uint256 _value, bytes)",
+        signature: "function transferWithData(address _to, uint256 _value, bytes _data)",
         selector: "0x2535f762",
+      },
+    ],
+    events: [
+      {
+        name: "TransferFromWithData",
+        signature: "TransferFromWithData(address,address,address,uint256,bytes)",
+        topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
+      },
+      {
+        name: "TransferWithData",
+        signature: "TransferWithData(address,address,uint256,bytes)",
+        topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
       },
     ],
     errors: [
@@ -8190,7 +8258,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "executeHoldByPartition",
         signature:
-          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_)",
+          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
         selector: "0x25fe8720",
       },
       {
@@ -8261,7 +8329,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "executeHoldByPartition",
         signature:
-          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_)",
+          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
         selector: "0x25fe8720",
       },
       {
@@ -8337,7 +8405,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "executeHoldByPartition",
         signature:
-          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_)",
+          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
         selector: "0x25fe8720",
       },
       {
@@ -8413,7 +8481,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "executeHoldByPartition",
         signature:
-          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_)",
+          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
         selector: "0x25fe8720",
       },
       {
@@ -11396,14 +11464,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedTransferAndLock",
         signature:
-          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
-        selector: "0xe2e20e05",
+          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
+        selector: "0xb122b3cf",
       },
       {
         name: "protectedTransferAndLockByPartition",
         signature:
-          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
-        selector: "0x8a1d3a47",
+          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
+        selector: "0x7bd8b49a",
       },
       {
         name: "transferAndLock",
@@ -11441,14 +11509,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedTransferAndLock",
         signature:
-          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
-        selector: "0xe2e20e05",
+          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
+        selector: "0xb122b3cf",
       },
       {
         name: "protectedTransferAndLockByPartition",
         signature:
-          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
-        selector: "0x8a1d3a47",
+          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
+        selector: "0x7bd8b49a",
       },
       {
         name: "transferAndLock",
@@ -11491,14 +11559,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedTransferAndLock",
         signature:
-          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
-        selector: "0xe2e20e05",
+          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
+        selector: "0xb122b3cf",
       },
       {
         name: "protectedTransferAndLockByPartition",
         signature:
-          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
-        selector: "0x8a1d3a47",
+          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
+        selector: "0x7bd8b49a",
       },
       {
         name: "transferAndLock",
@@ -11541,14 +11609,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "protectedTransferAndLock",
         signature:
-          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
-        selector: "0xe2e20e05",
+          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
+        selector: "0xb122b3cf",
       },
       {
         name: "protectedTransferAndLockByPartition",
         signature:
-          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, uint256 _deadline, uint256 _nounce, bytes _signature) returns (bool success_, uint256 lockId_)",
-        selector: "0x8a1d3a47",
+          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
+        selector: "0x7bd8b49a",
       },
       {
         name: "transferAndLock",
@@ -12014,6 +12082,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "ExternalListManagementStorageWrapper",
     inheritance: ["SsiManagementStorageWrapper"],
     methods: [],
+    errors: [{ name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" }],
   },
 
   ExternalPauseManagementStorageWrapper: {
@@ -12285,7 +12354,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0xb96d9539",
       },
       { name: "Unauthorized", signature: "Unauthorized(address,address,bytes32)", selector: "0x1e09743f" },
-      { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
       { name: "ZeroPartition", signature: "ZeroPartition()", selector: "0x4a6f30c3" },
       { name: "ZeroValue", signature: "ZeroValue()", selector: "0x7c946ed7" },
     ],

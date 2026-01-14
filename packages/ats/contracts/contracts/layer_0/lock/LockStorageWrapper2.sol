@@ -66,7 +66,6 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         }
 
         success_ = true;
-        _removeLabafLock(_partition, _tokenHolder, _lockId);
     }
 
     function _updateTotalLock(bytes32 _partition, address _tokenHolder) internal override returns (uint256 abaf_) {

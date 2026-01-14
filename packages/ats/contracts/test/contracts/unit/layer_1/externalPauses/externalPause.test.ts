@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { ResolverProxy, ExternalPauseManagementFacet, MockedExternalPause } from "@contract-types";
 
@@ -88,6 +88,14 @@ describe("ExternalPause Tests", () => {
         }),
       ).to.be.revertedWithCustomError(externalPauseManagement, "ListedPause");
     });
+
+    it("GIVEN an invalid address WHEN adding it THEN it reverts with ZeroAddressNotAllowed", async () => {
+      await expect(
+        externalPauseManagement.addExternalPause(ADDRESS_ZERO, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(externalPauseManagement, "ZeroAddressNotAllowed");
+    });
   });
 
   describe("Remove Tests", () => {
@@ -118,6 +126,17 @@ describe("ExternalPause Tests", () => {
   });
 
   describe("Update Tests", () => {
+    it("GIVEN invalid address WHEN updated THEN it reverts with ZeroAddressNotAllowed", async () => {
+      const pausesToUpdate = [ADDRESS_ZERO];
+      const actives = [true];
+
+      await expect(
+        externalPauseManagement.updateExternalPauses(pausesToUpdate, actives, {
+          gasLimit: GAS_LIMIT.high,
+        }),
+      ).to.be.revertedWithCustomError(externalPauseManagement, "ZeroAddressNotAllowed");
+    });
+
     it("GIVEN multiple external pauses WHEN updated THEN their statuses are updated and event is emitted", async () => {
       // Initial state: mock1=true, mock2=true. Verify.
       expect(await externalPauseManagement.isExternalPause(externalPauseMock1.address)).to.be.true;

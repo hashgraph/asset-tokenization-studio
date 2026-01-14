@@ -46,6 +46,7 @@ import {
 import { IssueData, OperatorTransferData, BasicTransferInfo } from "../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { IIdentityRegistry } from "../layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../layer_1/interfaces/ERC3643/ICompliance.sol";
+import {IProtectedPartitionsStorageWrapper} from "../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract Internals is Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -103,7 +104,7 @@ abstract contract Internals is Modifiers {
     function _approve(address owner, address spender, uint256 value) internal virtual returns (bool);
     function _approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) internal virtual returns (bool success_, bytes memory operationData_);
+    ) internal virtual returns (bool success_, bytes memory operationData_, bytes32 partition_) ;
     function _arePartitionsProtected() internal view virtual returns (bool);
     function _authorizeOperator(address _operator) internal virtual;
     function _authorizeOperatorByPartition(bytes32 _partition, address _operator) internal virtual;
@@ -283,33 +284,25 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual;
     function _checkRole(bytes32 _role, address _account) internal view virtual;
     function _checkRoleForPartition(bytes32 partition, address account) internal view virtual;
     function _checkTransferAndLockByPartitionSignature(
         bytes32 _partition,
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual;
     function _checkTransferAndLockSignature(
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual;
     function _checkTransferSignature(
         bytes32 _partition,
         address _from,
         address _to,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual;
     function _checkUnProtectedPartitionsOrWildCardRole() internal view virtual;
     function _checkUnpaused() internal view virtual;
@@ -403,7 +396,7 @@ abstract contract Internals is Modifiers {
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) internal virtual returns (bool success_);
+    ) internal virtual returns (bool success_, bytes32 partition_) ;
     function _finalizeControllable() internal virtual;
     function _freezeTokens(address _account, uint256 _amount) internal virtual;
     function _freezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal virtual;
@@ -775,7 +768,7 @@ abstract contract Internals is Modifiers {
         view
         virtual
         returns (ISustainabilityPerformanceTargetRate.InterestRate memory interestRate_);
-    function _getScheduledBalanceAdjusment(
+    function _getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
     ) internal view virtual returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_);
     function _getScheduledBalanceAdjustmentCount() internal view virtual returns (uint256);
@@ -859,6 +852,7 @@ abstract contract Internals is Modifiers {
     function _getTotalTokenHolders() internal view virtual returns (uint256);
     function _getTotalVotingHolders(uint256 _voteID) internal view virtual returns (uint256);
     function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view virtual returns (uint256);
+    function _actionContentHashExists(bytes32 _contentHash) internal view virtual returns (bool);
     function _getVotes(address account) internal view virtual returns (uint256);
     function _getVotesAdjusted(
         uint256 timepoint,
@@ -1027,31 +1021,23 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual returns (bool);
     function _isTransferAndLockByPartitionSignatureValid(
         bytes32 _partition,
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual returns (bool);
     function _isTransferAndLockSignatureValid(
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual returns (bool);
     function _isTransferSignatureValid(
         bytes32 _partition,
         address _from,
         address _to,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual returns (bool);
     function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal virtual;
     function _issueByPartition(IssueData memory _issueData) internal virtual;
@@ -1144,32 +1130,24 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal virtual;
     function _protectedTransferAndLock(
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal virtual returns (bool success_, uint256 lockId_);
     function _protectedTransferAndLockByPartition(
         bytes32 _partition,
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal virtual returns (bool success_, uint256 lockId_);
     function _protectedTransferFromByPartition(
         bytes32 _partition,
         address _from,
         address _to,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal virtual;
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal virtual returns (bytes32);
     function _pushLabafUserPartition(address _tokenHolder, uint256 _labaf) internal virtual;
     function _reclaimClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier

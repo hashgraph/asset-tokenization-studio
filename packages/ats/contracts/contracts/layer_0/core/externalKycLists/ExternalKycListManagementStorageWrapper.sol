@@ -15,6 +15,7 @@ abstract contract ExternalKycListManagementStorageWrapper is ExternalListManagem
     function _initialize_ExternalKycLists(address[] calldata _kycLists) internal override {
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {
+            _checkValidAddress(_kycLists[index]);
             _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
             unchecked {
                 ++index;

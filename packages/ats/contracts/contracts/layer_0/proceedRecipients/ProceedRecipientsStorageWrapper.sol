@@ -33,6 +33,7 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
     ) internal override {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
+            _checkValidAddress(_proceedRecipients[index]);
             _addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipients[index]);
             _setProceedRecipientData(_proceedRecipients[index], _data[index]);
             unchecked {

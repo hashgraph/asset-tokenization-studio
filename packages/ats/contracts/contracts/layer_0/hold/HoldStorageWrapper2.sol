@@ -90,10 +90,11 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) internal override returns (bool success_) {
+    ) internal override returns (bool success_, bytes32 partition_) {
         _beforeExecuteHold(_holdIdentifier, _to);
 
         success_ = _operateHoldByPartition(_holdIdentifier, _to, _amount, OperationType.Execute);
+        partition_ = _holdIdentifier.partition;
 
         HoldData memory holdData = _getHold(_holdIdentifier);
 
@@ -118,6 +119,8 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             _amount,
             OperationType.Release
         );
+
+        holdData = _getHold(_holdIdentifier);
 
         if (holdData.hold.amount == 0) {
             _removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
@@ -287,12 +290,10 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _beforeReleaseHold(HoldIdentifier calldata _holdIdentifier) internal override {
-        _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
         _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
     function _beforeReclaimHold(HoldIdentifier calldata _holdIdentifier) internal override {
-        _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
         _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 

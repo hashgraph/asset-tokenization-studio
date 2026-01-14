@@ -14,6 +14,7 @@ struct CorporateActionDataStorage {
     EnumerableSet.Bytes32Set actions;
     mapping(bytes32 => ActionData) actionsData;
     mapping(bytes32 => bytes32[]) actionsByType;
+    mapping(bytes32 => bool) actionsContentHashes;
 }
 
 interface ICorporateActionsStorageWrapper {

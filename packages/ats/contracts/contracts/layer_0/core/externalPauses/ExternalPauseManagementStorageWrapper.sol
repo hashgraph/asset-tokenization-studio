@@ -14,6 +14,7 @@ abstract contract ExternalPauseManagementStorageWrapper is ControlListStorageWra
     function _initialize_ExternalPauses(address[] calldata _pauses) internal override {
         uint256 length = _pauses.length;
         for (uint256 index; index < length; ) {
+            _checkValidAddress(_pauses[index]);
             _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pauses[index]);
             unchecked {
                 ++index;

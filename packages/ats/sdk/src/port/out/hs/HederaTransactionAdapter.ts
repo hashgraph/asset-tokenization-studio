@@ -313,6 +313,8 @@ import { MissingRegulationSubType } from '@domain/context/factory/error/MissingR
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { BaseContract, Contract, ContractTransaction } from 'ethers';
 import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
+import { ProtectionData } from '@domain/context/factory/ProtectionData';
+
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -954,6 +956,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       expirationTimestamp: expirationDate.toBigNumber(),
     };
 
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeWithArgs(
       new TransferAndLockFacet__factory().attach(security.toString()),
       'protectedTransferAndLockByPartition',
@@ -962,9 +970,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       [
         partitionId,
         transferAndLockData,
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
     );
   }
@@ -1511,6 +1517,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
     );
 
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeWithArgs(
       new ERC1410ManagementFacet__factory().attach(security.toString()),
       'protectedRedeemFromByPartition',
@@ -1520,9 +1532,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         partitionId,
         sourceId.toString(),
         amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
     );
   }
@@ -1541,6 +1551,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(
       `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
+
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeWithArgs(
       new ERC1410ManagementFacet__factory().attach(security.toString()),
       'protectedTransferFromByPartition',
@@ -1551,9 +1568,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         sourceId.toString(),
         targetId.toString(),
         amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
     );
   }
@@ -1579,6 +1594,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       data: '0x',
       expirationTimestamp: expirationDate.toBigNumber(),
     };
+
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeWithArgs(
       new TransferAndLockFacet__factory().attach(security.toString()),
       'protectedTransferAndLock',
@@ -1586,9 +1608,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       GAS.PROTECTED_TRANSFER_AND_LOCK,
       [
         transferAndLockData,
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
     );
   }

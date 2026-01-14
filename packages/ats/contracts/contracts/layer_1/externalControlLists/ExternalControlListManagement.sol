@@ -34,7 +34,14 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
 
     function addExternalControlList(
         address _controlList
-    ) external override onlyRole(_CONTROL_LIST_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+    )
+        external
+        override
+        onlyRole(_CONTROL_LIST_MANAGER_ROLE)
+        onlyUnpaused
+        validateAddress(_controlList)
+        returns (bool success_)
+    {
         success_ = _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
         if (!success_) {
             revert ListedControlList(_controlList);

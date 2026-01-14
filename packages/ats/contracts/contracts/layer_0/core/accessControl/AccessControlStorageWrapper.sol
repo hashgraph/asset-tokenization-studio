@@ -12,7 +12,6 @@ import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositio
 import { Internals } from "../../Internals.sol";
 
 abstract contract AccessControlStorageWrapper is IAccessControlStorageWrapper, Internals, BusinessLogicResolverWrapper {
-    // TODO: Check if it's possible to use only one dependency of AddressSet and Bytes32Set
     using LibCommon for EnumerableSet.AddressSet;
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;

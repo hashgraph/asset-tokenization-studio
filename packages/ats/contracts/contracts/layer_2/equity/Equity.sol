@@ -184,7 +184,7 @@ abstract contract Equity is IEquity, Common {
         onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
         returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
     {
-        return _getScheduledBalanceAdjusment(_balanceAdjustmentID);
+        return _getScheduledBalanceAdjustment(_balanceAdjustmentID);
     }
 
     function getScheduledBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {

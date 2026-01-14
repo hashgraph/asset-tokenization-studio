@@ -75,9 +75,9 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Internals {
         onlyIdentified(_holdIdentifier.tokenHolder, _to)
         onlyCompliant(address(0), _to, false)
         onlyWithValidHoldId(_holdIdentifier)
-        returns (bool success_)
+        returns (bool success_, bytes32 partition_)
     {
-        success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);
+        (success_, partition_) = _executeHoldByPartition(_holdIdentifier, _to, _amount);
 
         emit HoldByPartitionExecuted(
             _holdIdentifier.tokenHolder,

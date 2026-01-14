@@ -23,6 +23,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Internals {
         override
         onlyUnpaused
         onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
+        validateAddress(_proceedRecipient)
         onlyIfNotProceedRecipient(_proceedRecipient)
     {
         _addProceedRecipient(_proceedRecipient, _data);
@@ -50,6 +51,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Internals {
         override
         onlyUnpaused
         onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
+        validateAddress(_proceedRecipient)
         onlyIfProceedRecipient(_proceedRecipient)
     {
         _setProceedRecipientData(_proceedRecipient, _data);

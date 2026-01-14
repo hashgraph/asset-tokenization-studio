@@ -91,6 +91,10 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
         if (currentDelegate == delegatee) return;
 
+        _triggerScheduledCrossOrderedTasks(0);
+
+        _takeAbafCheckpoint();
+
         uint256 delegatorBalance = _balanceOfAdjustedAt(delegator, _blockTimestamp()) +
             _getLockedAmountForAdjustedAt(delegator, _blockTimestamp()) +
             _getHeldAmountForAdjusted(delegator) +

@@ -78,4 +78,6 @@ interface ICorporateActions {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (bytes32[] memory corporateActionIds_);
+
+    function actionContentHashExists(bytes32 _contentHash) external view returns (bool);
 }
