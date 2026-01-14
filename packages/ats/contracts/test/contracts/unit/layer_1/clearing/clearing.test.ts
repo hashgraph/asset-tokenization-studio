@@ -635,7 +635,7 @@ describe("Clearing Tests", () => {
           amountDecimals: 0,
         };
 
-        const [, dividendId] = await equityFacet.connect(signer_A).callStatic.setDividends(dividendInput);
+        const dividendId = await equityFacet.connect(signer_A).callStatic.setDividends(dividendInput);
         await equityFacet.connect(signer_A).setDividends(dividendInput);
 
         await timeTravelFacet.changeSystemTimestamp(recordDate.add(1));

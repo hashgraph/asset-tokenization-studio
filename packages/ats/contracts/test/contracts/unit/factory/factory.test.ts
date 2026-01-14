@@ -3,11 +3,11 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   BusinessLogicResolver,
+  IFactory,
   type AccessControl,
   type ControlList,
   type ERC1644,
   type ERC20,
-  type Factory,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "@test";
@@ -36,7 +36,7 @@ describe("Factory Tests", () => {
   const listOfCountries = "ES,FR,CH";
   const info = "info";
 
-  let factory: Factory;
+  let factory: IFactory;
   let businessLogicResolver: BusinessLogicResolver;
   let accessControlFacet: AccessControl;
   let controlListFacet: ControlList;

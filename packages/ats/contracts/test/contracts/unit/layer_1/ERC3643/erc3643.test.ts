@@ -2925,17 +2925,17 @@ describe("ERC3643 Tests", () => {
       ]);
       accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
 
-      pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
 
-      controlList = await ethers.getContractAt("ControlList", diamond.address);
+      controlList = await ethers.getContractAt("ControlListFacet", diamond.address);
 
       erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
-      erc1594Facet = await ethers.getContractAt("ERC1594", diamond.address);
+      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
 
       clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
       freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address);
-      kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_A);
-      ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_A);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
       await ssiManagementFacet.addIssuer(signer_A.address);
       await kycFacet.grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
       await kycFacet.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);

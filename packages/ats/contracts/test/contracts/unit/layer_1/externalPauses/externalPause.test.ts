@@ -23,8 +23,7 @@ describe("ExternalPause Tests", () => {
 
     const initMock2 = await (await ethers.getContractFactory("MockedExternalPause", tempSigner)).deploy();
     await initMock2.deployed();
-    console.log(initMock1.address, await initMock1.isPaused());
-    console.log(initMock2.address, await initMock2.isPaused());
+
     const base = await deployEquityTokenFixture({
       useLoadFixture: false,
       equityDataParams: {

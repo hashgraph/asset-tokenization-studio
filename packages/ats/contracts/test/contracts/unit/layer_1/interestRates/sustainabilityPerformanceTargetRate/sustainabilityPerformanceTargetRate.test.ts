@@ -14,7 +14,6 @@ import {
   deployBondSustainabilityPerformanceTargetRateTokenFixture,
 } from "@test";
 import { executeRbac } from "@test";
-import { BigNumber } from "ethers";
 
 describe("Sustainability Performance Target Rate Tests", () => {
   let diamond: ResolverProxy;

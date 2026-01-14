@@ -24,13 +24,13 @@ import {
   SsiManagementFacet,
   ClearingActionsFacet,
   Equity,
-  AccessControl,
-  Cap,
-  AdjustBalances,
   LockFacet,
   SnapshotsFacet,
   IERC3643,
-  ERC1644,
+  ERC1644Facet,
+  AccessControlFacet,
+  AdjustBalancesFacet,
+  CapFacet,
 } from "@contract-types";
 import { Contract } from "ethers";
 
@@ -79,12 +79,12 @@ describe("Hold Tests", () => {
   let ssiManagementFacet: SsiManagementFacet;
   let clearingActionsFacet: ClearingActionsFacet;
   let equityFacet: Equity;
-  let accessControlFacet: AccessControl;
-  let capFacet: Cap;
-  let adjustBalancesFacet: AdjustBalances;
+  let accessControlFacet: AccessControlFacet;
+  let capFacet: CapFacet;
+  let adjustBalancesFacet: AdjustBalancesFacet;
   let snapshotFacet: SnapshotsFacet;
   let erc3643Facet: IERC3643;
-  let erc1644Facet: ERC1644;
+  let erc1644Facet: ERC1644Facet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -175,16 +175,16 @@ describe("Hold Tests", () => {
     ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
     equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address, signer_A);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
     snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
 
-    capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
+    capFacet = await ethers.getContractAt("CapFacet", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
     erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_A);
     controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_E);
     erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address, signer_A);
-    erc1644Facet = await ethers.getContractAt("ERC1644", diamond.address, signer_A);
+    erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address, signer_A);
     // Set the initial RBACs
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);

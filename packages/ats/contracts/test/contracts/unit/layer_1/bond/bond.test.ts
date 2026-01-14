@@ -22,7 +22,6 @@ import {
 } from "@contract-types";
 import {
   DEFAULT_PARTITION,
-  dateToUnixTimestamp,
   ATS_ROLES,
   TIME_PERIODS_S,
   ADDRESS_ZERO,
@@ -30,7 +29,7 @@ import {
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
 } from "@scripts";
-import { getBondDetails, grantRoleAndPauseToken } from "@test";
+import { getBondDetails, getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
@@ -172,11 +171,12 @@ describe("Bond Tests", () => {
   }
 
   beforeEach(async () => {
-    startingDate = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
+    const currentTimestamp = await getDltTimestamp();
+    startingDate = currentTimestamp + 300;
     maturityDate = startingDate + numberOfCoupons * frequency;
-    couponRecordDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
-    couponExecutionDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:10:00Z`);
-    couponFixingDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:10:00Z`);
+    couponRecordDateInSeconds = currentTimestamp + 400;
+    couponExecutionDateInSeconds = currentTimestamp + 1200;
+    couponFixingDateInSeconds = currentTimestamp + 1200;
     couponEndDateInSeconds = couponFixingDateInSeconds - 1;
     couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
     couponData = {
@@ -210,7 +210,6 @@ describe("Bond Tests", () => {
         listOfCountries: "",
         info: "",
       };
-
       await expect(
         bondFacet._initialize_bondUSA(await getBondDetails(), regulationData, additionalSecurityData),
       ).to.be.rejectedWith("AlreadyInitialized");
@@ -806,7 +805,7 @@ describe("Bond Tests", () => {
 
         const clearingOperation = {
           partition: DEFAULT_PARTITION,
-          expirationTimestamp: dateToUnixTimestamp("2030-01-01T00:00:09Z"),
+          expirationTimestamp: (await getDltTimestamp()) + 500,
           data: EMPTY_HEX_BYTES,
         };
 
@@ -944,15 +943,18 @@ describe("Bond Tests", () => {
         data: "0x",
       });
 
-      couponRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:01Z");
-      couponExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:02Z");
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
 
       const couponData = {
         recordDate: couponRecordDateInSeconds.toString(),
         executionDate: couponExecutionDateInSeconds.toString(),
         rate: couponRate,
         rateDecimals: couponRateDecimals,
-        period: couponPeriod,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
       };
 
       await bondFacet.connect(signer_A).setCoupon(couponData);
@@ -991,15 +993,18 @@ describe("Bond Tests", () => {
         data: "0x",
       });
 
-      couponRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:01Z");
-      couponExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:02Z");
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
 
       const couponData = {
         recordDate: couponRecordDateInSeconds.toString(),
         executionDate: couponExecutionDateInSeconds.toString(),
         rate: couponRate,
         rateDecimals: couponRateDecimals,
-        period: couponPeriod,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
       };
 
       await bondFacet.connect(signer_A).setCoupon(couponData);
@@ -1021,15 +1026,18 @@ describe("Bond Tests", () => {
 
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
 
-      couponRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:01Z");
-      couponExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:02Z");
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
 
       const couponData = {
         recordDate: couponRecordDateInSeconds.toString(),
         executionDate: couponExecutionDateInSeconds.toString(),
         rate: couponRate,
         rateDecimals: couponRateDecimals,
-        period: couponPeriod,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
       };
 
       await bondFacet.connect(signer_A).setCoupon(couponData);
@@ -1040,7 +1048,10 @@ describe("Bond Tests", () => {
       expect(coupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
       expect(coupon.coupon.rate).to.equal(couponRate);
       expect(coupon.coupon.rateDecimals).to.equal(couponRateDecimals);
-      expect(coupon.coupon.period).to.equal(couponPeriod);
+      expect(coupon.coupon.startDate).to.equal(couponStartDateInSeconds);
+      expect(coupon.coupon.endDate).to.equal(couponEndDateInSeconds);
+      expect(coupon.coupon.fixingDate).to.equal(couponFixingDateInSeconds);
+      expect(coupon.coupon.rateStatus).to.equal(couponRateStatus);
     });
 
     it("GIVEN a non-coupon corporate action WHEN getCouponFor is called THEN transaction fails with WrongActionType", async () => {
@@ -1048,15 +1059,18 @@ describe("Bond Tests", () => {
 
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
 
-      couponRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:01Z");
-      couponExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:02Z");
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
 
       const couponData = {
         recordDate: couponRecordDateInSeconds.toString(),
         executionDate: couponExecutionDateInSeconds.toString(),
         rate: couponRate,
         rateDecimals: couponRateDecimals,
-        period: couponPeriod,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
       };
 
       await bondFacet.connect(signer_A).setCoupon(couponData);
@@ -1073,15 +1087,18 @@ describe("Bond Tests", () => {
 
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
 
-      couponRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:01Z");
-      couponExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:02Z");
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
 
       const couponData = {
         recordDate: couponRecordDateInSeconds.toString(),
         executionDate: couponExecutionDateInSeconds.toString(),
         rate: couponRate,
         rateDecimals: couponRateDecimals,
-        period: couponPeriod,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
       };
 
       await bondFacet.connect(signer_A).setCoupon(couponData);
