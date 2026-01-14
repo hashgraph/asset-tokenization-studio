@@ -24,7 +24,6 @@ interface IFactory {
         uint256 version;
     }
 
-    // TODO: Separete common data in new struct
     struct SecurityData {
         bool arePartitionsProtected;
         bool isMultiPartition;

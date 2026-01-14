@@ -309,6 +309,7 @@ import {
 import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
 import NetworkService from '@service/network/NetworkService';
 import MetamaskService from '@service/wallet/metamask/MetamaskService';
+import { ProtectionData } from '@domain/context/factory/ProtectionData';
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
@@ -1297,6 +1298,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
     );
 
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeTransaction(
       ERC1410ManagementFacet__factory.connect(
         security.toString(),
@@ -1307,9 +1314,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         partitionId,
         sourceId.toString(),
         amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
       GAS.PROTECTED_REDEEM,
     );
@@ -1329,6 +1334,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeTransaction(
       ERC1410ManagementFacet__factory.connect(
         security.toString(),
@@ -1340,9 +1351,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         sourceId.toString(),
         targetId.toString(),
         amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
       GAS.PROTECTED_TRANSFER,
     );
@@ -1371,6 +1380,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       expirationTimestamp: expirationDate.toBigNumber(),
     };
 
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeTransaction(
       TransferAndLockFacet__factory.connect(
         security.toString(),
@@ -1380,9 +1395,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [
         partitionId,
         transferAndLockData,
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
       GAS.PROTECTED_TRANSFER_AND_LOCK,
     );

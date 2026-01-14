@@ -14,6 +14,7 @@ contract ProceedRecipients is IProceedRecipients, Common {
     ) external override onlyUninitialized(_externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized) {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
+            _checkValidAddress(_proceedRecipients[index]);
             _addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipients[index]);
             _setProceedRecipientData(_proceedRecipients[index], _data[index]);
             unchecked {
@@ -32,6 +33,7 @@ contract ProceedRecipients is IProceedRecipients, Common {
         override
         onlyUnpaused
         onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
+        validateAddress(_proceedRecipient)
         onlyIfNotProceedRecipient(_proceedRecipient)
     {
         _addProceedRecipient(_proceedRecipient, _data);
@@ -59,6 +61,7 @@ contract ProceedRecipients is IProceedRecipients, Common {
         override
         onlyUnpaused
         onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
+        validateAddress(_proceedRecipient)
         onlyIfProceedRecipient(_proceedRecipient)
     {
         _setProceedRecipientData(_proceedRecipient, _data);

@@ -13,13 +13,14 @@ contract CorporateActionsFacet is CorporateActions, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_ = new bytes4[](7);
         staticFunctionSelectors_[selectorIndex++] = this.addCorporateAction.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCorporateAction.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCorporateActionCount.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCorporateActionIds.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCorporateActionCountByType.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getCorporateActionIdsByType.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.actionContentHashExists.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

@@ -203,150 +203,66 @@
 
 */
 
-import { UpdateExternalKycListsCommandHandler } from "@command/security/externalKycLists/updateExternalKycLists/UpdateExternalKycListsCommandHandler";
-import { TOKENS } from "../Tokens";
-import { AddExternalKycListCommandHandler } from "@command/security/externalKycLists/addExternalKycList/AddExternalKycListCommandHandler";
-import { RemoveExternalKycListCommandHandler } from "@command/security/externalKycLists/removeExternalKycList/RemoveExternalKycListCommandHandler";
-import { ActivateInternalKycCommandHandler } from "@command/security/kyc/activateInternalKyc/ActivateInternalKycCommandHandler";
-import { DeactivateInternalKycCommandHandler } from "@command/security/kyc/deactivateInternalKyc/DeactivateInternalKycCommandHandler";
-import { GrantKycCommandHandler } from "@command/security/kyc/grantKyc/GrantKycCommandHandler";
-import { RevokeKycCommandHandler } from "@command/security/kyc/revokeKyc/RevokeKycCommandHandler";
-import { GrantKycMockCommandHandler } from "@command/security/externalKycLists/mock/grantKycMock/GrantKycMockCommandHandler";
-import { RevokeKycMockCommandHandler } from "@command/security/externalKycLists/mock/revokeKycMock/RevokeKycMockCommandHandler";
-import { CreateExternalKycListMockCommandHandler } from "@command/security/externalKycLists/mock/createExternalKycMock/CreateExternalKycMockCommandHandler";
-import { GetKycStatusMockQueryHandler } from "@query/security/externalKycLists/mock/getKycStatusMock/GetKycStatusMockQueryHandler";
-import { GetKycForQueryHandler } from "@query/security/kyc/getKycFor/GetKycForQueryHandler";
-import { GetKycAccountsCountQueryHandler } from "@query/security/kyc/getKycAccountsCount/GetKycAccountsCountQueryHandler";
-import { GetKycAccountsDataQueryHandler } from "@query/security/kyc/getKycAccountsData/GetKycAccountsDataQueryHandler";
-import { GetKycStatusForQueryHandler } from "@query/security/kyc/getKycStatusFor/GetKycStatusForQueryHandler";
-import { GetIssuerListCountQueryHandler } from "@query/security/ssi/getIssuerListCount/GetIssuerListCountQueryHandler";
-import { GetIssuerListMembersQueryHandler } from "@query/security/ssi/getIssuerListMembers/GetIssuerListMembersQueryHandler";
-import { GetRevocationRegistryAddressQueryHandler } from "@query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQueryHandler";
-import { IsIssuerQueryHandler } from "@query/security/ssi/isIssuer/IsIssuerQueryHandler";
-import { GetExternalKycListsCountQueryHandler } from "@query/security/externalKycLists/getExternalKycListsCount/GetExternalKycListsCountQueryHandler";
-import { GetExternalKycListsMembersQueryHandler } from "@query/security/externalKycLists/getExternalKycListsMembers/GetExternalKycListsMembersQueryHandler";
-import { IsExternalKycListQueryHandler } from "@query/security/externalKycLists/isExternalKycList/IsExternalKycListQueryHandler";
-import { IsExternallyGrantedQueryHandler } from "@query/security/externalKycLists/isExternallyGranted/IsExternallyGrantedQueryHandler";
-import { IsInternalKycActivatedQueryHandler } from "@query/security/kyc/isInternalKycActivated/IsInternalKycActivatedQueryHandler";
-import { AddIssuerCommandHandler } from "@command/security/ssi/addIssuer/AddIssuerCommandHandler";
-import { RemoveIssuerCommandHandler } from "@command/security/ssi/removeIssuer/RemoveIssuerCommandHandler";
-import { SetRevocationRegistryAddressCommandHandler } from "@command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommandHandler";
-import { ActionContentHashExistsQueryHandler } from "@query/security/actionContentHashExists/ActionContentHashExistsQueryHandler";
+import { createMock } from "@golevelup/ts-jest";
+import { ErrorMsgFixture, EvmAddressPropsFixture } from "@test/fixtures/shared/DataFixture";
+import { ErrorCode } from "@core/error/BaseError";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ContractService from "@service/contract/ContractService";
+import { ActionContentHashExistsQueryFixture } from "@test/fixtures/corporateActions/CorporateActionsFixture";
+import { ActionContentHashExistsQuery, ActionContentHashExistsQueryResponse } from "./ActionContentHashExistsQuery";
+import { ActionContentHashExistsQueryHandler } from "./ActionContentHashExistsQueryHandler";
+import { ActionContentHashExistsQueryError } from "./error/ActionContentHashExistsQueryError";
 
-export const COMMAND_HANDLERS_KYC = [
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: UpdateExternalKycListsCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: AddExternalKycListCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: RemoveExternalKycListCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: ActivateInternalKycCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: DeactivateInternalKycCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: GrantKycCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: RevokeKycCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: GrantKycMockCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: RevokeKycMockCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: CreateExternalKycListMockCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: AddIssuerCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: RemoveIssuerCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: SetRevocationRegistryAddressCommandHandler,
-  },
-];
+describe("ActionContentHashExistsQueryHandler", () => {
+  let handler: ActionContentHashExistsQueryHandler;
+  let query: ActionContentHashExistsQuery;
 
-export const QUERY_HANDLERS_KYC = [
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetKycStatusMockQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetKycForQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetKycAccountsCountQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetKycAccountsDataQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetKycStatusForQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetIssuerListCountQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetIssuerListMembersQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetRevocationRegistryAddressQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: IsIssuerQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetExternalKycListsCountQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetExternalKycListsMembersQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: IsExternalKycListQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: IsExternallyGrantedQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: IsInternalKycActivatedQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: ActionContentHashExistsQueryHandler,
-  },
-];
+  const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
+  const contractServiceMock = createMock<ContractService>();
+
+  const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const errorMsg = ErrorMsgFixture.create().msg;
+
+  beforeEach(() => {
+    handler = new ActionContentHashExistsQueryHandler(queryAdapterServiceMock, contractServiceMock);
+    query = ActionContentHashExistsQueryFixture.create();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  describe("execute", () => {
+    it("throws ActionContentHashExistsQueryError when query fails with uncaught error", async () => {
+      const fakeError = new Error(errorMsg);
+
+      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(query);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(ActionContentHashExistsQueryError);
+
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          `An error occurred while querying action content hash exists: ${errorMsg}`,
+        ),
+        errorCode: ErrorCode.UncaughtQueryError,
+      });
+    });
+
+    it("should successfully check action content hash exist", async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+
+      queryAdapterServiceMock.actionContentHashExists.mockResolvedValueOnce(true);
+
+      const result = await handler.execute(query);
+
+      expect(result).toBeInstanceOf(ActionContentHashExistsQueryResponse);
+      expect(result.payload).toBe(true);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
+      expect(queryAdapterServiceMock.actionContentHashExists).toHaveBeenCalledWith(evmAddress, query.contentHash);
+    });
+  });
+});

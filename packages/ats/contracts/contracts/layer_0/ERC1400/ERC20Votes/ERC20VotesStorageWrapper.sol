@@ -71,13 +71,13 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     }
 
     function _delegate(address delegator, address delegatee) internal virtual {
-        _triggerScheduledCrossOrderedTasks(0);
-
-        _takeAbafCheckpoint();
-
         address currentDelegate = _delegates(delegator);
 
         if (currentDelegate == delegatee) return;
+
+        _triggerScheduledCrossOrderedTasks(0);
+
+        _takeAbafCheckpoint();
 
         uint256 delegatorBalance = _balanceOfAdjustedAt(delegator, _blockTimestamp()) +
             _getLockedAmountForAdjustedAt(delegator, _blockTimestamp()) +
