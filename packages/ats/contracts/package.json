@@ -127,7 +127,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@hashgraph/sdk": "2.64.5",
+    "@hiero-ledger/sdk": "2.79.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@onchain-id/solidity": "^2.2.1",

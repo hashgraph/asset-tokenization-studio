@@ -211,8 +211,8 @@ import {
   Transaction,
   TransactionResponse as HTransactionResponse,
   TransactionResponseJSON,
-} from '@hashgraph/sdk';
-import { NetworkName } from '@hashgraph/sdk/lib/client/Client';
+} from '@hiero-ledger/sdk';
+import { NetworkName } from '@hiero-ledger/sdk/lib/client/Client';
 import {
   base64StringToSignatureMap,
   DAppConnector,

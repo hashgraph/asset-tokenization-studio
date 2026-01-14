@@ -23,26 +23,26 @@ npm install @mass-payout/sdk
 ## Quick Start
 
 ```typescript
-import { MassPayoutSDK } from '@mass-payout/sdk';
+import { MassPayoutSDK } from "@mass-payout/sdk";
 
 // Initialize the SDK
 const sdk = new MassPayoutSDK({
-  networkType: 'testnet', // or 'mainnet'
-  operatorId: '0.0.123456',
-  operatorKey: 'your-private-key',
+  networkType: "testnet", // or 'mainnet'
+  operatorId: "0.0.123456",
+  operatorKey: "your-private-key",
 });
 
 // Execute a mass payout
 const payoutResult = await sdk.executeMassPayout({
-  tokenId: '0.0.789012', // HTS token ID or null for HBAR
+  tokenId: "0.0.789012", // HTS token ID or null for HBAR
   recipients: [
-    { accountId: '0.0.111111', amount: '100' },
-    { accountId: '0.0.222222', amount: '150' },
-    { accountId: '0.0.333333', amount: '200' },
+    { accountId: "0.0.111111", amount: "100" },
+    { accountId: "0.0.222222", amount: "150" },
+    { accountId: "0.0.333333", amount: "200" },
   ],
 });
 
-console.log('Payout completed:', payoutResult);
+console.log("Payout completed:", payoutResult);
 ```
 
 ## Core Concepts
@@ -77,7 +77,7 @@ The SDK follows Domain-Driven Design principles with a clean hexagonal architect
 
 ## Dependencies
 
-- @hashgraph/sdk: Hedera SDK for blockchain interactions
+- @hiero-ledger/sdk: Hedera SDK for blockchain interactions
 - @nestjs/common & @nestjs/core: Framework components
 - class-validator & class-transformer: Data validation and transformation
 - rxjs: Reactive programming support

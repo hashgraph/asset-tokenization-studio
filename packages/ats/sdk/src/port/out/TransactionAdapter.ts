@@ -215,7 +215,7 @@ import EvmAddress from '@domain/context/contract/EvmAddress';
 import { BondDetails } from '@domain/context/bond/BondDetails';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
 import HWCSettings from '@core/settings/walletConnect/HWCSettings';
-import { ContractId } from '@hashgraph/sdk';
+import { ContractId } from '@hiero-ledger/sdk';
 import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
 import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
 import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';

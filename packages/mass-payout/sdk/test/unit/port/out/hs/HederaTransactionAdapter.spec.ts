@@ -203,7 +203,7 @@
 
 */
 
-import { ContractId, TransactionReceipt } from "@hashgraph/sdk"
+import { ContractId, TransactionReceipt } from "@hiero-ledger/sdk"
 import TransactionResponse from "@domain/transaction/TransactionResponse"
 import EvmAddress from "@domain/contract/EvmAddress"
 import BigDecimal from "@domain/shared/BigDecimal"

@@ -215,7 +215,7 @@ import {
   DeployCommand,
   DeployCommandResponse,
 } from "@app/usecase/command/lifeCycleCashFlow/operations/deploy/DeployCommand";
-import { TokenId } from "@hashgraph/sdk";
+import { TokenId } from "@hiero-ledger/sdk";
 import { DeployCommandError } from "./error/DeployCommandError";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import RbacPort from "@port/out/hs/types/RbacPort";
