@@ -46,7 +46,9 @@ import {
 import { IssueData, OperatorTransferData, BasicTransferInfo } from "../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { IIdentityRegistry } from "../layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../layer_1/interfaces/ERC3643/ICompliance.sol";
-import {IProtectedPartitionsStorageWrapper} from "../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract Internals is Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -104,7 +106,7 @@ abstract contract Internals is Modifiers {
     function _approve(address owner, address spender, uint256 value) internal virtual returns (bool);
     function _approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) internal virtual returns (bool success_, bytes memory operationData_, bytes32 partition_) ;
+    ) internal virtual returns (bool success_, bytes memory operationData_, bytes32 partition_);
     function _arePartitionsProtected() internal view virtual returns (bool);
     function _authorizeOperator(address _operator) internal virtual;
     function _authorizeOperatorByPartition(bytes32 _partition, address _operator) internal virtual;
@@ -396,7 +398,7 @@ abstract contract Internals is Modifiers {
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) internal virtual returns (bool success_, bytes32 partition_) ;
+    ) internal virtual returns (bool success_, bytes32 partition_);
     function _finalizeControllable() internal virtual;
     function _freezeTokens(address _account, uint256 _amount) internal virtual;
     function _freezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal virtual;
