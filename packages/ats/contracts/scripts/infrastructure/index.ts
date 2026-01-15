@@ -196,7 +196,7 @@ export {
 // Utilities
 // ============================================================================
 
-export { validateAddress, validateBytes32 } from "./utils/validation";
+export { isValidAddress, validateAddress, isValidBytes32, validateBytes32 } from "./utils/validation";
 
 export {
   saveDeploymentOutput,

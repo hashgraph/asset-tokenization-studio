@@ -1,12 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Shared CLI validation utilities.
+ * CLI validation utilities with user-friendly exit behavior.
+ *
+ * This is the CLI LAYER - functions call process.exit() with helpful error
+ * messages for terminal users. Use these in CLI entry points where you want
+ * the script to terminate with a clear error message on invalid input.
+ *
+ * For programmatic use in workflows/operations that need try/catch error
+ * handling, use infrastructure/utils/validation.ts which throws errors.
+ *
+ * @example
+ * ```typescript
+ * // CLI pattern: exit on error
+ * import { requireValidAddress, parseBooleanEnv } from "./cli/shared";
+ *
+ * const proxyAddress = requireValidAddress(process.env.PROXY_ADDRESS, "PROXY_ADDRESS");
+ * const dryRun = parseBooleanEnv("DRY_RUN", false);
+ * ```
+ *
  * @module cli/shared/validation
  */
 
-import { ethers } from "ethers";
-import { error } from "@scripts/infrastructure";
+import { error, isValidAddress } from "@scripts/infrastructure";
 
 /**
  * Require and validate an Ethereum address from environment variable.
@@ -22,7 +38,7 @@ export function requireValidAddress(value: string | undefined, name: string): st
     process.exit(1);
   }
 
-  if (!ethers.utils.isAddress(value)) {
+  if (!isValidAddress(value)) {
     error(`❌ Invalid ${name}: ${value}`);
     error(`Must be a valid Ethereum address (0x...)`);
     process.exit(1);
@@ -42,7 +58,7 @@ export function requireValidAddress(value: string | undefined, name: string): st
 export function validateOptionalAddress(value: string | undefined, name: string): string | undefined {
   if (!value) return undefined;
 
-  if (!ethers.utils.isAddress(value)) {
+  if (!isValidAddress(value)) {
     error(`❌ Invalid ${name}: ${value}`);
     error(`Must be a valid Ethereum address (0x...)`);
     process.exit(1);
@@ -70,7 +86,7 @@ export function parseOptionalAddressList(envValue: string | undefined, name: str
   if (addresses.length === 0) return undefined;
 
   for (const addr of addresses) {
-    if (!ethers.utils.isAddress(addr)) {
+    if (!isValidAddress(addr)) {
       error(`❌ Invalid address in ${name}: ${addr}`);
       error(`All addresses must be valid Ethereum addresses (0x...)`);
       process.exit(1);

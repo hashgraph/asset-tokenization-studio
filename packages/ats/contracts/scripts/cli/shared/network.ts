@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Shared CLI utilities for network handling.
+ * CLI utilities for network handling with user-friendly exit behavior.
+ *
+ * This is the CLI LAYER - functions call process.exit() with helpful error
+ * messages for terminal users. For programmatic use where you need try/catch
+ * error handling, use the infrastructure layer directly.
+ *
  * @module cli/shared/network
  */
 
@@ -10,11 +15,17 @@ import { Signer } from "ethers";
 import { getAllNetworks, createNetworkSigner, info, error } from "@scripts/infrastructure";
 
 /**
- * Result of requiring a network signer from environment.
+ * Result of requiring a network signer from CLI environment.
+ *
+ * Extends the infrastructure's NetworkSignerResult with the network name
+ * for CLI logging and output purposes.
  */
-export interface NetworkSignerResult {
+export interface CliNetworkSignerResult {
+  /** Network identifier from NETWORK env var */
   network: string;
+  /** The ethers.js Signer instance */
   signer: Signer;
+  /** The signer's resolved address */
   address: string;
 }
 
@@ -24,7 +35,7 @@ export interface NetworkSignerResult {
  *
  * @returns Network name, signer, and deployer address
  */
-export async function requireNetworkSigner(): Promise<NetworkSignerResult> {
+export async function requireNetworkSigner(): Promise<CliNetworkSignerResult> {
   const network = process.env.NETWORK;
 
   if (!network) {
