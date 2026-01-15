@@ -532,12 +532,52 @@ npm run deploy:local
 
 ## Usage Modes
 
-The deployment system provides a unified CLI:
+The deployment system provides multiple CLI entry points for different deployment scenarios:
 
-| Mode       | Entry Point                    | Signer Source        | Use Case                                | Command                         |
-| ---------- | ------------------------------ | -------------------- | --------------------------------------- | ------------------------------- |
-| **Deploy** | [cli/deploy.ts](cli/deploy.ts) | `ethers.Wallet`      | Full deployment                         | `npm run deploy:hedera:testnet` |
-| **Module** | Import in your code            | Any ethers.js Signer | Custom scripts, programmatic deployment | See example below               |
+| Mode                      | Entry Point                                                              | Signer Source        | Use Case                                   | Command                                                                     |
+| ------------------------- | ------------------------------------------------------------------------ | -------------------- | ------------------------------------------ | --------------------------------------------------------------------------- |
+| **Deploy (New BLR)**      | [cli/deploySystemWithNewBlr.ts](cli/deploySystemWithNewBlr.ts)           | `ethers.Wallet`      | Full deployment with new BLR               | `npm run deploy:newBlr` or `npm run deploy:hedera:testnet`                  |
+| **Deploy (Existing BLR)** | [cli/deploySystemWithExistingBlr.ts](cli/deploySystemWithExistingBlr.ts) | `ethers.Wallet`      | Deploy tokens with existing BLR            | `npm run deploy:existingBlr` or `npm run deploy:existingBlr:hedera:testnet` |
+| **Upgrade Configs**       | [cli/upgradeConfigurations.ts](cli/upgradeConfigurations.ts)             | `ethers.Wallet`      | Create new facet versions & configurations | `npm run upgrade:configs` or `npm run upgrade:configs:hedera:testnet`       |
+| **Upgrade TUP Proxies**   | [cli/upgradeTupProxies.ts](cli/upgradeTupProxies.ts)                     | `ethers.Wallet`      | Upgrade BLR/Factory implementations        | `npm run upgrade:tup` or `npm run upgrade:tup:hedera:testnet`               |
+| **Module**                | Import in your code                                                      | Any ethers.js Signer | Custom scripts, programmatic deployment    | See example below                                                           |
+
+### CLI Shared Utilities
+
+All CLI entry points use reusable utilities from the `cli/shared/` directory to standardize environment validation and network configuration:
+
+#### `cli/shared/network.ts`
+
+- **`requireNetworkSigner()`** - Validates NETWORK environment variable and creates an ethers.js Signer
+  - Supports networks: `local`, `hedera-local`, `hedera-previewnet`, `hedera-testnet`, `hedera-mainnet`
+  - Loads private key from environment (e.g., `LOCAL_PRIVATE_KEY_0`, `HEDERA_TESTNET_PRIVATE_KEY_0`)
+  - Returns configured ethers.js Signer ready for contract interactions
+
+#### `cli/shared/validation.ts`
+
+- **`requireValidAddress(name)`** - Validates required Ethereum addresses from environment variables
+  - Throws error if address is missing or invalid format
+  - Example: `requireValidAddress('BLR_ADDRESS')`
+
+- **`validateOptionalAddress(name)`** - Validates optional Ethereum addresses
+  - Returns undefined if not set, validated address if present
+  - Example: `validateOptionalAddress('PROXY_ADDRESSES')`
+
+- **`parseOptionalAddressList(envVar)`** - Parses comma-separated address lists
+  - Splits string and validates each address format
+  - Example: `parseOptionalAddressList('0xabc...,0xdef...')`
+
+- **`requireEnvVar(name, fallback?)`** - Validates required string environment variables
+  - Throws error if missing and no fallback provided
+  - Example: `requireEnvVar('BLR_ADDRESS')`
+
+- **`parseBooleanEnv(envVar, default?)`** - Parses boolean flags from environment
+  - Handles 'true', '1', 'yes' as true; others as false
+  - Example: `parseBooleanEnv('DEPLOY_NEW_BLR_IMPL', false)`
+
+- **`parseIntEnv(envVar, default?)`** - Parses integer values from environment
+  - Validates numeric format
+  - Example: `parseIntEnv('CONFIRMATIONS', 1)`
 
 ### Import as Module
 
@@ -582,7 +622,7 @@ The upgrade workflow allows you to deploy new facet versions and update existing
 **Basic upgrade:**
 
 ```bash
-BLR_ADDRESS=<your-blr-address> npm run upgrade:testnet
+BLR_ADDRESS=<your-blr-address> npm run upgrade:configs:hedera:testnet
 ```
 
 **Upgrade with proxy updates:**
@@ -590,7 +630,7 @@ BLR_ADDRESS=<your-blr-address> npm run upgrade:testnet
 ```bash
 BLR_ADDRESS=0x123... \
 PROXY_ADDRESSES=0xabc...,0xdef... \
-npm run upgrade:testnet
+npm run upgrade:configs:hedera:testnet
 ```
 
 **Upgrade only equity:**
@@ -598,7 +638,7 @@ npm run upgrade:testnet
 ```bash
 BLR_ADDRESS=0x123... \
 CONFIGURATIONS=equity \
-npm run upgrade:testnet
+npm run upgrade:configs:hedera:testnet
 ```
 
 **Environment Variables:**
@@ -618,7 +658,7 @@ npm run upgrade:testnet
 
 ### Output
 
-Upgrade results are saved to `upgrades/{network}_{timestamp}.json`:
+Upgrade results are saved to `deployments/{network}/upgrade-configs-{timestamp}.json`:
 
 ```json
 {
@@ -649,7 +689,7 @@ Upgrades use checkpoint-based resumability:
 
 ```bash
 # Upgrade will automatically resume if previous attempt failed
-BLR_ADDRESS=0x123... npm run upgrade:testnet
+BLR_ADDRESS=0x123... npm run upgrade:configs:hedera:testnet
 ```
 
 ### Troubleshooting
@@ -696,7 +736,7 @@ export PROXY_ADMIN=0x...          # ProxyAdmin contract address
 export BLR_PROXY=0x...            # BLR proxy to upgrade
 export DEPLOY_NEW_BLR_IMPL=true   # Deploy new implementation
 
-npm run upgrade:tup:testnet
+npm run upgrade:tup:hedera:testnet
 ```
 
 **Pattern B: Upgrade to existing implementation**
@@ -706,7 +746,7 @@ export PROXY_ADMIN=0x...
 export BLR_PROXY=0x...
 export BLR_IMPLEMENTATION=0x...   # Address of pre-deployed implementation
 
-npm run upgrade:tup:testnet
+npm run upgrade:tup:hedera:testnet
 ```
 
 ### CLI Usage
@@ -714,19 +754,19 @@ npm run upgrade:tup:testnet
 **Upgrade BLR on testnet**
 
 ```bash
-npm run upgrade:tup:testnet
+npm run upgrade:tup:hedera:testnet
 ```
 
 **Upgrade Factory on testnet**
 
 ```bash
-FACTORY_PROXY=0x... npm run upgrade:tup:testnet
+FACTORY_PROXY=0x... npm run upgrade:tup:hedera:testnet
 ```
 
 **Upgrade both BLR and Factory**
 
 ```bash
-BLR_PROXY=0x... FACTORY_PROXY=0x... npm run upgrade:tup:testnet
+BLR_PROXY=0x... FACTORY_PROXY=0x... npm run upgrade:tup:hedera:testnet
 ```
 
 **Upgrade with existing implementations**
@@ -736,7 +776,7 @@ BLR_PROXY=0x... \
 BLR_IMPLEMENTATION=0x... \
 FACTORY_PROXY=0x... \
 FACTORY_IMPLEMENTATION=0x... \
-npm run upgrade:tup:testnet
+npm run upgrade:tup:hedera:testnet
 ```
 
 ### Environment Variables
@@ -764,7 +804,7 @@ npm run upgrade:tup:testnet
 
 ### Output
 
-Results are saved to `deployments/{network}/{network}-upgrade-tup-{timestamp}.json`:
+Results are saved to `deployments/{network}/upgrade-tup-{timestamp}.json`:
 
 ```json
 {
@@ -804,10 +844,10 @@ For long-running upgrades on slow networks, checkpoints automatically resume on 
 
 ```bash
 # Initial attempt (may fail)
-BLR_PROXY=0x... npm run upgrade:tup:testnet
+BLR_PROXY=0x... npm run upgrade:tup:hedera:testnet
 
 # Fix the issue, then retry - workflow resumes automatically
-BLR_PROXY=0x... npm run upgrade:tup:testnet
+BLR_PROXY=0x... npm run upgrade:tup:hedera:testnet
 ```
 
 Progress is tracked in `deployments/{network}/.checkpoints/` and automatically cleaned up on success.
@@ -844,15 +884,14 @@ Progress is tracked in `deployments/{network}/.checkpoints/` and automatically c
 
 Use the same workflow across networks:
 
-```bash
-# Testnet
-BLR_PROXY=0xTestnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:testnet
-
 # Previewnet (after validation)
+
 BLR_PROXY=0xPreviewnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:previewnet
 
 # Mainnet (after production testing)
+
 BLR_PROXY=0xMainnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:mainnet
+
 ```
 
 ### Difference from Upgrading Configurations
@@ -872,68 +911,70 @@ BLR_PROXY=0xMainnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:mainnet
 ## Directory Structure
 
 ```
+
 scripts/
-├── infrastructure/              # Generic deployment infrastructure
-│   ├── index.ts                # Public API exports
-│   ├── types.ts                # Shared type definitions
-│   ├── constants.ts            # Infrastructure constants
-│   ├── config.ts               # Network configuration
-│   ├── registryFactory.ts      # Registry helpers factory
-│   │
-│   ├── signer.ts               # Network signer utilities
-│   │
-│   ├── operations/             # Atomic deployment operations
-│   │   ├── deployContract.ts
-│   │   ├── deployProxy.ts
-│   │   ├── upgradeProxy.ts
-│   │   ├── blrDeployment.ts
-│   │   ├── blrConfigurations.ts
-│   │   ├── facetDeployment.ts
-│   │   ├── proxyAdminDeployment.ts
-│   │   ├── registerFacets.ts
-│   │   ├── verifyDeployment.ts
-│   │   └── generateRegistryPipeline.ts  # Registry generation pipeline
-│   │
-│   └── utils/                  # Generic utilities
-│       ├── validation.ts
-│       ├── logging.ts
-│       ├── transaction.ts
-│       └── naming.ts
+├── infrastructure/ # Generic deployment infrastructure
+│ ├── index.ts # Public API exports
+│ ├── types.ts # Shared type definitions
+│ ├── constants.ts # Infrastructure constants
+│ ├── config.ts # Network configuration
+│ ├── registryFactory.ts # Registry helpers factory
+│ │
+│ ├── signer.ts # Network signer utilities
+│ │
+│ ├── operations/ # Atomic deployment operations
+│ │ ├── deployContract.ts
+│ │ ├── deployProxy.ts
+│ │ ├── upgradeProxy.ts
+│ │ ├── blrDeployment.ts
+│ │ ├── blrConfigurations.ts
+│ │ ├── facetDeployment.ts
+│ │ ├── proxyAdminDeployment.ts
+│ │ ├── registerFacets.ts
+│ │ ├── verifyDeployment.ts
+│ │ └── generateRegistryPipeline.ts # Registry generation pipeline
+│ │
+│ └── utils/ # Generic utilities
+│ ├── validation.ts
+│ ├── logging.ts
+│ ├── transaction.ts
+│ └── naming.ts
 │
-├── domain/                      # ATS-specific business logic
-│   ├── index.ts                # Public API exports
-│   ├── constants.ts            # ATS constants (roles, regulations, etc.)
-│   ├── atsRegistry.ts          # ATS registry with helpers
-│   ├── atsRegistry.data.ts     # Auto-generated registry data
-│   │
-│   ├── equity/                 # Equity token logic
-│   │   └── createConfiguration.ts
-│   │
-│   ├── bond/                   # Bond token logic
-│   │   └── createConfiguration.ts
-│   │
-│   └── factory/                # Factory logic
-│       ├── deploy.ts
-│       └── deployToken.ts
+├── domain/ # ATS-specific business logic
+│ ├── index.ts # Public API exports
+│ ├── constants.ts # ATS constants (roles, regulations, etc.)
+│ ├── atsRegistry.ts # ATS registry with helpers
+│ ├── atsRegistry.data.ts # Auto-generated registry data
+│ │
+│ ├── equity/ # Equity token logic
+│ │ └── createConfiguration.ts
+│ │
+│ ├── bond/ # Bond token logic
+│ │ └── createConfiguration.ts
+│ │
+│ └── factory/ # Factory logic
+│ ├── deploy.ts
+│ └── deployToken.ts
 │
-├── workflows/                   # End-to-end orchestration
-│   ├── deploySystemWithNewBlr.ts
-│   └── deploySystemWithExistingBlr.ts
+├── workflows/ # End-to-end orchestration
+│ ├── deploySystemWithNewBlr.ts
+│ └── deploySystemWithExistingBlr.ts
 │
-├── cli/                         # Command-line entry points
-│   ├── deploy.ts               # Main deployment CLI
-│   ├── upgrade.ts              # Configuration upgrade CLI
-│   └── upgradeTup.ts           # TUP proxy upgrade CLI
+├── cli/ # Command-line entry points
+│ ├── deploy.ts # Main deployment CLI
+│ ├── upgrade.ts # Configuration upgrade CLI
+│ └── upgradeTup.ts # TUP proxy upgrade CLI
 │
-├── tools/                       # Code generation tools
-│   ├── generateRegistry.ts     # Registry generation CLI
-│   ├── scanner/
-│   │   └── metadataExtractor.ts  # Extract metadata from Solidity
-│   └── generators/
-│       └── registryGenerator.ts  # Generate TypeScript registry code
+├── tools/ # Code generation tools
+│ ├── generateRegistry.ts # Registry generation CLI
+│ ├── scanner/
+│ │ └── metadataExtractor.ts # Extract metadata from Solidity
+│ └── generators/
+│ └── registryGenerator.ts # Generate TypeScript registry code
 │
-└── index.ts                     # Root exports
-```
+└── index.ts # Root exports
+
+````
 
 ---
 
@@ -949,7 +990,7 @@ import { createNetworkSigner } from "@scripts/infrastructure";
 const { signer, address } = await createNetworkSigner("hedera-testnet");
 
 console.log(`Deployer: ${address}`);
-```
+````
 
 Environment variables follow the pattern:
 

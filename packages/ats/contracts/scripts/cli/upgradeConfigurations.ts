@@ -21,49 +21,32 @@
  *   NETWORK=hedera-testnet BLR_ADDRESS=0x123... PROXY_ADDRESSES=0xabc...,0xdef... npm run upgrade
  *   NETWORK=hedera-testnet BLR_ADDRESS=0x123... CONFIGURATIONS=equity npm run upgrade
  *
- * @module cli/upgrade
+ * @module cli/upgradeConfigurations
  */
 
 import { upgradeConfigurations } from "../workflows/upgradeConfigurations";
+import { DEFAULT_BATCH_SIZE, info, success, error, warn } from "@scripts/infrastructure";
 import {
-  getAllNetworks,
-  DEFAULT_BATCH_SIZE,
-  info,
-  success,
-  error,
-  warn,
-  createNetworkSigner,
-} from "@scripts/infrastructure";
+  requireNetworkSigner,
+  requireValidAddress,
+  parseOptionalAddressList,
+  parseBooleanEnv,
+  parseIntEnv,
+} from "./shared";
 import { ethers } from "ethers";
 
 /**
  * Main upgrade function for standalone environment.
  */
 async function main() {
-  // Get configuration from environment (network is required)
-  const network = process.env.NETWORK;
+  // Get network from environment (required)
+  const { network, signer, address } = await requireNetworkSigner();
 
-  if (!network) {
-    error("❌ Missing NETWORK environment variable.");
-    error("Usage: NETWORK=hedera-testnet BLR_ADDRESS=0x123... npm run upgrade");
-    const availableNetworks = getAllNetworks();
-    info(`Available networks: ${availableNetworks.join(", ")}`);
-    process.exit(1);
-  }
-
-  const blrAddress = process.env.BLR_ADDRESS;
-  const proxyAddressesStr = process.env.PROXY_ADDRESSES;
+  const blrAddress = requireValidAddress(process.env.BLR_ADDRESS, "BLR_ADDRESS");
+  const proxyAddresses = parseOptionalAddressList(process.env.PROXY_ADDRESSES, "PROXY_ADDRESSES");
   const configurationsStr = process.env.CONFIGURATIONS || "both";
-  const useTimeTravel = process.env.USE_TIMETRAVEL === "true";
-  const batchSize = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : DEFAULT_BATCH_SIZE;
-
-  // Parse proxy addresses
-  const proxyAddresses = proxyAddressesStr
-    ? proxyAddressesStr
-        .split(",")
-        .map((addr) => addr.trim())
-        .filter((addr) => addr.length > 0)
-    : undefined;
+  const useTimeTravel = parseBooleanEnv("USE_TIMETRAVEL", false);
+  const batchSize = parseIntEnv("BATCH_SIZE", DEFAULT_BATCH_SIZE);
 
   // Validate configurations parameter
   const configurations = configurationsStr as "equity" | "bond" | "both";
@@ -76,7 +59,7 @@ async function main() {
   info(`🔄 Starting ATS configuration upgrade`);
   info("---");
   info(`📡 Network: ${network}`);
-  info(`📍 BLR Address: ${blrAddress || "NOT PROVIDED"}`);
+  info(`📍 BLR Address: ${blrAddress}`);
   info(`⚙️ Configurations: ${configurations}`);
   info(`⏰ TimeTravel: ${useTimeTravel ? "enabled" : "disabled"}`);
   info(`📊 Batch Size: ${batchSize}`);
@@ -85,41 +68,8 @@ async function main() {
   }
   info("---");
 
-  // Validate BLR address
-  if (!blrAddress) {
-    error(`❌ Missing BLR_ADDRESS environment variable`);
-    error(`Usage: NETWORK=${network} BLR_ADDRESS=0x123... npm run upgrade`);
-    process.exit(1);
-  }
-
-  if (!ethers.utils.isAddress(blrAddress)) {
-    error(`❌ Invalid BLR address: ${blrAddress}`);
-    error(`Must be a valid Ethereum address (0x...)`);
-    process.exit(1);
-  }
-
-  // Validate proxy addresses if provided
-  if (proxyAddresses) {
-    for (const addr of proxyAddresses) {
-      if (!ethers.utils.isAddress(addr)) {
-        error(`❌ Invalid proxy address: ${addr}`);
-        error(`All addresses must be valid Ethereum addresses (0x...)`);
-        process.exit(1);
-      }
-    }
-  }
-
-  // Validate network configuration
-  const availableNetworks = getAllNetworks();
-  if (!availableNetworks.includes(network)) {
-    error(`❌ Network '${network}' not configured in Configuration.ts`);
-    info(`Available networks: ${availableNetworks.join(", ")}`);
-    process.exit(1);
-  }
-
   try {
-    // Create signer from network configuration
-    const { signer, address } = await createNetworkSigner(network);
+    // Use signer from network configuration
     info(`👤 Deployer: ${address}`);
     info(`💰 Balance: ${ethers.utils.formatEther(await signer.provider!.getBalance(address))} ETH`);
 
@@ -179,12 +129,11 @@ async function main() {
   }
 }
 
-// Run if called directly
+export { main };
+
 if (require.main === module) {
   main().catch((err) => {
     error("❌ Fatal error:", err);
     process.exit(1);
   });
 }
-
-export { main };

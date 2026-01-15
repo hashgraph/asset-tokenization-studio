@@ -17,30 +17,23 @@
  *   or
  *   npm run deploy:hedera:testnet
  *
- * @module cli/deploy
+ * @module cli/deploySystemWithNewBlr
  */
 
 import { deploySystemWithNewBlr } from "../workflows/deploySystemWithNewBlr";
-import { getAllNetworks, DEFAULT_BATCH_SIZE, info, success, error, createNetworkSigner } from "@scripts/infrastructure";
+import { DEFAULT_BATCH_SIZE, info, success, error } from "@scripts/infrastructure";
+import { requireNetworkSigner, parseBooleanEnv, parseIntEnv } from "./shared";
 
 /**
  * Main deployment function for standalone environment.
  */
 async function main() {
   // Get network from environment (required)
-  const network = process.env.NETWORK;
+  const { network, signer, address } = await requireNetworkSigner();
 
-  if (!network) {
-    error("❌ Missing NETWORK environment variable.");
-    error("Usage: NETWORK=hedera-testnet npm run deploy");
-    const availableNetworks = getAllNetworks();
-    info(`Available networks: ${availableNetworks.join(", ")}`);
-    process.exit(1);
-  }
-
-  const useTimeTravel = process.env.USE_TIMETRAVEL === "true";
-  const partialBatchDeploy = process.env.PARTIAL_BATCH_DEPLOY === "true";
-  const batchSize = process.env.BATCH_SIZE ? parseInt(process.env.BATCH_SIZE) : DEFAULT_BATCH_SIZE;
+  const useTimeTravel = parseBooleanEnv("USE_TIMETRAVEL", false);
+  const partialBatchDeploy = parseBooleanEnv("PARTIAL_BATCH_DEPLOY", false);
+  const batchSize = parseIntEnv("BATCH_SIZE", DEFAULT_BATCH_SIZE);
 
   info(`🚀 Starting ATS deployment`);
   info("---");
@@ -50,17 +43,8 @@ async function main() {
   info(`📊 Batch Size: ${batchSize}`);
   info("---");
 
-  // Validate network configuration
-  const availableNetworks = getAllNetworks();
-  if (!availableNetworks.includes(network)) {
-    error(`❌ Network '${network}' not configured in Configuration.ts`);
-    info(`Available networks: ${availableNetworks.join(", ")}`);
-    process.exit(1);
-  }
-
   try {
-    // Create signer from network configuration
-    const { signer, address } = await createNetworkSigner(network);
+    // Use signer from network configuration
     info(`👤 Deployer: ${address}`);
 
     // Deploy system with new BLR
@@ -90,12 +74,11 @@ async function main() {
   }
 }
 
-// Run if called directly
+export { main };
+
 if (require.main === module) {
   main().catch((err) => {
     error("❌ Fatal error:", err);
     process.exit(1);
   });
 }
-
-export { main };
