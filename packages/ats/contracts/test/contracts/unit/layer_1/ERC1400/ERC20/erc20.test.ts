@@ -364,6 +364,121 @@ describe("ERC20 Tests", () => {
       );
     });
 
+    describe("Wallet Recovery Tests", () => {
+      let erc3643Facet: any;
+      let erc3643ReadFacet: any;
+      let accessControlFacet: any;
+      const ADDRESS_ZERO = ethers.constants.AddressZero;
+
+      beforeEach(async () => {
+        erc3643Facet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address);
+        erc3643ReadFacet = await ethers.getContractAt("ERC3643ReadFacet", diamond.address);
+        accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address);
+      });
+
+      it("GIVEN non-recovered wallets WHEN approve THEN transaction succeeds", async () => {
+        // Verify both sender and spender are not recovered
+        const senderRecovered = await erc3643ReadFacet.isAddressRecovered(signer_C.address);
+        const spenderRecovered = await erc3643ReadFacet.isAddressRecovered(signer_D.address);
+        expect(senderRecovered).to.be.false;
+        expect(spenderRecovered).to.be.false;
+
+        // Approve should succeed
+        await expect(erc20SignerC.approve(signer_D.address, amount / 2))
+          .to.emit(erc20SignerC, "Approval")
+          .withArgs(signer_C.address, signer_D.address, amount / 2);
+      });
+
+      it("GIVEN a recovered sender WHEN approve THEN transaction fails with WalletRecovered", async () => {
+        // Grant AGENT_ROLE to perform recovery
+        await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+
+        // Recover signer_C's address (no need to redeem - recovery only checks locks/holds/clears)
+        await erc3643Facet.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
+
+        // Verify recovery was successful
+        expect(await erc3643ReadFacet.isAddressRecovered(signer_C.address)).to.be.true;
+
+        // Approve should fail because sender (signer_C) is recovered
+        await expect(erc20SignerC.approve(signer_D.address, amount / 2)).to.be.revertedWithCustomError(
+          erc20SignerC,
+          "WalletRecovered",
+        );
+      });
+
+      it("GIVEN a recovered spender WHEN approve THEN transaction fails with WalletRecovered", async () => {
+        // Grant AGENT_ROLE to perform recovery
+        await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+
+        // First ensure signer_C is NOT recovered
+        const senderRecovered = await erc3643ReadFacet.isAddressRecovered(signer_C.address);
+        expect(senderRecovered).to.be.false;
+
+        // Recover signer_D's address (no need to issue/redeem - recovery only checks locks/holds/clears)
+        await erc3643Facet.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
+
+        // Verify recovery was successful
+        expect(await erc3643ReadFacet.isAddressRecovered(signer_D.address)).to.be.true;
+
+        // Approve should fail because spender (signer_D) is recovered
+        // This should hit the SECOND onlyUnrecoveredAddress modifier (line 26 in ERC20.sol)
+        await expect(erc20SignerC.approve(signer_D.address, amount / 2)).to.be.revertedWithCustomError(
+          erc20SignerC,
+          "WalletRecovered",
+        );
+
+        // Also verify the error comes from the correct check by trying with estimateGas
+        await expect(erc20SignerC.estimateGas.approve(signer_D.address, amount / 2)).to.be.revertedWithCustomError(
+          erc20SignerC,
+          "WalletRecovered",
+        );
+      });
+    });
+
+    describe("Protected Partitions Role Tests", () => {
+      let protectedPartitionsFacet: any;
+      let accessControlFacet: any;
+
+      beforeEach(async () => {
+        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address);
+        accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+      });
+
+      it("GIVEN protected partitions activated WHEN transfer without role THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        // Enable protected partitions
+        await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await protectedPartitionsFacet.protectPartitions();
+
+        // Try transfer without partition-specific role
+        await expect(erc20SignerC.transfer(signer_D.address, amount / 2)).to.be.revertedWithCustomError(
+          erc20Facet,
+          "PartitionsAreProtectedAndNoRole",
+        );
+      });
+
+      it("GIVEN protected partitions activated WHEN transferFrom without role THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        // Enable protected partitions
+        await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await protectedPartitionsFacet.protectPartitions();
+
+        // Approve first
+        await erc20SignerC.approve(signer_D.address, amount);
+
+        // Try transferFrom without partition-specific role
+        await expect(
+          erc20SignerE.transferFrom(signer_C.address, signer_D.address, amount / 2),
+        ).to.be.revertedWithCustomError(erc20Facet, "PartitionsAreProtectedAndNoRole");
+      });
+    });
+
+    describe("decimalsAt", () => {
+      it("GIVEN an ERC20 token WHEN calling decimalsAt THEN returns correct decimals", async () => {
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        const decimalsValue = await erc20Facet.decimalsAt(currentTimestamp);
+        expect(decimalsValue).to.equal(6); // Configured decimals in fixture
+      });
+    });
+
     it("GIVEN a paused ERC20 WHEN running any state changing method THEN transaction fails with TokenIsPaused", async () => {
       await pauseFacet.pause();
 
