@@ -25,39 +25,34 @@
  *   NETWORK=hedera-testnet PROXY_ADMIN_ADDRESS=0x123... BLR_IMPLEMENTATION=0xabc... npm run upgrade:tup
  *   NETWORK=hedera-testnet PROXY_ADMIN_ADDRESS=0x123... BLR_PROXY=0x111... FACTORY_PROXY=0x222... npm run upgrade:tup
  *
- * @module cli/upgradeTup
+ * @module cli/upgradeTupProxies
  */
 
 import { upgradeTupProxies } from "../workflows/upgradeTupProxies";
-import { getAllNetworks, info, success, error, createNetworkSigner } from "@scripts/infrastructure";
-import { ethers } from "ethers";
+import { info, success, error } from "@scripts/infrastructure";
+import { requireNetworkSigner, requireValidAddress, validateOptionalAddress, parseBooleanEnv } from "./shared";
 
 async function main() {
-  // Get configuration from environment (network is required)
-  const network = process.env.NETWORK;
+  // Get network from environment (required)
+  const { network, signer, address } = await requireNetworkSigner();
 
-  if (!network) {
-    error("❌ Missing NETWORK environment variable.");
-    error("Usage: NETWORK=hedera-testnet PROXY_ADMIN_ADDRESS=0x123... npm run upgrade:tup");
-    const availableNetworks = getAllNetworks();
-    info(`Available networks: ${availableNetworks.join(", ")}`);
-    process.exit(1);
-  }
-
-  const proxyAdminAddress = process.env.PROXY_ADMIN_ADDRESS;
-  const blrProxyAddress = process.env.BLR_PROXY;
-  const factoryProxyAddress = process.env.FACTORY_PROXY;
-  const deployNewBlrImpl = process.env.DEPLOY_NEW_BLR_IMPL === "true";
-  const deployNewFactoryImpl = process.env.DEPLOY_NEW_FACTORY_IMPL === "true";
-  const blrImplementationAddress = process.env.BLR_IMPLEMENTATION;
-  const factoryImplementationAddress = process.env.FACTORY_IMPLEMENTATION;
+  const proxyAdminAddress = requireValidAddress(process.env.PROXY_ADMIN_ADDRESS, "PROXY_ADMIN_ADDRESS");
+  const blrProxyAddress = validateOptionalAddress(process.env.BLR_PROXY, "BLR proxy");
+  const factoryProxyAddress = validateOptionalAddress(process.env.FACTORY_PROXY, "Factory proxy");
+  const deployNewBlrImpl = parseBooleanEnv("DEPLOY_NEW_BLR_IMPL", false);
+  const deployNewFactoryImpl = parseBooleanEnv("DEPLOY_NEW_FACTORY_IMPL", false);
+  const blrImplementationAddress = validateOptionalAddress(process.env.BLR_IMPLEMENTATION, "BLR implementation");
+  const factoryImplementationAddress = validateOptionalAddress(
+    process.env.FACTORY_IMPLEMENTATION,
+    "Factory implementation",
+  );
   const blrInitData = process.env.BLR_INIT_DATA;
   const factoryInitData = process.env.FACTORY_INIT_DATA;
 
   info(`🔄 Starting TUP Proxy Upgrade`);
   info("---");
   info(`📡 Network: ${network}`);
-  info(`🔑 ProxyAdmin: ${proxyAdminAddress || "NOT PROVIDED"}`);
+  info(`🔑 ProxyAdmin: ${proxyAdminAddress}`);
   if (blrProxyAddress) {
     info(`  BLR Proxy: ${blrProxyAddress}`);
     info(`  Deploy: ${deployNewBlrImpl}, Implementation: ${blrImplementationAddress || "None"}`);
@@ -68,53 +63,6 @@ async function main() {
   }
   info("---");
 
-  // Validate required address
-  if (!proxyAdminAddress) {
-    error(`❌ Missing PROXY_ADMIN_ADDRESS environment variable`);
-    error(`Usage: NETWORK=${network} PROXY_ADMIN_ADDRESS=0x123... npm run upgrade:tup`);
-    process.exit(1);
-  }
-
-  if (!ethers.utils.isAddress(proxyAdminAddress)) {
-    error(`❌ Invalid ProxyAdmin address: ${proxyAdminAddress}`);
-    error(`Must be a valid Ethereum address (0x...)`);
-    process.exit(1);
-  }
-
-  // Validate addresses if provided
-  const addressesToValidate: Array<[string, string]> = [];
-
-  if (blrProxyAddress) {
-    addressesToValidate.push([blrProxyAddress, "BLR proxy"]);
-  }
-  if (factoryProxyAddress) {
-    addressesToValidate.push([factoryProxyAddress, "Factory proxy"]);
-  }
-  if (blrImplementationAddress) {
-    addressesToValidate.push([blrImplementationAddress, "BLR implementation"]);
-  }
-  if (factoryImplementationAddress) {
-    addressesToValidate.push([factoryImplementationAddress, "Factory implementation"]);
-  }
-
-  for (const [addr, name] of addressesToValidate) {
-    if (!ethers.utils.isAddress(addr)) {
-      error(`❌ Invalid ${name} address: ${addr}`);
-      error(`All addresses must be valid Ethereum addresses (0x...)`);
-      process.exit(1);
-    }
-  }
-
-  // Validate network configuration
-  const availableNetworks = getAllNetworks();
-  if (!availableNetworks.includes(network)) {
-    error(`❌ Network '${network}' not configured in Configuration.ts`);
-    info(`Available networks: ${availableNetworks.join(", ")}`);
-    process.exit(1);
-  }
-
-  // Create signer from network configuration
-  const { signer, address } = await createNetworkSigner(network);
   info(`👤 Deployer: ${address}`);
 
   try {
@@ -163,7 +111,11 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  error("❌ Fatal error:", err);
-  process.exit(1);
-});
+export { main };
+
+if (require.main === module) {
+  main().catch((err) => {
+    error("❌ Fatal error:", err);
+    process.exit(1);
+  });
+}
