@@ -1,10 +1,25 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Network signer utilities.
+ * Network signer utilities for the infrastructure layer.
  *
- * Provides convenience functions for creating ethers.js Signers
- * from network configuration and environment variables.
+ * This is the INFRASTRUCTURE LAYER - provides low-level signer creation
+ * when the network name is already known and validated.
+ *
+ * For CLI entry points that need to read NETWORK from environment variables
+ * and validate it with user-friendly error messages, use cli/shared/network.ts
+ * which wraps these utilities with CLI-friendly patterns.
+ *
+ * @example
+ * ```typescript
+ * // Infrastructure: use when network is already known
+ * import { createNetworkSigner } from "@scripts/infrastructure";
+ * const { signer, address } = await createNetworkSigner("hedera-testnet");
+ *
+ * // CLI: use when reading from environment
+ * import { requireNetworkSigner } from "./cli/shared";
+ * const { network, signer, address } = await requireNetworkSigner();
+ * ```
  *
  * @module infrastructure/signer
  */
