@@ -209,9 +209,10 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployEquity(equityData, factoryRegulationData)).to.emit(factory, "EquityDeployed");
+      const tx = factory.deployEquity(equityData, factoryRegulationData);
+      await expect(tx).to.emit(factory, "EquityDeployed");
 
-      const result = await factory.deployEquity(equityData, factoryRegulationData);
+      const result = await tx;
       const events = (await result.wait()).events!;
       const deployedEquityEvent = events.find((e) => e.event == "EquityDeployed");
       const equityAddress = deployedEquityEvent!.args!.equityAddress;
@@ -364,9 +365,11 @@ describe("Factory Tests", () => {
 
       const factoryRegulationData = getRegulationData();
 
-      await expect(factory.deployBond(bondData, factoryRegulationData)).to.emit(factory, "BondDeployed");
+      const tx = factory.deployBond(bondData, factoryRegulationData);
 
-      const result = await factory.deployBond(bondData, factoryRegulationData);
+      await expect(tx).to.emit(factory, "BondDeployed");
+
+      const result = await tx;
       const events = (await result.wait()).events!;
       const deployedBondEvent = events.find((e) => e.event == "BondDeployed");
       const bondAddress = deployedBondEvent!.args!.bondAddress;
