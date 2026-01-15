@@ -426,12 +426,6 @@ describe("ERC20 Tests", () => {
           erc20SignerC,
           "WalletRecovered",
         );
-
-        // Also verify the error comes from the correct check by trying with estimateGas
-        await expect(erc20SignerC.estimateGas.approve(signer_D.address, amount / 2)).to.be.revertedWithCustomError(
-          erc20SignerC,
-          "WalletRecovered",
-        );
       });
     });
 
