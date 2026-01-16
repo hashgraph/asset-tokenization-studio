@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { checkNounceAndDeadline, verify } from "../../layer_1/protectedPartitions/signatureVerification.sol";
-import { ITransferAndLock } from "../../layer_3/interfaces/ITransferAndLock.sol";
-import { _DEFAULT_PARTITION } from "../../layer_0/constants/values.sol";
 import {
+    checkNounceAndDeadline,
+    verify,
     getMessageHashTransferAndLockByPartition,
     getMessageHashTransferAndLock
-} from "../../layer_3/transferAndLock/signatureVerification.sol";
+} from "../../layer_0/common/libraries/ERC712Lib.sol";
+import { ITransferAndLock } from "../../layer_3/interfaces/ITransferAndLock.sol";
+import { _DEFAULT_PARTITION } from "../../layer_0/constants/values.sol";
 import { BasicTransferInfo } from "../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { SecurityStorageWrapper } from "../security/SecurityStorageWrapper.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 abstract contract TransferAndLockStorageWrapper is SecurityStorageWrapper {
     function _protectedTransferAndLockByPartition(
@@ -23,14 +25,14 @@ abstract contract TransferAndLockStorageWrapper is SecurityStorageWrapper {
         checkNounceAndDeadline(
             _protectionData.nounce,
             _transferAndLock.from,
-            _getNounceFor(_transferAndLock.from),
+            _getNonceFor(_transferAndLock.from),
             _protectionData.deadline,
             _blockTimestamp()
         );
 
         _checkTransferAndLockByPartitionSignature(_partition, _transferAndLock, _protectionData);
 
-        _setNounce(_protectionData.nounce, _transferAndLock.from);
+        _setNonceFor(_protectionData.nounce, _transferAndLock.from);
 
         _transferByPartition(
             _msgSender(),
@@ -65,14 +67,14 @@ abstract contract TransferAndLockStorageWrapper is SecurityStorageWrapper {
         checkNounceAndDeadline(
             _protectionData.nounce,
             _transferAndLock.from,
-            _getNounceFor(_transferAndLock.from),
+            _getNonceFor(_transferAndLock.from),
             _protectionData.deadline,
             _blockTimestamp()
         );
 
         _checkTransferAndLockSignature(_transferAndLock, _protectionData);
 
-        _setNounce(_protectionData.nounce, _transferAndLock.from);
+        _setNonceFor(_protectionData.nounce, _transferAndLock.from);
 
         _transferByPartition(
             _msgSender(),
@@ -129,8 +131,8 @@ abstract contract TransferAndLockStorageWrapper is SecurityStorageWrapper {
                 _transferAndLock.from,
                 functionHash,
                 _protectionData.signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
+                _getName(),
+                Strings.toString(_getResolverProxyVersion()),
                 _blockChainid(),
                 address(this)
             );
@@ -161,8 +163,8 @@ abstract contract TransferAndLockStorageWrapper is SecurityStorageWrapper {
                 _transferAndLock.from,
                 functionHash,
                 _protectionData.signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
+                _getName(),
+                Strings.toString(_getResolverProxyVersion()),
                 _blockChainid(),
                 address(this)
             );

@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-14T08:23:45.165Z
+ * Generated: 2026-01-16T10:39:08.259Z
  * Facets: 189
  * Infrastructure: 2
  *
@@ -5336,7 +5336,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
         selector: "0x3644e515",
       },
-      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
       {
         name: "permit",
@@ -5367,7 +5366,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
         selector: "0x3644e515",
       },
-      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
       {
         name: "permit",
@@ -5401,7 +5399,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
         selector: "0x3644e515",
       },
-      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
       {
         name: "permit",
@@ -5435,7 +5432,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
         selector: "0x3644e515",
       },
-      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
       {
         name: "permit",
@@ -11951,7 +11947,7 @@ export const TOTAL_INFRASTRUCTURE_CONTRACTS = 2 as const;
 export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> = {
   AccessControlStorageWrapper: {
     name: "AccessControlStorageWrapper",
-    inheritance: ["IAccessControlStorageWrapper", "Internals", "BusinessLogicResolverWrapper"],
+    inheritance: ["IAccessControlStorageWrapper", "ResolverProxyStorageWrapper", "BusinessLogicResolverWrapper"],
     methods: [],
   },
 
@@ -12570,6 +12566,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  NonceStorageWrapper: {
+    name: "NonceStorageWrapper",
+    inheritance: ["Internals"],
+    methods: [],
+  },
+
   PauseStorageWrapper: {
     name: "PauseStorageWrapper",
     inheritance: ["IPauseStorageWrapper", "ExternalPauseManagementStorageWrapper"],
@@ -12591,6 +12593,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   ProtectedPartitionsStorageWrapper: {
     name: "ProtectedPartitionsStorageWrapper",
     inheritance: ["IProtectedPartitionsStorageWrapper", "KycStorageWrapper"],
+    methods: [],
+  },
+
+  ResolverProxyStorageWrapper: {
+    name: "ResolverProxyStorageWrapper",
+    inheritance: ["NonceStorageWrapper"],
     methods: [],
   },
 
@@ -12664,7 +12672,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 56 as const;
+export const TOTAL_STORAGE_WRAPPERS = 58 as const;
 
 /**
  * All role identifiers extracted from contracts.

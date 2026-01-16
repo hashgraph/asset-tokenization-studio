@@ -79,6 +79,10 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         erc20Metadata_ = IERC20.ERC20Metadata({ info: erc20Info, securityType: erc20Storage.securityType });
     }
 
+    function _getName() internal view override returns (string memory) {
+        return _erc20Storage().name;
+    }
+
     function _decimals() internal view override returns (uint8) {
         return _erc20Storage().decimals;
     }

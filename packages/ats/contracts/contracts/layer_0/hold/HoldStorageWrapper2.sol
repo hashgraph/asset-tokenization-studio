@@ -19,7 +19,7 @@ import { LowLevelCall } from "../common/libraries/LowLevelCall.sol";
 import {
     ERC1410ProtectedPartitionsStorageWrapper
 } from "../ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol";
-import { checkNounceAndDeadline } from "../../layer_1/protectedPartitions/signatureVerification.sol";
+import { checkNounceAndDeadline } from "../../layer_0/common/libraries/ERC712Lib.sol";
 
 abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrapper {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -74,14 +74,14 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         checkNounceAndDeadline(
             _protectedHold.nonce,
             _from,
-            _getNounceFor(_from),
+            _getNonceFor(_from),
             _protectedHold.deadline,
             _blockTimestamp()
         );
 
         _checkCreateHoldSignature(_partition, _from, _protectedHold, _signature);
 
-        _setNounce(_protectedHold.nonce, _from);
+        _setNonceFor(_protectedHold.nonce, _from);
 
         return _createHoldByPartition(_partition, _from, _protectedHold.hold, "", ThirdPartyType.PROTECTED);
     }

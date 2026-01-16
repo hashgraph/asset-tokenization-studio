@@ -1,7 +1,15 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { type ResolverProxy, type Pause, ERC20PermitFacet, ERC20, AccessControl, ControlList } from "@contract-types";
+import {
+  type ResolverProxy,
+  type Pause,
+  ERC20PermitFacet,
+  ERC20,
+  AccessControl,
+  ControlList,
+  DiamondCutFacet,
+} from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, getDltTimestamp } from "@test";
 
@@ -16,9 +24,7 @@ describe("ERC20Permit Tests", () => {
   let pauseFacet: Pause;
   let accessControlFacet: AccessControl;
   let controlList: ControlList;
-
-  const CONTRACT_NAME_ERC20PERMIT = "ERC20Permit";
-  const CONTRACT_VERSION_ERC20PERMIT = "1.0.0";
+  let diamondCutFacet: DiamondCutFacet;
 
   beforeEach(async () => {
     const base = await deployEquityTokenFixture();
@@ -40,6 +46,7 @@ describe("ERC20Permit Tests", () => {
     erc20PermitFacet = await ethers.getContractAt("ERC20PermitFacet", diamond.address);
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
     erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_A);
+    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", diamond.address);
   });
 
   describe("Single Partition", () => {
@@ -53,9 +60,11 @@ describe("ERC20Permit Tests", () => {
     describe("Domain Separator", () => {
       it("GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned", async () => {
         const domainSeparator = await erc20PermitFacet.DOMAIN_SEPARATOR();
+        const CONTRACT_NAME = (await erc20Facet.getERC20Metadata()).info.name;
+        const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const domain = {
-          name: CONTRACT_NAME_ERC20PERMIT,
-          version: CONTRACT_VERSION_ERC20PERMIT,
+          name: CONTRACT_NAME,
+          version: CONTRACT_VERSION,
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
           verifyingContract: diamond.address,
         };
@@ -175,10 +184,12 @@ describe("ERC20Permit Tests", () => {
       it("GIVEN a signature from a different owner WHEN permit is called THEN the transaction reverts with ERC2612InvalidSigner", async () => {
         const nonce = await erc20PermitFacet.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
+        const CONTRACT_NAME = (await erc20Facet.getERC20Metadata()).info.name;
+        const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
 
         const domain = {
-          name: CONTRACT_NAME_ERC20PERMIT,
-          version: CONTRACT_VERSION_ERC20PERMIT,
+          name: CONTRACT_NAME,
+          version: CONTRACT_VERSION,
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
           verifyingContract: diamond.address,
         };
@@ -212,10 +223,12 @@ describe("ERC20Permit Tests", () => {
       it("GIVEN a valid signature WHEN permit is called THEN the approval succeeds and emits Approval event", async () => {
         const nonce = await erc20PermitFacet.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
+        const CONTRACT_NAME = (await erc20Facet.getERC20Metadata()).info.name;
+        const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
 
         const domain = {
-          name: CONTRACT_NAME_ERC20PERMIT,
-          version: CONTRACT_VERSION_ERC20PERMIT,
+          name: CONTRACT_NAME,
+          version: CONTRACT_VERSION,
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
           verifyingContract: diamond.address,
         };

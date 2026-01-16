@@ -60,3 +60,10 @@ bytes1 constant _ADDRESS_RECOVERED_FROM_ERROR_ID = 0x54;
 bytes1 constant _ADDRESS_RECOVERED_TO_ERROR_ID = 0x55;
 
 bytes1 constant _SUCCESS = 0x00;
+
+// solhint-disable max-line-length
+//keccak256(
+//    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+//);
+bytes32 constant _DOMAIN_TYPE_HASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
+string constant _SALT = "\x19\x01";

@@ -1,9 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { _DOMAIN_TYPE_HASH, _SALT } from "../../constants/values.sol";
 import {
-    _DOMAIN_TYPE_HASH,
-    _SALT,
     _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH,
     _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH,
     _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
@@ -13,16 +12,38 @@ import {
     _PROTECTED_CLEARING_REDEEM_TYPEHASH,
     _CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
-    _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
-    _PROTECTED_CLEARING_OPERATION_TYPEHASH
-} from "../constants/values.sol";
-import { Hold, ProtectedHold } from "../interfaces/hold/IHold.sol";
-import { IClearing } from "../interfaces/clearing/IClearing.sol";
+    _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH
+} from "../../../layer_1/constants/values.sol";
+import {
+    _PROTECTED_TRANSFER_AND_LOCK_FROM_PARTITION_TYPEHASH,
+    _PROTECTED_TRANSFER_AND_LOCK_BY_PARTITION_FROM_PARTITION_TYPEHASH
+} from "../../../layer_3/constants/values.sol";
+import { Hold, ProtectedHold } from "../../../layer_1/interfaces/hold/IHold.sol";
+import { IClearing } from "../../../layer_1/interfaces/clearing/IClearing.sol";
 
 error WrongSignatureLength();
 error WrongNounce(uint256 nounce, address account);
 error ExpiredDeadline(uint256 deadline);
 
+function getDomainHash(
+    string memory _contractName,
+    string memory _contractVersion,
+    uint256 _chainId,
+    address _contractAddress
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(
+                _DOMAIN_TYPE_HASH,
+                keccak256(bytes(_contractName)),
+                keccak256(bytes(_contractVersion)),
+                _chainId,
+                _contractAddress
+            )
+        );
+}
+
+// function hashes
 function getMessageHashTransfer(
     bytes32 _partition,
     address _from,
@@ -180,6 +201,57 @@ function getMessageHashClearingRedeem(
         );
 }
 
+function getMessageHashTransferAndLock(
+    address _from,
+    address _to,
+    uint256 _amount,
+    bytes calldata _data,
+    uint256 _expirationTimestamp,
+    uint256 _deadline,
+    uint256 _nounce
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(
+                _PROTECTED_TRANSFER_AND_LOCK_FROM_PARTITION_TYPEHASH,
+                _from,
+                _to,
+                _amount,
+                _data,
+                _expirationTimestamp,
+                _deadline,
+                _nounce
+            )
+        );
+}
+
+function getMessageHashTransferAndLockByPartition(
+    bytes32 _partition,
+    address _from,
+    address _to,
+    uint256 _amount,
+    bytes calldata _data,
+    uint256 _expirationTimestamp,
+    uint256 _deadline,
+    uint256 _nounce
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(
+                _PROTECTED_TRANSFER_AND_LOCK_BY_PARTITION_FROM_PARTITION_TYPEHASH,
+                _partition,
+                _from,
+                _to,
+                _amount,
+                _data,
+                _expirationTimestamp,
+                _deadline,
+                _nounce
+            )
+        );
+}
+
+// checks
 function checkNounceAndDeadline(
     uint256 _nounce,
     address _account,
@@ -199,38 +271,6 @@ function isNounceValid(uint256 _nounce, uint256 _currentNounce) pure returns (bo
     return _currentNounce < _nounce;
 }
 
-function verify(
-    address _signer,
-    bytes32 _functionHash,
-    bytes memory _signature,
-    string memory _contractName,
-    string memory _contractVersion,
-    uint256 _chainid,
-    address _contractAddress
-) pure returns (bool) {
-    bytes32 domainHash = getDomainHash(_contractName, _contractVersion, _chainid, _contractAddress);
-    bytes32 prefixedHash = keccak256(abi.encodePacked(_SALT, domainHash, _functionHash));
-    return (recoverSigner(prefixedHash, _signature) == _signer);
-}
-
-function getDomainHash(
-    string memory _contractName,
-    string memory _contractVersion,
-    uint256 _chainId,
-    address _contractAddress
-) pure returns (bytes32) {
-    return
-        keccak256(
-            abi.encode(
-                _DOMAIN_TYPE_HASH,
-                keccak256(bytes(_contractName)),
-                keccak256(bytes(_contractVersion)),
-                _chainId,
-                _contractAddress
-            )
-        );
-}
-
 function recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {
     (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
     return ecrecover(_prefixedHash, v, r, s);
@@ -248,4 +288,18 @@ function splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, ui
         v := byte(0, mload(add(sig, 96)))
     }
     // implicitly return (r, s, v)
+}
+
+function verify(
+    address _signer,
+    bytes32 _functionHash,
+    bytes memory _signature,
+    string memory _contractName,
+    string memory _contractVersion,
+    uint256 _chainid,
+    address _contractAddress
+) pure returns (bool) {
+    bytes32 domainHash = getDomainHash(_contractName, _contractVersion, _chainid, _contractAddress);
+    bytes32 prefixedHash = keccak256(abi.encodePacked(_SALT, domainHash, _functionHash));
+    return (recoverSigner(prefixedHash, _signature) == _signer);
 }
