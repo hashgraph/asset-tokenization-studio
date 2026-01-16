@@ -175,4 +175,36 @@ describe("ERC1643 Tests", () => {
     documents = await erc1643Facet.getAllDocuments();
     expect(documents.length).to.equal(0);
   });
+
+  it("GIVEN an existing document WHEN setDocument is called again with same name THEN document is updated without adding to docNames array", async () => {
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address);
+
+    // Add initial document
+    await erc1643Facet.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1);
+
+    // Verify document was added
+    let documents = await erc1643Facet.getAllDocuments();
+    expect(documents.length).to.equal(1);
+    expect(documents[0]).to.equal(documentName_1);
+
+    // Get initial document details
+    let document = await erc1643Facet.getDocument(documentName_1);
+    expect(document[0]).to.equal(documentURI_1);
+    expect(document[1]).to.equal(documentHASH_1);
+
+    // Update the same document with new URI and HASH
+    await expect(erc1643Facet.connect(signer_C).setDocument(documentName_1, documentURI_2, documentHASH_2))
+      .to.emit(erc1643Facet, "DocumentUpdated")
+      .withArgs(documentName_1, documentURI_2, documentHASH_2);
+
+    // Verify document list length is still 1 (not duplicated)
+    documents = await erc1643Facet.getAllDocuments();
+    expect(documents.length).to.equal(1);
+    expect(documents[0]).to.equal(documentName_1);
+
+    // Verify document was updated with new values
+    document = await erc1643Facet.getDocument(documentName_1);
+    expect(document[0]).to.equal(documentURI_2);
+    expect(document[1]).to.equal(documentHASH_2);
+  });
 });

@@ -79,6 +79,22 @@ describe("BusinessLogicResolver", () => {
         businessLogicResolver.connect(signer_C).registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2)),
       ).to.be.rejectedWith("AccountHasNoRole");
     });
+
+    it("GIVEN an account without admin role WHEN adding selectors to blacklist THEN transaction fails with AccountHasNoRole", async () => {
+      const blackListedSelectors = ["0x8456cb59"]; // pause() selector
+
+      await expect(
+        businessLogicResolver.connect(signer_C).addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors),
+      ).to.be.rejectedWith("AccountHasNoRole");
+    });
+
+    it("GIVEN an account without admin role WHEN removing selectors from blacklist THEN transaction fails with AccountHasNoRole", async () => {
+      const blackListedSelectors = ["0x8456cb59"]; // pause() selector
+
+      await expect(
+        businessLogicResolver.connect(signer_C).removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors),
+      ).to.be.rejectedWith("AccountHasNoRole");
+    });
   });
 
   describe("Business Logic Resolver functionality", () => {
@@ -215,6 +231,29 @@ describe("BusinessLogicResolver", () => {
         blackListedSelectors,
       );
 
+      await businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
+    });
+
+    it("GIVEN a selector already in blacklist WHEN adding it again THEN it should not be duplicated", async () => {
+      const blackListedSelectors = ["0x8456cb59"]; // pause() selector
+
+      await businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal(
+        blackListedSelectors,
+      );
+
+      // Add the same selector again
+      await businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal(
+        blackListedSelectors,
+      );
+    });
+
+    it("GIVEN a selector not in blacklist WHEN removing it THEN nothing changes", async () => {
+      const blackListedSelectors = ["0x8456cb59"]; // pause() selector
+
+      // Remove a selector that doesn't exist
       await businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
       expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
     });

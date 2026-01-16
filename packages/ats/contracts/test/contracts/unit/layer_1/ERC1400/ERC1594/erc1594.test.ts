@@ -691,5 +691,188 @@ describe("ERC1594 Tests", () => {
         expect(await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
       },
     );
+
+    describe("Recovered Addresses", () => {
+      let erc3643ManagementFacet: any;
+      let erc3643ReadFacet: any;
+
+      beforeEach(async () => {
+        erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address, signer_A);
+        erc3643ReadFacet = await ethers.getContractAt("ERC3643ReadFacet", diamond.address);
+
+        // Grant AGENT_ROLE to signer_A for recovery operations
+        await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+
+        // Issue tokens to signer_E and signer_C
+        await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
+        await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+        await erc1594Issuer.issue(signer_C.address, AMOUNT, DATA);
+      });
+
+      it("GIVEN a recovered msgSender WHEN redeemFrom THEN transaction fails with WalletRecovered", async () => {
+        // Approve BEFORE recovering the address
+        await erc20Facet.connect(signer_E).approve(signer_C.address, AMOUNT / 2);
+
+        // Recover signer_C's address
+        await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ethers.constants.AddressZero);
+
+        // Verify recovery was successful
+        expect(await erc3643ReadFacet.isAddressRecovered(signer_C.address)).to.be.true;
+
+        // signer_C is now recovered and cannot call redeemFrom
+        await expect(
+          erc1594Facet.connect(signer_C).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
+        ).to.be.revertedWithCustomError(erc3643ManagementFacet, "WalletRecovered");
+      });
+
+      it("GIVEN a recovered tokenHolder WHEN redeemFrom THEN transaction fails with WalletRecovered", async () => {
+        // Recover signer_E's address
+        await erc3643ManagementFacet.recoveryAddress(signer_E.address, signer_D.address, ethers.constants.AddressZero);
+
+        // Verify recovery was successful
+        expect(await erc3643ReadFacet.isAddressRecovered(signer_E.address)).to.be.true;
+
+        // Try to redeem from recovered address (signer_E) using signer_C
+        await expect(
+          erc1594Facet.connect(signer_C).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
+        ).to.be.revertedWithCustomError(erc3643ManagementFacet, "WalletRecovered");
+      });
+    });
+
+    describe("Protected Partitions with Wild Card Role", () => {
+      let protectedPartitionsFacet: any;
+
+      beforeEach(async () => {
+        // Deploy a new token with protected partitions
+        const base = await deployEquityTokenFixture({
+          equityDataParams: {
+            securityData: {
+              internalKycActivated: true,
+              maxSupply: MAX_SUPPLY,
+              arePartitionsProtected: true,
+            },
+          },
+          useLoadFixture: false,
+        });
+
+        diamond = base.diamond;
+        signer_A = base.deployer;
+        signer_B = base.user1;
+        signer_C = base.user2;
+        signer_D = base.user3;
+        signer_E = base.user4;
+
+        await executeRbac(base.accessControlFacet, [
+          {
+            role: ATS_ROLES._ISSUER_ROLE,
+            members: [signer_C.address],
+          },
+          {
+            role: ATS_ROLES._KYC_ROLE,
+            members: [signer_B.address],
+          },
+          {
+            role: ATS_ROLES._SSI_MANAGER_ROLE,
+            members: [signer_A.address],
+          },
+          {
+            role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+            members: [signer_A.address],
+          },
+          {
+            role: ATS_ROLES._WILD_CARD_ROLE,
+            members: [signer_E.address],
+          },
+        ]);
+
+        accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+        erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
+        erc1594Issuer = erc1594Facet.connect(signer_C);
+        erc1594Transferor = erc1594Facet.connect(signer_E);
+        erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_E);
+        erc1410SnapshotFacet = await ethers.getContractAt("IERC1410", diamond.address);
+        kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+        ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
+        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", diamond.address, signer_A);
+
+        // Setup KYC
+        await ssiManagementFacet.addIssuer(signer_E.address);
+        await kycFacet.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+        await kycFacet.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+
+        // Protect partitions
+        await protectedPartitionsFacet.protectPartitions();
+
+        // Issue tokens to signer_E
+        await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
+      });
+
+      it("GIVEN protected partitions and wildcard role WHEN transferWithData THEN transaction succeeds", async () => {
+        expect(await erc1594Transferor.transferWithData(signer_D.address, AMOUNT / 2, DATA))
+          .to.emit(erc1594Transferor, "Transferred")
+          .withArgs(signer_E.address, signer_D.address, AMOUNT / 2);
+
+        expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
+        expect(await erc1410SnapshotFacet.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
+      });
+
+      it("GIVEN protected partitions and wildcard role WHEN transferFromWithData THEN transaction succeeds", async () => {
+        // Issue tokens to signer_C first
+        await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+        await erc1594Issuer.issue(signer_C.address, AMOUNT, DATA);
+
+        // signer_C approves signer_E (who has wildcard role) to transfer
+        await erc20Facet.connect(signer_C).approve(signer_E.address, AMOUNT / 2);
+
+        expect(await erc1594Transferor.transferFromWithData(signer_C.address, signer_D.address, AMOUNT / 2, DATA))
+          .to.emit(erc1594Facet, "Transferred")
+          .withArgs(signer_C.address, signer_D.address, AMOUNT / 2);
+
+        expect(await erc1410SnapshotFacet.balanceOf(signer_C.address)).to.be.equal(AMOUNT / 2);
+        expect(await erc1410SnapshotFacet.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
+      });
+
+      it("GIVEN protected partitions and wildcard role WHEN redeem THEN transaction succeeds", async () => {
+        expect(await erc1594Transferor.redeem(AMOUNT / 2, DATA))
+          .to.emit(erc1594Transferor, "Redeemed")
+          .withArgs(ethers.constants.AddressZero, signer_E.address, AMOUNT / 2);
+
+        expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
+        expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT / 2);
+      });
+
+      it("GIVEN protected partitions without wildcard role WHEN transferWithData THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        // signer_D doesn't have wildcard role
+        await expect(
+          erc1594Facet.connect(signer_D).transferWithData(signer_E.address, AMOUNT / 2, DATA),
+        ).to.be.revertedWithCustomError(erc1594Facet, "PartitionsAreProtectedAndNoRole");
+      });
+
+      it("GIVEN protected partitions without wildcard role WHEN transferFromWithData THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        // signer_E approves signer_D (who doesn't have wildcard role)
+        await erc20Facet.approve(signer_D.address, AMOUNT / 2);
+
+        await expect(
+          erc1594Facet.connect(signer_D).transferFromWithData(signer_E.address, signer_C.address, AMOUNT / 2, DATA),
+        ).to.be.revertedWithCustomError(erc1594Facet, "PartitionsAreProtectedAndNoRole");
+      });
+
+      it("GIVEN protected partitions without wildcard role WHEN redeem THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        // signer_D doesn't have wildcard role
+        await expect(erc1594Facet.connect(signer_D).redeem(AMOUNT / 2, DATA)).to.be.revertedWithCustomError(
+          erc1594Facet,
+          "PartitionsAreProtectedAndNoRole",
+        );
+      });
+
+      it("GIVEN protected partitions without wildcard role WHEN redeemFrom THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        // signer_E approves signer_D (who doesn't have wildcard role)
+        await erc20Facet.approve(signer_D.address, AMOUNT / 2);
+
+        await expect(
+          erc1594Facet.connect(signer_D).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
+        ).to.be.revertedWithCustomError(erc1594Facet, "PartitionsAreProtectedAndNoRole");
+      });
+    });
   });
 });

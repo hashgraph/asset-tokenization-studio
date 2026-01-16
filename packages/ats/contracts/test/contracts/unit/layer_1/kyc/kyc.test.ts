@@ -345,5 +345,19 @@ describe("Kyc Tests", () => {
         .withArgs(signer_A.address, true);
       expect(await kycFacet.isInternalKycActivated()).to.be.true;
     });
+
+    it("GIVEN a paused Token WHEN activateInternalKyc THEN transaction fails with TokenIsPaused", async () => {
+      await pauseFacet.pause();
+      await expect(kycFacet.activateInternalKyc()).to.be.revertedWithCustomError(kycFacet, "TokenIsPaused");
+    });
+
+    it("GIVEN a paused Token WHEN deactivateInternalKyc THEN transaction fails with TokenIsPaused", async () => {
+      await pauseFacet.pause();
+      await expect(kycFacet.deactivateInternalKyc()).to.be.revertedWithCustomError(kycFacet, "TokenIsPaused");
+    });
+
+    it("GIVEN a VC already initialized WHEN initializeInternalKyc called twice THEN transaction fails with AlreadyInitialized", async () => {
+      await expect(kycFacet.initializeInternalKyc(true)).to.be.revertedWithCustomError(kycFacet, "AlreadyInitialized");
+    });
   });
 });

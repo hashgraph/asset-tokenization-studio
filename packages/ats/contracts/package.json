@@ -123,6 +123,7 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "ethers": "^5.8.0",
+
     "tslib": "^2.8.1",
     "zod": "^3.22.4"
   },
@@ -154,7 +155,8 @@
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "istanbul-combine": "^0.3.0"
   },
   "overrides": {
     "@typechain/ethers-v5": "10.2.1",

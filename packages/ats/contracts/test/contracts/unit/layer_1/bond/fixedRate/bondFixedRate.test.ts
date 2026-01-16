@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { ResolverProxy, BondUSAFixedRate, FixedRate, BondUSAReadFacet } from "@contract-types";
+import { ResolverProxy, BondUSAFixedRateFacet, FixedRate, BondUSAReadFacet } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondFixedRateTokenFixture } from "@test";
@@ -29,7 +29,7 @@ describe("Bond Fixed Rate Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: SignerWithAddress;
 
-  let bondFixedRateFacet: BondUSAFixedRate;
+  let bondFixedRateFacet: BondUSAFixedRateFacet;
   let bondReadFacet: BondUSAReadFacet;
   let fixedRateFacet: FixedRate;
 

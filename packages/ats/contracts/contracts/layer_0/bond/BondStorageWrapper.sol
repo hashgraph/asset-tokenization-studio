@@ -267,7 +267,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     }
 
     function _isBondInitialized() internal view override returns (bool) {
-        _bondStorage().initialized;
+        return _bondStorage().initialized;
     }
 
     function _bondStorage() internal pure returns (BondDataStorage storage bondData_) {

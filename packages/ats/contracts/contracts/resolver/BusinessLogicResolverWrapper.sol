@@ -42,7 +42,8 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
 
         businessLogicResolverDataStorage.latestVersion++;
         IBusinessLogicResolver.BusinessLogicRegistryData memory _businessLogicsRegistryData;
-        for (uint256 index; index < _businessLogicsRegistryDatas.length; index++) {
+        uint256 businessLogicsRegistryDatasLength = _businessLogicsRegistryDatas.length;
+        for (uint256 index; index < businessLogicsRegistryDatasLength; ) {
             _businessLogicsRegistryData = _businessLogicsRegistryDatas[index];
 
             if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicsRegistryData.businessLogicKey]) {
@@ -74,6 +75,10 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
                     )
                 )
             ] = versions.length - 1;
+
+            unchecked {
+                ++index;
+            }
         }
 
         businessLogicResolverDataStorage.versionStatuses[

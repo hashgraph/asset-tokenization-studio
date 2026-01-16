@@ -7,10 +7,11 @@ import { ERC1410Read } from "./ERC1410Read.sol";
 
 abstract contract ERC1410ReadFacetBase is IStaticFunctionSelectors, ERC1410Read {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](10);
+        staticFunctionSelectors_ = new bytes4[](11);
         uint256 selectorIndex = 0;
         // Balance and supply functions
         staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAt.selector;
         staticFunctionSelectors_[selectorIndex++] = this.balanceOfByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
         staticFunctionSelectors_[selectorIndex++] = this.totalSupplyByPartition.selector;
