@@ -1,5 +1,11 @@
 # @hashgraph/asset-tokenization-dapp
 
+## 3.1.0
+
+### Patch Changes
+
+- @hashgraph/asset-tokenization-sdk@3.1.0
+
 ## 3.0.0
 
 ### Minor Changes
