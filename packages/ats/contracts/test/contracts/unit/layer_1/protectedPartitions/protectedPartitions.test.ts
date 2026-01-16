@@ -15,6 +15,7 @@ import {
   type SsiManagementFacet,
   type IHold,
   ComplianceMock,
+  DiamondCutFacet,
 } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { Contract } from "ethers";
@@ -33,8 +34,8 @@ const packedDataWithoutPrefix = packedData.slice(2);
 const ProtectedPartitionRole_1 = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
 
 const domain = {
-  name: "ProtectedPartitions",
-  version: "1.0.0",
+  name: "",
+  version: "",
   chainId: 1,
   verifyingContract: "",
 };
@@ -228,6 +229,7 @@ describe("ProtectedPartitions Tests", () => {
   let protectedClearingOperation: ProtectedClearingOperationData;
   let complianceMock: ComplianceMock;
   let complianceMockAddress: string;
+  let diamondCutFacet: DiamondCutFacet;
 
   async function grant_WILD_CARD_ROLE_and_issue_tokens(
     wildCard_Account: string,
@@ -280,6 +282,8 @@ describe("ProtectedPartitions Tests", () => {
     accessControlFacet = await ethers.getContractAt("AccessControl", address);
     kycFacet = await ethers.getContractAt("KycFacet", address);
     ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", address);
+    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", address);
+
     const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", address, signer_A);
 
     const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", address, signer_A);
@@ -319,6 +323,9 @@ describe("ProtectedPartitions Tests", () => {
 
   async function setProtected() {
     await setFacets(diamond_ProtectedPartitions.address, complianceMockAddress);
+
+    domain.name = (await erc20Facet.getERC20Metadata()).info.name;
+    domain.version = (await diamondCutFacet.getConfigInfo()).version_.toString();
     domain.chainId = await network.provider.send("eth_chainId");
     domain.verifyingContract = diamond_ProtectedPartitions.address;
     await grantKyc();
