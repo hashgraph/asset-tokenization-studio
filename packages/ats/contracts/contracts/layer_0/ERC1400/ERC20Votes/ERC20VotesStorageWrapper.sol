@@ -7,7 +7,6 @@ import { IERC20Votes } from "../../../layer_1/interfaces/ERC1400/IERC20Votes.sol
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { CheckpointsLib } from "../../common/libraries/CheckpointsLib.sol";
-import { _CONTRACT_NAME_ERC20VOTES, _CONTRACT_VERSION_ERC20VOTES } from "contracts/layer_1/constants/values.sol";
 
 // solhint-disable custom-errors
 abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
@@ -15,8 +14,8 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
     struct ERC20VotesStorage {
         bool activated;
-        string contractName;
-        string contractVersion;
+        string DEPRECATED_contractName;
+        string DEPRECATED_contractVersion;
         mapping(address => address) delegates;
         mapping(address => CheckpointsLib.Checkpoint[]) checkpoints;
         CheckpointsLib.Checkpoint[] totalSupplyCheckpoints;
@@ -32,8 +31,6 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
         _setActivate(_activated);
         erc20VotesStorage.initialized = true;
-        erc20VotesStorage.contractName = _CONTRACT_NAME_ERC20VOTES;
-        erc20VotesStorage.contractVersion = _CONTRACT_VERSION_ERC20VOTES;
     }
 
     function _setActivate(bool _activated) internal virtual override {

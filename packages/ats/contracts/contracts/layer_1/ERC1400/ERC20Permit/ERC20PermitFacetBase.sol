@@ -8,9 +8,8 @@ import { ERC20Permit } from "./ERC20Permit.sol";
 
 abstract contract ERC20PermitFacetBase is ERC20Permit, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_ = new bytes4[](3);
         uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this.initialize_ERC20Permit.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.permit.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.nonces.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.DOMAIN_SEPARATOR.selector;

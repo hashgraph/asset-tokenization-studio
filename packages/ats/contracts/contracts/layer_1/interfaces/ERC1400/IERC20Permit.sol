@@ -7,9 +7,6 @@ interface IERC20Permit {
     error ERC2612ExpiredSignature(uint256 deadline);
     error ERC2612InvalidSigner(address signer, address owner);
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Permit() external;
-
     /**
      * @notice Approves a third party to spend tokens using off-chain signature
      */

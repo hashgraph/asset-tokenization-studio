@@ -17,19 +17,16 @@ import {
     getMessageHashClearingCreateHold,
     getMessageHashClearingRedeem,
     verify
-} from "../../../layer_1/protectedPartitions/signatureVerification.sol";
-import {
-    _CONTRACT_NAME_PROTECTEDPARTITIONS,
-    _CONTRACT_VERSION_PROTECTEDPARTITIONS
-} from "../../../layer_1/constants/values.sol";
+} from "../../../layer_0/common/libraries/ERC712Lib.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStorageWrapper, KycStorageWrapper {
     struct ProtectedPartitionsDataStorage {
         bool initialized;
         bool arePartitionsProtected;
-        string contractName;
-        string contractVersion;
-        mapping(address => uint256) nounces;
+        string DEPRECATED_contractName;
+        string DEPRECATED_contractVersion;
+        mapping(address => uint256) DEPRECATED_nounces;
     }
 
     // modifiers
@@ -46,8 +43,6 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
     function _initialize_ProtectedPartitions(bool _protectPartitions) internal override returns (bool success_) {
         ProtectedPartitionsDataStorage storage protectedPartitionsStorage = _protectedPartitionsStorage();
         protectedPartitionsStorage.arePartitionsProtected = _protectPartitions;
-        protectedPartitionsStorage.contractName = _CONTRACT_NAME_PROTECTEDPARTITIONS;
-        protectedPartitionsStorage.contractVersion = _CONTRACT_VERSION_PROTECTEDPARTITIONS;
         protectedPartitionsStorage.initialized = true;
         success_ = true;
     }
@@ -61,16 +56,8 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         emit PartitionsUnProtected(_msgSender());
     }
 
-    function _setNounce(uint256 _nounce, address _account) internal override {
-        _protectedPartitionsStorage().nounces[_account] = _nounce;
-    }
-
     function _arePartitionsProtected() internal view override returns (bool) {
         return _protectedPartitionsStorage().arePartitionsProtected;
-    }
-
-    function _getNounceFor(address _account) internal view override returns (uint256) {
-        return _protectedPartitionsStorage().nounces[_account];
     }
 
     function _checkTransferSignature(
@@ -103,8 +90,8 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
                 _from,
                 functionHash,
                 _protectionData.signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
+                _getName(),
+                Strings.toString(_getResolverProxyVersion()),
                 _blockChainid(),
                 address(this)
             );
@@ -137,8 +124,8 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
                 _from,
                 functionHash,
                 _protectionData.signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
+                _getName(),
+                Strings.toString(_getResolverProxyVersion()),
                 _blockChainid(),
                 address(this)
             );
@@ -166,8 +153,8 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
                 _from,
                 functionHash,
                 _signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
+                _getName(),
+                Strings.toString(_getResolverProxyVersion()),
                 _blockChainid(),
                 address(this)
             );
@@ -194,8 +181,8 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
                 _protectedClearingOperation.from,
                 functionHash,
                 _signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
+                _getName(),
+                Strings.toString(_getResolverProxyVersion()),
                 _blockChainid(),
                 address(this)
             );
@@ -224,8 +211,8 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
                 _protectedClearingOperation.from,
                 functionHash,
                 _signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
+                _getName(),
+                Strings.toString(_getResolverProxyVersion()),
                 _blockChainid(),
                 address(this)
             );
@@ -251,8 +238,8 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
                 _protectedClearingOperation.from,
                 functionHash,
                 _signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
+                _getName(),
+                Strings.toString(_getResolverProxyVersion()),
                 _blockChainid(),
                 address(this)
             );

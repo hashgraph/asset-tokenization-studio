@@ -5,23 +5,15 @@ import { ERC20VotesStorageWrapper } from "../../ERC1400/ERC20Votes/ERC20VotesSto
 import { IERC20Permit } from "../../../layer_1/interfaces/ERC1400/IERC20Permit.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { ERC20PERMIT_TYPEHASH } from "../../constants/values.sol";
-import { _CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT } from "../../../layer_1/constants/values.sol";
-import { getDomainHash } from "../../../layer_1/protectedPartitions/signatureVerification.sol";
+import { getDomainHash } from "../../../layer_0/common/libraries/ERC712Lib.sol";
 import { _ERC20PERMIT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { _CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT } from "contracts/layer_1/constants/values.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
     struct ERC20PermitStorage {
-        string contractName;
-        string contractVersion;
-        bool initialized;
-    }
-
-    function _initialize_ERC20Permit() internal override {
-        ERC20PermitStorage storage erc20PermitStorage = _erc20PermitStorage();
-        erc20PermitStorage.initialized = true;
-        erc20PermitStorage.contractName = _CONTRACT_NAME_ERC20PERMIT;
-        erc20PermitStorage.contractVersion = _CONTRACT_VERSION_ERC20PERMIT;
+        string DEPRECATED_contractName;
+        string DEPRECATED_contractVersion;
+        bool DEPRECATED_initialized;
     }
 
     function _permit(
@@ -37,16 +29,10 @@ abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
             revert IERC20Permit.ERC2612ExpiredSignature(deadline);
         }
 
-        bytes32 structHash = keccak256(
-            abi.encode(
-                ERC20PERMIT_TYPEHASH,
-                owner,
-                spender,
-                value,
-                _protectedPartitionsStorage().nounces[owner]++,
-                deadline
-            )
-        );
+        uint256 currentNonce = _getNonceFor(owner);
+
+        bytes32 structHash = keccak256(abi.encode(ERC20PERMIT_TYPEHASH, owner, spender, value, currentNonce, deadline));
+        _setNonceFor(currentNonce + 1, owner);
         address signer = ECDSA.recover(ECDSA.toTypedDataHash(_DOMAIN_SEPARATOR(), structHash), v, r, s);
 
         if (signer != owner) {
@@ -57,11 +43,7 @@ abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
 
     // solhint-disable-next-line func-name-mixedcase
     function _DOMAIN_SEPARATOR() internal view override returns (bytes32) {
-        return getDomainHash(_CONTRACT_NAME_ERC20PERMIT, _CONTRACT_VERSION_ERC20PERMIT, _blockChainid(), address(this));
-    }
-
-    function _isERC20PermitInitialized() internal view override returns (bool) {
-        return _erc20PermitStorage().initialized;
+        return getDomainHash(_getName(), Strings.toString(_getResolverProxyVersion()), _blockChainid(), address(this));
     }
 
     function _erc20PermitStorage() internal pure returns (ERC20PermitStorage storage erc20permitStorage_) {

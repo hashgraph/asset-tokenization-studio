@@ -9,9 +9,13 @@ import {
 } from "../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol";
 import { BusinessLogicResolverWrapper } from "../../../resolver/BusinessLogicResolverWrapper.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { Internals } from "../../Internals.sol";
+import { ResolverProxyStorageWrapper } from "../resolverProxy/ResolverProxyStorageWrapper.sol";
 
-abstract contract AccessControlStorageWrapper is IAccessControlStorageWrapper, Internals, BusinessLogicResolverWrapper {
+abstract contract AccessControlStorageWrapper is
+    IAccessControlStorageWrapper,
+    ResolverProxyStorageWrapper,
+    BusinessLogicResolverWrapper
+{
     using LibCommon for EnumerableSet.AddressSet;
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;

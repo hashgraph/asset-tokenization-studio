@@ -49,6 +49,7 @@ import { ICompliance } from "../layer_1/interfaces/ERC3643/ICompliance.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
 
 abstract contract Internals is Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -562,6 +563,7 @@ abstract contract Internals is Modifiers {
         address _account
     ) internal view virtual returns (IEquity.DividendFor memory dividendFor_);
     function _getERC20Metadata() internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
+    function _getName() internal view virtual returns (string memory);
     function _getERC20MetadataAdjusted() internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
     function _getERC20MetadataAdjustedAt(
         uint256 _timestamp
@@ -732,7 +734,7 @@ abstract contract Internals is Modifiers {
         bytes32 partition,
         uint256 timestamp
     ) internal view virtual returns (uint256);
-    function _getNounceFor(address _account) internal view virtual returns (uint256);
+    function _getNonceFor(address _account) internal view virtual returns (uint256);
     function _getOnchainID() internal view virtual returns (address);
     function _getPastTotalSupply(uint256 timepoint) internal view virtual returns (uint256);
     function _getPastVotes(address account, uint256 timepoint) internal view virtual returns (uint256);
@@ -915,8 +917,6 @@ abstract contract Internals is Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC20(IERC20.ERC20Metadata calldata erc20Metadata) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC20Permit() internal virtual;
-    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC20Votes(bool _activated) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC3643(address _compliance, address _identityRegistry) internal virtual;
@@ -985,7 +985,6 @@ abstract contract Internals is Modifiers {
         bytes calldata _signature
     ) internal view virtual returns (bool);
     function _isERC20Initialized() internal view virtual returns (bool);
-    function _isERC20PermitInitialized() internal view virtual returns (bool);
     function _isERC20VotesInitialized() internal view virtual returns (bool);
     function _isEscrow(Hold memory _hold, address _escrow) internal pure virtual returns (bool);
     function _isExternalList(bytes32 _position, address _list) internal view virtual returns (bool);
@@ -1238,7 +1237,7 @@ abstract contract Internals is Modifiers {
     function _setMaturityDate(uint256 _maturityDate) internal virtual returns (bool success_);
     function _setMaxSupply(uint256 _maxSupply) internal virtual;
     function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal virtual;
-    function _setNounce(uint256 _nounce, address _account) internal virtual;
+    function _setNonceFor(uint256 _nounce, address _account) internal virtual;
     function _setPause(bool _paused) internal virtual;
     function _setProceedRecipientData(address _proceedRecipient, bytes calldata _data) internal virtual;
     function _setProtectedPartitions(bool _protected) internal virtual;
@@ -1520,4 +1519,9 @@ abstract contract Internals is Modifiers {
     ) internal virtual;
 
     function _isSustainabilityPerformanceTargetRateInitialized() internal view virtual returns (bool);
+    function _getBusinessLogicResolver() internal view virtual returns (IBusinessLogicResolver);
+
+    function _getResolverProxyConfigurationId() internal view virtual returns (bytes32);
+
+    function _getResolverProxyVersion() internal view virtual returns (uint256);
 }
