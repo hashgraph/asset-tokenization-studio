@@ -23,7 +23,7 @@ import {
   validateAddress,
   waitForTransaction,
 } from "@scripts/infrastructure";
-import { verifyContractCode, VerificationOptions } from "../utils/verification";
+import { verifyContractCode, VerificationOptions } from "@scripts/infrastructure";
 
 /**
  * Options for deploying a contract.

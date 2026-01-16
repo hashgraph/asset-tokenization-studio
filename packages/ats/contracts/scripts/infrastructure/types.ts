@@ -31,6 +31,7 @@
  */
 
 import { Contract, ContractFactory, Signer, Wallet, Overrides, ContractReceipt, providers } from "ethers";
+import type { WorkflowType } from "./types/checkpoint";
 
 /**
  * Method definition with full signature and selector.
@@ -693,4 +694,280 @@ export function createSignerFromEnv(): Signer {
   }
 
   return createSigner({ rpcUrl, privateKey, chainId });
+}
+
+// ============================================================================
+// Deployment Output Types
+// ============================================================================
+
+/**
+ * Facet metadata in a deployment.
+ */
+export interface FacetMetadata {
+  name: string;
+  address: string;
+  contractId?: string;
+  key: string;
+}
+
+/**
+ * Configuration metadata in a deployment.
+ */
+export interface ConfigurationMetadata {
+  configId: string;
+  version: number;
+  facetCount: number;
+  facets?: Array<{
+    facetName: string;
+    key: string;
+    address: string;
+  }>;
+}
+
+/**
+ * Proxy update result from resolver proxy updates.
+ */
+export interface ProxyUpdateMetadata {
+  proxyAddress: string;
+  success: boolean;
+  previousVersion?: number;
+  newVersion?: number;
+  updateType: "version" | "config" | "resolver";
+  error?: string;
+  transactionHash?: string;
+  gasUsed?: number;
+}
+
+/**
+ * Deployed contract information.
+ */
+export interface DeployedContractMetadata {
+  address: string;
+  contractId?: string;
+  txHash?: string;
+  gasUsed?: number;
+}
+
+/**
+ * Output of deploySystemWithNewBlr workflow.
+ * Creates a complete new deployment with BLR, Factory, facets, and configurations.
+ *
+ * This type is defined here in infrastructure layer but also exported from
+ * the workflow module. They represent the same structure but are maintained
+ * in both locations during the refactoring phase.
+ */
+export interface DeploymentOutputType {
+  network: string;
+  timestamp: string;
+  deployer: string;
+  infrastructure: {
+    proxyAdmin: {
+      address: string;
+      contractId?: string;
+    };
+    blr: {
+      implementation: string;
+      implementationContractId?: string;
+      proxy: string;
+      proxyContractId?: string;
+    };
+    factory: {
+      implementation: string;
+      implementationContractId?: string;
+      proxy: string;
+      proxyContractId?: string;
+    };
+  };
+  facets: FacetMetadata[];
+  configurations: {
+    equity: ConfigurationMetadata;
+    bond: ConfigurationMetadata;
+  };
+  summary: {
+    totalContracts: number;
+    totalFacets: number;
+    totalConfigurations: number;
+    deploymentTime: number;
+    gasUsed: string;
+    success: boolean;
+  };
+  helpers: {
+    getEquityFacets(): FacetMetadata[];
+    getBondFacets(): FacetMetadata[];
+  };
+}
+
+/**
+ * Output of deploySystemWithExistingBlr workflow.
+ * Deploys Factory, facets, and configurations using an existing external BLR.
+ */
+export interface DeploymentWithExistingBlrOutputType {
+  network: string;
+  timestamp: string;
+  deployer: string;
+  infrastructure: {
+    proxyAdmin: {
+      address: string;
+      contractId?: string;
+    };
+    blr: {
+      implementation: string;
+      implementationContractId?: string;
+      proxy: string;
+      proxyContractId?: string;
+      isExternal: true;
+    };
+    factory: {
+      implementation: string;
+      implementationContractId?: string;
+      proxy: string;
+      proxyContractId?: string;
+    };
+  };
+  facets: FacetMetadata[];
+  configurations: {
+    equity: ConfigurationMetadata;
+    bond: ConfigurationMetadata;
+  };
+  summary: {
+    totalContracts: number;
+    totalFacets: number;
+    totalConfigurations: number;
+    deploymentTime: number;
+    gasUsed: string;
+    success: boolean;
+    skippedSteps: string[];
+  };
+}
+
+/**
+ * Output of upgradeConfigurations workflow.
+ * Deploys new facets and creates new configuration versions.
+ */
+export interface UpgradeConfigurationsOutputType {
+  network: string;
+  timestamp: string;
+  deployer: string;
+  blr: {
+    address: string;
+    isExternal: true;
+  };
+  facets: FacetMetadata[];
+  configurations: {
+    equity?: ConfigurationMetadata;
+    bond?: ConfigurationMetadata;
+  };
+  proxyUpdates?: ProxyUpdateMetadata[];
+  summary: {
+    totalFacetsDeployed: number;
+    configurationsCreated: number;
+    proxiesUpdated: number;
+    proxiesFailed: number;
+    deploymentTime: number;
+    gasUsed: string;
+    success: boolean;
+  };
+}
+
+/**
+ * Output of upgradeTupProxies workflow.
+ * Upgrades TUP (TransparentUpgradeableProxy) implementations via ProxyAdmin.
+ */
+export interface UpgradeTupProxiesOutputType {
+  network: string;
+  timestamp: string;
+  deployer: string;
+  proxyAdmin: { address: string };
+  implementations?: {
+    blr?: DeployedContractMetadata;
+    factory?: DeployedContractMetadata;
+  };
+  blrUpgrade?: UpgradeProxyResult;
+  factoryUpgrade?: UpgradeProxyResult;
+  summary: {
+    proxiesUpgraded: number;
+    proxiesFailed: number;
+    deploymentTime: number;
+    gasUsed: string;
+    success: boolean;
+  };
+}
+
+/**
+ * Union type for all ATS deployment outputs.
+ *
+ * This type represents the core ATS workflow outputs. Downstream projects
+ * can use custom output types through the generic parameter in SaveDeploymentOptions.
+ *
+ * @example Core ATS Usage
+ * ```typescript
+ * const atsOutput: DeploymentOutputType = { ... }
+ *
+ * await saveDeploymentOutput({
+ *   network: 'hedera-testnet',
+ *   workflow: 'newBlr',
+ *   data: atsOutput  // Full type safety and autocomplete
+ * })
+ * ```
+ *
+ * @example Downstream Extension
+ * ```typescript
+ * // In downstream project (e.g., GBP)
+ * interface GbpInfrastructureOutput {
+ *   timestamp: string;
+ *   network: string;
+ *   callableContracts: { ... };
+ *   result: any;
+ * }
+ *
+ * // No type constraint - any type accepted
+ * await saveDeploymentOutput({
+ *   network: 'hedera-testnet',
+ *   workflow: 'gbpInfrastructure',
+ *   data: gbpOutput  // No type assertion needed
+ * })
+ * ```
+ */
+export type AnyDeploymentOutput =
+  | DeploymentOutputType
+  | DeploymentWithExistingBlrOutputType
+  | UpgradeConfigurationsOutputType
+  | UpgradeTupProxiesOutputType;
+
+/**
+ * Options for saving a deployment output to disk.
+ *
+ * Generic type parameter T allows downstream projects to use custom output types
+ * while preserving type safety for ATS workflows (defaults to AnyDeploymentOutput).
+ */
+export interface SaveDeploymentOptions<T = AnyDeploymentOutput> {
+  network: string;
+  workflow: WorkflowType;
+  data: T;
+  customPath?: string;
+}
+
+/**
+ * Result of saving a deployment output to disk.
+ * Discriminated union for type-safe error handling.
+ */
+export type SaveResult =
+  | {
+      success: true;
+      filepath: string;
+      filename: string;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+/**
+ * Options for loading a deployment output from disk.
+ */
+export interface LoadDeploymentOptions {
+  network: string;
+  workflow?: WorkflowType;
+  timestamp?: string;
+  useLast?: boolean;
 }

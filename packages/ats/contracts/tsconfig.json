@@ -25,6 +25,13 @@
       "@test": ["./test/index.ts"]
     }
   },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"],
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  },
   "include": ["scripts/**/*", "Configuration.ts", "typechain-types/**/*", "test/**/*"],
   "exclude": ["node_modules", "tasks"]
 }

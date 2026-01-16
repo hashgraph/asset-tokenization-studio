@@ -28,19 +28,17 @@ Available environment variables:
 - `VITE_API_URL`: Backend API URL
 - `VITE_PORT`: Port for the development server
 
-### Running the App
-
-From the root directory:
-
-```bash
-npm run start:frontend
-```
-
-Or directly from the frontend directory:
+### Running the Application
 
 ```bash
 npm run dev
 ```
+
+### Accessing the Application
+
+Once the application is running, access it through:
+
+- **Application**: `http://localhost:5173`
 
 ### Building for Production
 

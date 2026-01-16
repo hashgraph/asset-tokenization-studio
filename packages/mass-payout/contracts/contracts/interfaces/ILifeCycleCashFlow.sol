@@ -203,16 +203,30 @@
 
 */
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+pragma solidity 0.8.22;
 
-import { IERC20 } from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-
-enum AssetType {
-    Bond,
-    Equity
-}
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface ILifeCycleCashFlow {
+    enum AssetType {
+        Bond,
+        Equity
+    }
+
+    struct Rbac {
+        bytes32 role;
+        address[] members;
+    }
+
+    struct SnapshotAmountInfo {
+        address asset;
+        uint256 snapshotID;
+        address holder;
+        uint256 amountOrPercentage;
+        uint256 paymentTokenBalance;
+        uint256 totalSupplyAtSnapshot;
+    }
+
     /*
      * @dev Emitted when a coupon/dividend by page is executed
      *
@@ -372,12 +386,63 @@ interface ILifeCycleCashFlow {
     );
 
     /*
+     * @dev Emitted when a token is associated with an account
+     *
+     * @param token The token the account is associated with
+     */
+    event TokenAssociated(address token);
+
+    /**
+     * @notice Error thrown when attempting to execute a payment for an asset not managed by the contract
+     *
+     * @param asset The address of the asset that is being tried to operate with
+     */
+    error InvalidAsset(address asset);
+
+    /**
+     * @notice Error thrown when attempting to execute a payment a date does not corresponds to the payment date
+     * @param paymentDateInit The initial execution date
+     * @param requestedDate The date a certain operation is requested to be made
+     */
+    error NotPaymentDate(uint256 paymentDateInit, uint256 requestedDate);
+
+    /**
+     * @notice Error thrown when the token association failed
+     */
+    error AssociateTokenFailed();
+
+    /**
+     * @notice Error thrown when a ERC20 token transfer fails
+     * @param to The address for the ERC20 token to be transferred to
+     * @param amount The amount of ERC20 token to be transferred
+     */
+    error TransferERC20TokenFailed(address to, uint256 amount);
+
+    /**
+     * @notice Error thrown when transfer an ERC20 token amount higher than the balance
+     * @param amount The amount of ERC20 token to be transferred
+     */
+    error NotEnoughBalance(uint256 amount);
+
+    /**
+     * @notice Error thrown when percentage exceeds 100
+     * @param percentage The percentage
+     */
+    error InvalidPercentage(uint256 percentage);
+
+    /**
+     * @notice Error thrown when the payment token to set is not valid
+     * @param paymentToken The payment token
+     */
+    error InvalidPaymentToken(address paymentToken);
+
+    /*
      * @dev Pay a coupon or dividend to a page of holders
      *
      * @param asset The address of the asset that the coupon/dividend belongs to
      * @param distributionID The coupon/dividend identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      *
      * @return The array of the holders addresses whose payment were not successful
      * @return The array of the holders addresses whose payment were successful
@@ -413,7 +478,7 @@ interface ILifeCycleCashFlow {
      *
      * @param bond The address of the bond for the cash out to be performed
      * @param pageIndex The index of the page whose cash outs will be performed
-     * @param pageLenth The number of holders who owns the bond to be cashed out
+     * @param pageLength The number of holders who owns the bond to be cashed out
      *
      * @return The array of the holders addresses whose cashes outs were not successful
      * @return The array of the holders addresses whose payment were successful
@@ -447,7 +512,7 @@ interface ILifeCycleCashFlow {
      * @param asset The address of the asset that the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      * @param amount The fixed amount to be paid distributed proportionally among the holders
      *
      * @return The array of the holders addresses whose payment were not successful
@@ -469,7 +534,7 @@ interface ILifeCycleCashFlow {
      * @param asset The address of the asset that the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      * @param percentage The contract balance percentage to be paid distributed proportionally among the holders
      *
      * @return The array of the holders addresses whose payment were not successful

@@ -203,9 +203,7 @@
 
 */
 
-pragma solidity 0.8.18;
+pragma solidity 0.8.22;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
 
 uint256 constant _PERCENTAGE_DECIMALS_SIZE = 2;

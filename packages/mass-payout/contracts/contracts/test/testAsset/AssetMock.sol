@@ -203,25 +203,27 @@
 
 */
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+pragma solidity 0.8.22;
 
-import { IAssetMock } from './interfaces/IAssetMock.sol';
-import { IFactory } from '@hashgraph/asset-tokenization-contracts/contracts/interfaces/factory/IFactory.sol';
+import { IAssetMock } from "./interfaces/IAssetMock.sol";
+import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/interfaces/factory/IFactory.sol";
 
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
-    IFactory.SecurityType internal _securityType;
-    bool internal _withHolders;
+    IFactory.SecurityType private _securityType;
+    bool private _withHolders;
+    uint256 private _numerator;
 
-    constructor(IFactory.SecurityType _secType, bool _wHolders) {
+    constructor(IFactory.SecurityType _secType, bool _wHolders, uint256 _amountNumerator) {
         _securityType = _secType;
         _withHolders = _wHolders;
+        _numerator = _amountNumerator;
     }
 
     function getERC20Metadata() external view returns (ERC20Metadata memory erc20Metadata_) {
-        erc20Metadata_.info.name = 'Mock Asset';
-        erc20Metadata_.info.symbol = 'MOCK';
-        erc20Metadata_.info.isin = 'MK0322861238';
+        erc20Metadata_.info.name = "Mock Asset";
+        erc20Metadata_.info.symbol = "MOCK";
+        erc20Metadata_.info.isin = "MK0322861238";
         erc20Metadata_.info.decimals = 6;
         erc20Metadata_.securityType = _securityType;
     }
@@ -246,8 +248,40 @@ contract AssetMock is IAssetMock {
 
     function getTokenHoldersAtSnapshot(uint256, uint256, uint256) external view returns (address[] memory holders_) {
         if (!_withHolders) return new address[](0);
-        holders_ = new address[](1);
+        holders_ = new address[](2);
         holders_[0] = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
+        holders_[1] = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
+    }
+
+    function getPrincipalFor(address) external view returns (PrincipalFor memory principalFor_) {
+        principalFor_.numerator = _numerator;
+        principalFor_.denominator = 1;
+    }
+
+    function getCouponAmountFor(uint256, address) external view returns (CouponAmountFor memory couponAmountFor_) {
+        couponAmountFor_.numerator = _numerator;
+        couponAmountFor_.denominator = 1;
+        couponAmountFor_.recordDateReached = true;
+    }
+
+    function getDividendAmountFor(
+        uint256,
+        address
+    ) external view returns (DividendAmountFor memory dividendAmountFor_) {
+        dividendAmountFor_.numerator = _numerator;
+        dividendAmountFor_.denominator = 1;
+        dividendAmountFor_.recordDateReached = true;
+    }
+
+    function decreaseAllowance(address, uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    // solhint-disable no-empty-blocks
+    function fullRedeemAtMaturity(address) external pure {}
+
+    function increaseAllowance(address, uint256) external pure returns (bool) {
+        revert NotImplemented();
     }
 
     function redeemAtMaturityByPartition(address, bytes32, uint256) external pure {
@@ -268,10 +302,6 @@ contract AssetMock is IAssetMock {
         bondDetailsData_.nominalValueDecimals = 2;
         bondDetailsData_.startingDate = 1751282807;
         bondDetailsData_.maturityDate = 1761823607;
-    }
-
-    function getCouponDetails() external pure returns (CouponDetailsData memory) {
-        revert NotImplemented();
     }
 
     function getCoupon(uint256) external pure returns (RegisteredCoupon memory registeredCoupon_) {
@@ -299,14 +329,6 @@ contract AssetMock is IAssetMock {
     }
 
     function getTotalCouponHolders(uint256) external pure returns (uint256) {
-        revert NotImplemented();
-    }
-
-    function getSecurityRegulationData() external pure returns (SecurityRegulationData memory) {
-        revert NotImplemented();
-    }
-
-    function getTotalSecurityHolders() external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -419,7 +441,7 @@ contract AssetMock is IAssetMock {
     }
 
     function balanceOfAtSnapshot(uint256, address) external pure returns (uint256 balance_) {
-        balance_ = 80;
+        balance_ = 500;
     }
 
     function decimalsAtSnapshot(uint256) external pure returns (uint8 decimals_) {
@@ -472,10 +494,6 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function transferByPartition(bytes32, BasicTransferInfo calldata, bytes calldata) external pure returns (bytes32) {
-        revert NotImplemented();
-    }
-
     function balanceOf(address) external pure returns (uint256) {
         return 120;
     }
@@ -489,7 +507,7 @@ contract AssetMock is IAssetMock {
     }
 
     function totalSupply() external pure returns (uint256) {
-        return 1000;
+        revert NotImplemented();
     }
 
     function isMultiPartition() external pure returns (bool) {

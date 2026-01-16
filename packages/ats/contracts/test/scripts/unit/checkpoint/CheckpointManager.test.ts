@@ -6,12 +6,12 @@ import { join } from "path";
 import { CheckpointManager } from "../../../../scripts/infrastructure/checkpoint/CheckpointManager";
 
 describe("CheckpointManager", () => {
-  const testCheckpointsDir = join(__dirname, "../../../../deployments/.checkpoints-test");
+  const testCheckpointsDir = join(__dirname, "../../../../deployments/test/unit/.checkpoints");
   let manager: CheckpointManager;
 
   beforeEach(async () => {
     // Create test checkpoint manager with custom directory
-    manager = new CheckpointManager(testCheckpointsDir);
+    manager = new CheckpointManager(undefined, testCheckpointsDir);
 
     // Ensure test directory exists and is empty
     try {
