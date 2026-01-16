@@ -11,13 +11,14 @@ import {
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S, ADDRESS_ZERO } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondKpiLinkedRateTokenFixture, DEFAULT_BOND_KPI_LINKED_RATE_PARAMS } from "@test";
+import { deployBondKpiLinkedRateTokenFixture, DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, getDltTimestamp } from "@test";
 import { executeRbac } from "@test";
 import { Contract } from "ethers";
 
 const couponPeriod = TIME_PERIODS_S.WEEK;
 const referenceDate = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
 const amount = 1000;
+const YEAR_SECONDS = 365 * 24 * 60 * 60;
 
 describe("Bond KpiLinked Rate Tests", () => {
   let couponRecordDateInSeconds = 0;
@@ -426,6 +427,295 @@ describe("Bond KpiLinked Rate Tests", () => {
       const rate_2 = newInterestRate.minRate;
 
       await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 2, signer_A.address);
+    });
+  });
+
+  describe("Bond Read - Ordered List", () => {
+    let currentBlockTimestamp: number;
+
+    beforeEach(async () => {
+      currentBlockTimestamp = await getDltTimestamp();
+    });
+
+    describe("getCouponsOrderedListTotal", () => {
+      it("should return 0 when no coupons have been created", async () => {
+        const total = await bondReadFacet.getCouponsOrderedListTotal();
+        expect(total).to.equal(0);
+      });
+
+      it("should return the correct count when coupons exist", async () => {
+        // Create 3 coupons with fixing dates
+        const coupon1 = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 2,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY,
+          rateStatus: 0,
+        };
+
+        await bondKpiLinkedRateFacet.setCoupon(coupon1);
+
+        const coupon2 = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 3,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 4,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 3,
+          rateStatus: 0,
+        };
+
+        await bondKpiLinkedRateFacet.setCoupon(coupon2);
+
+        const coupon3 = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 5,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 6,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 5,
+          rateStatus: 0,
+        };
+
+        await bondKpiLinkedRateFacet.setCoupon(coupon3);
+
+        // Move time forward past all fixing dates
+        await timeTravelFacet.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
+
+        const total = await bondReadFacet.getCouponsOrderedListTotal();
+        expect(total).to.equal(3);
+      });
+    });
+
+    describe("getCouponFromOrderedListAt", () => {
+      it("should return 0 for invalid position when no coupons exist", async () => {
+        const couponId = await bondReadFacet.getCouponFromOrderedListAt(0);
+        expect(couponId).to.equal(0);
+      });
+
+      it("should return 0 for position beyond the list", async () => {
+        // Create 1 coupon
+        const coupon = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 2,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY,
+          rateStatus: 0,
+        };
+
+        await bondKpiLinkedRateFacet.setCoupon(coupon);
+
+        // Move time forward past fixing date
+        await timeTravelFacet.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 2);
+
+        // Try to get position 1 (second item) when only 1 exists (index 0)
+        const couponId = await bondReadFacet.getCouponFromOrderedListAt(1);
+        expect(couponId).to.equal(0);
+      });
+
+      it("should return correct coupon ID at specific position", async () => {
+        // Create 3 coupons
+        const coupon1 = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 2,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY,
+          rateStatus: 0,
+        };
+
+        const tx1 = await bondKpiLinkedRateFacet.setCoupon(coupon1);
+        await tx1.wait();
+
+        const coupon2 = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 3,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 4,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 3,
+          rateStatus: 0,
+        };
+
+        const tx2 = await bondKpiLinkedRateFacet.setCoupon(coupon2);
+        await tx2.wait();
+
+        const coupon3 = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 5,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 6,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 5,
+          rateStatus: 0,
+        };
+
+        const tx3 = await bondKpiLinkedRateFacet.setCoupon(coupon3);
+        await tx3.wait();
+
+        // Move time forward past all fixing dates so coupons appear in ordered list
+        await timeTravelFacet.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
+
+        // Get coupon at position 0 (first coupon)
+        const couponId0 = await bondReadFacet.getCouponFromOrderedListAt(0);
+        expect(couponId0).to.equal(1);
+
+        // Get coupon at position 1 (second coupon)
+        const couponId1 = await bondReadFacet.getCouponFromOrderedListAt(1);
+        expect(couponId1).to.equal(2);
+
+        // Get coupon at position 2 (third coupon)
+        const couponId2 = await bondReadFacet.getCouponFromOrderedListAt(2);
+        expect(couponId2).to.equal(3);
+      });
+    });
+
+    describe("getCouponsOrderedList", () => {
+      it("should return empty array when no coupons exist", async () => {
+        const coupons = await bondReadFacet.getCouponsOrderedList(0, 10);
+        expect(coupons).to.be.an("array").that.is.empty;
+      });
+
+      it("should return all coupons when page size is larger than total", async () => {
+        // Create 3 coupons
+        const coupon1 = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 2,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY,
+          rateStatus: 0,
+        };
+
+        await bondKpiLinkedRateFacet.setCoupon(coupon1);
+
+        const coupon2 = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 3,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 4,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 3,
+          rateStatus: 0,
+        };
+
+        await bondKpiLinkedRateFacet.setCoupon(coupon2);
+
+        const coupon3 = {
+          recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 5,
+          executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 6,
+          rate: 0,
+          rateDecimals: 0,
+          startDate: currentBlockTimestamp,
+          endDate: currentBlockTimestamp + YEAR_SECONDS,
+          fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 5,
+          rateStatus: 0,
+        };
+
+        await bondKpiLinkedRateFacet.setCoupon(coupon3);
+
+        // Move time forward past all fixing dates
+        await timeTravelFacet.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
+
+        const coupons = await bondReadFacet.getCouponsOrderedList(0, 10);
+        expect(coupons).to.be.an("array").with.lengthOf(3);
+        expect(coupons[0]).to.equal(1);
+        expect(coupons[1]).to.equal(2);
+        expect(coupons[2]).to.equal(3);
+      });
+
+      it("should return paginated results correctly", async () => {
+        // Create 5 coupons
+        for (let i = 0; i < 5; i++) {
+          const coupon = {
+            recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * (i * 2 + 1),
+            executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * (i * 2 + 2),
+            rate: 0,
+            rateDecimals: 0,
+            startDate: currentBlockTimestamp,
+            endDate: currentBlockTimestamp + YEAR_SECONDS,
+            fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * (i * 2 + 1),
+            rateStatus: 0,
+          };
+
+          await bondKpiLinkedRateFacet.setCoupon(coupon);
+        }
+
+        // Move time forward past all fixing dates
+        await timeTravelFacet.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 11);
+
+        // Get first page (2 items)
+        const page1 = await bondReadFacet.getCouponsOrderedList(0, 2);
+        expect(page1).to.be.an("array").with.lengthOf(2);
+        expect(page1[0]).to.equal(1);
+        expect(page1[1]).to.equal(2);
+
+        // Get second page (2 items)
+        const page2 = await bondReadFacet.getCouponsOrderedList(1, 2);
+        expect(page2).to.be.an("array").with.lengthOf(2);
+        expect(page2[0]).to.equal(3);
+        expect(page2[1]).to.equal(4);
+
+        // Get third page (1 item remaining)
+        const page3 = await bondReadFacet.getCouponsOrderedList(2, 2);
+        expect(page3).to.be.an("array").with.lengthOf(1);
+        expect(page3[0]).to.equal(5);
+
+        // Get page beyond available data
+        const page4 = await bondReadFacet.getCouponsOrderedList(3, 2);
+        expect(page4).to.be.an("array").that.is.empty;
+      });
+
+      it("should handle single item per page", async () => {
+        // Create 3 coupons
+        for (let i = 0; i < 3; i++) {
+          const coupon = {
+            recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * (i * 2 + 1),
+            executionDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * (i * 2 + 2),
+            rate: 0,
+            rateDecimals: 0,
+            startDate: currentBlockTimestamp,
+            endDate: currentBlockTimestamp + YEAR_SECONDS,
+            fixingDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * (i * 2 + 1),
+            rateStatus: 0,
+          };
+
+          await bondKpiLinkedRateFacet.setCoupon(coupon);
+        }
+
+        // Move time forward past all fixing dates
+        await timeTravelFacet.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 7);
+
+        // Get page 0 (first item)
+        const page0 = await bondReadFacet.getCouponsOrderedList(0, 1);
+        expect(page0).to.be.an("array").with.lengthOf(1);
+        expect(page0[0]).to.equal(1);
+
+        // Get page 1 (second item)
+        const page1 = await bondReadFacet.getCouponsOrderedList(1, 1);
+        expect(page1).to.be.an("array").with.lengthOf(1);
+        expect(page1[0]).to.equal(2);
+
+        // Get page 2 (third item)
+        const page2 = await bondReadFacet.getCouponsOrderedList(2, 1);
+        expect(page2).to.be.an("array").with.lengthOf(1);
+        expect(page2[0]).to.equal(3);
+      });
     });
   });
 });
