@@ -199,232 +199,233 @@ describe("Bond KpiLinked Rate Tests", () => {
     };
     await loadFixture(deploySecurityFixture);
   });
+  describe("KpiLinkedRateFacet", () => {
+    it("GIVEN a kpiLinked rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsKpiLinked", async () => {
+      couponData.rateStatus = 1;
 
-  it("GIVEN a kpiLinked rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsKpiLinked", async () => {
-    couponData.rateStatus = 1;
+      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+    });
 
-    await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
-  });
+    it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
+      couponData.rate = 1;
 
-  it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
-    couponData.rate = 1;
+      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+    });
 
-    await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
-  });
+    it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
+      couponData.rateDecimals = 1;
 
-  it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
-    couponData.rateDecimals = 1;
+      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+    });
+
+    it("GIVEN a kpiLinked rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {
+      await expect(bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData))
+        .to.emit(bondKpiLinkedRateFacet, "CouponSet")
+        .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_A.address, [
+          couponRecordDateInSeconds,
+          couponExecutionDateInSeconds,
+          couponStartDateInSeconds,
+          couponEndDateInSeconds,
+          couponFixingDateInSeconds,
+          0,
+          0,
+          0,
+        ]);
 
-    await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
-  });
+      const couponCount = await bondReadFacet.getCouponCount();
+      expect(couponCount).to.equal(1);
 
-  it("GIVEN a kpiLinked rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {
-    await expect(bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData))
-      .to.emit(bondKpiLinkedRateFacet, "CouponSet")
-      .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_A.address, [
-        couponRecordDateInSeconds,
-        couponExecutionDateInSeconds,
-        couponStartDateInSeconds,
-        couponEndDateInSeconds,
-        couponFixingDateInSeconds,
-        0,
-        0,
-        0,
-      ]);
+      const registeredCoupon = await bondReadFacet.getCoupon(1);
+      expect(registeredCoupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
+      expect(registeredCoupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
+      expect(registeredCoupon.coupon.startDate).to.equal(couponStartDateInSeconds);
+      expect(registeredCoupon.coupon.endDate).to.equal(couponEndDateInSeconds);
+      expect(registeredCoupon.coupon.fixingDate).to.equal(couponFixingDateInSeconds);
+      expect(registeredCoupon.coupon.rate).to.equal(0);
+      expect(registeredCoupon.coupon.rateDecimals).to.equal(0);
+      expect(registeredCoupon.coupon.rateStatus).to.equal(0);
+    });
 
-    const couponCount = await bondReadFacet.getCouponCount();
-    expect(couponCount).to.equal(1);
+    it("GIVEN a kpiLinked rate bond WHEN rate is during start Period THEN transaction success and rate is start rate", async () => {
+      await setKpiConfiguration(10);
 
-    const registeredCoupon = await bondReadFacet.getCoupon(1);
-    expect(registeredCoupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
-    expect(registeredCoupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
-    expect(registeredCoupon.coupon.startDate).to.equal(couponStartDateInSeconds);
-    expect(registeredCoupon.coupon.endDate).to.equal(couponEndDateInSeconds);
-    expect(registeredCoupon.coupon.fixingDate).to.equal(couponFixingDateInSeconds);
-    expect(registeredCoupon.coupon.rate).to.equal(0);
-    expect(registeredCoupon.coupon.rateDecimals).to.equal(0);
-    expect(registeredCoupon.coupon.rateStatus).to.equal(0);
-  });
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-  it("GIVEN a kpiLinked rate bond WHEN rate is during start Period THEN transaction success and rate is start rate", async () => {
-    await setKpiConfiguration(10);
+      const registeredCouponPreFixingDate = await bondReadFacet.getCoupon(1);
+      const couponForPreFixingDate = await bondReadFacet.getCouponFor(1, signer_A.address);
+      const couponAmountForPreFixingDate = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
 
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      expect(registeredCouponPreFixingDate.coupon.rate).to.equal(0);
+      expect(registeredCouponPreFixingDate.coupon.rateDecimals).to.equal(0);
+      expect(registeredCouponPreFixingDate.coupon.rateStatus).to.equal(0);
 
-    const registeredCouponPreFixingDate = await bondReadFacet.getCoupon(1);
-    const couponForPreFixingDate = await bondReadFacet.getCouponFor(1, signer_A.address);
-    const couponAmountForPreFixingDate = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
+      expect(couponForPreFixingDate.coupon.rate).to.equal(0);
+      expect(couponForPreFixingDate.coupon.rateDecimals).to.equal(0);
+      expect(couponForPreFixingDate.coupon.rateStatus).to.equal(0);
 
-    expect(registeredCouponPreFixingDate.coupon.rate).to.equal(0);
-    expect(registeredCouponPreFixingDate.coupon.rateDecimals).to.equal(0);
-    expect(registeredCouponPreFixingDate.coupon.rateStatus).to.equal(0);
+      expect(couponAmountForPreFixingDate.numerator).to.equal(0);
+      expect(couponAmountForPreFixingDate.denominator).to.equal(0);
 
-    expect(couponForPreFixingDate.coupon.rate).to.equal(0);
-    expect(couponForPreFixingDate.coupon.rateDecimals).to.equal(0);
-    expect(couponForPreFixingDate.coupon.rateStatus).to.equal(0);
+      await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);
 
-    expect(couponAmountForPreFixingDate.numerator).to.equal(0);
-    expect(couponAmountForPreFixingDate.denominator).to.equal(0);
+      await checkCouponPostValues(newInterestRate.startRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
+    });
 
-    await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);
+    it("GIVEN a kpiLinked rate bond with no oracle WHEN rate is calculated THEN transaction success and rate is base rate", async () => {
+      await setKpiConfiguration(-10);
+      await kpiLinkedRateFacet.connect(signer_A).setKpiOracle(ADDRESS_ZERO);
 
-    await checkCouponPostValues(newInterestRate.startRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
-  });
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-  it("GIVEN a kpiLinked rate bond with no oracle WHEN rate is calculated THEN transaction success and rate is base rate", async () => {
-    await setKpiConfiguration(-10);
-    await kpiLinkedRateFacet.connect(signer_A).setKpiOracle(ADDRESS_ZERO);
+      await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);
 
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await checkCouponPostValues(newInterestRate.baseRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
+    });
 
-    await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);
+    it("GIVEN a kpiLinked rate bond WHEN no oracle report is found THEN transaction success and rate is previous rate plus penalty", async () => {
+      await setKpiConfiguration(-10);
 
-    await checkCouponPostValues(newInterestRate.baseRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
-  });
+      // Test missed penalty when there is a single coupon
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-  it("GIVEN a kpiLinked rate bond WHEN no oracle report is found THEN transaction success and rate is previous rate plus penalty", async () => {
-    await setKpiConfiguration(-10);
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-    // Test missed penalty when there is a single coupon
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await checkCouponPostValues(
+        0 + newInterestRate.missedPenalty,
+        newInterestRate.rateDecimals,
+        amount,
+        1,
+        signer_A.address,
+      );
 
-    await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+      // Test missed penalty when there are two coupons
+      updateCouponDates();
 
-    await checkCouponPostValues(
-      0 + newInterestRate.missedPenalty,
-      newInterestRate.rateDecimals,
-      amount,
-      1,
-      signer_A.address,
-    );
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-    // Test missed penalty when there are two coupons
-    updateCouponDates();
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await checkCouponPostValues(
+        0 + newInterestRate.missedPenalty,
+        newInterestRate.rateDecimals,
+        amount,
+        1,
+        signer_A.address,
+      );
 
-    await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+      await checkCouponPostValues(
+        newInterestRate.missedPenalty + newInterestRate.missedPenalty,
+        newInterestRate.rateDecimals,
+        amount,
+        2,
+        signer_A.address,
+      );
 
-    await checkCouponPostValues(
-      0 + newInterestRate.missedPenalty,
-      newInterestRate.rateDecimals,
-      amount,
-      1,
-      signer_A.address,
-    );
+      // Test missed penalty when previous coupon had less decimals
+      const previousCouponRate = 2 * newInterestRate.missedPenalty;
+      const previousCouponRateDecimals = newInterestRate.rateDecimals;
 
-    await checkCouponPostValues(
-      newInterestRate.missedPenalty + newInterestRate.missedPenalty,
-      newInterestRate.rateDecimals,
-      amount,
-      2,
-      signer_A.address,
-    );
+      newInterestRate.missedPenalty = previousCouponRate;
+      newInterestRate.rateDecimals = previousCouponRateDecimals + 1;
 
-    // Test missed penalty when previous coupon had less decimals
-    const previousCouponRate = 2 * newInterestRate.missedPenalty;
-    const previousCouponRateDecimals = newInterestRate.rateDecimals;
+      await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
 
-    newInterestRate.missedPenalty = previousCouponRate;
-    newInterestRate.rateDecimals = previousCouponRateDecimals + 1;
+      updateCouponDates();
 
-    await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-    updateCouponDates();
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      const rate = previousCouponRate * 10 + newInterestRate.missedPenalty;
 
-    await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+      await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
 
-    const rate = previousCouponRate * 10 + newInterestRate.missedPenalty;
+      await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
 
-    await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
+      await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 3, signer_A.address);
 
-    await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
+      // Test missed penalty when previous coupon had more decimals
+      const previousCouponRate_2 = rate;
+      const previousCouponRateDecimals_2 = newInterestRate.rateDecimals;
 
-    await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 3, signer_A.address);
+      newInterestRate.missedPenalty = previousCouponRate_2;
+      newInterestRate.rateDecimals = previousCouponRateDecimals_2 - 1;
 
-    // Test missed penalty when previous coupon had more decimals
-    const previousCouponRate_2 = rate;
-    const previousCouponRateDecimals_2 = newInterestRate.rateDecimals;
+      await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
 
-    newInterestRate.missedPenalty = previousCouponRate_2;
-    newInterestRate.rateDecimals = previousCouponRateDecimals_2 - 1;
+      updateCouponDates();
 
-    await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-    updateCouponDates();
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      const rate_2 = previousCouponRate_2 / 10 + newInterestRate.missedPenalty;
 
-    await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+      await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
 
-    const rate_2 = previousCouponRate_2 / 10 + newInterestRate.missedPenalty;
+      await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
 
-    await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
+      await checkCouponPostValues(previousCouponRate_2, previousCouponRateDecimals_2, amount, 3, signer_A.address);
 
-    await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
+      await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 4, signer_A.address);
+    });
 
-    await checkCouponPostValues(previousCouponRate_2, previousCouponRateDecimals_2, amount, 3, signer_A.address);
+    it("GIVEN a kpiLinked rate bond WHEN impact data is above baseline THEN transaction success and rate is calculated", async () => {
+      await setKpiConfiguration(-10);
 
-    await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 4, signer_A.address);
-  });
+      const impactData = newImpactData.baseLine + (newImpactData.maxDeviationCap - newImpactData.baseLine) / 2;
+      await mockKpiOracle.setKpiValue(impactData);
+      await mockKpiOracle.setExists(true);
 
-  it("GIVEN a kpiLinked rate bond WHEN impact data is above baseline THEN transaction success and rate is calculated", async () => {
-    await setKpiConfiguration(-10);
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-    const impactData = newImpactData.baseLine + (newImpactData.maxDeviationCap - newImpactData.baseLine) / 2;
-    await mockKpiOracle.setKpiValue(impactData);
-    await mockKpiOracle.setExists(true);
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      const rate = newInterestRate.baseRate + (newInterestRate.maxRate - newInterestRate.baseRate) / 2;
 
-    await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+      await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
 
-    const rate = newInterestRate.baseRate + (newInterestRate.maxRate - newInterestRate.baseRate) / 2;
+      const impactData_2 = 2 * newImpactData.maxDeviationCap;
+      await mockKpiOracle.setKpiValue(impactData_2);
+      await mockKpiOracle.setExists(true);
 
-    await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
+      updateCouponDates();
 
-    const impactData_2 = 2 * newImpactData.maxDeviationCap;
-    await mockKpiOracle.setKpiValue(impactData_2);
-    await mockKpiOracle.setExists(true);
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-    updateCouponDates();
+      const rate_2 = newInterestRate.maxRate;
 
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
-    await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+      await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 2, signer_A.address);
+    });
 
-    const rate_2 = newInterestRate.maxRate;
+    it("GIVEN a kpiLinked rate bond WHEN impact data is below baseline THEN transaction success and rate is calculated", async () => {
+      await setKpiConfiguration(-10);
 
-    await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 2, signer_A.address);
-  });
+      const impactData = newImpactData.baseLine - (newImpactData.baseLine - newImpactData.maxDeviationFloor) / 2;
+      await mockKpiOracle.setKpiValue(impactData);
+      await mockKpiOracle.setExists(true);
 
-  it("GIVEN a kpiLinked rate bond WHEN impact data is below baseline THEN transaction success and rate is calculated", async () => {
-    await setKpiConfiguration(-10);
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-    const impactData = newImpactData.baseLine - (newImpactData.baseLine - newImpactData.maxDeviationFloor) / 2;
-    await mockKpiOracle.setKpiValue(impactData);
-    await mockKpiOracle.setExists(true);
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      const rate = newInterestRate.baseRate - (newInterestRate.baseRate - newInterestRate.minRate) / 2;
 
-    await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+      await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
 
-    const rate = newInterestRate.baseRate - (newInterestRate.baseRate - newInterestRate.minRate) / 2;
+      const impactData_2 = newImpactData.maxDeviationFloor / 2;
+      await mockKpiOracle.setKpiValue(impactData_2);
+      await mockKpiOracle.setExists(true);
 
-    await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
+      updateCouponDates();
 
-    const impactData_2 = newImpactData.maxDeviationFloor / 2;
-    await mockKpiOracle.setKpiValue(impactData_2);
-    await mockKpiOracle.setExists(true);
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-    updateCouponDates();
+      const rate_2 = newInterestRate.minRate;
 
-    await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
-    await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
-
-    const rate_2 = newInterestRate.minRate;
-
-    await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 2, signer_A.address);
+      await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 2, signer_A.address);
+    });
   });
 });

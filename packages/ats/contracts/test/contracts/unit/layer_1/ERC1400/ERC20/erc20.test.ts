@@ -13,6 +13,8 @@ import {
   Kyc,
   SsiManagement,
   ClearingActionsFacet,
+  IERC3643,
+  AccessControlFacet,
 } from "@contract-types";
 import { ATS_ROLES, DEFAULT_PARTITION, EMPTY_STRING, ZERO } from "@scripts";
 import { assertObject } from "../../../../../common";
@@ -365,21 +367,19 @@ describe("ERC20 Tests", () => {
     });
 
     describe("Wallet Recovery Tests", () => {
-      let erc3643Facet: any;
-      let erc3643ReadFacet: any;
-      let accessControlFacet: any;
+      let erc3643Facet: IERC3643;
+      let accessControlFacet: AccessControlFacet;
       const ADDRESS_ZERO = ethers.constants.AddressZero;
 
       beforeEach(async () => {
-        erc3643Facet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address);
-        erc3643ReadFacet = await ethers.getContractAt("ERC3643ReadFacet", diamond.address);
+        erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
         accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address);
       });
 
       it("GIVEN non-recovered wallets WHEN approve THEN transaction succeeds", async () => {
         // Verify both sender and spender are not recovered
-        const senderRecovered = await erc3643ReadFacet.isAddressRecovered(signer_C.address);
-        const spenderRecovered = await erc3643ReadFacet.isAddressRecovered(signer_D.address);
+        const senderRecovered = await erc3643Facet.isAddressRecovered(signer_C.address);
+        const spenderRecovered = await erc3643Facet.isAddressRecovered(signer_D.address);
         expect(senderRecovered).to.be.false;
         expect(spenderRecovered).to.be.false;
 
@@ -395,9 +395,8 @@ describe("ERC20 Tests", () => {
 
         // Recover signer_C's address (no need to redeem - recovery only checks locks/holds/clears)
         await erc3643Facet.recoveryAddress(signer_C.address, signer_A.address, ADDRESS_ZERO);
-
         // Verify recovery was successful
-        expect(await erc3643ReadFacet.isAddressRecovered(signer_C.address)).to.be.true;
+        expect(await erc3643Facet.isAddressRecovered(signer_C.address)).to.be.true;
 
         // Approve should fail because sender (signer_C) is recovered
         await expect(erc20SignerC.approve(signer_D.address, amount / 2)).to.be.revertedWithCustomError(
@@ -411,14 +410,14 @@ describe("ERC20 Tests", () => {
         await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
 
         // First ensure signer_C is NOT recovered
-        const senderRecovered = await erc3643ReadFacet.isAddressRecovered(signer_C.address);
+        const senderRecovered = await erc3643Facet.isAddressRecovered(signer_C.address);
         expect(senderRecovered).to.be.false;
 
         // Recover signer_D's address (no need to issue/redeem - recovery only checks locks/holds/clears)
         await erc3643Facet.recoveryAddress(signer_D.address, signer_A.address, ADDRESS_ZERO);
 
         // Verify recovery was successful
-        expect(await erc3643ReadFacet.isAddressRecovered(signer_D.address)).to.be.true;
+        expect(await erc3643Facet.isAddressRecovered(signer_D.address)).to.be.true;
 
         // Approve should fail because spender (signer_D) is recovered
         // This should hit the SECOND onlyUnrecoveredAddress modifier (line 26 in ERC20.sol)
