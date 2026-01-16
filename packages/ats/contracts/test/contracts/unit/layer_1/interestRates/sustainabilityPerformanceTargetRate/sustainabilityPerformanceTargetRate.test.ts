@@ -7,11 +7,12 @@ import {
   SustainabilityPerformanceTargetRateFacet,
   ProceedRecipientsFacet,
 } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS,
   deployBondSustainabilityPerformanceTargetRateTokenFixture,
+  deployAtsInfrastructureFixture,
 } from "@test";
 import { executeRbac } from "@test";
 
@@ -89,6 +90,84 @@ describe("Sustainability Performance Target Rate Tests", () => {
         [project1],
       ),
     ).to.be.rejectedWith("AlreadyInitialized");
+  });
+
+  it("GIVEN mismatched array lengths WHEN initializing THEN transaction fails with ProvidedListsLengthMismatch", async () => {
+    // Deploy infrastructure to get BLR
+    const infrastructure = await deployAtsInfrastructureFixture();
+    const { blr } = infrastructure;
+
+    // Deploy a raw ResolverProxy without initialization
+    const ResolverProxyFactory = await ethers.getContractFactory("ResolverProxy");
+    const uninitializedDiamond = await ResolverProxyFactory.deploy(
+      blr.address,
+      BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+      1,
+      [
+        {
+          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+          members: [signer_A.address],
+        },
+      ],
+    );
+    await uninitializedDiamond.deployed();
+
+    // Get facets for the uninitialized diamond
+    const uninitializedAccessControl = await ethers.getContractAt(
+      "AccessControlFacet",
+      uninitializedDiamond.address,
+      signer_A,
+    );
+
+    // Set up roles
+    await executeRbac(uninitializedAccessControl, [
+      {
+        role: ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE,
+        members: [signer_A.address],
+      },
+    ]);
+
+    const uninitializedProceedFacet = await ethers.getContractAt(
+      "ProceedRecipientsFacet",
+      uninitializedDiamond.address,
+      signer_A,
+    );
+
+    // Add proceed recipients
+    await uninitializedProceedFacet.connect(signer_A).addProceedRecipient(project1, "0x");
+
+    const uninitializedFacet = await ethers.getContractAt(
+      "SustainabilityPerformanceTargetRateFacet",
+      uninitializedDiamond.address,
+      signer_A,
+    );
+
+    // Try to initialize with mismatched arrays (2 impact data, 1 project)
+    await expect(
+      uninitializedFacet.initialize_SustainabilityPerformanceTargetRate(
+        {
+          baseRate: 50,
+          startPeriod: 1000,
+          startRate: 50,
+          rateDecimals: 1,
+        },
+        [
+          {
+            baseLine: 750,
+            baseLineMode: 0,
+            deltaRate: 10,
+            impactDataMode: 0,
+          },
+          {
+            baseLine: 800,
+            baseLineMode: 1,
+            deltaRate: 15,
+            impactDataMode: 1,
+          },
+        ],
+        [project1], // Only one project but two impact data entries
+      ),
+    ).to.be.rejectedWith("ProvidedListsLengthMismatch");
   });
 
   describe("Paused", () => {
