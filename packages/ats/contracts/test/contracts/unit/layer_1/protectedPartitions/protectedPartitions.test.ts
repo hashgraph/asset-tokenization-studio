@@ -257,7 +257,7 @@ describe("ProtectedPartitions Tests", () => {
 
     const uniqueFragmentsHold = Array.from(fragmentMapHold.values());
 
-    holdFacet = new Contract(address, uniqueFragmentsHold, signer_A);
+    holdFacet = new Contract(address, uniqueFragmentsHold, signer_A) as IHold;
 
     protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", address);
     pauseFacet = await ethers.getContractAt("PauseFacet", address);
