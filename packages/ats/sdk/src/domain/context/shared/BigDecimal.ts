@@ -203,18 +203,13 @@
 
 */
 
-import {
-  parseFixed,
-  FixedNumber,
-  FixedFormat,
-  BigNumber,
-} from '@ethersproject/bignumber';
-import CheckNums from '@core/checks/numbers/CheckNums';
-import { Long } from '@hashgraph/sdk';
+import { parseFixed, FixedNumber, FixedFormat, BigNumber } from "@ethersproject/bignumber";
+import CheckNums from "@core/checks/numbers/CheckNums";
+import { Long } from "@hiero-ledger/sdk";
 
 export type BigDecimalFormat = string | number | FixedFormat | undefined;
 
-const SEPARATOR = '.';
+const SEPARATOR = ".";
 export default class BigDecimal implements FixedNumber {
   readonly _hex: string;
   readonly _value: string;
@@ -246,15 +241,11 @@ export default class BigDecimal implements FixedNumber {
 
   #fn: FixedNumber;
 
-  public static ZERO: BigDecimal = this.fromString('0', 0);
-  public static MINUSONE: BigDecimal = this.fromString('-1', 0);
+  public static ZERO: BigDecimal = this.fromString("0", 0);
+  public static MINUSONE: BigDecimal = this.fromString("-1", 0);
 
-  constructor(
-    value: string | BigNumber,
-    format?: BigDecimalFormat,
-    decimals?: number,
-  ) {
-    if (typeof value === 'string') {
+  constructor(value: string | BigNumber, format?: BigDecimalFormat, decimals?: number) {
+    if (typeof value === "string") {
       this.#fn = FixedNumber.fromString(value, format);
     } else {
       this.#fn = FixedNumber.fromValue(value, decimals, format);
@@ -360,7 +351,7 @@ export default class BigDecimal implements FixedNumber {
   public toString(): string {
     let number = this.#fn.toString();
 
-    if (number.endsWith('.0')) {
+    if (number.endsWith(".0")) {
       number = number.substring(0, number.length - 2);
     }
     return number;
@@ -373,21 +364,18 @@ export default class BigDecimal implements FixedNumber {
     let [int, float] = this.value.split(SEPARATOR);
     if (float && float.length && float.length > value) {
       float = float.substring(0, float.length - value);
-      return BigDecimal.fromString(
-        `${int}${SEPARATOR}${float}`,
-        Math.max(float?.length ?? 0, value),
-      );
+      return BigDecimal.fromString(`${int}${SEPARATOR}${float}`, Math.max(float?.length ?? 0, value));
     } else {
       return BigDecimal.fromString(int, Math.max(0, value));
     }
   }
 
   private splitNumber(): string[] {
-    const splitNumber = this.#fn.toString().split('.');
+    const splitNumber = this.#fn.toString().split(".");
     if (splitNumber.length > 1) {
-      splitNumber[1] = splitNumber[1].padEnd(this.format.decimals, '0');
+      splitNumber[1] = splitNumber[1].padEnd(this.format.decimals, "0");
     } else {
-      splitNumber[1] = '';
+      splitNumber[1] = "";
     }
     return splitNumber;
   }
@@ -397,7 +385,7 @@ export default class BigDecimal implements FixedNumber {
     const [, dec] = val.split(SEPARATOR);
     if (!dec) return 0;
     if (!CheckNums.isNumber(dec)) return 0;
-    return (dec as string).replace(/\.0+$/, '').length;
+    return (dec as string).replace(/\.0+$/, "").length;
   }
 
   public toLong(): Long {
@@ -405,10 +393,7 @@ export default class BigDecimal implements FixedNumber {
     return Long.fromString(number[0] + number[1]);
   }
 
-  static fromString(
-    value: string,
-    format?: string | number | FixedFormat | undefined,
-  ): BigDecimal {
+  static fromString(value: string, format?: string | number | FixedFormat | undefined): BigDecimal {
     if (format === undefined) {
       format = this.getDecimalsFromString(value);
     }
@@ -417,19 +402,15 @@ export default class BigDecimal implements FixedNumber {
 
   static fromStringFixed(value: string, decimals: number): BigDecimal {
     if (value.length < decimals) {
-      value = '0.' + value.padStart(decimals - value.length + 1, '0');
+      value = "0." + value.padStart(decimals - value.length + 1, "0");
     } else {
       const position = value.length - decimals;
-      value = value.substring(0, position) + '.' + value.substring(position);
+      value = value.substring(0, position) + "." + value.substring(position);
     }
     return new BigDecimal(value, decimals);
   }
 
-  static fromValue(
-    value: BigNumber,
-    decimals?: number,
-    format?: FixedFormat | string | number,
-  ): BigDecimal {
+  static fromValue(value: BigNumber, decimals?: number, format?: FixedFormat | string | number): BigDecimal {
     return new BigDecimal(value, format, decimals);
   }
 

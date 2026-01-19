@@ -203,44 +203,36 @@
 
 */
 
-import {
-  DelegateContractId,
-  ContractId as HContractId,
-  Long,
-} from '@hashgraph/sdk';
-import { proto } from '@hashgraph/proto';
-import InvalidKeyForContract from './error/InvalidKeyForContract';
-import BaseError from '@core/error/BaseError';
-import CheckStrings from '@core/checks/strings/CheckStrings';
-import { InvalidContractId } from './error/InvalidContractId';
-import { HederaId } from '../shared/HederaId';
+import { DelegateContractId, ContractId as HContractId, Long } from "@hiero-ledger/sdk";
+import { proto } from "@hashgraph/proto";
+import InvalidKeyForContract from "./error/InvalidKeyForContract";
+import BaseError from "@core/error/BaseError";
+import CheckStrings from "@core/checks/strings/CheckStrings";
+import { InvalidContractId } from "./error/InvalidContractId";
+import { HederaId } from "../shared/HederaId";
 
 export default class ContractId extends HederaId {
   public readonly value: string;
 
   constructor(value: string) {
-    if (value.length == 42 && value.startsWith('0x')) {
+    if (value.length == 42 && value.startsWith("0x")) {
       throw new InvalidContractId(value);
     }
     super(value);
   }
 
-  public static fromProtoBufKey(
-    key: string,
-    options: { strict: boolean } = { strict: false },
-  ): ContractId {
-    const normalizedInput = key.replace(/\s/g, '');
-    const normalizedHexInput = normalizedInput.replace(/0x/g, '').toLowerCase();
-    const keyProto = Buffer.from(normalizedHexInput, 'hex');
+  public static fromProtoBufKey(key: string, options: { strict: boolean } = { strict: false }): ContractId {
+    const normalizedInput = key.replace(/\s/g, "");
+    const normalizedHexInput = normalizedInput.replace(/0x/g, "").toLowerCase();
+    const keyProto = Buffer.from(normalizedHexInput, "hex");
     const out = proto.Key.decode(keyProto);
-    let id =
-      out?.contractID?.contractNum || out?.delegatableContractId?.contractNum;
+    let id = out?.contractID?.contractNum || out?.delegatableContractId?.contractNum;
     if (options.strict && !id) {
       throw new InvalidKeyForContract(out);
     } else if (!id) {
       id = Long.ZERO;
     }
-    return new ContractId('0.0.' + id.toString());
+    return new ContractId("0.0." + id.toString());
   }
 
   public static fromHederaContractId(con: HContractId | DelegateContractId) {
@@ -248,9 +240,7 @@ export default class ContractId extends HederaId {
   }
 
   public static fromHederaEthereumAddress(evmAddress: string) {
-    return new ContractId(
-      HContractId.fromSolidityAddress(evmAddress).toString(),
-    );
+    return new ContractId(HContractId.fromSolidityAddress(evmAddress).toString());
   }
 
   public static validate(id: string): BaseError[] {
@@ -259,8 +249,7 @@ export default class ContractId extends HederaId {
       err.push(new InvalidContractId(id));
     } else {
       try {
-        if (!(id.length == 42 && id.startsWith('0x')))
-          HContractId.fromString(id);
+        if (!(id.length == 42 && id.startsWith("0x"))) HContractId.fromString(id);
         // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (error) {
         err.push(new InvalidContractId(id));
