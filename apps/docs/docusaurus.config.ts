@@ -142,14 +142,6 @@ const config: Config = {
               label: "MP Getting Started",
               to: "/asset-tokenization-studio/mass-payout/getting-started/quick-start",
             },
-            {
-              label: "Architecture Decisions",
-              to: "/asset-tokenization-studio/references/adr/",
-            },
-            {
-              label: "Enhancement Proposals",
-              to: "/asset-tokenization-studio/references/proposals/",
-            },
           ],
         },
         {

@@ -146,35 +146,6 @@ const sidebars: SidebarsConfig = {
         },
       ],
     },
-    {
-      type: "category",
-      label: "References",
-      collapsed: false,
-      link: {
-        type: "doc",
-        id: "references/index",
-      },
-      items: [
-        {
-          type: "category",
-          label: "Architecture Decision Records",
-          link: {
-            type: "doc",
-            id: "references/adr/index",
-          },
-          items: ["references/adr/0001-adopt-docs-as-code-philosophy"],
-        },
-        {
-          type: "category",
-          label: "Enhancement Proposals",
-          link: {
-            type: "doc",
-            id: "references/proposals/index",
-          },
-          items: [],
-        },
-      ],
-    },
   ],
 };
 

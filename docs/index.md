@@ -64,10 +64,8 @@ Documentation for managing large-scale batch payment distributions on Hedera.
 
 ## References
 
-Cross-product documentation and architectural decisions.
+Cross-product documentation and guides.
 
-- [Architecture Decision Records (ADRs)](references/adr/)
-- [Enhancement Proposals](references/proposals/)
 - [General Guides](references/guides/)
 
 ## Support
