@@ -57,6 +57,7 @@ Click on a specific dividend to view:
 - Total dividend amount to distribute
 - List of eligible holders and their dividend amounts
 - Payment status
+- **Dividend Amount Calculation** (numerator, denominator, record date reached status)
 
 #### Viewing Dividend Holders
 
@@ -66,6 +67,7 @@ Click **"Snapshot"** or **"View Holders"** to see:
 - Balance at record date
 - Dividend amount each holder will receive
 - Payment status
+- **Token balance** at the time of the snapshot
 
 ### Balance Adjustments (Stock Splits)
 
@@ -168,6 +170,7 @@ Click on a specific coupon to view:
 - Total coupon amount to distribute
 - List of eligible bondholders and their coupon amounts
 - Payment status
+- **Coupon Amount Calculation** (numerator, denominator, record date reached status)
 
 ### Viewing Coupon Holders
 
@@ -177,6 +180,7 @@ Click **"Snapshot"** or **"View Holders"** to see:
 - Bond balance at record date
 - Coupon amount each holder will receive
 - Payment status
+- **Token balance and decimals** at the time of the snapshot
 
 ---
 

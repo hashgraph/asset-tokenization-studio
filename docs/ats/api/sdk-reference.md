@@ -214,6 +214,41 @@ Schedule a stock split or reverse split.
 - `executionTimestamp: string` - Execution date timestamp
 - `factor: string` - Adjustment factor (e.g., "2" for 2:1 split)
 
+### GetDividendAmountForRequest
+
+Get the dividend payment amount calculation for a specific holder.
+
+**Location**: `request/equity/GetDividendsForRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID
+- `dividendId: number` - Dividend ID
+- `targetId: string` - Account ID to query
+
+**Response** (`DividendAmountForViewModel`):
+
+- `numerator: string` - Numerator of the dividend amount calculation
+- `denominator: string` - Denominator of the dividend amount calculation
+- `recordDateReached: boolean` - Whether the record date has been reached
+
+**Usage**:
+
+```typescript
+import { Equity, GetDividendsForRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new GetDividendsForRequest({
+  securityId: "0.0.1234567",
+  dividendId: 1,
+  targetId: "0.0.7654321",
+});
+
+const dividendAmountFor = await Equity.getDividendAmountFor(request);
+console.log("Numerator:", dividendAmountFor.numerator);
+console.log("Denominator:", dividendAmountFor.denominator);
+console.log("Record Date Reached:", dividendAmountFor.recordDateReached);
+```
+
 ## Bond Operations
 
 ### SetCouponRequest
@@ -228,7 +263,10 @@ Schedule a coupon payment.
 - `rate: string` - Coupon rate
 - `recordTimestamp: string` - Record date timestamp
 - `executionTimestamp: string` - Execution date timestamp
-- `period: string` - Period in seconds
+- `startTimestamp: string` - Coupon period start timestamp
+- `endTimestamp: string` - Coupon period end timestamp
+- `fixingTimestamp: string` - Rate fixing timestamp (for floating rate bonds)
+- `rateStatus: number` - Rate status (0 = Fixed, 1 = Floating)
 
 **Usage**:
 
@@ -240,10 +278,132 @@ const request = new SetCouponRequest({
   rate: "5.0",
   recordTimestamp: "1734825600",
   executionTimestamp: "1735430400",
-  period: "7776000", // 90 days
+  startTimestamp: "1727049600",
+  endTimestamp: "1734825600",
+  fixingTimestamp: "1727049600",
+  rateStatus: 0, // Fixed rate
 });
 
 const couponId = await Bond.setCoupon(request);
+```
+
+### GetCouponAmountForRequest
+
+Get the coupon payment amount calculation for a specific holder.
+
+**Location**: `request/bond/GetCouponForRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID
+- `couponId: number` - Coupon ID
+- `targetId: string` - Account ID to query
+
+**Response** (`CouponAmountForViewModel`):
+
+- `numerator: string` - Numerator of the payment amount calculation
+- `denominator: string` - Denominator of the payment amount calculation
+- `recordDateReached: boolean` - Whether the record date has been reached
+
+**Usage**:
+
+```typescript
+import { Bond, GetCouponForRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new GetCouponForRequest({
+  securityId: "0.0.1234567",
+  couponId: 1,
+  targetId: "0.0.7654321",
+});
+
+const couponAmountFor = await Bond.getCouponAmountFor(request);
+console.log("Numerator:", couponAmountFor.numerator);
+console.log("Denominator:", couponAmountFor.denominator);
+console.log("Record Date Reached:", couponAmountFor.recordDateReached);
+```
+
+### GetPrincipalForRequest
+
+Get the principal payment calculation for a bondholder at maturity.
+
+**Location**: `request/bond/GetPrincipalForRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID
+- `targetId: string` - Account ID to query
+
+**Response** (`PrincipalForViewModel`):
+
+- `numerator: string` - Numerator of the principal calculation
+- `denominator: string` - Denominator of the principal calculation
+
+**Usage**:
+
+```typescript
+import { Bond, GetPrincipalForRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new GetPrincipalForRequest({
+  securityId: "0.0.1234567",
+  targetId: "0.0.7654321",
+});
+
+const principalFor = await Bond.getPrincipalFor(request);
+console.log("Principal:", principalFor.numerator, "/", principalFor.denominator);
+```
+
+### FullRedeemAtMaturityRequest
+
+Redeem all tokens for a specific holder when the bond reaches maturity.
+
+**Location**: `request/bond/FullRedeemAtMaturityRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID
+- `sourceId: string` - Account ID to redeem tokens from
+
+**Usage**:
+
+```typescript
+import { Bond, FullRedeemAtMaturityRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new FullRedeemAtMaturityRequest({
+  securityId: "0.0.1234567",
+  sourceId: "0.0.7654321",
+});
+
+const result = await Bond.fullRedeemAtMaturity(request);
+console.log("Success:", result.payload);
+console.log("Transaction:", result.transactionId);
+```
+
+### RedeemAtMaturityByPartitionRequest
+
+Redeem a specific amount of tokens from a partition at maturity.
+
+**Location**: `request/bond/RedeemAtMaturityByPartitionRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID
+- `partitionId: string` - Partition identifier
+- `sourceId: string` - Account ID to redeem tokens from
+- `amount: string` - Amount to redeem
+
+**Usage**:
+
+```typescript
+import { Bond, RedeemAtMaturityByPartitionRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new RedeemAtMaturityByPartitionRequest({
+  securityId: "0.0.1234567",
+  partitionId: "default",
+  sourceId: "0.0.7654321",
+  amount: "1000",
+});
+
+const result = await Bond.redeemAtMaturityByPartition(request);
 ```
 
 ## KYC Operations

@@ -83,6 +83,20 @@ Remove tokens from circulation:
 2. Enter amount to burn
 3. Tokens permanently removed
 
+### Full Redeem at Maturity (Bonds)
+
+For bond tokens that have reached maturity, you can redeem all tokens for a specific holder at once:
+
+1. Navigate to your bond token
+2. Select **Admin View (green)**
+3. Go to **Force Redeem** section
+4. Enable **"Full Redeem at Maturity"** checkbox (only available when maturity date has passed)
+5. Select the holder account
+6. Click **"Redeem All"**
+7. Approve the transaction
+
+This operation redeems all tokens held by the specified account across all partitions.
+
 ### Partial Redemption
 
 For bonds or special circumstances:
@@ -90,6 +104,15 @@ For bonds or special circumstances:
 1. Specify redemption amount per holder
 2. Execute pro-rata redemption
 3. Remaining tokens stay in circulation
+
+### Redeem at Maturity by Partition
+
+For multi-partition bonds, redeem tokens from a specific partition:
+
+1. Navigate to your bond token
+2. Select the partition to redeem from
+3. Specify the amount and holder
+4. Execute the redemption
 
 ## Minting Additional Tokens
 
