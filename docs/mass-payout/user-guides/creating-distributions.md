@@ -250,7 +250,7 @@ Access past distributions:
 4. The role hash is: `0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da`
 5. Confirm the transaction
 
-For more details on roles, see [ATS Roles and Permissions](../../ats/user-guides/roles-and-permissions.md#snapshot_role).
+For more details on roles, see [ATS Roles and Permissions](/ats/user-guides/roles-and-permissions#snapshot_role).
 
 ### No Holders Found or Payment Fails
 

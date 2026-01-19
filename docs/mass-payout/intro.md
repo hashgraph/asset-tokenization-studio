@@ -212,7 +212,7 @@ When using Mass Payout with ATS tokens, ensure the following:
 - The Mass Payout operator account (DFNS account configured in backend) must have the **SNAPSHOT_ROLE** granted in the ATS token contract
 - This role is required for manual payments that capture balance snapshots
 - Grant roles in ATS: Token Settings → Roles → Grant SNAPSHOT_ROLE
-- See [ATS Roles and Permissions](../ats/user-guides/roles-and-permissions.md#snapshot_role) for details
+- See [ATS Roles and Permissions](/ats/user-guides/roles-and-permissions#snapshot_role) for details
 
 **Token Holders**:
 
