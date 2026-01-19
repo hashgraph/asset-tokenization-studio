@@ -7,15 +7,9 @@ import { TransferAndLockStorageWrapper } from "../transferAndLock/TransferAndLoc
 
 abstract contract Common is TransferAndLockStorageWrapper {
     error AlreadyInitialized();
-    error OnlyDelegateAllowed();
 
     modifier onlyUninitialized(bool _initialized) override {
         _checkUninitialized(_initialized);
-        _;
-    }
-
-    modifier onlyDelegate() override {
-        _checkDelegate();
         _;
     }
 
@@ -33,10 +27,6 @@ abstract contract Common is TransferAndLockStorageWrapper {
         if (_arePartitionsProtected() && !_hasRole(_WILD_CARD_ROLE, _msgSender())) {
             revert PartitionsAreProtectedAndNoRole(_msgSender(), _WILD_CARD_ROLE);
         }
-    }
-
-    function _checkDelegate() private view {
-        if (_msgSender() != address(this)) revert OnlyDelegateAllowed();
     }
 
     function _checkClearingDisabled() private view {
