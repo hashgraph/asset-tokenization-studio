@@ -9,6 +9,22 @@
  * These are generic operations that work with any configuration ID and facet set.
  * Domain-specific configuration creation (equity, bond) is handled by modules.
  *
+ * ## Performance Note: Dynamic Imports
+ *
+ * This file uses dynamic imports (`await import()`) for some `@scripts/infrastructure`
+ * modules instead of static imports. This is intentional for parallel test performance.
+ *
+ * **Why:** The barrel export (`@scripts/infrastructure/index.ts`) re-exports from files
+ * that import `@contract-types` (typechain). When Node.js loads the barrel, it eagerly
+ * loads ALL re-exported modules, triggering typechain loading (~400 generated files).
+ *
+ * In parallel tests, each worker loads modules independently:
+ * - Static imports: N workers × full module graph = 4x+ slowdown
+ * - Dynamic imports: Modules loaded only when functions are called (lazy)
+ *
+ * **Measured impact:** Static imports caused tests to run in 8+ minutes vs 2 minutes.
+ *
+ * @see README.md "Troubleshooting > Parallel Tests Running Slowly" for details
  * @module core/operations/blrConfigurations
  */
 
@@ -16,10 +32,7 @@ import { BusinessLogicResolver } from "@contract-types";
 import {
   DEFAULT_TRANSACTION_TIMEOUT,
   DEFAULT_BATCH_SIZE,
-  GAS_LIMIT,
   OperationResult,
-  ok,
-  err,
   validateBytes32,
   extractRevertReason,
   info,
@@ -30,6 +43,17 @@ import {
   waitForTransaction,
   isInstantMiningNetwork,
 } from "@scripts/infrastructure";
+
+/**
+ * Facet configuration for BLR.
+ */
+export interface FacetConfiguration {
+  /** Facet name */
+  facetName: string;
+
+  /** Function selectors this facet handles */
+  selectors: string[];
+}
 
 /**
  * Batch facet configuration structure for contract calls.
@@ -204,7 +228,6 @@ function createBatchFacetConfigurations(facetIdList: string[], facetVersionList:
  * @param batchSize - Number of facets per batch (default: DEFAULT_BATCH_SIZE). Smaller batches = lower gas per transaction.
  * @param gasLimit - Optional gas limit override
  * @param confirmations - Number of confirmations to wait for (default: 0 for test environments)
- * @param network - Network name for instant mining detection (optional)
  * @returns Promise that resolves when all batches are processed
  *
  * @example
@@ -235,10 +258,15 @@ export async function processFacetLists(
   batchSize: number = DEFAULT_BATCH_SIZE,
   gasLimit?: number,
   confirmations: number = 0,
-  network?: string,
 ): Promise<void> {
-  // Use provided network parameter, default to "unknown" if not provided
-  const networkName = network || "unknown";
+  // Get network name for instant mining check
+  let networkName = "unknown";
+  try {
+    const hre = require("hardhat");
+    networkName = hre?.network?.name || "unknown";
+  } catch {
+    // Not in Hardhat context
+  }
 
   // On instant-mining networks, use larger batches but cap at 20 to avoid gas limit issues
   // On real networks, use configured batch size (default 15)
@@ -330,6 +358,9 @@ export async function sendBatchConfiguration(
   info(`  Confirmations to wait: ${confirmations}`);
 
   try {
+    // Dynamic import for parallel test performance (see module JSDoc for explanation)
+    const { GAS_LIMIT } = await import("@scripts/infrastructure");
+
     const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
       gasLimit: gasLimit || GAS_LIMIT.businessLogicResolver.createConfiguration,
     });
@@ -389,8 +420,7 @@ export async function sendBatchConfiguration(
  * const result = await createBatchConfiguration(blr, {
  *   configurationId: '0x123...',
  *   facets: facetsWithKeys,
- *   partialBatchDeploy: true,  // All batches marked as non-final
- *   network: 'hardhat'  // Optional network name for instant mining detection
+ *   partialBatchDeploy: true  // All batches marked as non-final
  * })
  * ```
  */
@@ -428,9 +458,6 @@ export async function createBatchConfiguration(
 
     /** Number of confirmations to wait for (default: 0 for test environments) */
     confirmations?: number;
-
-    /** Network name for instant mining detection (optional) */
-    network?: string;
   },
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   const {
@@ -440,8 +467,11 @@ export async function createBatchConfiguration(
     batchSize = DEFAULT_BATCH_SIZE,
     gasLimit,
     confirmations = 0,
-    network,
   } = options;
+
+  // Dynamic imports for parallel test performance (see module JSDoc for explanation)
+  const { info } = await import("@scripts/infrastructure");
+  const { ok, err } = await import("@scripts/infrastructure");
 
   if (facets.length === 0) {
     return err("EMPTY_FACET_LIST", "At least one facet is required for configuration");
@@ -494,14 +524,15 @@ export async function createBatchConfiguration(
       batchSize,
       gasLimit,
       confirmations,
-      network,
     );
 
     // Query the actual configuration-specific version after batch processing
     const configVersion = await blrContract.getLatestVersionByConfiguration(configurationId);
     const actualVersion = configVersion.toNumber();
 
-    success("Batch configuration completed successfully", {
+    // Dynamic import for parallel test performance (see module JSDoc)
+    const { success: logSuccess } = await import("../utils/logging");
+    logSuccess("Batch configuration completed successfully", {
       configurationId,
       facets: facetKeys.length,
       partialDeploy: partialBatchDeploy,
@@ -516,6 +547,8 @@ export async function createBatchConfiguration(
       blockNumber: 0,
     });
   } catch (error) {
+    // Dynamic import for parallel test performance (see module JSDoc)
+    const { error: logError } = await import("../utils/logging");
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     logError("Failed to create batch configuration", {

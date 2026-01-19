@@ -1242,6 +1242,34 @@ async function createBondConfiguration(
 
 ## Troubleshooting
 
+### Parallel Tests Running Slowly (8+ minutes instead of 2 minutes)
+
+**Symptom:** `npm run ats:contracts:test:parallel` takes 8+ minutes instead of ~2 minutes.
+
+**Root Cause:** Static imports from barrel exports (`@scripts/infrastructure`) cause eager loading of the entire module graph, including typechain (~400 generated files). In parallel tests, each worker loads modules independently, multiplying the overhead.
+
+**Solution:** Use dynamic imports for modules that would trigger heavy typechain loading:
+
+```typescript
+// ❌ SLOW: Static import loads entire barrel (including typechain consumers)
+import { GAS_LIMIT, ok, err } from "@scripts/infrastructure";
+
+// ✅ FAST: Dynamic import defers loading until function execution
+const { GAS_LIMIT } = await import("@scripts/infrastructure");
+const { ok, err } = await import("@scripts/infrastructure");
+```
+
+**Why this works:**
+
+- Static imports execute at module load time (before any test runs)
+- Dynamic imports execute only when the containing function is called
+- Most test files never call functions that need these imports
+- Result: Workers initialize faster, tests complete in ~2 minutes
+
+**Affected file:** `infrastructure/operations/blrConfigurations.ts`
+
+**Prevention:** When adding new exports to `@scripts/infrastructure` barrel that import from `@contract-types`, consider whether downstream files need dynamic imports to maintain test performance.
+
 ### "Cannot find module 'hardhat'"
 
 This means you're trying to use Hardhat's `ethers.getSigners()` from a non-Hardhat project. Use `ethers.Wallet` instead:
