@@ -221,7 +221,7 @@ import { MirrorNodes } from '@domain/context/network/MirrorNode';
 import { JsonRpcRelays } from '@domain/context/network/JsonRpcRelay';
 import { Factories } from '@domain/context/factory/Factories';
 import BigDecimal from '@domain/context/shared/BigDecimal';
-import { ContractId } from '@hashgraph/sdk';
+import { ContractId } from '@hiero-ledger/sdk';
 import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter';
 import {
   _PARTITION_ID_1,

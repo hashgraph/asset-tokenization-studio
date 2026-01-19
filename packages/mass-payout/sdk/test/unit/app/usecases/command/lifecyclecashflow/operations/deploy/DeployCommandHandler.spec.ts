@@ -221,7 +221,7 @@ const roleId = "0x00000000000000000000000000000000000000000000000000000000000000
 const memberAccountId = "0.0.123456";
 const memberEvmAddress = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-jest.mock("@hashgraph/sdk", () => ({
+jest.mock("@hiero-ledger/sdk", () => ({
   TokenId: {
     fromString: jest.fn().mockReturnValue({
       toSolidityAddress: jest.fn().mockReturnValue("0x1ba302dcf33f7f9fd08be50ddc2bbe44e4cccb3c"),

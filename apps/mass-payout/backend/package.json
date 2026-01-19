@@ -29,7 +29,7 @@
   "dependencies": {
     "@faker-js/faker": "9.8.0",
     "@hashgraph/asset-tokenization-sdk": "*",
-    "@hashgraph/sdk": "2.66.0",
+    "@hiero-ledger/sdk": "2.79.0",
     "@nestjs/cli": "10.3.2",
     "@nestjs/common": "10.3.3",
     "@nestjs/config": "3.2.0",

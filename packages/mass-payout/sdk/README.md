@@ -77,7 +77,7 @@ The SDK follows Domain-Driven Design principles with a clean hexagonal architect
 
 ## Dependencies
 
-- @hashgraph/sdk: Hedera SDK for blockchain interactions
+- @hiero-ledger/sdk: Hedera SDK for blockchain interactions
 - @nestjs/common & @nestjs/core: Framework components
 - class-validator & class-transformer: Data validation and transformation
 - rxjs: Reactive programming support
