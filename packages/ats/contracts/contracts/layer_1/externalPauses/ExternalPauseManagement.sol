@@ -2,26 +2,16 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalPauseManagement } from "../interfaces/externalPauses/IExternalPauseManagement.sol";
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { _PAUSE_MANAGER_ROLE } from "../constants/roles.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
 
-abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
+abstract contract ExternalPauseManagement is IExternalPauseManagement, Internals {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(
         address[] calldata _pauses
-    ) external override onlyUninitialized(_externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized) {
-        ExternalListDataStorage storage externalPauseDataStorage = _externalListStorage(
-            _PAUSE_MANAGEMENT_STORAGE_POSITION
-        );
-        uint256 length = _pauses.length;
-        for (uint256 index; index < length; ) {
-            _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pauses[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        externalPauseDataStorage.initialized = true;
+    ) external override onlyUninitialized(_isExternalPauseInitialized()) {
+        _initialize_ExternalPauses(_pauses);
     }
 
     function updateExternalPauses(
@@ -44,7 +34,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, Common {
 
     function addExternalPause(
         address _pause
-    ) external override onlyRole(_PAUSE_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+    ) external override onlyRole(_PAUSE_MANAGER_ROLE) onlyUnpaused validateAddress(_pause) returns (bool success_) {
         success_ = _addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert ListedPause(_pause);

@@ -1,17 +1,17 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { ExternalControlListManagement, MockedWhitelist, MockedBlacklist, ResolverProxy } from "@contract-types";
+import { ExternalControlListManagementFacet, MockedWhitelist, MockedBlacklist, ResolverProxy } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
-import { ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 
 describe("ExternalControlList Management Tests", () => {
   let signer_A: SignerWithAddress;
   let signer_B: SignerWithAddress;
 
   let diamond: ResolverProxy;
-  let externalControlListManagement: ExternalControlListManagement;
+  let externalControlListManagement: ExternalControlListManagementFacet;
   let externalWhitelistMock1: MockedWhitelist;
   let externalBlacklistMock1: MockedBlacklist;
   let externalWhitelistMock2: MockedWhitelist;
@@ -29,7 +29,7 @@ describe("ExternalControlList Management Tests", () => {
     signer_B = base.user1;
 
     externalControlListManagement = await ethers.getContractAt(
-      "ExternalControlListManagement",
+      "ExternalControlListManagementFacet",
       diamond.address,
       signer_A,
     );
@@ -82,6 +82,14 @@ describe("ExternalControlList Management Tests", () => {
         }),
       ).to.be.revertedWithCustomError(externalControlListManagement, "ListedControlList");
     });
+
+    it("GIVEN an invalid address WHEN adding it THEN it reverts with ZeroAddressNotAllowed", async () => {
+      await expect(
+        externalControlListManagement.addExternalControlList(ADDRESS_ZERO, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(externalControlListManagement, "ZeroAddressNotAllowed");
+    });
   });
 
   describe("Remove Tests", () => {
@@ -112,6 +120,17 @@ describe("ExternalControlList Management Tests", () => {
   });
 
   describe("Update Tests", () => {
+    it("GIVEN invalid address WHEN updated THEN it reverts with ZeroAddressNotAllowed", async () => {
+      const controlLists = [ADDRESS_ZERO];
+      const actives = [true];
+
+      await expect(
+        externalControlListManagement.updateExternalControlLists(controlLists, actives, {
+          gasLimit: GAS_LIMIT.high,
+        }),
+      ).to.be.revertedWithCustomError(externalControlListManagement, "ZeroAddressNotAllowed");
+    });
+
     it("GIVEN multiple external control lists WHEN updated THEN their statuses are updated and event is emitted", async () => {
       expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.true;
       expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.address)).to.be.true;

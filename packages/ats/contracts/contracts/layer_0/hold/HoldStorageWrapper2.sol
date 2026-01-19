@@ -31,7 +31,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         Hold memory _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
-    ) internal returns (bool success_, uint256 holdId_) {
+    ) internal override returns (bool success_, uint256 holdId_) {
         _triggerAndSyncAll(_partition, _from, address(0));
 
         uint256 abaf = _updateTotalHold(_partition, _from);
@@ -59,7 +59,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         address _from,
         uint256 _amount,
         uint256 _holdId
-    ) internal {
+    ) internal override {
         address thirdPartyAddress = _msgSender();
         _decreaseAllowedBalance(_from, thirdPartyAddress, _amount);
         _holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = thirdPartyAddress;
@@ -70,7 +70,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         address _from,
         ProtectedHold memory _protectedHold,
         bytes calldata _signature
-    ) internal returns (bool success_, uint256 holdId_) {
+    ) internal override returns (bool success_, uint256 holdId_) {
         checkNounceAndDeadline(
             _protectedHold.nonce,
             _from,
@@ -90,10 +90,11 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_, bytes32 partition_) {
         _beforeExecuteHold(_holdIdentifier, _to);
 
         success_ = _operateHoldByPartition(_holdIdentifier, _to, _amount, OperationType.Execute);
+        partition_ = _holdIdentifier.partition;
 
         HoldData memory holdData = _getHold(_holdIdentifier);
 
@@ -105,7 +106,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     function _releaseHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_) {
         _beforeReleaseHold(_holdIdentifier);
 
         HoldData memory holdData = _getHold(_holdIdentifier);
@@ -119,6 +120,8 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             OperationType.Release
         );
 
+        holdData = _getHold(_holdIdentifier);
+
         if (holdData.hold.amount == 0) {
             _removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
         }
@@ -126,7 +129,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
 
     function _reclaimHoldByPartition(
         HoldIdentifier calldata _holdIdentifier
-    ) internal returns (bool success_, uint256 amount_) {
+    ) internal override returns (bool success_, uint256 amount_) {
         _beforeReclaimHold(_holdIdentifier);
 
         HoldData memory holdData = _getHold(_holdIdentifier);
@@ -149,7 +152,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         address _to,
         uint256 _amount,
         OperationType _operation
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_) {
         HoldData memory holdData = _getHold(_holdIdentifier);
 
         if (_operation == OperationType.Execute) {
@@ -175,7 +178,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         success_ = true;
     }
 
-    function _transferHold(HoldIdentifier calldata _holdIdentifier, address _to, uint256 _amount) internal {
+    function _transferHold(HoldIdentifier calldata _holdIdentifier, address _to, uint256 _amount) internal override {
         if (_decreaseHeldAmount(_holdIdentifier, _amount) == 0) {
             _removeHold(_holdIdentifier);
         }
@@ -201,7 +204,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     function _decreaseHeldAmount(
         HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
-    ) internal returns (uint256 newHoldBalance_) {
+    ) internal override returns (uint256 newHoldBalance_) {
         HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage.totalHeldAmountByAccount[_holdIdentifier.tokenHolder] -= _amount;
@@ -219,7 +222,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             .amount;
     }
 
-    function _removeHold(HoldIdentifier calldata _holdIdentifier) internal {
+    function _removeHold(HoldIdentifier calldata _holdIdentifier) internal override {
         HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage.holdIdsByAccountAndPartition[_holdIdentifier.tokenHolder][_holdIdentifier.partition].remove(
@@ -237,7 +240,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         _removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
     }
 
-    function _updateTotalHold(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
+    function _updateTotalHold(bytes32 _partition, address _tokenHolder) internal override returns (uint256 abaf_) {
         abaf_ = _getAbaf();
 
         uint256 labaf = _getTotalHeldLabaf(_tokenHolder);
@@ -256,7 +259,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         }
     }
 
-    function _updateTotalHeldAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal {
+    function _updateTotalHeldAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
         if (_factor == 1) return;
 
         _holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
@@ -268,35 +271,33 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         address _tokenHolder,
         uint256 _factor,
         uint256 _abaf
-    ) internal {
+    ) internal override {
         if (_factor == 1) return;
 
         _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
         _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
-    function _beforeHold(bytes32 _partition, address _tokenHolder) internal {
+    function _beforeHold(bytes32 _partition, address _tokenHolder) internal override {
         _updateAccountSnapshot(_tokenHolder, _partition);
         _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function _beforeExecuteHold(HoldIdentifier calldata _holdIdentifier, address _to) internal {
+    function _beforeExecuteHold(HoldIdentifier calldata _holdIdentifier, address _to) internal override {
         _adjustHoldBalances(_holdIdentifier, _to);
         _updateAccountSnapshot(_to, _holdIdentifier.partition);
         _updateAccountHeldBalancesSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
     }
 
-    function _beforeReleaseHold(HoldIdentifier calldata _holdIdentifier) internal {
-        _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
+    function _beforeReleaseHold(HoldIdentifier calldata _holdIdentifier) internal override {
         _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
-    function _beforeReclaimHold(HoldIdentifier calldata _holdIdentifier) internal {
-        _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
+    function _beforeReclaimHold(HoldIdentifier calldata _holdIdentifier) internal override {
         _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
-    function _adjustHoldBalances(HoldIdentifier calldata _holdIdentifier, address _to) internal {
+    function _adjustHoldBalances(HoldIdentifier calldata _holdIdentifier, address _to) internal override {
         _triggerAndSyncAll(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to);
 
         uint256 abaf = _updateTotalHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder);
@@ -304,7 +305,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         _updateHold(_holdIdentifier.partition, _holdIdentifier.holdId, _holdIdentifier.tokenHolder, abaf);
     }
 
-    function _updateHold(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _abaf) internal {
+    function _updateHold(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _abaf) internal override {
         uint256 holdLabaf = _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
 
         if (_abaf != holdLabaf) {
@@ -320,14 +321,14 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         uint256 _holdId,
         address _tokenHolder,
         uint256 _factor
-    ) internal {
+    ) internal override {
         if (_factor == 1) return;
         HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage.holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
     }
 
-    function _getHeldAmountForAdjusted(address _tokenHolder) internal view virtual override returns (uint256 amount_) {
+    function _getHeldAmountForAdjusted(address _tokenHolder) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalHeldLabaf(_tokenHolder));
 
         return _getHeldAmountFor(_tokenHolder) * factor;
@@ -336,7 +337,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     function _getHeldAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
-    ) internal view returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactorForHeldAmountByTokenHolderAdjustedAt(_tokenHolder, _timestamp);
 
         return _getHeldAmountFor(_tokenHolder) * factor;
@@ -367,7 +368,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     function _getHeldAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view virtual override returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalHeldLabafByPartition(_partition, _tokenHolder));
         return _getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
     }
@@ -377,6 +378,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     )
         internal
         view
+        override
         returns (
             uint256 amount_,
             uint256 expirationTimestamp_,
@@ -404,19 +406,15 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         amount_ *= factor;
     }
 
-    function _getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) internal view returns (address thirdParty_) {
+    function _getHoldThirdParty(
+        HoldIdentifier calldata _holdIdentifier
+    ) internal view override returns (address thirdParty_) {
         HoldDataStorage storage holdStorage = _holdStorage();
 
         thirdParty_ = holdStorage.holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
             _holdIdentifier.partition
         ][_holdIdentifier.holdId];
     }
-
-    function _getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) internal view virtual returns (uint256);
 
     function _restoreHoldAllowance(
         ThirdPartyType _thirdPartyType,

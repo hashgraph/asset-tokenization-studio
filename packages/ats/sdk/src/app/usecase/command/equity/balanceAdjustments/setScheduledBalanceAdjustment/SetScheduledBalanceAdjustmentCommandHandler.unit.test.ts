@@ -203,31 +203,27 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import { SetScheduledBalanceAdjustmentCommandHandler } from './SetScheduledBalanceAdjustmentCommandHandler';
+import { createMock } from "@golevelup/ts-jest";
+import { SetScheduledBalanceAdjustmentCommandHandler } from "./SetScheduledBalanceAdjustmentCommandHandler";
 import {
   SetScheduledBalanceAdjustmentCommand,
   SetScheduledBalanceAdjustmentCommandResponse,
-} from './SetScheduledBalanceAdjustmentCommand';
-import TransactionService from '@service/transaction/TransactionService';
-import ContractService from '@service/contract/ContractService';
-import ValidationService from '@service/validation/ValidationService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import {
-  AccountPropsFixture,
-  ErrorMsgFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import AccountService from '@service/account/AccountService';
-import { SetScheduledBalanceAdjustmentCommandFixture } from '@test/fixtures/equity/EquityFixture';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import Account from '@domain/context/account/Account';
-import { faker } from '@faker-js/faker/.';
-import { SetScheduledBalanceAdjustmentCommandError } from './error/SetScheduledBalanceAdjustmentCommandError';
-import { ErrorCode } from '@core/error/BaseError';
+} from "./SetScheduledBalanceAdjustmentCommand";
+import TransactionService from "@service/transaction/TransactionService";
+import ContractService from "@service/contract/ContractService";
+import ValidationService from "@service/validation/ValidationService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { AccountPropsFixture, ErrorMsgFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import AccountService from "@service/account/AccountService";
+import { SetScheduledBalanceAdjustmentCommandFixture } from "@test/fixtures/equity/EquityFixture";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import Account from "@domain/context/account/Account";
+import { faker } from "@faker-js/faker/.";
+import { SetScheduledBalanceAdjustmentCommandError } from "./error/SetScheduledBalanceAdjustmentCommandError";
+import { ErrorCode } from "@core/error/BaseError";
 
-describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
+describe("SetScheduledBalanceAdjustmentCommandHandler", () => {
   let handler: SetScheduledBalanceAdjustmentCommandHandler;
   let command: SetScheduledBalanceAdjustmentCommand;
   const transactionServiceMock = createMock<TransactionService>();
@@ -239,7 +235,7 @@ describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
   const account = new Account(AccountPropsFixture.create());
   const evmAddress = new EvmAddress(account.evmAddress!);
   const errorMsg = ErrorMsgFixture.create().msg;
-  const balanceAdjustmentId = '0x' + faker.number.hex(32);
+  const balanceAdjustmentId = "0x" + faker.number.hex(32);
 
   beforeEach(() => {
     handler = new SetScheduledBalanceAdjustmentCommandHandler(
@@ -255,18 +251,16 @@ describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws SetScheduledBalanceAdjustmentCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws SetScheduledBalanceAdjustmentCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          SetScheduledBalanceAdjustmentCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(SetScheduledBalanceAdjustmentCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
@@ -276,33 +270,23 @@ describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully set scheduled balance adjustment', async () => {
+    describe("success cases", () => {
+      it("should successfully set scheduled balance adjustment", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         validationServiceMock.checkMaturityDate.mockResolvedValue(undefined);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
 
-        transactionServiceMock
-          .getHandler()
-          .setScheduledBalanceAdjustment.mockResolvedValue({
-            id: transactionId,
-          });
+        transactionServiceMock.getHandler().setScheduledBalanceAdjustment.mockResolvedValue({
+          id: transactionId,
+        });
 
-        transactionServiceMock.getTransactionResult.mockResolvedValue(
-          balanceAdjustmentId,
-        );
+        transactionServiceMock.getTransactionResult.mockResolvedValue(balanceAdjustmentId);
 
         const result = await handler.execute(command);
 
-        expect(result).toBeInstanceOf(
-          SetScheduledBalanceAdjustmentCommandResponse,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
-        );
+        expect(result).toBeInstanceOf(SetScheduledBalanceAdjustmentCommandResponse);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
@@ -310,25 +294,17 @@ describe('SetScheduledBalanceAdjustmentCommandHandler', () => {
           evmAddress.toString(),
           command.securityId,
         );
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(
           expect.objectContaining({
             res: { id: transactionId },
             className: SetScheduledBalanceAdjustmentCommandHandler.name,
-            position: 1,
-            numberOfResultsItems: 2,
+            position: 0,
+            numberOfResultsItems: 1,
           }),
         );
-        expect(
-          transactionServiceMock.getHandler().setScheduledBalanceAdjustment,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().setScheduledBalanceAdjustment,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getHandler().setScheduledBalanceAdjustment).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().setScheduledBalanceAdjustment).toHaveBeenCalledWith(
           evmAddress,
           BigDecimal.fromString(command.executionDate),
           BigDecimal.fromString(command.factor),

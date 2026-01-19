@@ -18,6 +18,10 @@ import {
     getMessageHashClearingRedeem,
     verify
 } from "../../../layer_1/protectedPartitions/signatureVerification.sol";
+import {
+    _CONTRACT_NAME_PROTECTEDPARTITIONS,
+    _CONTRACT_VERSION_PROTECTEDPARTITIONS
+} from "../../../layer_1/constants/values.sol";
 
 abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStorageWrapper, KycStorageWrapper {
     struct ProtectedPartitionsDataStorage {
@@ -29,17 +33,26 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
     }
 
     // modifiers
-    modifier onlyProtectedPartitions() {
+    modifier onlyProtectedPartitions() override {
         _checkProtectedPartitions();
         _;
     }
 
-    modifier onlyValidParticipant(bytes32 _partition) {
+    modifier onlyValidParticipant(bytes32 _partition) override {
         _checkValidPartition(_partition);
         _;
     }
 
-    function _setProtectedPartitions(bool _protected) internal {
+    function _initialize_ProtectedPartitions(bool _protectPartitions) internal override returns (bool success_) {
+        ProtectedPartitionsDataStorage storage protectedPartitionsStorage = _protectedPartitionsStorage();
+        protectedPartitionsStorage.arePartitionsProtected = _protectPartitions;
+        protectedPartitionsStorage.contractName = _CONTRACT_NAME_PROTECTEDPARTITIONS;
+        protectedPartitionsStorage.contractVersion = _CONTRACT_VERSION_PROTECTEDPARTITIONS;
+        protectedPartitionsStorage.initialized = true;
+        success_ = true;
+    }
+
+    function _setProtectedPartitions(bool _protected) internal override {
         _protectedPartitionsStorage().arePartitionsProtected = _protected;
         if (_protected) {
             emit PartitionsProtected(_msgSender());
@@ -48,15 +61,15 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         emit PartitionsUnProtected(_msgSender());
     }
 
-    function _setNounce(uint256 _nounce, address _account) internal {
+    function _setNounce(uint256 _nounce, address _account) internal override {
         _protectedPartitionsStorage().nounces[_account] = _nounce;
     }
 
-    function _arePartitionsProtected() internal view returns (bool) {
+    function _arePartitionsProtected() internal view override returns (bool) {
         return _protectedPartitionsStorage().arePartitionsProtected;
     }
 
-    function _getNounceFor(address _account) internal view returns (uint256) {
+    function _getNounceFor(address _account) internal view override returns (uint256) {
         return _protectedPartitionsStorage().nounces[_account];
     }
 
@@ -65,12 +78,9 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         address _from,
         address _to,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view {
-        if (!_isTransferSignatureValid(_partition, _from, _to, _amount, _deadline, _nounce, _signature))
-            revert WrongSignature();
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal view override {
+        if (!_isTransferSignatureValid(_partition, _from, _to, _amount, _protectionData)) revert WrongSignature();
     }
 
     function _isTransferSignatureValid(
@@ -78,16 +88,21 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         address _from,
         address _to,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashTransfer(_partition, _from, _to, _amount, _deadline, _nounce);
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal view override returns (bool) {
+        bytes32 functionHash = getMessageHashTransfer(
+            _partition,
+            _from,
+            _to,
+            _amount,
+            _protectionData.deadline,
+            _protectionData.nounce
+        );
         return
             verify(
                 _from,
                 functionHash,
-                _signature,
+                _protectionData.signature,
                 _protectedPartitionsStorage().contractName,
                 _protectedPartitionsStorage().contractVersion,
                 _blockChainid(),
@@ -99,28 +114,29 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view {
-        if (!_isRedeemSignatureValid(_partition, _from, _amount, _deadline, _nounce, _signature))
-            revert WrongSignature();
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal view override {
+        if (!_isRedeemSignatureValid(_partition, _from, _amount, _protectionData)) revert WrongSignature();
     }
 
     function _isRedeemSignatureValid(
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashRedeem(_partition, _from, _amount, _deadline, _nounce);
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal view override returns (bool) {
+        bytes32 functionHash = getMessageHashRedeem(
+            _partition,
+            _from,
+            _amount,
+            _protectionData.deadline,
+            _protectionData.nounce
+        );
         return
             verify(
                 _from,
                 functionHash,
-                _signature,
+                _protectionData.signature,
                 _protectedPartitionsStorage().contractName,
                 _protectedPartitionsStorage().contractVersion,
                 _blockChainid(),
@@ -133,7 +149,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         address _from,
         ProtectedHold memory _protectedHold,
         bytes calldata _signature
-    ) internal view {
+    ) internal view override {
         if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold, _signature)) revert WrongSignature();
     }
 
@@ -142,7 +158,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         address _from,
         ProtectedHold memory _protectedHold,
         bytes calldata _signature
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         bytes32 functionHash = getMessageHashCreateHold(_partition, _from, _protectedHold);
 
         return
@@ -161,7 +177,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
         Hold memory _hold,
         bytes calldata _signature
-    ) internal view {
+    ) internal view override {
         if (!_isClearingCreateHoldSignatureValid(_protectedClearingOperation, _hold, _signature))
             revert WrongSignature();
     }
@@ -170,7 +186,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
         Hold memory _hold,
         bytes calldata _signature
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         bytes32 functionHash = getMessageHashClearingCreateHold(_protectedClearingOperation, _hold);
 
         return
@@ -190,7 +206,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         uint256 _amount,
         address _to,
         bytes calldata _signature
-    ) internal view {
+    ) internal view override {
         if (!_isClearingTransferSignatureValid(_protectedClearingOperation, _to, _amount, _signature))
             revert WrongSignature();
     }
@@ -200,7 +216,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         address _to,
         uint256 _amount,
         bytes calldata _signature
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         bytes32 functionHash = getMessageHashClearingTransfer(_protectedClearingOperation, _to, _amount);
 
         return
@@ -219,7 +235,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
-    ) internal view {
+    ) internal view override {
         if (!_isClearingRedeemSignatureValid(_protectedClearingOperation, _amount, _signature)) revert WrongSignature();
     }
 
@@ -227,7 +243,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
-    ) internal view returns (bool) {
+    ) internal view override returns (bool) {
         bytes32 functionHash = getMessageHashClearingRedeem(_protectedClearingOperation, _amount);
 
         return
@@ -242,20 +258,24 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
             );
     }
 
-    function _checkRoleForPartition(bytes32 partition, address account) internal view {
+    function _checkRoleForPartition(bytes32 partition, address account) internal view override {
         _checkRole(_calculateRoleForPartition(partition), account);
     }
 
-    function _checkProtectedPartitions() internal view {
+    function _checkProtectedPartitions() internal view override {
         if (!_arePartitionsProtected()) revert PartitionsAreUnProtected();
     }
 
-    function _protectedPartitionsRole(bytes32 _partition) internal pure returns (bytes32) {
+    function _protectedPartitionsRole(bytes32 _partition) internal pure override returns (bytes32) {
         return keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
     }
 
-    function _calculateRoleForPartition(bytes32 partition) internal pure returns (bytes32 role) {
+    function _calculateRoleForPartition(bytes32 partition) internal pure override returns (bytes32 role) {
         role = keccak256(abi.encode(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
+    }
+
+    function _isProtectedPartitionInitialized() internal view override returns (bool) {
+        return _protectedPartitionsStorage().initialized;
     }
 
     function _protectedPartitionsStorage()

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    IScheduledSnapshots
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { ScheduledTasksCommon } from "../ScheduledTasksCommon.sol";
 import { _SCHEDULED_SNAPSHOTS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
@@ -14,11 +11,11 @@ import {
 } from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
-    function _addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes memory _newData) internal {
+    function _addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes memory _newData) internal override {
         ScheduledTasksLib.addScheduledTask(_scheduledSnapshotStorage(), _newScheduledTimestamp, _newData);
     }
 
-    function _triggerScheduledSnapshots(uint256 _max) internal returns (uint256) {
+    function _triggerScheduledSnapshots(uint256 _max) internal override returns (uint256) {
         return
             _triggerScheduledTasks(_scheduledSnapshotStorage(), _onScheduledSnapshotTriggered, _max, _blockTimestamp());
     }
@@ -27,7 +24,7 @@ abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
         uint256 _pos,
         uint256 _scheduledTasksLength,
         ScheduledTask memory _scheduledTask
-    ) internal {
+    ) internal override {
         uint256 newSnapShotID;
         if (_pos == _scheduledTasksLength - 1) {
             newSnapShotID = _snapshot();
@@ -41,14 +38,14 @@ abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
         }
     }
 
-    function _getScheduledSnapshotCount() internal view returns (uint256) {
+    function _getScheduledSnapshotCount() internal view override returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledSnapshotStorage());
     }
 
     function _getScheduledSnapshots(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (ScheduledTask[] memory scheduledSnapshot_) {
+    ) internal view override returns (ScheduledTask[] memory scheduledSnapshot_) {
         return ScheduledTasksLib.getScheduledTasks(_scheduledSnapshotStorage(), _pageIndex, _pageLength);
     }
 

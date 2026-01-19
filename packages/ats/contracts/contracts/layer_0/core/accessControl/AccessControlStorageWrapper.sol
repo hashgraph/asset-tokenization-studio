@@ -7,16 +7,11 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import {
     IAccessControlStorageWrapper
 } from "../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol";
-import { LocalContext } from "../../context/LocalContext.sol";
 import { BusinessLogicResolverWrapper } from "../../../resolver/BusinessLogicResolverWrapper.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { Internals } from "../../Internals.sol";
 
-abstract contract AccessControlStorageWrapper is
-    IAccessControlStorageWrapper,
-    LocalContext,
-    BusinessLogicResolverWrapper
-{
-    // TODO: Check if it's possible to use only one dependency of AddressSet and Bytes32Set
+abstract contract AccessControlStorageWrapper is IAccessControlStorageWrapper, Internals, BusinessLogicResolverWrapper {
     using LibCommon for EnumerableSet.AddressSet;
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -32,32 +27,32 @@ abstract contract AccessControlStorageWrapper is
         mapping(address => EnumerableSet.Bytes32Set) memberRoles;
     }
 
-    modifier onlyRole(bytes32 _role) {
+    modifier onlyRole(bytes32 _role) override {
         _checkRole(_role, _msgSender());
         _;
     }
 
-    modifier onlyRoleFor(bytes32 _role, address _account) {
+    modifier onlyRoleFor(bytes32 _role, address _account) override {
         _checkRole(_role, _account);
         _;
     }
 
-    modifier onlySameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) {
+    modifier onlySameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) override {
         _checkSameRolesAndActivesLength(_rolesLength, _activesLength);
         _;
     }
 
-    modifier onlyConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) {
+    modifier onlyConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) override {
         ArrayLib.checkUniqueValues(_roles, _actives);
         _;
     }
 
     // Internal
-    function _grantRole(bytes32 _role, address _account) internal returns (bool success_) {
+    function _grantRole(bytes32 _role, address _account) internal override returns (bool success_) {
         success_ = _grant(_rolesStorage(), _role, _account);
     }
 
-    function _revokeRole(bytes32 _role, address _account) internal returns (bool success_) {
+    function _revokeRole(bytes32 _role, address _account) internal override returns (bool success_) {
         success_ = _remove(_rolesStorage(), _role, _account);
     }
 
@@ -65,7 +60,7 @@ abstract contract AccessControlStorageWrapper is
         bytes32[] calldata _roles,
         bool[] calldata _actives,
         address _account
-    ) internal returns (bool success_) {
+    ) internal override returns (bool success_) {
         RoleDataStorage storage roleDataStorage = _rolesStorage();
         address sender = _msgSender();
         uint256 length = _roles.length;
@@ -86,15 +81,15 @@ abstract contract AccessControlStorageWrapper is
         success_ = true;
     }
 
-    function _getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
+    function _getRoleAdmin(bytes32 _role) internal view override returns (bytes32) {
         return _rolesStorage().roles[_role].roleAdmin;
     }
 
-    function _hasRole(bytes32 _role, address _account) internal view returns (bool) {
+    function _hasRole(bytes32 _role, address _account) internal view override returns (bool) {
         return _has(_rolesStorage(), _role, _account);
     }
 
-    function _hasAnyRole(bytes32[] memory _roles, address _account) internal view returns (bool) {
+    function _hasAnyRole(bytes32[] memory _roles, address _account) internal view override returns (bool) {
         for (uint256 i; i < _roles.length; i++) {
             if (_has(_rolesStorage(), _roles[i], _account)) {
                 return true;
@@ -103,7 +98,7 @@ abstract contract AccessControlStorageWrapper is
         return false;
     }
 
-    function _getRoleCountFor(address _account) internal view returns (uint256 roleCount_) {
+    function _getRoleCountFor(address _account) internal view override returns (uint256 roleCount_) {
         roleCount_ = _rolesStorage().memberRoles[_account].length();
     }
 
@@ -111,11 +106,11 @@ abstract contract AccessControlStorageWrapper is
         address _account,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (bytes32[] memory roles_) {
+    ) internal view override returns (bytes32[] memory roles_) {
         roles_ = _rolesStorage().memberRoles[_account].getFromSet(_pageIndex, _pageLength);
     }
 
-    function _getRoleMemberCount(bytes32 _role) internal view returns (uint256 memberCount_) {
+    function _getRoleMemberCount(bytes32 _role) internal view override returns (uint256 memberCount_) {
         memberCount_ = _rolesStorage().roles[_role].roleMembers.length();
     }
 
@@ -123,17 +118,17 @@ abstract contract AccessControlStorageWrapper is
         bytes32 _role,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
+    ) internal view override returns (address[] memory members_) {
         members_ = _rolesStorage().roles[_role].roleMembers.getFromSet(_pageIndex, _pageLength);
     }
 
-    function _checkRole(bytes32 _role, address _account) internal view {
+    function _checkRole(bytes32 _role, address _account) internal view override {
         if (!_hasRole(_role, _account)) {
             revert AccountHasNoRole(_account, _role);
         }
     }
 
-    function _checkAnyRole(bytes32[] memory _roles, address _account) internal view {
+    function _checkAnyRole(bytes32[] memory _roles, address _account) internal view override {
         if (!_hasAnyRole(_roles, _account)) {
             revert AccountHasNoRoles(_account, _roles);
         }

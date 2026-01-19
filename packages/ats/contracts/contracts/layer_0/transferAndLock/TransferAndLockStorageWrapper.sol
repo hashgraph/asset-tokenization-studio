@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { checkNounceAndDeadline, verify } from "../../layer_1/protectedPartitions/signatureVerification.sol";
 import { ITransferAndLock } from "../../layer_3/interfaces/ITransferAndLock.sol";
-import { ITransferAndLockStorageWrapper } from "../../layer_3/interfaces/ITransferAndLockStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../layer_0/constants/values.sol";
 import {
     getMessageHashTransferAndLockByPartition,
@@ -11,26 +10,27 @@ import {
 } from "../../layer_3/transferAndLock/signatureVerification.sol";
 import { BasicTransferInfo } from "../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { SecurityStorageWrapper } from "../security/SecurityStorageWrapper.sol";
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
-abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrapper, SecurityStorageWrapper {
+abstract contract TransferAndLockStorageWrapper is SecurityStorageWrapper {
     function _protectedTransferAndLockByPartition(
         bytes32 _partition,
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal returns (bool success_, uint256 lockId_) {
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal override returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
-            _nounce,
+            _protectionData.nounce,
             _transferAndLock.from,
             _getNounceFor(_transferAndLock.from),
-            _deadline,
+            _protectionData.deadline,
             _blockTimestamp()
         );
 
-        _checkTransferAndLockByPartitionSignature(_partition, _transferAndLock, _deadline, _nounce, _signature);
+        _checkTransferAndLockByPartitionSignature(_partition, _transferAndLock, _protectionData);
 
-        _setNounce(_nounce, _transferAndLock.from);
+        _setNounce(_protectionData.nounce, _transferAndLock.from);
 
         _transferByPartition(
             _msgSender(),
@@ -47,7 +47,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
             _transferAndLock.expirationTimestamp
         );
 
-        emit PartitionTransferredAndLocked(
+        emit ITransferAndLock.PartitionTransferredAndLocked(
             _partition,
             _msgSender(),
             _transferAndLock.to,
@@ -60,21 +60,19 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
 
     function _protectedTransferAndLock(
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal returns (bool success_, uint256 lockId_) {
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal override returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
-            _nounce,
+            _protectionData.nounce,
             _transferAndLock.from,
             _getNounceFor(_transferAndLock.from),
-            _deadline,
+            _protectionData.deadline,
             _blockTimestamp()
         );
 
-        _checkTransferAndLockSignature(_transferAndLock, _deadline, _nounce, _signature);
+        _checkTransferAndLockSignature(_transferAndLock, _protectionData);
 
-        _setNounce(_nounce, _transferAndLock.from);
+        _setNounce(_protectionData.nounce, _transferAndLock.from);
 
         _transferByPartition(
             _msgSender(),
@@ -91,7 +89,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
             _transferAndLock.expirationTimestamp
         );
 
-        emit PartitionTransferredAndLocked(
+        emit ITransferAndLock.PartitionTransferredAndLocked(
             _DEFAULT_PARTITION,
             _msgSender(),
             _transferAndLock.to,
@@ -105,21 +103,17 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
     function _checkTransferAndLockByPartitionSignature(
         bytes32 _partition,
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view {
-        if (!_isTransferAndLockByPartitionSignatureValid(_partition, _transferAndLock, _deadline, _nounce, _signature))
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal view override {
+        if (!_isTransferAndLockByPartitionSignatureValid(_partition, _transferAndLock, _protectionData))
             revert WrongSignature();
     }
 
     function _isTransferAndLockByPartitionSignatureValid(
         bytes32 _partition,
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view returns (bool) {
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal view override returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLockByPartition(
             _partition,
             _transferAndLock.from,
@@ -127,14 +121,14 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
             _transferAndLock.amount,
             _transferAndLock.data,
             _transferAndLock.expirationTimestamp,
-            _deadline,
-            _nounce
+            _protectionData.deadline,
+            _protectionData.nounce
         );
         return
             verify(
                 _transferAndLock.from,
                 functionHash,
-                _signature,
+                _protectionData.signature,
                 _protectedPartitionsStorage().contractName,
                 _protectedPartitionsStorage().contractVersion,
                 _blockChainid(),
@@ -144,34 +138,29 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLockStorageWrappe
 
     function _checkTransferAndLockSignature(
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view {
-        if (!_isTransferAndLockSignatureValid(_transferAndLock, _deadline, _nounce, _signature))
-            revert WrongSignature();
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal view override {
+        if (!_isTransferAndLockSignatureValid(_transferAndLock, _protectionData)) revert WrongSignature();
     }
 
     function _isTransferAndLockSignatureValid(
         ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view returns (bool) {
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal view override returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLock(
             _transferAndLock.from,
             _transferAndLock.to,
             _transferAndLock.amount,
             _transferAndLock.data,
             _transferAndLock.expirationTimestamp,
-            _deadline,
-            _nounce
+            _protectionData.deadline,
+            _protectionData.nounce
         );
         return
             verify(
                 _transferAndLock.from,
                 functionHash,
-                _signature,
+                _protectionData.signature,
                 _protectedPartitionsStorage().contractName,
                 _protectedPartitionsStorage().contractVersion,
                 _blockChainid(),

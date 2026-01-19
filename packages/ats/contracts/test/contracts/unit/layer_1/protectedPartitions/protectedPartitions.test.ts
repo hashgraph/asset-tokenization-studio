@@ -3,17 +3,17 @@ import { ethers, network } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type Pause,
-  AccessControl,
-  ProtectedPartitions,
+  type PauseFacet,
+  type AccessControl,
+  type ProtectedPartitionsFacet,
   type IERC1410,
-  ERC1594,
-  TransferAndLock,
-  ERC20,
-  ControlList,
-  Kyc,
-  SsiManagement,
-  IHold,
+  type ERC1594Facet,
+  type TransferAndLockFacet,
+  type ERC20Facet,
+  type ControlListFacet,
+  type KycFacet,
+  type SsiManagementFacet,
+  type IHold,
   ComplianceMock,
 } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
@@ -209,16 +209,16 @@ describe("ProtectedPartitions Tests", () => {
   let signer_B: SignerWithAddress;
   let signer_C: SignerWithAddress;
 
-  let protectedPartitionsFacet: ProtectedPartitions;
-  let pauseFacet: Pause;
+  let protectedPartitionsFacet: ProtectedPartitionsFacet;
+  let pauseFacet: PauseFacet;
   let erc1410Facet: IERC1410;
-  let erc1594Facet: ERC1594;
-  let erc20Facet: ERC20;
-  let transferAndLockFacet: TransferAndLock;
-  let controlListFacet: ControlList;
+  let erc1594Facet: ERC1594Facet;
+  let erc20Facet: ERC20Facet;
+  let transferAndLockFacet: TransferAndLockFacet;
+  let controlListFacet: ControlListFacet;
   let accessControlFacet: AccessControl;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
+  let kycFacet: KycFacet;
+  let ssiManagementFacet: SsiManagementFacet;
   let holdFacet: IHold;
   let clearingFacet: Contract;
   let protectedHold: ProtectedHoldData;
@@ -249,17 +249,37 @@ describe("ProtectedPartitions Tests", () => {
   }
 
   async function setFacets(address: string, compliance?: string) {
-    protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", address);
-    pauseFacet = await ethers.getContractAt("Pause", address);
+    const holdManagementFacet = await ethers.getContractAt("HoldManagementFacet", address, signer_A);
+
+    const holdReadFacet = await ethers.getContractAt("HoldReadFacet", address, signer_A);
+    const holdTokenHolderFacet = await ethers.getContractAt("HoldTokenHolderFacet", address, signer_A);
+
+    const fragmentMapHold = new Map<string, any>();
+    [
+      ...holdManagementFacet.interface.fragments,
+      ...holdReadFacet.interface.fragments,
+      ...holdTokenHolderFacet.interface.fragments,
+    ].forEach((fragment) => {
+      const key = fragment.format();
+      if (!fragmentMapHold.has(key)) {
+        fragmentMapHold.set(key, fragment);
+      }
+    });
+
+    const uniqueFragmentsHold = Array.from(fragmentMapHold.values());
+
+    holdFacet = new Contract(address, uniqueFragmentsHold, signer_A);
+
+    protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", address);
+    pauseFacet = await ethers.getContractAt("PauseFacet", address);
     erc1410Facet = await ethers.getContractAt("IERC1410", address);
-    erc1594Facet = await ethers.getContractAt("ERC1594", address);
-    erc20Facet = await ethers.getContractAt("ERC20", address);
-    transferAndLockFacet = await ethers.getContractAt("TransferAndLock", address);
-    controlListFacet = await ethers.getContractAt("ControlList", address);
+    erc1594Facet = await ethers.getContractAt("ERC1594Facet", address);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", address);
+    transferAndLockFacet = await ethers.getContractAt("TransferAndLockFacet", address);
+    controlListFacet = await ethers.getContractAt("ControlListFacet", address);
     accessControlFacet = await ethers.getContractAt("AccessControl", address);
-    holdFacet = await ethers.getContractAt("IHold", address);
-    kycFacet = await ethers.getContractAt("Kyc", address);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", address);
+    kycFacet = await ethers.getContractAt("KycFacet", address);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", address);
     const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", address, signer_A);
 
     const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", address, signer_A);
@@ -267,7 +287,7 @@ describe("ProtectedPartitions Tests", () => {
     const clearingReadFacet = await ethers.getContractAt("ClearingReadFacet", address, signer_A);
     const clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", address, signer_A);
 
-    const fragmentMap = new Map<string, any>();
+    const fragmentMapClearing = new Map<string, any>();
     [
       ...clearingTransferFacet.interface.fragments,
       ...clearingRedeemFacet.interface.fragments,
@@ -276,14 +296,14 @@ describe("ProtectedPartitions Tests", () => {
       ...clearingActionsFacet.interface.fragments,
     ].forEach((fragment) => {
       const key = fragment.format();
-      if (!fragmentMap.has(key)) {
-        fragmentMap.set(key, fragment);
+      if (!fragmentMapClearing.has(key)) {
+        fragmentMapClearing.set(key, fragment);
       }
     });
 
-    const uniqueFragments = Array.from(fragmentMap.values());
+    const uniqueFragmentsClearing = Array.from(fragmentMapClearing.values());
 
-    clearingFacet = new Contract(address, uniqueFragments, signer_A);
+    clearingFacet = new Contract(address, uniqueFragmentsClearing, signer_A);
 
     if (compliance) {
       complianceMock = await ethers.getContractAt("ComplianceMock", compliance);
@@ -459,15 +479,11 @@ describe("ProtectedPartitions Tests", () => {
       await pauseFacet.connect(signer_B).pause();
 
       await expect(
-        erc1410Facet.protectedTransferFromByPartition(
-          DEFAULT_PARTITION,
-          signer_A.address,
-          signer_B.address,
-          amount,
-          MAX_UINT256,
-          1,
-          "0x1234",
-        ),
+        erc1410Facet.protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+          deadline: MAX_UINT256,
+          nounce: 1,
+          signature: "0x1234",
+        }),
       ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
     });
 
@@ -477,15 +493,11 @@ describe("ProtectedPartitions Tests", () => {
       await clearingFacet.activateClearing();
 
       await expect(
-        erc1410Facet.protectedTransferFromByPartition(
-          DEFAULT_PARTITION,
-          signer_A.address,
-          signer_B.address,
-          amount,
-          MAX_UINT256,
-          1,
-          "0x1234",
-        ),
+        erc1410Facet.protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+          deadline: MAX_UINT256,
+          nounce: 1,
+          signature: "0x1234",
+        }),
       ).to.be.revertedWithCustomError(clearingFacet, "ClearingIsActivated");
     });
 
@@ -493,15 +505,11 @@ describe("ProtectedPartitions Tests", () => {
       await setProtected();
 
       await expect(
-        erc1410Facet.protectedTransferFromByPartition(
-          DEFAULT_PARTITION,
-          signer_A.address,
-          signer_B.address,
-          amount,
-          MAX_UINT256,
-          1,
-          "0x1234",
-        ),
+        erc1410Facet.protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+          deadline: MAX_UINT256,
+          nounce: 1,
+          signature: "0x1234",
+        }),
       ).to.be.rejectedWith("AccountHasNoRole");
     });
 
@@ -513,15 +521,11 @@ describe("ProtectedPartitions Tests", () => {
       await expect(
         erc1410Facet
           .connect(signer_B)
-          .protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_A.address,
-            signer_B.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
       ).to.be.revertedWithCustomError(controlListFacet, "AccountIsBlocked");
     });
 
@@ -533,15 +537,11 @@ describe("ProtectedPartitions Tests", () => {
       await expect(
         erc1410Facet
           .connect(signer_B)
-          .protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_A.address,
-            signer_B.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
       ).to.be.revertedWithCustomError(controlListFacet, "AccountIsBlocked");
     });
 
@@ -553,29 +553,21 @@ describe("ProtectedPartitions Tests", () => {
       await expect(
         erc1410Facet
           .connect(signer_B)
-          .protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_A.address,
-            signer_B.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
       ).to.be.revertedWithCustomError(kycFacet, "InvalidKycStatus");
 
       await expect(
         erc1410Facet
           .connect(signer_B)
-          .protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_B.address,
-            signer_A.address,
-            amount,
-            MAX_UINT256,
-            1,
-            "0x1234",
-          ),
+          .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_B.address, signer_A.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x1234",
+          }),
       ).to.be.revertedWithCustomError(kycFacet, "InvalidKycStatus");
     });
   });
@@ -587,14 +579,11 @@ describe("ProtectedPartitions Tests", () => {
       await pauseFacet.connect(signer_B).pause();
 
       await expect(
-        erc1410Facet.protectedRedeemFromByPartition(
-          DEFAULT_PARTITION,
-          signer_A.address,
-          amount,
-          MAX_UINT256,
-          1,
-          "0x1234",
-        ),
+        erc1410Facet.protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+          deadline: MAX_UINT256,
+          nounce: 1,
+          signature: "0x1234",
+        }),
       ).to.be.rejectedWith("TokenIsPaused");
     });
 
@@ -604,14 +593,11 @@ describe("ProtectedPartitions Tests", () => {
       await clearingFacet.activateClearing();
 
       await expect(
-        erc1410Facet.protectedRedeemFromByPartition(
-          DEFAULT_PARTITION,
-          signer_A.address,
-          amount,
-          MAX_UINT256,
-          1,
-          "0x1234",
-        ),
+        erc1410Facet.protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+          deadline: MAX_UINT256,
+          nounce: 1,
+          signature: "0x1234",
+        }),
       ).to.be.revertedWithCustomError(clearingFacet, "ClearingIsActivated");
     });
 
@@ -619,14 +605,11 @@ describe("ProtectedPartitions Tests", () => {
       await setProtected();
 
       await expect(
-        erc1410Facet.protectedRedeemFromByPartition(
-          DEFAULT_PARTITION,
-          signer_A.address,
-          amount,
-          MAX_UINT256,
-          1,
-          "0x1234",
-        ),
+        erc1410Facet.protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+          deadline: MAX_UINT256,
+          nounce: 1,
+          signature: "0x1234",
+        }),
       ).to.be.rejectedWith("AccountHasNoRole");
     });
 
@@ -636,9 +619,11 @@ describe("ProtectedPartitions Tests", () => {
       await controlListFacet.connect(signer_B).addToControlList(signer_A.address);
 
       await expect(
-        erc1410Facet
-          .connect(signer_B)
-          .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, MAX_UINT256, 1, "0x1234"),
+        erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+          deadline: MAX_UINT256,
+          nounce: 1,
+          signature: "0x1234",
+        }),
       ).to.be.rejectedWith("AccountIsBlocked");
     });
 
@@ -647,9 +632,11 @@ describe("ProtectedPartitions Tests", () => {
       await kycFacet.connect(signer_B).revokeKyc(signer_A.address);
 
       await expect(
-        erc1410Facet
-          .connect(signer_B)
-          .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, MAX_UINT256, 1, "0x1234"),
+        erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+          deadline: MAX_UINT256,
+          nounce: 1,
+          signature: "0x1234",
+        }),
       ).to.be.revertedWithCustomError(kycFacet, "InvalidKycStatus");
     });
   });
@@ -760,23 +747,21 @@ describe("ProtectedPartitions Tests", () => {
       await expect(
         erc1410Facet
           .connect(signer_B)
-          .protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_A.address,
-            signer_B.address,
-            amount,
-            1,
-            0,
-            "0x1234",
-          ),
+          .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+            deadline: 1,
+            nounce: 0,
+            signature: "0x1234",
+          }),
       ).to.be.rejectedWith("PartitionsAreUnProtected");
     });
 
     it("GIVEN an unprotected partitions equity WHEN performing a protected redeem THEN transaction fails with PartitionsAreUnProtected", async () => {
       await expect(
-        erc1410Facet
-          .connect(signer_B)
-          .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, 1, 0, "0x1234"),
+        erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+          deadline: 1,
+          nounce: 0,
+          signature: "0x1234",
+        }),
       ).to.be.rejectedWith("PartitionsAreUnProtected");
     });
 
@@ -870,15 +855,11 @@ describe("ProtectedPartitions Tests", () => {
         await expect(
           erc1410Facet
             .connect(signer_B)
-            .protectedTransferFromByPartition(
-              DEFAULT_PARTITION,
-              signer_A.address,
-              signer_B.address,
-              amount,
-              1,
-              1,
-              "0x1234",
-            ),
+            .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+              deadline: 1,
+              nounce: 1,
+              signature: "0x1234",
+            }),
         ).to.be.rejectedWith("ExpiredDeadline");
       });
 
@@ -892,15 +873,11 @@ describe("ProtectedPartitions Tests", () => {
         await expect(
           erc1410Facet
             .connect(signer_B)
-            .protectedTransferFromByPartition(
-              DEFAULT_PARTITION,
-              signer_A.address,
-              signer_B.address,
-              amount,
-              MAX_UINT256,
-              1,
-              "0x01",
-            ),
+            .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+              deadline: MAX_UINT256,
+              nounce: 1,
+              signature: "0x01",
+            }),
         ).to.be.rejectedWith("WrongSignatureLength");
       });
 
@@ -914,15 +891,12 @@ describe("ProtectedPartitions Tests", () => {
         await expect(
           erc1410Facet
             .connect(signer_B)
-            .protectedTransferFromByPartition(
-              DEFAULT_PARTITION,
-              signer_A.address,
-              signer_B.address,
-              amount,
-              MAX_UINT256,
-              1,
-              "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
-            ),
+            .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+              deadline: MAX_UINT256,
+              nounce: 1,
+              signature:
+                "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
+            }),
         ).to.be.rejectedWith("WrongSignature");
       });
 
@@ -938,15 +912,11 @@ describe("ProtectedPartitions Tests", () => {
         await expect(
           erc1410Facet
             .connect(signer_B)
-            .protectedTransferFromByPartition(
-              DEFAULT_PARTITION,
-              signer_A.address,
-              signer_B.address,
-              amount,
-              deadline,
-              0,
-              "0x1234",
-            ),
+            .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+              deadline: deadline,
+              nounce: 0,
+              signature: "0x1234",
+            }),
         ).to.be.rejectedWith("WrongNounce");
       });
 
@@ -1040,15 +1010,11 @@ describe("ProtectedPartitions Tests", () => {
 
         await erc1410Facet
           .connect(signer_B)
-          .protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_A.address,
-            signer_B.address,
-            amount,
-            deadline,
-            1,
-            signature,
-          );
+          .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+            deadline: deadline,
+            nounce: 1,
+            signature: signature,
+          });
       });
     });
 
@@ -1087,9 +1053,11 @@ describe("ProtectedPartitions Tests", () => {
           data: "0x",
         });
         await expect(
-          erc1410Facet
-            .connect(signer_B)
-            .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, 1, 0, "0x1234"),
+          erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+            deadline: 1,
+            nounce: 0,
+            signature: "0x1234",
+          }),
         ).to.be.rejectedWith("ExpiredDeadline");
       });
 
@@ -1101,9 +1069,11 @@ describe("ProtectedPartitions Tests", () => {
           data: "0x",
         });
         await expect(
-          erc1410Facet
-            .connect(signer_B)
-            .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, MAX_UINT256, 1, "0x01"),
+          erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature: "0x01",
+          }),
         ).to.be.rejectedWith("WrongSignatureLength");
       });
 
@@ -1115,16 +1085,12 @@ describe("ProtectedPartitions Tests", () => {
           data: "0x",
         });
         await expect(
-          erc1410Facet
-            .connect(signer_B)
-            .protectedRedeemFromByPartition(
-              DEFAULT_PARTITION,
-              signer_A.address,
-              amount,
-              MAX_UINT256,
-              1,
+          erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+            deadline: MAX_UINT256,
+            nounce: 1,
+            signature:
               "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
-            ),
+          }),
         ).to.be.rejectedWith("WrongSignature");
       });
 
@@ -1138,9 +1104,11 @@ describe("ProtectedPartitions Tests", () => {
         const deadline = MAX_UINT256;
 
         await expect(
-          erc1410Facet
-            .connect(signer_B)
-            .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, deadline, 0, "0x1234"),
+          erc1410Facet.connect(signer_B).protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+            deadline: deadline,
+            nounce: 0,
+            signature: "0x1234",
+          }),
         ).to.be.rejectedWith("WrongNounce");
       });
 
@@ -1175,7 +1143,11 @@ describe("ProtectedPartitions Tests", () => {
 
         await erc1410Facet
           .connect(signer_B)
-          .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, deadline, 1, signature);
+          .protectedRedeemFromByPartition(DEFAULT_PARTITION, signer_A.address, amount, {
+            deadline: deadline,
+            nounce: 1,
+            signature: signature,
+          });
       });
     });
 
@@ -1523,15 +1495,11 @@ describe("ProtectedPartitions Tests", () => {
 
         await erc1410Facet
           .connect(signer_B)
-          .protectedTransferFromByPartition(
-            DEFAULT_PARTITION,
-            signer_A.address,
-            signer_B.address,
-            amount,
-            deadline,
-            1,
-            signature,
-          );
+          .protectedTransferFromByPartition(DEFAULT_PARTITION, signer_A.address, signer_B.address, amount, {
+            deadline: deadline,
+            nounce: 1,
+            signature: signature,
+          });
         expect(await complianceMock.transferredHit()).to.equal(1);
       });
     });

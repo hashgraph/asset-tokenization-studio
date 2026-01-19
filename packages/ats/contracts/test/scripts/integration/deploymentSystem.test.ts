@@ -297,7 +297,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(registerResult.success).to.be.true;
       expect(registerResult.blrAddress).to.equal(blrResult.proxyAddress);
       expect(registerResult.registered.length).to.equal(TEST_SIZES.DUAL);
-      expect(registerResult.transactionHash).to.exist;
+      expect(registerResult.transactionHashes).to.exist;
     });
 
     it("should register single facet", async () => {
