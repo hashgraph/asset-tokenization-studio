@@ -145,9 +145,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
         (, , bytes memory data) = _getCorporateAction(actionId);
 
-        if (data.length > 0) {
-            (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
-        }
+        assert(data.length > 0);
+        (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
 
         registeredDividend_.snapshotId = _getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
@@ -231,9 +230,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
         (, , bytes memory data) = _getCorporateAction(actionId);
 
-        if (data.length > 0) {
-            (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
-        }
+        assert(data.length > 0);
+        (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
 
         registeredVoting_.snapshotId = _getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
@@ -304,9 +302,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
         (, , bytes memory data) = _getCorporateAction(actionId);
 
-        if (data.length > 0) {
-            (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));
-        }
+        assert(data.length > 0);
+        (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));
     }
 
     function _getScheduledBalanceAdjustmentsCount() internal view override returns (uint256 balanceAdjustmentCount_) {

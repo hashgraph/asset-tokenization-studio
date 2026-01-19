@@ -26,9 +26,8 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
     }
 
     function _approve(address owner, address spender, uint256 value) internal override returns (bool) {
-        if (owner == address(0)) {
-            revert ZeroOwnerAddress();
-        }
+        assert(owner != address(0));
+
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }

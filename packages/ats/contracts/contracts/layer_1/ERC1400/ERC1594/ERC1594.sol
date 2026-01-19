@@ -61,7 +61,6 @@ abstract contract ERC1594 is IERC1594, Internals {
         onlyWithinMaxSupply(_value)
         onlyIdentified(address(0), _tokenHolder)
         onlyCompliant(address(0), _tokenHolder, false)
-        onlyIssuable
         onlyUnpaused
     {
         {
