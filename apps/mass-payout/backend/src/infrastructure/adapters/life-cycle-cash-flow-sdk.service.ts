@@ -222,7 +222,7 @@ import {
   LifeCycleCashFlow,
   PauseRequest,
   UnpauseRequest,
-} from "@mass-payout/sdk"
+} from "@hashgraph/mass-payout-sdk"
 import { ExecuteDistributionResponse } from "@domain/ports/execute-distribution-response.interface"
 import { HederaService } from "@domain/ports/hedera.port"
 import { ConfigModule, ConfigService } from "@nestjs/config"

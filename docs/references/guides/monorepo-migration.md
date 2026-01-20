@@ -1,3 +1,9 @@
+---
+id: monorepo-migration
+title: Migration Guide - Workspace Structure Update
+sidebar_label: Monorepo Migration
+---
+
 # Migration Guide: Workspace Structure Update
 
 This document outlines the changes made during the BBND-1075 workspace migration and how to adapt to the new structure.

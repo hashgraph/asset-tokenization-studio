@@ -250,7 +250,7 @@ import EvmAddress from "@domain/contract/EvmAddress"
 import BigDecimal from "@domain/shared/BigDecimal"
 import RbacPort from "./types/RbacPort"
 import { ethers, BaseContract, ContractTransaction } from "ethers"
-import { LifeCycleCashFlow__factory, ProxyAdmin__factory, TransparentUpgradeableProxy__factory } from "@mass-payout/contracts"
+import { LifeCycleCashFlow__factory, ProxyAdmin__factory, TransparentUpgradeableProxy__factory } from "@hashgraph/mass-payout-contracts"
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   protected readonly logger = new Logger(HederaTransactionAdapter.name)

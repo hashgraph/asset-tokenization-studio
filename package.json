@@ -3,7 +3,7 @@
   "license": "Apache-2.0",
   "description": "asset tokenization",
   "private": true,
-  "workspaces": ["packages/ats/*", "packages/mass-payout/*", "apps/ats/*", "apps/mass-payout/*"],
+  "workspaces": ["packages/ats/*", "packages/mass-payout/*", "apps/ats/*", "apps/mass-payout/*", "apps/docs"],
   "overrides": {
     "@hashgraph/asset-tokenization-dapp": {
       "i18next": "23.10.1",
@@ -11,7 +11,7 @@
       "zustand": "4.4.1",
       "@phosphor-icons/react": "2.0.9"
     },
-    "@mass-payout/frontend": {
+    "@hashgraph/mass-payout-frontend": {
       "i18next": "23.10.1",
       "i18next-browser-languagedetector": "7.2.0",
       "zustand": "4.5.2",
@@ -51,6 +51,7 @@
     "release:ats": "changeset version --ignore '@hashgraph/mass-payout*'",
     "release:mp": "changeset version --ignore '@hashgraph/asset-tokenization-*'",
     "release:preview": "changeset status",
+    "docs:start": "npm run start --workspace=apps/docs",
     "ats:setup": "npm ci && npm run ats:build",
     "ats:setup:clean": "npm run ats:clean && npm install && npm run ats:build",
     "ats:build": "npm run ats:contracts:build && npm run ats:sdk:build && npm run ats:web:build",
@@ -141,8 +142,6 @@
     "mass-payout:backend:build": "npm run build --workspace=apps/mass-payout/backend",
     "mass-payout:backend:test": "npm run test --workspace=apps/mass-payout/backend",
     "mass-payout:backend:test:ci": "npm run test:ci --workspace=apps/mass-payout/backend --if-present || npm run test --workspace=apps/mass-payout/backend",
-    "mass-payout:backend:dev": "npm run start:dev --workspace=apps/mass-payout/backend",
-    "mass-payout:backend:start": "npm run start --workspace=apps/mass-payout/backend",
     "mass-payout:backend:clean": "npm run clean --workspace=apps/mass-payout/backend",
     "mass-payout:frontend:build": "npm run build --workspace=apps/mass-payout/frontend",
     "mass-payout:frontend:test": "npm run test --workspace=apps/mass-payout/frontend",
