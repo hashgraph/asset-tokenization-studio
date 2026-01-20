@@ -261,6 +261,7 @@ import {
   TREXFactoryAts__factory,
   ProceedRecipientsFacet__factory,
   CorporateActionsFacet__factory,
+  NoncesFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '@domain/context/security/ScheduledSnapshot';
 import { VotingRights } from '@domain/context/equity/VotingRights';
@@ -398,16 +399,16 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getNounceFor(
+  async getNonceFor(
     address: EvmAddress,
     target: EvmAddress,
   ): Promise<BigNumber> {
     LogService.logTrace(`Getting Nounce`);
 
     return await this.connect(
-      ProtectedPartitionsFacet__factory,
+      NoncesFacet__factory,
       address.toString(),
-    ).getNounceFor(target.toString());
+    ).nonces(target.toString());
   }
 
   async partitionsOf(

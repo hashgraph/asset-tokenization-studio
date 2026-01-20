@@ -1138,7 +1138,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return securityInfo.arePartitionsProtected ?? false;
   });
 
-  singletonInstance.getNounceFor = jest.fn(async (address: EvmAddress, target: EvmAddress) => {
+  singletonInstance.getNonceFor = jest.fn(async (address: EvmAddress, target: EvmAddress) => {
     const account = "0x" + target.toString().toUpperCase().substring(2);
     return nonces.get(account) ?? new BigDecimal("0").toBigNumber();
   });
