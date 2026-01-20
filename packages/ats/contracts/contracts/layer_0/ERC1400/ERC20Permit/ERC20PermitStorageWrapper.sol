@@ -6,7 +6,6 @@ import { IERC20Permit } from "../../../layer_1/interfaces/ERC1400/IERC20Permit.s
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { ERC20PERMIT_TYPEHASH } from "../../constants/values.sol";
 import { getDomainHash } from "../../../layer_0/common/libraries/ERC712Lib.sol";
-import { _ERC20PERMIT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
@@ -44,13 +43,5 @@ abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function _DOMAIN_SEPARATOR() internal view override returns (bytes32) {
         return getDomainHash(_getName(), Strings.toString(_getResolverProxyVersion()), _blockChainid(), address(this));
-    }
-
-    function _erc20PermitStorage() internal pure returns (ERC20PermitStorage storage erc20permitStorage_) {
-        bytes32 position = _ERC20PERMIT_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc20permitStorage_.slot := position
-        }
     }
 }
