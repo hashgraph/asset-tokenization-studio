@@ -24,9 +24,10 @@
  */
 
 // ============================================================================
-// Types
+// Types (consolidated in types/ folder)
 // ============================================================================
 
+// Core types
 export type {
   RegistryProvider,
   FacetDefinition,
@@ -59,10 +60,20 @@ export type {
   WorkflowType,
   AtsWorkflowType,
   ResumeOptions,
-} from "./types/checkpoint";
+} from "./types";
 
 // Type guards
-export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./types/checkpoint";
+export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./types";
+
+// BLR configuration types
+export type {
+  FacetConfiguration,
+  BatchFacetConfiguration,
+  CreateBlrConfigurationResult,
+  ConfigurationError,
+  ConfigurationData,
+  FacetConfigurationData,
+} from "./types";
 
 // ============================================================================
 // Constants
@@ -145,12 +156,7 @@ export { registerFacets, type RegisterFacetsOptions, type RegisterFacetsResult }
 
 export { registerAdditionalFacets, type RegisterAdditionalFacetsOptions } from "./operations/registerAdditionalFacets";
 
-export {
-  createBatchConfiguration,
-  type CreateBlrConfigurationResult,
-  type ConfigurationData,
-  type ConfigurationError,
-} from "./operations/blrConfigurations";
+export { createBatchConfiguration } from "./operations/blrConfigurations";
 
 export { deployBlr, type DeployBlrOptions, type DeployBlrResult } from "./operations/blrDeployment";
 

@@ -31,7 +31,7 @@
  */
 
 import { Contract, ContractFactory, Signer, Wallet, Overrides, providers } from "ethers";
-import type { WorkflowType } from "./types/checkpoint";
+import type { WorkflowType } from "./checkpoint";
 
 /**
  * Method definition with full signature and selector.

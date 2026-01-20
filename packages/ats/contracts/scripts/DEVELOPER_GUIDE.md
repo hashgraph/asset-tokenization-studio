@@ -1438,6 +1438,40 @@ export async function deployAndRegisterCustomFacets(signer: Signer, blr: Contrac
 
 ---
 
+### Type Declaration Patterns
+
+Two patterns are used for TypeScript types in this codebase:
+
+**Co-located (default)**: Define types in the same file as the function that uses them.
+
+```typescript
+// operations/blrDeployment.ts
+export interface DeployBlrOptions { ... }
+export interface DeployBlrResult { ... }
+export async function deployBlr(...): Promise<DeployBlrResult> { ... }
+```
+
+**Centralized**: Import from `types/` when shared across 3+ files.
+
+```typescript
+// operations/blrConfigurations.ts
+import type { ConfigurationData, ConfigurationError } from "../types";
+```
+
+**When to use each:**
+
+| Use Co-located           | Use Centralized          |
+| ------------------------ | ------------------------ |
+| Type used by 1-2 files   | Type used by 3+ files    |
+| Specific to one function | Core infrastructure type |
+| May evolve with feature  | Stable, rarely changes   |
+
+**Rule of thumb**: Start co-located. Extract to `types/` only when you need to import into a 3rd file.
+
+See [`types/core.ts:9-30`](infrastructure/types/core.ts#L9-L30) for detailed guidelines.
+
+---
+
 ## Troubleshooting
 
 ### "Facet not found in registry"
