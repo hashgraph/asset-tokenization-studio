@@ -5,6 +5,7 @@ import {
   type ResolverProxy,
   type Pause,
   ERC20PermitFacet,
+  NoncesFacet,
   ERC20,
   AccessControl,
   ControlList,
@@ -20,6 +21,7 @@ describe("ERC20Permit Tests", () => {
   let signer_C: SignerWithAddress;
 
   let erc20PermitFacet: ERC20PermitFacet;
+  let noncesFacet: NoncesFacet;
   let erc20Facet: ERC20;
   let pauseFacet: Pause;
   let accessControlFacet: AccessControl;
@@ -44,19 +46,13 @@ describe("ERC20Permit Tests", () => {
     controlList = await ethers.getContractAt("ControlList", diamond.address);
 
     erc20PermitFacet = await ethers.getContractAt("ERC20PermitFacet", diamond.address);
+    noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.address);
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
     erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_A);
     diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", diamond.address);
   });
 
   describe("Single Partition", () => {
-    describe("Nonces", () => {
-      it("GIVEN any account WHEN nonces is called THEN the current nonce for that account is returned", async () => {
-        const nonces = await erc20PermitFacet.nonces(signer_A.address);
-        expect(nonces).to.equal(0);
-      });
-    });
-
     describe("Domain Separator", () => {
       it("GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned", async () => {
         const domainSeparator = await erc20PermitFacet.DOMAIN_SEPARATOR();
@@ -182,7 +178,7 @@ describe("ERC20Permit Tests", () => {
       });
 
       it("GIVEN a signature from a different owner WHEN permit is called THEN the transaction reverts with ERC2612InvalidSigner", async () => {
-        const nonce = await erc20PermitFacet.nonces(signer_A.address);
+        const nonce = await noncesFacet.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
         const CONTRACT_NAME = (await erc20Facet.getERC20Metadata()).info.name;
         const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
@@ -221,7 +217,7 @@ describe("ERC20Permit Tests", () => {
       });
 
       it("GIVEN a valid signature WHEN permit is called THEN the approval succeeds and emits Approval event", async () => {
-        const nonce = await erc20PermitFacet.nonces(signer_A.address);
+        const nonce = await noncesFacet.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
         const CONTRACT_NAME = (await erc20Facet.getERC20Metadata()).info.name;
         const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
