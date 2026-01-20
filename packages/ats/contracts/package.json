@@ -155,8 +155,7 @@
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.8.2",
-    "istanbul-combine": "^0.3.0"
+    "typescript": "^5.8.2"
   },
   "overrides": {
     "@typechain/ethers-v5": "10.2.1",
