@@ -21,11 +21,6 @@ interface IERC20Permit {
     ) external;
 
     /**
-     * @notice Returns the current nonce for `owner`
-     */
-    function nonces(address owner) external view returns (uint256);
-
-    /**
      * @notice Returns the domain separator used in the encoding of the signature for `permit`, as defined by {EIP712}
      */
     // solhint-disable-next-line func-name-mixedcase

@@ -39,10 +39,6 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Internals {
         return _arePartitionsProtected();
     }
 
-    function getNounceFor(address account) external view override returns (uint256) {
-        return _getNonceFor(account);
-    }
-
     function calculateRoleForPartition(bytes32 partition) external pure override returns (bytes32 role) {
         role = _calculateRoleForPartition(partition);
     }

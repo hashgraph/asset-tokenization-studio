@@ -55,6 +55,7 @@ const BOND_FIXED_RATE_FACETS = [
   "ERC1643FixedRateFacet",
   "ERC1644FixedRateFacet",
   "ERC20PermitFixedRateFacet",
+  "NoncesFixedRateFacet",
   "ERC20VotesFixedRateFacet",
   "ERC3643BatchFixedRateFacet",
   "ERC3643ManagementFixedRateFacet",

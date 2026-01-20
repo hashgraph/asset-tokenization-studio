@@ -29,10 +29,6 @@ abstract contract ERC20Permit is IERC20Permit, Internals {
         _permit(owner, spender, value, deadline, v, r, s);
     }
 
-    function nonces(address owner) external view override returns (uint256) {
-        return _getNonceFor(owner);
-    }
-
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view override returns (bytes32) {
         return _DOMAIN_SEPARATOR();
