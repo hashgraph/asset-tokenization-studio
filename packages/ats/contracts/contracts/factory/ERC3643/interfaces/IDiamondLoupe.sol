@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.17;
 
-interface TRexIDiamondLoupe {
+interface TRexIDiamondLoupe{
     struct Facet {
         bytes32 id;
         address addr;
