@@ -42,7 +42,9 @@ library ScheduledTasksLib {
 
     function popScheduledTask(ScheduledTasksDataStorage storage _scheduledTasks) internal {
         uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
-        assert(scheduledTasksLength > 0);
+        if (scheduledTasksLength == 0) {
+            return;
+        }
         delete (_scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
         _scheduledTasks.scheduledTaskCount--;
     }
