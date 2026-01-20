@@ -8,29 +8,13 @@ import { IClearingTransfer } from "../layer_1/interfaces/clearing/IClearingTrans
 import { IClearingRedeem } from "../layer_1/interfaces/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "../layer_1/interfaces/clearing/IClearingHoldCreation.sol";
 import { ThirdPartyType } from "./common/types/ThirdPartyType.sol";
-import {
-    IHold,
-    Hold,
-    HoldData,
-    HoldIdentifier,
-    OperationType,
-    ProtectedHold
-} from "../layer_1/interfaces/hold/IHold.sol";
-import {
-    ISnapshotsStorageWrapper,
-    Snapshots,
-    PartitionSnapshots,
-    SnapshotsAddress
-} from "../layer_1/interfaces/snapshots/ISnapshots.sol";
+import { Hold, HoldData, HoldIdentifier, OperationType, ProtectedHold } from "../layer_1/interfaces/hold/IHold.sol";
+import { Snapshots, PartitionSnapshots, SnapshotsAddress } from "../layer_1/interfaces/snapshots/ISnapshots.sol";
 import { ILock } from "../layer_1/interfaces/lock/ILock.sol";
 import { ISecurity } from "../layer_3/interfaces/ISecurity.sol";
 import { IBondRead } from "../layer_2/interfaces/bond/IBondRead.sol";
 import { RegulationData, AdditionalSecurityData } from "../layer_3/constants/regulation.sol";
 import { ICap } from "../layer_1/interfaces/cap/ICap.sol";
-import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from "../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
 import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
 import { IEquity } from "../layer_2/interfaces/equity/IEquity.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
@@ -195,10 +179,6 @@ abstract contract Internals is Modifiers {
         uint256 abaf,
         address tokenHolder
     ) internal view virtual returns (uint256 factor);
-    function _calculateFactorByPartitionAdjustedAt(
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view virtual returns (uint256);
     function _calculateFactorByTokenHolderAndPartitionIndex(
         uint256 abaf,
         address tokenHolder,
@@ -278,7 +258,6 @@ abstract contract Internals is Modifiers {
         uint256[] memory _amounts
     ) internal pure virtual;
     function _checkInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) internal pure virtual;
-    function _checkIssuable() internal view virtual;
     function _checkNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) internal view virtual;
     function _checkOperator(bytes32 _partition, address _from) internal view virtual;
     function _checkProtectedPartitions() internal view virtual;
@@ -1462,26 +1441,31 @@ abstract contract Internals is Modifiers {
 
     function _isKycInitialized() internal view virtual returns (bool);
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ExternalControlLists(address[] calldata _controlLists) internal virtual;
 
     function _isExternalControlListInitialized() internal view virtual returns (bool);
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ExternalKycLists(address[] calldata _kycLists) internal virtual;
 
     function _isKycExternalInitialized() internal view virtual returns (bool);
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ExternalPauses(address[] calldata _pauses) internal virtual;
 
     function _isExternalPauseInitialized() internal view virtual returns (bool);
 
     function _isERC3643Initialized() internal view virtual returns (bool);
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1410(bool _multiPartition) internal virtual;
 
     function _isERC1410Initialized() internal view virtual returns (bool);
 
     function _isERC1594Initialized() internal view virtual returns (bool);
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1644(bool _controllable) internal virtual;
 
     function _isERC1644Initialized() internal view virtual returns (bool);
@@ -1495,7 +1479,7 @@ abstract contract Internals is Modifiers {
     function _setSymbol(string calldata _symbol) internal virtual;
 
     function _setOnchainID(address _onchainID) internal virtual;
-
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
@@ -1512,6 +1496,7 @@ abstract contract Internals is Modifiers {
         uint256 _couponID
     ) internal view virtual returns (uint256 previousCouponID_);
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_SustainabilityPerformanceTargetRate(
         ISustainabilityPerformanceTargetRate.InterestRate calldata _interestRate,
         ISustainabilityPerformanceTargetRate.ImpactData[] calldata _impactData,

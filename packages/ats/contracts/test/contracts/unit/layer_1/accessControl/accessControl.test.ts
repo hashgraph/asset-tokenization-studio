@@ -268,4 +268,37 @@ describe("Access Control Tests", () => {
     expect(rolesFor_C.length).to.equal(roleCountFor_C);
     expect(rolesFor_C[0].toUpperCase()).to.equal(ATS_ROLES._PAUSER_ROLE.toUpperCase());
   });
+
+  it("GIVEN an account that already has a role WHEN grantRole is called again THEN transaction fails with AccountAssignedToRole", async () => {
+    // Grant the role first time
+    await accessControlFacet.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
+
+    // Verify role was granted
+    expect(await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.equal(true);
+
+    // Try to grant the same role again and expect it to fail
+    await expect(accessControlFacet.connect(deployer).grantRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address))
+      .to.be.revertedWithCustomError(accessControlFacet, "AccountAssignedToRole")
+      .withArgs(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
+  });
+
+  it("GIVEN an account without a specific role WHEN revokeRole is called THEN transaction fails with AccountNotAssignedToRole", async () => {
+    // Verify that the account does not have the role
+    expect(await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.equal(false);
+
+    // Try to revoke a role that the account doesn't have
+    await expect(accessControlFacet.connect(deployer).revokeRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address))
+      .to.be.revertedWithCustomError(accessControlFacet, "AccountNotAssignedToRole")
+      .withArgs(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
+  });
+
+  it("GIVEN an account without a specific role WHEN renounceRole is called THEN transaction fails with AccountNotAssignedToRole", async () => {
+    // Verify that the account does not have the role
+    expect(await accessControlFacet.hasRole(ATS_ROLES._PAUSER_ROLE, unknownSigner.address)).to.equal(false);
+
+    // Try to renounce a role that the account doesn't have
+    await expect(accessControlFacet.connect(unknownSigner).renounceRole(ATS_ROLES._PAUSER_ROLE))
+      .to.be.revertedWithCustomError(accessControlFacet, "AccountNotAssignedToRole")
+      .withArgs(ATS_ROLES._PAUSER_ROLE, unknownSigner.address);
+  });
 });

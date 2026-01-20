@@ -21,11 +21,6 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         bool initialized;
     }
 
-    modifier onlyIssuable() override {
-        _checkIssuable();
-        _;
-    }
-
     modifier onlyCanTransferFromByPartition(
         address _from,
         address _to,
@@ -83,10 +78,6 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
 
     function _isIssuable() internal view override returns (bool) {
         return _erc1594Storage().issuance;
-    }
-
-    function _checkIssuable() internal view override {
-        if (!_isIssuable()) revert IssuanceIsClosed();
     }
 
     function _checkCanRedeemFromByPartition(
@@ -222,6 +213,10 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         if (!isCompliant) {
             LowLevelCall.revertWithData(bytes4(reasonCode), details);
         }
+    }
+
+    function _isERC1594Initialized() internal view override returns (bool) {
+        return _erc1594Storage().initialized;
     }
 
     function _erc1594Storage() internal pure returns (ERC1594Storage storage ds) {
@@ -403,9 +398,5 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         }
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
-    }
-
-    function _isERC1594Initialized() internal view override returns (bool) {
-        return _erc1594Storage().initialized;
     }
 }

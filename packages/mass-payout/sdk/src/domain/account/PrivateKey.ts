@@ -203,9 +203,9 @@
 
 */
 
-import KeyProps, { KeyType } from './KeyProps';
-import { PrivateKey as HPrivateKey } from '@hashgraph/sdk';
-import PublicKey from './PublicKey';
+import KeyProps, { KeyType } from "./KeyProps";
+import { PrivateKey as HPrivateKey } from "@hiero-ledger/sdk";
+import PublicKey from "./PublicKey";
 
 export default class PrivateKey implements KeyProps {
   public readonly key: string;

@@ -14,4 +14,11 @@ abstract contract TotalBalancesStorageWrapper is FixedRateStorageWrapper {
     ) internal view virtual override returns (uint256 totalBalance) {
         return 0;
     }
+
+    function _getTotalBalanceForByPartitionAdjusted(
+        bytes32 /*_partition*/,
+        address /*_tokenHolder*/
+    ) internal view virtual override returns (uint256) {
+        return 0;
+    }
 }

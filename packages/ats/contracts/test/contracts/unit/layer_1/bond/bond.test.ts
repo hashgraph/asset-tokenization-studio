@@ -22,7 +22,6 @@ import {
 } from "@contract-types";
 import {
   DEFAULT_PARTITION,
-  dateToUnixTimestamp,
   ATS_ROLES,
   TIME_PERIODS_S,
   ADDRESS_ZERO,
@@ -30,7 +29,7 @@ import {
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
 } from "@scripts";
-import { grantRoleAndPauseToken } from "@test";
+import { getBondDetails, getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
@@ -171,12 +170,17 @@ describe("Bond Tests", () => {
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
   }
 
-  beforeEach(async () => {
-    startingDate = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
+  before(async () => {
+    const currentTimestamp = await getDltTimestamp();
+    startingDate = currentTimestamp + TIME_PERIODS_S.DAY;
     maturityDate = startingDate + numberOfCoupons * frequency;
-    couponRecordDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
-    couponExecutionDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:10:00Z`);
-    couponFixingDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:10:00Z`);
+  });
+
+  beforeEach(async () => {
+    const currentTimestamp = await getDltTimestamp();
+    couponRecordDateInSeconds = currentTimestamp + 400;
+    couponExecutionDateInSeconds = currentTimestamp + 1200;
+    couponFixingDateInSeconds = currentTimestamp + 1200;
     couponEndDateInSeconds = couponFixingDateInSeconds - 1;
     couponStartDateInSeconds = couponEndDateInSeconds - couponPeriod;
     couponData = {
@@ -190,6 +194,30 @@ describe("Bond Tests", () => {
       rateStatus: 1,
     };
     await loadFixture(deploySecurityFixture);
+  });
+
+  describe("Initialization", () => {
+    it("GIVEN an initialized bond WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+      const regulationData = {
+        regulationType: 1, // REG_S
+        regulationSubType: 0, // NONE
+        dealSize: 0,
+        accreditedInvestors: 1, // ACCREDITATION_REQUIRED
+        maxNonAccreditedInvestors: 0,
+        manualInvestorVerification: 1, // VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
+        internationalInvestors: 1, // ALLOWED
+        resaleHoldPeriod: 0, // NOT_APPLICABLE
+      };
+
+      const additionalSecurityData = {
+        countriesControlListType: false,
+        listOfCountries: "",
+        info: "",
+      };
+      await expect(
+        bondFacet._initialize_bondUSA(await getBondDetails(), regulationData, additionalSecurityData),
+      ).to.be.rejectedWith("AlreadyInitialized");
+    });
   });
 
   describe("Single Partition", () => {
@@ -781,7 +809,7 @@ describe("Bond Tests", () => {
 
         const clearingOperation = {
           partition: DEFAULT_PARTITION,
-          expirationTimestamp: dateToUnixTimestamp("2030-01-01T00:00:09Z"),
+          expirationTimestamp: (await getDltTimestamp()) + 500,
           data: EMPTY_HEX_BYTES,
         };
 
@@ -900,6 +928,271 @@ describe("Bond Tests", () => {
         .withArgs(_PARTITION_ID, signer_A.address, signer_A.address, amount, "0x", "0x")
         .to.emit(bondFacet, "RedeemedByPartition")
         .withArgs(DEFAULT_PARTITION, signer_A.address, signer_A.address, amount, "0x", "0x");
+    });
+
+    it("GIVEN a coupon with snapshot WHEN getCouponHolders is called THEN returns token holders from snapshot", async () => {
+      await deploySecurityFixture(true);
+
+      const TotalAmount = 1000;
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+
+      // Grant KYC to signer_B for issuing tokens later
+      await kycFacet.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+      await erc1410Facet.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: TotalAmount,
+        data: "0x",
+      });
+
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
+
+      const couponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
+      };
+
+      await bondFacet.connect(signer_A).setCoupon(couponData);
+
+      // Time travel past record date
+      await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+
+      // Trigger scheduled tasks by performing an action (issue more tokens to signer_B)
+      await erc1410Facet.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_B.address,
+        value: 500,
+        data: "0x",
+      });
+
+      const coupon = await bondReadFacet.getCoupon(1);
+      const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
+      const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
+
+      expect(coupon.snapshotId).to.be.greaterThan(0); // Snapshot should have been taken
+      expect(couponTotalHolders).to.equal(1);
+      expect(couponHolders).to.have.members([signer_A.address]);
+    });
+
+    it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses current balance", async () => {
+      await deploySecurityFixture(true);
+
+      const TotalAmount = 1000;
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+
+      await erc1410Facet.connect(signer_A).issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: TotalAmount,
+        data: "0x",
+      });
+
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
+
+      const couponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
+      };
+
+      await bondFacet.connect(signer_A).setCoupon(couponData);
+
+      // Time travel past record date but DON'T trigger snapshot
+      await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+
+      // Query couponFor without triggering snapshot - should use current balance path
+      const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
+      const coupon = await bondReadFacet.getCoupon(1);
+
+      expect(coupon.snapshotId).to.equal(0); // No snapshot taken
+      expect(couponFor.recordDateReached).to.be.true;
+      expect(couponFor.tokenBalance).to.equal(TotalAmount);
+    });
+
+    it("GIVEN a coupon WHEN getCoupon is called THEN decodes coupon data", async () => {
+      await deploySecurityFixture(true);
+
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
+
+      const couponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
+      };
+
+      await bondFacet.connect(signer_A).setCoupon(couponData);
+
+      const coupon = await bondReadFacet.getCoupon(1);
+
+      expect(coupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
+      expect(coupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
+      expect(coupon.coupon.rate).to.equal(couponRate);
+      expect(coupon.coupon.rateDecimals).to.equal(couponRateDecimals);
+      expect(coupon.coupon.startDate).to.equal(couponStartDateInSeconds);
+      expect(coupon.coupon.endDate).to.equal(couponEndDateInSeconds);
+      expect(coupon.coupon.fixingDate).to.equal(couponFixingDateInSeconds);
+      expect(coupon.coupon.rateStatus).to.equal(couponRateStatus);
+    });
+
+    it("GIVEN a non-coupon corporate action WHEN getCouponFor is called THEN transaction fails with WrongActionType", async () => {
+      await deploySecurityFixture(true);
+
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
+
+      const couponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
+      };
+
+      await bondFacet.connect(signer_A).setCoupon(couponData);
+
+      // Try to access with invalid coupon ID (0 would be invalid or different action type)
+      await expect(bondReadFacet.getCouponFor(999, signer_A.address)).to.be.revertedWithCustomError(
+        bondReadFacet,
+        "WrongIndexForAction",
+      );
+    });
+
+    it("GIVEN a non-coupon corporate action WHEN getCouponAmountFor is called THEN transaction fails with WrongActionType", async () => {
+      await deploySecurityFixture(true);
+
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+
+      couponRecordDateInSeconds = (await getDltTimestamp()) + 1000;
+      couponExecutionDateInSeconds = (await getDltTimestamp()) + 2000;
+
+      const couponData = {
+        recordDate: couponRecordDateInSeconds.toString(),
+        executionDate: couponExecutionDateInSeconds.toString(),
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: couponStartDateInSeconds.toString(),
+        endDate: couponEndDateInSeconds.toString(),
+        fixingDate: couponFixingDateInSeconds.toString(),
+        rateStatus: couponRateStatus,
+      };
+
+      await bondFacet.connect(signer_A).setCoupon(couponData);
+
+      // Try to access with invalid coupon ID
+      await expect(bondReadFacet.getCouponAmountFor(999, signer_A.address)).to.be.revertedWithCustomError(
+        bondReadFacet,
+        "WrongIndexForAction",
+      );
+    });
+  });
+
+  describe("Uncovered Branch Tests", () => {
+    it("GIVEN a token holder with zero balance WHEN fullRedeemAtMaturity is called THEN succeeds without redeeming", async () => {
+      // Create a new user with no tokens
+      const signers = await ethers.getSigners();
+      const newUser = signers[10]; // Use a signer that hasn't been used yet
+
+      // Grant KYC to new user
+      await kycFacet.grantKyc(newUser.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+      // Move time past maturity
+      await timeTravelFacet.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
+
+      // Call fullRedeemAtMaturity on account with zero balance (signer_A has _MATURITY_REDEEMER_ROLE)
+      await expect(bondFacet.connect(signer_A).fullRedeemAtMaturity(newUser.address)).to.not.be.reverted;
+    });
+
+    it("GIVEN invalid startDate > endDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
+      // Grant corporate action role to signer_C
+      await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      const currentTimestamp = await getDltTimestamp();
+      const invalidCoupon = {
+        recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
+        executionDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: currentTimestamp + TIME_PERIODS_S.DAY * 3, // startDate > endDate
+        endDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+        fixingDate: currentTimestamp + TIME_PERIODS_S.DAY,
+        rateStatus: couponRateStatus,
+      };
+
+      await expect(bondFacet.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(
+        bondFacet,
+        "WrongDates",
+      );
+    });
+
+    it("GIVEN invalid fixingDate > executionDate WHEN setCoupon THEN transaction fails with WrongDates", async () => {
+      // Grant corporate action role to signer_C
+      await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      const currentTimestamp = await getDltTimestamp();
+      const invalidCoupon = {
+        recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
+        executionDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: currentTimestamp,
+        endDate: currentTimestamp + TIME_PERIODS_S.DAY * 3,
+        fixingDate: currentTimestamp + TIME_PERIODS_S.DAY * 3, // fixingDate > executionDate
+        rateStatus: couponRateStatus,
+      };
+
+      await expect(bondFacet.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(
+        bondFacet,
+        "WrongDates",
+      );
+    });
+
+    it("GIVEN fixingDate in the past WHEN setCoupon THEN transaction fails with WrongTimestamp", async () => {
+      // Grant corporate action role to signer_C
+      await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+      const currentTimestamp = await getDltTimestamp();
+      const invalidCoupon = {
+        recordDate: currentTimestamp + TIME_PERIODS_S.DAY,
+        executionDate: currentTimestamp + TIME_PERIODS_S.DAY * 2,
+        rate: couponRate,
+        rateDecimals: couponRateDecimals,
+        startDate: currentTimestamp - TIME_PERIODS_S.DAY * 3,
+        endDate: currentTimestamp + TIME_PERIODS_S.DAY * 3,
+        fixingDate: currentTimestamp - TIME_PERIODS_S.DAY, // fixingDate in the past
+        rateStatus: couponRateStatus,
+      };
+
+      await expect(bondFacet.connect(signer_C).setCoupon(invalidCoupon)).to.be.revertedWithCustomError(
+        bondFacet,
+        "WrongTimestamp",
+      );
     });
   });
 });

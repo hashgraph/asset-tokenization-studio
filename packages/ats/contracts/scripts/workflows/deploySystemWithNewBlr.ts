@@ -48,7 +48,11 @@ import {
   createBondKpiLinkedRateConfiguration,
   createBondSustainabilityPerformanceTargetRateConfiguration,
 } from "@scripts/domain";
-import { BusinessLogicResolver__factory, ProxyAdmin__factory } from "@contract-types";
+import {
+  BusinessLogicResolver__factory,
+  IStaticFunctionSelectors__factory,
+  ProxyAdmin__factory,
+} from "@contract-types";
 
 /**
  * Complete deployment output structure.
@@ -391,26 +395,30 @@ export async function deploySystemWithNewBlr(
       info("\n📝 Step 4/7: Registering facets in BLR...");
 
       // Prepare facets with resolver keys from registry
-      const facetsToRegister = Array.from(facetsResult.deployed.entries()).map(([facetName, deploymentResult]) => {
-        if (!deploymentResult.address) {
-          throw new Error(`No address for facet: ${facetName}`);
-        }
+      const facetsToRegister = await Promise.all(
+        Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
+          if (!deploymentResult.address) {
+            throw new Error(`No address for facet: ${facetName}`);
+          }
 
-        // Strip "TimeTravel" suffix to get canonical name
-        const baseName = facetName.replace(/TimeTravel$/, "");
+          // Strip "TimeTravel" suffix to get canonical name
+          const baseName = facetName.replace(/TimeTravel$/, "");
+          // deploymentResult.address
+          const staticSelector = IStaticFunctionSelectors__factory.connect(deploymentResult.address, signer);
+          const resolverKey = await staticSelector.getStaticResolverKey();
+          // Look up resolver key from registry
 
-        // Look up resolver key from registry
-        const definition = atsRegistry.getFacetDefinition(baseName);
-        if (!definition || !definition.resolverKey?.value) {
-          throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
-        }
+          if (!resolverKey) {
+            throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
+          }
 
-        return {
-          name: facetName,
-          address: deploymentResult.address,
-          resolverKey: definition.resolverKey.value,
-        };
-      });
+          return {
+            name: facetName,
+            address: deploymentResult.address,
+            resolverKey: resolverKey,
+          };
+        }),
+      );
 
       const registerResult = await registerFacets(blrContract, {
         facets: facetsToRegister,
@@ -783,6 +791,7 @@ export async function deploySystemWithNewBlr(
             ? bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.find((bf) => bf.address === facetAddress)
             : undefined;
 
+          const staticFunctionSelectors = IStaticFunctionSelectors__factory.connect(facetAddress, signer);
           return {
             name: facetName,
             address: facetAddress,
@@ -793,7 +802,7 @@ export async function deploySystemWithNewBlr(
               bondFixedRateFacet?.key ||
               bondKpiLinkedRateFacet?.key ||
               bondSustainabilityPerformanceTargetRateFacet?.key ||
-              "",
+              (await staticFunctionSelectors.getStaticResolverKey()),
           };
         }),
       ),

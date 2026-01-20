@@ -120,6 +120,7 @@ describe("ERC3643 Tests", () => {
             erc20MetadataInfo: { name, symbol, decimals, isin },
           },
         },
+        useLoadFixture: false, // Avoid nested loadFixture to prevent mock state pollution
       });
       diamond = base.diamond;
       signer_A = base.deployer;
@@ -253,6 +254,15 @@ describe("ERC3643 Tests", () => {
       expect(parsed["Config ID"].toLowerCase()).to.equal(configId.toLowerCase());
       expect(parsed["Version"]).to.equal(configVersion.toString());
     });
+
+    describe("initialize", () => {
+      it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with AlreadyInitialized", async () => {
+        await expect(
+          erc3643Facet.initialize_ERC3643(complianceMock.address, identityRegistryMock.address),
+        ).to.be.rejectedWith("AlreadyInitialized");
+      });
+    });
+
     describe("mint", () => {
       it("GIVEN an account with issuer role WHEN mint THEN transaction succeeds", async () => {
         // issue succeeds
@@ -451,6 +461,38 @@ describe("ERC3643 Tests", () => {
           expect(snapshot_Balance_Of_E_3).to.equal(AMOUNT - 1);
           expect(snapshot_FrozenBalance_Of_E_3).to.equal(1);
           expect(snapshot_Total_Supply_3).to.equal(AMOUNT);
+        });
+
+        it("GIVEN frozen tokens WHEN querying historical snapshot THEN balance and frozen amounts are tracked separately", async () => {
+          await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+
+          await erc1410Facet.issueByPartition({
+            partition: DEFAULT_PARTITION,
+            tokenHolder: signer_E.address,
+            value: AMOUNT,
+            data: "0x",
+          });
+
+          // snapshot
+          await snapshotFacet.connect(signer_A).takeSnapshot();
+
+          // Freeze some tokens
+          await freezeFacet.connect(signer_A).freezePartialTokens(signer_E.address, 100);
+
+          // snapshot
+          await snapshotFacet.connect(signer_A).takeSnapshot();
+
+          // Check snapshots track balance and frozen separately
+          const balance1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_E.address);
+          const frozen1 = await snapshotFacet.frozenBalanceOfAtSnapshot(1, signer_E.address);
+          const balance2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_E.address);
+          const frozen2 = await snapshotFacet.frozenBalanceOfAtSnapshot(2, signer_E.address);
+
+          expect(balance1).to.equal(AMOUNT); // Full balance, no frozen
+          expect(frozen1).to.equal(0); // No frozen tokens yet
+          expect(balance2).to.equal(AMOUNT - 100); // Balance reduced
+          expect(frozen2).to.equal(100); // Frozen tokens tracked
+          expect(balance2.add(frozen2)).to.equal(AMOUNT); // Total remains same
         });
       });
 
@@ -1287,6 +1329,19 @@ describe("ERC3643 Tests", () => {
 
           await expect(erc3643Facet.batchMint(toList, amounts)).to.be.rejectedWith("InputAmountsArrayLengthMismatch");
         });
+
+        it("GIVEN a paused token WHEN batchMint THEN transaction fails with TokenIsPaused", async () => {
+          await pauseFacet.pause();
+
+          const mintAmount = AMOUNT / 2;
+          const toList = [signer_D.address];
+          const amounts = [mintAmount];
+
+          await expect(erc3643Facet.batchMint(toList, amounts)).to.be.revertedWithCustomError(
+            pauseFacet,
+            "TokenIsPaused",
+          );
+        });
       });
 
       describe("batchTransfer", () => {
@@ -1335,6 +1390,67 @@ describe("ERC3643 Tests", () => {
 
           await expect(erc3643Facet.batchTransfer(toList, amounts)).to.be.rejectedWith(
             "InputAmountsArrayLengthMismatch",
+          );
+        });
+
+        it("GIVEN a paused token WHEN batchTransfer THEN transaction fails with TokenIsPaused", async () => {
+          await pauseFacet.pause();
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            pauseFacet,
+            "TokenIsPaused",
+          );
+        });
+
+        it("GIVEN clearing is activated WHEN batchTransfer THEN transaction fails with ClearingIsActivated", async () => {
+          await clearingActionsFacet.activateClearing();
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            clearingFacet,
+            "ClearingIsActivated",
+          );
+        });
+
+        it("GIVEN protected partitions without wildcard role WHEN batchTransfer THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+          await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+          await protectedPartitionsFacet.protectPartitions();
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            clearingFacet,
+            "PartitionsAreProtectedAndNoRole",
+          );
+        });
+
+        it("GIVEN non-verified sender WHEN batchTransfer THEN transaction fails with AddressNotVerified", async () => {
+          await identityRegistryMock.setFlags(false, false);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            erc3643Facet,
+            "AddressNotVerified",
+          );
+        });
+
+        it("GIVEN compliance returns false WHEN batchTransfer THEN transaction fails with ComplianceNotAllowed", async () => {
+          await complianceMock.setFlags(false, false);
+
+          const toList = [signer_F.address];
+          const amounts = [transferAmount];
+
+          await expect(erc3643Facet.connect(signer_E).batchTransfer(toList, amounts)).to.be.revertedWithCustomError(
+            erc3643Facet,
+            "ComplianceNotAllowed",
           );
         });
       });
@@ -1390,6 +1506,29 @@ describe("ERC3643 Tests", () => {
             "InputAmountsArrayLengthMismatch",
           );
         });
+
+        it("GIVEN toList and amounts with different lengths WHEN batchForcedTransfer THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
+          const mintAmount = AMOUNT / 2;
+          const fromList = [signer_A.address, signer_F.address];
+          const toList = [signer_D.address, signer_E.address];
+          const amounts = [mintAmount];
+
+          await expect(erc3643Facet.batchForcedTransfer(fromList, toList, amounts)).to.be.rejectedWith(
+            "InputAmountsArrayLengthMismatch",
+          );
+        });
+
+        it("GIVEN a paused token WHEN batchForcedTransfer THEN transaction fails with TokenIsPaused", async () => {
+          await pauseFacet.pause();
+
+          const fromList = [signer_F.address];
+          const toList = [signer_E.address];
+          const amounts = [transferAmount];
+
+          await expect(
+            erc3643Facet.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
+          ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        });
       });
 
       describe("batchBurn", () => {
@@ -1424,12 +1563,23 @@ describe("ERC3643 Tests", () => {
         });
 
         it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
-          const mintAmount = AMOUNT / 2;
-          const toList = [signer_D.address];
-          const amounts = [mintAmount, mintAmount];
+          const userAddresses = [signer_D.address];
+          const amounts = [burnAmount, burnAmount];
 
-          await expect(erc3643Facet.batchTransfer(toList, amounts)).to.be.rejectedWith(
+          await expect(erc3643Facet.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.rejectedWith(
             "InputAmountsArrayLengthMismatch",
+          );
+        });
+
+        it("GIVEN a paused token WHEN batchBurn THEN transaction fails with TokenIsPaused", async () => {
+          await pauseFacet.pause();
+
+          const userAddresses = [signer_D.address];
+          const amounts = [burnAmount];
+
+          await expect(erc3643Facet.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
+            pauseFacet,
+            "TokenIsPaused",
           );
         });
       });
@@ -1623,6 +1773,33 @@ describe("ERC3643 Tests", () => {
         expect(hasRole).to.equal(true);
       });
 
+      it("GIVEN an agent WHEN removing agent THEN removeAgent emits AgentRemoved and revokes role", async () => {
+        await erc3643Facet.addAgent(signer_B.address);
+
+        expect(await erc3643Facet.removeAgent(signer_B.address))
+          .to.emit(erc3643Facet, "AgentRemoved")
+          .withArgs(signer_B.address);
+
+        const hasRole = await accessControlFacet.hasRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
+        const isAgent = await erc3643Facet.isAgent(signer_B.address);
+        expect(isAgent).to.equal(false);
+        expect(hasRole).to.equal(false);
+      });
+
+      it("GIVEN a non-agent address WHEN removing agent THEN reverts with AccountNotAssignedToRole", async () => {
+        await expect(erc3643Facet.removeAgent(signer_C.address))
+          .to.be.revertedWithCustomError(accessControlFacet, "AccountNotAssignedToRole")
+          .withArgs(ATS_ROLES._AGENT_ROLE, signer_C.address);
+      });
+
+      it("GIVEN an already-agent address WHEN adding agent again THEN reverts with AccountAssignedToRole", async () => {
+        await erc3643Facet.addAgent(signer_B.address);
+
+        await expect(erc3643Facet.addAgent(signer_B.address))
+          .to.be.revertedWithCustomError(accessControlFacet, "AccountAssignedToRole")
+          .withArgs(ATS_ROLES._AGENT_ROLE, signer_B.address);
+      });
+
       it("GIVEN a user with the agent role WHEN performing actions using ERC-1400 methods succeeds", async () => {
         await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_B.address);
         const amount = 1000;
@@ -1704,7 +1881,6 @@ describe("ERC3643 Tests", () => {
         ).to.be.rejectedWith("AccountHasNoRole");
       });
       it("GIVEN an account without TREX_OWNER role WHEN setCompliance THEN transaction fails with AccountHasNoRole", async () => {
-        // set compliance fails
         await expect(erc3643Facet.connect(signer_C).setCompliance(complianceMock.address)).to.be.rejectedWith(
           "AccountHasNoRole",
         );
@@ -1728,9 +1904,16 @@ describe("ERC3643 Tests", () => {
         );
       });
 
-      it("GIVEN an account without admin role WHEN addAgent THEN transaction fails with AccountHasNoRole", async () => {
-        // add agent fails
+      it("GIVEN an account without admin role WHEN addAgent or removeAgent THEN transaction fails with AccountHasNoRole", async () => {
         await expect(erc3643Facet.connect(signer_C).addAgent(signer_A.address)).to.be.rejectedWith("AccountHasNoRole");
+        await expect(erc3643Facet.connect(signer_C).removeAgent(signer_A.address)).to.be.rejectedWith(
+          "AccountHasNoRole",
+        );
+      });
+      it("GIVEN an account without AGENT_ROLE role WHEN recoveryAddress THEN transaction fails with AccountHasNoRole", async () => {
+        await expect(
+          erc3643Facet.connect(signer_C).recoveryAddress(signer_A.address, signer_B.address, signer_C.address),
+        ).to.be.rejectedWith("AccountHasNoRole");
       });
     });
 
@@ -1761,13 +1944,34 @@ describe("ERC3643 Tests", () => {
         );
       });
 
-      it("GIVEN a paused token WHEN attempting to addAgent THEN transactions revert with TokenIsPaused error", async () => {
+      it("GIVEN a paused token WHEN batchFreezePartialTokens THEN transactions revert with TokenIsPaused error", async () => {
+        const userAddresses = [signer_D.address, signer_E.address];
+        const amounts = [100, 100];
+
+        await expect(freezeFacet.batchFreezePartialTokens(userAddresses, amounts)).to.be.revertedWithCustomError(
+          pauseFacet,
+          "TokenIsPaused",
+        );
+      });
+
+      it("GIVEN a paused token WHEN batchUnfreezePartialTokens THEN transactions revert with TokenIsPaused error", async () => {
+        const userAddresses = [signer_D.address, signer_E.address];
+        const amounts = [100, 100];
+
+        await expect(freezeFacet.batchUnfreezePartialTokens(userAddresses, amounts)).to.be.revertedWithCustomError(
+          pauseFacet,
+          "TokenIsPaused",
+        );
+      });
+
+      it("GIVEN a paused token WHEN attempting to addAgent or removeAgent THEN transactions revert with TokenIsPaused error", async () => {
         await expect(erc3643Facet.addAgent(signer_A.address)).to.be.rejectedWith("TokenIsPaused");
+        await expect(erc3643Facet.removeAgent(signer_A.address)).to.be.rejectedWith("TokenIsPaused");
       });
 
       it("GIVEN a paused token WHEN attempting to update name or symbol THEN transactions revert with TokenIsPaused error", async () => {
         await expect(erc3643Facet.setName(newName)).to.be.rejectedWith("TokenIsPaused");
-        await expect(erc3643Facet.setName(newSymbol)).to.be.rejectedWith("TokenIsPaused");
+        await expect(erc3643Facet.setSymbol(newSymbol)).to.be.rejectedWith("TokenIsPaused");
         await expect(erc3643Facet.setOnchainID(onchainId)).to.be.rejectedWith("TokenIsPaused");
         await expect(erc3643Facet.setIdentityRegistry(identityRegistryMock.address)).to.be.rejectedWith(
           "TokenIsPaused",
@@ -1853,6 +2057,121 @@ describe("ERC3643 Tests", () => {
         expect(balance_After_Partition_1).to.be.equal(
           balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor * adjustFactor),
         );
+      });
+
+      it("GIVEN frozen tokens WHEN ABAF changes and freezing again THEN frozen amount adjustment is applied", async () => {
+        // Grant necessary role for adjustBalances and connect to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+        const adjustBalancesFacetA = adjustBalancesFacet.connect(signer_A);
+
+        const amount = 1000;
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_E.address,
+          value: amount,
+          data: EMPTY_HEX_BYTES,
+        });
+
+        // Freeze tokens initially
+        await freezeFacet.freezePartialTokens(signer_E.address, amount / 2);
+
+        const frozenBefore = await freezeFacet.getFrozenTokens(signer_E.address);
+
+        // Change ABAF
+        await adjustBalancesFacetA.adjustBalances(2, 1); // 2x adjustment
+
+        // Freeze more tokens - this should trigger _updateTotalFreezeAmountAndLabaf
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_E.address,
+          value: amount,
+          data: EMPTY_HEX_BYTES,
+        });
+        await freezeFacet.freezePartialTokens(signer_E.address, amount / 2);
+
+        const frozenAfter = await freezeFacet.getFrozenTokens(signer_E.address);
+
+        // The previously frozen amount should be adjusted by factor 2
+        expect(frozenAfter).to.be.equal(frozenBefore.mul(2).add(amount / 2));
+      });
+
+      it("GIVEN frozen tokens WHEN freezing again without ABAF change THEN factor equals 1", async () => {
+        const amount = 1000;
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_E.address,
+          value: amount,
+          data: EMPTY_HEX_BYTES,
+        });
+
+        // Freeze tokens initially
+        await freezeFacet.freezePartialTokens(signer_E.address, amount / 2);
+
+        const frozenBefore = await freezeFacet.getFrozenTokens(signer_E.address);
+
+        // Freeze more tokens WITHOUT changing ABAF - this should hit the factor == 1 branch
+        await freezeFacet.freezePartialTokens(signer_E.address, amount / 4);
+
+        const frozenAfter = await freezeFacet.getFrozenTokens(signer_E.address);
+
+        // The frozen amount should just be sum (no factor adjustment)
+        expect(frozenAfter).to.be.equal(frozenBefore.add(amount / 4));
+      });
+
+      it("GIVEN frozen tokens by partition WHEN checking total balance THEN frozen tokens are included", async () => {
+        await accessControlFacet.grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+        await accessControlFacet.grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+
+        const amount = 1000;
+        const frozenAmount = 300;
+
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_E.address,
+          value: amount,
+          data: EMPTY_HEX_BYTES,
+        });
+
+        // Freeze some tokens by partition
+        await freezeFacet.freezePartialTokens(signer_E.address, frozenAmount);
+
+        // Take a snapshot - this will invoke _getTotalBalanceForByPartitionAdjusted
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // Get balances before ABAF
+        const frozenBefore = await freezeFacet.getFrozenTokens(signer_E.address);
+        const freeBefore = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address);
+
+        // Apply ABAF with factor 2 - this internally uses _getTotalBalanceForByPartitionAdjusted to calculate total balance
+        const decimals = await erc20Facet.decimals();
+        await adjustBalancesFacet.connect(signer_A).adjustBalances(2, decimals);
+
+        // Take another snapshot after ABAF to trigger _getTotalBalanceForByPartitionAdjusted again
+        await snapshotFacet.connect(signer_A).takeSnapshot();
+
+        // After ABAF, both free and frozen should be doubled
+        const frozenAfter = await freezeFacet.getFrozenTokens(signer_E.address);
+        const freeAfter = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address);
+
+        // Verify _getTotalBalanceForByPartitionAdjusted was used: total = free + frozen, then multiplied by factor
+        expect(frozenAfter).to.equal(frozenBefore.mul(2));
+        expect(freeAfter).to.equal(freeBefore.mul(2));
+        expect(frozenAfter.add(freeAfter)).to.equal(amount * 2);
+
+        // Verify snapshots captured the total balance including frozen tokens by partition
+        const snapshot1BalanceByPartition = await snapshotFacet.balanceOfAtSnapshotByPartition(
+          DEFAULT_PARTITION,
+          1,
+          signer_E.address,
+        );
+        const snapshot2BalanceByPartition = await snapshotFacet.balanceOfAtSnapshotByPartition(
+          DEFAULT_PARTITION,
+          2,
+          signer_E.address,
+        );
+
+        expect(snapshot1BalanceByPartition).to.equal(amount - frozenAmount);
+        expect(snapshot2BalanceByPartition).to.equal((amount - frozenAmount) * 2);
       });
     });
 
@@ -2438,6 +2757,13 @@ describe("ERC3643 Tests", () => {
           "WalletRecovered",
         );
       });
+      it("GIVEN a recovered wallet WHEN recoveryAddress THEN transaction fails with WalletRecovered", async () => {
+        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(
+          erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+      });
     });
   });
 
@@ -2565,6 +2891,90 @@ describe("ERC3643 Tests", () => {
           freezeFacet.batchUnfreezePartialTokens([signer_A.address], [AMOUNT]),
         ).to.be.revertedWithCustomError(erc1410Facet, "NotAllowedInMultiPartitionMode");
       });
+    });
+  });
+
+  describe("Token is controllable", () => {
+    async function deployERC3643TokenIsControllableFixture() {
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isControllable: false,
+            maxSupply: MAX_SUPPLY,
+          },
+        },
+      });
+      diamond = base.diamond;
+      await executeRbac(base.accessControlFacet, [
+        {
+          role: ATS_ROLES._CONTROLLER_ROLE,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES._ISSUER_ROLE,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES._KYC_ROLE,
+          members: [signer_A.address],
+        },
+        {
+          role: ATS_ROLES._SSI_MANAGER_ROLE,
+          members: [signer_A.address],
+        },
+      ]);
+      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
+
+      controlList = await ethers.getContractAt("ControlListFacet", diamond.address);
+
+      erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
+      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
+
+      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
+      freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_A);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
+      await ssiManagementFacet.addIssuer(signer_A.address);
+      await kycFacet.grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+      await kycFacet.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+      await erc3643Facet.mint(signer_D.address, AMOUNT);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployERC3643TokenIsControllableFixture);
+    });
+
+    it("GIVEN token is not controllable WHEN batchBurn THEN transaction fails with TokenIsNotControllable", async () => {
+      const userAddresses = [signer_D.address];
+      const amounts = [AMOUNT];
+
+      await expect(erc3643Facet.connect(signer_A).batchBurn(userAddresses, amounts)).to.be.revertedWithCustomError(
+        erc1594Facet,
+        "TokenIsNotControllable",
+      );
+    });
+    it("GIVEN token is not controllable WHEN batchForcedTransfer THEN transaction fails with TokenIsNotControllable", async () => {
+      const fromList = [signer_F.address];
+      const toList = [signer_E.address];
+      const amounts = [AMOUNT];
+
+      await expect(
+        erc3643Facet.connect(signer_A).batchForcedTransfer(fromList, toList, amounts),
+      ).to.be.revertedWithCustomError(erc1594Facet, "TokenIsNotControllable");
+    });
+    it("GIVEN token is controllable WHEN burning THEN transaction fails with TokenIsNotControllable", async () => {
+      await expect(erc3643Facet.burn(signer_E.address, AMOUNT)).to.be.revertedWithCustomError(
+        erc1594Facet,
+        "TokenIsNotControllable",
+      );
+    });
+    it("GIVEN token is controllable WHEN forcedTransfer THEN transaction fails with TokenIsNotControllable", async () => {
+      await expect(
+        erc3643Facet.forcedTransfer(signer_E.address, signer_D.address, AMOUNT),
+      ).to.be.revertedWithCustomError(erc1594Facet, "TokenIsNotControllable");
     });
   });
 });

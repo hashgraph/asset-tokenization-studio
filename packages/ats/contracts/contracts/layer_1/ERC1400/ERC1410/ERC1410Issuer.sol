@@ -12,7 +12,6 @@ abstract contract ERC1410Issuer is IERC1410Issuer, Internals {
     )
         external
         onlyUnpaused
-        onlyIssuable
         onlyWithinMaxSupply(_issueData.value)
         onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)

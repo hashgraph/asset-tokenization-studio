@@ -91,6 +91,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
 
   //Interest Rate
   "SustainabilityPerformanceTargetRateFacet",
+  "KpisSustainabilityPerformanceTargetRateFacet",
 
   // Jurisdiction-Specific
   "BondUSASustainabilityPerformanceTargetRateFacet",

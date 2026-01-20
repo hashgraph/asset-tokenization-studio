@@ -208,11 +208,11 @@
 
 import { Test, TestingModule } from "@nestjs/testing"
 import { LifeCycleCashFlowSdkService } from "@infrastructure/adapters/life-cycle-cash-flow-sdk.service"
-import { LifeCycleCashFlow } from "@mass-payout/sdk"
+import { LifeCycleCashFlow } from "@hashgraph/mass-payout-sdk"
 import { HederaService } from "@domain/ports/hedera.port"
 import { ConfigService } from "@nestjs/config"
 import { LifeCycleCashFlowAddress } from "@domain/model/life-cycle-cash-flow-address.value-object"
-import { RbacRequest } from "@mass-payout/sdk"
+import { RbacRequest } from "@hashgraph/mass-payout-sdk"
 
 describe("LifeCycleCashFlowSdkService", () => {
   let service: LifeCycleCashFlowSdkService

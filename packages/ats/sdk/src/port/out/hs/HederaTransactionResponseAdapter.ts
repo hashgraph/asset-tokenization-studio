@@ -209,7 +209,7 @@ import {
   TransactionReceipt,
   TransactionRecord,
   TransactionResponse as HTransactionResponse,
-} from '@hashgraph/sdk';
+} from '@hiero-ledger/sdk';
 import TransactionResponse from '@domain/context/transaction/TransactionResponse';
 import { TransactionResponseError } from '../error/TransactionResponseError';
 import { TransactionType } from '../TransactionResponseEnums';

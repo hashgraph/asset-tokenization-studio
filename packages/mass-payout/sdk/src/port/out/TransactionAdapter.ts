@@ -207,7 +207,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable unused-imports/no-unused-vars */
 import Account from "@domain/account/Account"
-import { ContractId } from "@hashgraph/sdk"
+import { ContractId } from "@hiero-ledger/sdk"
 import { Environment } from "@domain/network/Environment"
 import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings"
 import EvmAddress from "@domain/contract/EvmAddress"

@@ -29,7 +29,7 @@ abstract contract ExternalPauseManagementStorageWrapper is ControlListStorageWra
         );
         uint256 length = _getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
 
-        for (uint256 index; index < length; ++index) {
+        for (uint256 index = 0; index < length; ) {
             if (IExternalPause(externalPauseDataStorage.list.at(index)).isPaused()) return true;
             unchecked {
                 ++index;
