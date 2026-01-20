@@ -15,6 +15,7 @@ import {
   type IERC1410,
   type IERC3643,
   TimeTravelFacet,
+  NoncesFacet,
   Kyc,
   SsiManagement,
   AccessControl,
@@ -23,6 +24,7 @@ import {
   Snapshots,
   ERC3643Management,
   ProtectedPartitions,
+  DiamondCutFacet
 } from "@contract-types";
 import { ADDRESS_ZERO, ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -165,6 +167,9 @@ describe("Clearing Tests", () => {
   let erc3643ManagementFacet: ERC3643Management;
   let erc3643Facet: IERC3643;
   let protectedPartitionsFacet: ProtectedPartitions;
+  let noncesFacet: NoncesFacet;
+  let diamondCutFacet: DiamondCutFacet
+  
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -215,6 +220,8 @@ describe("Clearing Tests", () => {
     erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address, signer_A);
     erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address, signer_A);
     protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address, signer_A);
+    noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.address, signer_A);
+    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", diamond.address, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -4330,7 +4337,7 @@ describe("Clearing Tests", () => {
         await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
         // Get the nonce for signer_A
-        const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
         const protectedClearingOperation = {
           clearingOperation: {
@@ -4344,10 +4351,13 @@ describe("Clearing Tests", () => {
         };
 
         // Prepare EIP-712 domain
+        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
+
         const domain = {
-          name: "ProtectedPartitions",
-          version: "1.0.0",
+          name: name,
+          version: version,
           chainId: parseInt(chainId, 16),
           verifyingContract: diamond.address,
         };
@@ -4417,7 +4427,7 @@ describe("Clearing Tests", () => {
         await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
         // Get the nonce for signer_A
-        const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
         const protectedClearingOperation = {
           clearingOperation: {
@@ -4431,10 +4441,13 @@ describe("Clearing Tests", () => {
         };
 
         // Prepare EIP-712 domain
+        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
+
         const domain = {
-          name: "ProtectedPartitions",
-          version: "1.0.0",
+          name: name,
+          version: version,
           chainId: parseInt(chainId, 16),
           verifyingContract: diamond.address,
         };
@@ -4502,7 +4515,7 @@ describe("Clearing Tests", () => {
         await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
         // Get the nonce for signer_A
-        const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
         const protectedClearingOperation = {
           clearingOperation: {
@@ -4524,10 +4537,13 @@ describe("Clearing Tests", () => {
         };
 
         // Prepare EIP-712 domain
+        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
+
         const domain = {
-          name: "ProtectedPartitions",
-          version: "1.0.0",
+          name: name,
+          version: version,
           chainId: parseInt(chainId, 16),
           verifyingContract: diamond.address,
         };
@@ -4659,7 +4675,7 @@ describe("Clearing Tests", () => {
             const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
             await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
-            const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -4734,7 +4750,7 @@ describe("Clearing Tests", () => {
             const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
             await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
-            const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -4803,7 +4819,7 @@ describe("Clearing Tests", () => {
 
             // Don't grant protectedPartitionRole
 
-            const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -4882,7 +4898,7 @@ describe("Clearing Tests", () => {
             await clearingActionsFacet.activateClearing();
             await clearingActionsFacet.deactivateClearing();
 
-            const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -5015,7 +5031,7 @@ describe("Clearing Tests", () => {
             await clearingActionsFacet.activateClearing();
             await clearingActionsFacet.deactivateClearing();
 
-            const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -5159,7 +5175,7 @@ describe("Clearing Tests", () => {
             await clearingActionsFacet.activateClearing();
             await clearingActionsFacet.deactivateClearing();
 
-            const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -5416,7 +5432,7 @@ describe("Clearing Tests", () => {
           data: _DATA,
         });
 
-        const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
         const protectedClearingOpExpired = {
           clearingOperation: {
@@ -5452,7 +5468,7 @@ describe("Clearing Tests", () => {
           data: _DATA,
         });
 
-        const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
         const protectedClearingOpExpired = {
           clearingOperation: {
@@ -5497,7 +5513,7 @@ describe("Clearing Tests", () => {
         });
 
         // Don't grant the protected partition role for signer_A
-        const nonce = (await protectedPartitionsFacet.getNounceFor(signer_A.address)).toNumber() + 1;
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
 
         const protectedClearingOp = {
           clearingOperation: {

@@ -20,6 +20,7 @@ import {
   TimeTravelFacet,
   ControlListFacet,
   ProtectedPartitionsFacet,
+  DiamondCutFacet,
 } from "@contract-types";
 import { grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -115,6 +116,7 @@ describe("ERC1410 Tests", () => {
   let clearingActionsFacet: ClearingActionsFacet;
   let snapshotsFacet: SnapshotsFacet;
   let timeTravelFacet: TimeTravelFacet;
+  let diamondCutFacet: DiamondCutFacet
 
   async function setPreBalanceAdjustment(singlePartition?: boolean) {
     await grantRolesToAccounts();
@@ -367,6 +369,7 @@ describe("ERC1410 Tests", () => {
     controlList = await ethers.getContractAt("ControlListFacet", diamond.address, signer_A);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
     snapshotsFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
+    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", diamond.address);
 
     capFacet = await ethers.getContractAt("Cap", diamond.address);
 
@@ -2437,8 +2440,8 @@ describe("ERC1410 Tests", () => {
             _nounce: 1,
           };
           const domain = {
-            name: "ProtectedPartitions",
-            version: "1.0.0",
+            name: (await erc20Facet.getERC20Metadata()).info.name,
+            version: (await diamondCutFacet.getConfigInfo()).version_.toString(),
             chainId: await network.provider.send("eth_chainId"),
             verifyingContract: diamond.address,
           };

@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-20T10:06:18.207Z
+ * Generated: 2026-01-20T13:21:48.982Z
  * Facets: 193
  * Infrastructure: 2
  *
@@ -12431,7 +12431,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         topic0: "0xb7d0d6b60740753e9f16692a2f479472a1385aec2420fa43225b02f2ffa1afe7",
       },
     ],
-    errors: [{ name: "IssuanceIsClosed", signature: "IssuanceIsClosed()", selector: "0xd3c3caeb" }],
   },
 
   IERC1644StorageWrapper: {

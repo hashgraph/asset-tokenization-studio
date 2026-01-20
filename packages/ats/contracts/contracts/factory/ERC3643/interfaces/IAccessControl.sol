@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.17;
 
-interface TRexIAccessControl{
+interface TRexIAccessControl {
     /**
      * @dev Emitted when a role is granted to an account
      *

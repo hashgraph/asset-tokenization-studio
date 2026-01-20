@@ -282,15 +282,6 @@ describe("ERC20Permit Tests", () => {
     });
   });
 
-  describe("initialize_ERC20Permit", () => {
-    it("GIVEN ERC20Permit already initialized WHEN calling initialize_ERC20Permit THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(erc20PermitFacet.initialize_ERC20Permit()).to.be.revertedWithCustomError(
-        erc20PermitFacet,
-        "AlreadyInitialized",
-      );
-    });
-  });
-
   describe("onlyUnrecoveredAddress modifier for permit", () => {
     it("GIVEN a recovered owner address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
       const erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address);

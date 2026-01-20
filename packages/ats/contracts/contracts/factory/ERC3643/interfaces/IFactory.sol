@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.17;
 
-import {TRexIResolverProxy as IResolverProxy} from './IResolverProxy.sol';
-import {TRexIBusinessLogicResolver as IBusinessLogicResolver} from './IBusinessLogicResolver.sol';
-import {TRexIERC20 as IERC20} from './IERC20.sol';
-import {TRexIBondRead as IBondRead} from './IBondRead.sol';
-import {TRexIEquity as IEquity} from './IEquity.sol';
-import {FactoryRegulationData, RegulationData, RegulationType, RegulationSubType} from './regulation.sol';
-import {TRexIFixedRate as IFixedRate} from './IFixedRate.sol';
-import {TRexIKpiLinkedRate as IKpiLinkedRate} from './IKpiLinkedRate.sol';
-import {TRexISustainabilityPerformanceTargetRate as ISustainabilityPerformanceTargetRate} from './ISustainabilityPerformanceTargetRate.sol';
+import { TRexIResolverProxy as IResolverProxy } from "./IResolverProxy.sol";
+import { TRexIBusinessLogicResolver as IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
+import { TRexIERC20 as IERC20 } from "./IERC20.sol";
+import { TRexIBondRead as IBondRead } from "./IBondRead.sol";
+import { TRexIEquity as IEquity } from "./IEquity.sol";
+import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
+import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
+import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
+import {
+    TRexISustainabilityPerformanceTargetRate as ISustainabilityPerformanceTargetRate
+} from "./ISustainabilityPerformanceTargetRate.sol";
 
 interface TRexIFactory {
     enum SecurityType {
