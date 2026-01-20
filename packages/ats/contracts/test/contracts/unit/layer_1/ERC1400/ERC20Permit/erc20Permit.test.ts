@@ -272,4 +272,63 @@ describe("ERC20Permit Tests", () => {
       ).to.be.revertedWithCustomError(erc20PermitFacet, "NotAllowedInMultiPartitionMode");
     });
   });
+
+  describe("initialize_ERC20Permit", () => {
+    it("GIVEN ERC20Permit already initialized WHEN calling initialize_ERC20Permit THEN transaction fails with AlreadyInitialized", async () => {
+      await expect(erc20PermitFacet.initialize_ERC20Permit()).to.be.revertedWithCustomError(
+        erc20PermitFacet,
+        "AlreadyInitialized",
+      );
+    });
+  });
+
+  describe("onlyUnrecoveredAddress modifier for permit", () => {
+    it("GIVEN a recovered owner address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
+      const erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address);
+
+      // Grant _AGENT_ROLE to recover address
+      await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+
+      // Recover signer_B (owner) address
+      await erc3643ManagementFacet.recoveryAddress(signer_B.address, signer_C.address, ADDRESS_ZERO);
+
+      const expiry = (await getDltTimestamp()) + 3600;
+
+      await expect(
+        erc20PermitFacet.permit(
+          signer_B.address,
+          signer_A.address,
+          1,
+          expiry,
+          27,
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        ),
+      ).to.be.revertedWithCustomError(erc20PermitFacet, "WalletRecovered");
+    });
+
+    it("GIVEN a recovered spender address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
+      const erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address);
+
+      // Grant _AGENT_ROLE to recover address
+      await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+
+      // Recover signer_C (spender) address
+      await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
+
+      const expiry = (await getDltTimestamp()) + 3600;
+
+      await expect(
+        erc20PermitFacet.permit(
+          signer_A.address,
+          signer_C.address,
+          1,
+          expiry,
+          27,
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        ),
+      ).to.be.revertedWithCustomError(erc20PermitFacet, "WalletRecovered");
+    });
+  });
 });

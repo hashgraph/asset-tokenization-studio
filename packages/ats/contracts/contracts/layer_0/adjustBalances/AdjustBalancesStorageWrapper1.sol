@@ -171,13 +171,6 @@ abstract contract AdjustBalancesStorageWrapper1 is
         factor = _calculateFactor(abaf, _adjustBalancesStorage().labaf[tokenHolder]);
     }
 
-    function _calculateFactorByPartitionAdjustedAt(
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view override returns (uint256) {
-        return _calculateFactor(_getAbafAdjustedAt(timestamp), _adjustBalancesStorage().labafByPartition[partition]);
-    }
-
     function _calculateFactorByTokenHolderAndPartitionIndex(
         uint256 abaf,
         address tokenHolder,

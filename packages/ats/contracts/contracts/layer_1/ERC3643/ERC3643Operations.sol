@@ -29,7 +29,6 @@ abstract contract ERC3643Operations is IERC3643Operations, Internals {
         onlyWithinMaxSupply(_amount)
         onlyIdentified(address(0), _to)
         onlyCompliant(address(0), _to, false)
-        onlyIssuable
     {
         {
             bytes32[] memory roles = new bytes32[](2);

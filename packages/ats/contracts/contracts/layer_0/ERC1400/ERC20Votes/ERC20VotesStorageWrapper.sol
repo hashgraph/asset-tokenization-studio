@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _ERC20VOTES_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ERC1594StorageWrapper } from "../ERC1594/ERC1594StorageWrapper.sol";
 import { IERC20Votes } from "../../../layer_1/interfaces/ERC1400/IERC20Votes.sol";
-import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { CheckpointsLib } from "../../common/libraries/CheckpointsLib.sol";
 import { _CONTRACT_NAME_ERC20VOTES, _CONTRACT_VERSION_ERC20VOTES } from "contracts/layer_1/constants/values.sol";
@@ -28,6 +27,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
     event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance);
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC20Votes(bool _activated) internal override {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
         _setActivate(_activated);
@@ -205,8 +205,9 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     function _calculateFactorBetween(uint256 _fromBlock, uint256 _toBlock) internal view override returns (uint256) {
         (, uint256 abafAtBlockFrom) = _erc20VotesStorage().abafCheckpoints.checkpointsLookup(_fromBlock);
         (, uint256 abafAtBlockTo) = _erc20VotesStorage().abafCheckpoints.checkpointsLookup(_toBlock);
+        assert(abafAtBlockFrom <= abafAtBlockTo);
 
-        if (abafAtBlockFrom == 0 || abafAtBlockTo == 0) return 1;
+        if (abafAtBlockFrom == 0) return 1;
 
         return abafAtBlockTo / abafAtBlockFrom;
     }
@@ -215,16 +216,16 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         return _erc20VotesStorage().activated;
     }
 
+    function _isERC20VotesInitialized() internal view override returns (bool) {
+        return _erc20VotesStorage().initialized;
+    }
+
     function _add(uint256 a, uint256 b) internal pure override returns (uint256) {
         return a + b;
     }
 
     function _subtract(uint256 a, uint256 b) internal pure override returns (uint256) {
         return a - b;
-    }
-
-    function _isERC20VotesInitialized() internal view override returns (bool) {
-        return _erc20VotesStorage().initialized;
     }
 
     function _erc20VotesStorage() internal pure returns (ERC20VotesStorage storage erc20votesStorage_) {

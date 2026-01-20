@@ -54,7 +54,7 @@ abstract contract ERC3643Batch is IERC3643Batch, Internals {
     function batchMint(
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external onlyValidInputAmountsArrayLength(_toList, _amounts) onlyUnpaused onlyWithoutMultiPartition onlyIssuable {
+    ) external onlyValidInputAmountsArrayLength(_toList, _amounts) onlyUnpaused onlyWithoutMultiPartition {
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;

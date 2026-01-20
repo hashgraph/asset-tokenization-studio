@@ -100,7 +100,9 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual override returns (uint256) {
-        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+        return
+            super._getTotalBalanceForByPartitionAdjusted(_partition, _tokenHolder) +
+            _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function _getTotalBalanceForAdjustedAt(

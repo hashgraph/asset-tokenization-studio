@@ -41,6 +41,7 @@ abstract contract KpisStorageWrapper is
 
         if (length == 0 || ckpt[length - 1].from < _date) {
             _pushKpiData(ckpt, _date, _value);
+            emit IKpis.KpiDataAdded(_project, _date, _value);
             return;
         }
 

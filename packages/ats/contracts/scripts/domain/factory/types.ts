@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
 import { AtsRoleName, AtsRoleHash } from "@scripts/domain";
 export interface Rbac {
-  role: AtsRoleName | AtsRoleHash;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  role: AtsRoleName | AtsRoleHash | (string & {});
   members: string[];
 }
 

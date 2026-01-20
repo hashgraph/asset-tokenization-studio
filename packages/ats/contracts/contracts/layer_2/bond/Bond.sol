@@ -26,9 +26,8 @@ abstract contract Bond is IBond, Internals {
         for (uint256 i = 0; i < partitions.length; i++) {
             bytes32 partition = partitions[i];
             uint256 balance = _balanceOfByPartition(partition, _tokenHolder);
-            if (balance > 0) {
-                _redeemByPartition(partition, _tokenHolder, _msgSender(), balance, "", "");
-            }
+            assert(balance > 0);
+            _redeemByPartition(partition, _tokenHolder, _msgSender(), balance, "", "");
         }
     }
 
