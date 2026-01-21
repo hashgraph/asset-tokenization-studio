@@ -11,10 +11,12 @@ import { InternalsKpiLinkedInterestRate } from "../Internals.sol";
 import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";
 import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
+import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";
+import { KpisStorageWrapper } from "../../KpisStorageWrapper.sol";
 
 abstract contract BondStorageWrapperKpiLinkedInterestRate is
     InternalsKpiLinkedInterestRate,
-    BondStorageWrapperFixingDateInterestRate
+    ProceedRecipientsStorageWrapperKpiInterestRate
 {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -29,7 +31,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
         return super._setCoupon(_newCoupon);
     }
 
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, BondStorageWrapper) {
+    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, KpisStorageWrapper) {
         super._addToCouponsOrderedList(_couponID);
         _setKpiLinkedInterestRate(_couponID);
     }

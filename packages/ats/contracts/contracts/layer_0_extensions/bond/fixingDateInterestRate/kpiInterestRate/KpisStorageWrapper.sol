@@ -5,15 +5,12 @@ import { _KPIS_STORAGE_POSITION } from "contracts/layer_0/constants/storagePosit
 import { IKpis } from "contracts/layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
 import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
-import { InternalsSustainabilityPerformanceTargetInterestRate } from "../Internals.sol";
-import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
+import { InternalsKpiInterestRate } from "./Internals.sol";
+import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";
 import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
 
-abstract contract KpisStorageWrapper is
-    InternalsSustainabilityPerformanceTargetInterestRate,
-    BondStorageWrapperFixingDateInterestRate
-{
+abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWrapperFixingDateInterestRate {
     using CheckpointsLib for CheckpointsLib.Checkpoint[];
 
     struct KpisDataStorage {

@@ -4,10 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKpis } from "../../interfaces/kpis/kpiLatest/IKpis.sol";
 import { _KPI_MANAGER_ROLE } from "../../constants/roles.sol";
 import {
-    InternalsSustainabilityPerformanceTargetInterestRate
-} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Internals.sol";
+    InternalsKpiInterestRate
+} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/Internals.sol";
 
-abstract contract Kpis is IKpis, InternalsSustainabilityPerformanceTargetInterestRate {
+abstract contract Kpis is IKpis, InternalsKpiInterestRate {
     function addKpiData(
         uint256 _date,
         uint256 _value,

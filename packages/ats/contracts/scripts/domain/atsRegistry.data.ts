@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-21T15:11:01.440Z
- * Facets: 193
+ * Generated: 2026-01-21T16:23:02.962Z
+ * Facets: 194
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -295,6 +295,8 @@ import {
   HoldTokenHolderSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KpiLinkedRateFacet__factory,
   KpiLinkedRateFacetTimeTravel__factory,
+  KpisKpiLinkedRateFacet__factory,
+  KpisKpiLinkedRateFacetTimeTravel__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KycFacet__factory,
@@ -8611,6 +8613,56 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel ? new KpiLinkedRateFacetTimeTravel__factory(signer) : new KpiLinkedRateFacet__factory(signer),
   },
 
+  KpisKpiLinkedRateFacet: {
+    name: "KpisKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xb668a0e99ee4bce486604d5a7097a4e5d837d1736e0cf43b190b56d0adea78b9",
+    },
+    inheritance: ["KpisFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addKpiData",
+        signature: "function addKpiData(uint256 _date, uint256 _value, address _project)",
+        selector: "0x0de2be70",
+      },
+      {
+        name: "getLatestKpiData",
+        signature:
+          "function getLatestKpiData(uint256 _from, uint256 _to, address _project) view returns (uint256 value_, bool exists_)",
+        selector: "0xfc7f5cb3",
+      },
+      {
+        name: "getMinDate",
+        signature: "function getMinDate() view returns (uint256 minDate_)",
+        selector: "0x48de6fa7",
+      },
+      {
+        name: "isCheckPointDate",
+        signature: "function isCheckPointDate(uint256 _date, address _project) view returns (bool exists_)",
+        selector: "0x8078ccd5",
+      },
+    ],
+    events: [
+      {
+        name: "KpiDataAdded",
+        signature: "KpiDataAdded(address,uint256,uint256)",
+        topic0: "0xb14d0e5a6665e6c690dc5c7ffc777323768a449038bc6bfed9986ecd52547303",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "InvalidDate", signature: "InvalidDate(uint256,uint256,uint256)", selector: "0x1addb674" },
+      { name: "InvalidDateRange", signature: "InvalidDateRange(uint256,uint256)", selector: "0x8914d40b" },
+      { name: "KpiDataAlreadyExists", signature: "KpiDataAlreadyExists(uint256)", selector: "0x74efd82c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new KpisKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new KpisKpiLinkedRateFacet__factory(signer),
+  },
+
   KpisSustainabilityPerformanceTargetRateFacet: {
     name: "KpisSustainabilityPerformanceTargetRateFacet",
     resolverKey: {
@@ -11665,7 +11717,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 193 as const;
+export const TOTAL_FACETS = 194 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -11979,14 +12031,17 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   BondStorageWrapperKpiLinkedInterestRate: {
     name: "BondStorageWrapperKpiLinkedInterestRate",
-    inheritance: ["InternalsKpiLinkedInterestRate", "BondStorageWrapperFixingDateInterestRate"],
+    inheritance: ["InternalsKpiLinkedInterestRate", "ProceedRecipientsStorageWrapperKpiInterestRate"],
     methods: [],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
   },
 
   BondStorageWrapperSustainabilityPerformanceTargetInterestRate: {
     name: "BondStorageWrapperSustainabilityPerformanceTargetInterestRate",
-    inheritance: ["ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate"],
+    inheritance: [
+      "InternalsSustainabilityPerformanceTargetInterestRate",
+      "ProceedRecipientsStorageWrapperKpiInterestRate",
+    ],
     methods: [],
     errors: [
       {
@@ -12568,7 +12623,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
-    inheritance: ["InternalsSustainabilityPerformanceTargetInterestRate", "BondStorageWrapperFixingDateInterestRate"],
+    inheritance: ["InternalsKpiInterestRate", "BondStorageWrapperFixingDateInterestRate"],
     methods: [],
   },
 
@@ -12596,8 +12651,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
-  ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate: {
-    name: "ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate",
+  ProceedRecipientsStorageWrapperKpiInterestRate: {
+    name: "ProceedRecipientsStorageWrapperKpiInterestRate",
     inheritance: ["KpisStorageWrapper"],
     methods: [],
   },
