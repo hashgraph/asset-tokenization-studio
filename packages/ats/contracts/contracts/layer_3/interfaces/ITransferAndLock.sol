@@ -16,14 +16,6 @@ interface ITransferAndLock {
         uint256 lockId
     );
 
-    struct TransferAndLockStruct {
-        address from;
-        address to;
-        uint256 amount;
-        bytes data;
-        uint256 expirationTimestamp;
-    }
-
     /**
      * @notice Transfers tokens to a specified address for a partition and locks them until the expiration timestamp
      * @param _partition The partition from which tokens will be transferred and locked
@@ -55,28 +47,4 @@ interface ITransferAndLock {
         uint256 _expirationTimestamp
     ) external returns (bool success_, uint256 lockId_);
 
-    /**
-     * @notice Transfers tokens to a specified address for a partition and locks them until the expiration timestamp
-     * @dev Can only be called by an account with the protected partitions role
-     * @param _partition The partition from which tokens will be transferred and locked
-     * @param _transferAndLockData The struct containing the transfer and lock data
-     * @param _protectionData The protection dataure to be valid
-     */
-    function protectedTransferAndLockByPartition(
-        bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLockData,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) external returns (bool success_, uint256 lockId_);
-
-    /**
-     * @notice Transfers tokens to a specified address and locks them until the expiration
-     *         timestamp using the default partition
-     * @dev Can only be called by an account with the protected partitions role
-     * @param _transferAndLockData The struct containing the transfer and lock data
-     * @param _protectionData The protection dataure to be valid
-     */
-    function protectedTransferAndLock(
-        TransferAndLockStruct calldata _transferAndLockData,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) external returns (bool success_, uint256 lockId_);
 }

@@ -74,39 +74,4 @@ abstract contract TransferAndLock is ITransferAndLock, Internals {
             lockId_
         );
     }
-
-    function protectedTransferAndLockByPartition(
-        bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLockData,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    )
-        external
-        override
-        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_transferAndLockData.expirationTimestamp)
-        onlyProtectedPartitions
-        returns (bool success_, uint256 lockId_)
-    {
-        return _protectedTransferAndLockByPartition(_partition, _transferAndLockData, _protectionData);
-    }
-
-    function protectedTransferAndLock(
-        TransferAndLockStruct calldata _transferAndLockData,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    )
-        external
-        override
-        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-        onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyWithValidExpirationTimestamp(_transferAndLockData.expirationTimestamp)
-        onlyProtectedPartitions
-        returns (bool success_, uint256 lockId_)
-    {
-        return _protectedTransferAndLock(_transferAndLockData, _protectionData);
-    }
 }
