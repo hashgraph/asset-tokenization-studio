@@ -1,5 +1,5 @@
 ---
-"@hashgraph/asset-tokenization-studio-contracts": minor
+"@hashgraph/asset-tokenization-contracts": minor
 ---
 
 Add comprehensive upgrade workflows for ATS configurations and infrastructure
