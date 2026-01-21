@@ -269,15 +269,6 @@ abstract contract Internals is Modifiers {
     ) internal view virtual;
     function _checkRole(bytes32 _role, address _account) internal view virtual;
     function _checkRoleForPartition(bytes32 partition, address account) internal view virtual;
-    function _checkTransferAndLockByPartitionSignature(
-        bytes32 _partition,
-        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal view virtual;
-    function _checkTransferAndLockSignature(
-        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal view virtual;
     function _checkTransferSignature(
         bytes32 _partition,
         address _from,
@@ -1004,15 +995,6 @@ abstract contract Internals is Modifiers {
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual returns (bool);
-    function _isTransferAndLockByPartitionSignatureValid(
-        bytes32 _partition,
-        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal view virtual returns (bool);
-    function _isTransferAndLockSignatureValid(
-        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal view virtual returns (bool);
     function _isTransferSignatureValid(
         bytes32 _partition,
         address _from,
@@ -1113,15 +1095,6 @@ abstract contract Internals is Modifiers {
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal virtual;
-    function _protectedTransferAndLock(
-        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal virtual returns (bool success_, uint256 lockId_);
-    function _protectedTransferAndLockByPartition(
-        bytes32 _partition,
-        ITransferAndLock.TransferAndLockStruct calldata _transferAndLock,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal virtual returns (bool success_, uint256 lockId_);
     function _protectedTransferFromByPartition(
         bytes32 _partition,
         address _from,

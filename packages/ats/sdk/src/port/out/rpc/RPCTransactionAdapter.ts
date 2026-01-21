@@ -1367,50 +1367,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async protectedTransferAndLockByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-  ): Promise<TransactionResponse> {
-    LogService.logTrace(
-      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
-    );
-
-    const transferAndLockData: TransferAndLock = {
-      from: sourceId.toString(),
-      to: targetId.toString(),
-      amount: amount.toBigNumber(),
-      data: '0x',
-      expirationTimestamp: expirationDate.toBigNumber(),
-    };
-
-    const protectionData: ProtectionData = {
-      deadline: deadline.toBigNumber(),
-      nounce: nounce.toBigNumber(),
-      signature: signature
-    }
-
-    return this.executeTransaction(
-      TransferAndLockFacet__factory.connect(
-        security.toString(),
-        this.getSignerOrProvider(),
-      ),
-      'protectedTransferAndLockByPartition',
-      [
-        partitionId,
-        transferAndLockData,
-        protectionData,
-      ],
-      GAS.PROTECTED_TRANSFER_AND_LOCK,
-    );
-  }
-
   async createHoldByPartition(
     security: EvmAddress,
     partitionId: string,

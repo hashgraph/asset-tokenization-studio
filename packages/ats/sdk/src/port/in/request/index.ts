@@ -269,7 +269,6 @@ import ProtectedTransferFromByPartitionRequest from "./security/operations/trans
 import ProtectedRedeemFromByPartitionRequest from "./security/operations/redeem/ProtectedRedeemFromByPartitionRequest";
 import GetNounceRequest from "./security/operations/protectedPartitions/GetNounceRequest";
 import PartitionsProtectedRequest from "./security/operations/protectedPartitions/PartitionsProtectedRequest";
-import ProtectedTransferAndLockByPartitionRequest from "./security/operations/transfer/ProtectedTransferAndLockByPartitionRequest";
 import CreateHoldByPartitionRequest from "./security/operations/hold/CreateHoldByPartition";
 import CreateHoldFromByPartitionRequest from "./security/operations/hold/CreateHoldFromByPartition";
 import ControllerCreateHoldByPartitionRequest from "./security/operations/hold/ControllerCreateHoldFromByPartition";
@@ -472,7 +471,6 @@ export {
   ProtectedRedeemFromByPartitionRequest,
   GetNounceRequest,
   PartitionsProtectedRequest,
-  ProtectedTransferAndLockByPartitionRequest,
   CreateHoldByPartitionRequest,
   CreateHoldFromByPartitionRequest,
   ControllerCreateHoldByPartitionRequest,

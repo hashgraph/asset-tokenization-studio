@@ -499,18 +499,6 @@ interface ITransactionAdapter {
     security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  protectedTransferAndLockByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>>;
   redeemAtMaturityByPartition(
     security: EvmAddress,
     partitionId: string,
@@ -1398,18 +1386,6 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>>;
   abstract unprotectPartitions(
     security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>>;
-  abstract protectedTransferAndLockByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract updateMaturityDate(
