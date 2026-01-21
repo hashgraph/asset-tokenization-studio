@@ -103,7 +103,7 @@ jobs:
               popd > /dev/null
             fi
           done
-          
+
           # Verify successful packing
           if [ -z "$(ls -A dist-artifacts)" ]; then
              echo "::warning::No public packages were found to pack."

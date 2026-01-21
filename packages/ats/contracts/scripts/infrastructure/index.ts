@@ -40,6 +40,14 @@ export type {
   CreateConfigResult,
   OperationResult,
   SignerOptions,
+  AnyDeploymentOutput,
+  SaveDeploymentOptions,
+  SaveResult,
+  LoadDeploymentOptions,
+  DeploymentOutputType,
+  DeploymentWithExistingBlrOutputType,
+  UpgradeConfigurationsOutputType,
+  UpgradeTupProxiesOutputType,
 } from "./types";
 
 export { ok, err, createSigner, createSignerFromEnv } from "./types";
@@ -51,8 +59,12 @@ export type {
   ConfigurationResult,
   CheckpointStatus,
   WorkflowType,
+  AtsWorkflowType,
   ResumeOptions,
 } from "./types/checkpoint";
+
+// Type guards
+export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./types/checkpoint";
 
 // ============================================================================
 // Constants
@@ -77,6 +89,9 @@ export {
   ENV_VAR_PATTERNS,
   DEPLOYMENT_OUTPUT_DIR,
   DEPLOYMENT_OUTPUT_PATTERN,
+  ATS_WORKFLOW_DESCRIPTORS,
+  WORKFLOW_DESCRIPTORS,
+  registerWorkflowDescriptor,
 } from "./constants";
 
 export type { Network } from "./constants";
@@ -99,8 +114,14 @@ export {
 
 export { getNetworkConfig, getAllNetworks } from "./config";
 
-export { getDeploymentConfig, isLocalNetwork, isInstantMiningNetwork, DEPLOYMENT_CONFIGS } from "./networkConfig";
-export type { DeploymentConfig } from "./networkConfig";
+export {
+  getDeploymentConfig,
+  isLocalNetwork,
+  isInstantMiningNetwork,
+  DEPLOYMENT_CONFIGS,
+  KNOWN_NETWORKS,
+} from "./networkConfig";
+export type { DeploymentConfig, KnownNetwork } from "./networkConfig";
 
 // ============================================================================
 // Operations
@@ -114,7 +135,7 @@ export type { DeployProxyOptions, DeployProxyResult } from "./operations/deployP
 
 export { deployTransparentProxy } from "./operations/transparentProxyDeployment";
 
-export { upgradeProxy } from "./operations/upgradeProxy";
+export { upgradeProxy, upgradeMultipleProxies, proxyNeedsUpgrade, prepareUpgrade } from "./operations/upgradeProxy";
 
 export { registerFacets, type RegisterFacetsOptions, type RegisterFacetsResult } from "./operations/registerFacets";
 
@@ -147,6 +168,20 @@ export {
 } from "./operations/deployResolverProxy";
 
 export {
+  ResolverProxyUpdateType,
+  ResolverProxyUpdateOptions,
+  updateResolverProxyVersion,
+  updateResolverProxyConfig,
+  updateResolverProxyResolver,
+  getResolverProxyConfigInfo,
+  type UpdateResolverProxyVersionOptions,
+  type UpdateResolverProxyConfigOptions,
+  type UpdateResolverProxyResolverOptions,
+  type UpdateResolverProxyConfigResult,
+  type ResolverProxyConfigInfo,
+} from "./operations/updateResolverProxyConfig";
+
+export {
   generateRegistryPipeline,
   DEFAULT_REGISTRY_CONFIG,
   type RegistryGenerationConfig,
@@ -160,7 +195,17 @@ export {
 
 export { validateAddress, validateBytes32 } from "./utils/validation";
 
-export { loadDeployment, findLatestDeployment, listDeploymentFiles } from "./utils/deploymentFiles";
+export {
+  saveDeploymentOutput,
+  loadDeployment,
+  loadDeploymentByWorkflow,
+  findLatestDeployment,
+  listDeploymentsByWorkflow,
+  listDeploymentFiles,
+  getDeploymentsDir,
+  getNetworkDeploymentDir,
+  generateDeploymentFilename,
+} from "./utils/deploymentFiles";
 
 export {
   waitForTransaction,
@@ -201,6 +246,8 @@ export {
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 
 export { getSelector } from "./utils/selector";
+
+export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
 // ============================================================================
 // Checkpoint System

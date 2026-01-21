@@ -1,5 +1,99 @@
 # @hashgraph/asset-tokenization-contracts
 
+## 3.1.0
+
+### Minor Changes
+
+- 1f51771: Centralize deployment file management and enhance for downstream consumption:
+
+  **Bug Fixes & Refactoring:**
+  - Fixed critical variable shadowing bug in filename extraction
+  - Added cross-platform path handling (Unix/Windows)
+  - Eliminated 240 lines of duplicated code across workflow files
+  - Centralized deployment file utilities in infrastructure layer
+  - Added TDD regression tests to prevent future bugs
+
+  **New Features (Downstream Enhancement):**
+  - Made `WorkflowType` fully extensible: changed from `AtsWorkflowType | (string & Record<string, never>)` to `AtsWorkflowType | string`
+  - Made deployment output types fully extensible by removing generic constraint
+  - Added type guards: `isSaveSuccess()`, `isSaveFailure()`, `isAtsWorkflow()`
+  - Added `registerWorkflowDescriptor()` for custom workflow naming
+  - Updated `generateDeploymentFilename()` with descriptor registry fallback
+  - Added comprehensive downstream usage documentation to README
+  - Exported `ATS_WORKFLOW_DESCRIPTORS` and new utility functions
+
+  **Breaking Changes:**
+  - `WorkflowType`: Simplified from complex intersection to clean union `AtsWorkflowType | string`
+  - `SaveDeploymentOptions<T>` and `saveDeploymentOutput<T>()` now accept any type (removed `extends AnyDeploymentOutput` constraint)
+  - These changes enable downstream projects to use custom workflows and output types without type assertions
+  - ATS workflows maintain full type safety through literal types and default type parameters
+
+  Enables downstream projects (like GBP) to extend ATS deployment utilities with custom workflows and output types while maintaining type safety and backward compatibility.
+
+- b802e88: feat(contracts): add updateResolverProxyConfig operation with comprehensive tests
+
+  Add new `updateResolverProxyConfig` operation for updating already deployed ResolverProxy configurations. Enables downstream projects to update proxy version, configuration ID, or resolver address without redeploying.
+
+  Features:
+  - Parameter-based action detection (version/config/resolver updates)
+  - `getResolverProxyConfigInfo` helper for querying proxy state
+  - Pre/post state verification with structured results
+  - New lightweight `deployResolverProxyFixture` using composition pattern
+  - 33 comprehensive tests (12 unit + 21 integration)
+  - Architecture documentation in CLAUDE.md
+
+- c7ff16f: Add comprehensive upgrade workflows for ATS configurations and infrastructure
+
+  **New Features:**
+  - Configuration upgrade workflow for ResolverProxy token contracts (Equity/Bond)
+  - TUP proxy upgrade workflow for BLR and Factory infrastructure
+  - CLI entry points for both upgrade patterns with environment configuration
+  - Checkpoint-based resumability for failed upgrades
+  - Selective configuration upgrades (equity, bond, or both)
+  - Batch update support for multiple ResolverProxy tokens
+
+  **Infrastructure Improvements:**
+  - Fixed import inconsistencies (relative imports → @scripts/\* aliases)
+  - Simplified checkpoint directory structure (.checkpoints/)
+  - Added Zod runtime validation with helpful error messages
+  - Optimized registry lookups from O(n²) to O(n) complexity
+  - Enhanced CheckpointManager with nested path support
+  - Added ts-node configuration for path alias resolution
+  - Fixed confirmations bug in tests
+
+  **Testing:**
+  - 1,419 new test cases with comprehensive coverage
+  - 33 configuration upgrade tests
+  - 25 TUP upgrade tests
+  - Enhanced checkpoint resumability tests
+  - All 1,010 tests passing
+
+  **Documentation:**
+  - Added Scenarios 3-6 to DEVELOPER_GUIDE.md
+  - Comprehensive README.md upgrade sections
+  - Updated .env.sample with upgrade variables
+  - Clear distinction between TUP and ResolverProxy patterns
+
+  **Breaking Changes:** None - backward compatible
+
+### Patch Changes
+
+- 7f92cd7: Enable parallel test execution with tsx loader for 60-75% faster test runs
+  - Add tsx (v4.21.0) for runtime TypeScript support in Mocha worker threads
+  - Configure parallel test scripts with NODE_OPTIONS='--import tsx'
+  - Fix circular dependency in checkpoint module imports
+  - Fix DiamondCutManager test assertions to use TypeChain factories
+  - Separate contract and script tests with dedicated parallel targets
+
+- 1ecd8ee: Update timestamp format to ISO standard with filesystem-safe characters
+- fa07c70: test(contracts): add comprehensive unit and integration tests for TUP upgrade operations
+
+  Add 34 tests for TransparentUpgradeableProxy (TUP) upgrade operations:
+  - 13 unit tests covering parameter validation, behavior detection, result structure, and helper functions
+  - 21 integration tests covering upgrade scenarios, access control, state verification, and gas reporting
+  - New TUP test fixtures using composition pattern (deployTupProxyFixture, deployTupProxyWithV2Fixture)
+  - Mock contracts (MockImplementation, MockImplementationV2) with proper initialization guards and storage layout compatibility
+
 ## 3.0.0
 
 ### Minor Changes

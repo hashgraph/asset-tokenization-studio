@@ -23,103 +23,29 @@ import {
   deployProxyAdmin,
   validateAddress,
   fetchHederaContractId,
-  success,
   info,
   warn,
   error as logError,
   getDeploymentConfig,
   CheckpointManager,
   NullCheckpointManager,
+  saveDeploymentOutput,
   type DeploymentCheckpoint,
   type ResumeOptions,
+  type DeploymentWithExistingBlrOutputType,
   formatCheckpointStatus,
   getStepName,
   toConfigurationData,
   convertCheckpointFacets,
 } from "@scripts/infrastructure";
 import { atsRegistry, deployFactory, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
-
-import { promises as fs } from "fs";
-import { dirname } from "path";
 import { BusinessLogicResolver__factory } from "@contract-types";
 
 /**
  * Deployment output structure (compatible with deployCompleteSystem).
+ * Re-exported from infrastructure for backward compatibility.
  */
-export interface DeploymentWithExistingBlrOutput {
-  /** Network name (testnet, mainnet, etc.) */
-  network: string;
-
-  /** ISO timestamp of deployment */
-  timestamp: string;
-
-  /** Deployer address */
-  deployer: string;
-
-  /** Infrastructure contracts */
-  infrastructure: {
-    proxyAdmin: {
-      address: string;
-      contractId?: string;
-    };
-    blr: {
-      implementation: string;
-      implementationContractId?: string;
-      proxy: string;
-      proxyContractId?: string;
-      isExternal: true; // Marker to indicate BLR was not deployed here
-    };
-    factory: {
-      implementation: string;
-      implementationContractId?: string;
-      proxy: string;
-      proxyContractId?: string;
-    };
-  };
-
-  /** Deployed facets */
-  facets: Array<{
-    name: string;
-    address: string;
-    contractId?: string;
-    key: string;
-  }>;
-
-  /** Token configurations */
-  configurations: {
-    equity: {
-      configId: string;
-      version: number;
-      facetCount: number;
-      facets: Array<{
-        facetName: string;
-        key: string;
-        address: string;
-      }>;
-    };
-    bond: {
-      configId: string;
-      version: number;
-      facetCount: number;
-      facets: Array<{
-        facetName: string;
-        key: string;
-        address: string;
-      }>;
-    };
-  };
-
-  /** Deployment summary */
-  summary: {
-    totalContracts: number;
-    totalFacets: number;
-    totalConfigurations: number;
-    deploymentTime: number;
-    gasUsed: string;
-    success: boolean;
-    skippedSteps: string[]; // Steps that were skipped
-  };
-}
+export type DeploymentWithExistingBlrOutput = DeploymentWithExistingBlrOutputType;
 
 /**
  * Options for deploying with existing BLR.
@@ -251,8 +177,8 @@ export async function deploySystemWithExistingBlr(
   // Initialize checkpoint manager
   // Use NullCheckpointManager for tests to eliminate filesystem I/O overhead
   const checkpointManager = ignoreCheckpoint
-    ? new NullCheckpointManager(checkpointDir)
-    : new CheckpointManager(checkpointDir);
+    ? new NullCheckpointManager(network, checkpointDir)
+    : new CheckpointManager(network, checkpointDir);
   let checkpoint: DeploymentCheckpoint | null = null;
 
   // Check for existing checkpoints if not explicitly ignoring
@@ -810,10 +736,18 @@ export async function deploySystemWithExistingBlr(
     }
 
     if (saveOutput) {
-      const finalOutputPath = outputPath || `deployments/${network}-external-blr-${Date.now()}.json`;
+      const result = await saveDeploymentOutput({
+        network,
+        workflow: "existingBlr",
+        data: output,
+        customPath: outputPath,
+      });
 
-      await saveDeploymentOutput(output, finalOutputPath);
-      info(`\n💾 Deployment output saved: ${finalOutputPath}`);
+      if (result.success) {
+        info(`\n💾 Deployment output saved: ${result.filepath}`);
+      } else {
+        warn(`\n⚠️  Warning: Could not save deployment output: ${result.error}`);
+      }
     }
 
     info("\n" + "═".repeat(60));
@@ -854,26 +788,5 @@ export async function deploySystemWithExistingBlr(
     }
 
     throw error;
-  }
-}
-
-/**
- * Save deployment output to JSON file.
- *
- * @param output - Deployment output
- * @param filePath - File path to save to
- */
-async function saveDeploymentOutput(output: DeploymentWithExistingBlrOutput, filePath: string): Promise<void> {
-  try {
-    // Ensure directory exists
-    const dir = dirname(filePath);
-    await fs.mkdir(dir, { recursive: true });
-
-    // Write JSON file with pretty formatting
-    await fs.writeFile(filePath, JSON.stringify(output, null, 2), "utf-8");
-
-    success("Deployment output saved", { path: filePath });
-  } catch (error) {
-    warn(`Warning: Could not save deployment output: ${error}`);
   }
 }
