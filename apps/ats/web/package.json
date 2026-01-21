@@ -1,10 +1,10 @@
 {
   "name": "@hashgraph/asset-tokenization-dapp",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc && vite build",
-    "test": "NODE_OPTIONS='--max-old-space-size=8192' NODE_ENV=test jest --runInBand",
+    "test": "NODE_ENV=test jest --runInBand",
     "test:ci": "NODE_ENV=test jest --ci --runInBand",
     "clean": "npx --yes npm-run-all --parallel clean:node clean:build",
     "dev": "vite",
