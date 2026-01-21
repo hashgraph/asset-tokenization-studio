@@ -144,7 +144,7 @@
     "chai": "^4.4.0",
     "dotenv": "^16.0.3",
     "glob": "^11.0.3",
-    "hardhat": "^v2.26.3",
+    "hardhat": "^v3.1.5",
     "hardhat-abi-exporter": "^2.11.0",
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-dependency-compiler": "^1.2.1",
