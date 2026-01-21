@@ -135,19 +135,19 @@ git push
 
 ## Troubleshooting
 
-### ❌ "Uncommitted changes detected"
+### "Uncommitted changes detected"
 
 **Solution**: Run `changeset:version` locally, commit with GPG signature, and push before triggering release workflow.
 
-### ❌ "Tag already exists"
+### "Tag already exists"
 
 **Solution**: Version bump may not have occurred. Check current version and existing tags with `git tag -l`.
 
-### ❌ Changeset check failed
+### Changeset check failed
 
 **Solution**: Run `npm run changeset` or add bypass label (`no-changeset`, `docs-only`, `chore`, `hotfix`).
 
-### ❌ GPG signing error
+### GPG signing error
 
 **Solution**: Configure GPG key:
 
@@ -156,7 +156,7 @@ git config --global user.signingkey YOUR_GPG_KEY_ID
 git config --global commit.gpgsign true
 ```
 
-### ❌ Tests failing
+### Tests failing
 
 **Solution**: Run tests locally before pushing:
 
