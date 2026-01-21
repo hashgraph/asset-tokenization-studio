@@ -76,6 +76,6 @@
     "react-i18next": "13.2.0",
     "react-router-dom": "6.10.0",
     "use-react-router-breadcrumbs": "^4.0.1",
-    "zustand": "4.4.1"
+    "zustand": "5.0.10"
   }
 }
