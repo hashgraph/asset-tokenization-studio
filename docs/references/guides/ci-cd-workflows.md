@@ -31,35 +31,16 @@ These documents explain how our automated workflows function, making it easier f
 
 - **`.github/workflows/test-ats.yml`**: Runs ATS tests (contracts, SDK, web app)
   - Triggered on: Changes to `packages/ats/**` or `apps/ats/**`
-  - Docs: `test-ats-workflow.md` (coming soon)
 
 - **`.github/workflows/test-mp.yml`**: Runs Mass Payout tests
   - Triggered on: Changes to `packages/mass-payout/**` or `apps/mass-payout/**`
-  - Docs: `test-mp-workflow.md` (coming soon)
 
 ### Release Workflows
 
 - **`.github/workflows/publish.yml`**: Publishes packages to npm
   - Triggered by: Release tags (`v*-ats`, `v*-mp`)
-  - Docs: `publishing-workflow.md` (coming soon)
 
-- **ATS Release**: Semi-automated release process with manual version bumping
-  - Docs: `ats-release-process.md` (coming soon)
-
-- **Mass Payout Release**: Semi-automated release process with manual version bumping
-  - Docs: `mp-release-process.md` (coming soon)
-
-## Workflow Documentation Format
-
-Each workflow documentation file should include:
-
-1. **Overview**: What does this workflow do?
-2. **Triggers**: When does it run?
-3. **Steps**: What are the main stages?
-4. **Secrets/Variables**: What configuration is required?
-5. **Outputs**: What artifacts or results are produced?
-6. **Troubleshooting**: Common failures and how to fix them
-7. **Maintenance**: How to update or modify the workflow
+- **ATS Release** / **Mass Payout Release**: Semi-automated release processes with manual version bumping (see [Release Process](#release-process) below)
 
 ## Understanding Conditional Workflows
 
@@ -75,36 +56,132 @@ on:
 
 This improves CI efficiency by avoiding unnecessary test runs.
 
-## Release Process Overview
+## Release Process
 
-Both ATS and Mass Payout follow a **semi-automated release process**:
+**IMPORTANT**: All commits require GPG signatures. Version bumps must be done locally.
 
-1. **Manual Version Bump** (Local):
-   - Developer runs `npm run changeset:version`
-   - Reviews changes to `package.json` and `CHANGELOG.md`
-   - Commits with GPG signature: `git commit -S -m "chore: release"`
-   - Pushes to remote
+### ATS Release
 
-2. **Automated Tag & Release** (GitHub Actions):
-   - Triggered via GitHub UI: Actions → Release → Run workflow
-   - Validates version bump is committed
-   - Creates and pushes git tag (e.g., `v1.2.3-ats`)
-   - Creates GitHub release with auto-generated notes
-   - Triggers npm publishing workflow
+**Step 1: Local Version Bump**
 
-**Why Manual Version Bumping?**
+```bash
+# Run changeset version
+npm run changeset:version
+
+# Review changes
+git diff
+
+# Commit with GPG signature (REQUIRED)
+git commit -S -m "chore: release ATS packages v3.0.0"
+
+# Push
+git push
+```
+
+**Step 2: Trigger Release Workflow**
+
+1. Go to **Actions** → **ATS Release**
+2. Click **Run workflow**
+3. Select **preview** (dry-run) or **release** (creates tag & publishes)
+
+The workflow will:
+
+- Validate version is committed
+- Create & push tag (e.g., `v3.0.0-ats`)
+- Create GitHub release
+- Auto-trigger NPM publish
+
+### Mass Payout Release
+
+**Step 1: Local Version Bump**
+
+```bash
+# Run changeset version (ignore ATS packages)
+npx changeset version --ignore "@hashgraph/asset-tokenization-*"
+
+# Review changes
+git diff
+
+# Commit with GPG signature (REQUIRED)
+git commit -S -m "chore: release Mass Payout packages v2.0.0"
+
+# Push
+git push
+```
+
+**Step 2: Trigger Release Workflow**
+
+1. Go to **Actions** → **Mass Payout Release**
+2. Click **Run workflow**
+3. Select **preview** or **release**
+
+### Why Manual Version Bumping?
 
 - GPG-signed commits required for security
 - Allows human review of version changes
 - Prevents accidental releases
 
-## Required GitHub Secrets
+## Workflows Reference
 
-Document all required secrets and their purpose:
+| Workflow                | Trigger                | Purpose                   |
+| ----------------------- | ---------------------- | ------------------------- |
+| **ATS Tests**           | PR to main (ATS files) | Run ATS package tests     |
+| **Mass Payout Tests**   | PR to main (MP files)  | Run Mass Payout tests     |
+| **Changeset Check**     | PR to develop          | Validate changeset exists |
+| **ATS Release**         | Manual                 | Create ATS release tag    |
+| **Mass Payout Release** | Manual                 | Create MP release tag     |
+| **ATS Publish**         | Tag push `v*-ats`      | Publish to npm            |
+| **Mass Payout Publish** | Tag push `v*-mp`       | Publish to npm            |
+
+## Troubleshooting
+
+### ❌ "Uncommitted changes detected"
+
+**Solution**: Run `changeset:version` locally, commit with GPG signature, and push before triggering release workflow.
+
+### ❌ "Tag already exists"
+
+**Solution**: Version bump may not have occurred. Check current version and existing tags with `git tag -l`.
+
+### ❌ Changeset check failed
+
+**Solution**: Run `npm run changeset` or add bypass label (`no-changeset`, `docs-only`, `chore`, `hotfix`).
+
+### ❌ GPG signing error
+
+**Solution**: Configure GPG key:
+
+```bash
+git config --global user.signingkey YOUR_GPG_KEY_ID
+git config --global commit.gpgsign true
+```
+
+### ❌ Tests failing
+
+**Solution**: Run tests locally before pushing:
+
+```bash
+npm run ats:test
+npm run mass-payout:test
+```
+
+## Quick Commands
+
+```bash
+# Development
+npm run changeset              # Create changeset
+npm run changeset:status       # Check pending changes
+npm run ats:test               # Run ATS tests
+npm run mass-payout:test       # Run Mass Payout tests
+
+# Release (local)
+npm run changeset:version      # Bump versions & generate CHANGELOGs
+```
+
+## Required GitHub Secrets
 
 - `NPM_TOKEN`: For publishing packages to npm registry
 - `GITHUB_TOKEN`: Automatically provided by GitHub Actions
-- (Add others as needed)
 
 ## Modifying Workflows
 
@@ -116,19 +193,10 @@ When modifying CI/CD workflows:
 4. **Use conditional runs**: Avoid running unnecessary jobs
 5. **Fail fast**: Order jobs to catch errors early
 
-## Contributing
-
-If you modify a workflow, update this documentation. Include:
-
-- What changed and why
-- How to test the changes
-- Any new requirements or breaking changes
-
 ## Questions?
 
 For workflow-related questions:
 
 1. Check this documentation
 2. Review the actual workflow files in `.github/workflows/`
-3. Ask in the team chat
-4. Create an issue with the `ci/cd` label
+3. Create an issue with the `ci/cd` label
