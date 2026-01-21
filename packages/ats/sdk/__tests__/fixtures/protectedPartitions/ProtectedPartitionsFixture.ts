@@ -213,7 +213,6 @@ import ProtectedTransferFromByPartitionRequest from '@port/in/request/security/o
 import ProtectedRedeemFromByPartitionRequest from '@port/in/request/security/operations/redeem/ProtectedRedeemFromByPartitionRequest';
 import PartitionsProtectedRequest from '@port/in/request/security/operations/protectedPartitions/PartitionsProtectedRequest';
 import GetNounceRequest from '@port/in/request/security/operations/protectedPartitions/GetNounceRequest';
-import ProtectedTransferAndLockByPartitionRequest from '@port/in/request/security/operations/transfer/ProtectedTransferAndLockByPartitionRequest';
 import { ProtectPartitionsCommand } from '@command/security/operations/protectPartitions/ProtectPartitionsCommand';
 
 export const ProtectedTransferFromByPartitionRequestFixture =
@@ -266,24 +265,6 @@ export const GetNounceRequestFixture = createFixture<GetNounceRequest>(
     request.targetId.as(() => HederaIdPropsFixture.create().value);
   },
 );
-
-export const ProtectedTransferAndLockByPartitionRequestFixture =
-  createFixture<ProtectedTransferAndLockByPartitionRequest>((request) => {
-    request.securityId.as(() => HederaIdPropsFixture.create().value);
-    request.partitionId.as(() => PartitionIdFixture.create().value);
-    request.sourceId.as(() => HederaIdPropsFixture.create().value);
-    request.targetId.as(() => HederaIdPropsFixture.create().value);
-    request.amount.faker((faker) =>
-      faker.number.int({ min: 1, max: 10 }).toString(),
-    );
-    request.deadline.faker((faker) => faker.date.future().getTime().toString());
-    request.nounce.faker((faker) =>
-      faker.number.int({ min: 0, max: 1000 }).toString(),
-    );
-    request.signature.faker((faker) =>
-      faker.string.hexadecimal({ length: 64, prefix: '0x' }),
-    );
-  });
 
 export const ProtectPartitionsCommandFixture =
   createFixture<ProtectPartitionsCommand>((command) => {

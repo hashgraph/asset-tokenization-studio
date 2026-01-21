@@ -932,48 +932,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       [targetId.toString()],
     );
   }
-  protectedTransferAndLockByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-    securityId: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
-    );
-
-    const transferAndLockData: TransferAndLock = {
-      from: sourceId.toString(),
-      to: targetId.toString(),
-      amount: amount.toBigNumber(),
-      data: '0x',
-      expirationTimestamp: expirationDate.toBigNumber(),
-    };
-
-    const protectionData: ProtectionData = {
-      deadline: deadline.toBigNumber(),
-      nounce: nounce.toBigNumber(),
-      signature: signature
-    }
-
-    return this.executeWithArgs(
-      new TransferAndLockFacet__factory().attach(security.toString()),
-      'protectedTransferAndLockByPartition',
-      securityId,
-      GAS.PROTECTED_TRANSFER_AND_LOCK,
-      [
-        partitionId,
-        transferAndLockData,
-        protectionData,
-      ],
-    );
-  }
   async controllerTransfer(
     security: EvmAddress,
     sourceId: EvmAddress,
@@ -1568,46 +1526,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         sourceId.toString(),
         targetId.toString(),
         amount.toBigNumber(),
-        protectionData,
-      ],
-    );
-  }
-
-  async protectedTransferAndLock(
-    security: EvmAddress,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-    securityId: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
-    );
-    const transferAndLockData: TransferAndLock = {
-      from: sourceId.toString(),
-      to: targetId.toString(),
-      amount: amount.toBigNumber(),
-      data: '0x',
-      expirationTimestamp: expirationDate.toBigNumber(),
-    };
-
-    const protectionData: ProtectionData = {
-      deadline: deadline.toBigNumber(),
-      nounce: nounce.toBigNumber(),
-      signature: signature
-    }
-
-    return this.executeWithArgs(
-      new TransferAndLockFacet__factory().attach(security.toString()),
-      'protectedTransferAndLock',
-      securityId,
-      GAS.PROTECTED_TRANSFER_AND_LOCK,
-      [
-        transferAndLockData,
         protectionData,
       ],
     );

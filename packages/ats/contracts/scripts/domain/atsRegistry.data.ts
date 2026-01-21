@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-14T08:23:45.165Z
+ * Generated: 2026-01-21T10:38:45.830Z
  * Facets: 189
  * Infrastructure: 2
  *
@@ -11462,18 +11462,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["TransferAndLockFacetBase", "Common"],
     methods: [
       {
-        name: "protectedTransferAndLock",
-        signature:
-          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
-        selector: "0xb122b3cf",
-      },
-      {
-        name: "protectedTransferAndLockByPartition",
-        signature:
-          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
-        selector: "0x7bd8b49a",
-      },
-      {
         name: "transferAndLock",
         signature:
           "function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
@@ -11506,18 +11494,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["TransferAndLockFacetBase", "CommonFixedInterestRate"],
     methods: [
-      {
-        name: "protectedTransferAndLock",
-        signature:
-          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
-        selector: "0xb122b3cf",
-      },
-      {
-        name: "protectedTransferAndLockByPartition",
-        signature:
-          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
-        selector: "0x7bd8b49a",
-      },
       {
         name: "transferAndLock",
         signature:
@@ -11557,18 +11533,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["TransferAndLockFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
       {
-        name: "protectedTransferAndLock",
-        signature:
-          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
-        selector: "0xb122b3cf",
-      },
-      {
-        name: "protectedTransferAndLockByPartition",
-        signature:
-          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
-        selector: "0x7bd8b49a",
-      },
-      {
         name: "transferAndLock",
         signature:
           "function transferAndLock(address _to, uint256 _amount, bytes _data, uint256 _expirationTimestamp) returns (bool success_, uint256 lockId_)",
@@ -11606,18 +11570,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["TransferAndLockFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
     methods: [
-      {
-        name: "protectedTransferAndLock",
-        signature:
-          "function protectedTransferAndLock(tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
-        selector: "0xb122b3cf",
-      },
-      {
-        name: "protectedTransferAndLockByPartition",
-        signature:
-          "function protectedTransferAndLockByPartition(bytes32 _partition, tuple(address from, address to, uint256 amount, bytes data, uint256 expirationTimestamp) _transferAndLockData, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bool success_, uint256 lockId_)",
-        selector: "0x7bd8b49a",
-      },
       {
         name: "transferAndLock",
         signature:
@@ -12374,7 +12326,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         topic0: "0xb7d0d6b60740753e9f16692a2f479472a1385aec2420fa43225b02f2ffa1afe7",
       },
     ],
-    errors: [{ name: "IssuanceIsClosed", signature: "IssuanceIsClosed()", selector: "0xd3c3caeb" }],
   },
 
   IERC1644StorageWrapper: {
@@ -12653,18 +12604,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     inheritance: ["FixedRateStorageWrapper"],
     methods: [],
   },
-
-  TransferAndLockStorageWrapper: {
-    name: "TransferAndLockStorageWrapper",
-    inheritance: ["SecurityStorageWrapper"],
-    methods: [],
-  },
 };
 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 56 as const;
+export const TOTAL_STORAGE_WRAPPERS = 55 as const;
 
 /**
  * All role identifiers extracted from contracts.
