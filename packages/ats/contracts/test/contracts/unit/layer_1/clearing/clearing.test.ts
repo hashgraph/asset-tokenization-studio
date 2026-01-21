@@ -24,7 +24,7 @@ import {
   Snapshots,
   ERC3643Management,
   ProtectedPartitions,
-  DiamondCutFacet
+  DiamondCutFacet,
 } from "@contract-types";
 import { ADDRESS_ZERO, ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -168,8 +168,7 @@ describe("Clearing Tests", () => {
   let erc3643Facet: IERC3643;
   let protectedPartitionsFacet: ProtectedPartitions;
   let noncesFacet: NoncesFacet;
-  let diamondCutFacet: DiamondCutFacet
-  
+  let diamondCutFacet: DiamondCutFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;

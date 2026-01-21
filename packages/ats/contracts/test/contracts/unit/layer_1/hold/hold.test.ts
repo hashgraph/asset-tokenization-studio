@@ -31,7 +31,7 @@ import {
   AccessControlFacet,
   AdjustBalancesFacet,
   CapFacet,
-  DiamondCutFacet
+  DiamondCutFacet,
 } from "@contract-types";
 import { Contract } from "ethers";
 
@@ -86,7 +86,7 @@ describe("Hold Tests", () => {
   let snapshotFacet: SnapshotsFacet;
   let erc3643Facet: IERC3643;
   let erc1644Facet: ERC1644Facet;
-  let diamondCutFacet: DiamondCutFacet
+  let diamondCutFacet: DiamondCutFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;

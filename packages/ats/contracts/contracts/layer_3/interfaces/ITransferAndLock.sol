@@ -46,5 +46,4 @@ interface ITransferAndLock {
         bytes calldata _data,
         uint256 _expirationTimestamp
     ) external returns (bool success_, uint256 lockId_);
-
 }

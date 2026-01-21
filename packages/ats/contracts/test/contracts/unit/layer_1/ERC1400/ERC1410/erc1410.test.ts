@@ -116,7 +116,7 @@ describe("ERC1410 Tests", () => {
   let clearingActionsFacet: ClearingActionsFacet;
   let snapshotsFacet: SnapshotsFacet;
   let timeTravelFacet: TimeTravelFacet;
-  let diamondCutFacet: DiamondCutFacet
+  let diamondCutFacet: DiamondCutFacet;
 
   async function setPreBalanceAdjustment(singlePartition?: boolean) {
     await grantRolesToAccounts();

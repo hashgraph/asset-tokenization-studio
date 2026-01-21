@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-20T13:21:48.982Z
+ * Generated: 2026-01-21T15:11:01.440Z
  * Facets: 193
  * Infrastructure: 2
  *
@@ -12678,7 +12678,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 58 as const;
+export const TOTAL_STORAGE_WRAPPERS = 57 as const;
 
 /**
  * All role identifiers extracted from contracts.

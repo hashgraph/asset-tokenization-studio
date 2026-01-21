@@ -14,10 +14,6 @@ import {
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH
 } from "../../../layer_1/constants/values.sol";
-import {
-    _PROTECTED_TRANSFER_AND_LOCK_FROM_PARTITION_TYPEHASH,
-    _PROTECTED_TRANSFER_AND_LOCK_BY_PARTITION_FROM_PARTITION_TYPEHASH
-} from "../../../layer_3/constants/values.sol";
 import { Hold, ProtectedHold } from "../../../layer_1/interfaces/hold/IHold.sol";
 import { IClearing } from "../../../layer_1/interfaces/clearing/IClearing.sol";
 
@@ -197,56 +193,6 @@ function getMessageHashClearingRedeem(
                     )
                 ),
                 _amount
-            )
-        );
-}
-
-function getMessageHashTransferAndLock(
-    address _from,
-    address _to,
-    uint256 _amount,
-    bytes calldata _data,
-    uint256 _expirationTimestamp,
-    uint256 _deadline,
-    uint256 _nounce
-) pure returns (bytes32) {
-    return
-        keccak256(
-            abi.encode(
-                _PROTECTED_TRANSFER_AND_LOCK_FROM_PARTITION_TYPEHASH,
-                _from,
-                _to,
-                _amount,
-                _data,
-                _expirationTimestamp,
-                _deadline,
-                _nounce
-            )
-        );
-}
-
-function getMessageHashTransferAndLockByPartition(
-    bytes32 _partition,
-    address _from,
-    address _to,
-    uint256 _amount,
-    bytes calldata _data,
-    uint256 _expirationTimestamp,
-    uint256 _deadline,
-    uint256 _nounce
-) pure returns (bytes32) {
-    return
-        keccak256(
-            abi.encode(
-                _PROTECTED_TRANSFER_AND_LOCK_BY_PARTITION_FROM_PARTITION_TYPEHASH,
-                _partition,
-                _from,
-                _to,
-                _amount,
-                _data,
-                _expirationTimestamp,
-                _deadline,
-                _nounce
             )
         );
 }
