@@ -48,7 +48,7 @@
     "chai-as-promised": "^7.1.1",
     "dotenv": "^16.0.3",
     "ethers": "^5.8.0",
-    "hardhat": "^2.22.19",
+    "hardhat": "^3.1.5",
     "hardhat-abi-exporter": "^2.11.0",
     "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.8",
