@@ -8,12 +8,11 @@ import { ProtectedPartitions } from "./ProtectedPartitions.sol";
 abstract contract ProtectedPartitionsFacetBase is ProtectedPartitions, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_ = new bytes4[](5);
         staticFunctionSelectors_[selectorIndex++] = this.initialize_ProtectedPartitions.selector;
         staticFunctionSelectors_[selectorIndex++] = this.protectPartitions.selector;
         staticFunctionSelectors_[selectorIndex++] = this.unprotectPartitions.selector;
         staticFunctionSelectors_[selectorIndex++] = this.arePartitionsProtected.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getNounceFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.calculateRoleForPartition.selector;
     }
 

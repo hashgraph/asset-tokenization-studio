@@ -283,7 +283,6 @@ contract Factory is IFactory, Common {
 
         IERC20Votes(securityAddress_).initialize_ERC20Votes(_securityData.erc20VotesActivated);
 
-        IERC20Permit(securityAddress_).initialize_ERC20Permit();
         IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
     }
 }

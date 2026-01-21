@@ -31,6 +31,7 @@ import {
   AccessControlFacet,
   AdjustBalancesFacet,
   CapFacet,
+  DiamondCutFacet,
 } from "@contract-types";
 import { Contract } from "ethers";
 
@@ -85,6 +86,7 @@ describe("Hold Tests", () => {
   let snapshotFacet: SnapshotsFacet;
   let erc3643Facet: IERC3643;
   let erc1644Facet: ERC1644Facet;
+  let diamondCutFacet: DiamondCutFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -185,6 +187,8 @@ describe("Hold Tests", () => {
     controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_E);
     erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address, signer_A);
     erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address, signer_A);
+    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", diamond.address, signer_A);
+
     // Set the initial RBACs
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -1150,10 +1154,13 @@ describe("Hold Tests", () => {
       beforeEach(async () => {
         await loadFixture(protectedEquityTokenFixture);
 
+        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
+
         domain = {
-          name: "ProtectedPartitions",
-          version: "1.0.0",
+          name: name,
+          version: version,
           chainId: chainId,
           verifyingContract: diamond.address,
         };

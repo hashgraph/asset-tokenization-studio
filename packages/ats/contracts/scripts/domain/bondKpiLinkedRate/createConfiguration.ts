@@ -55,6 +55,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "ERC1643KpiLinkedRateFacet",
   "ERC1644KpiLinkedRateFacet",
   "ERC20PermitKpiLinkedRateFacet",
+  "NoncesKpiLinkedRateFacet",
   "ERC20VotesKpiLinkedRateFacet",
   "ERC3643BatchKpiLinkedRateFacet",
   "ERC3643ManagementKpiLinkedRateFacet",

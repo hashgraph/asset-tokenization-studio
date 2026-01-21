@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-21T10:38:45.830Z
- * Facets: 189
+ * Generated: 2026-01-21T15:11:01.440Z
+ * Facets: 193
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -313,6 +313,14 @@ import {
   LockKpiLinkedRateFacetTimeTravel__factory,
   LockSustainabilityPerformanceTargetRateFacet__factory,
   LockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  NoncesFacet__factory,
+  NoncesFacetTimeTravel__factory,
+  NoncesFixedRateFacet__factory,
+  NoncesFixedRateFacetTimeTravel__factory,
+  NoncesKpiLinkedRateFacet__factory,
+  NoncesKpiLinkedRateFacetTimeTravel__factory,
+  NoncesSustainabilityPerformanceTargetRateFacet__factory,
+  NoncesSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   PauseFacet__factory,
   PauseFacetTimeTravel__factory,
   PauseFixedRateFacet__factory,
@@ -5336,8 +5344,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
         selector: "0x3644e515",
       },
-      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
-      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
       {
         name: "permit",
         signature:
@@ -5367,8 +5373,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
         selector: "0x3644e515",
       },
-      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
-      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
       {
         name: "permit",
         signature:
@@ -5401,8 +5405,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
         selector: "0x3644e515",
       },
-      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
-      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
       {
         name: "permit",
         signature:
@@ -5435,8 +5437,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function DOMAIN_SEPARATOR() view returns (bytes32)",
         selector: "0x3644e515",
       },
-      { name: "initialize_ERC20Permit", signature: "function initialize_ERC20Permit()", selector: "0x70d162dc" },
-      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
       {
         name: "permit",
         signature:
@@ -9431,6 +9431,83 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new LockSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
+  NoncesFacet: {
+    name: "NoncesFacet",
+    resolverKey: {
+      name: "_NONCES_RESOLVER_KEY",
+      value: "0xb235fd4aa74228c048d55d58514cd3393ef934423864ef7ddca6d302041c2bd1",
+    },
+    inheritance: ["NoncesFacetBase", "Common"],
+    methods: [
+      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
+    ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new NoncesFacetTimeTravel__factory(signer) : new NoncesFacet__factory(signer),
+  },
+
+  NoncesFixedRateFacet: {
+    name: "NoncesFixedRateFacet",
+    resolverKey: {
+      name: "_NONCES_FIXED_RATE_RESOLVER_KEY",
+      value: "0xb13c3f8e56b31e6f487b3586c2eafb6f13c33bf6b0063a62f31fb386b0dab046",
+    },
+    inheritance: ["NoncesFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new NoncesFixedRateFacetTimeTravel__factory(signer) : new NoncesFixedRateFacet__factory(signer),
+  },
+
+  NoncesKpiLinkedRateFacet: {
+    name: "NoncesKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_NONCES_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xc267b98bd9bdee7ecfccb0929874a128cc0814cf4bd67274423368452b324dc6",
+    },
+    inheritance: ["NoncesFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new NoncesKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new NoncesKpiLinkedRateFacet__factory(signer),
+  },
+
+  NoncesSustainabilityPerformanceTargetRateFacet: {
+    name: "NoncesSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_NONCES_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x631217f1fdd4036273035308e6637d8cdef1927db4eef0af68e5aac13a70892e",
+    },
+    inheritance: ["NoncesFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new NoncesSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new NoncesSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   PauseFacet: {
     name: "PauseFacet",
     resolverKey: {
@@ -9870,11 +9947,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcb4da6fc",
       },
       {
-        name: "getNounceFor",
-        signature: "function getNounceFor(address account) view returns (uint256)",
-        selector: "0x9f6b67c2",
-      },
-      {
         name: "initialize_ProtectedPartitions",
         signature: "function initialize_ProtectedPartitions(bool _protectPartitions) returns (bool success_)",
         selector: "0x90c032cc",
@@ -9914,11 +9986,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "calculateRoleForPartition",
         signature: "function calculateRoleForPartition(bytes32 partition) pure returns (bytes32 role)",
         selector: "0xcb4da6fc",
-      },
-      {
-        name: "getNounceFor",
-        signature: "function getNounceFor(address account) view returns (uint256)",
-        selector: "0x9f6b67c2",
       },
       {
         name: "initialize_ProtectedPartitions",
@@ -9965,11 +10032,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcb4da6fc",
       },
       {
-        name: "getNounceFor",
-        signature: "function getNounceFor(address account) view returns (uint256)",
-        selector: "0x9f6b67c2",
-      },
-      {
         name: "initialize_ProtectedPartitions",
         signature: "function initialize_ProtectedPartitions(bool _protectPartitions) returns (bool success_)",
         selector: "0x90c032cc",
@@ -10012,11 +10074,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "calculateRoleForPartition",
         signature: "function calculateRoleForPartition(bytes32 partition) pure returns (bytes32 role)",
         selector: "0xcb4da6fc",
-      },
-      {
-        name: "getNounceFor",
-        signature: "function getNounceFor(address account) view returns (uint256)",
-        selector: "0x9f6b67c2",
       },
       {
         name: "initialize_ProtectedPartitions",
@@ -11608,7 +11665,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 189 as const;
+export const TOTAL_FACETS = 193 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -11903,7 +11960,7 @@ export const TOTAL_INFRASTRUCTURE_CONTRACTS = 2 as const;
 export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> = {
   AccessControlStorageWrapper: {
     name: "AccessControlStorageWrapper",
-    inheritance: ["IAccessControlStorageWrapper", "Internals", "BusinessLogicResolverWrapper"],
+    inheritance: ["IAccessControlStorageWrapper", "ResolverProxyStorageWrapper", "BusinessLogicResolverWrapper"],
     methods: [],
   },
 
@@ -12521,6 +12578,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  NonceStorageWrapper: {
+    name: "NonceStorageWrapper",
+    inheritance: ["Internals"],
+    methods: [],
+  },
+
   PauseStorageWrapper: {
     name: "PauseStorageWrapper",
     inheritance: ["IPauseStorageWrapper", "ExternalPauseManagementStorageWrapper"],
@@ -12542,6 +12605,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   ProtectedPartitionsStorageWrapper: {
     name: "ProtectedPartitionsStorageWrapper",
     inheritance: ["IProtectedPartitionsStorageWrapper", "KycStorageWrapper"],
+    methods: [],
+  },
+
+  ResolverProxyStorageWrapper: {
+    name: "ResolverProxyStorageWrapper",
+    inheritance: ["NonceStorageWrapper"],
     methods: [],
   },
 
@@ -12609,7 +12678,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 55 as const;
+export const TOTAL_STORAGE_WRAPPERS = 57 as const;
 
 /**
  * All role identifiers extracted from contracts.

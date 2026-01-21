@@ -7,7 +7,7 @@ import { IClearingActions } from "../../layer_1/interfaces/clearing/IClearingAct
 import { IClearingTransfer } from "../../layer_1/interfaces/clearing/IClearingTransfer.sol";
 import { IClearingStorageWrapper } from "../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { checkNounceAndDeadline } from "../../layer_1/protectedPartitions/signatureVerification.sol";
+import { checkNounceAndDeadline } from "../../layer_0/common/libraries/ERC712Lib.sol";
 import { Hold } from "../../layer_1/interfaces/hold/IHold.sol";
 import { ThirdPartyType } from "../common/types/ThirdPartyType.sol";
 import { ICompliance } from "../../layer_1/interfaces/ERC3643/ICompliance.sol";
@@ -28,14 +28,14 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
-            _getNounceFor(_protectedClearingOperation.from),
+            _getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
             _blockTimestamp()
         );
 
         _checkClearingTransferSignature(_protectedClearingOperation, _amount, _to, _signature);
 
-        _setNounce(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
+        _setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
 
         (success_, clearingId_) = _clearingTransferCreation(
             _protectedClearingOperation.clearingOperation,
@@ -55,14 +55,14 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
-            _getNounceFor(_protectedClearingOperation.from),
+            _getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
             _blockTimestamp()
         );
 
         _checkClearingCreateHoldSignature(_protectedClearingOperation, _hold, _signature);
 
-        _setNounce(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
+        _setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
 
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _protectedClearingOperation.clearingOperation,
@@ -81,14 +81,14 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
-            _getNounceFor(_protectedClearingOperation.from),
+            _getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
             _blockTimestamp()
         );
 
         _checkClearingRedeemSignature(_protectedClearingOperation, _amount, _signature);
 
-        _setNounce(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
+        _setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
 
         (success_, clearingId_) = _clearingRedeemCreation(
             _protectedClearingOperation.clearingOperation,

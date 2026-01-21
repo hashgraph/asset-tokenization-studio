@@ -25,13 +25,6 @@ interface IProtectedPartitions {
     function arePartitionsProtected() external view returns (bool);
 
     /**
-     * @notice Returns the nounce for an account
-     * @param account The address of the account
-     * @return uint256 The nounce for the account
-     */
-    function getNounceFor(address account) external view returns (uint256);
-
-    /**
      * @notice Calculates the role required to transfer tokens from a given partition
      * @param _partition The partition to calculate the role for
      * @return roleForPartition_ The role required to transfer tokens from the given partition

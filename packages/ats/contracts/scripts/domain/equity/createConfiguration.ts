@@ -55,6 +55,7 @@ const EQUITY_FACETS = [
   "ERC1643Facet",
   "ERC1644Facet",
   "ERC20PermitFacet",
+  "NoncesFacet",
   "ERC20VotesFacet",
   "ERC3643BatchFacet",
   "ERC3643ManagementFacet",

@@ -55,6 +55,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "ERC1643SustainabilityPerformanceTargetRateFacet",
   "ERC1644SustainabilityPerformanceTargetRateFacet",
   "ERC20PermitSustainabilityPerformanceTargetRateFacet",
+  "NoncesSustainabilityPerformanceTargetRateFacet",
   "ERC20VotesSustainabilityPerformanceTargetRateFacet",
   "ERC3643BatchSustainabilityPerformanceTargetRateFacet",
   "ERC3643ManagementSustainabilityPerformanceTargetRateFacet",

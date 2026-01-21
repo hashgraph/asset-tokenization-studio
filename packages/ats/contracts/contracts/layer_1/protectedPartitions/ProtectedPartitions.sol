@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "contracts/layer_0/Internals.sol";
 import { IProtectedPartitions } from "../interfaces/protectedPartitions/IProtectedPartitions.sol";
-import { _CONTRACT_NAME_PROTECTEDPARTITIONS, _CONTRACT_VERSION_PROTECTEDPARTITIONS } from "../constants/values.sol";
 import { _PROTECTED_PARTITIONS_ROLE } from "../constants/roles.sol";
 
 abstract contract ProtectedPartitions is IProtectedPartitions, Internals {
@@ -38,10 +37,6 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Internals {
 
     function arePartitionsProtected() external view override returns (bool) {
         return _arePartitionsProtected();
-    }
-
-    function getNounceFor(address account) external view override returns (uint256) {
-        return _getNounceFor(account);
     }
 
     function calculateRoleForPartition(bytes32 partition) external pure override returns (bytes32 role) {
