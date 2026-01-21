@@ -203,42 +203,38 @@
 
 */
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+pragma solidity 0.8.22;
 
 // solhint-disable max-line-length
 
-import { ILifeCycleCashFlowStorageWrapper } from './interfaces/ILifeCycleCashFlowStorageWrapper.sol';
-import { AssetType } from './interfaces/ILifeCycleCashFlow.sol';
-import { LocalContext } from './common/LocalContext.sol';
+import { ILifeCycleCashFlow } from "./interfaces/ILifeCycleCashFlow.sol";
 import {
     HederaTokenService
-} from '@hashgraph/smart-contracts/contracts/system-contracts/hedera-token-service/HederaTokenService.sol';
-import { IERC20 } from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol';
-import { IERC20 as OZ_IERC20 } from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import { ERC20 } from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/ERC1400/ERC20/ERC20.sol';
-import { IERC1410 } from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC1410.sol';
+} from "@hashgraph/smart-contracts/contracts/system-contracts/hedera-token-service/HederaTokenService.sol";
+import { Pause } from "./core/Pause.sol";
+import { AccessControl } from "./core/AccessControl.sol";
+import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
+import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {
     ISnapshots
-} from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/snapshots/ISnapshots.sol';
-import { IBond } from '@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBond.sol';
-import { IBondRead } from '@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBondRead.sol';
-import { IEquity } from '@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/equity/IEquity.sol';
-import { ISecurity } from '@hashgraph/asset-tokenization-contracts/contracts/layer_3/interfaces/ISecurity.sol';
-import { _DEFAULT_PARTITION, _PERCENTAGE_DECIMALS_SIZE } from './constants/values.sol';
-import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from './constants/storagePositions.sol';
+} from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/snapshots/ISnapshots.sol";
+import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBond.sol";
+import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/equity/IEquity.sol";
+import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/layer_3/interfaces/ISecurity.sol";
+import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
+import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 
-abstract contract LifeCycleCashFlowStorageWrapper is
-    ILifeCycleCashFlowStorageWrapper,
-    HederaTokenService,
-    LocalContext
-{
+abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaTokenService, Pause, AccessControl {
+    using SafeERC20 for OZ_IERC20;
+
     struct LifeCycleCashFlowStorage {
         address asset;
-        AssetType assetType;
+        ILifeCycleCashFlow.AssetType assetType;
         OZ_IERC20 paymentToken;
         mapping(uint256 => mapping(address => bool)) paidAddressesByDistribution;
         mapping(uint256 => mapping(address => bool)) paidAddressesBySnapshot;
-        mapping(address => bool) cashOutPaidAddresses;
     }
 
     modifier isAsset(address _asset) {
@@ -256,6 +252,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         _;
     }
 
+    modifier onlyValidPaymentToken(address _paymentToken) {
+        _checkPaymentToken(_paymentToken);
+        _;
+    }
     /*
      * @dev Pay a coupon or dividend to a list of holders
      *
@@ -263,12 +263,12 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param asset The asset the distribution belongs to
      * @param distributionID The coupon/dividend identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      *
      * @return The array of the holders addresses whose payment were not successful
      */
     function _executeDistribution(
-        AssetType _assetType,
+        ILifeCycleCashFlow.AssetType _assetType,
         address _asset,
         uint256 _distributionID,
         uint256 _pageIndex,
@@ -296,20 +296,25 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return The array of the holders addresses whose payment were not successful
      */
     function _executeDistributionByAddresses(
-        AssetType _assetType,
+        ILifeCycleCashFlow.AssetType _assetType,
         address _asset,
         uint256 _distributionID,
         address[] memory _holders
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
-        (failed_, succeeded_, paidAmount_) = _payHoldersDistribution(_assetType, _asset, _distributionID, _holders);
+        address[] memory filteredHolders = _filterZeroAddresses(_holders);
+        (failed_, succeeded_, paidAmount_) = _payHoldersDistribution(
+            _assetType,
+            _asset,
+            _distributionID,
+            filteredHolders
+        );
     }
-
     /*
      * @dev Perform a bond cash out to a page of holders
      *
      * @param bond The bond the cash out belongs to
      * @param pageIndex The index of the page whose cash outs will be performed
-     * @param pageLenth The number of holders who owns the bond to be cashed out
+     * @param pageLength The number of holders who owns the bond to be cashed out
      *
      * @return The array of the holders addresses whose cashes outs were not successful
      * @return True if ATS returns holders for their bonds to be cashed out, and false otherwise
@@ -338,7 +343,8 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         address _bond,
         address[] memory _holders
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
-        (failed_, succeeded_, paidAmount_) = _payHoldersCashOut(_bond, _holders);
+        address[] memory filteredHolders = _filterZeroAddresses(_holders);
+        (failed_, succeeded_, paidAmount_) = _payHoldersCashOut(_bond, filteredHolders);
     }
 
     /*
@@ -347,7 +353,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param asset The asset the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      * @param amount The fixed amount to be paid distributed proportionally among the holders
      *
      * @return The array of the holders addresses whose payment were not successful
@@ -397,7 +403,8 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         internal
         returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_, bool executed_)
     {
-        if (_percentage > 100 * 10 ** _PERCENTAGE_DECIMALS_SIZE) revert InvalidPercentage(_percentage);
+        if (_percentage > 100 * 10 ** _PERCENTAGE_DECIMALS_SIZE)
+            revert ILifeCycleCashFlow.InvalidPercentage(_percentage);
         address[] memory holders = _getHoldersBySnapshot(_asset, _snapshotID, _pageIndex, _pageLength);
         if (holders.length == 0) return (failed_, succeeded_, paidAmount_, false);
         (failed_, succeeded_, paidAmount_) = _executeSnapshotByAddresses(
@@ -426,11 +433,12 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 _snapshotID,
         address[] memory _holders,
         uint256 _amount,
-        function(address, uint256, address, uint256) internal returns (uint256) _getSnapshotAmount
+        function(ILifeCycleCashFlow.SnapshotAmountInfo memory) internal returns (uint256) _getSnapshotAmount
     ) internal returns (address[] memory failed_, address[] memory succeeded_, uint256[] memory paidAmount_) {
+        address[] memory filteredHolders = _filterZeroAddresses(_holders);
         (failed_, succeeded_, paidAmount_) = _paySnapshotHolders(
             _asset,
-            _holders,
+            filteredHolders,
             _snapshotID,
             _amount,
             _getSnapshotAmount
@@ -446,11 +454,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is
     function _transferPaymentToken(address _to, uint256 _amount) internal {
         OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
         if (paymentToken.balanceOf(address(this)) < _amount) {
-            revert NotEnoughBalance(_amount);
+            revert ILifeCycleCashFlow.NotEnoughBalance(_amount);
         }
 
-        if (!paymentToken.transfer(_to, _amount)) {
-            revert TransferERC20TokenFailed(_to, _amount);
+        if (!paymentToken.trySafeTransfer(_to, _amount)) {
+            revert ILifeCycleCashFlow.TransferERC20TokenFailed(_to, _amount);
         }
     }
 
@@ -459,9 +467,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      *
      * @param newPaymentToken The new payment token
      */
-    function _updatePaymentToken(address _newPaymenToken) internal {
-        _setPaymentToken(OZ_IERC20(_newPaymenToken));
-        _associateToken(_newPaymenToken);
+    function _updatePaymentToken(address _newPaymentToken) internal {
+        _setPaymentToken(OZ_IERC20(_newPaymentToken));
+        _associateToken(_newPaymentToken);
     }
 
     /*
@@ -478,7 +486,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      *
      * @param assetType The asset type to be set
      */
-    function _setAssetType(AssetType _assetType) internal {
+    function _setAssetType(ILifeCycleCashFlow.AssetType _assetType) internal {
         _lifeCycleCashFlowStorage().assetType = _assetType;
     }
 
@@ -492,13 +500,26 @@ abstract contract LifeCycleCashFlowStorageWrapper is
     }
 
     /*
+     * @dev Assign RBAC roles to members
+     *
+     * @param rbac The array of RBAC roles and members
+     */
+    function _assignRbacRoles(ILifeCycleCashFlow.Rbac[] memory _rbac) internal {
+        for (uint256 rbacIndex; rbacIndex < _rbac.length; rbacIndex++) {
+            for (uint256 memberIndex; memberIndex < _rbac[rbacIndex].members.length; memberIndex++) {
+                _grantRole(_rbac[rbacIndex].role, _rbac[rbacIndex].members[memberIndex]);
+            }
+        }
+    }
+
+    /*
      * @dev Associate with payment token to the contract
      *
      * @param token The address of the token we want to associate with the contract
      */
     function _associateToken(address _token) internal virtual {
         if (HederaTokenService.associateToken(address(this), _token) != 22) {
-            revert AssociateTokenFailed();
+            revert ILifeCycleCashFlow.AssociateTokenFailed();
         }
 
         emit TokenAssociated(_token);
@@ -515,14 +536,13 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return The amount to be paid
      */
     function _getSnapshotAmountByAmount(
-        address _asset,
-        uint256 _snapshotID,
-        address _holder,
-        uint256 _amount
+        ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 assetTotalSupply = _getAssetTotalSupply(_asset);
-        uint256 holderTokens = ISnapshots(_asset).balanceOfAtSnapshot(_snapshotID, _holder);
-        return ((_amount * holderTokens) / assetTotalSupply);
+        uint256 holderTokens = ISnapshots(amountInfo.asset).balanceOfAtSnapshot(
+            amountInfo.snapshotID,
+            amountInfo.holder
+        );
+        return ((amountInfo.amountOrPercentage * holderTokens) / amountInfo.totalSupplyAtSnapshot);
     }
 
     /*
@@ -536,16 +556,14 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return The amount to be paid
      */
     function _getSnapshotAmountByPercentage(
-        address _asset,
-        uint256 _snapshotID,
-        address _holder,
-        uint256 _percentage
+        ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo
     ) internal view returns (uint256) {
-        uint256 paymentTokenBalance = _lifeCycleCashFlowStorage().paymentToken.balanceOf(address(this));
-        uint256 assetTotalSupply = _getAssetTotalSupply(_asset);
-        uint256 holderTokens = ISnapshots(_asset).balanceOfAtSnapshot(_snapshotID, _holder);
-        return ((((paymentTokenBalance * _percentage) / (100 * 10 ** _PERCENTAGE_DECIMALS_SIZE)) * holderTokens) /
-            assetTotalSupply);
+        uint256 holderTokens = ISnapshots(amountInfo.asset).balanceOfAtSnapshot(
+            amountInfo.snapshotID,
+            amountInfo.holder
+        );
+        return ((amountInfo.paymentTokenBalance * amountInfo.amountOrPercentage * holderTokens) /
+            ((100 * 10 ** _PERCENTAGE_DECIMALS_SIZE) * amountInfo.totalSupplyAtSnapshot));
     }
 
     /*
@@ -608,16 +626,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is
     }
 
     /*
-     * @dev Change the payment token
-     *
-     * @param paymentToken The new payment token
-     */
-    function _setNewPaymentToken(address _paymentToken) private {
-        _setPaymentToken(OZ_IERC20(_paymentToken));
-        _associateToken(_paymentToken);
-    }
-
-    /*
      * @dev Sets a payment to a holder for a distribution
      *
      * @param distributionID The distribution paid to a holder
@@ -638,15 +646,6 @@ abstract contract LifeCycleCashFlowStorageWrapper is
     }
 
     /*
-     * @dev Sets a cash out to a holder
-     *
-     * @param holder The holder who was cashed out
-     */
-    function _setHolderCashOutPaid(address holder) private {
-        _lifeCycleCashFlowStorage().cashOutPaidAddresses[holder] = true;
-    }
-
-    /*
      * @dev Returns the array containing holders addresses who couldn't be paid for a distribution id
      *
      * @param assetType The type of the asset, bond/equity, the distribution belongs to
@@ -657,7 +656,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return The array of the holders addresses whose payment were not successful for the distribution
      */
     function _payHoldersDistribution(
-        AssetType _assetType,
+        ILifeCycleCashFlow.AssetType _assetType,
         address _asset,
         uint256 _distributionID,
         address[] memory _holders
@@ -669,27 +668,34 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
         OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        uint8 paymentTokenDecimals = _getPaymentTokenDecimals();
 
         uint256 failedIndex;
         uint256 succeededIndex;
-        uint256 nominalValue;
-
-        if (_assetType == AssetType.Bond) {
-            nominalValue = IBondRead(_asset).getBondDetails().nominalValue;
-        }
 
         for (uint256 index; index < _holders.length; ) {
-            (bool success, uint256 amount) = (_assetType == AssetType.Bond)
-                ? _getCouponAmount(_asset, _distributionID, _holders[index], nominalValue)
-                : _getDividendAmount(_asset, _distributionID, _holders[index]);
+            address holder = _holders[index];
 
-            if (!success || !_payHolderDistribution(_distributionID, _holders[index], amount, paymentToken)) {
-                failedAddresses_[failedIndex] = _holders[index];
+            if (_isDistributionHolderPaid(_distributionID, holder)) {
+                failedAddresses_[failedIndex] = holder;
+                unchecked {
+                    ++failedIndex;
+                    ++index;
+                }
+                continue;
+            }
+
+            uint256 amount = (_assetType == ILifeCycleCashFlow.AssetType.Bond)
+                ? _getCouponAmount(_asset, _distributionID, holder, paymentTokenDecimals)
+                : _getDividendAmount(_asset, _distributionID, holder, paymentTokenDecimals);
+
+            if (!_payHolderDistribution(_distributionID, holder, amount, paymentToken)) {
+                failedAddresses_[failedIndex] = holder;
                 unchecked {
                     ++failedIndex;
                 }
             } else {
-                succeededAddresses_[succeededIndex] = _holders[index];
+                succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = amount;
                 unchecked {
                     ++succeededIndex;
@@ -719,7 +725,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         address[] memory _holders,
         uint256 _snapshotID,
         uint256 _amountOrPercentage,
-        function(address, uint256, address, uint256) internal returns (uint256) _getSnapshotAmount
+        function(ILifeCycleCashFlow.SnapshotAmountInfo memory) internal returns (uint256) _getSnapshotAmount
     )
         private
         returns (address[] memory failedAddresses_, address[] memory succeededAddresses_, uint256[] memory paidAmount_)
@@ -727,20 +733,38 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         failedAddresses_ = new address[](_holders.length);
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
-        OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        uint256 paymentTokenBalance = _lifeCycleCashFlowStorage().paymentToken.balanceOf(address(this));
+        uint256 assetTotalSupply = _getTotalSupplyAtSnapshot(_asset, _snapshotID);
 
         uint256 failedIndex;
         uint256 succeededIndex;
         for (uint256 index; index < _holders.length; ) {
-            uint256 amount = _getSnapshotAmount(_asset, _snapshotID, _holders[index], _amountOrPercentage);
+            address holder = _holders[index];
+            if (_isSnapshotHolderPaid(_snapshotID, holder)) {
+                failedAddresses_[failedIndex] = holder;
+                unchecked {
+                    ++failedIndex;
+                    ++index;
+                }
+                continue;
+            }
 
-            if (!_paySnapshotHolder(_snapshotID, _holders[index], amount, paymentToken)) {
-                failedAddresses_[failedIndex] = _holders[index];
+            ILifeCycleCashFlow.SnapshotAmountInfo memory amountInfo;
+            amountInfo.asset = _asset;
+            amountInfo.snapshotID = _snapshotID;
+            amountInfo.holder = holder;
+            amountInfo.amountOrPercentage = _amountOrPercentage;
+            amountInfo.paymentTokenBalance = paymentTokenBalance;
+            amountInfo.totalSupplyAtSnapshot = assetTotalSupply;
+            uint256 amount = _getSnapshotAmount(amountInfo);
+
+            if (!_paySnapshotHolder(_snapshotID, holder, amount, _lifeCycleCashFlowStorage().paymentToken)) {
+                failedAddresses_[failedIndex] = holder;
                 unchecked {
                     ++failedIndex;
                 }
             } else {
-                succeededAddresses_[succeededIndex] = _holders[index];
+                succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = amount;
                 unchecked {
                     ++succeededIndex;
@@ -773,21 +797,22 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         succeededAddresses_ = new address[](_holders.length);
         paidAmount_ = new uint256[](_holders.length);
         OZ_IERC20 paymentToken = _lifeCycleCashFlowStorage().paymentToken;
+        uint8 paymentTokenDecimals = _getPaymentTokenDecimals();
 
         uint256 failedIndex;
         uint256 succeededIndex;
         for (uint256 index; index < _holders.length; ) {
-            uint256 cashAmount = _getCashOutAmount(_bond, _holders[index]);
+            address holder = _holders[index];
+            uint256 cashAmount = _getCashOutAmount(_bond, holder, paymentTokenDecimals);
 
-            if (!_payHolderCashOut(_holders[index], cashAmount, paymentToken)) {
-                failedAddresses_[failedIndex] = _holders[index];
+            if (!_payHolderCashOut(holder, cashAmount, paymentToken)) {
+                failedAddresses_[failedIndex] = holder;
                 unchecked {
                     ++failedIndex;
                 }
             } else {
-                uint256 tokensAmount = _getTokensAmount(_bond, _holders[index]);
-                IBond(_bond).redeemAtMaturityByPartition(_holders[index], _DEFAULT_PARTITION, tokensAmount);
-                succeededAddresses_[succeededIndex] = _holders[index];
+                IBond(_bond).fullRedeemAtMaturity(holder);
+                succeededAddresses_[succeededIndex] = holder;
                 paidAmount_[succeededIndex] = cashAmount;
                 unchecked {
                     ++succeededIndex;
@@ -816,23 +841,21 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 _amount,
         OZ_IERC20 _paymentToken
     ) private returns (bool) {
-        if (_isDistributionHolderPaid(_distributionID, _holder)) {
-            return false;
-        }
-
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
         }
 
-        try _paymentToken.transfer(_holder, _amount) returns (bool result) {
-            // If the transfer was successful, we set the holder as paid
-            if (result) {
-                _setDistributionHolderPaid(_distributionID, _holder);
-            }
-            return result;
-        } catch {
-            return false;
+        if (_amount == 0) {
+            _setDistributionHolderPaid(_distributionID, _holder);
+            return true;
         }
+
+        if (_paymentToken.trySafeTransfer(_holder, _amount)) {
+            _setDistributionHolderPaid(_distributionID, _holder);
+            return true;
+        }
+
+        return false;
     }
 
     /*
@@ -851,22 +874,21 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         uint256 _amount,
         OZ_IERC20 _paymentToken
     ) private returns (bool) {
-        if (_isSnapshotHolderPaid(_snapshotID, _holder)) {
-            return false;
-        }
-
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
         }
 
-        try _paymentToken.transfer(_holder, _amount) returns (bool result) {
-            if (result) {
-                _setSnapshotHolderPaid(_snapshotID, _holder);
-            }
-            return result;
-        } catch {
-            return false;
+        if (_amount == 0) {
+            _setSnapshotHolderPaid(_snapshotID, _holder);
+            return true;
         }
+
+        if (_paymentToken.trySafeTransfer(_holder, _amount)) {
+            _setSnapshotHolderPaid(_snapshotID, _holder);
+            return true;
+        }
+
+        return false;
     }
 
     /*
@@ -879,22 +901,15 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @return True if the payment succeeded, false otherwise
      */
     function _payHolderCashOut(address _holder, uint256 _amount, OZ_IERC20 _paymentToken) private returns (bool) {
-        if (_isHolderCashOutPaid(_holder)) {
-            return false;
-        }
-
         if (_paymentToken.balanceOf(address(this)) < _amount) {
             return false;
         }
 
-        try _paymentToken.transfer(_holder, _amount) returns (bool result) {
-            if (result) {
-                _setHolderCashOutPaid(_holder);
-            }
-            return result;
-        } catch {
-            return false;
+        if (_amount == 0) {
+            return true;
         }
+
+        return _paymentToken.trySafeTransfer(_holder, _amount);
     }
 
     /*
@@ -904,18 +919,18 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param asset The asset the holders belongs to
      * @param distributionID The coupon/dividend identifier
      * @param pageIndex The index of the page
-     * @param pageLenth The number of holders
+     * @param pageLength The number of holders
      *
      * @return The array of the holders addresses
      */
     function _getHolders(
-        AssetType _assetType,
+        ILifeCycleCashFlow.AssetType _assetType,
         address _asset,
         uint256 _distributionID,
         uint256 _pageIndex,
         uint256 _pageLength
     ) private view returns (address[] memory holders_) {
-        if (_assetType == AssetType.Bond) {
+        if (_assetType == ILifeCycleCashFlow.AssetType.Bond) {
             return IBondRead(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
         } else {
             return IEquity(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
@@ -928,7 +943,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      * @param asset The asset the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page
-     * @param pageLenth The number of holders
+     * @param pageLength The number of holders
      *
      * @return The array of the holders addresses
      */
@@ -948,19 +963,8 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      */
     function _checkAsset(address _assetAddress) private view {
         if (_assetAddress != _lifeCycleCashFlowStorage().asset) {
-            revert InvalidAsset(_assetAddress);
+            revert ILifeCycleCashFlow.InvalidAsset(_assetAddress);
         }
-    }
-
-    /*
-     * @dev Check if a certain holder was already cashed out
-     *
-     * @param holder The holder to check if the cash out was already paid
-     *
-     * @return True if the holder was already cashed out, false otherwise
-     */
-    function _isHolderCashOutPaid(address holder) private view returns (bool paid) {
-        return _lifeCycleCashFlowStorage().cashOutPaidAddresses[holder];
     }
 
     /*
@@ -985,26 +989,14 @@ abstract contract LifeCycleCashFlowStorageWrapper is
     }
 
     /*
-     * @dev Get the amount of asset tokens of a holder
-     *
-     * @param asset The asset the holder's balance is requested
-     * @param holder The holder whose tokens are requested
-     *
-     * @return The amount of tokens
-     */
-    function _getTokensAmount(address _asset, address _holder) private view returns (uint256) {
-        return IERC1410(_asset).balanceOf(_holder);
-    }
-
-    /*
      * @dev Get the asset total supply
      *
      * @param asset The asset its total supply is requested
      *
      * @return The asset total supply
      */
-    function _getAssetTotalSupply(address _asset) private view returns (uint256) {
-        return IERC1410(_asset).totalSupply();
+    function _getTotalSupplyAtSnapshot(address _asset, uint256 _snapshotID) private view returns (uint256) {
+        return ISnapshots(_asset).totalSupplyAtSnapshot(_snapshotID);
     }
 
     /*
@@ -1022,18 +1014,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is
         address _asset,
         uint256 _couponID,
         address _holder,
-        uint256 _nominalValue
-    ) private view returns (bool success, uint256 amount) {
-        try IBondRead(_asset).getCouponFor(_couponID, _holder) returns (IBondRead.CouponFor memory couponFor) {
-            amount = ((couponFor.tokenBalance * _nominalValue * couponFor.period * couponFor.rate) /
-                100 /
-                (365 * 24 * 60 * 60) /
-                10 ** couponFor.decimals /
-                10 ** couponFor.rateDecimals);
-            return (true, amount);
-        } catch {
-            return (false, 0);
-        }
+        uint8 _paymentTokenDecimals
+    ) private view returns (uint256 amount) {
+        IBondRead.CouponAmountFor memory couponAmountFor = IBondRead(_asset).getCouponAmountFor(_couponID, _holder);
+        return (couponAmountFor.numerator * 10 ** _paymentTokenDecimals) / couponAmountFor.denominator;
     }
 
     /*
@@ -1049,15 +1033,11 @@ abstract contract LifeCycleCashFlowStorageWrapper is
     function _getDividendAmount(
         address _asset,
         uint256 _dividendID,
-        address _holder
-    ) private view returns (bool success, uint256 amount) {
-        IEquity equity = IEquity(_asset);
-        try equity.getDividendsFor(_dividendID, _holder) returns (IEquity.DividendFor memory dividendFor) {
-            amount = ((dividendFor.tokenBalance * dividendFor.amount) / 10 ** dividendFor.decimals);
-            return (true, amount);
-        } catch {
-            return (false, 0);
-        }
+        address _holder,
+        uint8 _paymentTokenDecimals
+    ) private view returns (uint256) {
+        IEquity.DividendAmountFor memory dividendAmountFor = IEquity(_asset).getDividendAmountFor(_dividendID, _holder);
+        return (dividendAmountFor.numerator * 10 ** _paymentTokenDecimals) / dividendAmountFor.denominator;
     }
 
     /*
@@ -1068,10 +1048,13 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      *
      * @return The amount to be paid
      */
-    function _getCashOutAmount(address _asset, address _holder) private view returns (uint256) {
-        IBondRead.BondDetailsData memory bondDetailsData = IBondRead(_asset).getBondDetails();
-        uint8 bondDecimals = ERC20(_asset).getERC20Metadata().info.decimals;
-        return ((IERC1410(_asset).balanceOf(_holder) * bondDetailsData.nominalValue) / 10 ** bondDecimals);
+    function _getCashOutAmount(
+        address _asset,
+        address _holder,
+        uint8 _paymentTokenDecimals
+    ) private view returns (uint256) {
+        IBondRead.PrincipalFor memory principalFor = IBondRead(_asset).getPrincipalFor(_holder);
+        return (principalFor.numerator * 10 ** _paymentTokenDecimals) / principalFor.denominator;
     }
 
     /*
@@ -1084,9 +1067,20 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      */
     function _getDistributionExecutionDate(address _asset, uint256 _distributionID) private view returns (uint256) {
         return
-            (_lifeCycleCashFlowStorage().assetType == AssetType.Bond)
+            (_lifeCycleCashFlowStorage().assetType == ILifeCycleCashFlow.AssetType.Bond)
                 ? IBondRead(_asset).getCoupon(_distributionID).coupon.executionDate
                 : IEquity(_asset).getDividends(_distributionID).dividend.executionDate;
+    }
+
+    /*
+     * @dev Check that the payment token is valid
+     *
+     * @param paymentToken The payment token address
+     */
+    function _checkPaymentToken(address _paymentToken) private pure {
+        if (_paymentToken == address(0)) {
+            revert ILifeCycleCashFlow.InvalidPaymentToken(_paymentToken);
+        }
     }
 
     /*
@@ -1100,7 +1094,36 @@ abstract contract LifeCycleCashFlowStorageWrapper is
      */
     function _checkPaymentDate(uint256 _initialDate, uint256 _currentDate) private pure {
         if (_currentDate < _initialDate) {
-            revert NotPaymentDate(_initialDate, _currentDate);
+            revert ILifeCycleCashFlow.NotPaymentDate(_initialDate, _currentDate);
         }
+    }
+
+    /*
+     * @dev Filter zero address addresses from an array of holders
+     *
+     * @param holders The holder's array
+     *
+     * @returns The array of holder's addresses without zero address addresses
+     */
+    function _filterZeroAddresses(address[] memory holders) private pure returns (address[] memory) {
+        uint256 count;
+
+        for (uint256 i = 0; i < holders.length; i++) {
+            if (holders[i] != address(0)) {
+                count++;
+            }
+        }
+
+        address[] memory filtered = new address[](count);
+
+        uint256 index;
+        for (uint256 i = 0; i < holders.length; i++) {
+            if (holders[i] != address(0)) {
+                filtered[index] = holders[i];
+                index++;
+            }
+        }
+
+        return filtered;
     }
 }

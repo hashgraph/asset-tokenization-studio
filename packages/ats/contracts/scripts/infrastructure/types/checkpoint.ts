@@ -55,9 +55,34 @@ export interface ConfigurationResult {
 export type CheckpointStatus = "in-progress" | "completed" | "failed";
 
 /**
- * Workflow type for checkpoint tracking.
+ * Core ATS workflow types.
+ *
+ * These are the official workflows provided by ATS.
+ * Downstream projects can extend WorkflowType with custom workflows.
  */
-export type WorkflowType = "newBlr" | "existingBlr";
+export type AtsWorkflowType = "newBlr" | "existingBlr" | "upgradeConfigurations" | "upgradeTupProxies";
+
+/**
+ * Extensible workflow type for checkpoint tracking.
+ *
+ * Allows downstream projects to add custom workflows while preserving
+ * autocomplete for core ATS workflows.
+ *
+ * @example Extending with custom workflows
+ * ```typescript
+ * // In downstream project (e.g., GBP)
+ * import type { AtsWorkflowType } from '@hashgraph/asset-tokenization-contracts/scripts'
+ *
+ * type GbpWorkflowType = AtsWorkflowType | 'gbpInfrastructure' | 'gbpUpgrade'
+ *
+ * await saveDeploymentOutput({
+ *   network: 'hedera-testnet',
+ *   workflow: 'gbpInfrastructure',  // No type assertion needed
+ *   data: output
+ * })
+ * ```
+ */
+export type WorkflowType = AtsWorkflowType | string;
 
 /**
  * Deployment checkpoint for state tracking and resumability.
@@ -152,6 +177,26 @@ export interface DeploymentCheckpoint {
       /** Hedera Contract ID for proxy (if deployed on Hedera network) */
       proxyContractId?: string;
     };
+
+    /**
+     * Proxy updates tracking (upgradeConfigurations workflow)
+     * Tracks which ResolverProxies have been updated to the new version
+     */
+    proxyUpdates?: Map<
+      string,
+      {
+        /** Whether update succeeded */
+        success: boolean;
+        /** Transaction hash of update */
+        transactionHash?: string;
+        /** Error message if failed */
+        error?: string;
+        /** Previous version before update */
+        previousVersion?: number;
+        /** New version after update */
+        newVersion?: number;
+      }
+    >;
   };
 
   // ============================================================================
@@ -175,6 +220,14 @@ export interface DeploymentCheckpoint {
     deployFactory?: boolean;
     createConfigurations?: boolean;
     existingProxyAdminAddress?: string;
+
+    // upgradeConfigurations workflow options
+    /** BLR address for upgrade workflow */
+    blrAddress?: string;
+    /** Which configurations to upgrade: 'equity', 'bond', or 'both' */
+    configurations?: "equity" | "bond" | "both";
+    /** Proxy addresses to update after configuration upgrade */
+    proxyAddresses?: string[];
   };
 
   // ============================================================================
@@ -251,4 +304,83 @@ export interface ResumeOptions {
    * @example '/tmp/ats-deployments/.checkpoints'
    */
   checkpointDir?: string;
+}
+
+// ============================================================================
+// Type Guards
+// ============================================================================
+
+import type { SaveResult } from "../types";
+
+/**
+ * Type guard for SaveResult success case.
+ *
+ * Enables type narrowing for discriminated union results.
+ *
+ * @param result - Save result to check
+ * @returns True if result is success case
+ *
+ * @example
+ * ```typescript
+ * import { saveDeploymentOutput, isSaveSuccess } from '@hashgraph/asset-tokenization-contracts/scripts'
+ *
+ * const result = await saveDeploymentOutput(options)
+ *
+ * if (isSaveSuccess(result)) {
+ *   console.log(`Saved to: ${result.filepath}`)
+ * } else {
+ *   console.error(`Failed: ${result.error}`)
+ * }
+ * ```
+ */
+export function isSaveSuccess(result: SaveResult): result is { success: true; filepath: string; filename: string } {
+  return result.success === true;
+}
+
+/**
+ * Type guard for SaveResult failure case.
+ *
+ * Enables type narrowing for discriminated union results.
+ *
+ * @param result - Save result to check
+ * @returns True if result is failure case
+ *
+ * @example
+ * ```typescript
+ * import { saveDeploymentOutput, isSaveFailure } from '@hashgraph/asset-tokenization-contracts/scripts'
+ *
+ * const result = await saveDeploymentOutput(options)
+ *
+ * if (isSaveFailure(result)) {
+ *   console.error(`Save failed: ${result.error}`)
+ * }
+ * ```
+ */
+export function isSaveFailure(result: SaveResult): result is { success: false; error: string } {
+  return result.success === false;
+}
+
+/**
+ * Type guard for ATS core workflow types.
+ *
+ * Checks if a workflow string is one of the official ATS workflows.
+ *
+ * @param workflow - Workflow string to check
+ * @returns True if workflow is a core ATS workflow
+ *
+ * @example
+ * ```typescript
+ * import { isAtsWorkflow } from '@hashgraph/asset-tokenization-contracts/scripts'
+ *
+ * if (isAtsWorkflow('newBlr')) {
+ *   console.log('Core ATS workflow')
+ * }
+ *
+ * if (!isAtsWorkflow('customWorkflow')) {
+ *   console.log('Custom downstream workflow')
+ * }
+ * ```
+ */
+export function isAtsWorkflow(workflow: string): workflow is AtsWorkflowType {
+  return ["newBlr", "existingBlr", "upgradeConfigurations", "upgradeTupProxies"].includes(workflow);
 }

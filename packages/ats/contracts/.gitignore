@@ -47,11 +47,15 @@ typechain-types
 #Slither
 Slither/*
 
-# Deployment files - ignore local/test networks
-deployments/hardhat_*.json
-deployments/localhost_*.json
-deployments/*local_*.json
+# Deployment output files - ignore local/test networks
+deployments/*hardhat*.json
+deployments/*localhost*.json
+deployments/*local*.json
+deployments/test-*.json
 
-# Checkpoint files (deployment state tracking) - never commit
-deployments/.checkpoints/**/*
-deployments/.checkpoints/*.json
+# Checkpoint files (deployment state tracking) - never commit checkpoints
+deployments/**/.checkpoints/
+*.checkpoint.json
+
+# Test artifacts - all test-generated files go here
+.temp/

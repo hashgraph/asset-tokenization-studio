@@ -41,8 +41,8 @@ describe("Checkpoint Resumability - Integration Tests", () => {
     let manager: CheckpointManager;
 
     beforeEach(async () => {
-      testDir = createTestCheckpointsDir("happy-path");
-      manager = new CheckpointManager(testDir);
+      testDir = createTestCheckpointsDir();
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -173,8 +173,8 @@ describe("Checkpoint Resumability - Integration Tests", () => {
     let manager: CheckpointManager;
 
     beforeEach(async () => {
-      testDir = createTestCheckpointsDir("facet-failure");
-      manager = new CheckpointManager(testDir);
+      testDir = createTestCheckpointsDir();
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -290,8 +290,8 @@ describe("Checkpoint Resumability - Integration Tests", () => {
     let manager: CheckpointManager;
 
     beforeEach(async () => {
-      testDir = createTestCheckpointsDir("config-failure");
-      manager = new CheckpointManager(testDir);
+      testDir = createTestCheckpointsDir();
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -400,8 +400,8 @@ describe("Checkpoint Resumability - Integration Tests", () => {
     let manager: CheckpointManager;
 
     beforeEach(async () => {
-      testDir = createTestCheckpointsDir("network-isolation");
-      manager = new CheckpointManager(testDir);
+      testDir = createTestCheckpointsDir();
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -541,8 +541,8 @@ describe("Checkpoint Resumability - Integration Tests", () => {
     let manager: CheckpointManager;
 
     beforeEach(async () => {
-      testDir = createTestCheckpointsDir("explicit-resume");
-      manager = new CheckpointManager(testDir);
+      testDir = createTestCheckpointsDir();
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -678,8 +678,8 @@ describe("Checkpoint Resumability - Integration Tests", () => {
     let manager: CheckpointManager;
 
     beforeEach(async () => {
-      testDir = createTestCheckpointsDir("cleanup");
-      manager = new CheckpointManager(testDir);
+      testDir = createTestCheckpointsDir();
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -879,8 +879,8 @@ describe("Checkpoint Resumability - Integration Tests", () => {
     let manager: CheckpointManager;
 
     beforeEach(async () => {
-      testDir = createTestCheckpointsDir("timetravel");
-      manager = new CheckpointManager(testDir);
+      testDir = createTestCheckpointsDir();
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 
@@ -1046,8 +1046,8 @@ describe("Checkpoint Resumability - Integration Tests", () => {
     let manager: CheckpointManager;
 
     beforeEach(async () => {
-      testDir = createTestCheckpointsDir("edge-cases");
-      manager = new CheckpointManager(testDir);
+      testDir = createTestCheckpointsDir();
+      manager = new CheckpointManager(undefined, testDir);
       await cleanupTestCheckpoints(testDir);
     });
 

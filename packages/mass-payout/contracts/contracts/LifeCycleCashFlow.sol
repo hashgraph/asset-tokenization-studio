@@ -203,37 +203,27 @@
 
 */
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.18;
+pragma solidity 0.8.22;
 
 // solhint-disable max-line-length
 
-import { ILifeCycleCashFlow, AssetType } from './interfaces/ILifeCycleCashFlow.sol';
-import { Pause } from './core/Pause.sol';
-import { AccessControl } from './core/AccessControl.sol';
-import { LifeCycleCashFlowStorageWrapper } from './LifeCycleCashFlowStorageWrapper.sol';
-import { IERC20 } from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import { Initializable } from '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
-import { ERC20 } from '@hashgraph/asset-tokenization-contracts/contracts/layer_1/ERC1400/ERC20/ERC20.sol';
-import {
-    _DEFAULT_ADMIN_ROLE,
-    _PAUSER_ROLE,
-    _PAYOUT_ROLE,
-    _CASHOUT_ROLE,
-    _TRANSFERER_ROLE,
-    _PAYMENT_TOKEN_MANAGER_ROLE
-} from './constants/roles.sol';
+import { ILifeCycleCashFlow } from "./interfaces/ILifeCycleCashFlow.sol";
+import { LifeCycleCashFlowStorageWrapper } from "./LifeCycleCashFlowStorageWrapper.sol";
+import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
+import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { _PAYOUT_ROLE, _CASHOUT_ROLE, _TRANSFERER_ROLE, _PAYMENT_TOKEN_MANAGER_ROLE } from "./constants/roles.sol";
 
-contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFlowStorageWrapper, Pause, AccessControl {
-    function initialize(address _asset, address _paymentToken) public initializer {
-        _grantRole(_DEFAULT_ADMIN_ROLE, _msgSender());
-        _grantRole(_PAUSER_ROLE, _msgSender());
-        _grantRole(_PAYOUT_ROLE, _msgSender());
-        _grantRole(_CASHOUT_ROLE, _msgSender());
-        _grantRole(_TRANSFERER_ROLE, _msgSender());
-        _grantRole(_PAYMENT_TOKEN_MANAGER_ROLE, _msgSender());
+contract LifeCycleCashFlow is Initializable, LifeCycleCashFlowStorageWrapper {
+    function initialize(
+        address _asset,
+        address _paymentToken,
+        Rbac[] memory _rbac
+    ) public initializer onlyValidPaymentToken(_paymentToken) {
         _setAsset(_asset);
-        _setAssetType(AssetType(uint8(ERC20(_asset).getERC20Metadata().securityType)));
+        _setAssetType(ILifeCycleCashFlow.AssetType(uint8(IERC20(_asset).getERC20Metadata().securityType)));
         _updatePaymentToken(_paymentToken);
+        _assignRbacRoles(_rbac);
     }
 
     /*
@@ -242,7 +232,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      * @param asset The address of the asset that the coupon/dividend belongs to
      * @param distributionID The coupon/dividend identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      *
      * @return The array of the holders addresses whose payment were not successful
      * @return The array of the holders addresses whose payment were successful
@@ -313,7 +303,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      *
      * @param bond The address of the bond for the cash out to be performed
      * @param pageIndex The index of the page whose cash outs will be performed
-     * @param pageLenth The number of holders who owns the bond to be cashed out
+     * @param pageLength The number of holders who owns the bond to be cashed out
      *
      * @return The array of the holders addresses whose cashes outs were not successful
      * @return The array of the holders addresses whose payment were successful
@@ -375,7 +365,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      * @param asset The address of the asset that the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      * @param amount The fixed amount to be paid distributed proportionally among the holders
      *
      * @return The array of the holders addresses whose payment were not successful
@@ -413,7 +403,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      * @param asset The address of the asset that the snapshot belongs to
      * @param snapshotID The snapshot identifier
      * @param pageIndex The index of the page whose holders will be paid
-     * @param pageLenth The number of holders who will be paid
+     * @param pageLength The number of holders who will be paid
      * @param percentage The contract balance percentage to be paid distributed proportionally among the holders
      *
      * @return The array of the holders addresses whose payment were not successful
@@ -545,7 +535,9 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      *
      * @param paymentToken The new payment token
      */
-    function updatePaymentToken(address _paymentToken) external onlyUnpaused onlyRole(_PAYMENT_TOKEN_MANAGER_ROLE) {
+    function updatePaymentToken(
+        address _paymentToken
+    ) external onlyUnpaused onlyRole(_PAYMENT_TOKEN_MANAGER_ROLE) onlyValidPaymentToken(_paymentToken) {
         _updatePaymentToken(_paymentToken);
         emit PaymentTokenChanged(_paymentToken);
     }
@@ -555,7 +547,7 @@ contract LifeCycleCashFlow is ILifeCycleCashFlow, Initializable, LifeCycleCashFl
      *
      * @returns The payment token
      */
-    function getPaymentToken() external view returns (IERC20) {
+    function getPaymentToken() external view returns (OZ_IERC20) {
         return _getPaymentToken();
     }
 

@@ -52,6 +52,7 @@ export * from "./infrastructure/operations/blrDeployment";
 export * from "./infrastructure/operations/proxyAdminDeployment";
 export * from "./infrastructure/operations/facetDeployment";
 export * from "./infrastructure/operations/deployResolverProxy";
+export * from "./infrastructure/operations/updateResolverProxyConfig";
 export * from "./infrastructure/operations/generateRegistryPipeline";
 
 // Infrastructure utilities
@@ -72,8 +73,10 @@ export type {
   ConfigurationResult,
   CheckpointStatus,
   WorkflowType,
+  AtsWorkflowType,
   ResumeOptions,
 } from "./infrastructure/types/checkpoint";
+export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./infrastructure/types/checkpoint";
 export { CheckpointManager } from "./infrastructure/checkpoint/CheckpointManager";
 export { NullCheckpointManager } from "./infrastructure/checkpoint/NullCheckpointManager";
 export type { CreateCheckpointParams } from "./infrastructure/checkpoint/CheckpointManager";
@@ -126,6 +129,8 @@ export * from "./domain/factory/deployBondToken";
 // Complete deployment workflows
 export * from "./workflows/deploySystemWithNewBlr";
 export * from "./workflows/deploySystemWithExistingBlr";
+export * from "./workflows/upgradeConfigurations";
+export * from "./workflows/upgradeTupProxies";
 
 // ========================================
 // Registry Generation Tools (for extending ATS)
