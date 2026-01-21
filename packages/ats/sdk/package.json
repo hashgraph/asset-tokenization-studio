@@ -67,7 +67,7 @@
     "@walletconnect/modal": "^2.6.2",
     "axios": "^1.7.9",
     "cd": "^0.3.3",
-    "chai": "^4.3.8",
+    "chai": "^6.2.2",
     "chai-as-promised": "^7.1.1",
     "dotenv": "^16.3.1",
     "dpdm": "^3.14.0",
