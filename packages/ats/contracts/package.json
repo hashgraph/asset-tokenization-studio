@@ -141,7 +141,7 @@
     "@typechain/ethers-v5": "10.2.1",
     "@typechain/hardhat": "^6.1.2",
     "@types/jest": "^29.5.14",
-    "chai": "^4.4.0",
+    "chai": "^6.2.2",
     "dotenv": "^16.0.3",
     "glob": "^11.0.3",
     "hardhat": "^v2.26.3",
