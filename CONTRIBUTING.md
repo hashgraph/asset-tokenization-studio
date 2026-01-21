@@ -43,7 +43,7 @@ Copy and configure environment files:
 
 ```bash
 # ATS Web App
-cp apps/ats/web/.env.example apps/ats/web/.env.local
+cp apps/ats/web/.env.example apps/ats/web/.env
 
 # Mass Payout Backend
 cp apps/mass-payout/backend/.env.example apps/mass-payout/backend/.env
@@ -98,12 +98,24 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
+**Requirements:**
+
+- **DCO Sign-off**: All commits must include a sign-off (`--signoff` or `-s`)
+- **GPG Signature**: All commits must be GPG-signed (`-S`)
+
 **Examples:**
 
 ```bash
-git commit -m "feat(ats:sdk): add batch transfer support"
-git commit -m "fix(mp:backend): resolve payout calculation error"
-git commit -m "docs: update quick start guide"
+git commit --signoff -S -m "feat(ats:sdk): add batch transfer support"
+git commit --signoff -S -m "fix(mp:backend): resolve payout calculation error"
+git commit --signoff -S -m "docs: update quick start guide"
+```
+
+**Configure GPG signing:**
+
+```bash
+git config --global user.signingkey YOUR_GPG_KEY_ID
+git config --global commit.gpgsign true
 ```
 
 ## Creating a Changeset (Required)
@@ -127,10 +139,12 @@ Commit the generated changeset file:
 
 ```bash
 git add .changeset/*.md
-git commit -m "chore: add changeset"
+git commit --signoff -S -m "chore: add changeset"
 ```
 
-> **Note**: Changesets accumulate in the `.changeset` folder. During the release process (when creating a PR from `develop` to `main`), these changesets are consumed to automatically calculate the new version and update the changelog.
+> **Note**: Changesets accumulate in the `.changeset` folder. During the release process, these changesets are consumed to automatically calculate the new version and update the changelog.
+
+**Bypass Labels**: For non-feature changes (docs, chores, hotfixes), you can skip the changeset requirement by adding one of these labels to your PR: `no-changeset`, `docs-only`, `chore`, or `hotfix`.
 
 ## Pull Requests
 
@@ -153,11 +167,19 @@ git commit -m "chore: add changeset"
    - Related issues
 4. Request reviews from maintainers
 
+### Automated Checks
+
+PRs are validated automatically for:
+
+- ✅ Tests pass (only for changed modules)
+- ✅ Changeset exists (or bypass label applied)
+- ✅ DCO compliance (sign-off present)
+
 ### PR Title Format
 
 ```
-feat(ats:sdk): add batch transfer functionality
-fix(mp:backend): resolve race condition in scheduler
+feat: add batch transfer functionality
+fix: resolve race condition in scheduler
 docs: add deployment guide
 ```
 
