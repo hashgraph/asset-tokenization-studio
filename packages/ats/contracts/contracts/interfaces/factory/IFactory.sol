@@ -16,6 +16,7 @@ import { IFixedRate } from "../../layer_2/interfaces/interestRates/fixedRate/IFi
 import { IKpiLinkedRate } from "../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import {
     ISustainabilityPerformanceTargetRate
+// solhint-disable-next-line max-line-length
 } from "../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 
 interface IFactory {

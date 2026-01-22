@@ -39,6 +39,7 @@ import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRat
 import { Common } from "../layer_0/common/Common.sol";
 import {
     ISustainabilityPerformanceTargetRate
+// solhint-disable-next-line max-line-length    
 } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 
 contract Factory is IFactory, Common {

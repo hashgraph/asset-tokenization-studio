@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     CommonSustainabilityPerformanceTargetInterestRate
+// solhint-disable-next-line max-line-length
 } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 import {
     ISustainabilityPerformanceTargetRate

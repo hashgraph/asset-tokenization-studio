@@ -6,6 +6,7 @@ import {
 } from "contracts/layer_2/constants/storagePositions.sol";
 import {
     ISustainabilityPerformanceTargetRate
+// solhint-disable-next-line max-line-length
 } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { KpiLinkedRateStorageWrapper } from "../kpiLinkedRate/KpiLinkedRateStorageWrapper.sol";
 

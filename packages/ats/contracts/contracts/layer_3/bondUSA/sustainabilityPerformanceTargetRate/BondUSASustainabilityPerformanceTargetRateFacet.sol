@@ -7,6 +7,7 @@ import {
 import { BondUSAFacetBase } from "../BondUSAFacetBase.sol";
 import {
     CommonSustainabilityPerformanceTargetInterestRate
+// solhint-disable-next-line max-line-length    
 } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract BondUSASustainabilityPerformanceTargetRateFacet is

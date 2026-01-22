@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
 import {
     ISustainabilityPerformanceTargetRate
+// solhint-disable-next-line max-line-length
 } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {

@@ -21,6 +21,7 @@ import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRat
 import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
 import {
     ISustainabilityPerformanceTargetRate
+// solhint-disable-next-line max-line-length    
 } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import {
     ScheduledTask,

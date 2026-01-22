@@ -5,6 +5,7 @@ import { IKpis } from "../../interfaces/kpis/kpiLatest/IKpis.sol";
 import { _KPI_MANAGER_ROLE } from "../../constants/roles.sol";
 import {
     InternalsSustainabilityPerformanceTargetInterestRate
+// solhint-disable-next-line max-line-length
 } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Internals.sol";
 
 abstract contract Kpis is IKpis, InternalsSustainabilityPerformanceTargetInterestRate {
