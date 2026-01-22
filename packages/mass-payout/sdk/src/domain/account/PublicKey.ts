@@ -203,13 +203,13 @@
 
 */
 
-import KeyProps, { KeyType } from './KeyProps';
-import { PublicKey as HPublicKey } from '@hashgraph/sdk';
-import BaseError from '@core/error/BaseError';
+import KeyProps, { KeyType } from "./KeyProps";
+import { PublicKey as HPublicKey } from "@hiero-ledger/sdk";
+import BaseError from "@core/error/BaseError";
 
 export default class PublicKey implements KeyProps {
   public static readonly NULL: PublicKey = new PublicKey({
-    key: 'null',
+    key: "null",
     type: KeyType.NULL,
   });
 
@@ -217,7 +217,7 @@ export default class PublicKey implements KeyProps {
   public readonly type: string;
   constructor(params: Partial<KeyProps> | string) {
     let key: string, type: string;
-    if (typeof params === 'string') {
+    if (typeof params === "string") {
       key = this.formatKey(params);
       type = this.getTypeFromLength(key);
     } else {
@@ -241,7 +241,7 @@ export default class PublicKey implements KeyProps {
   }
 
   private formatKey(key: string): string {
-    if (key.length > 0 && key.startsWith('0x')) {
+    if (key.length > 0 && key.startsWith("0x")) {
       return key.substring(2);
     }
     return key;

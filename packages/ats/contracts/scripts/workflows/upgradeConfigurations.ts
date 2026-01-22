@@ -594,7 +594,7 @@ async function registerFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
     throw new Error(`Facet registration failed: ${registerResult.error}`);
   }
 
-  ctx.totalGasUsed += registerResult.gasUsed || 0;
+  ctx.totalGasUsed += registerResult.transactionGas?.reduce((sum, gas) => sum + gas, 0) ?? 0;
   info(`✅ Registered ${registerResult.registered.length} facets in BLR`);
 
   if (registerResult.failed.length > 0) {

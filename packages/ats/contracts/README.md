@@ -23,7 +23,7 @@ The contracts module contains the code of all Solidity smart contracts deployed 
 **Standards:**
 
 - ERC-1400 for security tokens
-- Partial ERC-3643 (TREX) compatibility (v1.15.0+)
+- Partial ERC-3643 (T-REX) compatibility (v1.15.0+)
 
 **Location:** `packages/ats/contracts` within the monorepo
 
@@ -346,37 +346,153 @@ npm run test:demo                  # Demo tests
 npm run test:demo:hedera           # Hedera-specific demo tests
 ```
 
-### Architecture
+## Architecture
 
-The Asset Tokenization Studio uses a modular diamond pattern architecture where functionality is split into facets. This approach allows for upgradeable contracts while maintaining gas efficiency.
+The ATS contracts implement a **4-layer hierarchical design** using the **Diamond Pattern (EIP-2535)** for maximum upgradeability and modularity.
 
-#### Core Facets
+### System Overview
+
+```
+┌─────────────────────────────────────────┐
+│         ProxyAdmin                      │
+│  (Manages proxy upgrades)               │
+└─────────────────────────────────────────┘
+                  │
+        ┌─────────┴─────────┐
+        │                   │
+┌───────▼──────────┐  ┌────▼────────────┐
+│ BLR Proxy        │  │ Factory Proxy   │
+│ (Facet Registry) │  │ (Token Creator) │
+└───────┬──────────┘  └─────────────────┘
+        │
+        ├─ Business Logic Resolver (BLR)
+        │  ├─ Facet version management
+        │  ├─ Configuration management
+        │  └─ Resolver key → address mapping
+        │
+        ├─ 46+ Facets (Layers 0-3)
+        │  ├─ Layer 0: Storage wrappers
+        │  ├─ Layer 1: Core business logic
+        │  ├─ Layer 2: Domain features
+        │  └─ Layer 3: Jurisdiction-specific
+        │
+        └─ 2 Configurations
+            ├─ Equity Config (43 facets)
+            └─ Bond Config (43 facets)
+```
+
+### Four-Layer Architecture
+
+**Layer 0: Storage Wrappers**
+
+- Data structures and storage management
+- Examples: `ERC1400StorageWrapper`, `KycStorageWrapper`, `CapStorageWrapper`
+- Storage isolation per feature for upgradeability
+- EIP-1967 storage pattern
+
+**Layer 1: Core Business Logic**
+
+- ERC-1400/ERC-3643 base implementations
+- `Common.sol` provides shared logic for all facets
+- Access control, validation, and core operations
+- Domains: AccessControl, Freeze, Hold, ControlList, CorporateActions
+
+**Layer 2: Domain-Specific Features (Facets)**
+
+- **Bond**: Coupon payments, maturity redemption (`Bond.sol`, `BondRead.sol`)
+- **Equity**: Dividends, voting, balance adjustments (`Equity.sol`)
+- **Scheduled Tasks**: Snapshots, balance adjustments, cross-ordered tasks
+- **Proceed Recipients**: Payment distribution logic
+- Each facet is independently upgradeable
+
+**Layer 3: Jurisdiction-Specific Implementations**
+
+- USA-specific features: `bondUSA/`, `equityUSA/`
+- Specialized compliance rules per jurisdiction
+- Extends Layer 2 features with regulatory requirements
+
+### Key Components
+
+**Business Logic Resolver (BLR)**
+
+- Central registry mapping Business Logic Keys (BLK) to versioned facet addresses
+- Manages global version counter across all facets
+- Provides configuration management for token types
+- Location: `contracts/resolver/BusinessLogicResolver.sol`
+
+**Diamond Proxy (ResolverProxy)**
+
+- EIP-2535 compliant proxy routing function calls to appropriate facets
+- Each token is a proxy instance
+- Routes via BLR resolution
+- Location: `contracts/resolverProxy/ResolverProxy.sol`
+
+**TREXFactory**
+
+- Factory pattern for deploying complete token ecosystems
+- Creates tokens with specific configurations (Equity/Bond)
+- Handles initialization of all required facets
+- Location: `contracts/factory/TREXFactory.sol`
+
+### Core Facet Categories
 
 **ERC1400 Token Standard Facets:**
 
-- `ERC1410ManagementFacet`: Token partition management and administrative functions
+- `ERC1410ManagementFacet`: Token partition management
 - `ERC1410ReadFacet`: Read-only token state queries
-- `ERC1410TokenHolderFacet`: Token holder operations (transfers, approvals)
-- `ERC20Facet`: Basic ERC20 compatibility layer
+- `ERC1410TokenHolderFacet`: Token holder operations
+- `ERC20Facet`: ERC20 compatibility layer
 - `ERC1594Facet`: Security token issuance and redemption
 - `ERC1644Facet`: Controller operations for forced transfers
 
 **ERC3643 (T-REX) Compliance Facets:**
 
-- `ERC3643Facet`: Core ERC3643 token operations (mint, burn, forced transfers)
-- `ERC3643BatchFacet`: Batch operations for gas-efficient bulk actions
-- `FreezeFacet`: Advanced freeze functionality for partial and full address freezing
+- `ERC3643ManagementFacet`: Core operations (mint, burn, forced transfers)
+- `ERC3643OperationsFacet`: Transfer and compliance operations
+- `ERC3643ReadFacet`: State queries
+- `ERC3643BatchFacet`: Gas-efficient bulk operations
+- `FreezeFacet`: Partial and full address freezing
 
 **Hold & Clearing Facets:**
 
 - `HoldManagementFacet`: Hold creation and management
 - `HoldReadFacet`: Hold state queries
 - `HoldTokenHolderFacet`: Token holder hold operations
-- `ClearingHoldCreationFacet`: Clearing-specific hold creation
+- `ClearingHoldCreationFacet`: Clearing-specific holds
 - `ClearingTransferFacet`: Clearing transfers
 - `ClearingRedeemFacet`: Clearing redemptions
-- `ClearingActionsFacet`: Clearing operation approvals
-- `ClearingReadFacet`: Clearing state queries
+- `ClearingActionsFacet`: Operation approvals
+- `ClearingReadFacet`: State queries
+
+### Design Patterns
+
+**Diamond Pattern Implementation:**
+
+- Facets share storage via inheritance
+- Function selector routing via fallback
+- Versioned facet upgrades
+- Configuration-based facet composition
+
+**Proxy Pattern:**
+
+- Transparent upgradeable proxies (OpenZeppelin)
+- ProxyAdmin for upgrade management
+- Separate implementation and proxy contracts
+
+**Registry Pattern:**
+
+- Resolver keys map to facet implementations
+- Version management for safe upgrades
+- Configuration snapshots for token types
+
+### Documentation
+
+For comprehensive architecture documentation and tutorials, see the [ATS Developer Guides](../../../docs/ats/developer-guides/contracts/).
+
+Additional resources:
+
+- **[Scripts Technical Reference](scripts/README.md)**
+- **[Developer Guide](scripts/DEVELOPER_GUIDE.md)**
 
 ### Security Roles
 
@@ -385,7 +501,7 @@ The platform implements a comprehensive role-based access control system:
 #### Administrative Roles
 
 - **Admin Role**: Full administrative control over the security token
-- **TREX Owner**: Owner of ERC3643 tokens with special privileges for compliance configuration
+- **T-REX Owner**: Owner of ERC3643 tokens with special privileges for compliance configuration
 - **Diamond Owner**: Contract upgrade and facet management permissions
 
 #### Operational Roles
@@ -473,3 +589,9 @@ bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a02
 ## 🧩 Notes:
 
 - All roles are `bytes32` constants derived using: `keccak256("security.token.standard.role.<roleName>")` _(replace `<roleName>` with the actual role string)_
+
+---
+
+## 📚 Documentation
+
+For more information about the project, see the [Documentation](https://hashgraph.github.io/asset-tokenization-studio/).

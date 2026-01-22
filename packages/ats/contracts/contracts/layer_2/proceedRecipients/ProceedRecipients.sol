@@ -2,26 +2,17 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients } from "../interfaces/proceedRecipients/IProceedRecipients.sol";
-import { Common } from "../../layer_1/common/Common.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../constants/roles.sol";
 import { _PROCEED_RECIPIENTS_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
 
-contract ProceedRecipients is IProceedRecipients, Common {
+abstract contract ProceedRecipients is IProceedRecipients, Internals {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
-    ) external override onlyUninitialized(_externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized) {
-        uint256 length = _proceedRecipients.length;
-        for (uint256 index; index < length; ) {
-            _addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipients[index]);
-            _setProceedRecipientData(_proceedRecipients[index], _data[index]);
-            unchecked {
-                ++index;
-            }
-        }
-
-        _externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized = true;
+    ) external override onlyUninitialized(_isProceedRecipientsInitialized()) {
+        _initialize_ProceedRecipients(_proceedRecipients, _data);
     }
 
     function addProceedRecipient(
@@ -32,6 +23,7 @@ contract ProceedRecipients is IProceedRecipients, Common {
         override
         onlyUnpaused
         onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
+        validateAddress(_proceedRecipient)
         onlyIfNotProceedRecipient(_proceedRecipient)
     {
         _addProceedRecipient(_proceedRecipient, _data);
@@ -59,6 +51,7 @@ contract ProceedRecipients is IProceedRecipients, Common {
         override
         onlyUnpaused
         onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
+        validateAddress(_proceedRecipient)
         onlyIfProceedRecipient(_proceedRecipient)
     {
         _setProceedRecipientData(_proceedRecipient, _data);
@@ -66,7 +59,7 @@ contract ProceedRecipients is IProceedRecipients, Common {
     }
 
     function isProceedRecipient(address _proceedRecipient) external view override returns (bool) {
-        return _isExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
+        return _isProceedRecipient(_proceedRecipient);
     }
 
     function getProceedRecipientData(address _proceedRecipient) external view override returns (bytes memory) {
@@ -74,13 +67,13 @@ contract ProceedRecipients is IProceedRecipients, Common {
     }
 
     function getProceedRecipientsCount() external view override returns (uint256) {
-        return _getExternalListsCount(_PROCEED_RECIPIENTS_STORAGE_POSITION);
+        return _getProceedRecipientsCount();
     }
 
     function getProceedRecipients(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory proceedRecipients_) {
-        return _getExternalListsMembers(_PROCEED_RECIPIENTS_STORAGE_POSITION, _pageIndex, _pageLength);
+        return _getProceedRecipients(_pageIndex, _pageLength);
     }
 }

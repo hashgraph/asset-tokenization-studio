@@ -62,6 +62,7 @@ import {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
 } from "../request";
+import { CastRateStatus } from "@domain/context/bond/RateStatus";
 
 interface IBondInPort {
   create(request: CreateBondRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
@@ -185,11 +186,29 @@ class BondInPort implements IBondInPort {
 
   @LogError
   async setCoupon(request: SetCouponRequest): Promise<{ payload: number; transactionId: string }> {
-    const { rate, recordTimestamp, executionTimestamp, securityId, period } = request;
+    const {
+      rate,
+      recordTimestamp,
+      executionTimestamp,
+      securityId,
+      startTimestamp,
+      endTimestamp,
+      fixingTimestamp,
+      rateStatus,
+    } = request;
     ValidatedRequest.handleValidation("SetCouponRequest", request);
 
     return await this.commandBus.execute(
-      new SetCouponCommand(securityId, recordTimestamp, executionTimestamp, rate, period),
+      new SetCouponCommand(
+        securityId,
+        recordTimestamp,
+        executionTimestamp,
+        rate,
+        startTimestamp,
+        endTimestamp,
+        fixingTimestamp,
+        CastRateStatus.fromNumber(rateStatus),
+      ),
     );
   }
 
@@ -252,7 +271,10 @@ class BondInPort implements IBondInPort {
       executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
       rate: res.coupon.rate.toString(),
       rateDecimals: res.coupon.rateDecimals,
-      period: res.coupon.period,
+      startDate: new Date(res.coupon.startTimeStamp * ONE_THOUSAND),
+      endDate: new Date(res.coupon.endTimeStamp * ONE_THOUSAND),
+      fixingDate: new Date(res.coupon.fixingTimeStamp * ONE_THOUSAND),
+      rateStatus: CastRateStatus.toNumber(res.coupon.rateStatus),
     };
 
     return coupon;

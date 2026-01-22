@@ -207,7 +207,7 @@ import { ConfigService } from "@nestjs/config"
 import * as crypto from "crypto"
 import axios from "axios"
 import { HederaService, HederaTransactionHashResponse } from "@domain/ports/hedera.port"
-import { AccountId, EvmAddress } from "@hashgraph/sdk"
+import { AccountId, EvmAddress } from "@hiero-ledger/sdk"
 
 /**
  * Implementation of Hedera Mirror Node service

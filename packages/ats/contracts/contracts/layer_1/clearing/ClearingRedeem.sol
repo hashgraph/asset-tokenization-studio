@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { IClearingRedeem } from "../interfaces/clearing/IClearingRedeem.sol";
 import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
 
-abstract contract ClearingRedeem is IClearingRedeem, Common {
+abstract contract ClearingRedeem is IClearingRedeem, Internals {
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount

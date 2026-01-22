@@ -2,27 +2,17 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalKycListManagement } from "../interfaces/externalKycLists/IExternalKycListManagement.sol";
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { _KYC_MANAGER_ROLE } from "../constants/roles.sol";
 import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
 import { IKyc } from "../interfaces/kyc/IKyc.sol";
 
-abstract contract ExternalKycListManagement is IExternalKycListManagement, Common {
+abstract contract ExternalKycListManagement is IExternalKycListManagement, Internals {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalKycLists(
         address[] calldata _kycLists
-    ) external override onlyUninitialized(_externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized) {
-        ExternalListDataStorage storage externalKycListDataStorage = _externalListStorage(
-            _KYC_MANAGEMENT_STORAGE_POSITION
-        );
-        uint256 length = _kycLists.length;
-        for (uint256 index; index < length; ) {
-            _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        externalKycListDataStorage.initialized = true;
+    ) external override onlyUninitialized(_isKycExternalInitialized()) {
+        _initialize_ExternalKycLists(_kycLists);
     }
 
     function updateExternalKycLists(
@@ -45,7 +35,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement, Commo
 
     function addExternalKycList(
         address _kycLists
-    ) external override onlyRole(_KYC_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
+    ) external override onlyRole(_KYC_MANAGER_ROLE) onlyUnpaused validateAddress(_kycLists) returns (bool success_) {
         success_ = _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);

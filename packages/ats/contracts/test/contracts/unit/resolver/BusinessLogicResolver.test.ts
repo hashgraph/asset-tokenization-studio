@@ -79,6 +79,22 @@ describe("BusinessLogicResolver", () => {
         businessLogicResolver.connect(signer_C).registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2)),
       ).to.be.rejectedWith("AccountHasNoRole");
     });
+
+    it("GIVEN an account without admin role WHEN adding selectors to blacklist THEN transaction fails with AccountHasNoRole", async () => {
+      const blackListedSelectors = ["0x8456cb59"]; // pause() selector
+
+      await expect(
+        businessLogicResolver.connect(signer_C).addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors),
+      ).to.be.rejectedWith("AccountHasNoRole");
+    });
+
+    it("GIVEN an account without admin role WHEN removing selectors from blacklist THEN transaction fails with AccountHasNoRole", async () => {
+      const blackListedSelectors = ["0x8456cb59"]; // pause() selector
+
+      await expect(
+        businessLogicResolver.connect(signer_C).removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors),
+      ).to.be.rejectedWith("AccountHasNoRole");
+    });
   });
 
   describe("Business Logic Resolver functionality", () => {
@@ -119,14 +135,6 @@ describe("BusinessLogicResolver", () => {
       );
     });
 
-    it("GIVEN a list of logics WHEN registerBusinessLogics THEN Fails if some key is not informed with AllBusinessLogicKeysMustBeenInformed", async () => {
-      await businessLogicResolver.registerBusinessLogics([BUSINESS_LOGIC_KEYS[0]]);
-
-      await expect(businessLogicResolver.registerBusinessLogics([BUSINESS_LOGIC_KEYS[1]])).to.be.rejectedWith(
-        "AllBusinessLogicKeysMustBeenInformed",
-      );
-    });
-
     it("GIVEN an empty registry WHEN registerBusinessLogics THEN queries responds with correct values", async () => {
       const LATEST_VERSION = 1;
       const BUSINESS_LOGICS_TO_REGISTER = BUSINESS_LOGIC_KEYS.slice(0, 2);
@@ -157,6 +165,16 @@ describe("BusinessLogicResolver", () => {
       expect(await businessLogicResolver.getBusinessLogicCount()).is.equal(BUSINESS_LOGICS_TO_REGISTER.length);
       expect(await businessLogicResolver.getBusinessLogicKeys(0, 10)).is.deep.equal(
         BUSINESS_LOGICS_TO_REGISTER.map((businessLogic) => businessLogic.businessLogicKey),
+      );
+    });
+
+    it("GIVEN a list of logics WHEN registerBusinessLogics in batch THEN success", async () => {
+      await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(0, 2));
+      await businessLogicResolver.registerBusinessLogics(BUSINESS_LOGIC_KEYS.slice(2, BUSINESS_LOGIC_KEYS.length));
+
+      expect(await businessLogicResolver.getBusinessLogicCount()).is.equal(BUSINESS_LOGIC_KEYS.length);
+      expect(await businessLogicResolver.getBusinessLogicKeys(0, BUSINESS_LOGIC_KEYS.length)).is.deep.equal(
+        BUSINESS_LOGIC_KEYS.map((businessLogic) => businessLogic.businessLogicKey),
       );
     });
 
@@ -213,6 +231,29 @@ describe("BusinessLogicResolver", () => {
         blackListedSelectors,
       );
 
+      await businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
+    });
+
+    it("GIVEN a selector already in blacklist WHEN adding it again THEN it should not be duplicated", async () => {
+      const blackListedSelectors = ["0x8456cb59"]; // pause() selector
+
+      await businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal(
+        blackListedSelectors,
+      );
+
+      // Add the same selector again
+      await businessLogicResolver.addSelectorsToBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
+      expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal(
+        blackListedSelectors,
+      );
+    });
+
+    it("GIVEN a selector not in blacklist WHEN removing it THEN nothing changes", async () => {
+      const blackListedSelectors = ["0x8456cb59"]; // pause() selector
+
+      // Remove a selector that doesn't exist
       await businessLogicResolver.removeSelectorsFromBlacklist(EQUITY_CONFIG_ID, blackListedSelectors);
       expect(await businessLogicResolver.getSelectorsBlacklist(EQUITY_CONFIG_ID, 0, 100)).to.deep.equal([]);
     });

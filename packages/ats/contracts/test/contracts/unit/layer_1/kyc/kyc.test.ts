@@ -7,10 +7,10 @@ import { executeRbac } from "@test";
 import { ATS_ROLES, ADDRESS_ZERO } from "@scripts";
 import {
   ResolverProxy,
-  Kyc,
-  Pause,
-  SsiManagement,
-  ExternalKycListManagement,
+  KycFacet,
+  PauseFacet,
+  SsiManagementFacet,
+  ExternalKycListManagementFacet,
   MockedT3RevocationRegistry,
   MockedExternalKycList,
   TimeTravelFacet,
@@ -27,10 +27,10 @@ describe("Kyc Tests", () => {
   let signer_C: SignerWithAddress;
   let signer_D: SignerWithAddress;
 
-  let kycFacet: Kyc;
-  let pauseFacet: Pause;
-  let ssiManagementFacet: SsiManagement;
-  let externalKycListManagement: ExternalKycListManagement;
+  let kycFacet: KycFacet;
+  let pauseFacet: PauseFacet;
+  let ssiManagementFacet: SsiManagementFacet;
+  let externalKycListManagement: ExternalKycListManagementFacet;
   let revocationList: MockedT3RevocationRegistry;
   let externalKycListMock: MockedExternalKycList;
   let timeTravelFacet: TimeTravelFacet;
@@ -67,10 +67,10 @@ describe("Kyc Tests", () => {
         members: [signer_C.address],
       },
     ]);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_A);
-    externalKycListManagement = await ethers.getContractAt("ExternalKycListManagement", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_C);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_A);
+    externalKycListManagement = await ethers.getContractAt("ExternalKycListManagementFacet", diamond.address, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_C);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
 
     revocationList = await (await ethers.getContractFactory("MockedT3RevocationRegistry", signer_C)).deploy();
@@ -344,6 +344,20 @@ describe("Kyc Tests", () => {
         .to.emit(kycFacet, "InternalKycStatusUpdated")
         .withArgs(signer_A.address, true);
       expect(await kycFacet.isInternalKycActivated()).to.be.true;
+    });
+
+    it("GIVEN a paused Token WHEN activateInternalKyc THEN transaction fails with TokenIsPaused", async () => {
+      await pauseFacet.pause();
+      await expect(kycFacet.activateInternalKyc()).to.be.revertedWithCustomError(kycFacet, "TokenIsPaused");
+    });
+
+    it("GIVEN a paused Token WHEN deactivateInternalKyc THEN transaction fails with TokenIsPaused", async () => {
+      await pauseFacet.pause();
+      await expect(kycFacet.deactivateInternalKyc()).to.be.revertedWithCustomError(kycFacet, "TokenIsPaused");
+    });
+
+    it("GIVEN a VC already initialized WHEN initializeInternalKyc called twice THEN transaction fails with AlreadyInitialized", async () => {
+      await expect(kycFacet.initializeInternalKyc(true)).to.be.revertedWithCustomError(kycFacet, "AlreadyInitialized");
     });
   });
 });

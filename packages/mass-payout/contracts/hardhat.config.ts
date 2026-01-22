@@ -214,6 +214,7 @@ import "solidity-coverage";
 import Configuration from "@configuration";
 
 import "hardhat/types/config";
+import "@primitivefi/hardhat-dodoc";
 
 declare module "hardhat/types/config" {
   interface HardhatNetworkUserConfig {
@@ -291,6 +292,13 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 3_000_000,
+  },
+  dodoc: {
+    runOnCompile: false,
+    outputDir: "./docs/api",
+    freshOutput: true,
+    include: ["contracts"],
+    exclude: ["contracts/test", "contracts/mocks", "node_modules"],
   },
 };
 

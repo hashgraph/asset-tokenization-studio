@@ -34,8 +34,18 @@ export interface ContractFile {
 
   /** Source code content */
   source: string;
+
+  artifactData: HardhatArtifact;
 }
 
+export interface HardhatArtifact {
+  contractName: string;
+  sourceName: string;
+  abi: any[];
+  bytecode: string;
+  deployedBytecode: string;
+  metadata?: string;
+}
 /**
  * Categorized contracts by type.
  */
@@ -68,7 +78,7 @@ export interface CategorizedContracts {
  * @param contractsDir - Absolute path to contracts directory
  * @returns Array of discovered contract files
  */
-export function findAllContracts(contractsDir: string): ContractFile[] {
+export function findAllContracts(contractsDir: string, artifactDir: string): ContractFile[] {
   const solidityFiles = findSolidityFiles(contractsDir);
   const contracts: ContractFile[] = [];
 
@@ -85,18 +95,21 @@ export function findAllContracts(contractsDir: string): ContractFile[] {
     const directory = path.dirname(filePath);
     const fileName = path.basename(filePath, ".sol");
 
-    // Primary contract usually matches filename
-    const primaryContract = contractNames.find((name) => name === fileName) || contractNames[0];
+    for (const contractName of contractNames) {
+      const artifactPath = path.join(artifactDir, relativePath, `${contractName}.json`);
+      const artifactData: HardhatArtifact = JSON.parse(readFile(artifactPath));
 
-    contracts.push({
-      filePath,
-      relativePath,
-      directory,
-      fileName,
-      contractNames,
-      primaryContract,
-      source,
-    });
+      contracts.push({
+        filePath,
+        relativePath,
+        directory,
+        fileName,
+        contractNames, // Keep all contract names for context
+        primaryContract: contractName, // Each contract is its own primary
+        source,
+        artifactData,
+      });
+    }
   }
 
   return contracts;

@@ -33,12 +33,6 @@ export * from "./constants";
 // Domain registry (ATS-specific contract registry helpers)
 export * from "./atsRegistry";
 
-// Equity configuration
-export * from "./equity/createConfiguration";
-
-// Bond configuration
-export * from "./bond/createConfiguration";
-
 // Factory deployment and types
 export * from "./factory/deploy";
 export * from "./factory/types";
@@ -46,3 +40,21 @@ export * from "./factory/types";
 // Token deployment from factory
 export * from "./factory/deployEquityToken";
 export * from "./factory/deployBondToken";
+export * from "./factory/deployBondFixedRateToken";
+export * from "./factory/deployBondKpiLinkedRateToken";
+export * from "./factory/deployBondSustainabilityPerformanceTargetRateToken";
+
+// Equity configuration
+export * from "./equity/createConfiguration";
+
+// Bond Variable Rate configuration
+export * from "./bond/createConfiguration";
+
+// Bond Fixed Rate configuration
+export * from "./bondFixedRate/createConfiguration";
+
+// Bond Kpi Linked Rate configuration
+export * from "./bondKpiLinkedRate/createConfiguration";
+
+// Bond Sustainability Performance Target Rate configuration
+export * from "./bondSustainabilityPerformanceTargetRate/createConfiguration";

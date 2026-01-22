@@ -12,6 +12,11 @@ import { LowLevelCall } from "../../common/libraries/LowLevelCall.sol";
 abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20StorageWrapper1 {
     using LowLevelCall for address;
 
+    function _initialize_ERC1410(bool _multiPartition) internal override {
+        _erc1410BasicStorage().multiPartition = _multiPartition;
+        _erc1410BasicStorage().initialized = true;
+    }
+
     function _transferByPartition(
         address _from,
         BasicTransferInfo memory _basicTransferInfo,
@@ -19,7 +24,7 @@ abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20Sto
         bytes memory _data,
         address _operator,
         bytes memory _operatorData
-    ) internal returns (bytes32) {
+    ) internal override returns (bytes32) {
         _beforeTokenTransfer(_partition, _from, _basicTransferInfo.to, _basicTransferInfo.value);
 
         _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
@@ -55,12 +60,10 @@ abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20Sto
 
         _afterTokenTransfer(_partition, _from, _basicTransferInfo.to, _basicTransferInfo.value);
 
-        return bytes32(0);
+        return _partition;
     }
 
-    function _beforeTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal virtual;
-
-    function _afterTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal virtual;
-
-    function _addPartitionTo(uint256 _value, address _account, bytes32 _partition) internal virtual;
+    function _isERC1410Initialized() internal view override returns (bool) {
+        return _erc1410BasicStorage().initialized;
+    }
 }

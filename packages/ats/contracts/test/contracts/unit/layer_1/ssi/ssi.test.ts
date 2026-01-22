@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { type ResolverProxy, Pause, SsiManagement, MockedT3RevocationRegistry } from "@contract-types";
+import { type ResolverProxy, PauseFacet, SsiManagementFacet, MockedT3RevocationRegistry } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -13,8 +13,8 @@ describe("SSI Tests", () => {
   let signer_B: SignerWithAddress;
   let signer_C: SignerWithAddress;
 
-  let pauseFacet: Pause;
-  let ssiManagementFacet: SsiManagement;
+  let pauseFacet: PauseFacet;
+  let ssiManagementFacet: SsiManagementFacet;
   let revocationList: MockedT3RevocationRegistry;
 
   async function deploySecurityFixture() {
@@ -34,8 +34,8 @@ describe("SSI Tests", () => {
         members: [signer_C.address],
       },
     ]);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_C);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_C);
     revocationList = await (await ethers.getContractFactory("MockedT3RevocationRegistry", signer_C)).deploy();
     await revocationList.deployed();
   }

@@ -204,7 +204,7 @@
 
 import { faker } from "@faker-js/faker"
 import { LifeCycleCashFlowAddress } from "@domain/model/life-cycle-cash-flow-address.value-object"
-import { AccountId, TransactionId } from "@hashgraph/sdk"
+import { AccountId, TransactionId } from "@hiero-ledger/sdk"
 
 export const fakeHederaTxId = (): string => {
   const account = AccountId.fromString(`0.0.${faker.number.int({ min: 1, max: 10_000_000 })}`)

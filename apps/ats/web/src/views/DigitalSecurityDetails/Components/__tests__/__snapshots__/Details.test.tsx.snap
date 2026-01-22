@@ -170,7 +170,7 @@ exports[`Details should render correctly 1`] = `
             <p
               class="chakra-text css-uivqlt"
             >
-              0.00
+              0
             </p>
           </div>
           <div

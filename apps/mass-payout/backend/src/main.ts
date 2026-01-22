@@ -234,8 +234,13 @@ async function bootstrap() {
     logger: getLogLevels((process.env.LOG_LEVEL as LogLevel) || "log"),
   })
 
+  // CORS Configuration
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim())
+    : ["http://localhost:5173"]
+
   app.enableCors({
-    origin: ["http://localhost:5173"],
+    origin: corsOrigins,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -245,7 +250,8 @@ async function bootstrap() {
     setupSwagger(app)
   }
 
-  await app.listen(3000)
+  const port = process.env.PORT || 3000
+  await app.listen(port)
 }
 
 bootstrap()

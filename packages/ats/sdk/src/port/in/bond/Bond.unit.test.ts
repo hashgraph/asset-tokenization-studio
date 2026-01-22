@@ -84,6 +84,7 @@ import { IsProceedRecipientQuery } from "@query/security/proceedRecipient/isProc
 import { GetProceedRecipientsCountQuery } from "@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQuery";
 import { GetProceedRecipientDataQuery } from "@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery";
 import { GetProceedRecipientsQuery } from "@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQuery";
+import { CastRateStatus } from "@domain/context/bond/RateStatus";
 
 describe("Bond", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -480,7 +481,10 @@ describe("Bond", () => {
           setCouponRequest.recordTimestamp,
           setCouponRequest.executionTimestamp,
           setCouponRequest.rate,
-          setCouponRequest.period,
+          setCouponRequest.startTimestamp,
+          setCouponRequest.endTimestamp,
+          setCouponRequest.fixingTimestamp,
+          CastRateStatus.fromNumber(setCouponRequest.rateStatus),
         ),
       );
 
@@ -501,7 +505,10 @@ describe("Bond", () => {
           setCouponRequest.recordTimestamp,
           setCouponRequest.executionTimestamp,
           setCouponRequest.rate,
-          setCouponRequest.period,
+          setCouponRequest.startTimestamp,
+          setCouponRequest.endTimestamp,
+          setCouponRequest.fixingTimestamp,
+          CastRateStatus.fromNumber(setCouponRequest.rateStatus),
         ),
       );
     });
@@ -857,6 +864,11 @@ describe("Bond", () => {
             recordDate: new Date(expectedResponse2.coupon.recordTimeStamp * ONE_THOUSAND),
             executionDate: new Date(expectedResponse2.coupon.executionTimeStamp * ONE_THOUSAND),
             rate: expectedResponse2.coupon.rate.toString(),
+            rateDecimals: expectedResponse2.coupon.rateDecimals,
+            startDate: new Date(expectedResponse2.coupon.startTimeStamp * ONE_THOUSAND),
+            endDate: new Date(expectedResponse2.coupon.endTimeStamp * ONE_THOUSAND),
+            fixingDate: new Date(expectedResponse2.coupon.fixingTimeStamp * ONE_THOUSAND),
+            rateStatus: CastRateStatus.toNumber(expectedResponse2.coupon.rateStatus),
           },
         ]),
       );

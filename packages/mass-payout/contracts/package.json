@@ -1,5 +1,5 @@
 {
-  "name": "@mass-payout/contracts",
+  "name": "@hashgraph/mass-payout-contracts",
   "main": "build/typechain-types/index.js",
   "types": "build/typechain-types/index.d.ts",
   "version": "1.0.0",
@@ -25,13 +25,14 @@
     "slither:analysis": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --solc-remaps @=node_modules/@\"",
     "slither:storageLayout": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print variable-order --solc-remaps @=node_modules/@\"",
     "slither:inheritance": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print inheritance --solc-remaps @=node_modules/@\"",
-    "slither:summary": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print human-summary --solc-remaps @=node_modules/@\""
+    "slither:summary": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print human-summary --solc-remaps @=node_modules/@\"",
+    "doc": "npx hardhat dodoc"
   },
   "dependencies": {
     "bn.js": "5.2.1"
   },
   "devDependencies": {
-    "@hashgraph/sdk": "2.64.5",
+    "@hiero-ledger/sdk": "2.79.0",
     "@hashgraph/smart-contracts": "github:hashgraph/hedera-smart-contracts#v0.10.1",
     "@nomicfoundation/hardhat-chai-matchers": "1.0.6",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
@@ -40,6 +41,7 @@
     "@openzeppelin/contracts": "^5.3.0",
     "@openzeppelin/contracts-upgradeable": "^4.9.6",
     "@openzeppelin/hardhat-upgrades": "^1.28.0",
+    "@primitivefi/hardhat-dodoc": "^0.2.3",
     "@terminal3/ecdsa_vc": "0.1.21",
     "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",

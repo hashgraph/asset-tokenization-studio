@@ -108,9 +108,9 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       // Verify success
       expect(result.success).to.be.true;
       expect(result.blrAddress).to.equal(blrAddress);
-      expect(result.transactionHash).to.exist;
-      expect(result.blockNumber).to.be.greaterThan(0);
-      expect(result.gasUsed).to.be.greaterThan(0);
+      expect(result.transactionHashes).to.exist;
+      expect(result.blockNumbers).to.exist;
+      expect(result.transactionGas).to.exist;
 
       // Verify registered count includes new facets
       expect(result.registered.length).to.equal(TEST_SIZES.DUAL);

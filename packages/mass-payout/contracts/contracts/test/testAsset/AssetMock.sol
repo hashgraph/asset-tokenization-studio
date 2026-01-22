@@ -288,7 +288,7 @@ contract AssetMock is IAssetMock {
         return;
     }
 
-    function setCoupon(Coupon calldata) external pure returns (bool, uint256) {
+    function setCoupon(Coupon calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -307,21 +307,25 @@ contract AssetMock is IAssetMock {
     function getCoupon(uint256) external pure returns (RegisteredCoupon memory registeredCoupon_) {
         registeredCoupon_.coupon.recordDate = 1753874807;
         registeredCoupon_.coupon.executionDate = 1753874807;
+        registeredCoupon_.coupon.startDate = 1;
+        registeredCoupon_.coupon.endDate = 2592001;
+        registeredCoupon_.coupon.fixingDate = 1753874808;
         registeredCoupon_.coupon.rate = 1;
-        registeredCoupon_.coupon.period = 2592000;
         registeredCoupon_.coupon.rateDecimals = 1;
         registeredCoupon_.snapshotId = 1;
     }
 
     function getCouponFor(uint256, address) external pure returns (CouponFor memory couponFor_) {
         couponFor_.tokenBalance = 3;
-        couponFor_.rate = 2;
-        couponFor_.recordDate = 1753874807;
-        couponFor_.executionDate = 1753874807;
-        couponFor_.period = 2592000;
-        couponFor_.rateDecimals = 1;
         couponFor_.decimals = 2;
         couponFor_.recordDateReached = true;
+        couponFor_.coupon.rate = 2;
+        couponFor_.coupon.recordDate = 1753874807;
+        couponFor_.coupon.executionDate = 1753874807;
+        couponFor_.coupon.startDate = 1;
+        couponFor_.coupon.endDate = 2592001;
+        couponFor_.coupon.fixingDate = 1753874808;
+        couponFor_.coupon.rateDecimals = 1;
     }
 
     function getCouponCount() external pure returns (uint256) {
@@ -332,15 +336,15 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function setDividends(Dividend calldata) external pure returns (bool, uint256) {
+    function setDividends(Dividend calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
-    function setVoting(Voting calldata) external pure returns (bool, uint256) {
+    function setVoting(Voting calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
-    function setScheduledBalanceAdjustment(ScheduledBalanceAdjustment calldata) external pure returns (bool, uint256) {
+    function setScheduledBalanceAdjustment(ScheduledBalanceAdjustment calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -515,6 +519,18 @@ contract AssetMock is IAssetMock {
     }
 
     function totalSupplyByPartition(bytes32) external pure returns (uint256) {
+        revert NotImplemented();
+    }
+
+    function getCouponFromOrderedListAt(uint256) external pure returns (uint256) {
+        revert NotImplemented();
+    }
+
+    function getCouponsOrderedList(uint256, uint256) external pure returns (uint256[] memory) {
+        revert NotImplemented();
+    }
+
+    function getCouponsOrderedListTotal() external pure returns (uint256) {
         revert NotImplemented();
     }
 }

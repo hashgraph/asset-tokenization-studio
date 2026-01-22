@@ -11,9 +11,14 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         bool initialized;
     }
 
-    modifier onlyControllable() {
+    modifier onlyControllable() override {
         _checkControllable();
         _;
+    }
+
+    function _initialize_ERC1644(bool _controllable) internal override {
+        _erc1644Storage().isControllable = _controllable;
+        _erc1644Storage().initialized = true;
     }
 
     function _controllerTransfer(
@@ -22,7 +27,7 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal {
+    ) internal override {
         _transfer(_from, _to, _value);
         emit ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
     }
@@ -32,19 +37,17 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal {
+    ) internal override {
         _burn(_tokenHolder, _value);
         emit ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 
-    function _finalizeControllable() internal {
-        if (!_erc1644Storage().isControllable) return;
-
+    function _finalizeControllable() internal override {
         _erc1644Storage().isControllable = false;
         emit FinalizedControllerFeature(_msgSender());
     }
 
-    function _isControllable() internal view returns (bool) {
+    function _isControllable() internal view override returns (bool) {
         return _erc1644Storage().isControllable;
     }
 
@@ -58,5 +61,9 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
 
     function _checkControllable() private view {
         if (!_isControllable()) revert TokenIsNotControllable();
+    }
+
+    function _isERC1644Initialized() internal view override returns (bool) {
+        return _erc1644Storage().initialized;
     }
 }

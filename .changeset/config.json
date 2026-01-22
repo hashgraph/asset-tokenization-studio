@@ -8,7 +8,12 @@
       "@hashgraph/asset-tokenization-sdk",
       "@hashgraph/asset-tokenization-dapp"
     ],
-    ["@mass-payout/contracts", "@mass-payout/sdk"]
+    [
+      "@hashgraph/mass-payout-contracts",
+      "@hashgraph/mass-payout-sdk",
+      "@hashgraph/mass-payout-backend",
+      "@hashgraph/mass-payout-frontend"
+    ]
   ],
   "linked": [],
   "access": "restricted",

@@ -1,0 +1,12 @@
+.readingTime {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.readingTimeIcon {
+  font-size: 1rem;
+}
