@@ -37,13 +37,15 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
  */
 export function extractContractNames(source: string): string[] {
   // Remove single-line comments (// ...)
-  let cleanSource = source.replace(/\/\/.*$/gm, "");
+  // Using [^\n]* instead of .* to avoid ReDoS vulnerability
+  let cleanSource = source.replace(/\/\/[^\n]*$/gm, "");
 
   // Remove multi-line comments (/* ... */)
   cleanSource = cleanSource.replace(/\/\*[\s\S]*?\*\//g, "");
 
   // Remove natspec comments (/// ... and /** ... */)
-  cleanSource = cleanSource.replace(/\/\/\/.*$/gm, "");
+  // Using [^\n]* instead of .* to avoid ReDoS vulnerability
+  cleanSource = cleanSource.replace(/\/\/\/[^\n]*$/gm, "");
   cleanSource = cleanSource.replace(/\/\*\*[\s\S]*?\*\//g, "");
 
   const contractRegex = /(?:abstract\s+)?(?:contract|interface|library)\s+(\w+)/g;
