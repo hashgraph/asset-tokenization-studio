@@ -36,27 +36,17 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
  * @returns Array of contract names
  */
 export function extractContractNames(source: string): string[] {
-  // Remove single-line comments (// ... and /// ...) using line-by-line processing
-  // to avoid ReDoS vulnerability with regex on uncontrolled input
-  const lines = source.split("\n");
-  const cleanLines = lines.map((line) => {
-    const commentIndex = line.indexOf("//");
-    if (commentIndex !== -1) {
-      // Check if // is inside a string literal (simple heuristic)
-      const beforeComment = line.substring(0, commentIndex);
-      const singleQuotes = (beforeComment.match(/'/g) || []).length;
-      const doubleQuotes = (beforeComment.match(/"/g) || []).length;
-      // If odd number of quotes, we're inside a string - don't remove
-      if (singleQuotes % 2 === 0 && doubleQuotes % 2 === 0) {
-        return line.substring(0, commentIndex);
-      }
-    }
-    return line;
-  });
-  let cleanSource = cleanLines.join("\n");
+  // Remove single-line comments (// ...)
+  // Using [^\n]* instead of .* to avoid ReDoS vulnerability
+  let cleanSource = source.replace(/\/\/[^\n]*$/gm, "");
 
-  // Remove multi-line comments (/* ... */ and /** ... */)
+  // Remove multi-line comments (/* ... */)
   cleanSource = cleanSource.replace(/\/\*[\s\S]*?\*\//g, "");
+
+  // Remove natspec comments (/// ... and /** ... */)
+  // Using [^\n]* instead of .* to avoid ReDoS vulnerability
+  cleanSource = cleanSource.replace(/\/\/\/[^\n]*$/gm, "");
+  cleanSource = cleanSource.replace(/\/\*\*[\s\S]*?\*\//g, "");
 
   const contractRegex = /(?:abstract\s+)?(?:contract|interface|library)\s+(\w+)/g;
   const matches: string[] = [];
