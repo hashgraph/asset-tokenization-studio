@@ -9,9 +9,9 @@ import { TRexIEquity as IEquity } from "./IEquity.sol";
 import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
 import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
 import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
-import {
-    TRexISustainabilityPerformanceTargetRate as ISustainabilityPerformanceTargetRate
-} from "./ISustainabilityPerformanceTargetRate.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import {TRexISustainabilityPerformanceTargetRate as ISustainabilityPerformanceTargetRate} from "./ISustainabilityPerformanceTargetRate.sol";
 
 interface TRexIFactory {
     enum SecurityType {

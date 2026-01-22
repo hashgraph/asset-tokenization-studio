@@ -13,7 +13,9 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
     struct ERC20VotesStorage {
         bool activated;
+        // solhint-disable-next-line var-name-mixedcase
         string DEPRECATED_contractName;
+        // solhint-disable-next-line var-name-mixedcase
         string DEPRECATED_contractVersion;
         mapping(address => address) delegates;
         mapping(address => CheckpointsLib.Checkpoint[]) checkpoints;

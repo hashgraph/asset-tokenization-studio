@@ -15,14 +15,12 @@ import {
   type IHold,
   ComplianceMock,
   DiamondCutFacet,
-  NoncesFacet,
 } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { Contract } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
-import { nonces } from "../../../../../typechain-types/contracts/layer_1/index.js";
 
 const amount = 1;
 
@@ -221,7 +219,6 @@ describe("ProtectedPartitions Tests", () => {
   let complianceMock: ComplianceMock;
   let complianceMockAddress: string;
   let diamondCutFacet: DiamondCutFacet;
-  let noncesFacet: NoncesFacet;
 
   async function grant_WILD_CARD_ROLE_and_issue_tokens(
     wildCard_Account: string,
@@ -274,7 +271,6 @@ describe("ProtectedPartitions Tests", () => {
     kycFacet = await ethers.getContractAt("KycFacet", address);
     ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", address);
     diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", address);
-    noncesFacet = await ethers.getContractAt("NoncesFacet", address);
 
     const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", address, signer_A);
 

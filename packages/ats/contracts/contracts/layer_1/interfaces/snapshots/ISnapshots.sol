@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { ISnapshotsStorageWrapper } from "./ISnapshotsStorageWrapper.sol";
 
 // Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a

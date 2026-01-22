@@ -192,6 +192,10 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         }
     }
 
+    function _isClearingInitialized() internal view override returns (bool) {
+        return _clearingStorage().initialized;
+    }
+
     function _buildClearingTransferData(
         uint256 _amount,
         uint256 _expirationTimestamp,
@@ -284,10 +288,6 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
 
     function _checkClearingActivated() private view {
         if (!_isClearingActivated()) revert IClearing.ClearingIsDisabled();
-    }
-
-    function _isClearingInitialized() internal view override returns (bool) {
-        return _clearingStorage().initialized;
     }
 
     function _buildClearingOperationBasicInfo(

@@ -10,8 +10,11 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 abstract contract ERC20PermitStorageWrapper is ERC20VotesStorageWrapper {
     struct ERC20PermitStorage {
+        // solhint-disable-next-line var-name-mixedcase
         string DEPRECATED_contractName;
+        // solhint-disable-next-line var-name-mixedcase
         string DEPRECATED_contractVersion;
+        // solhint-disable-next-line var-name-mixedcase
         bool DEPRECATED_initialized;
     }
 

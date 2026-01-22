@@ -13,6 +13,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         bool initialized;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_Cap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal override {
         CapDataStorage storage capStorage = _capStorage();
 
@@ -68,12 +69,12 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         return _getMaxSupplyByPartition(partition) * factor;
     }
 
-    function _isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure override returns (bool) {
-        return (_maxSupply == 0) || (_amount <= _maxSupply);
-    }
-
     function _isCapInitialized() internal view override returns (bool) {
         return _capStorage().initialized;
+    }
+
+    function _isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure override returns (bool) {
+        return (_maxSupply == 0) || (_amount <= _maxSupply);
     }
 
     function _capStorage() internal pure returns (CapDataStorage storage cap_) {

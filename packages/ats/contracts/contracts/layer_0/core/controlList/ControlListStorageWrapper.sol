@@ -29,6 +29,7 @@ abstract contract ControlListStorageWrapper is IControlListStorageWrapper, Exter
         _;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ControlList(bool _isWhiteList) internal override {
         ControlListStorage storage controlListStorage = _controlListStorage();
         controlListStorage.isWhiteList = _isWhiteList;

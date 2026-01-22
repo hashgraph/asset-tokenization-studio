@@ -5,9 +5,9 @@ import { ERC1410TokenHolderFacetBase } from "../ERC1410TokenHolderFacetBase.sol"
 import {
     _ERC1410_TOKEN_HOLDER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "contracts/layer_1/constants/resolverKeys.sol";
-import {
-    CommonSustainabilityPerformanceTargetInterestRate
-} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { CommonSustainabilityPerformanceTargetInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet is
     ERC1410TokenHolderFacetBase,
