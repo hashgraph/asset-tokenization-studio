@@ -20,8 +20,9 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
     }
 
     modifier isValidDate(uint256 _date, address _project) override {
-        if (_date <= _getMinDateAdjusted() || _date > _blockTimestamp()) {
-            revert IKpis.InvalidDate(_date, _getMinDateAdjusted(), _blockTimestamp());
+        uint256 minDate = _getMinDateAdjusted();
+        if (_date <= minDate || _date > _blockTimestamp()) {
+            revert IKpis.InvalidDate(_date, minDate, _blockTimestamp());
         }
         if (_isCheckpointDate(_date, _project)) {
             revert IKpis.KpiDataAlreadyExists(_date);
@@ -89,7 +90,9 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
 
         uint256 lastFixingDate = _getCoupon(_couponID).coupon.fixingDate;
 
-        if (lastFixingDate > _kpisDataStorage().minDate) _setMinDate(lastFixingDate);
+        assert(lastFixingDate >= _kpisDataStorage().minDate);
+
+        _setMinDate(lastFixingDate);
     }
 
     function _getLatestKpiData(
@@ -111,7 +114,9 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
 
         uint256 lastFixingDate = _getCoupon(_getCouponFromOrderedListAt(total - 1)).coupon.fixingDate;
 
-        if (lastFixingDate > minDate_) minDate_ = lastFixingDate;
+        assert(lastFixingDate >= minDate_);
+
+        minDate_ = lastFixingDate;
     }
 
     function _isCheckpointDate(uint256 _date, address _project) internal view override returns (bool) {
