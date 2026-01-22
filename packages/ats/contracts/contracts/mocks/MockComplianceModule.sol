@@ -13,12 +13,15 @@ contract MockComplianceModule {
     event ComplianceUnbound(address indexed _compliance);
     event ConfigSet(address indexed _compliance, uint256 value);
 
+    error AlreadyBound();
+    error NotBound();
+
     /**
      * @dev Binds the module to a compliance contract
      * @param _compliance address of the compliance contract
      */
     function bindCompliance(address _compliance) external {
-        require(!_boundCompliances[_compliance], "already bound");
+        if (_boundCompliances[_compliance]) revert AlreadyBound();
         _boundCompliances[_compliance] = true;
         emit ComplianceBound(_compliance);
     }
@@ -28,7 +31,7 @@ contract MockComplianceModule {
      * @param _compliance address of the compliance contract
      */
     function unbindCompliance(address _compliance) external {
-        require(_boundCompliances[_compliance], "not bound");
+        if (!_boundCompliances[_compliance]) revert NotBound();
         _boundCompliances[_compliance] = false;
         emit ComplianceUnbound(_compliance);
     }

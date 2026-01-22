@@ -17,21 +17,19 @@ This README provides comprehensive reference documentation for the deployment sy
 
 **Before deploying:**
 
-- **🔴 Network flag required**: Must explicitly specify `--network <name>` when using Hardhat deployment
-- **🔴 Double dash required**: Use `--` before network flag when using npm scripts (e.g., `npm run deploy:hardhat -- --network hedera-testnet`)
+- **🔴 NETWORK required**: Must set `NETWORK` environment variable (no default fallback)
 - **🔴 Environment setup**: Real networks require `.env` configuration (RPC endpoint + private key)
 - **🔴 Gas costs**: Full deployment costs ~$20-50 on testnet, ensure sufficient balance
 - **🔴 Time commitment**: Real network deployments take 5-10 minutes due to transaction confirmations
 
 **Quick Command Reference:**
 
-| Command                                              | Use Case                 | Requirements                |
-| ---------------------------------------------------- | ------------------------ | --------------------------- |
-| `npm run deploy:hardhat -- --network hardhat`        | In-memory testing        | Hardhat project             |
-| `npm run deploy:hardhat -- --network hedera-testnet` | Testnet deployment       | Hardhat + `.env`            |
-| `npm run deploy`                                     | Standalone deployment    | Compiled artifacts + `.env` |
-| `npm run deploy:hedera:testnet`                      | Testnet shortcut         | `.env` configured           |
-| `npm run generate:registry`                          | Update contract metadata | Contracts compiled          |
+| Command                         | Use Case                 | Requirements         |
+| ------------------------------- | ------------------------ | -------------------- |
+| `npm run deploy:local`          | Local testing            | Hardhat node running |
+| `npm run deploy:hedera:testnet` | Testnet deployment       | `.env` configured    |
+| `npm run deploy:hedera:mainnet` | Mainnet deployment       | `.env` configured    |
+| `npm run generate:registry`     | Update contract metadata | Contracts compiled   |
 
 ---
 
@@ -445,8 +443,6 @@ import type { DeploymentResult } from "@scripts/infrastructure";
 
 ## Quick Start
 
-> **Note**: We'll use Hardhat deployment as the primary example. For standalone deployment (no Hardhat runtime), see [Usage Modes](#usage-modes).
-
 ### Step 1: Setup Environment
 
 **From contracts directory** (`packages/ats/contracts/`):
@@ -455,10 +451,13 @@ import type { DeploymentResult } from "@scripts/infrastructure";
 cp .env.sample .env
 ```
 
-**For in-memory testing** (hardhat network):
+**For local testing** (local Hardhat node):
 
-- No `.env` configuration needed
-- Uses Hardhat's built-in accounts
+```bash
+# Uses test accounts, minimal .env configuration
+LOCAL_JSON_RPC_ENDPOINT='http://127.0.0.1:8545'
+LOCAL_PRIVATE_KEY_0='0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+```
 
 **For real networks** (testnet/mainnet), edit `.env`:
 
@@ -471,21 +470,21 @@ HEDERA_TESTNET_MIRROR_NODE_ENDPOINT='https://testnet.mirrornode.hedera.com'
 HEDERA_TESTNET_PRIVATE_KEY_0='0x...'
 
 # Optional: TimeTravel mode (testing only)
-USE_TIME_TRAVEL=false
+USE_TIMETRAVEL=false
 ```
 
 ### Step 2: Deploy
 
 ```bash
-# In-memory test network (fast, no .env needed)
-npm run deploy:hardhat -- --network hardhat
+# Local test network (requires running Hardhat node)
+npm run deploy:local
 
 # Testnet (requires .env configuration)
-npm run deploy:hardhat -- --network hedera-testnet
+npm run deploy:hedera:testnet
 
 # Other networks
-npm run deploy:hardhat -- --network hedera-mainnet
-npm run deploy:hardhat -- --network hedera-previewnet
+npm run deploy:hedera:mainnet
+npm run deploy:hedera:previewnet
 ```
 
 ### Step 3: Verify Deployment
@@ -524,7 +523,7 @@ rm deployments/{network}/.checkpoints/*.json
 # Deploy fresh (adjust network as needed)
 npm run deploy:hedera:testnet
 npm run deploy:hedera:mainnet
-npm run deploy:hardhat -- --network hardhat
+npm run deploy:local
 ```
 
 **Why?** Partial configurations can't be resumed reliably. See [Troubleshooting](#when-deployment-fails) for details.
@@ -533,13 +532,52 @@ npm run deploy:hardhat -- --network hardhat
 
 ## Usage Modes
 
-The deployment system supports three modes:
+The deployment system provides multiple CLI entry points for different deployment scenarios:
 
-| Mode           | Entry Point                            | Signer Source         | Use Case                                  | Command                                             |
-| -------------- | -------------------------------------- | --------------------- | ----------------------------------------- | --------------------------------------------------- |
-| **Hardhat**    | [cli/hardhat.ts](cli/hardhat.ts)       | `ethers.getSigners()` | Hardhat project deployment                | `npm run deploy:hardhat -- --network <name>`        |
-| **Standalone** | [cli/standalone.ts](cli/standalone.ts) | `ethers.Wallet`       | No Hardhat dependency, ~3x faster startup | `npm run deploy` or `npm run deploy:hedera:testnet` |
-| **Module**     | Import in your code                    | Any ethers.js Signer  | Custom scripts, programmatic deployment   | See example below                                   |
+| Mode                      | Entry Point                                                              | Signer Source        | Use Case                                   | Command                                                                     |
+| ------------------------- | ------------------------------------------------------------------------ | -------------------- | ------------------------------------------ | --------------------------------------------------------------------------- |
+| **Deploy (New BLR)**      | [cli/deploySystemWithNewBlr.ts](cli/deploySystemWithNewBlr.ts)           | `ethers.Wallet`      | Full deployment with new BLR               | `npm run deploy:newBlr` or `npm run deploy:hedera:testnet`                  |
+| **Deploy (Existing BLR)** | [cli/deploySystemWithExistingBlr.ts](cli/deploySystemWithExistingBlr.ts) | `ethers.Wallet`      | Deploy tokens with existing BLR            | `npm run deploy:existingBlr` or `npm run deploy:existingBlr:hedera:testnet` |
+| **Upgrade Configs**       | [cli/upgradeConfigurations.ts](cli/upgradeConfigurations.ts)             | `ethers.Wallet`      | Create new facet versions & configurations | `npm run upgrade:configs` or `npm run upgrade:configs:hedera:testnet`       |
+| **Upgrade TUP Proxies**   | [cli/upgradeTupProxies.ts](cli/upgradeTupProxies.ts)                     | `ethers.Wallet`      | Upgrade BLR/Factory implementations        | `npm run upgrade:tup` or `npm run upgrade:tup:hedera:testnet`               |
+| **Module**                | Import in your code                                                      | Any ethers.js Signer | Custom scripts, programmatic deployment    | See example below                                                           |
+
+### CLI Shared Utilities
+
+All CLI entry points use reusable utilities from the `cli/shared/` directory to standardize environment validation and network configuration:
+
+#### `cli/shared/network.ts`
+
+- **`requireNetworkSigner()`** - Validates NETWORK environment variable and creates an ethers.js Signer
+  - Supports networks: `local`, `hedera-local`, `hedera-previewnet`, `hedera-testnet`, `hedera-mainnet`
+  - Loads private key from environment (e.g., `LOCAL_PRIVATE_KEY_0`, `HEDERA_TESTNET_PRIVATE_KEY_0`)
+  - Returns configured ethers.js Signer ready for contract interactions
+
+#### `cli/shared/validation.ts`
+
+- **`requireValidAddress(name)`** - Validates required Ethereum addresses from environment variables
+  - Throws error if address is missing or invalid format
+  - Example: `requireValidAddress('BLR_ADDRESS')`
+
+- **`validateOptionalAddress(name)`** - Validates optional Ethereum addresses
+  - Returns undefined if not set, validated address if present
+  - Example: `validateOptionalAddress('PROXY_ADDRESSES')`
+
+- **`parseOptionalAddressList(envVar)`** - Parses comma-separated address lists
+  - Splits string and validates each address format
+  - Example: `parseOptionalAddressList('0xabc...,0xdef...')`
+
+- **`requireEnvVar(name, fallback?)`** - Validates required string environment variables
+  - Throws error if missing and no fallback provided
+  - Example: `requireEnvVar('BLR_ADDRESS')`
+
+- **`parseBooleanEnv(envVar, default?)`** - Parses boolean flags from environment
+  - Handles 'true', '1', 'yes' as true; others as false
+  - Example: `parseBooleanEnv('DEPLOY_NEW_BLR_IMPL', false)`
+
+- **`parseIntEnv(envVar, default?)`** - Parses integer values from environment
+  - Validates numeric format
+  - Example: `parseIntEnv('CONFIRMATIONS', 1)`
 
 ### Import as Module
 
@@ -584,7 +622,7 @@ The upgrade workflow allows you to deploy new facet versions and update existing
 **Basic upgrade:**
 
 ```bash
-BLR_ADDRESS=<your-blr-address> npm run upgrade:testnet
+BLR_ADDRESS=<your-blr-address> npm run upgrade:configs:hedera:testnet
 ```
 
 **Upgrade with proxy updates:**
@@ -592,7 +630,7 @@ BLR_ADDRESS=<your-blr-address> npm run upgrade:testnet
 ```bash
 BLR_ADDRESS=0x123... \
 PROXY_ADDRESSES=0xabc...,0xdef... \
-npm run upgrade:testnet
+npm run upgrade:configs:hedera:testnet
 ```
 
 **Upgrade only equity:**
@@ -600,7 +638,7 @@ npm run upgrade:testnet
 ```bash
 BLR_ADDRESS=0x123... \
 CONFIGURATIONS=equity \
-npm run upgrade:testnet
+npm run upgrade:configs:hedera:testnet
 ```
 
 **Environment Variables:**
@@ -620,7 +658,7 @@ npm run upgrade:testnet
 
 ### Output
 
-Upgrade results are saved to `upgrades/{network}_{timestamp}.json`:
+Upgrade results are saved to `deployments/{network}/upgrade-configs-{timestamp}.json`:
 
 ```json
 {
@@ -651,7 +689,7 @@ Upgrades use checkpoint-based resumability:
 
 ```bash
 # Upgrade will automatically resume if previous attempt failed
-BLR_ADDRESS=0x123... npm run upgrade:testnet
+BLR_ADDRESS=0x123... npm run upgrade:configs:hedera:testnet
 ```
 
 ### Troubleshooting
@@ -698,7 +736,7 @@ export PROXY_ADMIN=0x...          # ProxyAdmin contract address
 export BLR_PROXY=0x...            # BLR proxy to upgrade
 export DEPLOY_NEW_BLR_IMPL=true   # Deploy new implementation
 
-npm run upgrade:tup:testnet
+npm run upgrade:tup:hedera:testnet
 ```
 
 **Pattern B: Upgrade to existing implementation**
@@ -708,7 +746,7 @@ export PROXY_ADMIN=0x...
 export BLR_PROXY=0x...
 export BLR_IMPLEMENTATION=0x...   # Address of pre-deployed implementation
 
-npm run upgrade:tup:testnet
+npm run upgrade:tup:hedera:testnet
 ```
 
 ### CLI Usage
@@ -716,19 +754,19 @@ npm run upgrade:tup:testnet
 **Upgrade BLR on testnet**
 
 ```bash
-npm run upgrade:tup:testnet
+npm run upgrade:tup:hedera:testnet
 ```
 
 **Upgrade Factory on testnet**
 
 ```bash
-FACTORY_PROXY=0x... npm run upgrade:tup:testnet
+FACTORY_PROXY=0x... npm run upgrade:tup:hedera:testnet
 ```
 
 **Upgrade both BLR and Factory**
 
 ```bash
-BLR_PROXY=0x... FACTORY_PROXY=0x... npm run upgrade:tup:testnet
+BLR_PROXY=0x... FACTORY_PROXY=0x... npm run upgrade:tup:hedera:testnet
 ```
 
 **Upgrade with existing implementations**
@@ -738,7 +776,7 @@ BLR_PROXY=0x... \
 BLR_IMPLEMENTATION=0x... \
 FACTORY_PROXY=0x... \
 FACTORY_IMPLEMENTATION=0x... \
-npm run upgrade:tup:testnet
+npm run upgrade:tup:hedera:testnet
 ```
 
 ### Environment Variables
@@ -766,7 +804,7 @@ npm run upgrade:tup:testnet
 
 ### Output
 
-Results are saved to `deployments/{network}/{network}-upgrade-tup-{timestamp}.json`:
+Results are saved to `deployments/{network}/upgrade-tup-{timestamp}.json`:
 
 ```json
 {
@@ -806,10 +844,10 @@ For long-running upgrades on slow networks, checkpoints automatically resume on 
 
 ```bash
 # Initial attempt (may fail)
-BLR_PROXY=0x... npm run upgrade:tup:testnet
+BLR_PROXY=0x... npm run upgrade:tup:hedera:testnet
 
 # Fix the issue, then retry - workflow resumes automatically
-BLR_PROXY=0x... npm run upgrade:tup:testnet
+BLR_PROXY=0x... npm run upgrade:tup:hedera:testnet
 ```
 
 Progress is tracked in `deployments/{network}/.checkpoints/` and automatically cleaned up on success.
@@ -846,15 +884,14 @@ Progress is tracked in `deployments/{network}/.checkpoints/` and automatically c
 
 Use the same workflow across networks:
 
-```bash
-# Testnet
-BLR_PROXY=0xTestnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:testnet
-
 # Previewnet (after validation)
+
 BLR_PROXY=0xPreviewnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:previewnet
 
 # Mainnet (after production testing)
+
 BLR_PROXY=0xMainnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:mainnet
+
 ```
 
 ### Difference from Upgrading Configurations
@@ -874,97 +911,96 @@ BLR_PROXY=0xMainnetBLR... DEPLOY_NEW_BLR_IMPL=true npm run upgrade:tup:mainnet
 ## Directory Structure
 
 ```
+
 scripts/
-├── infrastructure/              # Generic deployment infrastructure
-│   ├── index.ts                # Public API exports
-│   ├── types.ts                # Shared type definitions
-│   ├── constants.ts            # Infrastructure constants
-│   ├── config.ts               # Network configuration
-│   ├── registryFactory.ts      # Registry helpers factory
-│   │
-│   ├── providers/              # Framework adapters
-│   │   ├── index.ts
-│   │   ├── hardhatProvider.ts
-│   │   └── standaloneProvider.ts
-│   │
-│   ├── operations/             # Atomic deployment operations
-│   │   ├── deployContract.ts
-│   │   ├── deployProxy.ts
-│   │   ├── upgradeProxy.ts
-│   │   ├── blrDeployment.ts
-│   │   ├── blrConfigurations.ts
-│   │   ├── facetDeployment.ts
-│   │   ├── proxyAdminDeployment.ts
-│   │   ├── registerFacets.ts
-│   │   ├── verifyDeployment.ts
-│   │   └── generateRegistryPipeline.ts  # Registry generation pipeline
-│   │
-│   └── utils/                  # Generic utilities
-│       ├── validation.ts
-│       ├── logging.ts
-│       ├── transaction.ts
-│       └── naming.ts
+├── infrastructure/ # Generic deployment infrastructure
+│ ├── index.ts # Public API exports
+│ ├── types.ts # Shared type definitions
+│ ├── constants.ts # Infrastructure constants
+│ ├── config.ts # Network configuration
+│ ├── registryFactory.ts # Registry helpers factory
+│ │
+│ ├── signer.ts # Network signer utilities
+│ │
+│ ├── operations/ # Atomic deployment operations
+│ │ ├── deployContract.ts
+│ │ ├── deployProxy.ts
+│ │ ├── upgradeProxy.ts
+│ │ ├── blrDeployment.ts
+│ │ ├── blrConfigurations.ts
+│ │ ├── facetDeployment.ts
+│ │ ├── proxyAdminDeployment.ts
+│ │ ├── registerFacets.ts
+│ │ ├── verifyDeployment.ts
+│ │ └── generateRegistryPipeline.ts # Registry generation pipeline
+│ │
+│ └── utils/ # Generic utilities
+│ ├── validation.ts
+│ ├── logging.ts
+│ ├── transaction.ts
+│ └── naming.ts
 │
-├── domain/                      # ATS-specific business logic
-│   ├── index.ts                # Public API exports
-│   ├── constants.ts            # ATS constants (roles, regulations, etc.)
-│   ├── atsRegistry.ts          # ATS registry with helpers
-│   ├── atsRegistry.data.ts     # Auto-generated registry data
-│   │
-│   ├── equity/                 # Equity token logic
-│   │   └── createConfiguration.ts
-│   │
-│   ├── bond/                   # Bond token logic
-│   │   └── createConfiguration.ts
-│   │
-│   └── factory/                # Factory logic
-│       ├── deploy.ts
-│       └── deployToken.ts
+├── domain/ # ATS-specific business logic
+│ ├── index.ts # Public API exports
+│ ├── constants.ts # ATS constants (roles, regulations, etc.)
+│ ├── atsRegistry.ts # ATS registry with helpers
+│ ├── atsRegistry.data.ts # Auto-generated registry data
+│ │
+│ ├── equity/ # Equity token logic
+│ │ └── createConfiguration.ts
+│ │
+│ ├── bond/ # Bond token logic
+│ │ └── createConfiguration.ts
+│ │
+│ └── factory/ # Factory logic
+│ ├── deploy.ts
+│ └── deployToken.ts
 │
-├── workflows/                   # End-to-end orchestration
-│   ├── deploySystemWithNewBlr.ts
-│   └── deploySystemWithExistingBlr.ts
+├── workflows/ # End-to-end orchestration
+│ ├── deploySystemWithNewBlr.ts
+│ └── deploySystemWithExistingBlr.ts
 │
-├── cli/                         # Command-line entry points
-│   ├── hardhat.ts              # Hardhat-based deployment CLI
-│   └── standalone.ts           # Standalone deployment CLI
+├── cli/ # Command-line entry points
+│ ├── deploy.ts # Main deployment CLI
+│ ├── upgrade.ts # Configuration upgrade CLI
+│ └── upgradeTup.ts # TUP proxy upgrade CLI
 │
-├── tools/                       # Code generation tools
-│   ├── generateRegistry.ts     # Registry generation CLI
-│   ├── scanner/
-│   │   └── metadataExtractor.ts  # Extract metadata from Solidity
-│   └── generators/
-│       └── registryGenerator.ts  # Generate TypeScript registry code
+├── tools/ # Code generation tools
+│ ├── generateRegistry.ts # Registry generation CLI
+│ ├── scanner/
+│ │ └── metadataExtractor.ts # Extract metadata from Solidity
+│ └── generators/
+│ └── registryGenerator.ts # Generate TypeScript registry code
 │
-└── index.ts                     # Root exports
-```
+└── index.ts # Root exports
+
+````
 
 ---
 
-### 1. Providers
+### 1. Network Signer
 
-Providers abstract framework-specific deployment logic.
-
-**HardhatProvider** (Hardhat-dependent):
+The `createNetworkSigner` function creates an ethers.js Signer from network configuration:
 
 ```typescript
-import { HardhatProvider } from "./core/providers";
+import { createNetworkSigner } from "@scripts/infrastructure";
 
-const provider = new HardhatProvider();
-const signer = await provider.getSigner();
-const factory = await provider.getFactory("AccessControlFacet");
-```
+// Creates signer using getNetworkConfig() for RPC URL
+// and getPrivateKey() for private key from environment
+const { signer, address } = await createNetworkSigner("hedera-testnet");
 
-**StandaloneProvider** (Framework-agnostic):
+console.log(`Deployer: ${address}`);
+````
 
-```typescript
-import { StandaloneProvider } from "./core/providers";
+Environment variables follow the pattern:
 
-const provider = new StandaloneProvider({
-  rpcUrl: "https://testnet.hashio.io/api",
-  privateKey: "0x...",
-  artifactsPath: "./artifacts", // optional
-});
+- `{NETWORK}_JSON_RPC_ENDPOINT` - RPC URL
+- `{NETWORK}_PRIVATE_KEY_0` - Deployer private key
+
+```bash
+# .env
+HEDERA_TESTNET_JSON_RPC_ENDPOINT='https://testnet.hashio.io/api'
+HEDERA_TESTNET_PRIVATE_KEY_0='0x...'
 ```
 
 ### 2. Contract Instance Pattern
@@ -1206,6 +1242,34 @@ async function createBondConfiguration(
 
 ## Troubleshooting
 
+### Parallel Tests Running Slowly (8+ minutes instead of 2 minutes)
+
+**Symptom:** `npm run ats:contracts:test:parallel` takes 8+ minutes instead of ~2 minutes.
+
+**Root Cause:** Static imports from barrel exports (`@scripts/infrastructure`) cause eager loading of the entire module graph, including typechain (~400 generated files). In parallel tests, each worker loads modules independently, multiplying the overhead.
+
+**Solution:** Use dynamic imports for modules that would trigger heavy typechain loading:
+
+```typescript
+// ❌ SLOW: Static import loads entire barrel (including typechain consumers)
+import { GAS_LIMIT, ok, err } from "@scripts/infrastructure";
+
+// ✅ FAST: Dynamic import defers loading until function execution
+const { GAS_LIMIT } = await import("@scripts/infrastructure");
+const { ok, err } = await import("@scripts/infrastructure");
+```
+
+**Why this works:**
+
+- Static imports execute at module load time (before any test runs)
+- Dynamic imports execute only when the containing function is called
+- Most test files never call functions that need these imports
+- Result: Workers initialize faster, tests complete in ~2 minutes
+
+**Affected file:** `infrastructure/operations/blrConfigurations.ts`
+
+**Prevention:** When adding new exports to `@scripts/infrastructure` barrel that import from `@contract-types`, consider whether downstream files need dynamic imports to maintain test performance.
+
 ### "Cannot find module 'hardhat'"
 
 This means you're trying to use Hardhat's `ethers.getSigners()` from a non-Hardhat project. Use `ethers.Wallet` instead:
@@ -1230,18 +1294,14 @@ npm run compile
 
 ### "No signers available"
 
-**In Hardhat context**, ensure you're running in Hardhat context:
+Ensure you have configured the correct private key in your `.env` file:
 
 ```bash
-npx hardhat run scripts/cli/hardhat.ts
-```
+# For testnet
+HEDERA_TESTNET_PRIVATE_KEY_0='0x...'
 
-**In Standalone context**, provide a valid private key:
-
-```typescript
-import { ethers } from "ethers";
-const provider = new ethers.providers.JsonRpcProvider("...");
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider); // Must be valid hex private key
+# For local
+LOCAL_PRIVATE_KEY_0='0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 ```
 
 ### When Deployment Fails
@@ -1257,7 +1317,7 @@ rm deployments/{network}/.checkpoints/*.json
 # 2. Deploy with new contracts (adjust for your network)
 npm run deploy:hedera:testnet
 npm run deploy:hedera:mainnet
-npm run deploy:hardhat -- --network hardhat
+npm run deploy:local
 ```
 
 This will deploy:

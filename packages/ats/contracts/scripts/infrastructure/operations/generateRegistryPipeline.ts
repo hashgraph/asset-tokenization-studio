@@ -28,8 +28,23 @@
  */
 
 import * as path from "path";
-import { ContractFile } from "../../tools/scanner/contractFinder";
-import { ContractMetadata } from "../../tools/scanner/metadataExtractor";
+import {
+  ContractFile,
+  ContractMetadata,
+  findAllContracts,
+  categorizeContracts,
+  pairTimeTravelVariants,
+  extractMetadata,
+  detectCategory,
+  detectLayer,
+  generateRegistry,
+  generateSummary,
+  extractRoles,
+  extractResolverKeys,
+  writeFile as writeToFileFn,
+  readFile,
+  findSolidityFiles,
+} from "@scripts/tools";
 import { LogLevel, configureLogger, section, info, success, warn, table } from "@scripts/infrastructure";
 
 /**
@@ -234,15 +249,6 @@ export async function generateRegistryPipeline(
   writeToFile: boolean = true,
 ): Promise<RegistryGenerationResult> {
   const startTime = Date.now();
-
-  // Import dependencies lazily to avoid circular dependencies
-  const { findAllContracts, categorizeContracts, pairTimeTravelVariants } = await import(
-    "../../tools/scanner/contractFinder"
-  );
-  const { extractMetadata, detectCategory, detectLayer } = await import("../../tools/scanner/metadataExtractor");
-  const { generateRegistry, generateSummary } = await import("../../tools/generators/registryGenerator");
-  const { extractRoles, extractResolverKeys } = await import("../../tools/utils/solidityUtils");
-  const { writeFile: writeToFileFn, readFile, findSolidityFiles } = await import("../../tools/utils/fileUtils");
 
   // Merge with defaults
   const fullConfig: Required<RegistryGenerationConfig> = {

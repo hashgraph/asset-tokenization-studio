@@ -85,12 +85,14 @@ graph LR
         S1[ERC1400Storage]
         S2[KYCStorage]
         S3[CapStorage]
+        S4[NonceStorage]
     end
 
     subgraph "Layer 1: Core Logic"
         C1[Common.sol]
         C2[ERC1400Base]
         C3[ERC3643Base]
+        C4[Nonces]
     end
 
     subgraph "Layer 2: Features"
@@ -107,6 +109,7 @@ graph LR
     S1 --> C1
     S2 --> C2
     S3 --> C3
+    S4 --> C4
     C1 --> F1
     C2 --> F2
     C3 --> F3

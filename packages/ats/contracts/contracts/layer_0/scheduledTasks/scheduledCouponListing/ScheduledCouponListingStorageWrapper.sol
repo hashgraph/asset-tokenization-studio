@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ScheduledSnapshotsStorageWrapper } from "../scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol";
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { _SCHEDULED_COUPON_LISTING_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IBondRead } from "../../../layer_2/interfaces/bond/IBondRead.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage

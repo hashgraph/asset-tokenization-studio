@@ -26,11 +26,11 @@ The configuration settings determine which Business Logic Resolver (BLR) your to
 
 **What it is**: The Hedera Contract ID of the Business Logic Resolver (BLR)
 
-**Format**: Hedera ID format (e.g., `0.0.7511642`)
+**Format**: Hedera ID format (e.g., `0.0.7707874`)
 
 **Purpose**: Points your token to the registry of available business logic implementations
 
-**Example**: `0.0.7511642`
+**Example**: `0.0.7707874`
 
 ### Configuration ID
 
@@ -63,7 +63,7 @@ The configuration settings determine which Business Logic Resolver (BLR) your to
 Configuration Details
 
 Resolver ID
-0.0.7511642
+0.0.7707874
 
 Configuration ID
 0x0000000000000000000000000000000000000000000000000000000000000001
@@ -77,7 +77,7 @@ Configuration Version
 1. Navigate to **Management** → **Configuration**
 2. Click **"Edit Configuration"** or **"Update"**
 3. Enter the configuration values:
-   - **Resolver ID**: Enter the Hedera ID of the BLR (e.g., `0.0.7511642`)
+   - **Resolver ID**: Enter the Hedera ID of the BLR (e.g., `0.0.7707874`)
    - **Configuration ID**: Enter the configuration ID in hex format (e.g., `0x0000000000000000000000000000000000000000000000000000000000000001`)
    - **Configuration Version**: Enter version number (use `0` for latest)
 4. Click **"Save"** or **"Update Configuration"**

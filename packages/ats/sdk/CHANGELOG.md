@@ -1,5 +1,38 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 4.0.0
+
+### Major Changes
+
+- 3ba32c9: Audit issues fixes: compliance with ERC1400 standard, pause bypasses removed, dividends calculations errors fixed, hold data stale data updated, duplicated CA not accepted anymore, batch freeze operations and external lists do not accept zero addresses anymore, gas optimizations
+- 6950d41: Code refactor plus Coupon fixing, start and end date added. Four type of bonds exist : standard, fixed rate, kpi linked rate and sustainability performance target rate
+
+### Minor Changes
+
+- 902fea1: Added Docusaurus and project documentation, renamed the MP package organization, and added a Claude documentation command.
+- 8f7487a: EIP712 standard fixed. Now single name (ERC20 token name) and version (BLR version number) used for all facets methods. Nonce facet created to centralized to nonce per user management.
+- cbcc1db: Protected Transfer and Lock methods removed from smart contracts and sdk.
+
+### Patch Changes
+
+- 650874b: Set `collectCoverage` to `false` by default and enable it only in CI
+- c10a8ee: Replaced the Hashgraph SDK with the Hiero Ledger SDK
+- Updated dependencies [3ba32c9]
+- Updated dependencies [2d5495e]
+- Updated dependencies [902fea1]
+- Updated dependencies [1f51771]
+- Updated dependencies [dff883d]
+- Updated dependencies [b802e88]
+- Updated dependencies [6950d41]
+- Updated dependencies [7f92cd7]
+- Updated dependencies [8f7487a]
+- Updated dependencies [c10a8ee]
+- Updated dependencies [1ecd8ee]
+- Updated dependencies [fa07c70]
+- Updated dependencies [c7ff16f]
+- Updated dependencies [cbcc1db]
+  - @hashgraph/asset-tokenization-contracts@4.0.0
+
 ## 3.1.0
 
 ### Patch Changes

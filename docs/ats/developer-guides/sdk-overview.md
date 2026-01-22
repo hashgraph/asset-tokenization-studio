@@ -72,11 +72,21 @@ Operations specific to equity tokens:
 
 Operations specific to bond tokens:
 
-- **`Bond.create()`** - Create bond token
-- **`Bond.setCoupon()`** - Schedule coupon payment
+- **`Bond.create()`** - Create bond token (standard bond)
+- **`Bond.createFixedRate()`** - Create fixed rate bond
+- **`Bond.createKpiLinkedRate()`** - Create KPI linked rate bond
+- **`Bond.createSustainabilityPerformanceTargetRate()`** - Create sustainability performance target rate bond
+- **`Bond.setCoupon()`** - Schedule coupon payment (with start/end dates)
 - **`Bond.getAllCoupons()`** - Query all scheduled coupons
 - **`Bond.updateMaturityDate()`** - Update bond maturity date
 - **`Bond.fullRedeemAtMaturity()`** - Execute maturity redemption
+
+**Bond Types:**
+
+- **Standard**: Basic bond with configurable coupon rates
+- **Fixed Rate**: Predetermined fixed interest rate throughout the bond's life
+- **KPI Linked Rate**: Interest rate linked to KPI performance metrics
+- **Sustainability Performance Target Rate**: Rate tied to ESG/sustainability targets
 
 ### KYC & Compliance
 
@@ -132,8 +142,8 @@ const initRequest = new InitializationRequest({
     headerName: "",
   },
   configuration: {
-    resolverAddress: "0.0.7511642",
-    factoryAddress: "0.0.7512002",
+    resolverAddress: "0.0.7707874",
+    factoryAddress: "0.0.7708432",
   },
 });
 
@@ -217,15 +227,21 @@ await Equity.setDividends(dividendRequest);
 ```typescript
 import { Bond, SetCouponRequest } from "@hashgraph/asset-tokenization-sdk";
 
+const now = Math.floor(Date.now() / 1000);
 const couponRequest = new SetCouponRequest({
   tokenId: "0.0.1234567",
-  amount: 50000, // Coupon amount
-  recordDate: Math.floor(Date.now() / 1000) + 86400,
-  paymentDate: Math.floor(Date.now() / 1000) + 172800,
+  rate: 500, // 5.00% (rate with decimals)
+  rateDecimals: 2,
+  startDate: now - 7776000, // 90 days ago (start of accrual period)
+  endDate: now, // Today (end of accrual period)
+  recordDate: now + 86400, // Tomorrow (snapshot date)
+  executionDate: now + 172800, // Day after tomorrow (payment date)
 });
 
 await Bond.setCoupon(couponRequest);
 ```
+
+> **Note**: The coupon interest is calculated based on the period between `startDate` and `endDate`. The `recordDate` determines which bondholders are eligible, and `executionDate` is when payment is distributed.
 
 ### Creating Holds
 

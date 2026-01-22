@@ -14,9 +14,9 @@ import {
 } from "../../layer_3/constants/regulation.sol";
 import { IFixedRate } from "../../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
-import {
-    ISustainabilityPerformanceTargetRate
-} from "../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { ISustainabilityPerformanceTargetRate } from "../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 
 interface IFactory {
     enum SecurityType {

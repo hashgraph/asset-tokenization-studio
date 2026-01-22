@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
-import {
-    ISustainabilityPerformanceTargetRate
-} from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { ISustainabilityPerformanceTargetRate } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
 import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";

@@ -57,6 +57,7 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
         _postOnScheduledCrossOrderedTaskTriggered(taskType);
     }
 
+    // solhint-disable-next-line no-empty-blocks
     function _postOnScheduledCrossOrderedTaskTriggered(bytes32 taskType) internal virtual {}
 
     function _getScheduledCrossOrderedTaskCount() internal view override returns (uint256) {

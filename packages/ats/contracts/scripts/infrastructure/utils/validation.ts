@@ -1,12 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Validation utilities for ATS deployment system.
+ * Core validation utilities for ATS deployment system.
  *
- * Provides reusable validation functions for addresses, contract IDs,
- * and other common input validation needs.
+ * This is the INFRASTRUCTURE LAYER - functions throw errors for programmatic
+ * error handling in workflows and operations. Use try/catch to handle validation
+ * failures gracefully.
  *
- * @module core/utils/validation
+ * For CLI entry points that need user-friendly exit behavior with process.exit(),
+ * use cli/shared/validation.ts which wraps these utilities with CLI-friendly patterns.
+ *
+ * @example
+ * ```typescript
+ * // Infrastructure pattern: throw/catch
+ * import { validateAddress, isValidAddress } from "@scripts/infrastructure";
+ *
+ * try {
+ *   validateAddress(userInput, "proxyAddress");
+ * } catch (error) {
+ *   return { success: false, error: error.message };
+ * }
+ * ```
+ *
+ * @module infrastructure/utils/validation
  */
 
 import { ethers } from "ethers";

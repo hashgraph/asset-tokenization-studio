@@ -107,6 +107,7 @@ Provide type-safe access to Diamond storage:
 - **KycStorageWrapper** - KYC and identity management
 - **CapStorageWrapper** - Supply cap and issuance limits
 - **AccessControlStorageWrapper** - Role-based permissions
+- **NonceStorageWrapper** - EIP712 nonce storage for signature verification
 
 **Purpose**: Storage isolation per feature for safe upgradeability
 
@@ -120,8 +121,11 @@ Base implementations of standards:
 - **Hold** - Token holds and escrow
 - **ControlList** - Whitelisting and blacklisting
 - **Common** - Shared logic across facets
+- **Nonces** - Centralized EIP712 nonce management for signature verification
 
 **Purpose**: Reusable base logic for all token types
+
+> **Note**: The Nonces facet centralizes nonce management for all EIP712 signed operations, using a single token name (ERC20 token name) and version (BLR version number) across all facets.
 
 ### Layer 2: Domain Features (Facets)
 
@@ -313,6 +317,7 @@ Existing storage preserved
 3. **Upgradeability** - Fix bugs without redeploying
 4. **Storage Isolation** - Each facet's storage is separate
 5. **Event Logging** - Full audit trail
+6. **EIP712 Signatures** - Centralized nonce management for permit and meta-transaction support
 
 ## Best Practices
 
