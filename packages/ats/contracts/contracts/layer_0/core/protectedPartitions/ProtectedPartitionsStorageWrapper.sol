@@ -253,16 +253,16 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         if (!_arePartitionsProtected()) revert PartitionsAreUnProtected();
     }
 
+    function _isProtectedPartitionInitialized() internal view override returns (bool) {
+        return _protectedPartitionsStorage().initialized;
+    }
+
     function _protectedPartitionsRole(bytes32 _partition) internal pure override returns (bytes32) {
         return keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
     }
 
     function _calculateRoleForPartition(bytes32 partition) internal pure override returns (bytes32 role) {
         role = keccak256(abi.encode(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
-    }
-
-    function _isProtectedPartitionInitialized() internal view override returns (bool) {
-        return _protectedPartitionsStorage().initialized;
     }
 
     function _protectedPartitionsStorage()

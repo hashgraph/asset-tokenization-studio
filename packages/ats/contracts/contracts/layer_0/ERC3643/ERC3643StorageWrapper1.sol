@@ -139,15 +139,15 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         }
     }
 
-    function _isERC3643Initialized() internal view override returns (bool) {
-        return _erc3643Storage().initialized;
-    }
-
     function _erc3643Storage() internal pure returns (IERC3643Management.ERC3643Storage storage erc3643Storage_) {
         bytes32 position = _ERC3643_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc3643Storage_.slot := position
         }
+    }
+
+    function _isERC3643Initialized() internal view override returns (bool) {
+        return _erc3643Storage().initialized;
     }
 }

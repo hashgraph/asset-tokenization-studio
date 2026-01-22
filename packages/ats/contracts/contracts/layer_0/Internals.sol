@@ -40,12 +40,11 @@ abstract contract Internals is Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function _DOMAIN_SEPARATOR() internal view virtual returns (bytes32);
     function _abafAtSnapshot(uint256 _snapshotID) internal view virtual returns (uint256 abaf_);
-    function _add(uint256 a, uint256 b) internal pure virtual returns (uint256);
-    function _addAgent(address _agent) internal virtual;
     function _addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
     ) internal virtual returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
+    function _addAgent(address _agent) internal virtual;
     function _addExternalList(bytes32 _position, address _list) internal virtual returns (bool success_);
     function _addIssuer(address _issuer) internal virtual returns (bool success_);
     function _addNewTokenHolder(address tokenHolder) internal virtual;
@@ -172,6 +171,7 @@ abstract contract Internals is Modifiers {
     ) internal pure virtual returns (IClearing.ClearingTransferData memory);
     function _burn(address from, uint256 value) internal virtual;
     function _burnFrom(address account, uint256 value) internal virtual;
+    function _add(uint256 a, uint256 b) internal pure virtual returns (uint256);
     function _calculateFactor(uint256 _abaf, uint256 _labaf) internal pure virtual returns (uint256 factor_);
     function _calculateFactorBetween(uint256 _fromBlock, uint256 _toBlock) internal view virtual returns (uint256);
     function _calculateFactorByAbafAndTokenHolder(

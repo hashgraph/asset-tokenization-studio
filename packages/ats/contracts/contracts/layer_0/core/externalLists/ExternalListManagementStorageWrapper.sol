@@ -59,16 +59,16 @@ abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWr
         count_ = _externalListStorage(_position).list.length();
     }
 
+    function _setExternalListInitialized(bytes32 _position) internal override {
+        _externalListStorage(_position).initialized = true;
+    }
+
     function _getExternalListsMembers(
         bytes32 _position,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view override returns (address[] memory members_) {
         members_ = _externalListStorage(_position).list.getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _setExternalListInitialized(bytes32 _position) internal override {
-        _externalListStorage(_position).initialized = true;
     }
 
     function _externalListStorage(

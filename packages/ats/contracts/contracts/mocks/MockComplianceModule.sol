@@ -9,12 +9,12 @@ contract MockComplianceModule {
     mapping(address => bool) private _boundCompliances;
     mapping(address => uint256) private _complianceConfig;
 
-    error AlreadyBound();
-    error NotBound();
-
     event ComplianceBound(address indexed _compliance);
     event ComplianceUnbound(address indexed _compliance);
     event ConfigSet(address indexed _compliance, uint256 value);
+
+    error AlreadyBound();
+    error NotBound();
 
     /**
      * @dev Binds the module to a compliance contract

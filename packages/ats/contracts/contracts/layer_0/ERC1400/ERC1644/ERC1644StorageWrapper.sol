@@ -51,6 +51,10 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         return _erc1644Storage().isControllable;
     }
 
+    function _isERC1644Initialized() internal view override returns (bool) {
+        return _erc1644Storage().initialized;
+    }
+
     function _erc1644Storage() internal pure returns (ERC1644Storage storage erc1644Storage_) {
         bytes32 position = _ERC1644_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -61,9 +65,5 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
 
     function _checkControllable() private view {
         if (!_isControllable()) revert TokenIsNotControllable();
-    }
-
-    function _isERC1644Initialized() internal view override returns (bool) {
-        return _erc1644Storage().initialized;
     }
 }
