@@ -12,6 +12,7 @@ import { LowLevelCall } from "../../common/libraries/LowLevelCall.sol";
 abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20StorageWrapper1 {
     using LowLevelCall for address;
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1410(bool _multiPartition) internal override {
         _erc1410BasicStorage().multiPartition = _multiPartition;
         _erc1410BasicStorage().initialized = true;
