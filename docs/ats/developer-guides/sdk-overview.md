@@ -142,8 +142,8 @@ const initRequest = new InitializationRequest({
     headerName: "",
   },
   configuration: {
-    resolverAddress: "0.0.7511642",
-    factoryAddress: "0.0.7512002",
+    resolverAddress: "0.0.7707874",
+    factoryAddress: "0.0.7708432",
   },
 });
 
