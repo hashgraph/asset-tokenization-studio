@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _AGENT_ROLE, _ISSUER_ROLE } from "../../constants/roles.sol";
+import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
 import { BasicTransferInfo, OperatorTransferData } from "../../interfaces/ERC1400/IERC1410.sol";
 import { IERC1410Management } from "../../interfaces/ERC1400/IERC1410Management.sol";
 import { Internals } from "../../../layer_0/Internals.sol";
-import { IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";

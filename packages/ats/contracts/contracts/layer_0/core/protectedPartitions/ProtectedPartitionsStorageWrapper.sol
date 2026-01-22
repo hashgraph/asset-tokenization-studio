@@ -24,8 +24,11 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
     struct ProtectedPartitionsDataStorage {
         bool initialized;
         bool arePartitionsProtected;
+        // solhint-disable-next-line var-name-mixedcase
         string DEPRECATED_contractName;
+        // solhint-disable-next-line var-name-mixedcase
         string DEPRECATED_contractVersion;
+        // solhint-disable-next-line var-name-mixedcase
         mapping(address => uint256) DEPRECATED_nounces;
     }
 
@@ -40,6 +43,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         _;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ProtectedPartitions(bool _protectPartitions) internal override returns (bool success_) {
         ProtectedPartitionsDataStorage storage protectedPartitionsStorage = _protectedPartitionsStorage();
         protectedPartitionsStorage.arePartitionsProtected = _protectPartitions;
@@ -253,16 +257,16 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         if (!_arePartitionsProtected()) revert PartitionsAreUnProtected();
     }
 
+    function _isProtectedPartitionInitialized() internal view override returns (bool) {
+        return _protectedPartitionsStorage().initialized;
+    }
+
     function _protectedPartitionsRole(bytes32 _partition) internal pure override returns (bytes32) {
         return keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
     }
 
     function _calculateRoleForPartition(bytes32 partition) internal pure override returns (bytes32 role) {
         role = keccak256(abi.encode(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
-    }
-
-    function _isProtectedPartitionInitialized() internal view override returns (bool) {
-        return _protectedPartitionsStorage().initialized;
     }
 
     function _protectedPartitionsStorage()

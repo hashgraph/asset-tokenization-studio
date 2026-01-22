@@ -11,6 +11,7 @@ abstract contract ExternalControlListManagementStorageWrapper is ProtectedPartit
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ExternalControlLists(address[] calldata _controlLists) internal override {
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {

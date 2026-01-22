@@ -19,6 +19,9 @@ abstract contract InternalsSustainabilityPerformanceTargetInterestRate is
     ) internal virtual;
     function _setMinDate(uint256 _date) internal virtual;
     function _setCheckpointDate(uint256 _date, address _project) internal virtual;
+    // ===== Bond Methods =====
+    function _setSustainabilityPerformanceTargetInterestRate(uint256 _couponID) internal virtual;
+
     function _getLatestKpiData(
         uint256 _from,
         uint256 _to,
@@ -26,9 +29,6 @@ abstract contract InternalsSustainabilityPerformanceTargetInterestRate is
     ) internal view virtual returns (uint256 value_, bool exists_);
     function _getMinDateAdjusted() internal view virtual returns (uint256 minDate_);
     function _isCheckpointDate(uint256 _date, address _project) internal view virtual returns (bool);
-
-    // ===== Bond Methods =====
-    function _setSustainabilityPerformanceTargetInterestRate(uint256 _couponID) internal virtual;
 
     function _calculateSustainabilityPerformanceTargetInterestRate(
         uint256 _couponID,

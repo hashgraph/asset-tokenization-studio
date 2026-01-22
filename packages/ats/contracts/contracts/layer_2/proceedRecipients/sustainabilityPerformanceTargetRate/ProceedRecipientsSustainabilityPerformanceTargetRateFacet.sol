@@ -5,9 +5,9 @@ import { ProceedRecipientsFacetBase } from "../ProceedRecipientsFacetBase.sol";
 import {
     _PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "contracts/layer_2/constants/resolverKeys.sol";
-import {
-    CommonSustainabilityPerformanceTargetInterestRate
-} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { CommonSustainabilityPerformanceTargetInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract ProceedRecipientsSustainabilityPerformanceTargetRateFacet is
     ProceedRecipientsFacetBase,

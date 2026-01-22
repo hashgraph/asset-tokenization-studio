@@ -17,6 +17,7 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         IFactory.SecurityType securityType;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC20(IERC20.ERC20Metadata calldata erc20Metadata) internal override {
         ERC20Storage storage erc20Storage = _erc20Storage();
         erc20Storage.name = erc20Metadata.info.name;

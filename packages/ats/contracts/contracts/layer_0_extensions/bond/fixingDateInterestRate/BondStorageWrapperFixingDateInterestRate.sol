@@ -2,10 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
-import { COUPON_LISTING_TASK_TYPE, COUPON_CORPORATE_ACTION_TYPE } from "../../../layer_0/constants/values.sol";
+import { COUPON_LISTING_TASK_TYPE } from "../../../layer_0/constants/values.sol";
 import { LowLevelCall } from "contracts/layer_0/common/libraries/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
 import {
     ScheduledCrossOrderedTasksStorageWrapperFixingDateInterestRate
 } from "./ScheduledCrossOrderedTasksStorageWrapper.sol";

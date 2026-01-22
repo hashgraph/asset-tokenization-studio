@@ -12,6 +12,7 @@ abstract contract ExternalKycListManagementStorageWrapper is ExternalListManagem
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ExternalKycLists(address[] calldata _kycLists) internal override {
         uint256 length = _kycLists.length;
         for (uint256 index; index < length; ) {

@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _KPIS_STORAGE_POSITION } from "contracts/layer_0/constants/storagePositions.sol";
 import { IKpis } from "contracts/layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
 import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
-import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
 import { InternalsSustainabilityPerformanceTargetInterestRate } from "../Internals.sol";
 import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";
