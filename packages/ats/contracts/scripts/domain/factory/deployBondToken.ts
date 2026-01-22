@@ -2,14 +2,8 @@ import { ethers } from "ethers";
 import type { IFactory, ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
-import {
-  ATS_ROLES,
-  BOND_CONFIG_ID,
-  BondDetailsDataParams,
-  FactoryRegulationDataParams,
-  Rbac,
-  SecurityDataParams,
-} from "@scripts/domain";
+import { ATS_ROLES, BOND_CONFIG_ID } from "../constants";
+import { BondDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataParams } from "./types";
 
 // ============================================================================
 // Types

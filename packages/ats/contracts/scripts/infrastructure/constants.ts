@@ -251,7 +251,6 @@ export const DEPLOYMENT_OUTPUT_DIR = "./deployments";
 /**
  * Deployment output file naming pattern.
  */
-export const DEPLOYMENT_OUTPUT_PATTERN = "{network}_{timestamp}.json";
 
 // * Time periods (in seconds and milliseconds)
 export const TIME_PERIODS_S = {

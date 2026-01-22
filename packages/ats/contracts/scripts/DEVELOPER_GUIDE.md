@@ -121,49 +121,32 @@ const resolverKey = facetDef.resolverKey.value; // Looked up from registry
 
 ## Quick Start - Using the CLI
 
-### Hardhat Mode
-
-Deploy using Hardhat's built-in ethers and network configuration:
+Deploy to different networks using the unified CLI:
 
 ```bash
-# Default network (from hardhat.config.ts)
-npm run deploy:hardhat
+# Local testing (requires running Hardhat node)
+npm run deploy:local
 
-# Specific network
-npm run deploy:hardhat -- --network hedera-testnet
-npm run deploy:hardhat -- --network hedera-mainnet
-npm run deploy:hardhat -- --network hardhat  # Local in-memory
-```
-
-**When to use**: Working within Hardhat project, need access to Hardhat tasks/helpers.
-
-### Standalone Mode
-
-Deploy without Hardhat runtime (~3x faster startup):
-
-```bash
-# Default to hedera-testnet
-npm run deploy
-
-# Specific network
+# Hedera networks
 npm run deploy:hedera:testnet
 npm run deploy:hedera:mainnet
+npm run deploy:hedera:previewnet
 ```
 
-**When to use**: Production deployments, CI/CD pipelines, faster iteration cycles.
+**Note**: The `NETWORK` environment variable is required (no default fallback).
 
 ### Network Configuration
 
-Both modes read from `.env` files for network configuration:
+The CLI reads from `.env` files for network configuration:
 
 ```bash
-# Required environment variables
-HEDERA_TESTNET_RPC_URL=https://testnet.hashio.io/api
-HEDERA_TESTNET_PRIVATE_KEY=0x...
-HEDERA_TESTNET_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com
+# Required environment variables (pattern: {NETWORK}_*)
+HEDERA_TESTNET_JSON_RPC_ENDPOINT=https://testnet.hashio.io/api
+HEDERA_TESTNET_PRIVATE_KEY_0=0x...
+HEDERA_TESTNET_MIRROR_NODE_ENDPOINT=https://testnet.mirrornode.hedera.com
 ```
 
-See [Configuration.ts](/Users/work/Projects/asset-tokenization-studio/packages/ats/contracts/scripts/infrastructure/config.ts) for all network options.
+See [Configuration.ts](../Configuration.ts) for all network options.
 
 ---
 
@@ -1452,6 +1435,40 @@ export async function deployAndRegisterCustomFacets(signer: Signer, blr: Contrac
 ```
 
 **Pattern**: Small, focused operations that can be composed into custom workflows.
+
+---
+
+### Type Declaration Patterns
+
+Two patterns are used for TypeScript types in this codebase:
+
+**Co-located (default)**: Define types in the same file as the function that uses them.
+
+```typescript
+// operations/blrDeployment.ts
+export interface DeployBlrOptions { ... }
+export interface DeployBlrResult { ... }
+export async function deployBlr(...): Promise<DeployBlrResult> { ... }
+```
+
+**Centralized**: Import from `types/` when shared across 3+ files.
+
+```typescript
+// operations/blrConfigurations.ts
+import type { ConfigurationData, ConfigurationError } from "../types";
+```
+
+**When to use each:**
+
+| Use Co-located           | Use Centralized          |
+| ------------------------ | ------------------------ |
+| Type used by 1-2 files   | Type used by 3+ files    |
+| Specific to one function | Core infrastructure type |
+| May evolve with feature  | Stable, rarely changes   |
+
+**Rule of thumb**: Start co-located. Extract to `types/` only when you need to import into a 3rd file.
+
+See [`types/core.ts:9-30`](infrastructure/types/core.ts#L9-L30) for detailed guidelines.
 
 ---
 

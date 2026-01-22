@@ -20,7 +20,8 @@ import {
   createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
-import { EQUITY_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import { EQUITY_CONFIG_ID } from "../constants";
+import { atsRegistry } from "../atsRegistry";
 
 /**
  * Equity-specific facets list (41 facets total).
