@@ -30,8 +30,8 @@
  * @module core/types
  */
 
-import { Contract, ContractFactory, Signer, Wallet, Overrides, ContractReceipt, providers } from "ethers";
-import type { WorkflowType } from "./types/checkpoint";
+import { Contract, ContractFactory, Signer, Wallet, Overrides, providers } from "ethers";
+import type { WorkflowType } from "./checkpoint";
 
 /**
  * Method definition with full signature and selector.
@@ -425,52 +425,6 @@ export interface UpgradeProxyResult {
  * scripts/core/operations/registerFacets.ts to keep them close to the implementation.
  * Import from there if needed.
  */
-
-/**
- * Options for creating a configuration in BusinessLogicResolver
- */
-export interface CreateConfigOptions {
-  /** Address of BusinessLogicResolver */
-  blrAddress: string;
-
-  /** Configuration ID (bytes32) */
-  configId: string;
-
-  /** Facet IDs (in order) */
-  facetIds: string[];
-
-  /** Facet versions (corresponding to facetIds) */
-  facetVersions: number[];
-
-  /** Network */
-  network?: string;
-
-  /** Transaction overrides */
-  overrides?: Overrides;
-}
-
-/**
- * Result of creating a configuration
- */
-export interface CreateConfigResult {
-  /** BLR address */
-  blrAddress: string;
-
-  /** Configuration ID */
-  configId: string;
-
-  /** Configuration version number */
-  configVersion: number;
-
-  /** Included facets */
-  facets: Array<{
-    id: string;
-    version: number;
-  }>;
-
-  /** Creation transaction receipt */
-  receipt: ContractReceipt;
-}
 
 /**
  * NOTE: High-level deployment module types are defined in their respective

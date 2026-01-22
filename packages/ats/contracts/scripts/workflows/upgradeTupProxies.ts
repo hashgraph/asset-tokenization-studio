@@ -111,12 +111,9 @@ import {
   type UpgradeTupProxiesOutputType,
   type UpgradeProxyResult,
   validateAddress,
-  generateTimestamp,
+  saveDeploymentOutput,
 } from "@scripts/infrastructure";
 import { ProxyAdmin__factory, BusinessLogicResolver__factory, Factory__factory } from "@contract-types";
-
-import { promises as fs } from "fs";
-import { dirname } from "path";
 
 // ============================================================================
 // Constants
@@ -767,15 +764,17 @@ export async function upgradeTupProxies(
     await ctx.checkpointManager.saveCheckpoint(ctx.checkpoint);
 
     if (saveOutput) {
-      const outputDir = outputPath ? dirname(outputPath) : `deployments/${network}`;
-      await fs.mkdir(outputDir, { recursive: true });
-
-      const timestamp = generateTimestamp();
-      const filename = `${network}-upgrade-tup-${timestamp}.json`;
-      const filepath = outputPath || `${outputDir}/${filename}`;
-
-      await fs.writeFile(filepath, JSON.stringify(output, null, 2));
-      info(`Upgrade output saved to: ${filepath}`);
+      const result = await saveDeploymentOutput({
+        network,
+        workflow: "upgradeTupProxies",
+        data: output,
+        customPath: outputPath,
+      });
+      if (result.success) {
+        info(`Upgrade output saved to: ${result.filepath}`);
+      } else {
+        warn(`Warning: Could not save upgrade output: ${result.error}`);
+      }
     }
 
     if (deleteOnSuccess) {

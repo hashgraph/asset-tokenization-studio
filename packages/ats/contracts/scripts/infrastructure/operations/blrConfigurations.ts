@@ -9,9 +9,26 @@
  * These are generic operations that work with any configuration ID and facet set.
  * Domain-specific configuration creation (equity, bond) is handled by modules.
  *
+ * ## Performance Note: Dynamic Imports
+ *
+ * This file uses dynamic imports (`await import()`) for some `@scripts/infrastructure`
+ * modules instead of static imports. This is intentional for parallel test performance.
+ *
+ * **Why:** The barrel export (`@scripts/infrastructure/index.ts`) re-exports from files
+ * that import `@contract-types` (typechain). When Node.js loads the barrel, it eagerly
+ * loads ALL re-exported modules, triggering typechain loading (~400 generated files).
+ *
+ * In parallel tests, each worker loads modules independently:
+ * - Static imports: N workers × full module graph = 4x+ slowdown
+ * - Dynamic imports: Modules loaded only when functions are called (lazy)
+ *
+ * **Measured impact:** Static imports caused tests to run in 8+ minutes vs 2 minutes.
+ *
+ * @see README.md "Troubleshooting > Parallel Tests Running Slowly" for details
  * @module core/operations/blrConfigurations
  */
 
+import { Contract } from "ethers";
 import { BusinessLogicResolver } from "@contract-types";
 import {
   DEFAULT_TRANSACTION_TIMEOUT,
@@ -28,62 +45,8 @@ import {
   isInstantMiningNetwork,
 } from "@scripts/infrastructure";
 
-/**
- * Facet configuration for BLR.
- */
-export interface FacetConfiguration {
-  /** Facet name */
-  facetName: string;
-
-  /** Function selectors this facet handles */
-  selectors: string[];
-}
-
-/**
- * Batch facet configuration structure for contract calls.
- * This matches the IDiamondCutManager.FacetConfigurationStruct interface.
- */
-export interface BatchFacetConfiguration {
-  /** Facet ID (keccak256 hash of facet name) */
-  id: string;
-
-  /** Facet version */
-  version: number;
-}
-
-/**
- * Result of BLR configuration.
- *
- * Used by the deployBlrWithFacets workflow helper.
- */
-export interface CreateBlrConfigurationResult {
-  /** Whether configuration succeeded */
-  success: boolean;
-
-  /** BLR address */
-  blrAddress: string;
-
-  /** Configuration ID */
-  configurationId: string;
-
-  /** Configuration version created */
-  version?: number;
-
-  /** Number of facets configured */
-  facetCount: number;
-
-  /** Transaction hash (only if success=true) */
-  transactionHash?: string;
-
-  /** Block number (only if success=true) */
-  blockNumber?: number;
-
-  /** Gas used (only if success=true) */
-  gasUsed?: number;
-
-  /** Error message (only if success=false) */
-  error?: string;
-}
+// Types imported from centralized types module
+import type { BatchFacetConfiguration, ConfigurationData, ConfigurationError, FacetConfigurationData } from "../types";
 
 /**
  * Get the latest configuration version for a configuration ID.
@@ -137,45 +100,6 @@ export async function configurationExists(blr: BusinessLogicResolver, configurat
   } catch {
     return false;
   }
-}
-
-// ============================================================================
-// Configuration Creation (Generic Operation for BLR Configurations)
-// ============================================================================
-
-/**
- * Error types for configuration operations.
- */
-export type ConfigurationError =
-  | "EMPTY_FACET_LIST"
-  | "INVALID_ADDRESS"
-  | "INVALID_CONFIG_ID"
-  | "FACET_NOT_FOUND"
-  | "TRANSACTION_FAILED"
-  | "EVENT_PARSE_FAILED";
-
-/**
- * Configuration data returned on success.
- */
-export interface ConfigurationData {
-  /** Configuration ID */
-  configurationId: string;
-
-  /** Configuration version */
-  version: number;
-
-  /** Facet keys and addresses */
-  facetKeys: Array<{
-    facetName: string;
-    key: string;
-    address: string;
-  }>;
-
-  /** Transaction hash */
-  transactionHash: string;
-
-  /** Block number */
-  blockNumber: number;
 }
 
 // ============================================================================
@@ -342,7 +266,7 @@ export async function sendBatchConfiguration(
   info(`  Confirmations to wait: ${confirmations}`);
 
   try {
-    // Import GAS_LIMIT constants
+    // Dynamic import for parallel test performance (see module JSDoc for explanation)
     const { GAS_LIMIT } = await import("@scripts/infrastructure");
 
     const txResponse = await blrContract.createBatchConfiguration(configId, configurations, finalBatch, {
@@ -408,20 +332,6 @@ export async function sendBatchConfiguration(
  * })
  * ```
  */
-/**
- * Facet data for configuration creation.
- */
-export interface FacetConfigurationData {
-  /** Base facet name (e.g., 'AccessControlFacet') */
-  facetName: string;
-
-  /** Resolver key (bytes32) for the facet */
-  resolverKey: string;
-
-  /** Deployed facet address */
-  address: string;
-}
-
 export async function createBatchConfiguration(
   blrContract: Contract,
   options: {
@@ -453,6 +363,7 @@ export async function createBatchConfiguration(
     confirmations = 0,
   } = options;
 
+  // Dynamic imports for parallel test performance (see module JSDoc for explanation)
   const { info } = await import("@scripts/infrastructure");
   const { ok, err } = await import("@scripts/infrastructure");
 
@@ -513,6 +424,7 @@ export async function createBatchConfiguration(
     const configVersion = await blrContract.getLatestVersionByConfiguration(configurationId);
     const actualVersion = configVersion.toNumber();
 
+    // Dynamic import for parallel test performance (see module JSDoc)
     const { success: logSuccess } = await import("../utils/logging");
     logSuccess("Batch configuration completed successfully", {
       configurationId,
@@ -529,6 +441,7 @@ export async function createBatchConfiguration(
       blockNumber: 0,
     });
   } catch (error) {
+    // Dynamic import for parallel test performance (see module JSDoc)
     const { error: logError } = await import("../utils/logging");
     const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -539,6 +452,3 @@ export async function createBatchConfiguration(
     return err("TRANSACTION_FAILED", errorMessage, error);
   }
 }
-
-// Re-export Contract type for convenience
-type Contract = import("ethers").Contract;

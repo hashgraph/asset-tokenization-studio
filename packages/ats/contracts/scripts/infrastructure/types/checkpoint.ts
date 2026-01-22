@@ -316,7 +316,7 @@ export interface ResumeOptions {
 // Type Guards
 // ============================================================================
 
-import type { SaveResult } from "../types";
+import type { SaveResult } from "./core";
 
 /**
  * Type guard for SaveResult success case.
