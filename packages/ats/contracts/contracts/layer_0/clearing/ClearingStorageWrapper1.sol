@@ -192,6 +192,10 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         }
     }
 
+    function _isClearingInitialized() internal view override returns (bool) {
+        return _clearingStorage().initialized;
+    }
+
     function _buildClearingTransferData(
         uint256 _amount,
         uint256 _expirationTimestamp,
@@ -274,10 +278,6 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
         assembly {
             clearing_.slot := position
         }
-    }
-
-    function _isClearingInitialized() internal view override returns (bool) {
-        return _clearingStorage().initialized;
     }
 
     function _checkClearingId(

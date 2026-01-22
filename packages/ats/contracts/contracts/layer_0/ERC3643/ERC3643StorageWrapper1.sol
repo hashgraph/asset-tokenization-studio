@@ -124,6 +124,10 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         return _erc3643Storage().onchainID;
     }
 
+    function _isERC3643Initialized() internal view override returns (bool) {
+        return _erc3643Storage().initialized;
+    }
+
     function _checkInputAmountsArrayLength(
         address[] memory _addresses,
         uint256[] memory _amounts
@@ -145,9 +149,5 @@ abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecip
         assembly {
             erc3643Storage_.slot := position
         }
-    }
-
-    function _isERC3643Initialized() internal view override returns (bool) {
-        return _erc3643Storage().initialized;
     }
 }
