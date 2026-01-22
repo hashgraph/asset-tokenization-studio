@@ -37,10 +37,9 @@ import { validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Common } from "../layer_0/common/Common.sol";
-import {
-    ISustainabilityPerformanceTargetRate
-// solhint-disable-next-line max-line-length    
-} from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { ISustainabilityPerformanceTargetRate } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 
 contract Factory is IFactory, Common {
     modifier checkResolver(IBusinessLogicResolver resolver) {

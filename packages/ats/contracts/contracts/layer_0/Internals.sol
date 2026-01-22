@@ -19,10 +19,9 @@ import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
 import { IEquity } from "../layer_2/interfaces/equity/IEquity.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
-import {
-    ISustainabilityPerformanceTargetRate
-// solhint-disable-next-line max-line-length    
-} from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { ISustainabilityPerformanceTargetRate } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
@@ -93,7 +92,7 @@ abstract contract Internals is Modifiers {
     function _cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) internal virtual returns (bool success_);
-        function _clearingHoldCreationCreation(
+    function _clearingHoldCreationCreation(
         IClearing.ClearingOperation memory _clearingOperation,
         address _from,
         Hold calldata _hold,
@@ -107,7 +106,7 @@ abstract contract Internals is Modifiers {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) internal virtual returns (bool success_, uint256 clearingId_);
-        function _clearingTransferCreation(
+    function _clearingTransferCreation(
         IClearing.ClearingOperation memory _clearingOperation,
         uint256 _amount,
         address _to,
@@ -128,16 +127,16 @@ abstract contract Internals is Modifiers {
         bytes memory _data,
         bytes memory _operatorData
     ) internal virtual;
-        function _createHoldByPartition(
+    function _createHoldByPartition(
         bytes32 _partition,
         address _from,
         Hold memory _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) internal virtual returns (bool success_, uint256 holdId_);
-        function _decreaseAllowance(address spender, uint256 subtractedValue) internal virtual returns (bool);
+    function _decreaseAllowance(address spender, uint256 subtractedValue) internal virtual returns (bool);
     function _decreaseAllowedBalance(address from, address spender, uint256 value) internal virtual;
-        function _decreaseAllowedBalanceForClearing(
+    function _decreaseAllowedBalanceForClearing(
         bytes32 _partition,
         uint256 _clearingId,
         IClearing.ClearingOperationType _clearingOperationType,
@@ -156,7 +155,7 @@ abstract contract Internals is Modifiers {
     ) internal virtual returns (uint256 newHoldBalance_);
     function _delegate(address delegatee) internal virtual;
     function _delegate(address delegator, address delegatee) internal virtual;
-        function _deletePartitionForHolder(address _holder, bytes32 _partition, uint256 index) internal virtual;
+    function _deletePartitionForHolder(address _holder, bytes32 _partition, uint256 index) internal virtual;
     function _executeHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         address _to,
@@ -165,7 +164,7 @@ abstract contract Internals is Modifiers {
     function _finalizeControllable() internal virtual;
     function _freezeTokens(address _account, uint256 _amount) internal virtual;
     function _freezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal virtual;
-        function _grantKyc(
+    function _grantKyc(
         address _account,
         string memory _vcId,
         uint256 _validFrom,
@@ -173,7 +172,7 @@ abstract contract Internals is Modifiers {
         address _issuer
     ) internal virtual returns (bool success_);
     function _grantRole(bytes32 _role, address _account) internal virtual returns (bool success_);
-        function _increaseAllowance(address spender, uint256 addedValue) internal virtual returns (bool);
+    function _increaseAllowance(address spender, uint256 addedValue) internal virtual returns (bool);
     function _increaseAllowedBalance(address from, address spender, uint256 value) internal virtual;
     function _increaseBalanceByPartition(address _from, uint256 _value, bytes32 _partition) internal virtual;
     function _increaseClearedAmounts(address _tokenHolder, bytes32 _partition, uint256 _amount) internal virtual;
@@ -203,7 +202,7 @@ abstract contract Internals is Modifiers {
     function _setExternalListInitialized(bytes32 _position) internal virtual;
     function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal virtual;
     function _issueByPartition(IssueData memory _issueData) internal virtual;
-        function _lockByPartition(
+    function _lockByPartition(
         bytes32 _partition,
         uint256 _amount,
         address _tokenHolder,
@@ -239,8 +238,8 @@ abstract contract Internals is Modifiers {
     ) internal virtual returns (bool success_);
     function _operatorTransferByPartition(
         OperatorTransferData calldata _operatorTransferData
-    ) internal virtual returns (bytes32); 
-       function _permit(
+    ) internal virtual returns (bytes32);
+    function _permit(
         address owner,
         address spender,
         uint256 value,
@@ -412,8 +411,8 @@ abstract contract Internals is Modifiers {
     ) internal virtual;
     function _syncBalanceAdjustments(bytes32 _partition, address _from, address _to) internal virtual;
     function _takeAbafCheckpoint() internal virtual;
-    function _takeSnapshot() internal virtual returns (uint256 snapshotID_);     
-        function _transfer(address from, address to, uint256 value) internal virtual returns (bool);
+    function _takeSnapshot() internal virtual returns (uint256 snapshotID_);
+    function _transfer(address from, address to, uint256 value) internal virtual returns (bool);
     function _transferByPartition(
         address _from,
         BasicTransferInfo memory _basicTransferInfo,
@@ -562,21 +561,21 @@ abstract contract Internals is Modifiers {
     ) internal virtual;
     function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
     function _updateTotalTokenHolderSnapshot() internal virtual;
-        // solhint-disable-next-line func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function _initializeClearing(bool _clearingActive) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ProtectedPartitions(bool _protectPartition) internal virtual returns (bool success_);
-        // solhint-disable-next-line func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function _initializeInternalKyc(bool _internalKycActivated) internal virtual;
-       // solhint-disable-next-line func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ExternalControlLists(address[] calldata _controlLists) internal virtual;
-      // solhint-disable-next-line func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ExternalKycLists(address[] calldata _kycLists) internal virtual;
-        // solhint-disable-next-line func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ExternalPauses(address[] calldata _pauses) internal virtual;
-       // solhint-disable-next-line func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1410(bool _multiPartition) internal virtual;
-      // solhint-disable-next-line func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1644(bool _controllable) internal virtual;
     function _setName(string calldata _name) internal virtual;
 
@@ -588,7 +587,7 @@ abstract contract Internals is Modifiers {
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
     ) internal virtual;
-        // solhint-disable-next-line func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_SustainabilityPerformanceTargetRate(
         ISustainabilityPerformanceTargetRate.InterestRate calldata _interestRate,
         ISustainabilityPerformanceTargetRate.ImpactData[] calldata _impactData,
@@ -753,7 +752,7 @@ abstract contract Internals is Modifiers {
         uint256 _snapshotID,
         address _tokenHolder
     ) internal view virtual returns (uint256 balance_);
-        function _calculateFactorForClearedAmountByTokenHolderAdjustedAt(
+    function _calculateFactorForClearedAmountByTokenHolderAdjustedAt(
         address tokenHolder,
         uint256 timestamp
     ) internal view virtual returns (uint256 factor);

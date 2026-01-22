@@ -5,10 +5,9 @@ import { ERC1594FacetBase } from "../ERC1594FacetBase.sol";
 import {
     _ERC1594_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "contracts/layer_1/constants/resolverKeys.sol";
-import {
-    CommonSustainabilityPerformanceTargetInterestRate
-// solhint-disable-next-line max-line-length    
-} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { CommonSustainabilityPerformanceTargetInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract ERC1594SustainabilityPerformanceTargetRateFacet is
     ERC1594FacetBase,

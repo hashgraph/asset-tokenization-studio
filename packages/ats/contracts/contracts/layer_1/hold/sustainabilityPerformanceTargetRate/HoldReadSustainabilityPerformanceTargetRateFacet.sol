@@ -5,10 +5,9 @@ import { HoldReadFacetBase } from "../HoldReadFacetBase.sol";
 import {
     _HOLD_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "contracts/layer_1/constants/resolverKeys.sol";
-import {
-    CommonSustainabilityPerformanceTargetInterestRate
+// prettier-ignore
 // solhint-disable-next-line max-line-length
-} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import { CommonSustainabilityPerformanceTargetInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract HoldReadSustainabilityPerformanceTargetRateFacet is
     HoldReadFacetBase,

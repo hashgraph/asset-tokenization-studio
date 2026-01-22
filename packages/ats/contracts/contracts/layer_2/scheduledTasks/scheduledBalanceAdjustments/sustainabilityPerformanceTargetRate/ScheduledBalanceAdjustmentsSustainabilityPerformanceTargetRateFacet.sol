@@ -6,10 +6,9 @@ import {
 } from "../../../constants/resolverKeys.sol";
 // solhint-disable-next-line max-line-length
 import { ScheduledBalanceAdjustmentsFacetBase } from "../ScheduledBalanceAdjustmentsFacetBase.sol";
-import {
-    CommonSustainabilityPerformanceTargetInterestRate
+// prettier-ignore
 // solhint-disable-next-line max-line-length
-} from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet is
     ScheduledBalanceAdjustmentsFacetBase,

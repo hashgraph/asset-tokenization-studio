@@ -5,10 +5,9 @@ import {
     _ERC3643_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "../../constants/resolverKeys.sol";
 import { ERC3643ManagementFacetBase } from "../ERC3643ManagementFacetBase.sol";
-import {
-    CommonSustainabilityPerformanceTargetInterestRate
-// solhint-disable-next-line max-line-length    
-} from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract ERC3643ManagementSustainabilityPerformanceTargetRateFacet is
     ERC3643ManagementFacetBase,
