@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { AtsRoleName, AtsRoleHash } from "@scripts/domain";
+import { AtsRoleName, AtsRoleHash } from "../constants";
 export interface Rbac {
   // eslint-disable-next-line @typescript-eslint/ban-types
   role: AtsRoleName | AtsRoleHash | (string & {});
