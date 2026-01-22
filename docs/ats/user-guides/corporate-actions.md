@@ -132,41 +132,45 @@ For bond tokens, execute periodic interest payments to bondholders.
 
 The coupons table displays:
 
-| ID  | Record Date | Execution Date | Coupon Rate | Period  | Snapshot |
-| --- | ----------- | -------------- | ----------- | ------- | -------- |
-| 1   | 2024-12-15  | 2024-12-22     | 5.0%        | 90 days | View     |
-| 2   | 2025-03-15  | 2025-03-22     | 5.0%        | 90 days | View     |
+| ID  | Record Date | Execution Date | Start Date | End Date   | Coupon Rate | Snapshot |
+| --- | ----------- | -------------- | ---------- | ---------- | ----------- | -------- |
+| 1   | 2024-12-15  | 2024-12-22     | 2024-09-15 | 2024-12-15 | 5.0%        | View     |
+| 2   | 2025-03-15  | 2025-03-22     | 2024-12-15 | 2025-03-15 | 5.0%        | View     |
 
 - **ID**: Unique coupon identifier
 - **Record Date**: Snapshot date for eligible bondholders
 - **Execution Date**: Payment distribution date
+- **Start Date**: Beginning of the coupon accrual period
+- **End Date**: End of the coupon accrual period
 - **Coupon Rate**: Interest rate for the period
-- **Period**: Duration of the coupon period
 - **Snapshot**: View eligible bondholders
+
+> **Note**: The coupon period is calculated as the difference between start and end dates. This allows precise interest calculations based on actual accrual periods.
 
 ### Programming a New Coupon
 
 1. Click **"New Coupon"** or **"Add Coupon"**
 2. Fill in the coupon details:
    - **Coupon Rate**: Interest rate (e.g., `5.0` for 5%)
-   - **Record Date**: Select date using date picker
-   - **Execution Date**: Select date using date picker (must be after record date)
-   - **Period**: Select from dropdown:
-     - 1 day
-     - 1 week
-     - 1 month
-     - 3 months (90 days)
-     - 1 year
+   - **Start Date**: Beginning of the coupon accrual period
+   - **End Date**: End of the coupon accrual period
+   - **Record Date**: Snapshot date to determine eligible bondholders (typically same as end date)
+   - **Execution Date**: When coupon payment is distributed (must be after record date)
 3. Click **"Create"** or **"Schedule Coupon"**
 4. Approve the transaction in your wallet
 
-**Important**: The execution date must be after the record date.
+**Important**:
+
+- The start date must be before the end date
+- The execution date must be after the record date
+- Coupon interest is calculated based on the period between start and end dates
 
 ### Viewing Coupon Details
 
 Click on a specific coupon to view:
 
-- Coupon parameters (rate, period, dates)
+- Coupon parameters (rate, start date, end date, record date, execution date)
+- Coupon accrual period (calculated from start and end dates)
 - Total coupon amount to distribute
 - List of eligible bondholders and their coupon amounts
 - Payment status

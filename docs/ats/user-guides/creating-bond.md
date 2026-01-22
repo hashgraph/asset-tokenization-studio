@@ -18,6 +18,19 @@ Bond tokens represent debt securities issued by companies or organizations. They
 - Transfer restrictions and compliance rules
 - Configurable payment schedules and terms
 
+### Bond Types
+
+ATS supports four types of bonds at the smart contract level, each designed for different use cases:
+
+| Bond Type                                  | Description                                         | Use Case                                      |
+| ------------------------------------------ | --------------------------------------------------- | --------------------------------------------- |
+| **Standard**                               | Basic bond with configurable coupon rates           | Traditional corporate bonds, government bonds |
+| **Fixed Rate**                             | Bond with a predetermined fixed interest rate       | Predictable income securities, savings bonds  |
+| **KPI Linked Rate**                        | Interest rate linked to Key Performance Indicators  | Performance-based bonds, ESG-linked debt      |
+| **Sustainability Performance Target Rate** | Rate tied to sustainability/ESG performance targets | Green bonds, sustainability-linked bonds      |
+
+> **Note**: The web application creates standard bonds by default. For specialized bond types (Fixed Rate, KPI Linked, Sustainability Performance Target), use the SDK or contract deployment scripts directly. See the [Developer Guide](../developer-guides/contracts/index.md) for details.
+
 ## Prerequisites
 
 - ATS web application running and accessible
