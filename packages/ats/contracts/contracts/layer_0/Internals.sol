@@ -19,7 +19,6 @@ import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
 import { IEquity } from "../layer_2/interfaces/equity/IEquity.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
-import { ITransferAndLock } from "../layer_3/interfaces/ITransferAndLock.sol";
 import {
     ISustainabilityPerformanceTargetRate
 } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";

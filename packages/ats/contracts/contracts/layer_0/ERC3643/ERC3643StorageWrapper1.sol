@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ERC3643_STORAGE_POSITION, _RESOLVER_PROXY_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { _ERC3643_STORAGE_POSITION } from "../constants/storagePositions.sol";
 import { _AGENT_ROLE } from "../constants/roles.sol";
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
 import { IAccessControl } from "../../layer_1/interfaces/accessControl/IAccessControl.sol";
 import { IERC3643StorageWrapper } from "../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol";
 import { IIdentityRegistry } from "../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
-import { _ERC3643_STORAGE_POSITION, _RESOLVER_PROXY_STORAGE_POSITION } from "../constants/storagePositions.sol";
 import { ICompliance } from "../../layer_1/interfaces/ERC3643/ICompliance.sol";
 import { LowLevelCall } from "../common/libraries/LowLevelCall.sol";
 import { ProceedRecipientsStorageWrapper } from "../proceedRecipients/ProceedRecipientsStorageWrapper.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { _AGENT_ROLE } from "../constants/roles.sol";
 
 abstract contract ERC3643StorageWrapper1 is IERC3643StorageWrapper, ProceedRecipientsStorageWrapper {
     using LowLevelCall for address;

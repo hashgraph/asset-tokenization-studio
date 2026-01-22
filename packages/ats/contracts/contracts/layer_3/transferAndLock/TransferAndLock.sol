@@ -6,9 +6,6 @@ import { _LOCKER_ROLE } from "../../layer_1/constants/roles.sol";
 import { ITransferAndLock } from "../interfaces/ITransferAndLock.sol";
 import { BasicTransferInfo } from "../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { Internals } from "../../layer_0/Internals.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract TransferAndLock is ITransferAndLock, Internals {
     function transferAndLockByPartition(

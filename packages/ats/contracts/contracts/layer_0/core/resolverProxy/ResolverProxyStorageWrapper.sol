@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IResolverProxy } from "../../../interfaces/resolver/resolverProxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../../../interfaces/resolver/IBusinessLogicResolver.sol";
-import { IDiamondLoupe } from "../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
 import { _RESOLVER_PROXY_STORAGE_POSITION } from "../../../layer_1/constants/storagePositions.sol";
 import { NonceStorageWrapper } from "../nonce/NonceStorageWrapper.sol";
 

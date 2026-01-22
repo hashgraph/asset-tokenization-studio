@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IResolverProxy } from "../../../interfaces/resolver/resolverProxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../../../interfaces/resolver/IBusinessLogicResolver.sol";
 import { IDiamondLoupe } from "../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
-import { _RESOLVER_PROXY_STORAGE_POSITION } from "../../../layer_1/constants/storagePositions.sol";
 import { Common } from "../../../layer_0/common/Common.sol";
 import { ResolverProxyStorageWrapper } from "../../../layer_0/core/resolverProxy/ResolverProxyStorageWrapper.sol";
 
