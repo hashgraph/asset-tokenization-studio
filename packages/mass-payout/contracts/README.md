@@ -86,6 +86,16 @@ These contracts are designed to work with:
 - Mass Payout SDK for programmatic interaction
 - Mass Payout frontend and backend applications
 
+---
+
+## 📚 Documentation
+
+For more information about the project, see:
+
+- [Guides](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/guides)
+- [API Documentation](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/api)
+- [References](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/references)
+
 ## License
 
 Apache License 2.0

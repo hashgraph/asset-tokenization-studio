@@ -7,9 +7,6 @@ interface IERC20Permit {
     error ERC2612ExpiredSignature(uint256 deadline);
     error ERC2612InvalidSigner(address signer, address owner);
 
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Permit() external;
-
     /**
      * @notice Approves a third party to spend tokens using off-chain signature
      */
@@ -22,11 +19,6 @@ interface IERC20Permit {
         bytes32 r,
         bytes32 s
     ) external;
-
-    /**
-     * @notice Returns the current nonce for `owner`
-     */
-    function nonces(address owner) external view returns (uint256);
 
     /**
      * @notice Returns the domain separator used in the encoding of the signature for `permit`, as defined by {EIP712}

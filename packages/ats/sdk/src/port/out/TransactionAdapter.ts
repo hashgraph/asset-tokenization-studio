@@ -215,11 +215,12 @@ import EvmAddress from '@domain/context/contract/EvmAddress';
 import { BondDetails } from '@domain/context/bond/BondDetails';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
 import HWCSettings from '@core/settings/walletConnect/HWCSettings';
-import { ContractId } from '@hashgraph/sdk';
+import { ContractId } from '@hiero-ledger/sdk';
 import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
 import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
 import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
 import { ClearingOperationType } from '@domain/context/security/Clearing';
+import { RateStatus } from '@domain/context/bond/RateStatus';
 
 export interface InitializationData {
   account?: Account;
@@ -381,7 +382,10 @@ interface ITransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-    period: BigDecimal,
+    startDate: BigDecimal,
+    endDate: BigDecimal,
+    fixingDate: BigDecimal,
+    rateStatus: RateStatus,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setDocument(
@@ -495,18 +499,6 @@ interface ITransactionAdapter {
     security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  protectedTransferAndLockByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>>;
   redeemAtMaturityByPartition(
     security: EvmAddress,
     partitionId: string,
@@ -1297,7 +1289,10 @@ export default abstract class TransactionAdapter
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-    period: BigDecimal,
+    startDate: BigDecimal,
+    endDate: BigDecimal,
+    fixingDate: BigDecimal,
+    rateStatus: RateStatus,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract setVotingRights(
@@ -1391,18 +1386,6 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>>;
   abstract unprotectPartitions(
     security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>>;
-  abstract protectedTransferAndLockByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract updateMaturityDate(

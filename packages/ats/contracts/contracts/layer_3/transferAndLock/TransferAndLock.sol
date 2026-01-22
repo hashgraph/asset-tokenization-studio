@@ -5,10 +5,12 @@ import { _DEFAULT_PARTITION } from "../../layer_0/constants/values.sol";
 import { _LOCKER_ROLE } from "../../layer_1/constants/roles.sol";
 import { ITransferAndLock } from "../interfaces/ITransferAndLock.sol";
 import { BasicTransferInfo } from "../../layer_1/interfaces/ERC1400/IERC1410.sol";
-import { Common } from "../../layer_1/common/Common.sol";
-import { ITransferAndLock } from "../interfaces/ITransferAndLock.sol";
+import { Internals } from "../../layer_0/Internals.sol";
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
-abstract contract TransferAndLock is ITransferAndLock, Common {
+abstract contract TransferAndLock is ITransferAndLock, Internals {
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,
@@ -71,44 +73,5 @@ abstract contract TransferAndLock is ITransferAndLock, Common {
             _expirationTimestamp,
             lockId_
         );
-    }
-
-    function protectedTransferAndLockByPartition(
-        bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLockData,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_transferAndLockData.expirationTimestamp)
-        onlyProtectedPartitions
-        returns (bool success_, uint256 lockId_)
-    {
-        return _protectedTransferAndLockByPartition(_partition, _transferAndLockData, _deadline, _nounce, _signature);
-    }
-
-    function protectedTransferAndLock(
-        TransferAndLockStruct calldata _transferAndLockData,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-        onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyWithValidExpirationTimestamp(_transferAndLockData.expirationTimestamp)
-        onlyProtectedPartitions
-        returns (bool success_, uint256 lockId_)
-    {
-        return _protectedTransferAndLock(_transferAndLockData, _deadline, _nounce, _signature);
     }
 }

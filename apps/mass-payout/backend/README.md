@@ -160,3 +160,13 @@ npm run test:cov
 2. Enable "Automatic Prettier configuration" and "Run on save"
 3. Go to **Tools** → **Actions on Save**
 4. Enable "Optimize imports"
+
+---
+
+## 📚 Documentation
+
+For more information about the project, see:
+
+- [Guides](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/guides)
+- [API Documentation](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/api)
+- [References](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/references)

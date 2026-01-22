@@ -8,11 +8,11 @@
  *
  * @module tools/utils/abiValidator
  */
-
+import { ethers } from "ethers";
 import * as fs from "fs";
 import * as path from "path";
 import { MethodDefinition } from "../../infrastructure/types";
-import { calculateSelector } from "./solidityUtils";
+import { id } from "ethers/lib/utils";
 
 /**
  * Load compiled ABI from Hardhat artifacts.
@@ -72,20 +72,23 @@ function findArtifactPath(dir: string, contractName: string): string | undefined
  * @param abi - Contract ABI
  * @returns Map of method name to signature details
  */
-export function extractMethodsFromABI(abi: any[]): Map<string, { signature: string; selector: string }> {
-  const methods = new Map<string, { signature: string; selector: string }>();
+export function extractMethodsFromABI(abi: any[]): MethodDefinition[] {
+  const STATIC_METHODS_TO_EXCLUDE = new Set([
+    "getStaticFunctionSelectors",
+    "getStaticInterfaceIds",
+    "getStaticResolverKey",
+  ]);
 
-  for (const item of abi) {
-    if (item.type === "function") {
+  const methods: MethodDefinition[] = [];
+  const iface = new ethers.utils.Interface(abi);
+  const functions = iface.functions;
+  for (const item of Object.values(functions)) {
+    if (!STATIC_METHODS_TO_EXCLUDE.has(item.name)) {
       const name = item.name;
-      const inputs = item.inputs || [];
+      const signature = item.format("full");
+      const selector = id(item.format("sighash")).substring(0, 10);
 
-      // Build canonical signature
-      const types = inputs.map((input: any) => input.type);
-      const signature = `${name}(${types.join(",")})`;
-      const selector = calculateSelector(signature);
-
-      methods.set(name, { signature, selector });
+      methods.push({ name, signature, selector });
     }
   }
 
@@ -105,30 +108,9 @@ export function extractMethodsFromABI(abi: any[]): Map<string, { signature: stri
  * @param contractName - Contract name for logging
  * @returns Validated method definitions
  */
-export function validateAndMerge(
-  regexMethods: MethodDefinition[],
-  abiMethods: Map<string, { signature: string; selector: string }> | undefined,
-  contractName: string,
-): MethodDefinition[] {
-  // If no ABI, return regex results as-is
-  if (!abiMethods || abiMethods.size === 0) {
-    return regexMethods;
-  }
-
-  // Use ABI as source of truth
+export function validateAndMerge(abiMethods: Map<string, { signature: string; selector: string }>): MethodDefinition[] {
   const result: MethodDefinition[] = [];
-  const regexMethodMap = new Map(regexMethods.map((m) => [m.name, m]));
-
   for (const [name, abiMethod] of abiMethods.entries()) {
-    const regexMethod = regexMethodMap.get(name);
-
-    // Warn if signatures mismatch
-    if (regexMethod && regexMethod.signature !== abiMethod.signature) {
-      console.warn(`[ABI Validation] Signature mismatch for ${contractName}.${name}:`);
-      console.warn(`  Regex:  ${regexMethod.signature}`);
-      console.warn(`  ABI:    ${abiMethod.signature}`);
-    }
-
     result.push({
       name,
       signature: abiMethod.signature,

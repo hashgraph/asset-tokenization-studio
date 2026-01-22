@@ -214,7 +214,7 @@ import {
   ContractId,
   Signer,
   Transaction,
-} from '@hashgraph/sdk';
+} from '@hiero-ledger/sdk';
 import {
   AccessControlFacet__factory,
   Bond__factory,
@@ -312,6 +312,9 @@ import {
 import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
 import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
 import { BaseContract, Contract, ContractTransaction } from 'ethers';
+import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
+import { ProtectionData } from '@domain/context/factory/ProtectionData';
+
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -929,44 +932,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       [targetId.toString()],
     );
   }
-  protectedTransferAndLockByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-    securityId: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
-    );
-
-    const transferAndLockData: TransferAndLock = {
-      from: sourceId.toString(),
-      to: targetId.toString(),
-      amount: amount.toBigNumber(),
-      data: '0x',
-      expirationTimestamp: expirationDate.toBigNumber(),
-    };
-
-    return this.executeWithArgs(
-      new TransferAndLockFacet__factory().attach(security.toString()),
-      'protectedTransferAndLockByPartition',
-      securityId,
-      GAS.PROTECTED_TRANSFER_AND_LOCK,
-      [
-        partitionId,
-        transferAndLockData,
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
-      ],
-    );
-  }
   async controllerTransfer(
     security: EvmAddress,
     sourceId: EvmAddress,
@@ -1089,7 +1054,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-    period: BigDecimal,
+    startDate: BigDecimal,
+    endDate: BigDecimal,
+    fixingDate: BigDecimal,
+    rateStatus: RateStatus,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(
@@ -1097,7 +1065,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
       rate : ${rate},
-      period: ${period}`,
+       startDate: ${startDate},
+      endDate: ${endDate},
+      fixingDate: ${fixingDate},
+      rateStatus: ${rateStatus}`,
     );
 
     const coupon = {
@@ -1105,7 +1076,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       executionDate: executionDate.toHexString(),
       rate: rate.toHexString(),
       rateDecimals: rate.decimals,
-      period: period.toHexString(),
+      startDate: startDate.toBigNumber(),
+      endDate: endDate.toBigNumber(),
+      fixingDate: fixingDate.toBigNumber(),
+      rateStatus: CastRateStatus.toNumber(rateStatus),
     };
     return this.executeWithArgs(
       new BondUSAFacet__factory().attach(security.toString()),
@@ -1501,6 +1475,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
     );
 
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeWithArgs(
       new ERC1410ManagementFacet__factory().attach(security.toString()),
       'protectedRedeemFromByPartition',
@@ -1510,9 +1490,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         partitionId,
         sourceId.toString(),
         amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
     );
   }
@@ -1531,6 +1509,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(
       `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
+
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeWithArgs(
       new ERC1410ManagementFacet__factory().attach(security.toString()),
       'protectedTransferFromByPartition',
@@ -1541,44 +1526,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         sourceId.toString(),
         targetId.toString(),
         amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
-      ],
-    );
-  }
-
-  async protectedTransferAndLock(
-    security: EvmAddress,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-    securityId: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
-    );
-    const transferAndLockData: TransferAndLock = {
-      from: sourceId.toString(),
-      to: targetId.toString(),
-      amount: amount.toBigNumber(),
-      data: '0x',
-      expirationTimestamp: expirationDate.toBigNumber(),
-    };
-    return this.executeWithArgs(
-      new TransferAndLockFacet__factory().attach(security.toString()),
-      'protectedTransferAndLock',
-      securityId,
-      GAS.PROTECTED_TRANSFER_AND_LOCK,
-      [
-        transferAndLockData,
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
     );
   }

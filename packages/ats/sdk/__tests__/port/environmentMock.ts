@@ -243,6 +243,7 @@ import {
   ClearingTransfer,
 } from "@domain/context/security/Clearing";
 import { HoldDetails } from "@domain/context/security/Hold";
+import { RateStatus } from "@domain/context/bond/RateStatus";
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -509,7 +510,16 @@ function createBondMockImplementation(
 
   for (let i = 0; i < numberOfCoupons; i++) {
     const timeStamp = couponInfo.firstCouponDate + couponInfo.couponFrequency * i;
-    const coupon = new Coupon(timeStamp, timeStamp, couponInfo.couponRate, couponInfo.couponRateDecimals, 0);
+    const coupon = new Coupon(
+      timeStamp,
+      timeStamp,
+      couponInfo.couponRate,
+      couponInfo.couponRateDecimals,
+      timeStamp,
+      timeStamp,
+      timeStamp,
+      RateStatus.PENDING,
+    );
     coupons.push(coupon);
   }
 
@@ -1128,7 +1138,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return securityInfo.arePartitionsProtected ?? false;
   });
 
-  singletonInstance.getNounceFor = jest.fn(async (address: EvmAddress, target: EvmAddress) => {
+  singletonInstance.getNonceFor = jest.fn(async (address: EvmAddress, target: EvmAddress) => {
     const account = "0x" + target.toString().toUpperCase().substring(2);
     return nonces.get(account) ?? new BigDecimal("0").toBigNumber();
   });
@@ -1601,13 +1611,25 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
   });
 
   singletonInstance.setCoupon = jest.fn(
-    async (address: EvmAddress, recordDate: BigDecimal, executionDate: BigDecimal, rate: BigDecimal) => {
+    async (
+      address: EvmAddress,
+      recordDate: BigDecimal,
+      executionDate: BigDecimal,
+      rate: BigDecimal,
+      startDate: BigDecimal,
+      endDate: BigDecimal,
+      fixingDate: BigDecimal,
+      rateStatus: RateStatus,
+    ) => {
       const coupon = new Coupon(
         parseInt(recordDate.toString()),
         parseInt(executionDate.toString()),
         rate,
         rate.decimals,
-        0,
+        parseInt(startDate.toString()),
+        parseInt(endDate.toString()),
+        parseInt(fixingDate.toString()),
+        rateStatus,
       );
       coupons.push(coupon);
       return {
@@ -1914,50 +1936,6 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
       nounce: BigDecimal,
       signature: string,
     ) => {
-      decreaseBalance(sourceId, amount);
-
-      return {
-        status: "success",
-        id: transactionId,
-      } as TransactionResponse;
-    },
-  );
-
-  singletonInstance.protectedTransferAndLockByPartition = jest.fn(
-    async (
-      security: EvmAddress,
-      partitionId: string,
-      amount: BigDecimal,
-      sourceId: EvmAddress,
-      targetId: EvmAddress,
-      expirationDate: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-    ) => {
-      const account = "0x" + targetId.toString().toUpperCase().substring(2);
-
-      const accountLocks = locks.get(account);
-      const lockIds = locksIds.get(account);
-      const lastLockId = lastLockIds.get(account) ?? 0;
-
-      const newLastLockId = lastLockId + 1;
-
-      if (!lockIds) locksIds.set(account, [newLastLockId]);
-      else {
-        lockIds.push(newLastLockId);
-        locksIds.set(account, lockIds);
-      }
-      if (!accountLocks) {
-        const newLock: lock = new Map();
-        newLock.set(newLastLockId, [expirationDate.toString(), amount.toString()]);
-        locks.set(account, newLock);
-      } else {
-        accountLocks.set(newLastLockId, [expirationDate.toString(), amount.toString()]);
-        locks.set(account, accountLocks);
-      }
-
-      increaseLockedBalance(targetId, amount);
       decreaseBalance(sourceId, amount);
 
       return {
@@ -2441,7 +2419,8 @@ jest.mock("@port/out/mirror/MirrorNodeAdapter", () => {
 
   MirrorNodeAdapterMock.getContractResults = jest.fn(
     async (transactionId: string, numberOfResultItems: number, timeout = 15, requestInterval = 2) => {
-      return ["123", "1"];
+      if (numberOfResultItems == 1) return ["1"];
+      else return ["123", "1"];
     },
   );
 

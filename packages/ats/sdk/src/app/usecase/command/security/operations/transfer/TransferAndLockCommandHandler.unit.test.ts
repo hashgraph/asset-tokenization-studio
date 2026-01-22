@@ -260,7 +260,7 @@ describe('TransferAndLockCommandHandler', () => {
     );
     const commandRaw = TransferAndLockCommandFixture.create();
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const { deadline, nounce, signature, ...commandFiltered } = commandRaw;
+    const { ...commandFiltered } = commandRaw;
     command = commandFiltered;
   });
 

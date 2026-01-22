@@ -2,20 +2,14 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 import { IERC20Votes } from "../../interfaces/ERC1400/IERC20Votes.sol";
-import { _CONTRACT_NAME_ERC20VOTES, _CONTRACT_VERSION_ERC20VOTES } from "../../constants/values.sol";
+import { CheckpointsLib } from "../../../layer_0/common/libraries/CheckpointsLib.sol";
 
-abstract contract ERC20Votes is IERC20Votes, Common {
+abstract contract ERC20Votes is IERC20Votes, Internals {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(
-        bool _activated
-    ) external override onlyUninitialized(_erc20VotesStorage().initialized) {
-        ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
-        _setActivate(_activated);
-        erc20VotesStorage.initialized = true;
-        erc20VotesStorage.contractName = _CONTRACT_NAME_ERC20VOTES;
-        erc20VotesStorage.contractVersion = _CONTRACT_VERSION_ERC20VOTES;
+    function initialize_ERC20Votes(bool _activated) external override onlyUninitialized(_isERC20VotesInitialized()) {
+        _initialize_ERC20Votes(_activated);
     }
 
     function delegate(address _delegatee) external override onlyUnpaused {
@@ -47,7 +41,10 @@ abstract contract ERC20Votes is IERC20Votes, Common {
         return _delegates(_account);
     }
 
-    function checkpoints(address _account, uint256 _pos) external view override returns (Checkpoint memory) {
+    function checkpoints(
+        address _account,
+        uint256 _pos
+    ) external view override returns (CheckpointsLib.Checkpoint memory) {
         return _checkpoints(_account, _pos);
     }
 

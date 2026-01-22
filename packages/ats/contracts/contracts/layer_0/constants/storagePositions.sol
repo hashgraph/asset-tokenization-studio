@@ -36,6 +36,9 @@ bytes32 constant _SCHEDULED_SNAPSHOTS_STORAGE_POSITION = 0xe5334ddaa6268d55c7efe
 // keccak256('security.token.standard.scheduledBalanceAdjustments.storage');
 bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION = 0xaf4aaa3de473ec9b58645d40f5a2fe4e176157e247b2d875db61f1a70935ac68;
 
+// keccak256('security.token.standard.scheduledCouponListing.storage');
+bytes32 constant _SCHEDULED_COUPON_LISTING_STORAGE_POSITION = 0x020cecc946ba57a1f8569220f46e5763939a3e864a1a4064efc2be63a845635a;
+
 // keccak256('security.token.standard.scheduledCrossOrderedTasks.storage');
 bytes32 constant _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION = 0x07c301a048b8fa80688acfab6d93f7e94a43ce454031a02cdd132b92ca943a70;
 
@@ -95,3 +98,9 @@ bytes32 constant _PROCEED_RECIPIENTS_STORAGE_POSITION = 0xd76ee368b4f6f14377350e
 
 // keccak256('security.token.standard.proceedRecipients.data.storage');
 bytes32 constant _PROCEED_RECIPIENTS_DATA_STORAGE_POSITION = 0xc7c4e0ff0ace36b5d2de5287c034dccef63aa2fb6c2498a31a48fd5516019f8c;
+
+// keccak256('security.token.standard.kpis.data.storage');
+bytes32 constant _KPIS_STORAGE_POSITION = 0x15e2583fed61d8b30b191451b67403569c6ee36d7d93206cb4a6de2f6f69c0b9;
+
+// keccak256('security.token.standard.nonce.storage');
+bytes32 constant _NONCE_STORAGE_POSITION = 0xfce5baa472f37a2de2808d549c4eb6787a5a27db638637a7ffa45da5f9f8c9f7;

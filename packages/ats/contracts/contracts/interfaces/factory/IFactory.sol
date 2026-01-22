@@ -12,6 +12,11 @@ import {
     RegulationType,
     RegulationSubType
 } from "../../layer_3/constants/regulation.sol";
+import { IFixedRate } from "../../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import {
+    ISustainabilityPerformanceTargetRate
+} from "../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 
 interface IFactory {
     enum SecurityType {
@@ -24,7 +29,6 @@ interface IFactory {
         uint256 version;
     }
 
-    // TODO: Separete common data in new struct
     struct SecurityData {
         bool arePartitionsProtected;
         bool isMultiPartition;
@@ -57,6 +61,28 @@ interface IFactory {
         bytes[] proceedRecipientsData;
     }
 
+    struct BondKpiLinkedRateData {
+        BondData bondData;
+        FactoryRegulationData factoryRegulationData;
+        IKpiLinkedRate.InterestRate interestRate;
+        IKpiLinkedRate.ImpactData impactData;
+        address kpiOracle;
+    }
+
+    struct BondSustainabilityPerformanceTargetRateData {
+        BondData bondData;
+        FactoryRegulationData factoryRegulationData;
+        ISustainabilityPerformanceTargetRate.InterestRate interestRate;
+        ISustainabilityPerformanceTargetRate.ImpactData[] impactData;
+        address[] projects;
+    }
+
+    struct BondFixedRateData {
+        BondData bondData;
+        FactoryRegulationData factoryRegulationData;
+        IFixedRate.FixedRateData fixedRateData;
+    }
+
     event EquityDeployed(
         address indexed deployer,
         address equityAddress,
@@ -69,6 +95,20 @@ interface IFactory {
         address bondAddress,
         BondData bondData,
         FactoryRegulationData regulationData
+    );
+
+    event BondFixedRateDeployed(address indexed deployer, address bondAddress, BondFixedRateData bondFixedRateData);
+
+    event BondKpiLinkedRateDeployed(
+        address indexed deployer,
+        address bondAddress,
+        BondKpiLinkedRateData bondKpiLinkedRateData
+    );
+
+    event BondSustainabilityPerformanceTargetRateDeployed(
+        address indexed deployer,
+        address bondAddress,
+        BondSustainabilityPerformanceTargetRateData bondSustainabilityPerformanceTargetRateData
     );
 
     error EmptyResolver(IBusinessLogicResolver resolver);
@@ -88,6 +128,16 @@ interface IFactory {
     function deployBond(
         BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address bondAddress_);
+
+    function deployBondFixedRate(BondFixedRateData calldata _bondFixedRateData) external returns (address bondAddress_);
+
+    function deployBondKpiLinkedRate(
+        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
+    ) external returns (address bondAddress_);
+
+    function deployBondSustainabilityPerformanceTargetRate(
+        BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
     ) external returns (address bondAddress_);
 
     function getAppliedRegulationData(

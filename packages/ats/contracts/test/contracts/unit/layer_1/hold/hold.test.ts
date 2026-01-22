@@ -1,28 +1,39 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
-import { EMPTY_STRING, ATS_ROLES, ZERO, EMPTY_HEX_BYTES, ADDRESS_ZERO, dateToUnixTimestamp } from "@scripts";
+import {
+  EMPTY_STRING,
+  ATS_ROLES,
+  ZERO,
+  EMPTY_HEX_BYTES,
+  ADDRESS_ZERO,
+  dateToUnixTimestamp,
+  DEFAULT_PARTITION,
+} from "@scripts";
 import {
   ResolverProxy,
-  IHold,
-  Pause,
+  PauseFacet,
   IERC1410,
-  ControlList,
-  ERC20,
+  ControlListFacet,
+  ERC20Facet,
   TimeTravelFacet,
-  Kyc,
-  SsiManagement,
+  KycFacet,
+  SsiManagementFacet,
   ClearingActionsFacet,
   Equity,
-  AccessControl,
-  Cap,
-  AdjustBalances,
-  Lock,
-  Snapshots,
+  LockFacet,
+  SnapshotsFacet,
+  IERC3643,
+  ERC1644Facet,
+  AccessControlFacet,
+  AdjustBalancesFacet,
+  CapFacet,
+  DiamondCutFacet,
 } from "@contract-types";
+import { Contract } from "ethers";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -58,21 +69,24 @@ describe("Hold Tests", () => {
   let signer_D: SignerWithAddress;
   let signer_E: SignerWithAddress;
 
-  let holdFacet: IHold;
-  let pauseFacet: Pause;
-  let lock: Lock;
+  let holdFacet: Contract;
+  let pauseFacet: PauseFacet;
+  let lock: LockFacet;
   let erc1410Facet: IERC1410;
-  let controlListFacet: ControlList;
-  let erc20Facet: ERC20;
+  let controlListFacet: ControlListFacet;
+  let erc20Facet: ERC20Facet;
   let timeTravelFacet: TimeTravelFacet;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
+  let kycFacet: KycFacet;
+  let ssiManagementFacet: SsiManagementFacet;
   let clearingActionsFacet: ClearingActionsFacet;
   let equityFacet: Equity;
-  let accessControlFacet: AccessControl;
-  let capFacet: Cap;
-  let adjustBalancesFacet: AdjustBalances;
-  let snapshotFacet: Snapshots;
+  let accessControlFacet: AccessControlFacet;
+  let capFacet: CapFacet;
+  let adjustBalancesFacet: AdjustBalancesFacet;
+  let snapshotFacet: SnapshotsFacet;
+  let erc3643Facet: IERC3643;
+  let erc1644Facet: ERC1644Facet;
+  let diamondCutFacet: DiamondCutFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -80,6 +94,13 @@ describe("Hold Tests", () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let hold: any;
+
+  const packedData = ethers.utils.defaultAbiCoder.encode(
+    ["bytes32", "bytes32"],
+    [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
+  );
+  const packedDataWithoutPrefix = packedData.slice(2);
+  const ProtectedPartitionRole_1 = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
 
   function set_initRbacs() {
     return [
@@ -115,26 +136,59 @@ describe("Hold Tests", () => {
         role: ATS_ROLES._CONTROLLER_ROLE,
         members: [signer_C.address],
       },
+      {
+        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        members: [signer_B.address],
+      },
+      {
+        role: ATS_ROLES._AGENT_ROLE,
+        members: [signer_A.address],
+      },
+      { role: ProtectedPartitionRole_1, members: [signer_B.address] },
     ];
   }
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    lock = await ethers.getContractAt("Lock", diamond.address, signer_A);
-    holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_D);
+    const holdManagementFacet = await ethers.getContractAt("HoldManagementFacet", diamond.address, signer_A);
+
+    const holdReadFacet = await ethers.getContractAt("HoldReadFacet", diamond.address, signer_A);
+    const holdTokenHolderFacet = await ethers.getContractAt("HoldTokenHolderFacet", diamond.address, signer_A);
+
+    const fragmentMap = new Map<string, any>();
+    [
+      ...holdManagementFacet.interface.fragments,
+      ...holdReadFacet.interface.fragments,
+      ...holdTokenHolderFacet.interface.fragments,
+    ].forEach((fragment) => {
+      const key = fragment.format();
+      if (!fragmentMap.has(key)) {
+        fragmentMap.set(key, fragment);
+      }
+    });
+
+    const uniqueFragments = Array.from(fragmentMap.values());
+
+    holdFacet = new Contract(diamond.address, uniqueFragments, signer_A);
+
+    lock = await ethers.getContractAt("LockFacet", diamond.address, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_D);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
     equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address, signer_A);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
+    snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
 
-    capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
-    erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_A);
-    controlListFacet = await ethers.getContractAt("ControlList", diamond.address, signer_E);
+    capFacet = await ethers.getContractAt("CapFacet", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_A);
+    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_E);
+    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address, signer_A);
+    erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address, signer_A);
+    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", diamond.address, signer_A);
+
     // Set the initial RBACs
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -452,6 +506,76 @@ describe("Hold Tests", () => {
     });
 
     describe("Create with wrong input arguments", () => {
+      it("Given a invalid _from address when createHoldFromByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        await erc20Facet.connect(signer_A).approve(signer_B.address, _AMOUNT);
+
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .createHoldFromByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, hold, EMPTY_HEX_BYTES),
+        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+      });
+
+      it("Given a invalid _from address when operatorCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        const hold_wrong = {
+          amount: _AMOUNT,
+          expirationTimestamp: expirationTimestamp,
+          escrow: ADDRESS_ZERO,
+          to: ADDRESS_ZERO,
+          data: _DATA,
+        };
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .operatorCreateHoldByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, hold_wrong, EMPTY_HEX_BYTES),
+        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+      });
+
+      it("Given token with partition protected WHEN operatorCreateHoldByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        const base = await deployEquityTokenFixture({
+          equityDataParams: {
+            securityData: {
+              isMultiPartition: false,
+              arePartitionsProtected: true,
+            },
+          },
+        });
+        await executeRbac(base.accessControlFacet, set_initRbacs());
+        diamond = base.diamond;
+        await setFacets({ diamond });
+        const operatorData = "0xab56";
+
+        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, operatorData),
+        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+      });
+
+      it("Given a invalid _from address when controllerCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        const hold_wrong = {
+          amount: _AMOUNT,
+          expirationTimestamp: expirationTimestamp,
+          escrow: ADDRESS_ZERO,
+          to: ADDRESS_ZERO,
+          data: _DATA,
+        };
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, hold_wrong, EMPTY_HEX_BYTES),
+        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+      });
+      it("Given noControllable token when controllerCreateHoldByPartition THEN transaction fails with TokenIsNotControllable", async () => {
+        await erc1644Facet.finalizeControllable();
+
+        await expect(
+          holdFacet
+            .connect(signer_C)
+            .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
+        ).to.be.revertedWithCustomError(erc1644Facet, "TokenIsNotControllable");
+      });
       it("GIVEN a Token WHEN creating hold with amount bigger than balance THEN transaction fails with InsufficientBalance", async () => {
         const AmountLargerThanBalance = 1000 * _AMOUNT;
 
@@ -493,6 +617,31 @@ describe("Hold Tests", () => {
             .connect(signer_C)
             .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(erc20Facet, "InsufficientBalance");
+      });
+
+      it("GIVEN msg.sender recovering WHEN createHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)).to.be.revertedWithCustomError(
+          erc3643Facet,
+          "WalletRecovered",
+        );
+      });
+
+      it("GIVEN hold.to recovering WHEN createHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+        const hold_with_destination = {
+          amount: _AMOUNT,
+          expirationTimestamp: expirationTimestamp,
+          escrow: signer_B.address,
+          to: signer_C.address,
+          data: _DATA,
+        };
+
+        await erc3643Facet.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(
+          holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold_with_destination),
+        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
       });
 
       it("GIVEN a Token WHEN createHoldByPartition passing empty escrow THEN transaction fails with ZeroAddressNotAllowed", async () => {
@@ -696,6 +845,14 @@ describe("Hold Tests", () => {
     });
 
     describe("Execute with wrong input arguments", () => {
+      it("GIVEN a wrong hold id WHEN executeHoldByPartition THEN transaction fails with WrongHoldId", async () => {
+        holdIdentifier.holdId = 999;
+
+        await expect(
+          holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, 1),
+        ).to.be.revertedWithCustomError(holdFacet, "WrongHoldId");
+      });
+
       it("GIVEN a wrong escrow id WHEN executeHoldByPartition THEN transaction fails with IsNotEscrow", async () => {
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
@@ -748,6 +905,14 @@ describe("Hold Tests", () => {
     });
 
     describe("Release with wrong input arguments", () => {
+      it("GIVEN a wrong hold id WHEN releaseHoldByPartition THEN transaction fails with WrongHoldId", async () => {
+        holdIdentifier.holdId = 999;
+
+        await expect(
+          holdFacet.connect(signer_B).releaseHoldByPartition(holdIdentifier, 1),
+        ).to.be.revertedWithCustomError(holdFacet, "WrongHoldId");
+      });
+
       it("GIVEN a wrong escrow WHEN releaseHoldByPartition THEN transaction fails with IsNotEscrow", async () => {
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
@@ -942,11 +1107,327 @@ describe("Hold Tests", () => {
 
       expect(await erc20Facet.allowance(signer_A.address, signer_B.address)).to.be.equal(_AMOUNT);
     });
+
+    describe("Protected Create Hold By Partition", () => {
+      let protectedHold: any;
+      let domain: any;
+
+      const holdType = {
+        Hold: [
+          { name: "amount", type: "uint256" },
+          { name: "expirationTimestamp", type: "uint256" },
+          { name: "escrow", type: "address" },
+          { name: "to", type: "address" },
+          { name: "data", type: "bytes" },
+        ],
+        ProtectedHold: [
+          { name: "hold", type: "Hold" },
+          { name: "deadline", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+        ],
+        protectedCreateHoldByPartition: [
+          { name: "_partition", type: "bytes32" },
+          { name: "_from", type: "address" },
+          { name: "_protectedHold", type: "ProtectedHold" },
+        ],
+      };
+
+      async function protectedEquityTokenFixture() {
+        const base = await deployEquityTokenFixture({
+          equityDataParams: {
+            securityData: {
+              arePartitionsProtected: true,
+            },
+          },
+        });
+        diamond = base.diamond;
+        signer_A = base.deployer;
+        signer_B = base.user1;
+        signer_C = base.user2;
+        signer_D = base.user3;
+        signer_E = base.user4;
+
+        await executeRbac(base.accessControlFacet, set_initRbacs());
+        await setFacets({ diamond });
+      }
+
+      beforeEach(async () => {
+        await loadFixture(protectedEquityTokenFixture);
+
+        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
+        const chainId = await network.provider.send("eth_chainId");
+
+        domain = {
+          name: name,
+          version: version,
+          chainId: chainId,
+          verifyingContract: diamond.address,
+        };
+
+        protectedHold = {
+          hold: { ...hold },
+          deadline: MAX_UINT256,
+          nonce: 1,
+        };
+      });
+
+      it("GIVEN a paused Token WHEN protectedCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+        await pauseFacet.pause();
+
+        const message = {
+          _partition: _DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _protectedHold: protectedHold,
+        };
+        const signature = await signer_A._signTypedData(domain, holdType, message);
+
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      });
+
+      it("GIVEN a token in clearing mode WHEN protectedCreateHoldByPartition THEN transaction fails with ClearingIsActivated", async () => {
+        await clearingActionsFacet.activateClearing();
+
+        const message = {
+          _partition: _DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _protectedHold: protectedHold,
+        };
+        const signature = await signer_A._signTypedData(domain, holdType, message);
+
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
+        ).to.be.revertedWithCustomError(holdFacet, "ClearingIsActivated");
+      });
+
+      it("GIVEN a zero _from address WHEN protectedCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, protectedHold, "0x1234"),
+        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+      });
+
+      it("GIVEN a zero escrow address WHEN protectedCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        protectedHold.hold.escrow = ADDRESS_ZERO;
+
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
+        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+      });
+
+      it("GIVEN a from user recovering WHEN protectedCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
+        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+      });
+
+      it("GIVEN a hold user recovering WHEN protectedCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+        await erc3643Facet.recoveryAddress(protectedHold.hold.to, signer_B.address, ADDRESS_ZERO);
+
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
+        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+      });
+
+      it("GIVEN a invalid timestamp WHEN protectedCreateHoldByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
+        protectedHold.hold.expirationTimestamp = 0;
+        const message = {
+          _partition: _DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _protectedHold: protectedHold,
+        };
+        // Sign the message hash
+        const signature = await signer_A._signTypedData(domain, holdType, message);
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
+        ).to.be.revertedWithCustomError(lock, "WrongExpirationTimestamp");
+      });
+
+      it("GIVEN an account without protected partition role WHEN protectedCreateHoldByPartition THEN transaction fails with AccountHasNoRole", async () => {
+        const message = {
+          _partition: _DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _protectedHold: protectedHold,
+        };
+        const signature = await signer_A._signTypedData(domain, holdType, message);
+
+        await expect(
+          holdFacet
+            .connect(signer_C)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+      });
+
+      it("GIVEN valid parameters and signature WHEN protectedCreateHoldByPartition THEN transaction succeeds", async () => {
+        const message = {
+          _partition: _DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _protectedHold: protectedHold,
+        };
+        // Sign the message hash
+        const signature = await signer_A._signTypedData(domain, holdType, message);
+        await expect(
+          holdFacet
+            .connect(signer_B)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
+        )
+          .to.emit(holdFacet, "ProtectedHeldByPartition")
+          .withArgs(
+            signer_B.address,
+            signer_A.address,
+            _DEFAULT_PARTITION,
+            1,
+            [
+              protectedHold.hold.amount,
+              protectedHold.hold.expirationTimestamp,
+              protectedHold.hold.escrow,
+              protectedHold.hold.to,
+              protectedHold.hold.data,
+            ],
+            "0x",
+          );
+
+        // Verify hold was created correctly
+        const heldAmount = await holdFacet.getHeldAmountForByPartition(_DEFAULT_PARTITION, signer_A.address);
+        expect(heldAmount).to.equal(protectedHold.hold.amount);
+
+        const holdCount = await holdFacet.getHoldCountForByPartition(_DEFAULT_PARTITION, signer_A.address);
+        expect(holdCount).to.equal(1);
+
+        const retrievedHold = await holdFacet.getHoldForByPartition(holdIdentifier);
+        expect(retrievedHold.amount_).to.equal(protectedHold.hold.amount);
+        expect(retrievedHold.escrow_).to.equal(protectedHold.hold.escrow);
+        expect(retrievedHold.destination_).to.equal(protectedHold.hold.to);
+        expect(retrievedHold.expirationTimestamp_).to.equal(protectedHold.hold.expirationTimestamp);
+        expect(retrievedHold.thirdPartyType_).to.equal(ThirdPartyType.PROTECTED);
+
+        const holdThirdParty = await holdFacet.getHoldThirdParty(holdIdentifier);
+        expect(holdThirdParty).to.equal(ADDRESS_ZERO);
+      });
+
+      it("GIVEN a hold with specific destination WHEN protectedCreateHoldByPartition THEN hold is created with correct destination", async () => {
+        protectedHold.hold.to = signer_C.address;
+
+        const message = {
+          _partition: _DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _protectedHold: protectedHold,
+        };
+        const signature = await signer_A._signTypedData(domain, holdType, message);
+
+        await holdFacet
+          .connect(signer_B)
+          .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature);
+
+        const retrievedHold = await holdFacet.getHoldForByPartition(holdIdentifier);
+        expect(retrievedHold.destination_).to.equal(signer_C.address);
+      });
+
+      it("GIVEN token without partitionsProtected WHEN protectedCreateHoldByPartition THEN revert with PartitionsAreUnProtected ", async () => {
+        const base = await deployEquityTokenFixture({
+          equityDataParams: {
+            securityData: {
+              arePartitionsProtected: false,
+            },
+          },
+        });
+
+        await executeRbac(base.accessControlFacet, set_initRbacs());
+        const message = {
+          _partition: _DEFAULT_PARTITION,
+          _from: signer_A.address,
+          _protectedHold: protectedHold,
+        };
+        // Sign the message hash
+        const signature = await signer_A._signTypedData(domain, holdType, message);
+        await expect(
+          holdFacet
+            .attach(base.diamond.address)
+            .connect(signer_B)
+            .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
+        ).to.rejectedWith("PartitionsAreUnProtected");
+      });
+    });
   });
 
   describe("Multi-partition", () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureMultiPartition);
+    });
+
+    it("Given token with partition protected WHEN createHoldByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: true,
+            arePartitionsProtected: true,
+          },
+        },
+      });
+      await executeRbac(base.accessControlFacet, set_initRbacs());
+      diamond = base.diamond;
+      await setFacets({ diamond });
+
+      currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+
+      hold = {
+        amount: _AMOUNT,
+        expirationTimestamp: currentTimestamp + ONE_YEAR_IN_SECONDS,
+        escrow: signer_B.address,
+        to: ADDRESS_ZERO,
+        data: _DATA,
+      };
+
+      await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)).to.be.rejectedWith(
+        "PartitionsAreProtectedAndNoRole",
+      );
+    });
+
+    it("Given token with partition protected WHEN createHoldFromByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: true,
+            arePartitionsProtected: true,
+          },
+        },
+      });
+      await executeRbac(base.accessControlFacet, set_initRbacs());
+      diamond = base.diamond;
+      await setFacets({ diamond });
+
+      currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+
+      hold = {
+        amount: _AMOUNT,
+        expirationTimestamp: currentTimestamp + ONE_YEAR_IN_SECONDS,
+        escrow: signer_B.address,
+        to: ADDRESS_ZERO,
+        data: _DATA,
+      };
+
+      await expect(
+        holdFacet
+          .connect(signer_B)
+          .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
+      ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
     });
 
     it("GIVEN a Token WHEN createHoldByPartition for wrong partition THEN transaction fails with InvalidPartition", async () => {
