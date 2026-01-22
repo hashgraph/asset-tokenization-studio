@@ -27,6 +27,7 @@ abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper
         _;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data

@@ -24,8 +24,11 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
     struct ProtectedPartitionsDataStorage {
         bool initialized;
         bool arePartitionsProtected;
+        // solhint-disable-next-line var-name-mixedcase
         string DEPRECATED_contractName;
+        // solhint-disable-next-line var-name-mixedcase
         string DEPRECATED_contractVersion;
+        // solhint-disable-next-line var-name-mixedcase
         mapping(address => uint256) DEPRECATED_nounces;
     }
 
@@ -40,6 +43,7 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         _;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ProtectedPartitions(bool _protectPartitions) internal override returns (bool success_) {
         ProtectedPartitionsDataStorage storage protectedPartitionsStorage = _protectedPartitionsStorage();
         protectedPartitionsStorage.arePartitionsProtected = _protectPartitions;

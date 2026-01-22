@@ -11,6 +11,7 @@ abstract contract ExternalPauseManagementStorageWrapper is ControlListStorageWra
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ExternalPauses(address[] calldata _pauses) internal override {
         uint256 length = _pauses.length;
         for (uint256 index; index < length; ) {

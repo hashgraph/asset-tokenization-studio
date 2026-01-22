@@ -26,6 +26,7 @@ abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinked
         _;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_SustainabilityPerformanceTargetRate(
         ISustainabilityPerformanceTargetRate.InterestRate calldata _interestRate,
         ISustainabilityPerformanceTargetRate.ImpactData[] calldata _impactData,

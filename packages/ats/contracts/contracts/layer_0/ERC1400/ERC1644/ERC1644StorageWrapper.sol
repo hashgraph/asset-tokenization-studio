@@ -16,6 +16,7 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         _;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1644(bool _controllable) internal override {
         _erc1644Storage().isControllable = _controllable;
         _erc1644Storage().initialized = true;
