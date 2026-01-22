@@ -138,9 +138,8 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
 
         IBondRead.Coupon memory previousCoupon = _getCoupon(previousCouponId).coupon;
 
-        if (previousCoupon.rateStatus != IBondRead.RateCalculationStatus.SET) {
-            return _calculateKpiLinkedInterestRate(previousCouponId, previousCoupon);
-        }
+        assert(previousCoupon.rateStatus == IBondRead.RateCalculationStatus.SET);
+
         return (previousCoupon.rate, previousCoupon.rateDecimals);
     }
 }

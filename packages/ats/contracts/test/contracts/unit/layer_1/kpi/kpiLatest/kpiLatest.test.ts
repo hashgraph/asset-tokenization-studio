@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { KpisFacetBase, PauseFacet, ProceedRecipientsFacet, type ResolverProxy } from "@contract-types";
-import { ATS_ROLES } from "@scripts";
+import { ATS_ROLES, dateToUnixTimestamp } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondSustainabilityPerformanceTargetRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -62,64 +62,6 @@ describe("Kpi Latest Tests", () => {
   });
 
   describe("addKpiData", () => {
-    it("GIVEN a valid date, value and project WHEN addKpiData is called THEN KPI data is added successfully", async () => {
-      const date = 1000;
-      const value = 750;
-
-      await expect(kpiFacet.connect(signer_A).addKpiData(date, value, project1))
-        .to.emit(kpiFacet, "KpiDataAdded")
-        .withArgs(project1, date, value);
-
-      const isCheckpoint = await kpiFacet.isCheckPointDate(date, project1);
-      expect(isCheckpoint).to.be.true;
-    });
-
-    it("GIVEN multiple KPI data entries WHEN addKpiData is called in order THEN all entries are stored correctly", async () => {
-      const date1 = 1000;
-      const value1 = 750;
-      const date2 = 2000;
-      const value2 = 850;
-      const date3 = 3000;
-      const value3 = 950;
-
-      await kpiFacet.connect(signer_A).addKpiData(date1, value1, project1);
-      await kpiFacet.connect(signer_A).addKpiData(date2, value2, project1);
-      await kpiFacet.connect(signer_A).addKpiData(date3, value3, project1);
-
-      expect(await kpiFacet.isCheckPointDate(date1, project1)).to.be.true;
-      expect(await kpiFacet.isCheckPointDate(date2, project1)).to.be.true;
-      expect(await kpiFacet.isCheckPointDate(date3, project1)).to.be.true;
-    });
-
-    it("GIVEN KPI data entries WHEN addKpiData is called out of order THEN entries are stored correctly", async () => {
-      const date1 = 1000;
-      const value1 = 750;
-      const date2 = 3000;
-      const value2 = 950;
-      const date3 = 2000;
-      const value3 = 850;
-
-      await kpiFacet.connect(signer_A).addKpiData(date1, value1, project1);
-      await kpiFacet.connect(signer_A).addKpiData(date2, value2, project1);
-      await kpiFacet.connect(signer_A).addKpiData(date3, value3, project1);
-
-      expect(await kpiFacet.isCheckPointDate(date1, project1)).to.be.true;
-      expect(await kpiFacet.isCheckPointDate(date2, project1)).to.be.true;
-      expect(await kpiFacet.isCheckPointDate(date3, project1)).to.be.true;
-    });
-
-    it("GIVEN different projects WHEN addKpiData is called THEN data is stored separately", async () => {
-      const date = 1000;
-      const value1 = 750;
-      const value2 = 850;
-
-      await kpiFacet.connect(signer_A).addKpiData(date, value1, project1);
-      await kpiFacet.connect(signer_A).addKpiData(date, value2, project2);
-
-      expect(await kpiFacet.isCheckPointDate(date, project1)).to.be.true;
-      expect(await kpiFacet.isCheckPointDate(date, project2)).to.be.true;
-    });
-
     it("GIVEN a user without KPI_MANAGER_ROLE WHEN addKpiData is called THEN transaction fails", async () => {
       const date = 1000;
       const value = 750;
@@ -155,6 +97,74 @@ describe("Kpi Latest Tests", () => {
         kpiFacet,
         "InvalidDate",
       );
+    });
+
+    it("GIVEN a date after current block timestamp WHEN addKpiData is called THEN transaction fails", async () => {
+      const invalidDate = dateToUnixTimestamp(`2999-01-01T00:01:00Z`);
+      const value = 750;
+
+      await expect(kpiFacet.connect(signer_A).addKpiData(invalidDate, value, project1)).to.be.revertedWithCustomError(
+        kpiFacet,
+        "InvalidDate",
+      );
+    });
+
+    it("GIVEN a valid date, value and project WHEN addKpiData is called THEN KPI data is added successfully", async () => {
+      const date = 1000;
+      const value = 750;
+
+      await expect(kpiFacet.connect(signer_A).addKpiData(date, value, project1))
+        .to.emit(kpiFacet, "KpiDataAdded")
+        .withArgs(project1, date, value);
+
+      const isCheckpoint = await kpiFacet.isCheckPointDate(date, project1);
+      expect(isCheckpoint).to.be.true;
+    });
+
+    it("GIVEN multiple KPI data entries WHEN addKpiData is called in order THEN all entries are stored correctly", async () => {
+      const date1 = 1000;
+      const value1 = 750;
+      const date2 = 2000;
+      const value2 = 850;
+
+      await kpiFacet.connect(signer_A).addKpiData(date1, value1, project1);
+      await kpiFacet.connect(signer_A).addKpiData(date2, value2, project1);
+
+      expect(await kpiFacet.isCheckPointDate(date1, project1)).to.be.true;
+      expect(await kpiFacet.isCheckPointDate(date2, project1)).to.be.true;
+    });
+
+    it("GIVEN KPI data entries WHEN addKpiData is called out of order THEN entries are stored correctly", async () => {
+      const date1 = 1000;
+      const value1 = 750;
+      const date2 = 3000;
+      const value2 = 950;
+      const date3 = 2000;
+      const value3 = 850;
+      const date4 = 500;
+      const value4 = 650;
+
+      await kpiFacet.connect(signer_A).addKpiData(date1, value1, project1);
+      await kpiFacet.connect(signer_A).addKpiData(date2, value2, project1);
+      await kpiFacet.connect(signer_A).addKpiData(date3, value3, project1);
+      await kpiFacet.connect(signer_A).addKpiData(date4, value4, project1);
+
+      expect(await kpiFacet.isCheckPointDate(date1, project1)).to.be.true;
+      expect(await kpiFacet.isCheckPointDate(date2, project1)).to.be.true;
+      expect(await kpiFacet.isCheckPointDate(date3, project1)).to.be.true;
+      expect(await kpiFacet.isCheckPointDate(date4, project1)).to.be.true;
+    });
+
+    it("GIVEN different projects WHEN addKpiData is called THEN data is stored separately", async () => {
+      const date = 1000;
+      const value1 = 750;
+      const value2 = 850;
+
+      await kpiFacet.connect(signer_A).addKpiData(date, value1, project1);
+      await kpiFacet.connect(signer_A).addKpiData(date, value2, project2);
+
+      expect(await kpiFacet.isCheckPointDate(date, project1)).to.be.true;
+      expect(await kpiFacet.isCheckPointDate(date, project2)).to.be.true;
     });
   });
 

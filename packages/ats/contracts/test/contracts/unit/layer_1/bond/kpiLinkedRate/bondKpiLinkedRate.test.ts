@@ -10,6 +10,7 @@ import {
   ERC1594KpiLinkedRateFacetTimeTravel,
   ProceedRecipientsKpiLinkedRateFacetTimeTravel,
   KpisKpiLinkedRateFacetTimeTravel,
+  ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S, ADDRESS_ZERO } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -57,6 +58,7 @@ describe("Bond KpiLinked Rate Tests", () => {
   let erc1594Facet: ERC1594KpiLinkedRateFacetTimeTravel;
   let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
   let kpisFacet: KpisKpiLinkedRateFacetTimeTravel;
+  let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel;
 
   let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
@@ -115,6 +117,11 @@ describe("Bond KpiLinked Rate Tests", () => {
       signer_A,
     );
     kpisFacet = await ethers.getContractAt("KpisKpiLinkedRateFacetTimeTravel", diamond.address, signer_A);
+    scheduledTasksFacet = await ethers.getContractAt(
+      "ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel",
+      diamond.address,
+      signer_A,
+    );
 
     await erc1594Facet.issue(signer_A.address, amount, "0x");
     await proceedRecipientsFacet.addProceedRecipient(signer_B.address, "0x");
@@ -295,7 +302,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       await checkCouponPostValues(newInterestRate.startRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
     });
 
-    it("GIVEN a kpiLinked rate bond WHEN no oracle report is found THEN transaction success and rate is previous rate plus penalty", async () => {
+    it("GIVEN a kpiLinked rate bond WHEN no report is found THEN transaction success and rate is previous rate plus penalty", async () => {
       await setKpiConfiguration(-10);
 
       // Test missed penalty when there is a single coupon
@@ -383,6 +390,19 @@ describe("Bond KpiLinked Rate Tests", () => {
       await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 4, signer_A.address);
     });
 
+    it("GIVEN a kpiLinked rate bond WHEN no report is found but missing penalty is too high THEN transaction success and rate is max rate", async () => {
+      await setKpiConfiguration(-10);
+      newInterestRate.missedPenalty = newInterestRate.maxRate + 100;
+      await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
+
+      // Test missed penalty when there is a single coupon
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+
+      await checkCouponPostValues(newInterestRate.maxRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
+    });
+
     it("GIVEN a kpiLinked rate bond WHEN impact data is above baseline THEN transaction success and rate is calculated", async () => {
       await setKpiConfiguration(-10);
 
@@ -458,6 +478,25 @@ describe("Bond KpiLinked Rate Tests", () => {
       const rate_2 = newInterestRate.minRate;
 
       await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 2, signer_A.address);
+    });
+
+    it("GIVEN a kpiLinked rate bond WHEN setting two coupons where the second one has a lower fixing date THEN min Date remains unchanged", async () => {
+      await setKpiConfiguration(-10);
+
+      let originalFixingDate = couponData.fixingDate;
+
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+
+      couponData.fixingDate = (parseInt(couponData.fixingDate) - 1).toString();
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+
+      await checkMinDates(originalFixingDate);
+
+      await scheduledTasksFacet.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
+
+      await checkMinDates(originalFixingDate);
     });
   });
 
