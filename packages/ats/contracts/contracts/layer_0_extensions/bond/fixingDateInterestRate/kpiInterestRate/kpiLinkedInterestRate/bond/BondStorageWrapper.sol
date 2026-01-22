@@ -66,21 +66,26 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
             return (kpiLinkedRateStorage.startRate, kpiLinkedRateStorage.rateDecimals);
         }
 
-        if (kpiLinkedRateStorage.kpiOracle == address(0)) {
-            return (kpiLinkedRateStorage.baseRate, kpiLinkedRateStorage.rateDecimals);
-        }
+        address[] memory projects = _getProceedRecipients(0, _getProceedRecipientsCount());
+        uint256 impactData = 0;
+        bool reportFound = false;
 
-        (uint256 impactData, bool reportFound) = abi.decode(
-            kpiLinkedRateStorage.kpiOracle.functionStaticCall(
-                abi.encodeWithSelector(
-                    IKpi.getKpiData.selector,
-                    _coupon.fixingDate - kpiLinkedRateStorage.reportPeriod,
-                    _coupon.fixingDate
-                ),
-                IKpiLinkedRate.KpiOracleCalledFailed.selector
-            ),
-            (uint256, bool)
-        );
+        for (uint256 index = 0; index < projects.length; ) {
+            (uint256 value, bool exists) = _getLatestKpiData(
+                _coupon.fixingDate - kpiLinkedRateStorage.reportPeriod,
+                _coupon.fixingDate,
+                projects[index]
+            );
+
+            if (exists) {
+                impactData += value;
+                if (!reportFound) reportFound = true;
+            }
+
+            unchecked {
+                ++index;
+            }
+        }
 
         uint256 rate;
 

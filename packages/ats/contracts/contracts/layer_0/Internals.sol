@@ -634,7 +634,6 @@ abstract contract Internals is Modifiers {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory members_);
-    function _getKpiOracle() internal view virtual returns (address kpiOracle_);
     function _getKycAccountsCount(IKyc.KycStatus _kycStatus) internal view virtual returns (uint256 kycAccountsCount_);
     function _getKycAccountsData(
         IKyc.KycStatus _kycStatus,
@@ -1179,7 +1178,6 @@ abstract contract Internals is Modifiers {
     function _setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal virtual;
     function _setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal virtual;
     function _setInternalKyc(bool _activated) internal virtual returns (bool success_);
-    function _setKpiOracle(address _kpiOracle) internal virtual;
     function _setLockLabafById(
         bytes32 _partition,
         address _tokenHolder,

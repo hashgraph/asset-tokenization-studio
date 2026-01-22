@@ -5,10 +5,10 @@ import { KpisFacetBase } from "../KpisFacetBase.sol";
 import {
     CommonKpiLinkedInterestRate
 } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
-import { _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { _KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract KpisKpiLinkedRateFacet is KpisFacetBase, CommonKpiLinkedInterestRate {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
-        staticResolverKey_ = _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY;
+        staticResolverKey_ = _KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY;
     }
 }

@@ -89,7 +89,7 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
 
         uint256 lastFixingDate = _getCoupon(_couponID).coupon.fixingDate;
 
-        if (lastFixingDate > _kpisDataStorage().minDate) _kpisDataStorage().minDate = lastFixingDate;
+        if (lastFixingDate > _kpisDataStorage().minDate) _setMinDate(lastFixingDate);
     }
 
     function _getLatestKpiData(
