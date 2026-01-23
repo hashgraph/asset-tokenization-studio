@@ -140,7 +140,11 @@ export function extractContractNames(source: string): string[] {
   // to avoid ReDoS vulnerability with regex on uncontrolled input
   cleanSource = removeMultiLineComments(cleanSource);
 
-  const contractRegex = /(?:abstract\s+)?(?:contract|interface|library)\s+(\w+)/g;
+  // Normalize whitespace to prevent ReDoS from nested quantifiers like (?:abstract\s+)?\s+
+  cleanSource = cleanSource.replace(/[ \t]+/g, " ");
+
+  // After normalization, use simpler single-space pattern
+  const contractRegex = /(?:abstract )?(?:contract|interface|library) (\w+)/g;
   const matches: string[] = [];
 
   let match;
@@ -183,17 +187,25 @@ export interface RoleDefinition {
  * ```
  */
 export function extractRoles(source: string): RoleDefinition[] {
-  // Match: bytes32 [public] constant [_]ROLE_NAME = value;
-  // Underscore prefix is optional (legacy ATS uses it incorrectly)
-  const roleRegex = /bytes32\s+(?:public\s+)?constant\s+(_?\w+_ROLE)\s*=\s*([^;]+);/g;
+  // Process line by line to avoid ReDoS vulnerability with nested \s+ patterns
   const roles: RoleDefinition[] = [];
+  const lines = source.split("\n");
 
-  let match;
-  while ((match = roleRegex.exec(source)) !== null) {
-    const name = match[1];
-    const value = match[2].trim();
+  for (const line of lines) {
+    // Quick check to avoid regex on irrelevant lines
+    if (!line.includes("_ROLE") || !line.includes("bytes32") || !line.includes("constant")) {
+      continue;
+    }
 
-    roles.push({ name, value });
+    // Normalize whitespace within the line to prevent ReDoS from nested quantifiers
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+
+    // Match: bytes32 [public] constant [_]ROLE_NAME = value;
+    // Underscore prefix is optional (legacy ATS uses it incorrectly)
+    const match = normalizedLine.match(/bytes32 (?:public )?constant (_?\w+_ROLE) *= *([^;]+);/);
+    if (match) {
+      roles.push({ name: match[1], value: match[2].trim() });
+    }
   }
 
   return roles;
@@ -231,17 +243,25 @@ export interface ResolverKeyDefinition {
  * ```
  */
 export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
-  // Match: bytes32 [public] constant [_]RESOLVER_KEY_NAME = value;
-  // Underscore prefix is optional (legacy ATS uses it incorrectly)
-  const keyRegex = /bytes32\s+(?:public\s+)?constant\s+(_?\w+_RESOLVER_KEY)\s*=\s*([^;]+);/g;
+  // Process line by line to avoid ReDoS vulnerability with nested \s+ patterns
   const keys: ResolverKeyDefinition[] = [];
+  const lines = source.split("\n");
 
-  let match;
-  while ((match = keyRegex.exec(source)) !== null) {
-    const name = match[1];
-    const value = match[2].trim();
+  for (const line of lines) {
+    // Quick check to avoid regex on irrelevant lines
+    if (!line.includes("_RESOLVER_KEY") || !line.includes("bytes32") || !line.includes("constant")) {
+      continue;
+    }
 
-    keys.push({ name, value });
+    // Normalize whitespace within the line to prevent ReDoS from nested quantifiers
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+
+    // Match: bytes32 [public] constant [_]RESOLVER_KEY_NAME = value;
+    // Underscore prefix is optional (legacy ATS uses it incorrectly)
+    const match = normalizedLine.match(/bytes32 (?:public )?constant (_?\w+_RESOLVER_KEY) *= *([^;]+);/);
+    if (match) {
+      keys.push({ name: match[1], value: match[2].trim() });
+    }
   }
 
   return keys;
@@ -271,16 +291,30 @@ export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
  * ```
  */
 export function extractNatspecDescription(source: string, contractName: string): string | undefined {
-  // Find contract declaration with optional abstract/interface keywords
-  const contractDecl = new RegExp(`(?:abstract\\s+)?(?:contract|interface|library)\\s+${contractName}\\b`, "g");
+  // Search line by line to find the contract declaration
+  // This avoids ReDoS from nested quantifiers like (?:abstract\s+)?\s+
+  const lines = source.split("\n");
+  let charIndex = 0;
+  let foundIndex = -1;
 
-  const contractMatch = contractDecl.exec(source);
-  if (!contractMatch) {
+  for (const line of lines) {
+    // Normalize whitespace in this line only to prevent ReDoS
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+    // Check if this line contains the contract declaration
+    const contractRegex = new RegExp(`(?:abstract )?(?:contract|interface|library) ${contractName}\\b`);
+    if (contractRegex.test(normalizedLine)) {
+      foundIndex = charIndex;
+      break;
+    }
+    charIndex += line.length + 1; // +1 for newline
+  }
+
+  if (foundIndex === -1) {
     return undefined;
   }
 
   // Extract everything before the contract declaration
-  const beforeContract = source.substring(0, contractMatch.index);
+  const beforeContract = source.substring(0, foundIndex);
 
   // Find all natspec comment blocks (/** ... */) before the contract using safe iterative parsing
   // to avoid ReDoS vulnerability with regex on uncontrolled input
@@ -335,15 +369,26 @@ export function extractNatspecDescription(source: string, contractName: string):
  * ```
  */
 export function extractFacetResolverKeyImport(source: string): string | undefined {
-  // First try: Match import statement
-  const importRegex = /import\s+\{([^}]*_RESOLVER_KEY[^}]*)\}\s+from\s+["'][^"']+["']/g;
+  // Process line by line to avoid potential ReDoS with \s+ patterns
+  const lines = source.split("\n");
 
-  const match = importRegex.exec(source);
-  if (match) {
-    // Extract just the key name (might have whitespace or other imports)
-    const importedNames = match[1].split(",").map((s) => s.trim());
-    const keyName = importedNames.find((name) => name.endsWith("_RESOLVER_KEY"));
-    if (keyName) return keyName;
+  for (const line of lines) {
+    // Quick check to avoid regex on irrelevant lines
+    if (!line.includes("import") || !line.includes("_RESOLVER_KEY")) {
+      continue;
+    }
+
+    // Normalize whitespace to prevent ReDoS
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+    const importRegex = /import \{([^}]*_RESOLVER_KEY[^}]*)\} from ["'][^"']+["']/;
+    const match = normalizedLine.match(importRegex);
+
+    if (match) {
+      // Extract just the key name (might have whitespace or other imports)
+      const importedNames = match[1].split(",").map((s) => s.trim());
+      const keyName = importedNames.find((name) => name.endsWith("_RESOLVER_KEY"));
+      if (keyName) return keyName;
+    }
   }
 
   // Second try: Check for inline constant definition (e.g., TimeTravelFacet)
@@ -364,12 +409,24 @@ export function extractFacetResolverKeyImport(source: string): string | undefine
  * @returns Array of import paths
  */
 export function extractImports(source: string): string[] {
-  const importRegex = /import\s+["']([^"']+)["']/g;
+  // Process line by line for consistency with other extraction functions
   const imports: string[] = [];
+  const lines = source.split("\n");
 
-  let match;
-  while ((match = importRegex.exec(source)) !== null) {
-    imports.push(match[1]);
+  for (const line of lines) {
+    // Quick check to avoid regex on irrelevant lines
+    if (!line.includes("import")) {
+      continue;
+    }
+
+    // Normalize whitespace to prevent potential ReDoS
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+    const importRegex = /import ["']([^"']+)["']/g;
+
+    let match;
+    while ((match = importRegex.exec(normalizedLine)) !== null) {
+      imports.push(match[1]);
+    }
   }
 
   return imports;
@@ -415,9 +472,25 @@ export function getBaseName(contractName: string): string {
  * @returns Solidity version or null
  */
 export function extractSolidityVersion(source: string): string | null {
-  const pragmaRegex = /pragma\s+solidity\s+([^;]+);/;
-  const match = source.match(pragmaRegex);
-  return match ? match[1].trim() : null;
+  // Process line by line to avoid potential ReDoS with \s+ patterns
+  const lines = source.split("\n");
+
+  for (const line of lines) {
+    // Quick check to avoid regex on irrelevant lines
+    if (!line.includes("pragma") || !line.includes("solidity")) {
+      continue;
+    }
+
+    // Normalize whitespace to prevent ReDoS
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+    const pragmaRegex = /pragma solidity ([^;]+);/;
+    const match = normalizedLine.match(pragmaRegex);
+    if (match) {
+      return match[1].trim();
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -428,8 +501,24 @@ export function extractSolidityVersion(source: string): string | null {
  * @returns true if contract implements interface
  */
 export function implementsInterface(source: string, interfaceName: string): boolean {
-  const implementsRegex = new RegExp(`contract\\s+\\w+\\s+is\\s+[^{]*\\b${interfaceName}\\b`);
-  return implementsRegex.test(source);
+  // Process line by line to avoid potential ReDoS with \s+ patterns
+  const lines = source.split("\n");
+
+  for (const line of lines) {
+    // Quick check to avoid regex on irrelevant lines
+    if (!line.includes("contract") || !line.includes("is")) {
+      continue;
+    }
+
+    // Normalize whitespace to prevent ReDoS
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+    const implementsRegex = new RegExp(`contract \\w+ is [^{]*\\b${interfaceName}\\b`);
+    if (implementsRegex.test(normalizedLine)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -442,18 +531,30 @@ export function implementsInterface(source: string, interfaceName: string): bool
  * @returns Array of parent contract names
  */
 export function extractInheritance(source: string, contractName: string): string[] {
-  const regex = new RegExp(`contract\\s+${contractName}\\s+is\\s+([^{]+)`);
-  const match = source.match(regex);
+  // Process line by line to avoid potential ReDoS with \s+ patterns
+  const lines = source.split("\n");
 
-  if (!match) {
-    return [];
+  for (const line of lines) {
+    // Quick check to avoid regex on irrelevant lines
+    if (!line.includes("contract") || !line.includes(contractName) || !line.includes("is")) {
+      continue;
+    }
+
+    // Normalize whitespace to prevent ReDoS
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+    const regex = new RegExp(`contract ${contractName} is ([^{]+)`);
+    const match = normalizedLine.match(regex);
+
+    if (match) {
+      // Split by comma and clean up whitespace
+      return match[1]
+        .split(",")
+        .map((name) => name.trim())
+        .filter((name) => name.length > 0);
+    }
   }
 
-  // Split by comma and clean up whitespace
-  return match[1]
-    .split(",")
-    .map((name) => name.trim())
-    .filter((name) => name.length > 0);
+  return [];
 }
 
 /**
@@ -472,16 +573,32 @@ export function extractInheritance(source: string, contractName: string): string
  * ```
  */
 export function extractPublicMethods(source: string): MethodDefinition[] {
-  // Match: function name(...) external|public [view|pure|payable] [...]
-  // Exclude: constructor, receive, fallback
-  const functionRegex =
-    /function\s+(\w+)\s*\([^)]*\)\s+(?:external|public)(?:\s+(?:view|pure|payable|virtual|override|returns))*[^{;]*/g;
-
+  // Process line by line to avoid potential ReDoS with nested quantifiers
   const methods: MethodDefinition[] = [];
   const seen = new Set<string>();
+  const lines = source.split("\n");
 
-  let match;
-  while ((match = functionRegex.exec(source)) !== null) {
+  for (const line of lines) {
+    // Quick check to avoid regex on irrelevant lines
+    if (!line.includes("function")) {
+      continue;
+    }
+    if (!line.includes("external") && !line.includes("public")) {
+      continue;
+    }
+
+    // Normalize whitespace to prevent ReDoS
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+
+    // Simple pattern to extract function name from public/external functions
+    // Match: function name(...) external|public
+    const functionRegex = /function (\w+) *\([^)]*\) (?:external|public)/;
+    const match = normalizedLine.match(functionRegex);
+
+    if (!match) {
+      continue;
+    }
+
     const methodName = match[1];
 
     // Exclude special functions
@@ -533,15 +650,28 @@ export function extractPublicMethods(source: string): MethodDefinition[] {
  * ```
  */
 export function extractAllMethods(source: string): MethodDefinition[] {
-  // Match: function name(...) [visibility] [modifiers] [...]
-  // Exclude: constructor, receive, fallback
-  const functionRegex = /function\s+(\w+)\s*\([^)]*\)/g;
-
+  // Process line by line for consistency and to prevent potential ReDoS
   const methods: MethodDefinition[] = [];
   const seen = new Set<string>();
+  const lines = source.split("\n");
 
-  let match;
-  while ((match = functionRegex.exec(source)) !== null) {
+  for (const line of lines) {
+    // Quick check to avoid regex on irrelevant lines
+    if (!line.includes("function")) {
+      continue;
+    }
+
+    // Normalize whitespace to prevent potential ReDoS
+    const normalizedLine = line.replace(/[ \t]+/g, " ");
+
+    // Match: function name(...)
+    const functionRegex = /function (\w+) *\([^)]*\)/;
+    const match = normalizedLine.match(functionRegex);
+
+    if (!match) {
+      continue;
+    }
+
     const methodName = match[1];
 
     // Exclude special functions
