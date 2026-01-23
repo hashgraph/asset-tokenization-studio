@@ -1,26 +1,20 @@
-import { HStack, Stack, VStack } from '@chakra-ui/react';
-import {
-  Button,
-  DefinitionList,
-  Heading,
-  InputController,
-  Text,
-} from 'io-bricks-ui';
-import { useForm } from 'react-hook-form';
-import { useUpdateSecurityConfigVersion } from '../../../../hooks/mutations/useUpdateSecurityConfigVersion';
-import { useUpdateSecurityConfigId } from '../../../../hooks/mutations/useUpdateSecurityConfigId';
-import { useUpdateSecurityResolverAddress } from '../../../../hooks/mutations/useUpdateSecurityResolverAddress';
+import { HStack, Stack, VStack } from "@chakra-ui/react";
+import { Button, DefinitionList, Heading, InputController, Text } from "io-bricks-ui";
+import { useForm } from "react-hook-form";
+import { useUpdateSecurityConfigVersion } from "../../../../hooks/mutations/useUpdateSecurityConfigVersion";
+import { useUpdateSecurityConfigId } from "../../../../hooks/mutations/useUpdateSecurityConfigId";
+import { useUpdateSecurityResolverAddress } from "../../../../hooks/mutations/useUpdateSecurityResolverAddress";
 import {
   GetConfigInfoRequest,
   UpdateConfigRequest,
   UpdateConfigVersionRequest,
   UpdateResolverRequest,
-} from '@hashgraph/asset-tokenization-sdk';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useGetConfigDetails } from '../../../../hooks/queries/useGetConfigDetails';
-import { collapseText } from '../../../../utils/format';
-import { required } from '../../../../utils/rules';
+} from "@hashgraph/asset-tokenization-sdk";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useGetConfigDetails } from "../../../../hooks/queries/useGetConfigDetails";
+import { collapseText } from "../../../../utils/format";
+import { required } from "../../../../utils/rules";
 
 type ManagementFormSchema = {
   resolverId?: string;
@@ -33,16 +27,14 @@ interface ManagementProps {
 }
 
 export const Management = ({ id }: ManagementProps) => {
-  const { t } = useTranslation('security', {
-    keyPrefix: 'management',
+  const { t } = useTranslation("security", {
+    keyPrefix: "management",
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const { control, reset, handleSubmit, watch } = useForm<ManagementFormSchema>(
-    {
-      mode: 'onChange',
-    },
-  );
+  const { control, reset, handleSubmit, watch } = useForm<ManagementFormSchema>({
+    mode: "onChange",
+  });
 
   const {
     data: configDetails,
@@ -57,11 +49,9 @@ export const Management = ({ id }: ManagementProps) => {
     },
   );
 
-  const { mutate: updateSecurityConfigVersion } =
-    useUpdateSecurityConfigVersion();
+  const { mutate: updateSecurityConfigVersion } = useUpdateSecurityConfigVersion();
   const { mutate: updateSecurityConfigId } = useUpdateSecurityConfigId();
-  const { mutate: updateSecurityResolverAddress } =
-    useUpdateSecurityResolverAddress();
+  const { mutate: updateSecurityResolverAddress } = useUpdateSecurityResolverAddress();
 
   const onSubmit = (data: ManagementFormSchema) => {
     setIsLoading(true);
@@ -120,38 +110,36 @@ export const Management = ({ id }: ManagementProps) => {
   };
 
   return (
-    <HStack gap={6} align={'start'}>
+    <HStack gap={6} align={"start"}>
       <VStack layerStyle="container" align="start">
-        <VStack w={'full'} align="flex-start" p={6} gap={4}>
-          <VStack w={'full'} align={'flex-start'} gap={1}>
-            <Heading textStyle="HeadingMediumLG">{t('form.title')}</Heading>
-            <Text textStyle={'BodyRegularSM'}>{t('form.subtitle')}</Text>
+        <VStack w={"full"} align="flex-start" p={6} gap={4}>
+          <VStack w={"full"} align={"flex-start"} gap={1}>
+            <Heading textStyle="HeadingMediumLG">{t("form.title")}</Heading>
+            <Text textStyle={"BodyRegularSM"}>{t("form.subtitle")}</Text>
           </VStack>
-          <VStack w={'full'} align={'flex-start'} gap={2}>
+          <VStack w={"full"} align={"flex-start"} gap={2}>
             <InputController
               control={control}
               id="resolverId"
-              label={t('form.resolverId')}
+              label={t("form.resolverId")}
               placeholder="0.0.1234567"
               isClearable
             />
             <InputController
               control={control}
               id="configurationId"
-              label={t('form.configId')}
+              label={t("form.configId")}
               placeholder="0x123451234512345123451234512345"
               rules={{
                 validate: (value: string) =>
-                  watch('resolverId')
-                    ? !!value || t('form.validations.configIdWhenResolverId')
-                    : true,
+                  watch("resolverId") ? !!value || t("form.validations.configIdWhenResolverId") : true,
               }}
               isClearable
             />
             <InputController
               control={control}
               id="configurationVersion"
-              label={t('form.configVersion')}
+              label={t("form.configVersion")}
               placeholder="0"
               rules={{
                 required,
@@ -159,15 +147,15 @@ export const Management = ({ id }: ManagementProps) => {
               isClearable
             />
           </VStack>
-          <HStack w={'full'} justifyContent={'flex-end'}>
-            <Button variant={'secondary'} size={'md'} onClick={handleReset}>
+          <HStack w={"full"} justifyContent={"flex-end"}>
+            <Button variant={"secondary"} size={"md"} onClick={handleReset}>
               <Text textStyle="ElementsMediumSM" px={4}>
                 Clear
               </Text>
             </Button>
             <Button
-              variant={'primary'}
-              size={'md'}
+              variant={"primary"}
+              size={"md"}
               isDisabled={isLoading}
               isLoading={isLoading}
               onClick={handleSubmit(onSubmit)}
@@ -181,25 +169,25 @@ export const Management = ({ id }: ManagementProps) => {
       </VStack>
       <Stack layerStyle="container" align="start">
         <DefinitionList
-          title={t('details.title')}
+          title={t("details.title")}
           layerStyle="container"
           items={[
             {
-              title: t('details.resolverId'),
-              description: configDetails?.resolverAddress ?? '',
+              title: t("details.resolverId"),
+              description: configDetails?.resolverAddress ?? "",
               canCopy: true,
               isLoading: isLoadingConfigDetails || isFetchingConfigDetails,
             },
             {
-              title: t('details.configId'),
-              description: collapseText(configDetails?.configId ?? '', 10, 10),
-              valueToCopy: configDetails?.configId ?? '',
+              title: t("details.configId"),
+              description: collapseText(configDetails?.configId ?? "", 10, 10),
+              valueToCopy: configDetails?.configId ?? "",
               canCopy: true,
               isLoading: isLoadingConfigDetails || isFetchingConfigDetails,
             },
             {
-              title: t('details.configVersion'),
-              description: configDetails?.configVersion ?? '',
+              title: t("details.configVersion"),
+              description: configDetails?.configVersion ?? "",
               isLoading: isLoadingConfigDetails || isFetchingConfigDetails,
             },
           ]}

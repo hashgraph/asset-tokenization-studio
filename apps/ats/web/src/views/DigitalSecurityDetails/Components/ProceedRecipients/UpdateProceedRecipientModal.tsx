@@ -9,22 +9,21 @@ import {
   ModalOverlay,
   ModalProps,
   VStack,
-} from '@chakra-ui/react';
-import { Button, Input, InputController } from 'io-bricks-ui';
-import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import { useUpdateProceedRecipient } from '../../../../hooks/mutations/useProceedRecipients';
-import { UpdateProceedRecipientDataRequest } from '@hashgraph/asset-tokenization-sdk';
-import { textToHex } from '../../../../utils/format';
+} from "@chakra-ui/react";
+import { Button, Input, InputController } from "io-bricks-ui";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import { useUpdateProceedRecipient } from "../../../../hooks/mutations/useProceedRecipients";
+import { UpdateProceedRecipientDataRequest } from "@hashgraph/asset-tokenization-sdk";
+import { textToHex } from "../../../../utils/format";
 
 interface FormValues {
   address: string;
   data?: string;
 }
 
-interface UpdateProceedRecipientModalProps
-  extends Omit<ModalProps, 'children'> {
+interface UpdateProceedRecipientModalProps extends Omit<ModalProps, "children"> {
   proceedRecipientId: string;
 }
 
@@ -33,10 +32,10 @@ export const UpdateProceedRecipientModal = ({
   onClose,
   proceedRecipientId,
 }: UpdateProceedRecipientModalProps) => {
-  const { id: securityId = '' } = useParams();
+  const { id: securityId = "" } = useParams();
 
-  const { t: tUpdate } = useTranslation('security', {
-    keyPrefix: 'details.proceedRecipients.update',
+  const { t: tUpdate } = useTranslation("security", {
+    keyPrefix: "details.proceedRecipients.update",
   });
 
   const {
@@ -45,22 +44,20 @@ export const UpdateProceedRecipientModal = ({
     handleSubmit,
     reset,
   } = useForm<FormValues>({
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: {
       address: proceedRecipientId,
     },
   });
 
-  const {
-    mutate: updateProceedRecipientMutation,
-    isPending: isPendingUpdateProceedRecipient,
-  } = useUpdateProceedRecipient();
+  const { mutate: updateProceedRecipientMutation, isPending: isPendingUpdateProceedRecipient } =
+    useUpdateProceedRecipient();
 
   const onSubmit = (values: FormValues) => {
     const request = new UpdateProceedRecipientDataRequest({
       securityId,
       proceedRecipientId,
-      data: values.data ? textToHex(values.data) : '',
+      data: values.data ? textToHex(values.data) : "",
     });
 
     updateProceedRecipientMutation(request, {
@@ -83,23 +80,18 @@ export const UpdateProceedRecipientModal = ({
       }}
     >
       <ModalOverlay />
-      <ModalContent bgColor={'white'}>
-        <ModalHeader>{tUpdate('title')}</ModalHeader>
+      <ModalContent bgColor={"white"}>
+        <ModalHeader>{tUpdate("title")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack gap={4}>
             <Input
-              label={tUpdate('form.address.label')}
+              label={tUpdate("form.address.label")}
               isRequired={true}
               isDisabled={true}
               value={proceedRecipientId}
             />
-            <InputController
-              control={control}
-              id="data"
-              label={tUpdate('form.data.label')}
-              isRequired={false}
-            />
+            <InputController control={control} id="data" label={tUpdate("form.data.label")} isRequired={false} />
           </VStack>
         </ModalBody>
         <ModalFooter>
@@ -110,9 +102,9 @@ export const UpdateProceedRecipientModal = ({
                 reset();
                 onClose();
               }}
-              variant={'secondary'}
+              variant={"secondary"}
             >
-              {tUpdate('buttons.cancel')}
+              {tUpdate("buttons.cancel")}
             </Button>
             <Button
               isDisabled={!isValid || isPendingUpdateProceedRecipient}
@@ -120,7 +112,7 @@ export const UpdateProceedRecipientModal = ({
               type="submit"
               onClick={handleSubmit(onSubmit)}
             >
-              {tUpdate('buttons.update')}
+              {tUpdate("buttons.update")}
             </Button>
           </HStack>
         </ModalFooter>
