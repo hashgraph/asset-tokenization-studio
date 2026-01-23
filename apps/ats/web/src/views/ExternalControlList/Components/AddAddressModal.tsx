@@ -8,52 +8,36 @@ import {
   ModalOverlay,
   ModalProps,
   VStack,
-} from '@chakra-ui/react';
-import { Button, InputController } from 'io-bricks-ui';
-import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { ExternalControl } from '../ExternalControlList';
-import {
-  useAddToBlackListMock,
-  useAddToWhiteListMock,
-} from '../../../hooks/mutations/useExternalControl';
-import {
-  AddToBlackListMockRequest,
-  AddToWhiteListMockRequest,
-} from '@hashgraph/asset-tokenization-sdk';
+} from "@chakra-ui/react";
+import { Button, InputController } from "io-bricks-ui";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { ExternalControl } from "../ExternalControlList";
+import { useAddToBlackListMock, useAddToWhiteListMock } from "../../../hooks/mutations/useExternalControl";
+import { AddToBlackListMockRequest, AddToWhiteListMockRequest } from "@hashgraph/asset-tokenization-sdk";
 
 interface FormValues {
   accountId: string;
 }
 
-interface AddAddressModalProps extends Omit<ModalProps, 'children'> {
+interface AddAddressModalProps extends Omit<ModalProps, "children"> {
   externalControlSelected?: ExternalControl;
 }
 
-export const AddAddressModal = ({
-  externalControlSelected,
-  isOpen,
-  onClose,
-}: AddAddressModalProps) => {
-  const { t: tAddAddress } = useTranslation('externalControl', {
-    keyPrefix: 'addAddress',
+export const AddAddressModal = ({ externalControlSelected, isOpen, onClose }: AddAddressModalProps) => {
+  const { t: tAddAddress } = useTranslation("externalControl", {
+    keyPrefix: "addAddress",
   });
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
-    mode: 'onChange',
+    mode: "onChange",
   });
 
-  const {
-    mutateAsync: addToBlackListMutate,
-    isLoading: isLoadingAddToBlackListMockMutate,
-  } = useAddToBlackListMock();
-  const {
-    mutateAsync: addToWhiteListMutate,
-    isLoading: isLoadingAddToWhiteListMockMutate,
-  } = useAddToWhiteListMock();
+  const { mutateAsync: addToBlackListMutate, isLoading: isLoadingAddToBlackListMockMutate } = useAddToBlackListMock();
+  const { mutateAsync: addToWhiteListMutate, isLoading: isLoadingAddToWhiteListMockMutate } = useAddToWhiteListMock();
 
   const onSubmit = (values: FormValues) => {
-    if (externalControlSelected?.type === 'blacklist') {
+    if (externalControlSelected?.type === "blacklist") {
       return addToBlackListMutate(
         new AddToBlackListMockRequest({
           contractId: externalControlSelected.address,
@@ -62,7 +46,7 @@ export const AddAddressModal = ({
       ).finally(onClose);
     }
 
-    if (externalControlSelected?.type === 'whitelist') {
+    if (externalControlSelected?.type === "whitelist") {
       return addToWhiteListMutate(
         new AddToWhiteListMockRequest({
           contractId: externalControlSelected.address,
@@ -72,8 +56,7 @@ export const AddAddressModal = ({
     }
   };
 
-  const isLoading =
-    isLoadingAddToBlackListMockMutate || isLoadingAddToWhiteListMockMutate;
+  const isLoading = isLoadingAddToBlackListMockMutate || isLoadingAddToWhiteListMockMutate;
 
   return (
     <Modal
@@ -85,27 +68,22 @@ export const AddAddressModal = ({
       }}
     >
       <ModalOverlay />
-      <ModalContent bgColor={'white'}>
-        <ModalHeader>{tAddAddress('title')}</ModalHeader>
+      <ModalContent bgColor={"white"}>
+        <ModalHeader>{tAddAddress("title")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack gap={4}>
             <InputController
               control={control}
               id="accountId"
-              label={tAddAddress('input.label')}
-              placeholder={tAddAddress('input.placeholder')}
+              label={tAddAddress("input.label")}
+              placeholder={tAddAddress("input.placeholder")}
             />
           </VStack>
         </ModalBody>
         <ModalFooter>
-          <Button
-            isLoading={isLoading}
-            isDisabled={isLoading}
-            type="submit"
-            onClick={handleSubmit(onSubmit)}
-          >
-            {tAddAddress('add')}
+          <Button isLoading={isLoading} isDisabled={isLoading} type="submit" onClick={handleSubmit(onSubmit)}>
+            {tAddAddress("add")}
           </Button>
         </ModalFooter>
       </ModalContent>

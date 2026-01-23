@@ -1,18 +1,12 @@
-import React from 'react';
-import { Box } from '@chakra-ui/react';
-import { Table, Text } from 'io-bricks-ui';
-import { RoutePath } from '@/router/RoutePath';
-import {
-  TabContentProps,
-  AssetDistributionData,
-} from '../AssetDistributions.types';
-import { getTabTitle } from '../AssetDistributions.constants';
-import {
-  isDistributionRowClickable,
-  calculateTotalPages,
-} from '../AssetDistributions.utils';
-import { FilterControls } from './FilterControls';
-import { EmptyDistributionsState } from './EmptyDistributionsState';
+import React from "react";
+import { Box } from "@chakra-ui/react";
+import { Table, Text } from "io-bricks-ui";
+import { RoutePath } from "@/router/RoutePath";
+import { TabContentProps, AssetDistributionData } from "../AssetDistributions.types";
+import { getTabTitle } from "../AssetDistributions.constants";
+import { isDistributionRowClickable, calculateTotalPages } from "../AssetDistributions.utils";
+import { FilterControls } from "./FilterControls";
+import { EmptyDistributionsState } from "./EmptyDistributionsState";
 
 export const TabContent: React.FC<TabContentProps> = ({
   filterType,
@@ -28,9 +22,9 @@ export const TabContent: React.FC<TabContentProps> = ({
 }) => {
   const handleRowClick = (row: AssetDistributionData) => {
     if (isDistributionRowClickable(row.status) && id) {
-      const url = RoutePath.DISTRIBUTIONS_DETAILS.replace(':id', id)
-        .replace(':type', 'distribution')
-        .replace(':itemId', row.id);
+      const url = RoutePath.DISTRIBUTIONS_DETAILS.replace(":id", id)
+        .replace(":type", "distribution")
+        .replace(":itemId", row.id);
       navigate(url);
     }
   };
@@ -53,10 +47,7 @@ export const TabContent: React.FC<TabContentProps> = ({
             data={filteredDistributions}
             onClickRow={handleRowClick}
             totalElements={totalFilteredElements}
-            totalPages={calculateTotalPages(
-              totalFilteredElements,
-              table.pagination.pageSize,
-            )}
+            totalPages={calculateTotalPages(totalFilteredElements, table.pagination.pageSize)}
             isLoading={isLoading}
             {...table}
           />
