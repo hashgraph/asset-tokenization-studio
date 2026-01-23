@@ -28,6 +28,83 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
 ]);
 
 /**
+ * Represents a multi-line comment with its content and position.
+ */
+interface MultiLineComment {
+  /** The content between the comment delimiters (without the delimiters) */
+  content: string;
+  /** Start position in the source */
+  start: number;
+  /** End position in the source (after closing delimiter) */
+  end: number;
+  /** Whether this is a doc comment (starts with /**) */
+  isDocComment: boolean;
+}
+
+/**
+ * Extract all multi-line comments from source code using iterative parsing.
+ *
+ * This avoids ReDoS vulnerability that can occur with regex patterns like /\/\*[\s\S]*?\*\//g
+ * on pathological inputs (e.g., strings with many '/*' sequences).
+ *
+ * @param source - Source code potentially containing multi-line comments
+ * @returns Array of comments with their content and positions
+ */
+function extractMultiLineComments(source: string): MultiLineComment[] {
+  const comments: MultiLineComment[] = [];
+  let i = 0;
+  while (i < source.length) {
+    // Check for start of multi-line comment
+    if (source[i] === "/" && i + 1 < source.length && source[i + 1] === "*") {
+      const start = i;
+      const isDocComment = i + 2 < source.length && source[i + 2] === "*";
+      // Skip the opening /* or /**
+      i += 2;
+      const contentStart = i;
+      // Find the closing */
+      while (i < source.length) {
+        if (source[i] === "*" && i + 1 < source.length && source[i + 1] === "/") {
+          const content = source.substring(contentStart, i);
+          comments.push({ content, start, end: i + 2, isDocComment });
+          i += 2;
+          break;
+        }
+        i++;
+      }
+    } else {
+      i++;
+    }
+  }
+  return comments;
+}
+
+/**
+ * Remove multi-line comments from source code using iterative parsing.
+ *
+ * This avoids ReDoS vulnerability that can occur with regex patterns like /\/\*[\s\S]*?\*\//g
+ * on pathological inputs (e.g., strings with many '/*' sequences).
+ *
+ * @param source - Source code potentially containing multi-line comments
+ * @returns Source code with multi-line comments removed
+ */
+function removeMultiLineComments(source: string): string {
+  const comments = extractMultiLineComments(source);
+  if (comments.length === 0) {
+    return source;
+  }
+
+  // Build result by copying non-comment parts
+  let result = "";
+  let lastEnd = 0;
+  for (const comment of comments) {
+    result += source.substring(lastEnd, comment.start);
+    lastEnd = comment.end;
+  }
+  result += source.substring(lastEnd);
+  return result;
+}
+
+/**
  * Extract contract names from Solidity source code.
  *
  * Matches: contract ContractName, abstract contract ContractName, interface IName
@@ -59,8 +136,9 @@ export function extractContractNames(source: string): string[] {
   });
   let cleanSource = cleanLines.join("\n");
 
-  // Remove multi-line comments (/* ... */ and /** ... */)
-  cleanSource = cleanSource.replace(/\/\*[\s\S]*?\*\//g, "");
+  // Remove multi-line comments (/* ... */ and /** ... */) using iterative parsing
+  // to avoid ReDoS vulnerability with regex on uncontrolled input
+  cleanSource = removeMultiLineComments(cleanSource);
 
   const contractRegex = /(?:abstract\s+)?(?:contract|interface|library)\s+(\w+)/g;
   const matches: string[] = [];
@@ -204,21 +282,18 @@ export function extractNatspecDescription(source: string, contractName: string):
   // Extract everything before the contract declaration
   const beforeContract = source.substring(0, contractMatch.index);
 
-  // Find the last natspec comment block (/** ... */) before the contract
-  // This regex matches multiline comments that start with /**
-  const natspecRegex = /\/\*\*([\s\S]*?)\*\//g;
-  let lastNatspec: RegExpExecArray | null = null;
-  let match: RegExpExecArray | null;
+  // Find all natspec comment blocks (/** ... */) before the contract using safe iterative parsing
+  // to avoid ReDoS vulnerability with regex on uncontrolled input
+  const comments = extractMultiLineComments(beforeContract);
+  const docComments = comments.filter((c) => c.isDocComment);
 
-  while ((match = natspecRegex.exec(beforeContract)) !== null) {
-    lastNatspec = match;
-  }
-
-  if (!lastNatspec) {
+  if (docComments.length === 0) {
     return undefined;
   }
 
-  const natspecContent = lastNatspec[1];
+  // Get the last doc comment (closest to the contract declaration)
+  const lastNatspec = docComments[docComments.length - 1];
+  const natspecContent = lastNatspec.content;
 
   // Try to extract @notice first (priority)
   const noticeMatch = /@notice\s+([^\n@]+)/i.exec(natspecContent);
