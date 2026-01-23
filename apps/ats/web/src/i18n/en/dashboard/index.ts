@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache-2.0jk
+// SPDX-License-Identifier: Apache-2.0
 
 export default {
   commons: {
