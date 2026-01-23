@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class InvalidKycStatus extends BaseError {
   constructor() {
-    super(ErrorCode.InvalidKycStatus, 'Invalid KYC status');
+    super(ErrorCode.InvalidKycStatus, "Invalid KYC status");
   }
 }

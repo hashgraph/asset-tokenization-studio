@@ -203,18 +203,11 @@
 
 */
 
-import BaseError from '@core/error/BaseError';
-import { Environment } from '../network/Environment';
-import {
-  CheckRegulations,
-  RegulationSubType,
-  RegulationType,
-} from './RegulationType';
-import {
-  InvalidRegulationSubType,
-  InvalidRegulationSubTypeForType,
-} from './error/InvalidRegulationSubType';
-import { InvalidRegulationType } from './error/InvalidRegulationType';
+import BaseError from "@core/error/BaseError";
+import { Environment } from "../network/Environment";
+import { CheckRegulations, RegulationSubType, RegulationType } from "./RegulationType";
+import { InvalidRegulationSubType, InvalidRegulationSubTypeForType } from "./error/InvalidRegulationSubType";
+import { InvalidRegulationType } from "./error/InvalidRegulationType";
 
 export class EnvironmentFactory {
   factory: string;
@@ -245,18 +238,14 @@ export class Factory {
     return errorList;
   }
 
-  public static checkRegulationSubType(
-    value: number,
-    type: number,
-  ): BaseError[] {
+  public static checkRegulationSubType(value: number, type: number): BaseError[] {
     const errorList: BaseError[] = [];
 
     const length = Object.keys(RegulationSubType).length;
 
     if (value >= length) errorList.push(new InvalidRegulationSubType(value));
 
-    if (!CheckRegulations.typeAndSubtype(type, value))
-      errorList.push(new InvalidRegulationSubTypeForType(value, type));
+    if (!CheckRegulations.typeAndSubtype(type, value)) errorList.push(new InvalidRegulationSubTypeForType(value, type));
 
     return errorList;
   }

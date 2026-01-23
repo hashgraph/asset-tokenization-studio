@@ -203,9 +203,9 @@
 
 */
 
-import { SecurityRole } from '../../../../utils/SecurityRole';
+import { SecurityRole } from "../../../../utils/SecurityRole";
 
-export type TSecurityType = 'BOND' | 'EQUITY';
+export type TSecurityType = "BOND" | "EQUITY";
 
 export type TRole = {
   label: string;
@@ -215,118 +215,118 @@ export type TRole = {
 
 export const rolesList: TRole[] = [
   {
-    label: 'admin',
+    label: "admin",
     value: SecurityRole._DEFAULT_ADMIN_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'minter',
+    label: "minter",
     value: SecurityRole._ISSUER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'freezer',
+    label: "freezer",
     value: SecurityRole._FREEZE_MANAGER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'controller',
+    label: "controller",
     value: SecurityRole._CONTROLLER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'pause',
+    label: "pause",
     value: SecurityRole._PAUSER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'controlList',
+    label: "controlList",
     value: SecurityRole._CONTROLLIST_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'corporateActions',
+    label: "corporateActions",
     value: SecurityRole._CORPORATEACTIONS_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'document',
+    label: "document",
     value: SecurityRole._DOCUMENTER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'snapshot',
+    label: "snapshot",
     value: SecurityRole._SNAPSHOT_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'bondManager',
+    label: "bondManager",
     value: SecurityRole._BOND_MANAGER_ROLE,
-    allowedSecurities: ['BOND'],
+    allowedSecurities: ["BOND"],
   },
   {
-    label: 'adjustmentBalance',
+    label: "adjustmentBalance",
     value: SecurityRole._ADJUSTMENT_BALANCE_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'locker',
+    label: "locker",
     value: SecurityRole._LOCKER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'cap',
+    label: "cap",
     value: SecurityRole._CAP_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'kyc',
+    label: "kyc",
     value: SecurityRole._KYC_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'ssiManager',
+    label: "ssiManager",
     value: SecurityRole._SSI_MANAGER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'clearing',
+    label: "clearing",
     value: SecurityRole._CLEARING_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'clearingValidator',
+    label: "clearingValidator",
     value: SecurityRole._CLEARING_VALIDATOR_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'pauseManager',
+    label: "pauseManager",
     value: SecurityRole._PAUSE_MANAGER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'controlListManager',
+    label: "controlListManager",
     value: SecurityRole._CONTROL_LIST_MANAGER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'kycListManager',
+    label: "kycListManager",
     value: SecurityRole._KYC_MANAGER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'internalKYCManager',
+    label: "internalKYCManager",
     value: SecurityRole._INTERNAL_KYC_MANAGER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'trexOwner',
+    label: "trexOwner",
     value: SecurityRole._TREX_OWNER_ROLE,
-    allowedSecurities: ['BOND', 'EQUITY'],
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
-    label: 'proceedRecipientManager',
+    label: "proceedRecipientManager",
     value: SecurityRole._PROCEED_RECIPIENT_MANAGER_ROLE,
-    allowedSecurities: ['BOND'],
+    allowedSecurities: ["BOND"],
   },
 ];

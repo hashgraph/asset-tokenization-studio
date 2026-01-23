@@ -203,10 +203,10 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { MintCommandHandler } from '@command/security/operations/mint/MintCommandHandler';
-import { IssueCommandHandler } from '@command/security/operations/issue/IssueCommandHandler';
-import { BatchMintCommandHandler } from '@command/security/operations/batch/batchMint/BatchMintCommandHandler';
+import { TOKENS } from "../Tokens";
+import { MintCommandHandler } from "@command/security/operations/mint/MintCommandHandler";
+import { IssueCommandHandler } from "@command/security/operations/issue/IssueCommandHandler";
+import { BatchMintCommandHandler } from "@command/security/operations/batch/batchMint/BatchMintCommandHandler";
 
 export const COMMAND_HANDLERS_ISSUE = [
   {

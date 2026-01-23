@@ -204,8 +204,8 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Constructor } from '@core/Type';
-import { inject, delay } from 'tsyringe';
+import { Constructor } from "@core/Type";
+import { inject, delay } from "tsyringe";
 
 /**
  * This decorator substitutes the lazy loading construct from tsyringe
@@ -213,11 +213,7 @@ import { inject, delay } from 'tsyringe';
  * @param cls Class to lazy load
  */
 export function lazyInject<T>(token: Constructor<T>): any {
-  return (
-    target: any,
-    propertyKey: string | symbol,
-    parameterIndex: number,
-  ) => {
+  return (target: any, propertyKey: string | symbol, parameterIndex: number) => {
     inject(delay(() => token))(target, propertyKey, parameterIndex);
   };
 }

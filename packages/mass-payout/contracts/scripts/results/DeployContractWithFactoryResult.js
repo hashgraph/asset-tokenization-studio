@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 /*
                                  Apache License
                            Version 2.0, January 2004
@@ -203,7 +203,7 @@
    limitations under the License.
 
 */
-Object.defineProperty(exports, '__esModule', { value: true });
+Object.defineProperty(exports, "__esModule", { value: true });
 class DeployContractWithFactoryResult {
   address;
   contract;

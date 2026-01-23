@@ -203,19 +203,16 @@
 
 */
 
-import WalletEvent from '@app/services/event/WalletEvent';
-import { Environment } from '@domain/network/Environment';
-import { MirrorNode, MirrorNodes } from '@domain/network/MirrorNode';
-import { JsonRpcRelay, JsonRpcRelays } from '@domain/network/JsonRpcRelay';
-import { SupportedWallets } from '@domain/network/Wallet';
-import { BaseRequest } from '../BaseRequest';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import WalletEvent from "@app/services/event/WalletEvent";
+import { Environment } from "@domain/network/Environment";
+import { MirrorNode, MirrorNodes } from "@domain/network/MirrorNode";
+import { JsonRpcRelay, JsonRpcRelays } from "@domain/network/JsonRpcRelay";
+import { SupportedWallets } from "@domain/network/Wallet";
+import { BaseRequest } from "../BaseRequest";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 export { SupportedWallets };
 
-export default class InitializationRequest
-  extends ValidatedRequest<InitializationRequest>
-  implements BaseRequest
-{
+export default class InitializationRequest extends ValidatedRequest<InitializationRequest> implements BaseRequest {
   network: Environment;
   mirrorNode: MirrorNode;
   rpcNode: JsonRpcRelay;

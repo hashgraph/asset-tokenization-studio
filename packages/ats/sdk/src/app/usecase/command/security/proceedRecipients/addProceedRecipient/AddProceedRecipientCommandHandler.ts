@@ -170,25 +170,20 @@
    limitations under the License.
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import {
-  AddProceedRecipientCommand,
-  AddProceedRecipientCommandResponse,
-} from './AddProceedRecipientCommand';
-import { AddProceedRecipientCommandError } from './error/AddProceedRecipientCommandError';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { AddProceedRecipientCommand, AddProceedRecipientCommandResponse } from "./AddProceedRecipientCommand";
+import { AddProceedRecipientCommandError } from "./error/AddProceedRecipientCommandError";
 
 @CommandHandler(AddProceedRecipientCommand)
-export class AddProceedRecipientCommandHandler
-  implements ICommandHandler<AddProceedRecipientCommand>
-{
+export class AddProceedRecipientCommandHandler implements ICommandHandler<AddProceedRecipientCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
@@ -200,19 +195,15 @@ export class AddProceedRecipientCommandHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: AddProceedRecipientCommand,
-  ): Promise<AddProceedRecipientCommandResponse> {
+  async execute(command: AddProceedRecipientCommand): Promise<AddProceedRecipientCommandResponse> {
     try {
       const { securityId, proceedRecipient, data } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
-      const proceedRecipientEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(proceedRecipient);
+      const proceedRecipientEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(proceedRecipient);
 
       await this.validationService.checkPause(securityId);
 
@@ -222,12 +213,9 @@ export class AddProceedRecipientCommandHandler
         securityId,
       );
 
-      await this.validationService.checkIsNotProceedRecipient(
-        securityId,
-        proceedRecipient,
-      );
+      await this.validationService.checkIsNotProceedRecipient(securityId, proceedRecipient);
 
-      const dataToValidate = !data || data === '' ? '0x' : data;
+      const dataToValidate = !data || data === "" ? "0x" : data;
 
       const res = await handler.addProceedRecipient(
         securityEvmAddress,
@@ -236,12 +224,7 @@ export class AddProceedRecipientCommandHandler
         securityId,
       );
 
-      return Promise.resolve(
-        new AddProceedRecipientCommandResponse(
-          res.error === undefined,
-          res.id!,
-        ),
-      );
+      return Promise.resolve(new AddProceedRecipientCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new AddProceedRecipientCommandError(error as Error);
     }

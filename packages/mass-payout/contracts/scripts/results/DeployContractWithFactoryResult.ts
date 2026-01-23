@@ -203,7 +203,7 @@
 
 */
 
-import { Contract, ContractReceipt } from 'ethers';
+import { Contract, ContractReceipt } from "ethers";
 
 export default class DeployContractWithFactoryResult<C extends Contract> {
   public readonly address: string;

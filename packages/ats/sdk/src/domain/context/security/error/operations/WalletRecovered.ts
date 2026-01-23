@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class WalletRecovered extends BaseError {
   constructor() {
-    super(ErrorCode.WalletRecovered, 'Wallet has been recovered');
+    super(ErrorCode.WalletRecovered, "Wallet has been recovered");
   }
 }

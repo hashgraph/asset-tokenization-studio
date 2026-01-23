@@ -202,32 +202,28 @@
  *    limitations under the License.
  */
 
-import { render } from '@/test-utils';
-import { screen } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
-import { AssetType } from '@/services/AssetService';
-import {
-  mockAsset,
-  resetAssetMocks,
-  createMockAsset,
-} from '@/test-utils/mocks/AssetMocks';
-import { AssetDetail } from '../AssetDetail';
+import { render } from "@/test-utils";
+import { screen } from "@testing-library/react";
+import { createMemoryHistory } from "history";
+import { AssetType } from "@/services/AssetService";
+import { mockAsset, resetAssetMocks, createMockAsset } from "@/test-utils/mocks/AssetMocks";
+import { AssetDetail } from "../AssetDetail";
 
 const mockNavigate = jest.fn();
 const mockPauseMutateAsync = jest.fn();
 const mockUnpauseMutateAsync = jest.fn();
 const mockEnableSyncMutate = jest.fn();
 const mockDisableSyncMutate = jest.fn();
-const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ id: '0.0.890123' }),
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useParams: () => ({ id: "0.0.890123" }),
   useNavigate: () => mockNavigate,
   useSearchParams: () => [new URLSearchParams(), jest.fn()],
 }));
 
-jest.mock('../../hooks/queries/AssetQueries', () => ({
+jest.mock("../../hooks/queries/AssetQueries", () => ({
   useGetAsset: jest.fn(),
   usePauseAsset: jest.fn(),
   useUnpauseAsset: jest.fn(),
@@ -235,20 +231,15 @@ jest.mock('../../hooks/queries/AssetQueries', () => ({
   useDisableAssetSync: jest.fn(),
 }));
 
-jest.mock('@/hooks/useBreadcrumbs', () => ({
-  useBreadcrumbs: () => [
-    { label: 'Asset list', href: '/assets' },
-    { label: 'Asset Detail' },
-  ],
+jest.mock("@/hooks/useBreadcrumbs", () => ({
+  useBreadcrumbs: () => [{ label: "Asset list", href: "/assets" }, { label: "Asset Detail" }],
 }));
 
 // Mock child components
-jest.mock('../components/AssetHeader', () => ({
+jest.mock("../components/AssetHeader", () => ({
   AssetHeader: jest.fn(({ asset }) => (
     <div data-testid="asset-header">
-      <div data-testid="asset-status">
-        {asset?.isPaused ? 'Paused' : 'Active'}
-      </div>
+      <div data-testid="asset-status">{asset?.isPaused ? "Paused" : "Active"}</div>
       {asset && (
         <div>
           {asset.name} - {asset.hederaTokenAddress}
@@ -258,37 +249,30 @@ jest.mock('../components/AssetHeader', () => ({
   )),
 }));
 
-jest.mock('../components/TabsConfiguration', () => ({
+jest.mock("../components/TabsConfiguration", () => ({
   TabsConfiguration: jest.fn(({ asset }) => (
     <div data-testid="tabs-configuration">
-      <button data-testid="pause-unpause-button">
-        {asset?.isPaused ? 'Unpause Asset' : 'Pause Asset'}
-      </button>
+      <button data-testid="pause-unpause-button">{asset?.isPaused ? "Unpause Asset" : "Pause Asset"}</button>
       <button data-testid="import-corporate-actions-button">
-        {asset?.syncEnabled ? 'Disable Sync' : 'Enable Sync'}
+        {asset?.syncEnabled ? "Disable Sync" : "Enable Sync"}
       </button>
       <button data-testid="new-distribution-button">New Distribution</button>
     </div>
   )),
 }));
 
-jest.mock('../components/PopupConfigurations', () => ({
-  PopupConfigurations: jest.fn(() => (
-    <div data-testid="popup-configurations">Mock Popup</div>
-  )),
+jest.mock("../components/PopupConfigurations", () => ({
+  PopupConfigurations: jest.fn(() => <div data-testid="popup-configurations">Mock Popup</div>),
 }));
 
-describe('AssetDetail Component', () => {
+describe("AssetDetail Component", () => {
   let history: ReturnType<typeof createMemoryHistory>;
-  const mockUseGetAsset = require('../../hooks/queries/AssetQueries')
-    .useGetAsset as jest.MockedFunction<any>;
-  const mockUsePauseAsset = require('../../hooks/queries/AssetQueries')
-    .usePauseAsset as jest.MockedFunction<any>;
-  const mockUseUnpauseAsset = require('../../hooks/queries/AssetQueries')
-    .useUnpauseAsset as jest.MockedFunction<any>;
-  const mockUseEnableAssetSync = require('../../hooks/queries/AssetQueries')
+  const mockUseGetAsset = require("../../hooks/queries/AssetQueries").useGetAsset as jest.MockedFunction<any>;
+  const mockUsePauseAsset = require("../../hooks/queries/AssetQueries").usePauseAsset as jest.MockedFunction<any>;
+  const mockUseUnpauseAsset = require("../../hooks/queries/AssetQueries").useUnpauseAsset as jest.MockedFunction<any>;
+  const mockUseEnableAssetSync = require("../../hooks/queries/AssetQueries")
     .useEnableAssetSync as jest.MockedFunction<any>;
-  const mockUseDisableAssetSync = require('../../hooks/queries/AssetQueries')
+  const mockUseDisableAssetSync = require("../../hooks/queries/AssetQueries")
     .useDisableAssetSync as jest.MockedFunction<any>;
 
   beforeEach(() => {
@@ -330,30 +314,28 @@ describe('AssetDetail Component', () => {
     consoleSpy.mockRestore();
   });
 
-  describe('Basic rendering', () => {
-    test('should render correctly', () => {
+  describe("Basic rendering", () => {
+    test("should render correctly", () => {
       const component = render(<AssetDetail />, { history });
       expect(component.asFragment()).toMatchSnapshot();
     });
 
-    test('should display tabs configuration', () => {
+    test("should display tabs configuration", () => {
       render(<AssetDetail />, { history });
-      expect(screen.getByTestId('tabs-configuration')).toBeInTheDocument();
-      expect(screen.getByTestId('pause-unpause-button')).toBeInTheDocument();
-      expect(
-        screen.getByTestId('import-corporate-actions-button'),
-      ).toBeInTheDocument();
-      expect(screen.getByTestId('new-distribution-button')).toBeInTheDocument();
+      expect(screen.getByTestId("tabs-configuration")).toBeInTheDocument();
+      expect(screen.getByTestId("pause-unpause-button")).toBeInTheDocument();
+      expect(screen.getByTestId("import-corporate-actions-button")).toBeInTheDocument();
+      expect(screen.getByTestId("new-distribution-button")).toBeInTheDocument();
     });
 
-    test('should display popup configurations', () => {
+    test("should display popup configurations", () => {
       render(<AssetDetail />, { history });
-      expect(screen.getByTestId('popup-configurations')).toBeInTheDocument();
+      expect(screen.getByTestId("popup-configurations")).toBeInTheDocument();
     });
   });
 
-  describe('Loading states', () => {
-    test('should show loading spinner when asset is loading', () => {
+  describe("Loading states", () => {
+    test("should show loading spinner when asset is loading", () => {
       mockUseGetAsset.mockReturnValue({
         data: null,
         isLoading: true,
@@ -361,23 +343,21 @@ describe('AssetDetail Component', () => {
       });
 
       render(<AssetDetail />, { history });
-      expect(screen.getByText('Loading asset...')).toBeInTheDocument();
+      expect(screen.getByText("Loading asset...")).toBeInTheDocument();
     });
 
-    test('should show error message when asset loading fails', () => {
+    test("should show error message when asset loading fails", () => {
       mockUseGetAsset.mockReturnValue({
         data: null,
         isLoading: false,
-        error: new Error('Failed to load asset'),
+        error: new Error("Failed to load asset"),
       });
 
       render(<AssetDetail />, { history });
-      expect(
-        screen.getByText('Error loading asset or asset not found'),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Error loading asset or asset not found")).toBeInTheDocument();
     });
 
-    test('should show error message when asset is not found', () => {
+    test("should show error message when asset is not found", () => {
       mockUseGetAsset.mockReturnValue({
         data: null,
         isLoading: false,
@@ -385,14 +365,12 @@ describe('AssetDetail Component', () => {
       });
 
       render(<AssetDetail />, { history });
-      expect(
-        screen.getByText('Error loading asset or asset not found'),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Error loading asset or asset not found")).toBeInTheDocument();
     });
   });
 
-  describe('Asset status management', () => {
-    test('should display active status for unpaused asset', () => {
+  describe("Asset status management", () => {
+    test("should display active status for unpaused asset", () => {
       const activeAsset = createMockAsset({ isPaused: false });
       mockUseGetAsset.mockReturnValue({
         data: activeAsset,
@@ -401,13 +379,11 @@ describe('AssetDetail Component', () => {
       });
 
       render(<AssetDetail />, { history });
-      expect(screen.getByTestId('asset-status')).toHaveTextContent('Active');
-      expect(screen.getByTestId('pause-unpause-button')).toHaveTextContent(
-        'Pause Asset',
-      );
+      expect(screen.getByTestId("asset-status")).toHaveTextContent("Active");
+      expect(screen.getByTestId("pause-unpause-button")).toHaveTextContent("Pause Asset");
     });
 
-    test('should display paused status for paused asset', () => {
+    test("should display paused status for paused asset", () => {
       const pausedAsset = createMockAsset({ isPaused: true });
       mockUseGetAsset.mockReturnValue({
         data: pausedAsset,
@@ -416,20 +392,18 @@ describe('AssetDetail Component', () => {
       });
 
       render(<AssetDetail />, { history });
-      expect(screen.getByTestId('asset-status')).toHaveTextContent('Paused');
-      expect(screen.getByTestId('pause-unpause-button')).toHaveTextContent(
-        'Unpause Asset',
-      );
+      expect(screen.getByTestId("asset-status")).toHaveTextContent("Paused");
+      expect(screen.getByTestId("pause-unpause-button")).toHaveTextContent("Unpause Asset");
     });
 
-    test('should render pause/unpause button', () => {
+    test("should render pause/unpause button", () => {
       render(<AssetDetail />, { history });
-      expect(screen.getByTestId('pause-unpause-button')).toBeInTheDocument();
+      expect(screen.getByTestId("pause-unpause-button")).toBeInTheDocument();
     });
   });
 
-  describe('Sync management', () => {
-    test('should display correct sync button text for enabled sync', () => {
+  describe("Sync management", () => {
+    test("should display correct sync button text for enabled sync", () => {
       const syncEnabledAsset = createMockAsset({ syncEnabled: true });
       mockUseGetAsset.mockReturnValue({
         data: syncEnabledAsset,
@@ -438,12 +412,10 @@ describe('AssetDetail Component', () => {
       });
 
       render(<AssetDetail />, { history });
-      expect(
-        screen.getByTestId('import-corporate-actions-button'),
-      ).toHaveTextContent('Disable Sync');
+      expect(screen.getByTestId("import-corporate-actions-button")).toHaveTextContent("Disable Sync");
     });
 
-    test('should display correct sync button text for disabled sync', () => {
+    test("should display correct sync button text for disabled sync", () => {
       const syncDisabledAsset = createMockAsset({ syncEnabled: false });
       mockUseGetAsset.mockReturnValue({
         data: syncDisabledAsset,
@@ -452,32 +424,28 @@ describe('AssetDetail Component', () => {
       });
 
       render(<AssetDetail />, { history });
-      expect(
-        screen.getByTestId('import-corporate-actions-button'),
-      ).toHaveTextContent('Enable Sync');
+      expect(screen.getByTestId("import-corporate-actions-button")).toHaveTextContent("Enable Sync");
     });
 
-    test('should render import corporate actions button', () => {
+    test("should render import corporate actions button", () => {
       render(<AssetDetail />, { history });
-      expect(
-        screen.getByTestId('import-corporate-actions-button'),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("import-corporate-actions-button")).toBeInTheDocument();
     });
   });
 
-  describe('Navigation and tabs', () => {
-    test('should render new distribution button', () => {
+  describe("Navigation and tabs", () => {
+    test("should render new distribution button", () => {
       render(<AssetDetail />, { history });
-      expect(screen.getByTestId('new-distribution-button')).toBeInTheDocument();
+      expect(screen.getByTestId("new-distribution-button")).toBeInTheDocument();
     });
   });
 
-  describe('Asset data integration', () => {
-    test('should handle different asset types', () => {
+  describe("Asset data integration", () => {
+    test("should handle different asset types", () => {
       const bondAsset = createMockAsset({
         type: AssetType.BOND,
-        name: 'Bond Asset',
-        symbol: 'BOND',
+        name: "Bond Asset",
+        symbol: "BOND",
       });
 
       mockUseGetAsset.mockReturnValue({
@@ -488,13 +456,11 @@ describe('AssetDetail Component', () => {
 
       render(<AssetDetail />, { history });
 
-      expect(
-        screen.getByText(`${bondAsset.name} - ${bondAsset.hederaTokenAddress}`),
-      ).toBeInTheDocument();
+      expect(screen.getByText(`${bondAsset.name} - ${bondAsset.hederaTokenAddress}`)).toBeInTheDocument();
     });
 
-    test('should handle asset without ID correctly', () => {
-      const assetWithoutId = createMockAsset({ id: '' });
+    test("should handle asset without ID correctly", () => {
+      const assetWithoutId = createMockAsset({ id: "" });
       mockUseGetAsset.mockReturnValue({
         data: assetWithoutId,
         isLoading: false,
@@ -503,14 +469,14 @@ describe('AssetDetail Component', () => {
 
       render(<AssetDetail />, { history });
 
-      expect(screen.getByTestId('asset-header')).toBeInTheDocument();
+      expect(screen.getByTestId("asset-header")).toBeInTheDocument();
     });
 
-    test('should update state when asset data changes', () => {
+    test("should update state when asset data changes", () => {
       const { rerender } = render(<AssetDetail />, { history });
 
       // Initially active
-      expect(screen.getByTestId('asset-status')).toHaveTextContent('Active');
+      expect(screen.getByTestId("asset-status")).toHaveTextContent("Active");
 
       // Update to paused asset
       const pausedAsset = createMockAsset({ isPaused: true });
@@ -522,7 +488,7 @@ describe('AssetDetail Component', () => {
 
       rerender(<AssetDetail />);
 
-      expect(screen.getByTestId('asset-status')).toHaveTextContent('Paused');
+      expect(screen.getByTestId("asset-status")).toHaveTextContent("Paused");
     });
   });
 });

@@ -202,24 +202,24 @@
  *    limitations under the License.
  */
 
-import { ButtonProps, ButtonThemeConfiguration } from 'io-bricks-ui';
+import { ButtonProps, ButtonThemeConfiguration } from "io-bricks-ui";
 
-export const sizes: ButtonThemeConfiguration['sizes'] = {
+export const sizes: ButtonThemeConfiguration["sizes"] = {
   sm: {
-    fontSize: 'sm',
-    h: 'unset',
+    fontSize: "sm",
+    h: "unset",
     minH: 8,
     minW: 19,
   },
   md: {
-    fontSize: 'sm',
-    h: 'unset',
+    fontSize: "sm",
+    h: "unset",
     minH: 10,
     minW: 19,
   },
   lg: {
-    fontSize: 'sm',
-    h: 'unset',
+    fontSize: "sm",
+    h: "unset",
     minH: 12,
     minW: 19,
   },
@@ -232,36 +232,36 @@ interface Color {
   disabled: string;
 }
 
-type ColorName = 'primary' | 'secondary' | 'tertiary';
+type ColorName = "primary" | "secondary" | "tertiary";
 
 export const colors: Record<ColorName, Color> = {
   primary: {
-    enabled: 'primary.500',
-    hover: 'primary.400',
-    focused: 'primary.500',
-    disabled: 'primary.800',
+    enabled: "primary.500",
+    hover: "primary.400",
+    focused: "primary.500",
+    disabled: "primary.800",
   },
   secondary: {
-    enabled: 'primary.500',
-    hover: 'primary.400',
-    focused: 'primary.500',
-    disabled: 'primary.800',
+    enabled: "primary.500",
+    hover: "primary.400",
+    focused: "primary.500",
+    disabled: "primary.800",
   },
   tertiary: {
-    enabled: 'secondary.500',
-    hover: 'secondary.500',
-    focused: 'secondary.500',
-    disabled: 'neutral.600',
+    enabled: "secondary.500",
+    hover: "secondary.500",
+    focused: "secondary.500",
+    disabled: "neutral.600",
   },
 };
 
 const getColor = (props: ButtonProps, defaultColor: ColorName) => {
-  if (props.status === 'danger') {
+  if (props.status === "danger") {
     return {
-      enabled: 'status.error.500',
-      hover: 'status.error.400',
-      focused: 'status.error.500',
-      disabled: 'status.error.800',
+      enabled: "status.error.500",
+      hover: "status.error.400",
+      focused: "status.error.500",
+      disabled: "status.error.800",
     };
   }
   return colors[defaultColor];
@@ -270,51 +270,51 @@ const getColor = (props: ButtonProps, defaultColor: ColorName) => {
 export const variants = {
   primary: (props: ButtonProps) => {
     const getKey = (key: keyof Color) => {
-      const color = getColor(props, 'primary')[key];
+      const color = getColor(props, "primary")[key];
       return {
         bg: color,
         borderColor: color,
-        color: 'neutral.white',
+        color: "neutral.white",
       };
     };
     return {
-      ...getKey('enabled'),
+      ...getKey("enabled"),
       _hover: {
-        ...getKey('hover'),
-        _disabled: getKey('disabled'),
+        ...getKey("hover"),
+        _disabled: getKey("disabled"),
       },
-      _focus: getKey('focused'),
-      _disabled: getKey('disabled'),
+      _focus: getKey("focused"),
+      _disabled: getKey("disabled"),
       _loading: {
-        ...getKey('enabled'),
-        _hover: getKey('enabled'),
+        ...getKey("enabled"),
+        _hover: getKey("enabled"),
       },
     };
   },
   secondary: (props: ButtonProps) => {
     const getKey = (key: keyof Color) => {
-      const color = getColor(props, 'secondary')[key];
+      const color = getColor(props, "secondary")[key];
       return {
         color,
         borderColor: color,
       };
     };
     return {
-      ...getKey('enabled'),
-      _hover: getKey('hover'),
-      _focus: getKey('focused'),
-      _disabled: getKey('disabled'),
+      ...getKey("enabled"),
+      _hover: getKey("hover"),
+      _focus: getKey("focused"),
+      _disabled: getKey("disabled"),
     };
   },
   tertiary: (props: ButtonProps) => {
     const getKey = (key: keyof Color) => {
       const bgColor = {
-        enabled: 'transparent',
-        hover: 'neutral.150',
-        focused: 'neutral.100',
-        disabled: 'transparent',
+        enabled: "transparent",
+        hover: "neutral.150",
+        focused: "neutral.100",
+        disabled: "transparent",
       }[key];
-      const color = getColor(props, 'tertiary')[key];
+      const color = getColor(props, "tertiary")[key];
       return {
         color,
         bgColor,
@@ -322,11 +322,11 @@ export const variants = {
       };
     };
     return {
-      ...getKey('enabled'),
-      _hover: getKey('hover'),
-      _focus: getKey('focused'),
-      _active: getKey('focused'),
-      _disabled: getKey('disabled'),
+      ...getKey("enabled"),
+      _hover: getKey("hover"),
+      _focus: getKey("focused"),
+      _active: getKey("focused"),
+      _disabled: getKey("disabled"),
     };
   },
 };
@@ -335,49 +335,49 @@ export const Button: ButtonThemeConfiguration = {
   baseStyle: {
     py: 2,
     px: 4,
-    fontWeight: '500',
+    fontWeight: "500",
     lineHeight: 1,
-    border: '1px solid',
-    borderRadius: '8px',
-    display: 'inline-flex',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
-    transition: 'all 0.2s',
-    color: 'neutral.650',
+    border: "1px solid",
+    borderRadius: "8px",
+    display: "inline-flex",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    transition: "all 0.2s",
+    color: "neutral.650",
     leftIcon: {
-      color: 'neutral.650',
+      color: "neutral.650",
     },
   },
   sizes,
   variants: {
     ...variants,
     table: {
-      color: 'neutral.700',
-      textDecoration: 'none',
-      border: 'none',
-      background: 'transparent',
+      color: "neutral.700",
+      textDecoration: "none",
+      border: "none",
+      background: "transparent",
       padding: 0,
-      minHeight: 'auto',
-      height: 'auto',
-      width: '100%',
-      justifyContent: 'flex-start',
-      textAlign: 'left',
-      fontWeight: 'normal',
+      minHeight: "auto",
+      height: "auto",
+      width: "100%",
+      justifyContent: "flex-start",
+      textAlign: "left",
+      fontWeight: "normal",
       _hover: {
-        color: 'primary.600',
-        textDecoration: 'underline',
-        background: 'transparent',
+        color: "primary.600",
+        textDecoration: "underline",
+        background: "transparent",
       },
       _active: {
-        color: 'primary.700',
-        background: 'transparent',
+        color: "primary.700",
+        background: "transparent",
       },
       _focus: {
-        boxShadow: 'none',
-        border: 'none',
-        color: 'primary.600',
-        background: 'transparent',
+        boxShadow: "none",
+        border: "none",
+        color: "primary.600",
+        background: "transparent",
       },
     },
     ghost: {
@@ -388,7 +388,7 @@ export const Button: ButtonThemeConfiguration = {
     },
   },
   defaultProps: {
-    size: 'md',
-    variant: 'primary',
+    size: "md",
+    variant: "primary",
   },
 };

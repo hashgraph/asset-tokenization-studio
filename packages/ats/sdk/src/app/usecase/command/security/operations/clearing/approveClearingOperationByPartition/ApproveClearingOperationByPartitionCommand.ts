@@ -203,13 +203,11 @@
 
 */
 
-import { ClearingOperationType } from '@domain/context/security/Clearing';
-import { Command } from '@core/command/Command';
-import { CommandResponse } from '@core/command/CommandResponse';
+import { ClearingOperationType } from "@domain/context/security/Clearing";
+import { Command } from "@core/command/Command";
+import { CommandResponse } from "@core/command/CommandResponse";
 
-export class ApproveClearingOperationByPartitionCommandResponse
-  implements CommandResponse
-{
+export class ApproveClearingOperationByPartitionCommandResponse implements CommandResponse {
   constructor(
     public readonly payload: boolean,
     public readonly transactionId: string,

@@ -203,30 +203,27 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import Account from '@domain/context/account/Account';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { ActivateClearingCommandHandler } from './ActivateClearingCommandHandler';
-import {
-  ActivateClearingCommand,
-  ActivateClearingCommandResponse,
-} from './ActivateClearingCommand';
-import { SwitchClearingModeCommandFixture } from '@test/fixtures/clearing/ClearingFixture';
-import { ActivateClearingCommandError } from './error/ActivateClearingCommandError';
-import { ErrorCode } from '@core/error/BaseError';
+} from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import Account from "@domain/context/account/Account";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import { ActivateClearingCommandHandler } from "./ActivateClearingCommandHandler";
+import { ActivateClearingCommand, ActivateClearingCommandResponse } from "./ActivateClearingCommand";
+import { SwitchClearingModeCommandFixture } from "@test/fixtures/clearing/ClearingFixture";
+import { ActivateClearingCommandError } from "./error/ActivateClearingCommandError";
+import { ErrorCode } from "@core/error/BaseError";
 
-describe('ActivateClearingCommandHandler', () => {
+describe("ActivateClearingCommandHandler", () => {
   let handler: ActivateClearingCommandHandler;
   let command: ActivateClearingCommand;
 
@@ -254,29 +251,25 @@ describe('ActivateClearingCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws ActivateClearingCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws ActivateClearingCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          ActivateClearingCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(ActivateClearingCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while activating clearing mode: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while activating clearing mode: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully activate clearing mode', async () => {
+    describe("success cases", () => {
+      it("should successfully activate clearing mode", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
         transactionServiceMock.getHandler().activateClearing.mockResolvedValue({
@@ -289,18 +282,12 @@ describe('ActivateClearingCommandHandler', () => {
         expect(result.payload).toBe(true);
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
         expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().activateClearing,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().activateClearing).toHaveBeenCalledTimes(1);
 
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-          command.securityId,
-        );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
 
         expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
@@ -308,13 +295,9 @@ describe('ActivateClearingCommandHandler', () => {
           account.id.toString(),
           command.securityId,
         );
-        expect(
-          contractServiceMock.getContractEvmAddress,
-        ).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(1, command.securityId);
 
-        expect(
-          transactionServiceMock.getHandler().activateClearing,
-        ).toHaveBeenCalledWith(evmAddress);
+        expect(transactionServiceMock.getHandler().activateClearing).toHaveBeenCalledWith(evmAddress);
       });
     });
   });

@@ -203,22 +203,20 @@
 
 */
 
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '@core/query/QueryHandler';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import ContractService from '@service/contract/ContractService';
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
+import { IQueryHandler } from "@core/query/QueryHandler";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import ContractService from "@service/contract/ContractService";
 import {
   GetScheduledBalanceAdjustmentQuery,
   GetScheduledBalanceAdjustmentQueryResponse,
-} from './GetScheduledBalanceAdjustmentQuery';
-import { GetScheduledBalanceAdjustmentQueryError } from './error/GetScheduledBalanceAdjustmentQueryError';
+} from "./GetScheduledBalanceAdjustmentQuery";
+import { GetScheduledBalanceAdjustmentQueryError } from "./error/GetScheduledBalanceAdjustmentQueryError";
 
 @QueryHandler(GetScheduledBalanceAdjustmentQuery)
-export class GetScheduledBalanceAdjustmentQueryHandler
-  implements IQueryHandler<GetScheduledBalanceAdjustmentQuery>
-{
+export class GetScheduledBalanceAdjustmentQueryHandler implements IQueryHandler<GetScheduledBalanceAdjustmentQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
@@ -226,23 +224,15 @@ export class GetScheduledBalanceAdjustmentQueryHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    query: GetScheduledBalanceAdjustmentQuery,
-  ): Promise<GetScheduledBalanceAdjustmentQueryResponse> {
+  async execute(query: GetScheduledBalanceAdjustmentQuery): Promise<GetScheduledBalanceAdjustmentQueryResponse> {
     try {
       const { securityId, balanceAdjustmentId } = query;
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
-      const res = await this.queryAdapter.getScheduledBalanceAdjustment(
-        securityEvmAddress,
-        balanceAdjustmentId,
-      );
+      const res = await this.queryAdapter.getScheduledBalanceAdjustment(securityEvmAddress, balanceAdjustmentId);
 
-      return Promise.resolve(
-        new GetScheduledBalanceAdjustmentQueryResponse(res),
-      );
+      return Promise.resolve(new GetScheduledBalanceAdjustmentQueryResponse(res));
     } catch (error) {
       throw new GetScheduledBalanceAdjustmentQueryError(error as Error);
     }

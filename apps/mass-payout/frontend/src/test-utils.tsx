@@ -202,18 +202,18 @@
  *    limitations under the License.
  */
 
-import React from 'react';
-import { ChakraProvider } from '@chakra-ui/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render, waitFor } from '@testing-library/react';
-import type { MemoryHistory } from 'history';
-import { createMemoryHistory } from 'history';
-import { I18nextProvider } from 'react-i18next';
-import { Router } from 'react-router-dom';
-import i18n from './i18n/config';
-import theme from './theme';
-import userEvent from '@testing-library/user-event';
+import React from "react";
+import { ChakraProvider } from "@chakra-ui/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { RenderOptions, RenderResult } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
+import type { MemoryHistory } from "history";
+import { createMemoryHistory } from "history";
+import { I18nextProvider } from "react-i18next";
+import { Router } from "react-router-dom";
+import i18n from "./i18n/config";
+import theme from "./theme";
+import userEvent from "@testing-library/user-event";
 
 export const selectCalendar = async (
   component: RenderResult,
@@ -226,9 +226,7 @@ export const selectCalendar = async (
   await waitFor(() => {
     const daysToSelect = component.getAllByTestId(`day-${day}`);
 
-    const dayToSelect = daysToSelect.find(
-      (day) => !day.hasAttribute('disabled'),
-    );
+    const dayToSelect = daysToSelect.find((day) => !day.hasAttribute("disabled"));
 
     if (dayToSelect) {
       userEvent.click(dayToSelect);
@@ -284,9 +282,7 @@ const customRender = (
   } = {},
 ): RenderResult =>
   render(ui, {
-    wrapper: ({ children }) => (
-      <AllProviders history={history}>{children}</AllProviders>
-    ),
+    wrapper: ({ children }) => <AllProviders history={history}>{children}</AllProviders>,
     ...options,
   });
 

@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import { SecurityDate } from '../shared/SecurityDate';
+import ValidatedDomain from "@core/validation/ValidatedArgs";
+import { SecurityDate } from "../shared/SecurityDate";
 
 export class Kyc extends ValidatedDomain<Kyc> {
   public validFrom: string;
@@ -213,19 +213,10 @@ export class Kyc extends ValidatedDomain<Kyc> {
   public issuer: string;
   public status: number;
 
-  constructor(
-    validFrom: string,
-    validTo: string,
-    vcId: string,
-    issuer: string,
-    status: number,
-  ) {
+  constructor(validFrom: string, validTo: string, vcId: string, issuer: string, status: number) {
     super({
       validTo: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          parseInt(this.validFrom),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), parseInt(this.validFrom));
       },
     });
 

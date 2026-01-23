@@ -203,13 +203,10 @@
 
 */
 
-import BaseError from '@core/error/BaseError';
-import { BaseArgs } from './BaseArgs';
+import BaseError from "@core/error/BaseError";
+import { BaseArgs } from "./BaseArgs";
 
-export type ValidatedArgsKey<T extends BaseArgs> = keyof Omit<
-  T,
-  'validations' | 'validate'
->;
+export type ValidatedArgsKey<T extends BaseArgs> = keyof Omit<T, "validations" | "validate">;
 
 export type ValidationFn<K> = (val: K) => BaseError[] | void;
 export type PropType<TObj, TProp extends keyof TObj> = TObj[TProp];

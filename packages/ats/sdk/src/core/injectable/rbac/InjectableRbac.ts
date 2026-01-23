@@ -203,15 +203,15 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { HasRoleQueryHandler } from '@query/security/roles/hasRole/HasRoleQueryHandler';
-import { GetRoleCountForQueryHandler } from '@query/security/roles/getRoleCountFor/GetRoleCountForQueryHandler';
-import { GetRolesForQueryHandler } from '@query/security/roles/getRolesFor/GetRolesForQueryHandler';
-import { RevokeRoleCommandHandler } from '@command/security/roles/revokeRole/RevokeRoleCommandHandler';
-import { ApplyRolesCommandHandler } from '@command/security/roles/applyRoles/ApplyRolesCommandHandler';
-import { GrantRoleCommandHandler } from '@command/security/roles/grantRole/GrantRoleCommandHandler';
-import { GetRoleMemberCountQueryHandler } from '@query/security/roles/getRoleMemberCount/GetRoleMemberCountQueryHandler';
-import { GetRoleMembersQueryHandler } from '@query/security/roles/getRoleMembers/GetRoleMembersQueryHandler';
+import { TOKENS } from "../Tokens";
+import { HasRoleQueryHandler } from "@query/security/roles/hasRole/HasRoleQueryHandler";
+import { GetRoleCountForQueryHandler } from "@query/security/roles/getRoleCountFor/GetRoleCountForQueryHandler";
+import { GetRolesForQueryHandler } from "@query/security/roles/getRolesFor/GetRolesForQueryHandler";
+import { RevokeRoleCommandHandler } from "@command/security/roles/revokeRole/RevokeRoleCommandHandler";
+import { ApplyRolesCommandHandler } from "@command/security/roles/applyRoles/ApplyRolesCommandHandler";
+import { GrantRoleCommandHandler } from "@command/security/roles/grantRole/GrantRoleCommandHandler";
+import { GetRoleMemberCountQueryHandler } from "@query/security/roles/getRoleMemberCount/GetRoleMemberCountQueryHandler";
+import { GetRoleMembersQueryHandler } from "@query/security/roles/getRoleMembers/GetRoleMembersQueryHandler";
 
 export const COMMAND_HANDLERS_RBAC = [
   {

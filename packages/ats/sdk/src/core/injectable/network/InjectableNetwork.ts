@@ -203,11 +203,11 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { ConnectCommandHandler } from '@command/network/connect/ConnectCommandHandler';
-import { DisconnectCommandHandler } from '@command/network/disconnect/DisconnectCommandHandler';
-import { SetNetworkCommandHandler } from '@command/network/setNetwork/SetNetworkCommandHandler';
-import { SetConfigurationCommandHandler } from '@command/network/setConfiguration/SetConfigurationCommandHandler';
+import { TOKENS } from "../Tokens";
+import { ConnectCommandHandler } from "@command/network/connect/ConnectCommandHandler";
+import { DisconnectCommandHandler } from "@command/network/disconnect/DisconnectCommandHandler";
+import { SetNetworkCommandHandler } from "@command/network/setNetwork/SetNetworkCommandHandler";
+import { SetConfigurationCommandHandler } from "@command/network/setConfiguration/SetConfigurationCommandHandler";
 
 export const COMMAND_HANDLERS_NETWORK = [
   {

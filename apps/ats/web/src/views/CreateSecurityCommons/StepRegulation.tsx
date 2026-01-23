@@ -203,9 +203,9 @@
 
 */
 
-import { useEffect, useState } from 'react';
-import { Button, HStack, Stack, VStack, useDisclosure } from '@chakra-ui/react';
-import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from "react";
+import { Button, HStack, Stack, VStack, useDisclosure } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import {
   PhosphorIcon,
   Text,
@@ -220,25 +220,22 @@ import {
   useStepContext,
   PopUp,
   Tooltip,
-} from 'io-bricks-ui';
-import { Plus, X } from '@phosphor-icons/react';
-import { CancelButton } from '../../components/CancelButton';
-import { PreviousStepButton } from '../CreateEquity/Components/PreviousStepButton';
-import { required } from '../../utils/rules';
-import { ICreateEquityFormValues } from '../CreateEquity/ICreateEquityFormValues';
-import { useFormContext, useFormState } from 'react-hook-form';
-import { Info } from '@phosphor-icons/react';
-import { FormStepContainer } from '../../components/FormStepContainer';
-import { CountriesList } from './CountriesList';
-import { useGetRegulationDetails } from '../../hooks/queries/useGetSecurityDetails';
-import { GetRegulationDetailsRequest } from '@hashgraph/asset-tokenization-sdk';
-import { createColumnHelper } from '@tanstack/react-table';
-import {
-  COUNTRY_LIST_ALLOWED,
-  COUNTRY_LIST_BLOCKED,
-} from '../../utils/countriesConfig';
-import { ICreateBondFormValues } from '../CreateBond/ICreateBondFormValues';
-import _capitalize from 'lodash/capitalize';
+} from "io-bricks-ui";
+import { Plus, X } from "@phosphor-icons/react";
+import { CancelButton } from "../../components/CancelButton";
+import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
+import { required } from "../../utils/rules";
+import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
+import { useFormContext, useFormState } from "react-hook-form";
+import { Info } from "@phosphor-icons/react";
+import { FormStepContainer } from "../../components/FormStepContainer";
+import { CountriesList } from "./CountriesList";
+import { useGetRegulationDetails } from "../../hooks/queries/useGetSecurityDetails";
+import { GetRegulationDetailsRequest } from "@hashgraph/asset-tokenization-sdk";
+import { createColumnHelper } from "@tanstack/react-table";
+import { COUNTRY_LIST_ALLOWED, COUNTRY_LIST_BLOCKED } from "../../utils/countriesConfig";
+import { ICreateBondFormValues } from "../CreateBond/ICreateBondFormValues";
+import _capitalize from "lodash/capitalize";
 
 interface Regulation {
   restriction: {
@@ -249,41 +246,38 @@ interface Regulation {
 }
 
 export const StepRegulation = () => {
-  const { t } = useTranslation('security', { keyPrefix: 'regulation' });
-  const { control, watch, setValue } = useFormContext<
-    ICreateEquityFormValues | ICreateBondFormValues
-  >();
+  const { t } = useTranslation("security", { keyPrefix: "regulation" });
+  const { control, watch, setValue } = useFormContext<ICreateEquityFormValues | ICreateBondFormValues>();
   const stepFormState = useFormState({ control });
-  const [countryToAdd, setCountryToAdd] = useState<string>('');
+  const [countryToAdd, setCountryToAdd] = useState<string>("");
   const { goToNext } = useStepContext();
 
-  const regulationType = watch('regulationType');
-  const regulationSubType = watch('regulationSubType');
-  const countriesListType = watch('countriesListType');
-  const countriesList: string[] = watch('countriesList');
+  const regulationType = watch("regulationType");
+  const regulationSubType = watch("regulationSubType");
+  const countriesListType = watch("countriesListType");
+  const countriesList: string[] = watch("countriesList");
 
   useEffect(() => {
     if (regulationType === 1) {
-      setValue('regulationSubType', 0);
-      setValue('countriesListType', 1);
+      setValue("regulationSubType", 0);
+      setValue("countriesListType", 1);
     } else {
-      setValue('regulationSubType', 1);
-      setValue('countriesListType', 2);
+      setValue("regulationSubType", 1);
+      setValue("countriesListType", 2);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [regulationType]);
 
   // GET Regulation Details
-  const { data: regulationDetails, refetch: refetchRegulations } =
-    useGetRegulationDetails(
-      new GetRegulationDetailsRequest({
-        regulationType: regulationType,
-        regulationSubType: regulationSubType,
-      }),
-      {
-        retry: false,
-      },
-    );
+  const { data: regulationDetails, refetch: refetchRegulations } = useGetRegulationDetails(
+    new GetRegulationDetailsRequest({
+      regulationType: regulationType,
+      regulationSubType: regulationSubType,
+    }),
+    {
+      retry: false,
+    },
+  );
 
   useEffect(() => {
     refetchRegulations();
@@ -292,11 +286,11 @@ export const StepRegulation = () => {
   }, [regulationType, regulationSubType]);
 
   const addCountryOnSubmit = () => {
-    if (countryToAdd !== '') {
+    if (countryToAdd !== "") {
       if (!countriesList.includes(countryToAdd)) {
         countriesList.push(countryToAdd);
       }
-      setCountryToAdd('');
+      setCountryToAdd("");
     }
   };
 
@@ -306,7 +300,7 @@ export const StepRegulation = () => {
 
   const onRemoveCountryHandler = (country: string) => {
     setValue(
-      'countriesList',
+      "countriesList",
       countriesList.filter((obj) => obj !== country),
     );
   };
@@ -315,8 +309,8 @@ export const StepRegulation = () => {
 
   const columnHelper = createColumnHelper<Regulation>();
   const columns = [
-    columnHelper.accessor('restriction', {
-      header: t('restrictions'),
+    columnHelper.accessor("restriction", {
+      header: t("restrictions"),
       size: 160,
       enableSorting: false,
       cell: ({ getValue }) => {
@@ -332,8 +326,8 @@ export const StepRegulation = () => {
         );
       },
     }),
-    columnHelper.accessor('rule', {
-      header: t('rules'),
+    columnHelper.accessor("rule", {
+      header: t("rules"),
       size: 160,
       enableSorting: false,
       cell: ({ getValue }) => {
@@ -349,51 +343,48 @@ export const StepRegulation = () => {
   const dataRegulations: Regulation[] = [
     {
       restriction: {
-        text: t('dealSize'),
-        tooltip: t('dealSizeTooltip'),
+        text: t("dealSize"),
+        tooltip: t("dealSizeTooltip"),
       },
-      rule:
-        regulationDetails?.dealSize !== '0'
-          ? `${regulationDetails?.dealSize} $`
-          : t('dealSizePlaceHolder'),
+      rule: regulationDetails?.dealSize !== "0" ? `${regulationDetails?.dealSize} $` : t("dealSizePlaceHolder"),
     },
     {
       restriction: {
-        text: t('accreditedInvestors'),
-        tooltip: t('accreditedInvestorsTooltip'),
+        text: t("accreditedInvestors"),
+        tooltip: t("accreditedInvestorsTooltip"),
       },
-      rule: _capitalize(regulationDetails?.accreditedInvestors) ?? '',
+      rule: _capitalize(regulationDetails?.accreditedInvestors) ?? "",
     },
     {
       restriction: {
-        text: t('maxNonAccreditedInvestors'),
-        tooltip: t('maxNonAccreditedInvestorsTooltip'),
+        text: t("maxNonAccreditedInvestors"),
+        tooltip: t("maxNonAccreditedInvestorsTooltip"),
       },
       rule:
         regulationDetails?.maxNonAccreditedInvestors !== 0
-          ? `${regulationDetails?.maxNonAccreditedInvestors}` || ''
-          : t('maxNonAccreditedInvestorsPlaceHolder'),
+          ? `${regulationDetails?.maxNonAccreditedInvestors}` || ""
+          : t("maxNonAccreditedInvestorsPlaceHolder"),
     },
     {
       restriction: {
-        text: t('manualInvestorVerification'),
-        tooltip: t('manualInvestorVerificationTooltip'),
+        text: t("manualInvestorVerification"),
+        tooltip: t("manualInvestorVerificationTooltip"),
       },
-      rule: _capitalize(regulationDetails?.manualInvestorVerification) ?? '',
+      rule: _capitalize(regulationDetails?.manualInvestorVerification) ?? "",
     },
     {
       restriction: {
-        text: t('internationalInvestors'),
-        tooltip: t('internationalInvestorsTooltip'),
+        text: t("internationalInvestors"),
+        tooltip: t("internationalInvestorsTooltip"),
       },
-      rule: _capitalize(regulationDetails?.internationalInvestors) ?? '',
+      rule: _capitalize(regulationDetails?.internationalInvestors) ?? "",
     },
     {
       restriction: {
-        text: t('resaleHoldPeriod'),
-        tooltip: t('resaleHoldPeriodTooltip'),
+        text: t("resaleHoldPeriod"),
+        tooltip: t("resaleHoldPeriodTooltip"),
       },
-      rule: _capitalize(regulationDetails?.resaleHoldPeriod) ?? '',
+      rule: _capitalize(regulationDetails?.resaleHoldPeriod) ?? "",
     },
   ];
 
@@ -401,19 +392,19 @@ export const StepRegulation = () => {
     <FormStepContainer>
       <Stack w="600px" gap={8}>
         <Stack>
-          <Text textStyle="HeadingMediumLG">{t('title')}</Text>
+          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
           <HStack alignItems="top">
             <PhosphorIcon as={Info} fill="primary.500" weight={Weight.Fill} />
             <VStack alignItems="left">
-              <Text textStyle="ElementsSemiboldSM">{t('important') + ':'}</Text>
-              <Text textStyle="ElementsRegularSM">{t('titleImportant')}</Text>
+              <Text textStyle="ElementsSemiboldSM">{t("important") + ":"}</Text>
+              <Text textStyle="ElementsRegularSM">{t("titleImportant")}</Text>
             </VStack>
           </HStack>
         </Stack>
         <Stack w="full">
           <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">{t('jurisdiction')}</Text>
-            <Tooltip label={t('jurisdictionTooltip')} placement="right">
+            <Text textStyle="BodyTextRegularSM">{t("jurisdiction")}</Text>
+            <Tooltip label={t("jurisdictionTooltip")} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -423,17 +414,17 @@ export const StepRegulation = () => {
             defaultValue={1}
             options={[
               {
-                label: 'United States jurisdiction',
-                value: '1',
+                label: "United States jurisdiction",
+                value: "1",
               },
             ]}
           />
         </Stack>
-        <InfoDivider title={t('selectRegulation')} type="main" />
+        <InfoDivider title={t("selectRegulation")} type="main" />
         <Stack w="full">
           <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">{t('regulationType')}</Text>
-            <Tooltip label={t('regulationTypeTooltip')} placement="right">
+            <Text textStyle="BodyTextRegularSM">{t("regulationType")}</Text>
+            <Tooltip label={t("regulationTypeTooltip")} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -445,11 +436,11 @@ export const StepRegulation = () => {
             options={[
               {
                 value: 1,
-                label: t('regulationType_1'),
+                label: t("regulationType_1"),
               },
               {
                 value: 2,
-                label: t('regulationType_2'),
+                label: t("regulationType_2"),
               },
             ]}
           />
@@ -457,10 +448,8 @@ export const StepRegulation = () => {
         {regulationType !== 1 && (
           <Stack w="full">
             <HStack justifySelf="flex-start">
-              <Text textStyle="BodyTextRegularSM">
-                {t('regulationSubType')}
-              </Text>
-              <Tooltip label={t('regulationSubTypeTooltip')} placement="right">
+              <Text textStyle="BodyTextRegularSM">{t("regulationSubType")}</Text>
+              <Tooltip label={t("regulationSubTypeTooltip")} placement="right">
                 <PhosphorIcon as={Info} />
               </Tooltip>
             </HStack>
@@ -471,11 +460,11 @@ export const StepRegulation = () => {
               options={[
                 {
                   value: 1,
-                  label: t('regulationSubType_1'),
+                  label: t("regulationSubType_1"),
                 },
                 {
                   value: 2,
-                  label: t('regulationSubType_2'),
+                  label: t("regulationSubType_2"),
                 },
               ]}
             />
@@ -484,48 +473,33 @@ export const StepRegulation = () => {
         <HStack alignItems="top">
           <PhosphorIcon as={Info} fill="primary.500" weight={Weight.Fill} />
           <VStack alignItems="left">
-            <Text textStyle="ElementsSemiboldSM">{t('important') + ':'}</Text>
-            <Text textStyle="ElementsRegularSM">
-              {t('selectRegulationImportant')}
-            </Text>
+            <Text textStyle="ElementsSemiboldSM">{t("important") + ":"}</Text>
+            <Text textStyle="ElementsRegularSM">{t("selectRegulationImportant")}</Text>
           </VStack>
         </HStack>
         <PanelTitle
           title={
-            (regulationType ? t(`regulationType_${regulationType}`) : '') +
-            ' ' +
-            (regulationType === 2
-              ? t(`regulationSubType_${regulationSubType}`)
-              : '')
+            (regulationType ? t(`regulationType_${regulationType}`) : "") +
+            " " +
+            (regulationType === 2 ? t(`regulationSubType_${regulationSubType}`) : "")
           }
         />
         <Table name="regulations" columns={columns} data={dataRegulations} />
-        <InfoDivider
-          title={
-            countriesListType === 1 ? t('blockedList') : t('authorizationList')
-          }
-          type="main"
-        />
+        <InfoDivider title={countriesListType === 1 ? t("blockedList") : t("authorizationList")} type="main" />
         <HStack alignItems="top">
           <PhosphorIcon as={Info} fill="primary.500" weight={Weight.Fill} />
           <VStack alignItems="left">
-            <Text textStyle="ElementsSemiboldSM">{t('important') + ':'}</Text>
+            <Text textStyle="ElementsSemiboldSM">{t("important") + ":"}</Text>
             <Text textStyle="ElementsRegularSM">
-              {countriesListType === 1
-                ? t('blockedListImportant')
-                : t('authorizationListImportant')}
+              {countriesListType === 1 ? t("blockedListImportant") : t("authorizationListImportant")}
             </Text>
           </VStack>
         </HStack>
         <Stack w="full">
           <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">{t('selectCountry')}</Text>
+            <Text textStyle="BodyTextRegularSM">{t("selectCountry")}</Text>
             <Tooltip
-              label={
-                t('selectCountryTooltip') +
-                ' ' +
-                (countriesListType === 1 ? t('blockList') : t('allowList'))
-              }
+              label={t("selectCountryTooltip") + " " + (countriesListType === 1 ? t("blockList") : t("allowList"))}
               placement="right"
             >
               <PhosphorIcon as={Info} />
@@ -539,18 +513,10 @@ export const StepRegulation = () => {
                 label: value,
                 value: key,
               }))}
-              onChange={(country) =>
-                onOptionChangeHandler(country as SelectOption)
-              }
+              onChange={(country) => onOptionChangeHandler(country as SelectOption)}
             />
-            <Button
-              size="sm"
-              leftIcon={<PhosphorIcon as={Plus} />}
-              onClick={addCountryOnSubmit}
-            >
-              {t('addCountryButton') +
-                ' ' +
-                (countriesListType === 1 ? t('blockList') : t('allowList'))}
+            <Button size="sm" leftIcon={<PhosphorIcon as={Plus} />} onClick={addCountryOnSubmit}>
+              {t("addCountryButton") + " " + (countriesListType === 1 ? t("blockList") : t("allowList"))}
             </Button>
           </HStack>
         </Stack>
@@ -559,35 +525,15 @@ export const StepRegulation = () => {
           <>
             <VStack w="auto" layerStyle="whiteContainer">
               <PanelTitle
-                title={
-                  t('countriesIn') +
-                  ' ' +
-                  (countriesListType === 1 ? t('blockList') : t('allowList'))
-                }
+                title={t("countriesIn") + " " + (countriesListType === 1 ? t("blockList") : t("allowList"))}
               />
-              <HStack
-                layerStyle="whiteContainer"
-                noOfLines={20}
-                lineHeight={10}
-              >
+              <HStack layerStyle="whiteContainer" noOfLines={20} lineHeight={10}>
                 {countriesListType === 1
                   ? COUNTRY_LIST_BLOCKED.map((country) => (
-                      <Tag
-                        label={
-                          CountriesList[country as keyof typeof CountriesList]
-                        }
-                        size="sm"
-                        disabled
-                      />
+                      <Tag label={CountriesList[country as keyof typeof CountriesList]} size="sm" disabled />
                     ))
                   : COUNTRY_LIST_ALLOWED.map((country) => (
-                      <Tag
-                        label={
-                          CountriesList[country as keyof typeof CountriesList]
-                        }
-                        size="sm"
-                        disabled
-                      />
+                      <Tag label={CountriesList[country as keyof typeof CountriesList]} size="sm" disabled />
                     ))}
                 {countriesList.map((country) => (
                   <Tag
@@ -605,23 +551,12 @@ export const StepRegulation = () => {
           </>
         )}
 
-        <HStack
-          gap={4}
-          w="full"
-          h="100px"
-          align="end"
-          justifyContent={'flex-end'}
-        >
+        <HStack gap={4} w="full" h="100px" align="end" justifyContent={"flex-end"}>
           <CancelButton />
           <PreviousStepButton />
 
-          <Button
-            size="md"
-            variant="primary"
-            onClick={onOpen}
-            isDisabled={!stepFormState.isValid}
-          >
-            {t('nextStepButton')}
+          <Button size="md" variant="primary" onClick={onOpen} isDisabled={!stepFormState.isValid}>
+            {t("nextStepButton")}
           </Button>
         </HStack>
       </Stack>
@@ -631,10 +566,10 @@ export const StepRegulation = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={Info} size="md" />}
-        title={t('titlePopUp')}
-        description={t('descriptionPopUp')}
-        cancelText={t('cancelTextPopUp')}
-        confirmText={t('confirmTextPopUp')}
+        title={t("titlePopUp")}
+        description={t("descriptionPopUp")}
+        cancelText={t("cancelTextPopUp")}
+        confirmText={t("confirmTextPopUp")}
         onConfirm={() => {
           goToNext?.();
           onClose();

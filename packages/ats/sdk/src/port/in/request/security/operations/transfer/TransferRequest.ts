@@ -203,23 +203,15 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '@port/in/request/FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class TransferRequest extends ValidatedRequest<TransferRequest> {
   securityId: string;
   targetId: string;
   amount: string;
 
-  constructor({
-    targetId,
-    amount,
-    securityId,
-  }: {
-    targetId: string;
-    amount: string;
-    securityId: string;
-  }) {
+  constructor({ targetId, amount, securityId }: { targetId: string; amount: string; securityId: string }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

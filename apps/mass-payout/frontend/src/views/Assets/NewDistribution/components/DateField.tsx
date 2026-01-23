@@ -174,14 +174,9 @@
  *    END OF TERMS AND CONDITIONS
  */
 
-import {
-  Control,
-  FieldPath,
-  FieldValues,
-  RegisterOptions,
-} from 'react-hook-form';
-import { CalendarInputController } from 'io-bricks-ui';
-import { validateFutureDate } from '../NewDistribution.utils';
+import { Control, FieldPath, FieldValues, RegisterOptions } from "react-hook-form";
+import { CalendarInputController } from "io-bricks-ui";
+import { validateFutureDate } from "../NewDistribution.utils";
 
 interface DateFieldProps<T extends FieldValues> {
   name: FieldPath<T>;
@@ -211,8 +206,7 @@ export const DateField = <T extends FieldValues>({
         required: requiredMessage,
       }),
     ...(futureDateMessage && {
-      validate: (value: Date | string | undefined) =>
-        validateFutureDate(value, futureDateMessage),
+      validate: (value: Date | string | undefined) => validateFutureDate(value, futureDateMessage),
     }),
   };
 

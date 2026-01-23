@@ -203,11 +203,11 @@
 
 */
 
-import type { ComponentMultiStyleConfig } from '@chakra-ui/react';
-import { BasePlatformTheme } from 'io-bricks-ui/Theme';
+import type { ComponentMultiStyleConfig } from "@chakra-ui/react";
+import { BasePlatformTheme } from "io-bricks-ui/Theme";
 
 export const FormError: ComponentMultiStyleConfig = {
-  parts: ['text'],
+  parts: ["text"],
   baseStyle: {
     text: {
       ...BasePlatformTheme.textStyles.BodyRegularXS,
@@ -216,11 +216,11 @@ export const FormError: ComponentMultiStyleConfig = {
   variants: {
     outline: {
       text: {
-        color: 'status.error.500',
+        color: "status.error.500",
       },
     },
   },
   defaultProps: {
-    variant: 'outline',
+    variant: "outline",
   },
 };

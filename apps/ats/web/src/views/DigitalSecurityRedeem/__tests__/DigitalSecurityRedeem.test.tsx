@@ -203,38 +203,38 @@
 
 */
 
-import { DigitalSecurityRedeem } from '../DigitalSecurityRedeem';
-import { render } from '../../../test-utils';
+import { DigitalSecurityRedeem } from "../DigitalSecurityRedeem";
+import { render } from "../../../test-utils";
 
 describe(`${DigitalSecurityRedeem.name}`, () => {
   const factoryComponent = () => {
     return render(<DigitalSecurityRedeem />);
   };
 
-  test('render correctly', () => {
+  test("render correctly", () => {
     const component = factoryComponent();
 
     expect(component.asFragment()).toMatchSnapshot();
   });
 
-  test('should show Goback button', () => {
+  test("should show Goback button", () => {
     const component = factoryComponent();
 
-    const breadcrumbs = component.getByTestId('go-back-button');
+    const breadcrumbs = component.getByTestId("go-back-button");
     expect(breadcrumbs).toBeInTheDocument();
   });
 
-  test('should show breadcrumbs', () => {
+  test("should show breadcrumbs", () => {
     const component = factoryComponent();
 
-    const breadcrumbs = component.getByTestId('breadcrumb-desktop');
+    const breadcrumbs = component.getByTestId("breadcrumb-desktop");
     expect(breadcrumbs).toBeInTheDocument();
   });
 
-  test('should form be rendered properly', () => {
+  test("should form be rendered properly", () => {
     const component = factoryComponent();
 
-    const form = component.getByTestId('redeem-form');
+    const form = component.getByTestId("redeem-form");
     expect(form).toBeInTheDocument();
   });
 });

@@ -203,10 +203,10 @@
 
 */
 
-import { GetTokenHoldersAtSnapshotQueryHandler } from '@query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQueryHandler';
-import { TOKENS } from '../Tokens';
-import { TakeSnapshotCommandHandler } from '@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommandHandler';
-import { GetTotalTokenHoldersAtSnapshotQueryHandler } from '@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQueryHandler';
+import { GetTokenHoldersAtSnapshotQueryHandler } from "@query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQueryHandler";
+import { TOKENS } from "../Tokens";
+import { TakeSnapshotCommandHandler } from "@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommandHandler";
+import { GetTotalTokenHoldersAtSnapshotQueryHandler } from "@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQueryHandler";
 
 export const COMMAND_HANDLERS_SNAPSHOT = [
   {

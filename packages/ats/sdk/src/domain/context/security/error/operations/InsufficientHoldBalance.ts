@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class InsufficientHoldBalance extends BaseError {
   constructor() {
-    super(
-      ErrorCode.InsufficientHoldBalance,
-      `The hold balance is not sufficient to perform the operation`,
-    );
+    super(ErrorCode.InsufficientHoldBalance, `The hold balance is not sufficient to perform the operation`);
   }
 }

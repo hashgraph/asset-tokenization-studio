@@ -208,14 +208,14 @@ import {
   AccordionIcon as ChakraAccordionIcon,
   HStack,
   StackProps,
-} from '@chakra-ui/react';
-import { Button, Tag } from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { RouterManager } from '../../../router/RouterManager';
-import { RouteName } from '../../../router/RouteName';
-import { User } from '../../../utils/constants';
-import { useAccountStore } from '../../../store/accountStore';
-import { useWalletStore } from '../../../store/walletStore';
+} from "@chakra-ui/react";
+import { Button, Tag } from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import { RouterManager } from "../../../router/RouterManager";
+import { RouteName } from "../../../router/RouteName";
+import { User } from "../../../utils/constants";
+import { useAccountStore } from "../../../store/accountStore";
+import { useWalletStore } from "../../../store/walletStore";
 
 export interface AccordionItemCustomTitleProps extends StackProps {
   isAdmin: boolean;
@@ -223,16 +223,12 @@ export interface AccordionItemCustomTitleProps extends StackProps {
   numOfTokens: number;
 }
 
-export const AccordionItemCustomTitle = (
-  props: AccordionItemCustomTitleProps,
-) => {
+export const AccordionItemCustomTitle = (props: AccordionItemCustomTitleProps) => {
   const { isAdmin, isExpanded, numOfTokens, ...stackProps } = props;
-  const { t } = useTranslation('globals');
+  const { t } = useTranslation("globals");
   const { adminSecurities, holderSecurities } = useAccountStore();
   const { address } = useWalletStore();
-  const userSecurities = isAdmin
-    ? adminSecurities[address]
-    : holderSecurities[address];
+  const userSecurities = isAdmin ? adminSecurities[address] : holderSecurities[address];
 
   return (
     <HStack
@@ -241,19 +237,17 @@ export const AccordionItemCustomTitle = (
       h="64px"
       px={4}
       justify="space-between"
-      bg={isAdmin ? 'adminUI.100' : 'holderUI.100'}
-      borderRadius={isExpanded ? '4px 4px 0px 0px' : '4px'}
+      bg={isAdmin ? "adminUI.100" : "holderUI.100"}
+      borderRadius={isExpanded ? "4px 4px 0px 0px" : "4px"}
       {...stackProps}
     >
       <HStack>
         <ChakraAccordionButton gap={2} data-testid="custom-title-button">
-          <h2 style={{ fontWeight: 'bold' }}>
-            {isAdmin ? t('admin') : t('holder')}
-          </h2>
+          <h2 style={{ fontWeight: "bold" }}>{isAdmin ? t("admin") : t("holder")}</h2>
           <ChakraAccordionIcon />
         </ChakraAccordionButton>
         <HStack w="auto">
-          <Tag label={t('quantityOfSecurities', { numOfTokens })} size="sm" />
+          <Tag label={t("quantityOfSecurities", { numOfTokens })} size="sm" />
         </HStack>
       </HStack>
       <HStack>
@@ -267,7 +261,7 @@ export const AccordionItemCustomTitle = (
           }
           isDisabled={!userSecurities?.length}
         >
-          {t('seeAll')}
+          {t("seeAll")}
         </Button>
       </HStack>
     </HStack>

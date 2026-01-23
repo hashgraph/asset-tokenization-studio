@@ -203,13 +203,11 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
-import { ClearingTransfer } from '@domain/context/security/Clearing';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
+import { ClearingTransfer } from "@domain/context/security/Clearing";
 
-export class GetClearingTransferForByPartitionQueryResponse
-  implements QueryResponse
-{
+export class GetClearingTransferForByPartitionQueryResponse implements QueryResponse {
   constructor(public readonly payload: ClearingTransfer) {}
 }
 

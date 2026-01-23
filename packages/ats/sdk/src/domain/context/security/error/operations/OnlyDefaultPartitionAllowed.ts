@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class OnlyDefaultPartitionAllowed extends BaseError {
   constructor() {
-    super(
-      ErrorCode.OnlyDefaultPartitionAllowed,
-      `Only default partition allowed in single mode`,
-    );
+    super(ErrorCode.OnlyDefaultPartitionAllowed, `Only default partition allowed in single mode`);
   }
 }

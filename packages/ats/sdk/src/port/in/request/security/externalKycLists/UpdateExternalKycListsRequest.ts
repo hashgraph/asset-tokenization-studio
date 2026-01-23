@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../../FormatValidation';
-import { InvalidValue } from '../../error/InvalidValue';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../../FormatValidation";
+import { InvalidValue } from "../../error/InvalidValue";
 
 export default class UpdateExternalKycListsRequest extends ValidatedRequest<UpdateExternalKycListsRequest> {
   securityId: string;
@@ -224,17 +224,10 @@ export default class UpdateExternalKycListsRequest extends ValidatedRequest<Upda
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       externalKycListsAddresses: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(
-          vals,
-          'externalKycListsAddresses',
-        ),
+        FormatValidation.checkHederaIdOrEvmAddressArray(vals, "externalKycListsAddresses"),
       actives: (vals) =>
         vals.length !== externalKycListsAddresses.length
-          ? [
-              new InvalidValue(
-                `The list of externalKycListsAddresses and actives must have equal length.`,
-              ),
-            ]
+          ? [new InvalidValue(`The list of externalKycListsAddresses and actives must have equal length.`)]
           : [],
     });
 

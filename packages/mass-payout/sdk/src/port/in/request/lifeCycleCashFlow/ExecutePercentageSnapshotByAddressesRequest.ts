@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '@port/in/request/FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "@port/in/request/FormatValidation";
 
 // eslint-disable-next-line max-len
 export default class ExecutePercentageSnapshotByAddressesRequest extends ValidatedRequest<ExecutePercentageSnapshotByAddressesRequest> {
@@ -231,8 +231,7 @@ export default class ExecutePercentageSnapshotByAddressesRequest extends Validat
       lifeCycleCashFlow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       asset: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       snapshotId: FormatValidation.checkNumber(),
-      holders: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(vals, 'holders', false),
+      holders: (vals) => FormatValidation.checkHederaIdOrEvmAddressArray(vals, "holders", false),
       percentage: FormatValidation.checkAmount(),
     });
 

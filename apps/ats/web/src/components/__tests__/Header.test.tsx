@@ -203,15 +203,15 @@
 
 */
 
-import { Header, HeaderProps } from '../Header';
-import { render } from '../../test-utils';
+import { Header, HeaderProps } from "../Header";
+import { render } from "../../test-utils";
 
 const defaultProps: HeaderProps = {
-  page: 'digitalSecuritiesList',
+  page: "digitalSecuritiesList",
 };
 
 describe(`${Header.name}`, () => {
-  test('should render correctly', () => {
+  test("should render correctly", () => {
     const component = render(<Header {...defaultProps} />);
 
     expect(component.asFragment()).toMatchSnapshot();

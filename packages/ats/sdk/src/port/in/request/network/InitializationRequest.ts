@@ -203,25 +203,19 @@
 
 */
 
-import WalletEvent from '@service/event/WalletEvent';
-import Configuration from '@domain/context/network/Configuration';
-import { Environment } from '@domain/context/network/Environment';
-import { MirrorNode, MirrorNodes } from '@domain/context/network/MirrorNode';
-import {
-  JsonRpcRelay,
-  JsonRpcRelays,
-} from '@domain/context/network/JsonRpcRelay';
-import { SupportedWallets } from '@domain/context/network/Wallet';
-import { BaseRequest } from '../BaseRequest';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { Factories } from '@domain/context/factory/Factories';
-import { Resolvers } from '@domain/context/factory/Resolvers';
+import WalletEvent from "@service/event/WalletEvent";
+import Configuration from "@domain/context/network/Configuration";
+import { Environment } from "@domain/context/network/Environment";
+import { MirrorNode, MirrorNodes } from "@domain/context/network/MirrorNode";
+import { JsonRpcRelay, JsonRpcRelays } from "@domain/context/network/JsonRpcRelay";
+import { SupportedWallets } from "@domain/context/network/Wallet";
+import { BaseRequest } from "../BaseRequest";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { Factories } from "@domain/context/factory/Factories";
+import { Resolvers } from "@domain/context/factory/Resolvers";
 export { SupportedWallets };
 
-export default class InitializationRequest
-  extends ValidatedRequest<InitializationRequest>
-  implements BaseRequest
-{
+export default class InitializationRequest extends ValidatedRequest<InitializationRequest> implements BaseRequest {
   network: Environment;
   mirrorNode: MirrorNode;
   rpcNode: JsonRpcRelay;

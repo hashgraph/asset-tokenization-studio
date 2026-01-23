@@ -203,10 +203,10 @@
 
 */
 
-import { GetTokenBySaltQueryHandler } from '@query/factory/trex/getTokenBySalt/GetTokenBySaltQueryHandler';
-import { TOKENS } from '../Tokens';
-import { CreateTrexSuiteBondCommandHandler } from '@command/bond/createTrexSuite/CreateTrexSuiteBondCommandHandler';
-import { CreateTrexSuiteEquityCommandHandler } from '@command/equity/createTrexSuite/CreateTrexSuiteEquityCommandHandler';
+import { GetTokenBySaltQueryHandler } from "@query/factory/trex/getTokenBySalt/GetTokenBySaltQueryHandler";
+import { TOKENS } from "../Tokens";
+import { CreateTrexSuiteBondCommandHandler } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommandHandler";
+import { CreateTrexSuiteEquityCommandHandler } from "@command/equity/createTrexSuite/CreateTrexSuiteEquityCommandHandler";
 
 export const COMMAND_HANDLERS_TREX_FACTORY = [
   {

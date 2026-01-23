@@ -203,33 +203,26 @@
 
 */
 
-import { Link as RouterLink, useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { HStack } from '@chakra-ui/react';
-import { Button } from 'io-bricks-ui';
-import { RouteName } from '../../../router/RouteName';
-import { RouterManager } from '../../../router/RouterManager';
-import { useGetIsPaused } from '../../../hooks/queries/useGetSecurityDetails';
-import { PauseRequest } from '@hashgraph/asset-tokenization-sdk';
+import { Link as RouterLink, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { HStack } from "@chakra-ui/react";
+import { Button } from "io-bricks-ui";
+import { RouteName } from "../../../router/RouteName";
+import { RouterManager } from "../../../router/RouterManager";
+import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
+import { PauseRequest } from "@hashgraph/asset-tokenization-sdk";
 
 export const HolderActionsButtons = () => {
-  const { t: tButtons } = useTranslation('security', {
-    keyPrefix: 'details.actions',
+  const { t: tButtons } = useTranslation("security", {
+    keyPrefix: "details.actions",
   });
-  const { id = '' } = useParams();
-  const { data: isPaused } = useGetIsPaused(
-    new PauseRequest({ securityId: id }),
-  );
+  const { id = "" } = useParams();
+  const { data: isPaused } = useGetIsPaused(new PauseRequest({ securityId: id }));
 
   if (isPaused) return <></>;
 
   return (
-    <HStack
-      data-testid="holder-actions-buttons"
-      w="full"
-      justifyContent="flex-end"
-      gap={4}
-    >
+    <HStack data-testid="holder-actions-buttons" w="full" justifyContent="flex-end" gap={4}>
       <Button
         data-testid="transfer-button"
         as={RouterLink}
@@ -238,7 +231,7 @@ export const HolderActionsButtons = () => {
         })}
         variant="secondary"
       >
-        {tButtons('transfer')}
+        {tButtons("transfer")}
       </Button>
       <Button
         data-testid="redeem-button"
@@ -248,7 +241,7 @@ export const HolderActionsButtons = () => {
         })}
         variant="secondary"
       >
-        {tButtons('redeem')}
+        {tButtons("redeem")}
       </Button>
     </HStack>
   );

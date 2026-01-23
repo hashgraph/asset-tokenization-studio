@@ -203,19 +203,14 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import Injectable from '@core/injectable/Injectable';
-import {
-  DisconnectCommand,
-  DisconnectCommandResponse,
-} from './DisconnectCommand';
-import { DisconnectCommandError } from './error/DisconnectCommandError';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import Injectable from "@core/injectable/Injectable";
+import { DisconnectCommand, DisconnectCommandResponse } from "./DisconnectCommand";
+import { DisconnectCommandError } from "./error/DisconnectCommandError";
 
 @CommandHandler(DisconnectCommand)
-export class DisconnectCommandHandler
-  implements ICommandHandler<DisconnectCommand>
-{
+export class DisconnectCommandHandler implements ICommandHandler<DisconnectCommand> {
   async execute(): Promise<DisconnectCommandResponse> {
     try {
       const handler = Injectable.resolveTransactionHandler();

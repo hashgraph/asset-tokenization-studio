@@ -203,20 +203,14 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
 export default class IsProceedRecipientRequest extends ValidatedRequest<IsProceedRecipientRequest> {
   securityId: string;
   proceedRecipientId: string;
 
-  constructor({
-    securityId,
-    proceedRecipientId,
-  }: {
-    securityId: string;
-    proceedRecipientId: string;
-  }) {
+  constructor({ securityId, proceedRecipientId }: { securityId: string; proceedRecipientId: string }) {
     super({
       proceedRecipientId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
 

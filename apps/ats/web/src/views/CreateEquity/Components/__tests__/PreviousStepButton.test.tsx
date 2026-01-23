@@ -203,17 +203,17 @@
 
 */
 
-import { PreviousStepButton } from '../PreviousStepButton';
-import { render } from '../../../../test-utils';
+import { PreviousStepButton } from "../PreviousStepButton";
+import { render } from "../../../../test-utils";
 
 const goToPrevious = jest.fn();
-jest.mock('io-bricks-ui', () => ({
-  ...jest.requireActual('io-bricks-ui'),
+jest.mock("io-bricks-ui", () => ({
+  ...jest.requireActual("io-bricks-ui"),
   useStepContext: () => ({ goToPrevious }),
 }));
 
 describe(`${PreviousStepButton.name}`, () => {
-  test('render correctly', () => {
+  test("render correctly", () => {
     const component = render(<PreviousStepButton />);
 
     expect(component.asFragment()).toMatchSnapshot();

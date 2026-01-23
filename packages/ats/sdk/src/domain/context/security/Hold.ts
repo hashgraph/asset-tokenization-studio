@@ -203,8 +203,8 @@
 
 */
 
-import { BigNumber } from 'ethers';
-import BigDecimal from '../shared/BigDecimal';
+import { BigNumber } from "ethers";
+import BigDecimal from "../shared/BigDecimal";
 
 export class Hold {
   public amount: BigNumber;

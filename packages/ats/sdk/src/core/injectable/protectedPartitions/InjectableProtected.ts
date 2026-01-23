@@ -203,11 +203,11 @@
 
 */
 
-import { ProtectPartitionsCommandHandler } from '@command/security/operations/protectPartitions/ProtectPartitionsCommandHandler';
-import { TOKENS } from '../Tokens';
-import { UnprotectPartitionsCommandHandler } from '@command/security/operations/unprotectPartitions/UnprotectPartitionsCommandHandler';
-import { PartitionsProtectedQueryHandler } from '@query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQueryHandler';
-import { GetNounceQueryHandler } from '@query/security/protectedPartitions/getNounce/GetNounceQueryHandler';
+import { ProtectPartitionsCommandHandler } from "@command/security/operations/protectPartitions/ProtectPartitionsCommandHandler";
+import { TOKENS } from "../Tokens";
+import { UnprotectPartitionsCommandHandler } from "@command/security/operations/unprotectPartitions/UnprotectPartitionsCommandHandler";
+import { PartitionsProtectedQueryHandler } from "@query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQueryHandler";
+import { GetNounceQueryHandler } from "@query/security/protectedPartitions/getNounce/GetNounceQueryHandler";
 
 export const COMMAND_HANDLERS_PROTECTED = [
   {

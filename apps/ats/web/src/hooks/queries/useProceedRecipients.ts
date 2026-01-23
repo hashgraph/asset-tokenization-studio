@@ -203,21 +203,20 @@
 
 */
 
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import SDKService from '../../services/SDKService';
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import SDKService from "../../services/SDKService";
 import {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
   GetProceedRecipientDataRequest,
-} from '@hashgraph/asset-tokenization-sdk';
+} from "@hashgraph/asset-tokenization-sdk";
 
 export interface ProceedRecipientDataViewModelResponse {
   address: string;
   data?: string;
 }
 
-export const GET_PROCEED_RECIPIENT_LIST = (securityId: string) =>
-  `GET_PROCEED_RECIPIENT_LIST_${securityId}`;
+export const GET_PROCEED_RECIPIENT_LIST = (securityId: string) => `GET_PROCEED_RECIPIENT_LIST_${securityId}`;
 
 export const IS_INTERNAL_PROCEED_RECIPIENT_ACTIVATED = (securityId: string) =>
   `IS_INTERNAL_PROCEED_RECIPIENT_ACTIVATED_${securityId}`;
@@ -235,8 +234,7 @@ export const useGetProceedRecipientList = (
     [GET_PROCEED_RECIPIENT_LIST(request.securityId)],
     async () => {
       try {
-        const proceedRecipientsCount =
-          await SDKService.getProceedRecipientsCount(request);
+        const proceedRecipientsCount = await SDKService.getProceedRecipientsCount(request);
 
         const proceedRecipients = await SDKService.getProceedRecipients(
           new GetProceedRecipientsRequest({
@@ -260,7 +258,7 @@ export const useGetProceedRecipientList = (
                 data,
               } as ProceedRecipientDataViewModelResponse;
             } catch (error) {
-              console.error('Error fetching proceed recipient data', error);
+              console.error("Error fetching proceed recipient data", error);
               return { address: proceedRecipient, data: undefined };
             }
           }),
@@ -268,7 +266,7 @@ export const useGetProceedRecipientList = (
 
         return proceedRecipientsWithData;
       } catch (error) {
-        console.error('Error fetching proceed recipients', error);
+        console.error("Error fetching proceed recipients", error);
         throw error;
       }
     },

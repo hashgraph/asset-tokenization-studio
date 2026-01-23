@@ -203,25 +203,21 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import ValidationService from '@service/validation/ValidationService';
-import { ErrorCode } from '@core/error/BaseError';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { ReleaseCommandHandler } from './ReleaseCommandHandler';
-import { ReleaseCommand, ReleaseCommandResponse } from './ReleaseCommand';
-import { ReleaseCommandFixture } from '@test/fixtures/lock/LockFixture';
-import { ReleaseCommandError } from './error/ReleaseCommandError';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
+import { ErrorMsgFixture, EvmAddressPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import ValidationService from "@service/validation/ValidationService";
+import { ErrorCode } from "@core/error/BaseError";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { ReleaseCommandHandler } from "./ReleaseCommandHandler";
+import { ReleaseCommand, ReleaseCommandResponse } from "./ReleaseCommand";
+import { ReleaseCommandFixture } from "@test/fixtures/lock/LockFixture";
+import { ReleaseCommandError } from "./error/ReleaseCommandError";
 
-describe('ReleaseCommandHandler', () => {
+describe("ReleaseCommandHandler", () => {
   let handler: ReleaseCommandHandler;
   let command: ReleaseCommand;
 
@@ -248,9 +244,9 @@ describe('ReleaseCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws ReleaseCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws ReleaseCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
@@ -260,15 +256,13 @@ describe('ReleaseCommandHandler', () => {
         await expect(resultPromise).rejects.toBeInstanceOf(ReleaseCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while releasing lock: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while releasing lock: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully release lock', async () => {
+    describe("success cases", () => {
+      it("should successfully release lock", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
 
@@ -282,31 +276,17 @@ describe('ReleaseCommandHandler', () => {
         expect(result.payload).toBe(true);
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
-          command.sourceId,
-        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(command.sourceId);
 
-        expect(
-          transactionServiceMock.getHandler().release,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().release).toHaveBeenCalledTimes(1);
 
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-          command.securityId,
-        );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
 
-        expect(
-          transactionServiceMock.getHandler().release,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getHandler().release).toHaveBeenCalledWith(
           evmAddress,
           evmAddress,
           BigDecimal.fromString(command.lockId.toString()),

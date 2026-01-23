@@ -203,25 +203,19 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { ErrorCode } from '@core/error/BaseError';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ContractService from '@service/contract/ContractService';
-import AccountService from '@service/account/AccountService';
-import {
-  GetHoldsIdForByPartitionQuery,
-  GetHoldsIdForByPartitionQueryResponse,
-} from './GetHoldsIdForByPartitionQuery';
-import { GetHoldsIdForByPartitionQueryHandler } from './GetHoldsIdForByPartitionQueryHandler';
-import { GetHoldsIdForByPartitionQueryFixture } from '@test/fixtures/hold/HoldFixture';
-import { GetHoldsIdForByPartitionQueryError } from './error/GetHoldsIdForByPartitionQueryError';
+import { createMock } from "@golevelup/ts-jest";
+import { ErrorMsgFixture, EvmAddressPropsFixture } from "@test/fixtures/shared/DataFixture";
+import { ErrorCode } from "@core/error/BaseError";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ContractService from "@service/contract/ContractService";
+import AccountService from "@service/account/AccountService";
+import { GetHoldsIdForByPartitionQuery, GetHoldsIdForByPartitionQueryResponse } from "./GetHoldsIdForByPartitionQuery";
+import { GetHoldsIdForByPartitionQueryHandler } from "./GetHoldsIdForByPartitionQueryHandler";
+import { GetHoldsIdForByPartitionQueryFixture } from "@test/fixtures/hold/HoldFixture";
+import { GetHoldsIdForByPartitionQueryError } from "./error/GetHoldsIdForByPartitionQueryError";
 
-describe('GetHoldsIdForByPartitionQueryHandler', () => {
+describe("GetHoldsIdForByPartitionQueryHandler", () => {
   let handler: GetHoldsIdForByPartitionQueryHandler;
   let query: GetHoldsIdForByPartitionQuery;
 
@@ -230,9 +224,7 @@ describe('GetHoldsIdForByPartitionQueryHandler', () => {
   const accountServiceMock = createMock<AccountService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const targetEvmAddress = new EvmAddress(
-    EvmAddressPropsFixture.create().value,
-  );
+  const targetEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
@@ -248,54 +240,36 @@ describe('GetHoldsIdForByPartitionQueryHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('throws GetHoldsIdForByPartitionQueryError when query fails with uncaught error', async () => {
+  describe("execute", () => {
+    it("throws GetHoldsIdForByPartitionQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
       const resultPromise = handler.execute(query);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(
-        GetHoldsIdForByPartitionQueryError,
-      );
+      await expect(resultPromise).rejects.toBeInstanceOf(GetHoldsIdForByPartitionQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while querying hold: ${errorMsg}`,
-        ),
+        message: expect.stringContaining(`An error occurred while querying hold: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
 
-    it('should successfully get holds id for by partition', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
-        targetEvmAddress,
-      );
-      queryAdapterServiceMock.getHoldsIdForByPartition.mockResolvedValueOnce([
-        1,
-      ]);
+    it("should successfully get holds id for by partition", async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
+      queryAdapterServiceMock.getHoldsIdForByPartition.mockResolvedValueOnce([1]);
 
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(GetHoldsIdForByPartitionQueryResponse);
       expect(result.payload).toStrictEqual([1]);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
-        query.targetId,
-      );
-      expect(
-        queryAdapterServiceMock.getHoldsIdForByPartition,
-      ).toHaveBeenCalledWith(
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(query.targetId);
+      expect(queryAdapterServiceMock.getHoldsIdForByPartition).toHaveBeenCalledWith(
         evmAddress,
         query.partitionId,
         targetEvmAddress,

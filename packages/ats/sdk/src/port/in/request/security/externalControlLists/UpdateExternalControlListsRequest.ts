@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { InvalidValue } from '../../error/InvalidValue';
-import FormatValidation from '../../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { InvalidValue } from "../../error/InvalidValue";
+import FormatValidation from "../../FormatValidation";
 
 export default class UpdateExternalControlListsRequest extends ValidatedRequest<UpdateExternalControlListsRequest> {
   securityId: string;
@@ -224,17 +224,10 @@ export default class UpdateExternalControlListsRequest extends ValidatedRequest<
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       externalControlListsAddresses: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(
-          vals,
-          'externalControlListsAddresses',
-        ),
+        FormatValidation.checkHederaIdOrEvmAddressArray(vals, "externalControlListsAddresses"),
       actives: (vals) =>
         vals.length !== externalControlListsAddresses.length
-          ? [
-              new InvalidValue(
-                `The list of externalControlListsAddresses and actives must have equal length.`,
-              ),
-            ]
+          ? [new InvalidValue(`The list of externalControlListsAddresses and actives must have equal length.`)]
           : [],
     });
 

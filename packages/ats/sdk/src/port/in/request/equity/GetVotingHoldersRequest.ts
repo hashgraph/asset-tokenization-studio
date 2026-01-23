@@ -203,8 +203,8 @@
 
 */
 
-import FormatValidation from '@port/in/request/FormatValidation';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from "@port/in/request/FormatValidation";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
 export default class GetVotingHoldersRequest extends ValidatedRequest<GetVotingHoldersRequest> {
   securityId: string;
@@ -212,17 +212,7 @@ export default class GetVotingHoldersRequest extends ValidatedRequest<GetVotingH
   start: number;
   end: number;
 
-  constructor({
-    securityId,
-    voteId,
-    start,
-    end,
-  }: {
-    securityId: string;
-    voteId: number;
-    start: number;
-    end: number;
-  }) {
+  constructor({ securityId, voteId, start, end }: { securityId: string; voteId: number; start: number; end: number }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       voteId: FormatValidation.checkNumber({ min: 0 }),

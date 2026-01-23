@@ -203,35 +203,26 @@
 
 */
 
-import { UseQueryOptions, useQuery } from '@tanstack/react-query';
-import SDKService from '../../services/SDKService';
+import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import SDKService from "../../services/SDKService";
 import {
   GetExternalKycListsCountRequest,
   GetExternalKycListsMembersRequest,
   GetKycStatusMockRequest,
-} from '@hashgraph/asset-tokenization-sdk';
+} from "@hashgraph/asset-tokenization-sdk";
 
-export const GET_EXTERNAL_KYC_STATUS = (securityId: string) =>
-  `GET_EXTERNAL_KYC_COUNT_${securityId}`;
+export const GET_EXTERNAL_KYC_STATUS = (securityId: string) => `GET_EXTERNAL_KYC_COUNT_${securityId}`;
 
-export const GET_EXTERNAL_KYC_COUNT = (securityId: string) =>
-  `GET_EXTERNAL_KYC_COUNT_${securityId}`;
+export const GET_EXTERNAL_KYC_COUNT = (securityId: string) => `GET_EXTERNAL_KYC_COUNT_${securityId}`;
 
-export const GET_EXTERNAL_KYC_MEMBERS = (
-  securityId: string,
-  start: number,
-  end: number,
-) => `GET_EXTERNAL_KYC_MEMBERS_${securityId}_${start}_${end}`;
+export const GET_EXTERNAL_KYC_MEMBERS = (securityId: string, start: number, end: number) =>
+  `GET_EXTERNAL_KYC_MEMBERS_${securityId}_${start}_${end}`;
 
 export const useGetKycStatusMock = <TError, TData = number>(
   request: GetKycStatusMockRequest,
   options?: UseQueryOptions<number, TError, TData, [string]>,
 ) => {
-  return useQuery(
-    [GET_EXTERNAL_KYC_COUNT(request.contractId)],
-    () => SDKService.getKycStatusMock(request),
-    options,
-  );
+  return useQuery([GET_EXTERNAL_KYC_COUNT(request.contractId)], () => SDKService.getKycStatusMock(request), options);
 };
 
 export const useGetExternalKycListsCount = <TError, TData = number>(
@@ -257,12 +248,9 @@ export const useGetExternalKycListsMembers = <TError, TData = string[]>(
 };
 
 export const useGetExternalKyc = (securityId: string, start: number = 0) => {
-  const countQuery = useGetExternalKycListsCount(
-    new GetExternalKycListsCountRequest({ securityId }),
-    {
-      retry: false,
-    },
-  );
+  const countQuery = useGetExternalKycListsCount(new GetExternalKycListsCountRequest({ securityId }), {
+    retry: false,
+  });
 
   const membersQuery = useGetExternalKycListsMembers(
     new GetExternalKycListsMembersRequest({

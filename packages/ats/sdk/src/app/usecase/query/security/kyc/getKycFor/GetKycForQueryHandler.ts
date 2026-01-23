@@ -203,15 +203,15 @@
 
 */
 
-import { IQueryHandler } from '@core/query/QueryHandler';
-import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import AccountService from '@service/account/AccountService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { GetKycForQuery, GetKycForQueryResponse } from './GetKycForQuery';
-import ContractService from '@service/contract/ContractService';
-import { GetKycForQueryError } from './error/GetKycForQueryError';
+import { IQueryHandler } from "@core/query/QueryHandler";
+import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import AccountService from "@service/account/AccountService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { GetKycForQuery, GetKycForQueryResponse } from "./GetKycForQuery";
+import ContractService from "@service/contract/ContractService";
+import { GetKycForQueryError } from "./error/GetKycForQueryError";
 
 @QueryHandler(GetKycForQuery)
 export class GetKycForQueryHandler implements IQueryHandler<GetKycForQuery> {
@@ -228,15 +228,10 @@ export class GetKycForQueryHandler implements IQueryHandler<GetKycForQuery> {
     try {
       const { securityId, targetId } = query;
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
-      const res = await this.queryAdapter.getKycFor(
-        securityEvmAddress,
-        targetEvmAddress,
-      );
+      const res = await this.queryAdapter.getKycFor(securityEvmAddress, targetEvmAddress);
 
       return new GetKycForQueryResponse(res);
     } catch (error) {

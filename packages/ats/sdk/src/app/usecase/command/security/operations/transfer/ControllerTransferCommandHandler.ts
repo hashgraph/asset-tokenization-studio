@@ -203,26 +203,21 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import SecurityService from '@service/security/SecurityService';
-import {
-  ControllerTransferCommand,
-  ControllerTransferCommandResponse,
-} from './ControllerTransferCommand';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import { ControllerTransferCommandError } from './error/ControllerTransferCommandError';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import SecurityService from "@service/security/SecurityService";
+import { ControllerTransferCommand, ControllerTransferCommandResponse } from "./ControllerTransferCommand";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { ControllerTransferCommandError } from "./error/ControllerTransferCommandError";
 
 @CommandHandler(ControllerTransferCommand)
-export class ControllerTransferCommandHandler
-  implements ICommandHandler<ControllerTransferCommand>
-{
+export class ControllerTransferCommandHandler implements ICommandHandler<ControllerTransferCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
@@ -236,30 +231,19 @@ export class ControllerTransferCommandHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: ControllerTransferCommand,
-  ): Promise<ControllerTransferCommandResponse> {
+  async execute(command: ControllerTransferCommand): Promise<ControllerTransferCommandResponse> {
     try {
       const { securityId, targetId, sourceId, amount } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
       const security = await this.securityService.get(securityId);
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const sourceEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(sourceId);
 
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
-      await this.validationService.checkCanTransfer(
-        securityId,
-        targetId,
-        amount,
-        account.id.toString(),
-        sourceId,
-      );
+      await this.validationService.checkCanTransfer(securityId, targetId, amount, account.id.toString(), sourceId);
 
       await this.validationService.checkDecimals(security, amount);
 
@@ -272,9 +256,7 @@ export class ControllerTransferCommandHandler
         amountBd,
         securityId,
       );
-      return Promise.resolve(
-        new ControllerTransferCommandResponse(res.error === undefined, res.id!),
-      );
+      return Promise.resolve(new ControllerTransferCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new ControllerTransferCommandError(error as Error);
     }

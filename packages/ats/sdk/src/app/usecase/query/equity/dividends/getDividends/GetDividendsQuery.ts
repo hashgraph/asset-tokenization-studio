@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
-import { Dividend } from '@domain/context/equity/Dividend';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
+import { Dividend } from "@domain/context/equity/Dividend";
 
 export class GetDividendsQueryResponse implements QueryResponse {
   constructor(public readonly dividend: Dividend) {}

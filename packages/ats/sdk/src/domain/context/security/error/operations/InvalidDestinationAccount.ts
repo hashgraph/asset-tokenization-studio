@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class InvalidDestinationAccount extends BaseError {
   constructor() {
-    super(
-      ErrorCode.InvalidDestinationAccount,
-      `Invalid null destination account`,
-    );
+    super(ErrorCode.InvalidDestinationAccount, `Invalid null destination account`);
   }
 }

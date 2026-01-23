@@ -203,9 +203,9 @@
 
 */
 
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
+import { SecurityControlListType } from "@domain/context/security/SecurityControlListType";
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
 
 export class GetControlListTypeQueryResponse implements QueryResponse {
   constructor(public readonly payload: SecurityControlListType) {}

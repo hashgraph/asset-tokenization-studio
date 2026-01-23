@@ -203,16 +203,16 @@
 
 */
 
-import Account from '../account/Account';
+import Account from "../account/Account";
 
 export enum SupportedWallets {
-  METAMASK = 'Metamask',
-  HWALLETCONNECT = 'HWALLETCONNECT',
+  METAMASK = "Metamask",
+  HWALLETCONNECT = "HWALLETCONNECT",
   // HASHPACK = 'HashPack',
   //CLIENT = 'Client',
-  DFNS = 'DFNS',
-  FIREBLOCKS = 'Fireblocks',
-  AWSKMS = 'AWSKMS',
+  DFNS = "DFNS",
+  FIREBLOCKS = "Fireblocks",
+  AWSKMS = "AWSKMS",
 }
 
 export default interface Wallet {

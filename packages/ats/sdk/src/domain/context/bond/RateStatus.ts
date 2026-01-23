@@ -204,8 +204,8 @@
 */
 
 export enum RateStatus {
-  PENDING = 'PENDING',
-  SET = 'SET',
+  PENDING = "PENDING",
+  SET = "SET",
 }
 
 export class CastRateStatus {

@@ -203,25 +203,22 @@
 
 */
 
-import {
-  DetailReviewThemeConfiguration,
-  detailReviewPartsList,
-} from 'io-bricks-ui';
+import { DetailReviewThemeConfiguration, detailReviewPartsList } from "io-bricks-ui";
 
 export const DetailReview: DetailReviewThemeConfiguration = {
   parts: detailReviewPartsList,
   baseStyle: {
     container: {
-      flexDirection: 'column',
+      flexDirection: "column",
       gap: 2,
     },
     title: {
-      color: 'neutral.white',
-      textStyle: 'BodyRegularSM',
+      color: "neutral.white",
+      textStyle: "BodyRegularSM",
     },
     value: {
-      color: 'neutral.light.200',
-      textStyle: 'HeadingMediumMD',
+      color: "neutral.light.200",
+      textStyle: "HeadingMediumMD",
     },
   },
 };

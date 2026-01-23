@@ -203,33 +203,28 @@
 
 */
 
-import {
-  CreateEquityCommand,
-  CreateEquityCommandResponse,
-} from './CreateEquityCommand';
-import { InvalidRequest } from '@command/error/InvalidRequest';
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import ContractId from '@domain/context/contract/ContractId';
-import { Security } from '@domain/context/security/Security';
-import TransactionService from '@service/transaction/TransactionService';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { EquityDetails } from '@domain/context/equity/EquityDetails';
-import ContractService from '@service/contract/ContractService';
-import AccountService from '@service/account/AccountService';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { Response } from '@domain/context/transaction/Response';
-import { CreateEquityCommandError } from './error/CreateEquityCommandError';
-import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
-import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
-import { EVM_ZERO_ADDRESS } from '@core/Constants';
+import { CreateEquityCommand, CreateEquityCommandResponse } from "./CreateEquityCommand";
+import { InvalidRequest } from "@command/error/InvalidRequest";
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import ContractId from "@domain/context/contract/ContractId";
+import { Security } from "@domain/context/security/Security";
+import TransactionService from "@service/transaction/TransactionService";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { EquityDetails } from "@domain/context/equity/EquityDetails";
+import ContractService from "@service/contract/ContractService";
+import AccountService from "@service/account/AccountService";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { Response } from "@domain/context/transaction/Response";
+import { CreateEquityCommandError } from "./error/CreateEquityCommandError";
+import { MissingRegulationType } from "@domain/context/factory/error/MissingRegulationType";
+import { MissingRegulationSubType } from "@domain/context/factory/error/MissingRegulationSubType";
+import { EVM_ZERO_ADDRESS } from "@core/Constants";
 
 @CommandHandler(CreateEquityCommand)
-export class CreateEquityCommandHandler
-  implements ICommandHandler<CreateEquityCommand>
-{
+export class CreateEquityCommandHandler implements ICommandHandler<CreateEquityCommand> {
   constructor(
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
@@ -241,9 +236,7 @@ export class CreateEquityCommandHandler
     private readonly accountService: AccountService,
   ) {}
 
-  async execute(
-    command: CreateEquityCommand,
-  ): Promise<CreateEquityCommandResponse> {
+  async execute(command: CreateEquityCommand): Promise<CreateEquityCommandResponse> {
     let res: Response;
     try {
       const {
@@ -272,19 +265,19 @@ export class CreateEquityCommandHandler
       } = command;
 
       if (!factory) {
-        throw new InvalidRequest('Factory not found in request');
+        throw new InvalidRequest("Factory not found in request");
       }
 
       if (!resolver) {
-        throw new InvalidRequest('Resolver not found in request');
+        throw new InvalidRequest("Resolver not found in request");
       }
 
       if (!configId) {
-        throw new InvalidRequest('Config Id not found in request');
+        throw new InvalidRequest("Config Id not found in request");
       }
 
       if (configVersion === undefined) {
-        throw new InvalidRequest('Config Version not found in request');
+        throw new InvalidRequest("Config Version not found in request");
       }
       if (!security.regulationType) {
         throw new MissingRegulationType();
@@ -293,26 +286,20 @@ export class CreateEquityCommandHandler
         throw new MissingRegulationSubType();
       }
 
-      const diamondOwnerAccountEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+      const diamondOwnerAccountEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(
+        diamondOwnerAccount!,
+      );
 
-      const factoryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(factory.toString());
+      const factoryEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(factory.toString());
 
-      const resolverEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(resolver.toString());
+      const resolverEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(resolver.toString());
 
-      const [
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-      ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPausesIds),
-        this.contractService.getEvmAddressesFromHederaIds(
-          externalControlListsIds,
-        ),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycListsIds),
-      ]);
+      const [externalPausesEvmAddresses, externalControlListsEvmAddresses, externalKycListsEvmAddresses] =
+        await Promise.all([
+          this.contractService.getEvmAddressesFromHederaIds(externalPausesIds),
+          this.contractService.getEvmAddressesFromHederaIds(externalControlListsIds),
+          this.contractService.getEvmAddressesFromHederaIds(externalKycListsIds),
+        ]);
 
       const complianceEvmAddress = complianceId
         ? await this.contractService.getContractEvmAddress(complianceId)
@@ -354,27 +341,18 @@ export class CreateEquityCommandHandler
         factory.toString(),
       );
 
-      const contractAddress =
-        await this.transactionService.getTransactionResult({
-          res,
-          result: res.response?.equityAddress,
-          className: CreateEquityCommandHandler.name,
-          position: 0,
-          numberOfResultsItems: 1,
-        });
-      const contractId =
-        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
-          contractAddress,
-        );
+      const contractAddress = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.equityAddress,
+        className: CreateEquityCommandHandler.name,
+        position: 0,
+        numberOfResultsItems: 1,
+      });
+      const contractId = await this.mirrorNodeAdapter.getHederaIdfromContractAddress(contractAddress);
 
-      return Promise.resolve(
-        new CreateEquityCommandResponse(new ContractId(contractId), res.id!),
-      );
+      return Promise.resolve(new CreateEquityCommandResponse(new ContractId(contractId), res.id!));
     } catch (error) {
-      if (res?.response == 1)
-        return Promise.resolve(
-          new CreateEquityCommandResponse(new ContractId('0.0.0'), res.id!),
-        );
+      if (res?.response == 1) return Promise.resolve(new CreateEquityCommandResponse(new ContractId("0.0.0"), res.id!));
       else throw new CreateEquityCommandError(error as Error);
     }
   }

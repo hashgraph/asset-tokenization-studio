@@ -203,11 +203,11 @@
 
 */
 
-import { SetIdentityRegistryCommandHandler } from '@command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommandHandler';
-import { TOKENS } from '../Tokens';
-import { SetOnchainIDCommandHandler } from '@command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommandHandler';
-import { OnchainIDQueryHandler } from '@query/security/tokenMetadata/onchainId/OnchainIDQueryHandler';
-import { IdentityRegistryQueryHandler } from '@query/security/identityRegistry/IdentityRegistryQueryHandler';
+import { SetIdentityRegistryCommandHandler } from "@command/security/identityRegistry/setIdentityRegistry/SetIdentityRegistryCommandHandler";
+import { TOKENS } from "../Tokens";
+import { SetOnchainIDCommandHandler } from "@command/security/operations/tokenMetadata/setOnchainID/SetOnchainIDCommandHandler";
+import { OnchainIDQueryHandler } from "@query/security/tokenMetadata/onchainId/OnchainIDQueryHandler";
+import { IdentityRegistryQueryHandler } from "@query/security/identityRegistry/IdentityRegistryQueryHandler";
 
 export const COMMAND_HANDLERS_IDENTITY = [
   {

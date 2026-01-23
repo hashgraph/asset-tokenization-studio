@@ -203,8 +203,8 @@
 
 */
 
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import SDKService from '../../services/SDKService';
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import SDKService from "../../services/SDKService";
 import {
   GetClearingsIdForByPartitionRequest,
   IsClearingActivatedRequest,
@@ -212,12 +212,10 @@ import {
   GetClearingTransferForByPartitionRequest,
   GetClearingCreateHoldForByPartitionRequest,
   GetClearedAmountForRequest,
-} from '@hashgraph/asset-tokenization-sdk';
+} from "@hashgraph/asset-tokenization-sdk";
 
-export const GET_CLEARING_OPERATIONS_LIST = (securityId: string) =>
-  `GET_CLEARING_OPERATIONS_LIST_${securityId}`;
-export const GET_CLEARING_OPERATION_MODE = (securityId: string) =>
-  `GET_CLEARING_OPERATION_MODE_${securityId}`;
+export const GET_CLEARING_OPERATIONS_LIST = (securityId: string) => `GET_CLEARING_OPERATIONS_LIST_${securityId}`;
+export const GET_CLEARING_OPERATION_MODE = (securityId: string) => `GET_CLEARING_OPERATION_MODE_${securityId}`;
 export const GET_CLEARED_BALANCE = (securityId: string, targetId: string) =>
   `GET_CLEARED_BALANCE_${securityId}_${targetId}`;
 
@@ -245,12 +243,7 @@ export interface ClearingOperationViewModel {
 
 export const useGetClearingOperations = (
   request: UseGetClearingOperationsRequest,
-  options?: UseQueryOptions<
-    ClearingOperationViewModel[],
-    unknown,
-    ClearingOperationViewModel[],
-    string[]
-  >,
+  options?: UseQueryOptions<ClearingOperationViewModel[], unknown, ClearingOperationViewModel[], string[]>,
 ) => {
   return useQuery(
     [GET_CLEARING_OPERATIONS_LIST(request.securityId)],
@@ -304,13 +297,11 @@ export const useGetClearingOperations = (
                   id: clearingId,
                   amount: result.amount,
                   expirationDate: new Date(result.expirationDate),
-                  data: result.data || '',
-                  operatorData: result.operatorData || '',
+                  data: result.data || "",
+                  operatorData: result.operatorData || "",
                   destination: result.destination,
                   holdEscrow: result.holdEscrow,
-                  holdExpirationDate: result.holdExpirationDate
-                    ? new Date(result.holdExpirationDate)
-                    : undefined,
+                  holdExpirationDate: result.holdExpirationDate ? new Date(result.holdExpirationDate) : undefined,
                   holdTo: result.holdTo,
                   holdData: result.holdData,
                 } as ClearingOperationViewModel;
@@ -323,7 +314,7 @@ export const useGetClearingOperations = (
 
         return results.flat().filter(Boolean) as ClearingOperationViewModel[];
       } catch (error) {
-        console.error('Error fetching clearing operations', error);
+        console.error("Error fetching clearing operations", error);
         throw error;
       }
     },
@@ -339,12 +330,11 @@ export const useGetIsClearingActivated = (
     [GET_CLEARING_OPERATION_MODE(request.securityId)],
     async () => {
       try {
-        const isClearingActivated =
-          await SDKService.isClearingActivated(request);
+        const isClearingActivated = await SDKService.isClearingActivated(request);
 
         return isClearingActivated;
       } catch (error) {
-        console.error('Error fetching clearing operations', error);
+        console.error("Error fetching clearing operations", error);
         throw error;
       }
     },
@@ -364,7 +354,7 @@ export const useGetClearedAmountFor = (
 
         return clearedAmount;
       } catch (error) {
-        console.error('Error fetching cleared amount', error);
+        console.error("Error fetching cleared amount", error);
         throw error;
       }
     },

@@ -203,55 +203,32 @@
 
 */
 
-import BigDecimal from '@domain/shared/BigDecimal';
+import BigDecimal from "@domain/shared/BigDecimal";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable unused-imports/no-unused-vars */
 export default class CheckNums {
-  public static isWithinRange<T extends number | bigint | BigDecimal>(
-    value: T,
-    min: T,
-    max: T,
-  ): boolean {
-    return (
-      this.isLessOrEqualThan(value, max) &&
-      this.isGreaterOrEqualThan(value, min)
-    );
+  public static isWithinRange<T extends number | bigint | BigDecimal>(value: T, min: T, max: T): boolean {
+    return this.isLessOrEqualThan(value, max) && this.isGreaterOrEqualThan(value, min);
   }
 
-  public static isLessThan<T extends number | bigint | BigDecimal>(
-    value: T,
-    max: T,
-  ): boolean {
-    if (value instanceof BigDecimal && max instanceof BigDecimal)
-      return value.isLowerThan(max);
+  public static isLessThan<T extends number | bigint | BigDecimal>(value: T, max: T): boolean {
+    if (value instanceof BigDecimal && max instanceof BigDecimal) return value.isLowerThan(max);
     return value < max;
   }
 
-  public static isGreaterThan<T extends number | bigint | BigDecimal>(
-    value: T,
-    max: T,
-  ): boolean {
-    if (value instanceof BigDecimal && max instanceof BigDecimal)
-      return value.isGreaterThan(max);
+  public static isGreaterThan<T extends number | bigint | BigDecimal>(value: T, max: T): boolean {
+    if (value instanceof BigDecimal && max instanceof BigDecimal) return value.isGreaterThan(max);
     return value > max;
   }
 
-  public static isLessOrEqualThan<T extends number | bigint | BigDecimal>(
-    value: T,
-    max: T,
-  ): boolean {
-    if (value instanceof BigDecimal && max instanceof BigDecimal)
-      return value.isLowerOrEqualThan(max);
+  public static isLessOrEqualThan<T extends number | bigint | BigDecimal>(value: T, max: T): boolean {
+    if (value instanceof BigDecimal && max instanceof BigDecimal) return value.isLowerOrEqualThan(max);
     return value <= max;
   }
 
-  public static isGreaterOrEqualThan<T extends number | bigint | BigDecimal>(
-    value: T,
-    max: T,
-  ): boolean {
-    if (value instanceof BigDecimal && max instanceof BigDecimal)
-      return value.isGreaterOrEqualThan(max);
+  public static isGreaterOrEqualThan<T extends number | bigint | BigDecimal>(value: T, max: T): boolean {
+    if (value instanceof BigDecimal && max instanceof BigDecimal) return value.isGreaterOrEqualThan(max);
     return value >= max;
   }
 
@@ -274,12 +251,9 @@ export default class CheckNums {
     }
   }
 
-  public static hasMoreDecimals(
-    from: BigDecimal | string,
-    to: number,
-  ): boolean {
+  public static hasMoreDecimals(from: BigDecimal | string, to: number): boolean {
     let val = from;
-    if (typeof val === 'string') val = BigDecimal.fromString(val);
+    if (typeof val === "string") val = BigDecimal.fromString(val);
     return val.format.decimals > to;
   }
 

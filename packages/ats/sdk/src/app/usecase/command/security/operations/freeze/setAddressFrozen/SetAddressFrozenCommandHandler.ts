@@ -203,25 +203,20 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import { SetAddressFrozenCommandError } from './error/SetAddressFrozenCommandError';
-import {
-  SetAddressFrozenCommand,
-  SetAddressFrozenCommandResponse,
-} from './SetAddressFrozenCommand';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { SetAddressFrozenCommandError } from "./error/SetAddressFrozenCommandError";
+import { SetAddressFrozenCommand, SetAddressFrozenCommandResponse } from "./SetAddressFrozenCommand";
 
 @CommandHandler(SetAddressFrozenCommand)
-export class SetAddressFrozenCommandHandler
-  implements ICommandHandler<SetAddressFrozenCommand>
-{
+export class SetAddressFrozenCommandHandler implements ICommandHandler<SetAddressFrozenCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
@@ -233,16 +228,13 @@ export class SetAddressFrozenCommandHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: SetAddressFrozenCommand,
-  ): Promise<SetAddressFrozenCommandResponse> {
+  async execute(command: SetAddressFrozenCommand): Promise<SetAddressFrozenCommandResponse> {
     try {
       const { securityId, status, targetId } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
       await this.validationService.checkPause(securityId);
 
@@ -259,9 +251,7 @@ export class SetAddressFrozenCommandHandler
         securityId,
       );
 
-      return Promise.resolve(
-        new SetAddressFrozenCommandResponse(res.error === undefined, res.id!),
-      );
+      return Promise.resolve(new SetAddressFrozenCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new SetAddressFrozenCommandError(error as Error);
     }

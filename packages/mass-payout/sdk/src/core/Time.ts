@@ -204,18 +204,13 @@
 */
 
 export class Time {
-  public static delay(
-    time: number,
-    unit: 'seconds' | 'milliseconds' | 'sec' | 'ms',
-  ): Promise<boolean> {
+  public static delay(time: number, unit: "seconds" | "milliseconds" | "sec" | "ms"): Promise<boolean> {
     let delayInMilliseconds: number;
-    if (unit === 'seconds' || unit === 'sec') {
+    if (unit === "seconds" || unit === "sec") {
       delayInMilliseconds = time * 1000;
-    } else if (unit === 'milliseconds' || unit === 'ms') {
+    } else if (unit === "milliseconds" || unit === "ms") {
       delayInMilliseconds = time;
     }
-    return new Promise<boolean>((resolve) =>
-      setTimeout(() => resolve(true), delayInMilliseconds),
-    );
+    return new Promise<boolean>((resolve) => setTimeout(() => resolve(true), delayInMilliseconds));
   }
 }

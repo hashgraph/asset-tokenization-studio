@@ -203,12 +203,12 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { GetAccountBalanceQueryHandler } from '@query/account/balance/GetAccountBalanceQueryHandler';
-import { SetScheduledBalanceAdjustmentCommandHandler } from '@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler';
-import { BalanceOfQueryHandler } from '@query/security/balanceof/BalanceOfQueryHandler';
-import { GetScheduledBalanceAdjustmentQueryHandler } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler';
-import { GetScheduledBalanceAdjustmentCountQueryHandler } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQueryHandler';
+import { TOKENS } from "../Tokens";
+import { GetAccountBalanceQueryHandler } from "@query/account/balance/GetAccountBalanceQueryHandler";
+import { SetScheduledBalanceAdjustmentCommandHandler } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler";
+import { BalanceOfQueryHandler } from "@query/security/balanceof/BalanceOfQueryHandler";
+import { GetScheduledBalanceAdjustmentQueryHandler } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler";
+import { GetScheduledBalanceAdjustmentCountQueryHandler } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQueryHandler";
 
 export const COMMAND_HANDLERS_BALANCE = [
   {

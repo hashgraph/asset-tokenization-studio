@@ -203,25 +203,25 @@
 
 */
 
-import EventService from '@app/services/event/EventService';
-import { EventNotFound } from '@app/services/event/error/EventNotFound';
-import { EventListenerNotFound } from '@app/services/event/error/EventListenerNotFound';
-import WalletEvent, { WalletEvents } from '@app/services/event/WalletEvent';
-import { SupportedWallets } from '@domain/network/Wallet';
+import EventService from "@app/services/event/EventService";
+import { EventNotFound } from "@app/services/event/error/EventNotFound";
+import { EventListenerNotFound } from "@app/services/event/error/EventListenerNotFound";
+import WalletEvent, { WalletEvents } from "@app/services/event/WalletEvent";
+import { SupportedWallets } from "@domain/network/Wallet";
 
-describe('EventService', () => {
+describe("EventService", () => {
   let service: EventService;
 
   beforeEach(() => {
     service = new EventService();
   });
 
-  it('should register all wallet events on construction', () => {
+  it("should register all wallet events on construction", () => {
     const eventNames = service.eventNames();
     expect(eventNames).toEqual(Object.keys(WalletEvents));
   });
 
-  it('should allow registering and emitting a valid event', () => {
+  it("should allow registering and emitting a valid event", () => {
     const mockListener = jest.fn();
     const eventName = Object.keys(WalletEvents)[0] as keyof WalletEvent;
 
@@ -229,22 +229,20 @@ describe('EventService', () => {
     service.emit(eventName, { wallet: SupportedWallets.DFNS });
 
     expect(mockListener).toHaveBeenCalledTimes(1);
-    expect(mockListener).toHaveBeenCalledWith({ wallet: 'DFNS' });
+    expect(mockListener).toHaveBeenCalledWith({ wallet: "DFNS" });
   });
 
-  it('should throw EventNotFound when emitting unknown event', () => {
+  it("should throw EventNotFound when emitting unknown event", () => {
     // @ts-expect-error simulating invalid event
-    expect(() => service.emit('nonExistingEvent')).toThrow(EventNotFound);
+    expect(() => service.emit("nonExistingEvent")).toThrow(EventNotFound);
   });
 
-  it('should throw EventListenerNotFound when registering listener for unknown event', () => {
+  it("should throw EventListenerNotFound when registering listener for unknown event", () => {
     // @ts-expect-error simulating invalid event
-    expect(() => service.on('nonExistingEvent', jest.fn())).toThrow(
-      EventListenerNotFound,
-    );
+    expect(() => service.on("nonExistingEvent", jest.fn())).toThrow(EventListenerNotFound);
   });
 
-  it('should reuse the same EventEmitter instance for repeated event access', () => {
+  it("should reuse the same EventEmitter instance for repeated event access", () => {
     const eventName = Object.keys(WalletEvents)[0] as keyof WalletEvent;
     const emitter1 = (service as any).getEventEmitter(eventName);
     const emitter2 = (service as any).getEventEmitter(eventName);

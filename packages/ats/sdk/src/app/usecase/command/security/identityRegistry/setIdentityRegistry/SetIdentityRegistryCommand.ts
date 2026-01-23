@@ -170,8 +170,8 @@
    limitations under the License.
 */
 
-import { Command } from '@core/command/Command';
-import { CommandResponse } from '@core/command/CommandResponse';
+import { Command } from "@core/command/Command";
+import { CommandResponse } from "@core/command/CommandResponse";
 
 export class SetIdentityRegistryCommandResponse implements CommandResponse {
   constructor(

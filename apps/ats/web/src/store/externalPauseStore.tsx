@@ -203,8 +203,8 @@
 
 */
 
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
 
 export interface ExternalPauseStore {
   address: string;
@@ -215,14 +215,11 @@ interface ExternalPauseStoreProps {
   externalPauses: ExternalPauseStore[];
   addExternalPause: (externalPause: ExternalPauseStore) => void;
   removeExternalPause: (externalPauseAddress: string) => void;
-  toggleExternalPause: (
-    externalPauseAddress: string,
-    newPaused: boolean,
-  ) => void;
+  toggleExternalPause: (externalPauseAddress: string, newPaused: boolean) => void;
   reset: () => void;
 }
 
-const EXTERNAL_PAUSE_STORE_KEY = 'EXTERNAL_PAUSE_STORE_KEY';
+const EXTERNAL_PAUSE_STORE_KEY = "EXTERNAL_PAUSE_STORE_KEY";
 
 export const useExternalPauseStore = create<ExternalPauseStoreProps>()(
   persist(
@@ -234,18 +231,12 @@ export const useExternalPauseStore = create<ExternalPauseStoreProps>()(
         })),
       removeExternalPause: (externalPauseAddress) =>
         set((state) => ({
-          externalPauses: [
-            ...state.externalPauses.filter(
-              (pause) => pause.address !== externalPauseAddress,
-            ),
-          ],
+          externalPauses: [...state.externalPauses.filter((pause) => pause.address !== externalPauseAddress)],
         })),
       toggleExternalPause: (externalPauseAddress, newPaused) =>
         set((state) => ({
           externalPauses: state.externalPauses.map((pause) =>
-            pause.address === externalPauseAddress
-              ? { ...pause, isPaused: newPaused }
-              : pause,
+            pause.address === externalPauseAddress ? { ...pause, isPaused: newPaused } : pause,
           ),
         })),
       reset: () =>

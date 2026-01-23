@@ -203,12 +203,10 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
 
-export class GetExternalControlListsCountQueryResponse
-  implements QueryResponse
-{
+export class GetExternalControlListsCountQueryResponse implements QueryResponse {
   constructor(public readonly payload: number) {}
 }
 

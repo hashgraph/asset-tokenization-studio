@@ -203,38 +203,34 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '@core/command/CommandBus';
+import { createMock } from "@golevelup/ts-jest";
+import { CommandBus } from "@core/command/CommandBus";
 import {
   GetConfigInfoRequest,
   UpdateConfigRequest,
   UpdateConfigVersionRequest,
   UpdateResolverRequest,
-} from '../request';
-import {
-  EvmAddressPropsFixture,
-  HederaIdPropsFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import LogService from '@service/log/LogService';
-import { QueryBus } from '@core/query/QueryBus';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { ValidationError } from '@core/validation/ValidationError';
-import Management from './Management';
+} from "../request";
+import { EvmAddressPropsFixture, HederaIdPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import LogService from "@service/log/LogService";
+import { QueryBus } from "@core/query/QueryBus";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { ValidationError } from "@core/validation/ValidationError";
+import Management from "./Management";
 import {
   GetConfigInfoRequestFixture,
   UpdateConfigRequestFixture,
   UpdateConfigVersionRequestFixture,
   UpdateResolverRequestFixture,
-} from '@test/fixtures/management/ManagementFixture';
-import { UpdateConfigVersionCommand } from '@command/management/updateConfigVersion/updateConfigVersionCommand';
-import { UpdateConfigCommand } from '@command/management/updateConfig/updateConfigCommand';
-import { UpdateResolverCommand } from '@command/management/updateResolver/updateResolverCommand';
-import ContractId from '@domain/context/contract/ContractId';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import { DiamondConfiguration } from '@domain/context/security/DiamondConfiguration';
-import { GetConfigInfoQuery } from '@query/management/GetConfigInfoQuery';
-describe('Management', () => {
+} from "@test/fixtures/management/ManagementFixture";
+import { UpdateConfigVersionCommand } from "@command/management/updateConfigVersion/updateConfigVersionCommand";
+import { UpdateConfigCommand } from "@command/management/updateConfig/updateConfigCommand";
+import { UpdateResolverCommand } from "@command/management/updateResolver/updateResolverCommand";
+import ContractId from "@domain/context/contract/ContractId";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import { DiamondConfiguration } from "@domain/context/security/DiamondConfiguration";
+import { GetConfigInfoQuery } from "@query/management/GetConfigInfoQuery";
+describe("Management", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
   let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
@@ -264,8 +260,8 @@ describe('Management', () => {
     queryBusMock = createMock<QueryBus>();
     mirrorNodeMock = createMock<MirrorNodeAdapter>();
 
-    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
-    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    handleValidationSpy = jest.spyOn(ValidatedRequest, "handleValidation");
+    jest.spyOn(LogService, "logError").mockImplementation(() => {});
     (Management as any).commandBus = commandBusMock;
     (Management as any).queryBus = queryBusMock;
     (Management as any).mirrorNode = mirrorNodeMock;
@@ -276,91 +272,66 @@ describe('Management', () => {
     jest.restoreAllMocks();
   });
 
-  describe('updateConfigVersion', () => {
-    updateConfigVersionRequest = new UpdateConfigVersionRequest(
-      UpdateConfigVersionRequestFixture.create(),
-    );
-    it('should update config version successfully', async () => {
+  describe("updateConfigVersion", () => {
+    updateConfigVersionRequest = new UpdateConfigVersionRequest(UpdateConfigVersionRequestFixture.create());
+    it("should update config version successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Management.updateConfigVersion(
-        updateConfigVersionRequest,
-      );
+      const result = await Management.updateConfigVersion(updateConfigVersionRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateConfigVersionRequest',
-        updateConfigVersionRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("UpdateConfigVersionRequest", updateConfigVersionRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new UpdateConfigVersionCommand(
-          updateConfigVersionRequest.configVersion,
-          updateConfigVersionRequest.securityId,
-        ),
+        new UpdateConfigVersionCommand(updateConfigVersionRequest.configVersion, updateConfigVersionRequest.securityId),
       );
 
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Management.updateConfigVersion(updateConfigVersionRequest),
-      ).rejects.toThrow('Command execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateConfigVersionRequest',
-        updateConfigVersionRequest,
+      await expect(Management.updateConfigVersion(updateConfigVersionRequest)).rejects.toThrow(
+        "Command execution failed",
       );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("UpdateConfigVersionRequest", updateConfigVersionRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new UpdateConfigVersionCommand(
-          updateConfigVersionRequest.configVersion,
-          updateConfigVersionRequest.securityId,
-        ),
+        new UpdateConfigVersionCommand(updateConfigVersionRequest.configVersion, updateConfigVersionRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       updateConfigVersionRequest = new UpdateConfigVersionRequest({
         ...UpdateConfigVersionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Management.updateConfigVersion(updateConfigVersionRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.updateConfigVersion(updateConfigVersionRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if configVersion is invalid', async () => {
+    it("should throw error if configVersion is invalid", async () => {
       updateConfigVersionRequest = new UpdateConfigVersionRequest({
         ...UpdateConfigVersionRequestFixture.create({
-          configVersion: 'invalid' as unknown as number,
+          configVersion: "invalid" as unknown as number,
         }),
       });
 
-      await expect(
-        Management.updateConfigVersion(updateConfigVersionRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.updateConfigVersion(updateConfigVersionRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('updateConfig', () => {
-    updateConfigRequest = new UpdateConfigRequest(
-      UpdateConfigRequestFixture.create(),
-    );
-    it('should update config successfully', async () => {
+  describe("updateConfig", () => {
+    updateConfigRequest = new UpdateConfigRequest(UpdateConfigRequestFixture.create());
+    it("should update config successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Management.updateConfig(updateConfigRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateConfigRequest',
-        updateConfigRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("UpdateConfigRequest", updateConfigRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new UpdateConfigCommand(
@@ -373,18 +344,13 @@ describe('Management', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Management.updateConfig(updateConfigRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(Management.updateConfig(updateConfigRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateConfigRequest',
-        updateConfigRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("UpdateConfigRequest", updateConfigRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new UpdateConfigCommand(
@@ -395,54 +361,43 @@ describe('Management', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       updateConfigRequest = new UpdateConfigRequest({
         ...UpdateConfigRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Management.updateConfig(updateConfigRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.updateConfig(updateConfigRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if configId is invalid', async () => {
+    it("should throw error if configId is invalid", async () => {
       updateConfigRequest = new UpdateConfigRequest({
         ...UpdateConfigRequestFixture.create({
-          configId: 'invalid',
+          configId: "invalid",
         }),
       });
 
-      await expect(
-        Management.updateConfig(updateConfigRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.updateConfig(updateConfigRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if configVersion is invalid', async () => {
+    it("should throw error if configVersion is invalid", async () => {
       updateConfigRequest = new UpdateConfigRequest({
         ...UpdateConfigRequestFixture.create({
-          configVersion: 'invalid' as unknown as number,
+          configVersion: "invalid" as unknown as number,
         }),
       });
 
-      await expect(
-        Management.updateConfig(updateConfigRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.updateConfig(updateConfigRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('updateResolver', () => {
-    updateResolverRequest = new UpdateResolverRequest(
-      UpdateResolverRequestFixture.create(),
-    );
-    it('should update resolver successfully', async () => {
+  describe("updateResolver", () => {
+    updateResolverRequest = new UpdateResolverRequest(UpdateResolverRequestFixture.create());
+    it("should update resolver successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Management.updateResolver(updateResolverRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateResolverRequest',
-        updateResolverRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("UpdateResolverRequest", updateResolverRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new UpdateResolverCommand(
@@ -456,18 +411,13 @@ describe('Management', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Management.updateResolver(updateResolverRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(Management.updateResolver(updateResolverRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'UpdateResolverRequest',
-        updateResolverRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("UpdateResolverRequest", updateResolverRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new UpdateResolverCommand(
@@ -479,117 +429,91 @@ describe('Management', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       updateResolverRequest = new UpdateResolverRequest({
         ...UpdateResolverRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Management.updateResolver(updateResolverRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.updateResolver(updateResolverRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if configId is invalid', async () => {
+    it("should throw error if configId is invalid", async () => {
       updateResolverRequest = new UpdateResolverRequest({
         ...UpdateResolverRequestFixture.create({
-          configId: 'invalid',
+          configId: "invalid",
         }),
       });
 
-      await expect(
-        Management.updateResolver(updateResolverRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.updateResolver(updateResolverRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if configVersion is invalid', async () => {
+    it("should throw error if configVersion is invalid", async () => {
       updateResolverRequest = new UpdateResolverRequest({
         ...UpdateResolverRequestFixture.create({
-          configVersion: 'invalid' as unknown as number,
+          configVersion: "invalid" as unknown as number,
         }),
       });
 
-      await expect(
-        Management.updateResolver(updateResolverRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.updateResolver(updateResolverRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if resolver is invalid', async () => {
+    it("should throw error if resolver is invalid", async () => {
       updateResolverRequest = new UpdateResolverRequest({
         ...UpdateResolverRequestFixture.create({
-          resolver: 'invalid',
+          resolver: "invalid",
         }),
       });
 
-      await expect(
-        Management.updateResolver(updateResolverRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.updateResolver(updateResolverRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getConfigInfo', () => {
-    getConfigInfoRequest = new GetConfigInfoRequest(
-      GetConfigInfoRequestFixture.create(),
-    );
+  describe("getConfigInfo", () => {
+    getConfigInfoRequest = new GetConfigInfoRequest(GetConfigInfoRequestFixture.create());
 
     const expectedResponse = {
-      payload: new DiamondConfiguration(resolverAddress, '1', 1),
+      payload: new DiamondConfiguration(resolverAddress, "1", 1),
     };
-    it('should get config info successfully', async () => {
+    it("should get config info successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
       mirrorNodeMock.getContractInfo.mockResolvedValue(contractViewModel);
 
       const result = await Management.getConfigInfo(getConfigInfoRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetConfigInfoRequest',
-        getConfigInfoRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetConfigInfoRequest", getConfigInfoRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
       expect(mirrorNodeMock.getContractInfo).toHaveBeenCalledTimes(1);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetConfigInfoQuery(getConfigInfoRequest.securityId),
-      );
-      expect(mirrorNodeMock.getContractInfo).toHaveBeenCalledWith(
-        resolverAddress,
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetConfigInfoQuery(getConfigInfoRequest.securityId));
+      expect(mirrorNodeMock.getContractInfo).toHaveBeenCalledWith(resolverAddress);
       expect(result).toEqual(
         expect.objectContaining({
           resolverAddress: resolverAddress,
-          configId: '1',
+          configId: "1",
           configVersion: 1,
         }),
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Management.getConfigInfo(getConfigInfoRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(Management.getConfigInfo(getConfigInfoRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetConfigInfoRequest',
-        getConfigInfoRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetConfigInfoRequest", getConfigInfoRequest);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetConfigInfoQuery(getConfigInfoRequest.securityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetConfigInfoQuery(getConfigInfoRequest.securityId));
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getConfigInfoRequest = new GetConfigInfoRequest({
         ...GetConfigInfoRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Management.getConfigInfo(getConfigInfoRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Management.getConfigInfo(getConfigInfoRequest)).rejects.toThrow(ValidationError);
     });
   });
 });

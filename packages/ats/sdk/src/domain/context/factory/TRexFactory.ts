@@ -203,9 +203,9 @@
 
 */
 
-import { InvalidRequest } from '@command/error/InvalidRequest';
-import BaseError from '@core/error/BaseError';
-import ValidatedDomain from '@core/validation/ValidatedArgs';
+import { InvalidRequest } from "@command/error/InvalidRequest";
+import BaseError from "@core/error/BaseError";
+import ValidatedDomain from "@core/validation/ValidatedArgs";
 
 interface TrexTokenDetailsAtsProps {
   owner: string;
@@ -223,10 +223,7 @@ interface TrexClaimDetailsProps {
   issuerClaims: number[][];
 }
 
-export class TrexTokenDetailsAts
-  extends ValidatedDomain<TrexTokenDetailsAts>
-  implements TrexTokenDetailsAtsProps
-{
+export class TrexTokenDetailsAts extends ValidatedDomain<TrexTokenDetailsAts> implements TrexTokenDetailsAtsProps {
   public owner: string;
   public irs: string;
   public onchainId: string;
@@ -244,16 +241,10 @@ export class TrexTokenDetailsAts
         return TrexTokenDetailsAts.checkMaxAgents(params.irAgents, val);
       },
       compliancesModules: (val) => {
-        return TrexTokenDetailsAts.checkComplianceModules(
-          val,
-          params.complianceSettings,
-        );
+        return TrexTokenDetailsAts.checkComplianceModules(val, params.complianceSettings);
       },
       complianceSettings: (val) => {
-        return TrexTokenDetailsAts.checkComplianceModules(
-          params.compliancesModules,
-          val,
-        );
+        return TrexTokenDetailsAts.checkComplianceModules(params.compliancesModules, val);
       },
     });
 
@@ -278,41 +269,32 @@ export class TrexTokenDetailsAts
     ValidatedDomain.handleValidation(TrexTokenDetailsAts.name, this);
   }
 
-  public static checkMaxAgents(
-    irAgents: string[],
-    tokenAgents: string[],
-  ): BaseError[] {
+  public static checkMaxAgents(irAgents: string[], tokenAgents: string[]): BaseError[] {
     const errorList: BaseError[] = [];
 
     if (irAgents.length > 5 || tokenAgents.length > 5) {
-      errorList.push(new InvalidRequest('max 5 agents at deployment'));
+      errorList.push(new InvalidRequest("max 5 agents at deployment"));
     }
 
     return errorList;
   }
 
-  public static checkComplianceModules(
-    compliancesModules: string[],
-    complianceSettings: string[],
-  ): BaseError[] {
+  public static checkComplianceModules(compliancesModules: string[], complianceSettings: string[]): BaseError[] {
     const errorList: BaseError[] = [];
 
     if (compliancesModules.length > 30) {
-      errorList.push(new InvalidRequest('max 30 module actions at deployment'));
+      errorList.push(new InvalidRequest("max 30 module actions at deployment"));
     }
 
     if (compliancesModules.length < complianceSettings.length) {
-      errorList.push(new InvalidRequest('invalid compliance pattern'));
+      errorList.push(new InvalidRequest("invalid compliance pattern"));
     }
 
     return errorList;
   }
 }
 
-export class TrexClaimDetails
-  extends ValidatedDomain<TrexClaimDetails>
-  implements TrexClaimDetailsProps
-{
+export class TrexClaimDetails extends ValidatedDomain<TrexClaimDetails> implements TrexClaimDetailsProps {
   claimTopics: number[];
   issuers: string[];
   issuerClaims: number[][];
@@ -340,23 +322,20 @@ export class TrexClaimDetails
     const errorList: BaseError[] = [];
 
     if (value.length > 5) {
-      errorList.push(new InvalidRequest('max 5 claim topics at deployment'));
+      errorList.push(new InvalidRequest("max 5 claim topics at deployment"));
     }
     return errorList;
   }
 
-  public static checkIssuers(
-    issuers: string[],
-    issuerClaims: number[][],
-  ): BaseError[] {
+  public static checkIssuers(issuers: string[], issuerClaims: number[][]): BaseError[] {
     const errorList: BaseError[] = [];
 
     if (issuers.length > 5) {
-      errorList.push(new InvalidRequest('max 5 claim issuers at deployment'));
+      errorList.push(new InvalidRequest("max 5 claim issuers at deployment"));
     }
 
     if (issuers.length !== issuerClaims.length) {
-      errorList.push(new InvalidRequest('claim pattern not valid'));
+      errorList.push(new InvalidRequest("claim pattern not valid"));
     }
     return errorList;
   }

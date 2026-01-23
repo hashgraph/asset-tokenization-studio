@@ -203,29 +203,27 @@
 
 */
 
-import '../environmentMock';
-import Network from '@port/in/network/Network';
+import "../environmentMock";
+import Network from "@port/in/network/Network";
 
-import { GetAccountInfoRequest } from '@port/in/request/index';
-import ConnectRequest, {
-  SupportedWallets,
-} from '@port/in/request/network/ConnectRequest';
+import { GetAccountInfoRequest } from "@port/in/request/index";
+import ConnectRequest, { SupportedWallets } from "@port/in/request/network/ConnectRequest";
 
-import { CLIENT_ACCOUNT_ECDSA, CLIENT_PUBLIC_KEY_ECDSA } from '@test/config';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import Account from '@port/in/account/Account';
+import { CLIENT_ACCOUNT_ECDSA, CLIENT_PUBLIC_KEY_ECDSA } from "@test/config";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
+import Account from "@port/in/account/Account";
 
-describe('🧪 Account test', () => {
+describe("🧪 Account test", () => {
   beforeAll(async () => {
     const mirrorNode: MirrorNode = {
-      name: 'testmirrorNode',
-      baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+      name: "testmirrorNode",
+      baseUrl: "https://testnet.mirrornode.hedera.com/api/v1/",
     };
 
     const rpcNode: JsonRpcRelay = {
-      name: 'testrpcNode',
-      baseUrl: 'http://127.0.0.1:7546/api',
+      name: "testrpcNode",
+      baseUrl: "http://127.0.0.1:7546/api",
     };
 
     await Network.connect(
@@ -233,7 +231,7 @@ describe('🧪 Account test', () => {
         account: {
           accountId: CLIENT_ACCOUNT_ECDSA.id.toString(),
         },
-        network: 'testnet',
+        network: "testnet",
         wallet: SupportedWallets.METAMASK,
         mirrorNode: mirrorNode,
         rpcNode: rpcNode,
@@ -242,7 +240,7 @@ describe('🧪 Account test', () => {
     );
   }, 60_000);
 
-  it('Gets account info', async () => {
+  it("Gets account info", async () => {
     const res = await Account.getInfo(
       new GetAccountInfoRequest({
         account: {

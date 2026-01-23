@@ -202,8 +202,8 @@
  *    limitations under the License.
  */
 
-import { Box, HStack, Stack, useDisclosure, VStack } from '@chakra-ui/react';
-import { useForm, useWatch } from 'react-hook-form';
+import { Box, HStack, Stack, useDisclosure, VStack } from "@chakra-ui/react";
+import { useForm, useWatch } from "react-hook-form";
 import {
   Button,
   Text,
@@ -215,17 +215,14 @@ import {
   Weight,
   SelectController,
   InputController,
-} from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
-import { GobackButton } from '@/components/GobackButton';
-import { useEffect } from 'react';
-import { Warning } from '@phosphor-icons/react';
-import {
-  useCreateManualPayout,
-  useGetAsset,
-} from '../hooks/queries/AssetQueries';
-import { NewDistributionFormValues } from './NewDistribution.types';
+} from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
+import { GobackButton } from "@/components/GobackButton";
+import { useEffect } from "react";
+import { Warning } from "@phosphor-icons/react";
+import { useCreateManualPayout, useGetAsset } from "../hooks/queries/AssetQueries";
+import { NewDistributionFormValues } from "./NewDistribution.types";
 import {
   BREADCRUMB_ITEMS,
   createAmountTypeOptions,
@@ -233,21 +230,17 @@ import {
   createRecurringOptions,
   createTriggerConditionOptions,
   DEFAULT_FORM_VALUES,
-} from './NewDistribution.constants';
-import {
-  createPayload,
-  formatDistributionDescription,
-  isFormValid,
-} from './NewDistribution.utils';
-import { DateField } from './components/DateField';
+} from "./NewDistribution.constants";
+import { createPayload, formatDistributionDescription, isFormValid } from "./NewDistribution.utils";
+import { DateField } from "./components/DateField";
 
 export const NewDistribution = () => {
-  const { t } = useTranslation('assets');
+  const { t } = useTranslation("assets");
   const { id } = useParams();
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const createManualPayoutMutation = useCreateManualPayout();
-  const { data: assetData } = useGetAsset(id || '');
+  const { data: assetData } = useGetAsset(id || "");
 
   const {
     control,
@@ -255,16 +248,16 @@ export const NewDistribution = () => {
     getValues,
     formState: { isValid },
   } = useForm<NewDistributionFormValues>({
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: DEFAULT_FORM_VALUES,
   });
 
-  const amountType = useWatch({ control, name: 'amountType' });
-  const amount = useWatch({ control, name: 'amount' });
-  const distributionType = useWatch({ control, name: 'distributionType' });
+  const amountType = useWatch({ control, name: "amountType" });
+  const amount = useWatch({ control, name: "amount" });
+  const distributionType = useWatch({ control, name: "distributionType" });
 
   useEffect(() => {
-    setValue('amount', 0);
+    setValue("amount", 0);
   }, [amountType, setValue]);
 
   const formValues = getValues();
@@ -273,21 +266,19 @@ export const NewDistribution = () => {
   const onSubmit = async (data: NewDistributionFormValues) => {
     if (
       id &&
-      (data.distributionType === 'manual' ||
-        data.distributionType === 'automated' ||
-        (data.distributionType === 'scheduled' && data.scheduledDate) ||
-        (data.distributionType === 'recurring' &&
-          data.recurringFrequency &&
-          data.recurringStartDate))
+      (data.distributionType === "manual" ||
+        data.distributionType === "automated" ||
+        (data.distributionType === "scheduled" && data.scheduledDate) ||
+        (data.distributionType === "recurring" && data.recurringFrequency && data.recurringStartDate))
     ) {
       try {
         const payload = createPayload(id, data);
         await createManualPayoutMutation.mutateAsync(payload);
       } catch (error) {
-        console.error('Error creating manual payout:', error);
+        console.error("Error creating manual payout:", error);
       }
     } else {
-      console.log('Making distribution with data:', {
+      console.log("Making distribution with data:", {
         assetId: assetData?.id,
         assetName: assetData?.name,
         assetType: assetData?.type,
@@ -303,7 +294,7 @@ export const NewDistribution = () => {
     if (id) {
       navigate(`/assets/${id}?tab=distributions`);
     } else {
-      navigate('/assets');
+      navigate("/assets");
     }
   };
 
@@ -323,9 +314,9 @@ export const NewDistribution = () => {
     <Stack spacing="16px" w="full" h="full">
       <Breadcrumb items={BREADCRUMB_ITEMS} />
       <HStack align="center" w="full">
-        <GobackButton label={t('newDistribution.title')} mr={4} />
+        <GobackButton label={t("newDistribution.title")} mr={4} />
         <Text textStyle="BodyRegularXS" color="neutral.500">
-          {t('newDistribution.subtitle', {
+          {t("newDistribution.subtitle", {
             asset: assetData?.type,
             id: assetData?.id,
           })}
@@ -343,50 +334,36 @@ export const NewDistribution = () => {
       >
         <Stack gap={6} w="full" maxW="500px" align="flex-start" mt={2}>
           <Stack gap={2} align="flex-start">
-            <Text textStyle="HeadingMediumLG">
-              {t('newDistribution.configuration')}
-            </Text>
+            <Text textStyle="HeadingMediumLG">{t("newDistribution.configuration")}</Text>
             <Text textStyle="BodyTextRegularMD" color="gray.600">
-              {t('newDistribution.description')}
+              {t("newDistribution.description")}
             </Text>
           </Stack>
 
           <Stack gap={3} w="full">
             <HStack w="full">
               <Text textStyle="BodyTextRegularSM" fontWeight="medium">
-                {t('newDistribution.assetId')}
+                {t("newDistribution.assetId")}
               </Text>
-              <Text
-                textStyle="BodyTextRegularSM"
-                color="gray.700"
-                fontWeight="medium"
-              >
+              <Text textStyle="BodyTextRegularSM" color="gray.700" fontWeight="medium">
                 {assetData?.id}
               </Text>
             </HStack>
 
             <HStack w="full">
               <Text textStyle="BodyTextRegularSM" fontWeight="medium">
-                {t('newDistribution.assetName')}
+                {t("newDistribution.assetName")}
               </Text>
-              <Text
-                textStyle="BodyTextRegularSM"
-                color="gray.700"
-                fontWeight="medium"
-              >
+              <Text textStyle="BodyTextRegularSM" color="gray.700" fontWeight="medium">
                 {assetData?.name}
               </Text>
             </HStack>
 
             <HStack w="full">
               <Text textStyle="BodyTextRegularSM" fontWeight="medium">
-                {t('newDistribution.assetType')}
+                {t("newDistribution.assetType")}
               </Text>
-              <Text
-                textStyle="BodyTextRegularSM"
-                color="gray.700"
-                fontWeight="medium"
-              >
+              <Text textStyle="BodyTextRegularSM" color="gray.700" fontWeight="medium">
                 {assetData?.type}
               </Text>
             </HStack>
@@ -394,27 +371,27 @@ export const NewDistribution = () => {
               <SelectController
                 id="distributionType"
                 control={control}
-                label={t('newDistribution.selectType')}
+                label={t("newDistribution.selectType")}
                 options={distributionTypeOptions}
                 isSearchable={false}
               />
-              {distributionType === 'automated' && (
+              {distributionType === "automated" && (
                 <Text textStyle="BodyRegularSM" color="neutral.800">
-                  {t('newDistribution.selectInfo')}
+                  {t("newDistribution.selectInfo")}
                 </Text>
               )}
             </VStack>
             <InputController
               control={control}
               id="concept"
-              placeholder={t('newDistribution.conceptPlaceholder')}
-              label={t('newDistribution.concept')}
+              placeholder={t("newDistribution.conceptPlaceholder")}
+              label={t("newDistribution.concept")}
               size="md"
               w="full"
             />
             <Stack gap={2} w="full">
               <Text textStyle="BodyTextRegularXXS" fontWeight="medium">
-                {t('newDistribution.paymentType')}
+                {t("newDistribution.paymentType")}
               </Text>
               <RadioGroupController
                 control={control}
@@ -428,55 +405,49 @@ export const NewDistribution = () => {
             </Stack>
             <Stack gap={2} w="full">
               <InputNumberController
-                label={t('newDistribution.amount')}
+                label={t("newDistribution.amount")}
                 control={control}
                 id="amount"
-                placeholder={amountType === 'fixed' ? '0.00' : '0'}
-                addonLeft={<Text>{amountType === 'fixed' ? '$' : '%'}</Text>}
+                placeholder={amountType === "fixed" ? "0.00" : "0"}
+                addonLeft={<Text>{amountType === "fixed" ? "$" : "%"}</Text>}
                 minValue={0.01}
-                maxValue={amountType === 'percentage' ? 100 : undefined}
+                maxValue={amountType === "percentage" ? 100 : undefined}
                 decimalScale={2}
                 decimalSeparator="."
                 thousandSeparator=","
                 size="md"
                 w="full"
                 rules={{
-                  required: t('newDistribution.validation.amountRequired'),
+                  required: t("newDistribution.validation.amountRequired"),
                   min: {
                     value: 0.01,
                     message:
-                      amountType === 'fixed'
-                        ? t('newDistribution.validation.minimumAmountFixed')
-                        : t(
-                            'newDistribution.validation.minimumAmountPercentage',
-                          ),
+                      amountType === "fixed"
+                        ? t("newDistribution.validation.minimumAmountFixed")
+                        : t("newDistribution.validation.minimumAmountPercentage"),
                   },
                 }}
               />
             </Stack>
-            {distributionType === 'scheduled' && (
+            {distributionType === "scheduled" && (
               <Stack gap={2} w="full">
                 <DateField
                   name="scheduledDate"
                   control={control}
-                  label={t('newDistribution.scheduledExecutionTime')}
-                  placeholder={t('newDistribution.selectDateAndTime')}
+                  label={t("newDistribution.scheduledExecutionTime")}
+                  placeholder={t("newDistribution.selectDateAndTime")}
                   isRequired
-                  requiredMessage={t(
-                    'newDistribution.validation.scheduledDateRequired',
-                  )}
-                  futureDateMessage={t(
-                    'newDistribution.validation.futureDateRequired',
-                  )}
+                  requiredMessage={t("newDistribution.validation.scheduledDateRequired")}
+                  futureDateMessage={t("newDistribution.validation.futureDateRequired")}
                 />
               </Stack>
             )}
-            {distributionType === 'recurring' && (
+            {distributionType === "recurring" && (
               <>
                 <Stack gap={2} w="full">
                   <SelectController
                     id="recurringFrequency"
-                    label={t('newDistribution.recurringOptions.label')}
+                    label={t("newDistribution.recurringOptions.label")}
                     control={control}
                     options={recurringOptions}
                     isSearchable={false}
@@ -486,26 +457,22 @@ export const NewDistribution = () => {
                   <DateField
                     name="recurringStartDate"
                     control={control}
-                    label={t('newDistribution.startTime')}
-                    placeholder={t('newDistribution.selectDateAndTime')}
+                    label={t("newDistribution.startTime")}
+                    placeholder={t("newDistribution.selectDateAndTime")}
                     isRequired
-                    requiredMessage={t(
-                      'newDistribution.validation.startDateRequired',
-                    )}
-                    futureDateMessage={t(
-                      'newDistribution.validation.futureDateRequired',
-                    )}
+                    requiredMessage={t("newDistribution.validation.startDateRequired")}
+                    futureDateMessage={t("newDistribution.validation.futureDateRequired")}
                   />
                 </Stack>
               </>
             )}
-            {distributionType === 'automated' && (
+            {distributionType === "automated" && (
               <Stack gap={2} w="full">
                 <SelectController
                   id="triggerCondition"
                   name="triggerCondition"
                   control={control}
-                  label={t('newDistribution.trigerCondition')}
+                  label={t("newDistribution.trigerCondition")}
                   placeholder="Select trigger condition"
                   options={triggerConditionOptions}
                   isRequired
@@ -514,12 +481,8 @@ export const NewDistribution = () => {
             )}
           </Stack>
           <HStack w="full" pt={4} justifyContent="flex-end" gap={3}>
-            <Button
-              variant="secondary"
-              onClick={() => navigate(`/assets/${id}`)}
-              size="md"
-            >
-              {t('newDistribution.buttons.cancel')}
+            <Button variant="secondary" onClick={() => navigate(`/assets/${id}`)} size="md">
+              {t("newDistribution.buttons.cancel")}
             </Button>
             <Button
               variant="primary"
@@ -528,7 +491,7 @@ export const NewDistribution = () => {
               onClick={onOpen}
               size="md"
             >
-              {t('newDistribution.buttons.createDistribution')}
+              {t("newDistribution.buttons.createDistribution")}
             </Button>
           </HStack>
         </Stack>
@@ -536,16 +499,10 @@ export const NewDistribution = () => {
           isOpen={isOpen}
           onClose={handleClose}
           icon={<PhosphorIcon as={Warning} size="md" weight={Weight.Light} />}
-          title={t('newDistribution.popup.title')}
-          description={formatDistributionDescription(
-            t,
-            amount,
-            amountType,
-            formValues,
-            assetData,
-          )}
-          confirmText={t('newDistribution.popup.confirmText')}
-          cancelText={t('newDistribution.popup.cancelText')}
+          title={t("newDistribution.popup.title")}
+          description={formatDistributionDescription(t, amount, amountType, formValues, assetData)}
+          confirmText={t("newDistribution.popup.confirmText")}
+          cancelText={t("newDistribution.popup.cancelText")}
           onConfirm={handleMakeNewDistribution}
           onCancel={onClose}
           variant="info"

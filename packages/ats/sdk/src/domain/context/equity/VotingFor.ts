@@ -203,7 +203,7 @@
 
 */
 
-import BigDecimal from '../shared/BigDecimal';
+import BigDecimal from "../shared/BigDecimal";
 
 export class VotingFor {
   tokenBalance: BigDecimal;

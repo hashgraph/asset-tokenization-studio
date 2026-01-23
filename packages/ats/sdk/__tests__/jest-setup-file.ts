@@ -202,4 +202,4 @@
    limitations under the License.
 
 */
-import 'reflect-metadata';
+import "reflect-metadata";

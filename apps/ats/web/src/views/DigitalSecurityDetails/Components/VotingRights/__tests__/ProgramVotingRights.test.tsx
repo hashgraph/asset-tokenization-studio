@@ -203,8 +203,8 @@
 
 */
 
-import { ProgramVotingRights } from '../ProgramVotingRights';
-import { render } from '../../../../../test-utils';
+import { ProgramVotingRights } from "../ProgramVotingRights";
+import { render } from "../../../../../test-utils";
 /* import userEvent from "@testing-library/user-event";
 import { waitFor } from "@testing-library/react";
 
@@ -214,7 +214,7 @@ const name = "TestName"; */
 describe(`${ProgramVotingRights.name}`, () => {
   const factoryComponent = () => render(<ProgramVotingRights />);
 
-  test('should render correctly', () => {
+  test("should render correctly", () => {
     const component = factoryComponent();
 
     expect(component.asFragment()).toMatchSnapshot();

@@ -203,10 +203,10 @@
 
 */
 
-import { create } from 'zustand';
-import { WalletStatus } from '../utils/constants';
-import type { InitializationData } from '@hashgraph/asset-tokenization-sdk';
-import { NetworkData } from '@hashgraph/asset-tokenization-sdk';
+import { create } from "zustand";
+import { WalletStatus } from "../utils/constants";
+import type { InitializationData } from "@hashgraph/asset-tokenization-sdk";
+import { NetworkData } from "@hashgraph/asset-tokenization-sdk";
 
 type WalletStoreStatus =
   | WalletStatus.disconnected
@@ -226,7 +226,7 @@ interface WalletStore {
 }
 
 export const useWalletStore = create<WalletStore>((set) => ({
-  address: '',
+  address: "",
   setAddress: (address: string) =>
     set((state: WalletStore) => ({
       ...state,
@@ -239,7 +239,7 @@ export const useWalletStore = create<WalletStore>((set) => ({
   reset: () =>
     set((state: WalletStore) => ({
       ...state,
-      address: '',
+      address: "",
       data: null,
       network: null,
       connectionStatus: WalletStatus.disconnected,

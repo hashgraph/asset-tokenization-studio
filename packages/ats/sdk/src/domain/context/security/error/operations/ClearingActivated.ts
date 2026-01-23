@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class ClearingActivated extends BaseError {
   constructor() {
-    super(
-      ErrorCode.ClearingActivated,
-      `Operation not allowed when clearing mode is activated`,
-    );
+    super(ErrorCode.ClearingActivated, `Operation not allowed when clearing mode is activated`);
   }
 }

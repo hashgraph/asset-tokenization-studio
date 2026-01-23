@@ -203,10 +203,10 @@
 
 */
 
-import { transports } from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
-import TransportStream from 'winston-transport';
-import LogService from '@service/log/LogService';
+import { transports } from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
+import TransportStream from "winston-transport";
+import LogService from "@service/log/LogService";
 
 // App Metadata
 export type AppMetadata = {
@@ -218,7 +218,7 @@ export type AppMetadata = {
 };
 
 export type LogOptions = {
-  level: 'TRACE' | 'INFO' | 'ERROR' | string;
+  level: "TRACE" | "INFO" | "ERROR" | string;
   transports: TransportStream | TransportStream[];
 };
 

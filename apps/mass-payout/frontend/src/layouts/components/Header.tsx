@@ -202,15 +202,9 @@
  *    limitations under the License.
  */
 
-import { Divider, Flex, HStack } from '@chakra-ui/react';
-import {
-  Header as HeaderBase,
-  Text,
-  Logo,
-  PhosphorIcon,
-  Weight,
-} from 'io-bricks-ui';
-import { User } from '@phosphor-icons/react';
+import { Divider, Flex, HStack } from "@chakra-ui/react";
+import { Header as HeaderBase, Text, Logo, PhosphorIcon, Weight } from "io-bricks-ui";
+import { User } from "@phosphor-icons/react";
 
 export const Header = () => {
   return (
@@ -230,7 +224,7 @@ export const Header = () => {
       }
       // seems to be that Header does not accept variants
       sx={{
-        bg: 'neutral.50',
+        bg: "neutral.50",
         h: 16,
         pl: 6,
         pr: 8,

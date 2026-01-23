@@ -203,11 +203,11 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { SetMaxSupplyCommandHandler } from '@command/security/operations/cap/SetMaxSupplyCommandHandler';
-import { GetMaxSupplyQueryHandler } from '@query/security/cap/getMaxSupply/GetMaxSupplyQueryHandler';
-import { GetMaxSupplyByPartitionQueryHandler } from '@query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQueryHandler';
-import { GetTotalSupplyByPartitionQueryHandler } from '@query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQueryHandler';
+import { TOKENS } from "../Tokens";
+import { SetMaxSupplyCommandHandler } from "@command/security/operations/cap/SetMaxSupplyCommandHandler";
+import { GetMaxSupplyQueryHandler } from "@query/security/cap/getMaxSupply/GetMaxSupplyQueryHandler";
+import { GetMaxSupplyByPartitionQueryHandler } from "@query/security/cap/getMaxSupplyByPartition/GetMaxSupplyByPartitionQueryHandler";
+import { GetTotalSupplyByPartitionQueryHandler } from "@query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQueryHandler";
 
 export const COMMAND_HANDLERS_SUPPLY = [
   {

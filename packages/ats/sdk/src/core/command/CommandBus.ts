@@ -204,16 +204,16 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { injectable } from 'tsyringe';
-import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from '@core/Constants';
-import { CommandMetadata } from '@core/decorator/CommandMetadata';
-import Injectable from '@core/injectable/Injectable';
-import { Type } from '@core/Type';
-import { Command } from './Command';
-import { ICommandHandler } from './CommandHandler';
-import { CommandResponse } from './CommandResponse';
-import { CommandHandlerNotFoundException } from './error/CommandHandlerNotFoundException';
-import { InvalidCommandHandlerException } from './error/InvalidCommandHandlerException';
+import { injectable } from "tsyringe";
+import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from "@core/Constants";
+import { CommandMetadata } from "@core/decorator/CommandMetadata";
+import Injectable from "@core/injectable/Injectable";
+import { Type } from "@core/Type";
+import { Command } from "./Command";
+import { ICommandHandler } from "./CommandHandler";
+import { CommandResponse } from "./CommandResponse";
+import { CommandHandlerNotFoundException } from "./error/CommandHandlerNotFoundException";
+import { InvalidCommandHandlerException } from "./error/InvalidCommandHandlerException";
 
 export type CommandHandlerType = ICommandHandler<Command<CommandResponse>>;
 
@@ -223,9 +223,7 @@ export interface ICommandBus<T extends CommandResponse> {
 }
 
 @injectable()
-export class CommandBus<T extends CommandResponse = CommandResponse>
-  implements ICommandBus<T>
-{
+export class CommandBus<T extends CommandResponse = CommandResponse> implements ICommandBus<T> {
   public handlers = new Map<string, ICommandHandler<Command<T>>>();
 
   constructor() {
@@ -249,10 +247,7 @@ export class CommandBus<T extends CommandResponse = CommandResponse>
 
   private getCommandId<X>(command: Command<X>): string {
     const { constructor: commandType } = Object.getPrototypeOf(command);
-    const commandMetadata: CommandMetadata = Reflect.getMetadata(
-      COMMAND_METADATA,
-      commandType,
-    );
+    const commandMetadata: CommandMetadata = Reflect.getMetadata(COMMAND_METADATA, commandType);
     if (!commandMetadata) {
       throw new CommandHandlerNotFoundException(commandType.name);
     }
@@ -271,14 +266,8 @@ export class CommandBus<T extends CommandResponse = CommandResponse>
 
   private reflectCommandId(handler: CommandHandlerType): string | undefined {
     const { constructor: handlerType } = Object.getPrototypeOf(handler);
-    const command: Type<Command<CommandResponse>> = Reflect.getMetadata(
-      COMMAND_HANDLER_METADATA,
-      handlerType,
-    );
-    const commandMetadata: CommandMetadata = Reflect.getMetadata(
-      COMMAND_METADATA,
-      command,
-    );
+    const command: Type<Command<CommandResponse>> = Reflect.getMetadata(COMMAND_HANDLER_METADATA, handlerType);
+    const commandMetadata: CommandMetadata = Reflect.getMetadata(COMMAND_METADATA, command);
     return commandMetadata.id;
   }
 }

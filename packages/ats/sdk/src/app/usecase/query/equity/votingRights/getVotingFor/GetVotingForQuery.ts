@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
-import BigDecimal from '@domain/context/shared/BigDecimal';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
+import BigDecimal from "@domain/context/shared/BigDecimal";
 
 export class GetVotingForQueryResponse implements QueryResponse {
   constructor(

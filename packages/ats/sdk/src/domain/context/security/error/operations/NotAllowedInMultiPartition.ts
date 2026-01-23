@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class NotAllowedInMultiPartition extends BaseError {
   constructor() {
-    super(
-      ErrorCode.NotAllowedInMultiPartition,
-      `Operation not allowed in multi partition mode`,
-    );
+    super(ErrorCode.NotAllowedInMultiPartition, `Operation not allowed in multi partition mode`);
   }
 }

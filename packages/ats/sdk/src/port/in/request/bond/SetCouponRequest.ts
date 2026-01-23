@@ -203,11 +203,11 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
-import { SecurityDate } from '@domain/context/shared/SecurityDate';
-import { Bond } from '@domain/context/bond/Bond';
+import { SecurityDate } from "@domain/context/shared/SecurityDate";
+import { Bond } from "@domain/context/bond/Bond";
 
 export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest> {
   securityId: string;
@@ -248,26 +248,14 @@ export default class SetCouponRequest extends ValidatedRequest<SetCouponRequest>
         );
       },
       executionTimestamp: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          parseInt(this.recordTimestamp),
-          undefined,
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), parseInt(this.recordTimestamp), undefined);
       },
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       endTimestamp: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          parseInt(this.startTimestamp),
-          undefined,
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), parseInt(this.startTimestamp), undefined);
       },
       fixingTimestamp: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          undefined,
-          parseInt(this.executionTimestamp),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), undefined, parseInt(this.executionTimestamp));
       },
       rateStatus: (val) => {
         return Bond.checkRateStatus(val);

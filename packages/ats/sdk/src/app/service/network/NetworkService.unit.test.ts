@@ -203,14 +203,14 @@
 
 */
 
-import { container } from 'tsyringe';
-import NetworkService, { NetworkProps } from './NetworkService'; // Adjust path as needed
-import { Environment } from '@domain/context/network/Environment';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import Configuration from '@domain/context/network/Configuration';
+import { container } from "tsyringe";
+import NetworkService, { NetworkProps } from "./NetworkService"; // Adjust path as needed
+import { Environment } from "@domain/context/network/Environment";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
+import Configuration from "@domain/context/network/Configuration";
 
-describe('NetworkService', () => {
+describe("NetworkService", () => {
   let networkService: NetworkService;
   let mockProps: NetworkProps;
 
@@ -222,17 +222,17 @@ describe('NetworkService', () => {
       environment: {} as Environment,
       mirrorNode: {} as MirrorNode,
       rpcNode: {} as JsonRpcRelay,
-      consensusNodes: 'consensus-node-1,consensus-node-2',
+      consensusNodes: "consensus-node-1,consensus-node-2",
       configuration: {} as Configuration,
     };
 
-    container.register('NetworkProps', { useValue: mockProps });
+    container.register("NetworkProps", { useValue: mockProps });
 
     networkService = container.resolve(NetworkService);
   });
 
-  describe('constructor', () => {
-    it('should initialize with provided NetworkProps', () => {
+  describe("constructor", () => {
+    it("should initialize with provided NetworkProps", () => {
       expect(networkService.environment).toBe(mockProps.environment);
       expect(networkService.mirrorNode).toBe(mockProps.mirrorNode);
       expect(networkService.rpcNode).toBe(mockProps.rpcNode);
@@ -240,9 +240,9 @@ describe('NetworkService', () => {
       expect(networkService.configuration).toBe(mockProps.configuration);
     });
 
-    it('should initialize with undefined props if none provided', () => {
+    it("should initialize with undefined props if none provided", () => {
       container.clearInstances();
-      container.register('NetworkProps', {
+      container.register("NetworkProps", {
         useValue: {
           environment: undefined,
           mirrorNode: undefined,
@@ -261,7 +261,7 @@ describe('NetworkService', () => {
       expect(service.configuration).toBeUndefined();
     });
 
-    it('should be a singleton', () => {
+    it("should be a singleton", () => {
       const service1 = container.resolve(NetworkService);
       const service2 = container.resolve(NetworkService);
 
@@ -269,8 +269,8 @@ describe('NetworkService', () => {
     });
   });
 
-  describe('environment getter and setter', () => {
-    it('should get and set environment', () => {
+  describe("environment getter and setter", () => {
+    it("should get and set environment", () => {
       const newEnvironment = {} as Environment;
 
       networkService.environment = newEnvironment;
@@ -280,8 +280,8 @@ describe('NetworkService', () => {
     });
   });
 
-  describe('mirrorNode getter and setter', () => {
-    it('should get and set mirrorNode', () => {
+  describe("mirrorNode getter and setter", () => {
+    it("should get and set mirrorNode", () => {
       const newMirrorNode = {} as MirrorNode;
 
       networkService.mirrorNode = newMirrorNode;
@@ -291,8 +291,8 @@ describe('NetworkService', () => {
     });
   });
 
-  describe('rpcNode getter and setter', () => {
-    it('should get and set rpcNode', () => {
+  describe("rpcNode getter and setter", () => {
+    it("should get and set rpcNode", () => {
       const newRpcNode = {} as JsonRpcRelay;
 
       networkService.rpcNode = newRpcNode;
@@ -302,9 +302,9 @@ describe('NetworkService', () => {
     });
   });
 
-  describe('consensusNodes getter and setter', () => {
-    it('should get and set consensusNodes', () => {
-      const newConsensusNodes = 'new-consensus-node';
+  describe("consensusNodes getter and setter", () => {
+    it("should get and set consensusNodes", () => {
+      const newConsensusNodes = "new-consensus-node";
 
       networkService.consensusNodes = newConsensusNodes;
       const result = networkService.consensusNodes;
@@ -312,7 +312,7 @@ describe('NetworkService', () => {
       expect(result).toBe(newConsensusNodes);
     });
 
-    it('should handle undefined consensusNodes', () => {
+    it("should handle undefined consensusNodes", () => {
       networkService.consensusNodes = undefined;
       const result = networkService.consensusNodes;
 
@@ -320,8 +320,8 @@ describe('NetworkService', () => {
     });
   });
 
-  describe('configuration getter and setter', () => {
-    it('should get and set configuration', () => {
+  describe("configuration getter and setter", () => {
+    it("should get and set configuration", () => {
       const newConfiguration = {} as Configuration;
 
       networkService.configuration = newConfiguration;

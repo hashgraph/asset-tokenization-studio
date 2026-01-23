@@ -202,15 +202,15 @@
  *    limitations under the License.
  */
 
-import { Asset } from '../services/AssetService';
+import { Asset } from "../services/AssetService";
 
 export enum AssetStatus {
-  ACTIVE = 'detail.status.active',
-  PAUSED = 'detail.status.paused',
-  COMPLETED = 'detail.status.completed',
-  SCHEDULED = 'detail.status.scheduled',
-  IN_PROGRESS = 'detail.status.inProgress',
-  FAILED = 'detail.status.failed',
+  ACTIVE = "detail.status.active",
+  PAUSED = "detail.status.paused",
+  COMPLETED = "detail.status.completed",
+  SCHEDULED = "detail.status.scheduled",
+  IN_PROGRESS = "detail.status.inProgress",
+  FAILED = "detail.status.failed",
 }
 
 export interface AssetData {
@@ -227,10 +227,7 @@ export const transformAssetToAssetData = (asset: Asset): AssetData => ({
   assetType: asset.type,
   name: asset.name,
   assetId: asset.id,
-  lifecycleCashFlowId:
-    asset.lifeCycleCashFlowHederaAddress ||
-    asset.lifeCycleCashFlowEvmAddress ||
-    '',
+  lifecycleCashFlowId: asset.lifeCycleCashFlowHederaAddress || asset.lifeCycleCashFlowEvmAddress || "",
   maturityDate: asset.maturityDate,
   symbol: asset.symbol,
   status: asset.isPaused ? AssetStatus.PAUSED : AssetStatus.ACTIVE,

@@ -203,13 +203,11 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
-import { ClearingRedeem } from '@domain/context/security/Clearing';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
+import { ClearingRedeem } from "@domain/context/security/Clearing";
 
-export class GetClearingRedeemForByPartitionQueryResponse
-  implements QueryResponse
-{
+export class GetClearingRedeemForByPartitionQueryResponse implements QueryResponse {
   constructor(public readonly payload: ClearingRedeem) {}
 }
 

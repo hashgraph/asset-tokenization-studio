@@ -203,36 +203,31 @@
 
 */
 
-import type { AccordionThemeConfiguration } from 'io-bricks-ui';
+import type { AccordionThemeConfiguration } from "io-bricks-ui";
 
 // It is not exported from IOBricks
-const accordionPartsList: Array<string> = [
-  'container',
-  'divider',
-  'title',
-  'item',
-];
+const accordionPartsList: Array<string> = ["container", "divider", "title", "item"];
 
 export const Accordion: AccordionThemeConfiguration = {
   parts: accordionPartsList,
   baseStyle: {
     container: {
-      borderStyle: 'unset',
-      borderRadius: '4px',
+      borderStyle: "unset",
+      borderRadius: "4px",
     },
     divider: {
-      visibility: 'hidden',
+      visibility: "hidden",
     },
   },
   variants: {
     admin: {
       container: {
-        bg: 'adminUI.50',
+        bg: "adminUI.50",
       },
     },
     holder: {
       container: {
-        bg: 'holderUI.50',
+        bg: "holderUI.50",
       },
     },
   },

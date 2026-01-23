@@ -203,102 +203,102 @@
 
 */
 
-import { ToggleThemeConfiguration, togglePartsList } from 'io-bricks-ui';
-import { BasePlatformTheme } from 'io-bricks-ui/Theme';
+import { ToggleThemeConfiguration, togglePartsList } from "io-bricks-ui";
+import { BasePlatformTheme } from "io-bricks-ui/Theme";
 
 export const Toggle: ToggleThemeConfiguration = {
   parts: togglePartsList,
   baseStyle: {
     label: {
-      color: 'neutral.700',
+      color: "neutral.700",
       ...BasePlatformTheme.textStyles.BodyRegularXS,
     },
   },
   sizes: {
     md: {
       thumb: {
-        background: 'white',
+        background: "white",
         _checked: {
-          bg: 'neutral.650',
+          bg: "neutral.650",
         },
       },
       track: {
-        background: 'neutral.500',
+        background: "neutral.500",
         _focus: {
-          boxShadow: 'var(--chakra-colors-neutral-light-600) 0px 0px 1px 2px',
+          boxShadow: "var(--chakra-colors-neutral-light-600) 0px 0px 1px 2px",
         },
         _hover: {
-          background: 'neutral.400',
+          background: "neutral.400",
         },
         _checked: {
-          background: 'primary.500',
+          background: "primary.500",
           _hover: {
-            background: 'primary.400',
+            background: "primary.400",
           },
           _focus: {
-            boxShadow: 'var(--chakra-colors-primary-800) 0px 0px 1px 2px',
+            boxShadow: "var(--chakra-colors-primary-800) 0px 0px 1px 2px",
           },
         },
         _disabled: {
-          background: 'grey.200',
+          background: "grey.200",
           _checked: {
-            background: 'primary.50',
+            background: "primary.50",
             _hover: {
-              background: 'primary.50',
+              background: "primary.50",
             },
           },
         },
         _invalid: {
-          outlineColor: 'status.error.500',
+          outlineColor: "status.error.500",
           _focus: {
-            boxShadow: 'var(--chakra-colors-error-100) 0px 0px 1px 2px',
+            boxShadow: "var(--chakra-colors-error-100) 0px 0px 1px 2px",
           },
         },
       },
     },
     lg: {
       thumb: {
-        background: 'white',
+        background: "white",
         _checked: {
-          bg: 'neutral.650',
+          bg: "neutral.650",
         },
       },
       track: {
-        background: 'neutral.500',
+        background: "neutral.500",
         _focus: {
-          boxShadow: 'var(--chakra-colors-neutral-light-600) 0px 0px 1px 2px',
+          boxShadow: "var(--chakra-colors-neutral-light-600) 0px 0px 1px 2px",
         },
         _hover: {
-          background: 'neutral.400',
+          background: "neutral.400",
         },
         _checked: {
-          background: 'primary.500',
+          background: "primary.500",
           _hover: {
-            background: 'primary.400',
+            background: "primary.400",
           },
           _focus: {
-            boxShadow: 'var(--chakra-colors-primary-800) 0px 0px 1px 2px',
+            boxShadow: "var(--chakra-colors-primary-800) 0px 0px 1px 2px",
           },
         },
         _disabled: {
-          background: 'grey.200',
+          background: "grey.200",
           _checked: {
-            background: 'primary.50',
+            background: "primary.50",
             _hover: {
-              background: 'primary.50',
+              background: "primary.50",
             },
           },
         },
         _invalid: {
-          outlineColor: 'status.error.500',
+          outlineColor: "status.error.500",
           _focus: {
-            boxShadow: 'var(--chakra-colors-error-100) 0px 0px 1px 2px',
+            boxShadow: "var(--chakra-colors-error-100) 0px 0px 1px 2px",
           },
         },
       },
     },
   },
   defaultProps: {
-    size: 'md',
+    size: "md",
   },
 };

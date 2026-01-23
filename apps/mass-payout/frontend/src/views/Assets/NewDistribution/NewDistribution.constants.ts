@@ -180,24 +180,24 @@ import {
   NewDistributionFormValues,
   RecurringFrequency,
   TriggerCondition,
-} from './NewDistribution.types';
+} from "./NewDistribution.types";
 
 export const DEFAULT_FORM_VALUES: NewDistributionFormValues = {
   amountType: FormAmountType.FIXED,
   amount: 0,
-  distributionType: '',
-  concept: '',
-  scheduledDate: '',
-  recurringFrequency: '',
-  recurringStartDate: '',
+  distributionType: "",
+  concept: "",
+  scheduledDate: "",
+  recurringFrequency: "",
+  recurringStartDate: "",
   triggerCondition: TriggerCondition.ON_DEPOSIT,
 };
 
 export const BREADCRUMB_ITEMS = [
-  { label: 'Asset list', link: '/assets' },
+  { label: "Asset list", link: "/assets" },
   {
-    label: 'New Distribution',
-    link: '#',
+    label: "New Distribution",
+    link: "#",
   },
 ];
 
@@ -211,49 +211,49 @@ export const VALIDATION_CONSTANTS = {
 export const createDistributionTypeOptions = (t: (key: string) => string) => [
   {
     value: FormDistributionType.MANUAL,
-    label: t('newDistribution.distributionType.manual'),
+    label: t("newDistribution.distributionType.manual"),
   },
   {
     value: FormDistributionType.SCHEDULED,
-    label: t('newDistribution.distributionType.scheduled'),
+    label: t("newDistribution.distributionType.scheduled"),
   },
   {
     value: FormDistributionType.RECURRING,
-    label: t('newDistribution.distributionType.recurring'),
+    label: t("newDistribution.distributionType.recurring"),
   },
   {
     value: FormDistributionType.AUTOMATED,
-    label: t('newDistribution.distributionType.automated'),
+    label: t("newDistribution.distributionType.automated"),
   },
 ];
 
 export const createRecurringOptions = (t: (key: string) => string) => [
   {
     value: RecurringFrequency.HOURLY,
-    label: t('newDistribution.recurringOptions.hourly'),
+    label: t("newDistribution.recurringOptions.hourly"),
   },
   {
     value: RecurringFrequency.DAILY,
-    label: t('newDistribution.recurringOptions.daily'),
+    label: t("newDistribution.recurringOptions.daily"),
   },
   {
     value: RecurringFrequency.WEEKLY,
-    label: t('newDistribution.recurringOptions.weekly'),
+    label: t("newDistribution.recurringOptions.weekly"),
   },
   {
     value: RecurringFrequency.MONTHLY,
-    label: t('newDistribution.recurringOptions.monthly'),
+    label: t("newDistribution.recurringOptions.monthly"),
   },
 ];
 
 export const createTriggerConditionOptions = (t: (key: string) => string) => [
   {
-    label: t('newDistribution.triggerConditionOptions.onDeposit'),
+    label: t("newDistribution.triggerConditionOptions.onDeposit"),
     value: TriggerCondition.ON_DEPOSIT,
   },
 ];
 
 export const createAmountTypeOptions = (t: (key: string) => string) => [
-  { value: FormAmountType.FIXED, label: t('newDistribution.fixed') },
-  { value: FormAmountType.PERCENTAGE, label: t('newDistribution.percentage') },
+  { value: FormAmountType.FIXED, label: t("newDistribution.fixed") },
+  { value: FormAmountType.PERCENTAGE, label: t("newDistribution.percentage") },
 ];

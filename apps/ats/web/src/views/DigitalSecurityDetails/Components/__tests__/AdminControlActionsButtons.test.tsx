@@ -203,27 +203,27 @@
 
 */
 
-import { render } from '../../../../test-utils';
-import { useRolesStore } from '../../../../store/rolesStore';
-import { SecurityRole } from '../../../../utils/SecurityRole';
-import { AdminControlActionsButtons } from '../AdminControlActionsButtons';
+import { render } from "../../../../test-utils";
+import { useRolesStore } from "../../../../store/rolesStore";
+import { SecurityRole } from "../../../../utils/SecurityRole";
+import { AdminControlActionsButtons } from "../AdminControlActionsButtons";
 
-jest.mock('../../../../router/RouterManager', () => ({
+jest.mock("../../../../router/RouterManager", () => ({
   RouterManager: {
-    ...jest.requireActual('../../../../router/RouterManager').RouterManager,
+    ...jest.requireActual("../../../../router/RouterManager").RouterManager,
     getUrl: jest.fn(),
     to: jest.fn(),
   },
 }));
 
-jest.mock('../../../../hooks/queries/usePauseSecurity', () => ({
+jest.mock("../../../../hooks/queries/usePauseSecurity", () => ({
   usePauseSecurity: jest.fn(() => ({
     mutate: jest.fn(),
     isLoading: false,
   })),
 }));
 
-jest.mock('../../../../hooks/queries/useUnpauseSecurity', () => ({
+jest.mock("../../../../hooks/queries/useUnpauseSecurity", () => ({
   useUnpauseSecurity: jest.fn(() => ({
     mutate: jest.fn(),
     isLoading: false,
@@ -241,19 +241,19 @@ describe(`${AdminControlActionsButtons.name}`, () => {
 
   const factoryComponent = () => render(<AdminControlActionsButtons />);
 
-  test('should render correctly', () => {
+  test("should render correctly", () => {
     const component = factoryComponent();
 
-    expect(component.asFragment()).toMatchSnapshot('defaultAdminRole');
+    expect(component.asFragment()).toMatchSnapshot("defaultAdminRole");
   });
 
-  test('by default admin has not freeze manager role', () => {
+  test("by default admin has not freeze manager role", () => {
     const component = factoryComponent();
 
-    expect(component.queryByTestId('freeze-button')).not.toBeInTheDocument();
+    expect(component.queryByTestId("freeze-button")).not.toBeInTheDocument();
   });
 
-  describe('Admin has freeze manager role', () => {
+  describe("Admin has freeze manager role", () => {
     beforeEach(() => {
       useRolesStore.setState({
         ...initialStoreState,
@@ -261,16 +261,16 @@ describe(`${AdminControlActionsButtons.name}`, () => {
       });
     });
 
-    test('should render correctly', () => {
+    test("should render correctly", () => {
       const component = factoryComponent();
 
-      expect(component.asFragment()).toMatchSnapshot('minterRole');
+      expect(component.asFragment()).toMatchSnapshot("minterRole");
     });
 
-    test('should show freeze manager button', () => {
+    test("should show freeze manager button", () => {
       const component = factoryComponent();
 
-      expect(component.getByTestId('freeze-button')).toBeInTheDocument();
+      expect(component.getByTestId("freeze-button")).toBeInTheDocument();
     });
   });
 });

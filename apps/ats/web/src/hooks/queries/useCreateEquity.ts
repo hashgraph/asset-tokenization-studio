@@ -203,76 +203,70 @@
 
 */
 
-import { useMutation } from '@tanstack/react-query';
-import { SDKService } from '../../services/SDKService';
-import { type CreateEquityRequest } from '@hashgraph/asset-tokenization-sdk';
-import { useToast } from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { useSecurityStore } from '../../store/securityStore';
-import { RouteName } from '../../router/RouteName';
-import { RouterManager } from '../../router/RouterManager';
-import { useAccountStore } from '../../store/accountStore';
-import { useWalletStore } from '../../store/walletStore';
+import { useMutation } from "@tanstack/react-query";
+import { SDKService } from "../../services/SDKService";
+import { type CreateEquityRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useToast } from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import { useSecurityStore } from "../../store/securityStore";
+import { RouteName } from "../../router/RouteName";
+import { RouterManager } from "../../router/RouterManager";
+import { useAccountStore } from "../../store/accountStore";
+import { useWalletStore } from "../../store/walletStore";
 
 export const useCreateEquity = () => {
   const toast = useToast();
-  const { t } = useTranslation('security', { keyPrefix: 'createEquity' });
+  const { t } = useTranslation("security", { keyPrefix: "createEquity" });
   const { address } = useWalletStore();
   const { addSecurity } = useSecurityStore();
   const { addSecurityToAdmin, addSecurityToHolder } = useAccountStore();
 
-  return useMutation(
-    (createRequest: CreateEquityRequest) =>
-      SDKService.createEquity(createRequest),
-    {
-      onSuccess: (data) => {
-        console.log('SDK message --> Security creation success: ', data);
+  return useMutation((createRequest: CreateEquityRequest) => SDKService.createEquity(createRequest), {
+    onSuccess: (data) => {
+      console.log("SDK message --> Security creation success: ", data);
 
-        if (!data) return;
+      if (!data) return;
 
-        const security = {
-          name: data.security.name ?? '',
-          symbol: data.security.symbol ?? '',
-          isin: data.security.isin ?? '',
-          type: data.security.type,
-          address: data.security.diamondAddress?.toString() ?? '',
-          evmAddress: data.security.evmDiamondAddress?.toString() ?? '',
-        };
-        toast.show({
-          duration: 3000,
-          title: `${t('messages.succes')} ${security.name} - ${
-            security.symbol
-          }`,
-          description: t('messages.creationSuccessful') + `${security.address}`,
-          variant: 'subtle',
-          status: 'success',
-        });
-        addSecurity(security);
+      const security = {
+        name: data.security.name ?? "",
+        symbol: data.security.symbol ?? "",
+        isin: data.security.isin ?? "",
+        type: data.security.type,
+        address: data.security.diamondAddress?.toString() ?? "",
+        evmAddress: data.security.evmDiamondAddress?.toString() ?? "",
+      };
+      toast.show({
+        duration: 3000,
+        title: `${t("messages.succes")} ${security.name} - ${security.symbol}`,
+        description: t("messages.creationSuccessful") + `${security.address}`,
+        variant: "subtle",
+        status: "success",
+      });
+      addSecurity(security);
 
-        addSecurityToAdmin(address, {
-          address: security.address,
-          isFavorite: false,
-        });
+      addSecurityToAdmin(address, {
+        address: security.address,
+        isFavorite: false,
+      });
 
-        addSecurityToHolder(address, {
-          address: security.address,
-          isFavorite: false,
-        });
+      addSecurityToHolder(address, {
+        address: security.address,
+        isFavorite: false,
+      });
 
-        RouterManager.to(RouteName.DigitalSecurityDetails, {
-          params: { id: security.address },
-        });
-      },
-      onError: (error) => {
-        console.log('SDK message --> Security creation error: ', error);
-        toast.show({
-          duration: 3000,
-          title: t('messages.error'),
-          description: t('messages.creationFailed'),
-          variant: 'subtle',
-          status: 'error',
-        });
-      },
+      RouterManager.to(RouteName.DigitalSecurityDetails, {
+        params: { id: security.address },
+      });
     },
-  );
+    onError: (error) => {
+      console.log("SDK message --> Security creation error: ", error);
+      toast.show({
+        duration: 3000,
+        title: t("messages.error"),
+        description: t("messages.creationFailed"),
+        variant: "subtle",
+        status: "error",
+      });
+    },
+  });
 };

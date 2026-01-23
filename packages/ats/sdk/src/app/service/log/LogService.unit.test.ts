@@ -203,12 +203,12 @@
 
 */
 
-import LogService, { LogLevel } from './LogService';
-import BaseError, { ErrorCode } from '@core/error/BaseError';
-import * as winston from 'winston';
+import LogService, { LogLevel } from "./LogService";
+import BaseError, { ErrorCode } from "@core/error/BaseError";
+import * as winston from "winston";
 
-jest.mock('winston', () => {
-  const originalWinston = jest.requireActual('winston');
+jest.mock("winston", () => {
+  const originalWinston = jest.requireActual("winston");
   return {
     ...originalWinston,
     createLogger: jest.fn(() => ({
@@ -217,7 +217,7 @@ jest.mock('winston', () => {
   };
 });
 
-describe('LogService', () => {
+describe("LogService", () => {
   const mockLogger = {
     log: jest.fn(),
   };
@@ -229,42 +229,34 @@ describe('LogService', () => {
     jest.clearAllMocks();
   });
 
-  it('should log TRACE level messages', () => {
-    LogService.logTrace('Trace message', { key: 'value' });
+  it("should log TRACE level messages", () => {
+    LogService.logTrace("Trace message", { key: "value" });
 
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      LogLevel.TRACE,
-      'Trace message',
-      {
-        timestamp: expect.any(String),
-        other: [{ key: 'value' }],
-      },
-    );
+    expect(mockLogger.log).toHaveBeenCalledWith(LogLevel.TRACE, "Trace message", {
+      timestamp: expect.any(String),
+      other: [{ key: "value" }],
+    });
   });
 
-  it('should log INFO level messages', () => {
-    LogService.logInfo('Info message', 123);
+  it("should log INFO level messages", () => {
+    LogService.logInfo("Info message", 123);
 
-    expect(mockLogger.log).toHaveBeenCalledWith(LogLevel.INFO, 'Info message', {
+    expect(mockLogger.log).toHaveBeenCalledWith(LogLevel.INFO, "Info message", {
       timestamp: expect.any(String),
       other: [123],
     });
   });
 
-  it('should log ERROR level messages', () => {
-    LogService.logError('Some error message');
+  it("should log ERROR level messages", () => {
+    LogService.logError("Some error message");
 
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      LogLevel.ERROR,
-      'Some error message',
-      {
-        timestamp: expect.any(String),
-        other: [],
-      },
-    );
+    expect(mockLogger.log).toHaveBeenCalledWith(LogLevel.ERROR, "Some error message", {
+      timestamp: expect.any(String),
+      other: [],
+    });
   });
 
-  it('should log BaseError properly', () => {
+  it("should log BaseError properly", () => {
     class TestBaseError extends BaseError {
       constructor(code: ErrorCode, message: string) {
         super(code, message);
@@ -275,33 +267,22 @@ describe('LogService', () => {
       }
     }
 
-    const error = new TestBaseError(
-      ErrorCode.Unexpected,
-      'Something went wrong',
-    );
+    const error = new TestBaseError(ErrorCode.Unexpected, "Something went wrong");
 
-    LogService.logError(error, 'context');
+    LogService.logError(error, "context");
 
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      LogLevel.ERROR,
-      'BaseError: Something went wrong',
-      {
-        timestamp: expect.any(String),
-        other: ['context'],
-      },
-    );
+    expect(mockLogger.log).toHaveBeenCalledWith(LogLevel.ERROR, "BaseError: Something went wrong", {
+      timestamp: expect.any(String),
+      other: ["context"],
+    });
   });
 
-  it('should fallback to default log when non-BaseError thrown', () => {
-    LogService.logError(new Error('Generic error'), 'extra');
+  it("should fallback to default log when non-BaseError thrown", () => {
+    LogService.logError(new Error("Generic error"), "extra");
 
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      LogLevel.ERROR,
-      new Error('Generic error'),
-      {
-        timestamp: expect.any(String),
-        other: ['extra'],
-      },
-    );
+    expect(mockLogger.log).toHaveBeenCalledWith(LogLevel.ERROR, new Error("Generic error"), {
+      timestamp: expect.any(String),
+      other: ["extra"],
+    });
   });
 });

@@ -203,22 +203,22 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import SecurityService from '@service/security/SecurityService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import EvmAddress from '@domain/context/contract/EvmAddress';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import SecurityService from "@service/security/SecurityService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import EvmAddress from "@domain/context/contract/EvmAddress";
 import {
   ProtectedClearingTransferByPartitionCommand,
   ProtectedClearingTransferByPartitionCommandResponse,
-} from './ProtectedClearingTransferByPartitionCommand';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import { ProtectedClearingTransferByPartitionCommandError } from './error/ProtectedClearingTransferByPartitionCommandError';
-import { KycStatus } from '@domain/context/kyc/Kyc';
+} from "./ProtectedClearingTransferByPartitionCommand";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { ProtectedClearingTransferByPartitionCommandError } from "./error/ProtectedClearingTransferByPartitionCommandError";
+import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(ProtectedClearingTransferByPartitionCommand)
 export class ProtectedClearingTransferByPartitionCommandHandler
@@ -241,47 +241,27 @@ export class ProtectedClearingTransferByPartitionCommandHandler
     command: ProtectedClearingTransferByPartitionCommand,
   ): Promise<ProtectedClearingTransferByPartitionCommandResponse> {
     try {
-      const {
-        securityId,
-        partitionId,
-        amount,
-        sourceId,
-        targetId,
-        expirationDate,
-        deadline,
-        nonce,
-        signature,
-      } = command;
+      const { securityId, partitionId, amount, sourceId, targetId, expirationDate, deadline, nonce, signature } =
+        command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
       const security = await this.securityService.get(securityId);
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const sourceEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(sourceId);
 
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
       const amountBd = BigDecimal.fromString(amount, security.decimals);
 
       await this.validationService.checkPause(securityId);
 
       await this.validationService.checkClearingActivated(securityId);
-      await this.validationService.checkKycAddresses(
-        securityId,
-        [sourceId, targetId],
-        KycStatus.GRANTED,
-      );
+      await this.validationService.checkKycAddresses(securityId, [sourceId, targetId], KycStatus.GRANTED);
 
       await this.validationService.checkProtectedPartitions(security);
 
-      await this.validationService.checkProtectedPartitionRole(
-        partitionId,
-        account.id.toString(),
-        securityId,
-      );
+      await this.validationService.checkProtectedPartitionRole(partitionId, account.id.toString(), securityId);
 
       await this.validationService.checkControlList(
         securityId,
@@ -293,11 +273,7 @@ export class ProtectedClearingTransferByPartitionCommandHandler
 
       await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-      await this.validationService.checkValidNounce(
-        securityId,
-        sourceId,
-        nonce,
-      );
+      await this.validationService.checkValidNounce(securityId, sourceId, nonce);
 
       const res = await handler.protectedClearingTransferByPartition(
         securityEvmAddress,
@@ -321,15 +297,10 @@ export class ProtectedClearingTransferByPartitionCommandHandler
       });
 
       return Promise.resolve(
-        new ProtectedClearingTransferByPartitionCommandResponse(
-          parseInt(clearingId, 16),
-          res.id!,
-        ),
+        new ProtectedClearingTransferByPartitionCommandResponse(parseInt(clearingId, 16), res.id!),
       );
     } catch (error) {
-      throw new ProtectedClearingTransferByPartitionCommandError(
-        error as Error,
-      );
+      throw new ProtectedClearingTransferByPartitionCommandError(error as Error);
     }
   }
 }

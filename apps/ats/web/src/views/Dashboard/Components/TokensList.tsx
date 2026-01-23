@@ -203,9 +203,9 @@
 
 */
 
-import { Stack } from '@chakra-ui/react';
-import { FavoritesList } from './FavoritesList';
-import { User } from '../../../utils/constants';
+import { Stack } from "@chakra-ui/react";
+import { FavoritesList } from "./FavoritesList";
+import { User } from "../../../utils/constants";
 
 export const TokensList = () => {
   return (

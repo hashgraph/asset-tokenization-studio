@@ -203,17 +203,17 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { TransferCommandHandler } from '@command/security/operations/transfer/TransferCommandHandler';
-import { TransferAndLockCommandHandler } from '@command/security/operations/transfer/TransferAndLockCommandHandler';
-import { ControllerRedeemCommandHandler } from '@command/security/operations/redeem/ControllerRedeemCommandHandler';
-import { ControllerTransferCommandHandler } from '@command/security/operations/transfer/ControllerTransferCommandHandler';
-import { ForcedTransferCommandHandler } from '@command/security/operations/transfer/ForcedTransferCommandHandler';
-import { ProtectedTransferFromByPartitionCommandHandler } from '@command/security/operations/transfer/ProtectedTransferFromByPartitionCommandHandler';
-import { BatchForcedTransferCommandHandler } from '@command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommandHandler';
-import { BatchTransferCommandHandler } from '@command/security/operations/batch/batchTransfer/BatchTransferCommandHandler';
-import { CanTransferByPartitionQueryHandler } from '@query/security/canTransferByPartition/CanTransferByPartitionQueryHandler';
-import { CanTransferQueryHandler } from '@query/security/canTransfer/CanTransferQueryHandler';
+import { TOKENS } from "../Tokens";
+import { TransferCommandHandler } from "@command/security/operations/transfer/TransferCommandHandler";
+import { TransferAndLockCommandHandler } from "@command/security/operations/transfer/TransferAndLockCommandHandler";
+import { ControllerRedeemCommandHandler } from "@command/security/operations/redeem/ControllerRedeemCommandHandler";
+import { ControllerTransferCommandHandler } from "@command/security/operations/transfer/ControllerTransferCommandHandler";
+import { ForcedTransferCommandHandler } from "@command/security/operations/transfer/ForcedTransferCommandHandler";
+import { ProtectedTransferFromByPartitionCommandHandler } from "@command/security/operations/transfer/ProtectedTransferFromByPartitionCommandHandler";
+import { BatchForcedTransferCommandHandler } from "@command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommandHandler";
+import { BatchTransferCommandHandler } from "@command/security/operations/batch/batchTransfer/BatchTransferCommandHandler";
+import { CanTransferByPartitionQueryHandler } from "@query/security/canTransferByPartition/CanTransferByPartitionQueryHandler";
+import { CanTransferQueryHandler } from "@query/security/canTransfer/CanTransferQueryHandler";
 
 export const COMMAND_HANDLERS_TRANSFER = [
   {

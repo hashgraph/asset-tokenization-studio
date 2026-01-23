@@ -4,14 +4,14 @@
  * Queda prohibida su distribución, copia o uso no autorizado.
  */
 
-import { Box, Text } from '@chakra-ui/react';
-import { Table } from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { ColumnDef } from '@tanstack/react-table';
-import { UseTableReturn } from '@/hooks/useTable';
-import { RouteName } from '@/router/RouteName';
-import { RouterManager } from '@/router/RouterManager';
-import type { Asset } from '@/services/AssetService';
+import { Box, Text } from "@chakra-ui/react";
+import { Table } from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import { ColumnDef } from "@tanstack/react-table";
+import { UseTableReturn } from "@/hooks/useTable";
+import { RouteName } from "@/router/RouteName";
+import { RouterManager } from "@/router/RouterManager";
+import type { Asset } from "@/services/AssetService";
 
 interface AssetTableProps {
   isLoading: boolean;
@@ -21,14 +21,8 @@ interface AssetTableProps {
   table: UseTableReturn;
 }
 
-export const AssetTable = ({
-  isLoading,
-  columns,
-  filteredAssets,
-  totalPages,
-  table,
-}: AssetTableProps) => {
-  const { t } = useTranslation('assets');
+export const AssetTable = ({ isLoading, columns, filteredAssets, totalPages, table }: AssetTableProps) => {
+  const { t } = useTranslation("assets");
 
   const onClickRow = (asset: Asset) => {
     RouterManager.to(RouteName.AssetDetail, {
@@ -48,7 +42,7 @@ export const AssetTable = ({
       justifyContent="space-between"
     >
       <Text textStyle="ElementsSemiboldLG" color="neutral.900" mb={6}>
-        {t('title')}
+        {t("title")}
       </Text>
 
       <Box flex="1" display="flex" flexDirection="column" minHeight="0">

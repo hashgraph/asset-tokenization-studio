@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
-import { Tabs } from 'io-bricks-ui';
-import { Stack } from '@chakra-ui/react';
-import { useTranslation } from 'react-i18next';
-import { AssetDistributions } from '../../AssetDistributions/AssetDistributions';
-import type { Asset } from '@/services/AssetService';
-import { Details } from './Details';
+import { useMemo } from "react";
+import { Tabs } from "io-bricks-ui";
+import { Stack } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
+import { AssetDistributions } from "../../AssetDistributions/AssetDistributions";
+import type { Asset } from "@/services/AssetService";
+import { Details } from "./Details";
 
 interface TabsConfigurationProps {
   asset: Asset | null;
@@ -31,15 +31,13 @@ export const TabsConfiguration = ({
   onNewDistribution,
   onTabChange,
 }: TabsConfigurationProps) => {
-  const { t } = useTranslation('assets');
+  const { t } = useTranslation("assets");
 
   const tabs = useMemo(() => {
     const assetTabs = [
       {
-        content: (
-          <Details assetData={asset || null} isLoading={isLoadingAsset} />
-        ),
-        header: t('detail.tabs.details.title'),
+        content: <Details assetData={asset || null} isLoading={isLoadingAsset} />,
+        header: t("detail.tabs.details.title"),
       },
       {
         content: (
@@ -52,7 +50,7 @@ export const TabsConfiguration = ({
             handleNewDistribution={onNewDistribution}
           />
         ),
-        header: t('detail.tabs.distributions'),
+        header: t("detail.tabs.distributions"),
       },
     ];
 
@@ -71,12 +69,7 @@ export const TabsConfiguration = ({
 
   return (
     <Stack w="full" h="full" borderRadius={1} gap={4}>
-      <Tabs
-        tabs={tabs}
-        variant="primary"
-        index={activeTabIndex}
-        onChange={onTabChange}
-      />
+      <Tabs tabs={tabs} variant="primary" index={activeTabIndex} onChange={onTabChange} />
     </Stack>
   );
 };

@@ -203,24 +203,16 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '../../../FormatValidation';
+import FormatValidation from "../../../FormatValidation";
 
 export default class SetAddressFrozenRequest extends ValidatedRequest<SetAddressFrozenRequest> {
   securityId: string;
   targetId: string;
   status: boolean;
 
-  constructor({
-    securityId,
-    targetId,
-    status,
-  }: {
-    securityId: string;
-    status: boolean;
-    targetId: string;
-  }) {
+  constructor({ securityId, targetId, status }: { securityId: string; status: boolean; targetId: string }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       status: FormatValidation.checkBoolean(),

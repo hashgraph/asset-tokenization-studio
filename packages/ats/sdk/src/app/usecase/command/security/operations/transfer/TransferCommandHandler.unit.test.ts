@@ -203,30 +203,30 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { ErrorCode } from '@core/error/BaseError';
-import { TransferCommandFixture } from '@test/fixtures/transfer/TransferFixture';
-import { Security } from '@domain/context/security/Security';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { TransferCommandHandler } from './TransferCommandHandler';
-import { TransferCommand, TransferCommandResponse } from './TransferCommand';
-import { TransferCommandError } from './error/TransferCommandError';
-import SecurityService from '@service/security/SecurityService';
-import Account from '@domain/context/account/Account';
+} from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { ErrorCode } from "@core/error/BaseError";
+import { TransferCommandFixture } from "@test/fixtures/transfer/TransferFixture";
+import { Security } from "@domain/context/security/Security";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { TransferCommandHandler } from "./TransferCommandHandler";
+import { TransferCommand, TransferCommandResponse } from "./TransferCommand";
+import { TransferCommandError } from "./error/TransferCommandError";
+import SecurityService from "@service/security/SecurityService";
+import Account from "@domain/context/account/Account";
 
-describe('TransferCommandHandler', () => {
+describe("TransferCommandHandler", () => {
   let handler: TransferCommandHandler;
   let command: TransferCommand;
 
@@ -252,8 +252,7 @@ describe('TransferCommandHandler', () => {
     );
     const commandRaw = TransferCommandFixture.create();
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const { deadline, nounce, signature, sourceId, ...commandFiltered } =
-      commandRaw;
+    const { deadline, nounce, signature, sourceId, ...commandFiltered } = commandRaw;
     command = commandFiltered;
   });
 
@@ -261,29 +260,25 @@ describe('TransferCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws TransferCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws TransferCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          TransferCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(TransferCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while transferring tokens: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while transferring tokens: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully transfer', async () => {
+    describe("success cases", () => {
+      it("should successfully transfer", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
@@ -298,19 +293,10 @@ describe('TransferCommandHandler', () => {
         expect(result).toBeInstanceOf(TransferCommandResponse);
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
-          1,
-          command.targetId,
-        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(1, command.targetId);
 
         expect(validationServiceMock.checkCanTransfer).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkCanTransfer).toHaveBeenCalledWith(
@@ -320,13 +306,9 @@ describe('TransferCommandHandler', () => {
           account.id.toString(),
         );
 
-        expect(
-          transactionServiceMock.getHandler().transfer,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().transfer).toHaveBeenCalledTimes(1);
 
-        expect(
-          transactionServiceMock.getHandler().transfer,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getHandler().transfer).toHaveBeenCalledWith(
           evmAddress,
           evmAddress,
           BigDecimal.fromString(command.amount, security.decimals),

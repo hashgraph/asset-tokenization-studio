@@ -203,13 +203,13 @@
 
 */
 
-import { singleton } from 'tsyringe';
-import Injectable from '@core/injectable/Injectable';
-import Service from '@service/Service';
-import { QueryBus } from '@core/query/QueryBus';
-import { Security } from '@domain/context/security/Security';
-import { GetSecurityQuery } from '@query/security/get/GetSecurityQuery';
-import { SecurityNotFound } from './error/SecurityNotFound';
+import { singleton } from "tsyringe";
+import Injectable from "@core/injectable/Injectable";
+import Service from "@service/Service";
+import { QueryBus } from "@core/query/QueryBus";
+import { Security } from "@domain/context/security/Security";
+import { GetSecurityQuery } from "@query/security/get/GetSecurityQuery";
+import { SecurityNotFound } from "./error/SecurityNotFound";
 
 @singleton()
 export default class SecurityService extends Service {
@@ -220,17 +220,9 @@ export default class SecurityService extends Service {
 
   async get(securityId: string): Promise<Security> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    const viewModel = (
-      await this.queryBus.execute(new GetSecurityQuery(securityId))
-    ).security;
+    const viewModel = (await this.queryBus.execute(new GetSecurityQuery(securityId))).security;
     const { name, decimals, symbol, evmDiamondAddress, isin } = viewModel;
-    if (
-      !name ||
-      decimals === undefined ||
-      !symbol ||
-      !isin ||
-      !evmDiamondAddress
-    )
+    if (!name || decimals === undefined || !symbol || !isin || !evmDiamondAddress)
       throw new SecurityNotFound(securityId);
 
     return new Security({

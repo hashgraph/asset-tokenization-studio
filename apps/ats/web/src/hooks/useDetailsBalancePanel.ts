@@ -203,19 +203,10 @@
 
 */
 
-import {
-  GetAccountBalanceRequest,
-  GetSecurityDetailsRequest,
-} from '@hashgraph/asset-tokenization-sdk';
-import {
-  useGetBalanceOf,
-  useGetSecurityDetails,
-} from './queries/useGetSecurityDetails';
+import { GetAccountBalanceRequest, GetSecurityDetailsRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useGetBalanceOf, useGetSecurityDetails } from "./queries/useGetSecurityDetails";
 
-export const useDetailsBalancePanel = (
-  securityId: string,
-  targetId: string,
-) => {
+export const useDetailsBalancePanel = (securityId: string, targetId: string) => {
   const {
     data: currentAvailableBalance,
     refetch: refetchCurrentAvailableBalance,
@@ -234,10 +225,9 @@ export const useDetailsBalancePanel = (
     securityId,
   });
 
-  const { refetch: refetchDetails, isFetching: isSecurityDetailsLoading } =
-    useGetSecurityDetails(detailsRequest, {
-      enabled: !!securityId,
-    });
+  const { refetch: refetchDetails, isFetching: isSecurityDetailsLoading } = useGetSecurityDetails(detailsRequest, {
+    enabled: !!securityId,
+  });
 
   const update = () => {
     refetchCurrentAvailableBalance();

@@ -203,9 +203,9 @@
 
 */
 
-import { Command } from '@core/command/Command';
-import { CommandResponse } from '@core/command/CommandResponse';
-import { RateStatus } from '@domain/context/bond/RateStatus.js';
+import { Command } from "@core/command/Command";
+import { CommandResponse } from "@core/command/CommandResponse";
+import { RateStatus } from "@domain/context/bond/RateStatus.js";
 
 export class SetCouponCommandResponse implements CommandResponse {
   constructor(

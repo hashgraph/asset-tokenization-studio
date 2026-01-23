@@ -203,27 +203,24 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import {
-  EvmAddressPropsFixture,
-  HederaIdPropsFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import SecurityService from '@service/security/SecurityService';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { Security } from '@domain/context/security/Security';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { GetExternalKycListsMembersQueryHandler } from './GetExternalKycListsMembersQueryHandler';
+import { createMock } from "@golevelup/ts-jest";
+import { EvmAddressPropsFixture, HederaIdPropsFixture } from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import SecurityService from "@service/security/SecurityService";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { Security } from "@domain/context/security/Security";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { GetExternalKycListsMembersQueryHandler } from "./GetExternalKycListsMembersQueryHandler";
 import {
   GetExternalKycListsMembersQuery,
   GetExternalKycListsMembersQueryResponse,
-} from './GetExternalKycListsMembersQuery';
-import AccountService from '@service/account/AccountService';
-import Account from '@domain/context/account/Account';
-import { GetExternalKycListsMembersQueryFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
+} from "./GetExternalKycListsMembersQuery";
+import AccountService from "@service/account/AccountService";
+import Account from "@domain/context/account/Account";
+import { GetExternalKycListsMembersQueryFixture } from "@test/fixtures/externalKycLists/ExternalKycListsFixture";
 
-describe('GetExternalKycListsMembersQueryHandler', () => {
+describe("GetExternalKycListsMembersQueryHandler", () => {
   let handler: GetExternalKycListsMembersQueryHandler;
   let query: GetExternalKycListsMembersQuery;
 
@@ -253,15 +250,11 @@ describe('GetExternalKycListsMembersQueryHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('should successfully get external kyc lists members', async () => {
+  describe("execute", () => {
+    it("should successfully get external kyc lists members", async () => {
       securityServiceMock.get.mockResolvedValueOnce(security);
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
-      queryAdapterServiceMock.getExternalKycListsMembers.mockResolvedValue([
-        evmAddress.toString(),
-      ]);
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      queryAdapterServiceMock.getExternalKycListsMembers.mockResolvedValue([evmAddress.toString()]);
       accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
 
       const result = await handler.execute(query);
@@ -269,25 +262,19 @@ describe('GetExternalKycListsMembersQueryHandler', () => {
       expect(result).toBeInstanceOf(GetExternalKycListsMembersQueryResponse);
       expect(result.payload).toStrictEqual([account.id.toString()]);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountInfo).toHaveBeenCalledTimes(1);
-      expect(
-        queryAdapterServiceMock.getExternalKycListsMembers,
-      ).toHaveBeenCalledTimes(1);
+      expect(queryAdapterServiceMock.getExternalKycListsMembers).toHaveBeenCalledTimes(1);
 
       expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
+      expect(queryAdapterServiceMock.getExternalKycListsMembers).toHaveBeenCalledWith(
+        evmAddress,
+        query.start,
+        query.end,
       );
-      expect(
-        queryAdapterServiceMock.getExternalKycListsMembers,
-      ).toHaveBeenCalledWith(evmAddress, query.start, query.end);
-      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(
-        evmAddress.toString(),
-      );
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(evmAddress.toString());
     });
   });
 });

@@ -204,9 +204,9 @@
 */
 
 export enum DividendType {
-  NONE = 'NONE',
-  PREFERRED = 'PREFERRED',
-  COMMON = 'COMMON',
+  NONE = "NONE",
+  PREFERRED = "PREFERRED",
+  COMMON = "COMMON",
 }
 
 export class CastDividendType {

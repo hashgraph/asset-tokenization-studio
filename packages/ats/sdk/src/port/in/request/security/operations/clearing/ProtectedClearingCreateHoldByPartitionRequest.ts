@@ -203,10 +203,10 @@
 
 */
 
-import { SecurityDate } from '@domain/context/shared/SecurityDate';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { SecurityDate } from "@domain/context/shared/SecurityDate";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '@port/in/request/FormatValidation';
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class ProtectedClearingCreateHoldByPartitionRequest extends ValidatedRequest<ProtectedClearingCreateHoldByPartitionRequest> {
   securityId: string;
@@ -255,22 +255,13 @@ export default class ProtectedClearingCreateHoldByPartitionRequest extends Valid
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       nonce: FormatValidation.checkNumber({ min: 0 }),
       clearingExpirationDate: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          Math.ceil(new Date().getTime() / 1000),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), Math.ceil(new Date().getTime() / 1000));
       },
       holdExpirationDate: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          Math.ceil(new Date().getTime() / 1000),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), Math.ceil(new Date().getTime() / 1000));
       },
       deadline: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          Math.ceil(new Date().getTime() / 1000),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), Math.ceil(new Date().getTime() / 1000));
       },
     });
 

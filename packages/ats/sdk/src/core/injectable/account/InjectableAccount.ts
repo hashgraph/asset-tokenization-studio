@@ -203,8 +203,8 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { GetAccountInfoQueryHandler } from '@query/account/info/GetAccountInfoQueryHandler';
+import { TOKENS } from "../Tokens";
+import { GetAccountInfoQueryHandler } from "@query/account/info/GetAccountInfoQueryHandler";
 
 export const QUERY_HANDLERS_ACCOUNT = [
   {

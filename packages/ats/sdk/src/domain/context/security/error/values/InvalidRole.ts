@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class InvalidRole extends BaseError {
   constructor(role: string) {

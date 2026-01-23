@@ -203,7 +203,7 @@
 
 */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   Box,
   Center,
@@ -218,34 +218,32 @@ import {
   OrderedList,
   Stack,
   VStack,
-} from '@chakra-ui/react';
-import { PhosphorIcon, Text, Weight, Button, PopUp } from 'io-bricks-ui';
-import landingBackground from '../../assets/layer.png';
-import { useWalletStore } from '../../store/walletStore';
-import { Trans, useTranslation } from 'react-i18next';
-import { RouterManager } from '../../router/RouterManager';
-import { RouteName } from '../../router/RouteName';
-import { Wallet } from '@phosphor-icons/react';
-import { METAMASK_URL, WalletStatus, User } from '../../utils/constants';
-import { useWalletConnection } from '../../hooks/useWalletConnection';
-import { useUserStore } from '../../store/userStore';
-import { SupportedWallets } from '@hashgraph/asset-tokenization-sdk';
+} from "@chakra-ui/react";
+import { PhosphorIcon, Text, Weight, Button, PopUp } from "io-bricks-ui";
+import landingBackground from "../../assets/layer.png";
+import { useWalletStore } from "../../store/walletStore";
+import { Trans, useTranslation } from "react-i18next";
+import { RouterManager } from "../../router/RouterManager";
+import { RouteName } from "../../router/RouteName";
+import { Wallet } from "@phosphor-icons/react";
+import { METAMASK_URL, WalletStatus, User } from "../../utils/constants";
+import { useWalletConnection } from "../../hooks/useWalletConnection";
+import { useUserStore } from "../../store/userStore";
+import { SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
 
 export const Landing = () => {
-  const { t } = useTranslation('landing');
-  const { t: tGlobals } = useTranslation('globals');
-  const { t: tConnecting } = useTranslation('landing', {
-    keyPrefix: 'metamaskPopup.connecting',
+  const { t } = useTranslation("landing");
+  const { t: tGlobals } = useTranslation("globals");
+  const { t: tConnecting } = useTranslation("landing", {
+    keyPrefix: "metamaskPopup.connecting",
   });
-  const { t: tUninstalled } = useTranslation('landing', {
-    keyPrefix: 'metamaskPopup.uninstalled',
+  const { t: tUninstalled } = useTranslation("landing", {
+    keyPrefix: "metamaskPopup.uninstalled",
   });
   const { connectionStatus, reset } = useWalletStore();
   const { handleConnectWallet: connectWallet } = useWalletConnection();
   const { setType } = useUserStore();
-  const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(
-    null,
-  );
+  const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(null);
 
   const handleConnectWallet = (wallet: SupportedWallets) => {
     setSelectedWallet(wallet);
@@ -253,7 +251,7 @@ export const Landing = () => {
   };
 
   const handleInstallButton = () => {
-    window.open(METAMASK_URL, '_blank');
+    window.open(METAMASK_URL, "_blank");
     reset();
   };
 
@@ -271,24 +269,17 @@ export const Landing = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionStatus]);
 
-  const isLoading =
-    connectionStatus === WalletStatus.connecting &&
-    selectedWallet !== SupportedWallets.HWALLETCONNECT;
+  const isLoading = connectionStatus === WalletStatus.connecting && selectedWallet !== SupportedWallets.HWALLETCONNECT;
   if (isLoading) {
     return (
       <Center h="full" data-testid="connecting-to-metamask">
         <PopUp isOpen={true} onClose={() => reset()}>
-          <PhosphorIcon
-            as={Wallet}
-            size="md"
-            sx={{ color: 'primary.500' }}
-            weight={Weight.Fill}
-          />
+          <PhosphorIcon as={Wallet} size="md" sx={{ color: "primary.500" }} weight={Weight.Fill} />
           <Text mt={2} textStyle="ElementsMediumMD">
-            {tConnecting('title')}
+            {tConnecting("title")}
           </Text>
           <Text mt={1} textStyle="ElementsRegularXS">
-            {tConnecting('description')}
+            {tConnecting("description")}
           </Text>
         </PopUp>
       </Center>
@@ -300,17 +291,12 @@ export const Landing = () => {
     return (
       <Center h="full" data-testid="install-metamask">
         <PopUp isOpen={true} onClose={() => reset()}>
-          <PhosphorIcon
-            as={Wallet}
-            size="md"
-            sx={{ color: 'primary.500' }}
-            weight={Weight.Fill}
-          />
+          <PhosphorIcon as={Wallet} size="md" sx={{ color: "primary.500" }} weight={Weight.Fill} />
           <Text mt={2} textStyle="ElementsMediumMD">
-            {tUninstalled('title')}
+            {tUninstalled("title")}
           </Text>
           <Text mt={1} textStyle="ElementsRegularXS" w="240px">
-            {tUninstalled('description')}
+            {tUninstalled("description")}
           </Text>
           <Button
             data-testid="install-metamask-extension-button"
@@ -319,7 +305,7 @@ export const Landing = () => {
             color="primary.500"
             mt={6}
           >
-            {tUninstalled('button')}
+            {tUninstalled("button")}
           </Button>
         </PopUp>
       </Center>
@@ -346,25 +332,20 @@ export const Landing = () => {
           color="neutral.900"
           maxW="470px"
         >
-          {`${t('connectYour')} `}
+          {`${t("connectYour")} `}
           <Text as="span" color="primary.500">
-            {t('Wallet')}
+            {t("Wallet")}
           </Text>
         </Text>
-        <Text
-          data-testid="subtitle"
-          textStyle="ElementsLightLG"
-          width="329px"
-          my={3}
-        >
-          {t('welcomeMessage')}
+        <Text data-testid="subtitle" textStyle="ElementsLightLG" width="329px" my={3}>
+          {t("welcomeMessage")}
         </Text>
         <Box textStyle="ElementsLightSM" width="100%">
           <Accordion allowToggle width="fit-content">
             <AccordionItem>
               <AccordionButton>
                 <Box flex="1" textAlign="left">
-                  {t('showMetamaskInstructions')}
+                  {t("showMetamaskInstructions")}
                 </Box>
                 <AccordionIcon />
               </AccordionButton>
@@ -376,7 +357,7 @@ export const Landing = () => {
                     p: <Text />,
                     ol: <OrderedList />,
                     li: <ListItem />,
-                    a: <Link isExternal sx={{ display: 'inline' }} />,
+                    a: <Link isExternal sx={{ display: "inline" }} />,
                   }}
                 />
               </AccordionPanel>
@@ -390,7 +371,7 @@ export const Landing = () => {
             onClick={() => handleConnectWallet(SupportedWallets.METAMASK)}
           >
             <Text textStyle="ElementsMediumSM" color="neutral.650">
-              {tGlobals('connectMetamask')}
+              {tGlobals("connectMetamask")}
             </Text>
           </Button>
           <Button
@@ -398,7 +379,7 @@ export const Landing = () => {
             onClick={() => handleConnectWallet(SupportedWallets.HWALLETCONNECT)}
           >
             <Text textStyle="ElementsMediumSM" color="neutral.650">
-              {tGlobals('connectWalletConnect')}
+              {tGlobals("connectWalletConnect")}
             </Text>
           </Button>
         </HStack>

@@ -205,37 +205,37 @@
 export const Input = {
   baseStyle: {
     field: {
-      bg: 'white',
-      border: '1px solid',
-      borderColor: 'neutral.300',
-      borderRadius: 'md',
+      bg: "white",
+      border: "1px solid",
+      borderColor: "neutral.300",
+      borderRadius: "md",
       _hover: {
-        borderColor: 'neutral.400',
+        borderColor: "neutral.400",
       },
       _focus: {
-        borderColor: 'primary.500',
-        boxShadow: '0 0 0 1px var(--chakra-colors-primary-500)',
+        borderColor: "primary.500",
+        boxShadow: "0 0 0 1px var(--chakra-colors-primary-500)",
       },
     },
   },
   variants: {
     outline: {
       field: {
-        bg: 'white',
-        border: '1px solid',
-        borderColor: 'neutral.300',
-        borderRadius: 'md',
+        bg: "white",
+        border: "1px solid",
+        borderColor: "neutral.300",
+        borderRadius: "md",
         _hover: {
-          borderColor: 'neutral.400',
+          borderColor: "neutral.400",
         },
         _focus: {
-          borderColor: 'primary.500',
-          boxShadow: '0 0 0 1px var(--chakra-colors-primary-500)',
+          borderColor: "primary.500",
+          boxShadow: "0 0 0 1px var(--chakra-colors-primary-500)",
         },
       },
     },
   },
   defaultProps: {
-    variant: 'outline',
+    variant: "outline",
   },
 };

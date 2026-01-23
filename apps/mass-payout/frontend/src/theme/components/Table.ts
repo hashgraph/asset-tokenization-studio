@@ -202,88 +202,77 @@
  *    limitations under the License.
  */
 
-import { tablePartsList, TableThemeConfiguration } from 'io-bricks-ui';
-import { BasePlatformTheme } from 'io-bricks-ui/Theme';
+import { tablePartsList, TableThemeConfiguration } from "io-bricks-ui";
+import { BasePlatformTheme } from "io-bricks-ui/Theme";
 
 const row = {
-  bg: 'neutral.400',
-  boxShadow: '0px 4px 14px rgba(0, 0, 0, 0.05)',
+  bg: "neutral.400",
+  boxShadow: "0px 4px 14px rgba(0, 0, 0, 0.05)",
 };
 
-const disabledColor = 'grey.500';
-const enabledColor = 'grey.900';
+const disabledColor = "grey.500";
+const enabledColor = "grey.900";
 
-const baseStyle: TableThemeConfiguration['baseStyle'] = ({
-  isSorted,
-  typeOfSort,
-}) => ({
+const baseStyle: TableThemeConfiguration["baseStyle"] = ({ isSorted, typeOfSort }) => ({
   headerContainer: {
     ...row,
-    bg: 'white',
+    bg: "white",
   },
   header: {
     // @ts-ignore
     ...BasePlatformTheme.textStyles.ElementsMediumSM,
-    color: 'neutral.900',
+    color: "neutral.900",
     px: 3,
     py: 4,
   },
   cell: {
-    apply: 'textStyles.ElementsRegularSM',
-    color: 'neutral.700',
+    apply: "textStyles.ElementsRegularSM",
+    color: "neutral.700",
     _focusVisible: {
-      outline: 'var(--chakra-colors-primary-100) auto 1px',
+      outline: "var(--chakra-colors-primary-100) auto 1px",
     },
-    bg: 'white',
+    bg: "white",
     "a, button[role='link']": {
-      color: 'neutral.700',
-      textDecoration: 'underline',
-      fontWeight: 'medium',
+      color: "neutral.700",
+      textDecoration: "underline",
+      fontWeight: "medium",
       _hover: {
-        color: 'primary.600',
-        textDecoration: 'underline',
+        color: "primary.600",
+        textDecoration: "underline",
       },
       _active: {
-        color: 'primary.700',
+        color: "primary.700",
       },
       _focus: {
-        boxShadow: 'none',
-        color: 'primary.600',
+        boxShadow: "none",
+        color: "primary.600",
       },
     },
   },
   rowContainer: {
     ...row,
     _hover: {
-      bg: 'neutral.150',
+      bg: "neutral.150",
     },
   },
   footerText: {
-    apply: 'textStyles.ElementsRegularXS',
-    color: 'neutral.900',
+    apply: "textStyles.ElementsRegularXS",
+    color: "neutral.900",
     mx: 2,
   },
   subtext: {
-    apply: 'textStyles.ElementsLightXS',
-    color: 'neutral.500',
+    apply: "textStyles.ElementsLightXS",
+    color: "neutral.500",
   },
   title: {
     ...BasePlatformTheme.textStyles.ElementsSemiboldLG,
   },
   sortIcon: {
-    '& polyline:first-of-type, & line:first-of-type': {
-      stroke: isSorted
-        ? typeOfSort === 'desc'
-          ? enabledColor
-          : disabledColor
-        : 'grey.800',
+    "& polyline:first-of-type, & line:first-of-type": {
+      stroke: isSorted ? (typeOfSort === "desc" ? enabledColor : disabledColor) : "grey.800",
     },
-    '& polyline:last-of-type, & line:last-of-type': {
-      stroke: isSorted
-        ? typeOfSort === 'asc'
-          ? enabledColor
-          : disabledColor
-        : 'grey.800',
+    "& polyline:last-of-type, & line:last-of-type": {
+      stroke: isSorted ? (typeOfSort === "asc" ? enabledColor : disabledColor) : "grey.800",
     },
   },
 });
@@ -292,6 +281,6 @@ export const Table: TableThemeConfiguration = {
   parts: tablePartsList,
   baseStyle,
   defaultProps: {
-    size: 'lg',
+    size: "lg",
   },
 };

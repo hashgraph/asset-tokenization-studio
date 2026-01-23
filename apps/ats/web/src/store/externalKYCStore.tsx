@@ -203,8 +203,8 @@
 
 */
 
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
 
 export interface ExternalKYCStore {
   address: string;
@@ -217,7 +217,7 @@ interface ExternalKYCStoreProps {
   reset: () => void;
 }
 
-const EXTERNAL_KYC_STORE_KEY = 'EXTERNAL_KYC_STORE_KEY';
+const EXTERNAL_KYC_STORE_KEY = "EXTERNAL_KYC_STORE_KEY";
 
 export const useExternalKYCStore = create<ExternalKYCStoreProps>()(
   persist(
@@ -229,11 +229,7 @@ export const useExternalKYCStore = create<ExternalKYCStoreProps>()(
         })),
       removeExternalKYC: (externalKYCAddress) =>
         set((state) => ({
-          externalKYCs: [
-            ...state.externalKYCs.filter(
-              (KYC) => KYC.address !== externalKYCAddress,
-            ),
-          ],
+          externalKYCs: [...state.externalKYCs.filter((KYC) => KYC.address !== externalKYCAddress)],
         })),
       reset: () =>
         set((state) => ({

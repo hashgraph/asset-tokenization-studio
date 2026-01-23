@@ -203,21 +203,19 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
 import {
   CreateExternalBlackListMockCommand,
   CreateExternalBlackListMockCommandResponse,
-} from './CreateExternalBlackListMockCommand';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '@service/transaction/TransactionService';
-import { CreateExternalBlackListMockCommandError } from './error/CreateExternalBlackListMockCommandError';
+} from "./CreateExternalBlackListMockCommand";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import TransactionService from "@service/transaction/TransactionService";
+import { CreateExternalBlackListMockCommandError } from "./error/CreateExternalBlackListMockCommandError";
 
 @CommandHandler(CreateExternalBlackListMockCommand)
-export class CreateExternalBlackListMockCommandHandler
-  implements ICommandHandler<CreateExternalBlackListMockCommand>
-{
+export class CreateExternalBlackListMockCommandHandler implements ICommandHandler<CreateExternalBlackListMockCommand> {
   constructor(
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
@@ -233,7 +231,7 @@ export class CreateExternalBlackListMockCommandHandler
 
       let contractAddress: string;
 
-      if (typeof res === 'string') {
+      if (typeof res === "string") {
         contractAddress = res;
       } else {
         contractAddress = await this.transactionService.getTransactionResult({
@@ -245,13 +243,9 @@ export class CreateExternalBlackListMockCommandHandler
         });
       }
 
-      const address = (
-        await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-      ).id.toString();
+      const address = (await this.mirrorNodeAdapter.getAccountInfo(contractAddress)).id.toString();
 
-      return Promise.resolve(
-        new CreateExternalBlackListMockCommandResponse(address),
-      );
+      return Promise.resolve(new CreateExternalBlackListMockCommandResponse(address));
     } catch (error) {
       throw new CreateExternalBlackListMockCommandError(error as Error);
     }

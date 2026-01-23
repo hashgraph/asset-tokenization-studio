@@ -203,10 +203,10 @@
 
 */
 
-import BaseError from '@core/error/BaseError';
-import { Security, SecurityProps } from '../security/Security';
-import { CastDividendType, DividendType } from './DividendType';
-import { InvalidDividendType } from './error/InvalidDividendType';
+import BaseError from "@core/error/BaseError";
+import { Security, SecurityProps } from "../security/Security";
+import { CastDividendType, DividendType } from "./DividendType";
+import { InvalidDividendType } from "./error/InvalidDividendType";
 
 export interface EquityProps extends SecurityProps {}
 
@@ -216,7 +216,7 @@ export class Equity extends Security implements EquityProps {
 
     const length = Object.keys(DividendType).length;
 
-    if (typeof value !== 'number') {
+    if (typeof value !== "number") {
       value = CastDividendType.toNumber(value);
     }
 

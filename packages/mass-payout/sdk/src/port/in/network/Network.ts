@@ -204,31 +204,28 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable, Logger } from '@nestjs/common';
-import { InitializationData, NetworkData } from '@port/out/TransactionAdapter';
-import ConnectRequest, {
-  DFNSConfigRequest,
-  SupportedWallets,
-} from '../request/network/ConnectRequest';
-import RequestMapper from '../request/mapping/RequestMapper';
-import TransactionService from '@app/services/transaction/TransactionService';
-import NetworkService from '@app/services/network/NetworkService';
-import Account from '@domain/account/Account';
-import SetNetworkRequest from '../request/network/SetNetworkRequest';
-import { Environment, unrecognized } from '@domain/network/Environment';
-import InitializationRequest from '../request/network/InitializationRequest';
-import { Event } from '@port/in/event/Event';
-import { LogError } from '@core/decorator/LogErrorDecorator';
-import { SetNetworkError } from './error/SetNetworkError';
-import { ExecuteConnectionError } from './error/ExecuteConnectionError';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { Injectable, Logger } from "@nestjs/common";
+import { InitializationData, NetworkData } from "@port/out/TransactionAdapter";
+import ConnectRequest, { DFNSConfigRequest, SupportedWallets } from "../request/network/ConnectRequest";
+import RequestMapper from "../request/mapping/RequestMapper";
+import TransactionService from "@app/services/transaction/TransactionService";
+import NetworkService from "@app/services/network/NetworkService";
+import Account from "@domain/account/Account";
+import SetNetworkRequest from "../request/network/SetNetworkRequest";
+import { Environment, unrecognized } from "@domain/network/Environment";
+import InitializationRequest from "../request/network/InitializationRequest";
+import { Event } from "@port/in/event/Event";
+import { LogError } from "@core/decorator/LogErrorDecorator";
+import { SetNetworkError } from "./error/SetNetworkError";
+import { ExecuteConnectionError } from "./error/ExecuteConnectionError";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
-import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
-import SetNetworkResponse from './response/SetNetworkResponse';
-import ExecuteConnectionResponse from './response/ExecuteConnectionResponse';
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { DFNSTransactionAdapter } from "@port/out/hs/hts/custodial/DFNSTransactionAdapter";
+import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
+import SetNetworkResponse from "./response/SetNetworkResponse";
+import ExecuteConnectionResponse from "./response/ExecuteConnectionResponse";
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -265,11 +262,10 @@ export class Network implements INetworkInPort {
 
   @LogError
   async setNetwork(req: SetNetworkRequest): Promise<SetNetworkResponse> {
-    ValidatedRequest.handleValidation('SetNetworkRequest', req);
+    ValidatedRequest.handleValidation("SetNetworkRequest", req);
     try {
       this.networkService.environment = req.environment;
-      if (req.consensusNodes)
-        this.networkService.consensusNodes = req.consensusNodes;
+      if (req.consensusNodes) this.networkService.consensusNodes = req.consensusNodes;
       if (req.rpcNode) this.networkService.rpcNode = req.rpcNode;
 
       // Init Mirror Node Adapter
@@ -277,10 +273,7 @@ export class Network implements INetworkInPort {
       this.networkService.mirrorNode = req.mirrorNode;
 
       // Init RPC Query Adapter
-      this.rpcQueryAdapter.init(
-        this.networkService.rpcNode.baseUrl,
-        this.networkService.rpcNode.apiKey,
-      );
+      this.rpcQueryAdapter.init(this.networkService.rpcNode.baseUrl, this.networkService.rpcNode.apiKey);
 
       return Promise.resolve(
         new SetNetworkResponse(
@@ -302,14 +295,11 @@ export class Network implements INetworkInPort {
   ): Promise<ExecuteConnectionResponse> {
     try {
       const handler = this.transactionService.getHandlerClass(wallet);
-      const input =
-        custodialSettings === undefined ? account : custodialSettings;
+      const input = custodialSettings === undefined ? account : custodialSettings;
 
       const registration = await handler.register(input);
 
-      return Promise.resolve(
-        new ExecuteConnectionResponse(registration, wallet),
-      );
+      return Promise.resolve(new ExecuteConnectionResponse(registration, wallet));
     } catch (error) {
       throw new ExecuteConnectionError(error as Error);
     }
@@ -317,7 +307,7 @@ export class Network implements INetworkInPort {
 
   @LogError
   async init(req: InitializationRequest): Promise<SupportedWallets[]> {
-    ValidatedRequest.handleValidation('InitializationRequest', req);
+    ValidatedRequest.handleValidation("InitializationRequest", req);
     await this.setNetwork(
       new SetNetworkRequest({
         environment: req.network,
@@ -335,14 +325,12 @@ export class Network implements INetworkInPort {
 
   @LogError
   async connect(req: ConnectRequest): Promise<InitializationData> {
-    this.logger.log('ConnectRequest from network', req);
-    ValidatedRequest.handleValidation('ConnectRequest', req);
+    this.logger.log("ConnectRequest from network", req);
+    ValidatedRequest.handleValidation("ConnectRequest", req);
 
-    const account = req.account
-      ? RequestMapper.mapAccount(req.account)
-      : undefined;
+    const account = req.account ? RequestMapper.mapAccount(req.account) : undefined;
     const custodialSettings = this.getCustodialSettings(req);
-    this.logger.log('SetNetwork', req.network, req.mirrorNode, req.rpcNode);
+    this.logger.log("SetNetwork", req.network, req.mirrorNode, req.rpcNode);
 
     await this.setNetwork(
       new SetNetworkRequest({
@@ -352,13 +340,8 @@ export class Network implements INetworkInPort {
       }),
     );
 
-    this.logger.log('ConnectRequest', req.wallet, account, custodialSettings);
-    const res = await this.executeConnection(
-      req.network,
-      req.wallet,
-      account,
-      custodialSettings,
-    );
+    this.logger.log("ConnectRequest", req.wallet, account, custodialSettings);
+    const res = await this.executeConnection(req.network, req.wallet, account, custodialSettings);
     return res.payload;
   }
 
@@ -369,9 +352,7 @@ export class Network implements INetworkInPort {
 
     switch (req.wallet) {
       case SupportedWallets.DFNS:
-        return RequestMapper.dfnsRequestToDfnsSettings(
-          req.custodialWalletSettings as DFNSConfigRequest,
-        );
+        return RequestMapper.dfnsRequestToDfnsSettings(req.custodialWalletSettings as DFNSConfigRequest);
 
       default:
         return undefined;

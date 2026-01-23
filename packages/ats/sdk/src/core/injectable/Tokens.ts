@@ -204,7 +204,7 @@
 */
 
 export const TOKENS = {
-  COMMAND_HANDLER: Symbol('CommandHandler'),
-  QUERY_HANDLER: Symbol('QueryHandler'),
-  TRANSACTION_HANDLER: 'TransactionHandler',
+  COMMAND_HANDLER: Symbol("CommandHandler"),
+  QUERY_HANDLER: Symbol("QueryHandler"),
+  TRANSACTION_HANDLER: "TransactionHandler",
 };

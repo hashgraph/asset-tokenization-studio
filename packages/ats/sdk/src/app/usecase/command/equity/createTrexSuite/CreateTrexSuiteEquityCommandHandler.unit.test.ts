@@ -203,31 +203,28 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import { CreateTrexSuiteEquityCommandHandler } from './CreateTrexSuiteEquityCommandHandler';
-import {
-  CreateTrexSuiteEquityCommand,
-  CreateTrexSuiteEquityCommandResponse,
-} from './CreateTrexSuiteEquityCommand';
-import TransactionService from '@service/transaction/TransactionService';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
+import { createMock } from "@golevelup/ts-jest";
+import { CreateTrexSuiteEquityCommandHandler } from "./CreateTrexSuiteEquityCommandHandler";
+import { CreateTrexSuiteEquityCommand, CreateTrexSuiteEquityCommandResponse } from "./CreateTrexSuiteEquityCommand";
+import TransactionService from "@service/transaction/TransactionService";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   HederaIdZeroAddressFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import AccountService from '@service/account/AccountService';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import { CreateTrexSuiteEquityCommandFixture } from '@test/fixtures/equity/EquityFixture';
-import { ErrorCode } from '@core/error/BaseError';
-import { CreateTrexSuiteEquityCommandError } from './error/CreateTrexSuiteEquityError';
-import ValidationService from '@service/validation/ValidationService';
+} from "@test/fixtures/shared/DataFixture";
+import AccountService from "@service/account/AccountService";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import { CreateTrexSuiteEquityCommandFixture } from "@test/fixtures/equity/EquityFixture";
+import { ErrorCode } from "@core/error/BaseError";
+import { CreateTrexSuiteEquityCommandError } from "./error/CreateTrexSuiteEquityError";
+import ValidationService from "@service/validation/ValidationService";
 
-describe('CreateTrexSuiteEquityCommandHandler', () => {
+describe("CreateTrexSuiteEquityCommandHandler", () => {
   let handler: CreateTrexSuiteEquityCommandHandler;
   let command: CreateTrexSuiteEquityCommand;
 
@@ -238,15 +235,9 @@ describe('CreateTrexSuiteEquityCommandHandler', () => {
   const validationServiceMock = createMock<ValidationService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const externalPauseEvmAddress = new EvmAddress(
-    EvmAddressPropsFixture.create().value,
-  );
-  const externalControlEvmAddress = new EvmAddress(
-    EvmAddressPropsFixture.create().value,
-  );
-  const externalKycEvmAddress = new EvmAddress(
-    EvmAddressPropsFixture.create().value,
-  );
+  const externalPauseEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalControlEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+  const externalKycEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const transactionId = TransactionIdFixture.create().id;
   const hederaId = HederaIdPropsFixture.create().value;
   const hederaIdZeroAddress = HederaIdZeroAddressFixture.create().address;
@@ -266,30 +257,26 @@ describe('CreateTrexSuiteEquityCommandHandler', () => {
   afterEach(() => {
     jest.resetAllMocks();
   });
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws CreateTrexSuiteEquityCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws CreateTrexSuiteEquityCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          CreateTrexSuiteEquityCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(CreateTrexSuiteEquityCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while creating the trex suite equity: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while creating the trex suite equity: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
 
-    describe('success cases', () => {
-      it('should successfully create an equity with equityAddress in response', async () => {
+    describe("success cases", () => {
+      it("should successfully create an equity with equityAddress in response", async () => {
         contractServiceMock.getContractEvmAddress
           .mockResolvedValueOnce(evmAddress)
           .mockResolvedValueOnce(evmAddress)
@@ -301,49 +288,29 @@ describe('CreateTrexSuiteEquityCommandHandler', () => {
           .mockResolvedValueOnce([externalKycEvmAddress]);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
 
-        transactionServiceMock
-          .getHandler()
-          .createTrexSuiteEquity.mockResolvedValue({
-            id: transactionId,
-            response: { _token: evmAddress.value },
-          });
+        transactionServiceMock.getHandler().createTrexSuiteEquity.mockResolvedValue({
+          id: transactionId,
+          response: { _token: evmAddress.value },
+        });
 
         validationServiceMock.checkTrexTokenSaltExists.mockResolvedValue();
 
-        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(
-          hederaId,
-        );
+        mirrorNodeAdapterMock.getHederaIdfromContractAddress.mockResolvedValue(hederaId);
 
-        transactionServiceMock.getTransactionResult.mockResolvedValue(
-          evmAddress.value,
-        );
+        transactionServiceMock.getTransactionResult.mockResolvedValue(evmAddress.value);
 
         const result = await handler.execute(command);
 
         expect(result).toBeInstanceOf(CreateTrexSuiteEquityCommandResponse);
         expect(result.securityId.value).toBe(hederaId);
         expect(result.transactionId).toBe(transactionId);
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          4,
-        );
-        expect(
-          contractServiceMock.getEvmAddressesFromHederaIds,
-        ).toHaveBeenCalledTimes(3);
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(
-          transactionServiceMock.getHandler().createTrexSuiteEquity,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          mirrorNodeAdapterMock.getHederaIdfromContractAddress,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().createTrexSuiteEquity,
-        ).toHaveBeenCalledWith(
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(4);
+        expect(contractServiceMock.getEvmAddressesFromHederaIds).toHaveBeenCalledTimes(3);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().createTrexSuiteEquity).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(1);
+        expect(mirrorNodeAdapterMock.getHederaIdfromContractAddress).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().createTrexSuiteEquity).toHaveBeenCalledWith(
           command.salt,
           command.owner,
           command.irs,
@@ -380,9 +347,7 @@ describe('CreateTrexSuiteEquityCommandHandler', () => {
           [externalKycEvmAddress],
           command.factory?.toString(),
         );
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith(
           expect.objectContaining({
             res: {
               id: transactionId,
@@ -396,18 +361,16 @@ describe('CreateTrexSuiteEquityCommandHandler', () => {
         );
       });
 
-      it('should handle error and return fallback response if response code is 1', async () => {
+      it("should handle error and return fallback response if response code is 1", async () => {
         mirrorNodeAdapterMock.getContractInfo.mockResolvedValue({
           id: hederaId,
           evmAddress: evmAddress.value,
         });
 
-        transactionServiceMock
-          .getHandler()
-          .createTrexSuiteEquity.mockResolvedValue({
-            id: transactionId,
-            response: 1,
-          });
+        transactionServiceMock.getHandler().createTrexSuiteEquity.mockResolvedValue({
+          id: transactionId,
+          response: 1,
+        });
 
         const result = await handler.execute(command);
 

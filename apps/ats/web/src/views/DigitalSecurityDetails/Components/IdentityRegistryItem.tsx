@@ -203,42 +203,29 @@
 
 */
 
-import {
-  IdentityRegistryRequest,
-  SetIdentityRegistryRequest,
-} from '@hashgraph/asset-tokenization-sdk';
-import { useEffect, useState } from 'react';
-import { FieldValues, useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { Flex } from '@chakra-ui/react';
-import {
-  IconButton,
-  InputController,
-  PhosphorIcon,
-  PopUp,
-  Text,
-} from 'io-bricks-ui';
-import { Pencil, X, Info, Check } from '@phosphor-icons/react';
-import { useRolesStore } from '../../../store/rolesStore';
-import { SecurityRole } from '../../../utils/SecurityRole';
-import { useParams } from 'react-router-dom';
-import { useGetIdentityRegistry } from '../../../hooks/queries/useIdentityRegistry';
-import { useUpdateIdentityRegistry } from '../../../hooks/mutations/useUpdateIdentityRegistry';
+import { IdentityRegistryRequest, SetIdentityRegistryRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useEffect, useState } from "react";
+import { FieldValues, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { Flex } from "@chakra-ui/react";
+import { IconButton, InputController, PhosphorIcon, PopUp, Text } from "io-bricks-ui";
+import { Pencil, X, Info, Check } from "@phosphor-icons/react";
+import { useRolesStore } from "../../../store/rolesStore";
+import { SecurityRole } from "../../../utils/SecurityRole";
+import { useParams } from "react-router-dom";
+import { useGetIdentityRegistry } from "../../../hooks/queries/useIdentityRegistry";
+import { useUpdateIdentityRegistry } from "../../../hooks/mutations/useUpdateIdentityRegistry";
 
-export const IdentityRegistryItem = ({
-  securityId,
-}: {
-  securityId: string;
-}) => {
-  const { id = '' } = useParams();
+export const IdentityRegistryItem = ({ securityId }: { securityId: string }) => {
+  const { id = "" } = useParams();
   const { roles: accountRoles } = useRolesStore();
 
-  const { t } = useTranslation('security', {
-    keyPrefix: 'details.bond.updateIdentityRegistry.toast',
+  const { t } = useTranslation("security", {
+    keyPrefix: "details.bond.updateIdentityRegistry.toast",
   });
 
   const { control, reset, handleSubmit } = useForm({
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -254,8 +241,7 @@ export const IdentityRegistryItem = ({
     },
   );
 
-  const { mutate: updateIdentityRegistryMutation } =
-    useUpdateIdentityRegistry();
+  const { mutate: updateIdentityRegistryMutation } = useUpdateIdentityRegistry();
 
   useEffect(() => {
     reset();
@@ -279,13 +265,8 @@ export const IdentityRegistryItem = ({
   };
 
   return (
-    <Flex
-      alignItems={'center'}
-      justifyContent={'space-between'}
-      w={'full'}
-      flex={1}
-    >
-      <Flex alignItems={'center'} gap={4}>
+    <Flex alignItems={"center"} justifyContent={"space-between"} w={"full"} flex={1}>
+      <Flex alignItems={"center"} gap={4}>
         {isEditMode && (
           <>
             <InputController
@@ -296,11 +277,11 @@ export const IdentityRegistryItem = ({
               size="sm"
               defaultValue={identityRegistry}
             />
-            <Flex alignItems={'center'} gap={2}>
+            <Flex alignItems={"center"} gap={2}>
               <IconButton
                 icon={<PhosphorIcon as={Check} />}
                 aria-label="save button"
-                size={'sm'}
+                size={"sm"}
                 onClick={() => {
                   setShowConfirmPopUp(true);
                 }}
@@ -308,7 +289,7 @@ export const IdentityRegistryItem = ({
               <IconButton
                 icon={<PhosphorIcon as={X} />}
                 aria-label="cancel button"
-                size={'sm'}
+                size={"sm"}
                 onClick={() => setIsEditMode(false)}
               />
             </Flex>
@@ -317,16 +298,15 @@ export const IdentityRegistryItem = ({
         {!isEditMode && (
           <>
             <Text>{identityRegistry}</Text>
-            {accountRoles.includes(SecurityRole._TREX_OWNER_ROLE) &&
-              identityRegistry !== '0.0.0' && (
-                <IconButton
-                  size={'sm'}
-                  icon={<PhosphorIcon as={Pencil} />}
-                  aria-label="edit button"
-                  variant="secondary"
-                  onClick={() => setIsEditMode(true)}
-                />
-              )}
+            {accountRoles.includes(SecurityRole._TREX_OWNER_ROLE) && identityRegistry !== "0.0.0" && (
+              <IconButton
+                size={"sm"}
+                icon={<PhosphorIcon as={Pencil} />}
+                aria-label="edit button"
+                variant="secondary"
+                onClick={() => setIsEditMode(true)}
+              />
+            )}
           </>
         )}
       </Flex>
@@ -339,10 +319,10 @@ export const IdentityRegistryItem = ({
         }}
         closeOnOverlayClick={!isLoading}
         icon={<PhosphorIcon as={Info} size="md" />}
-        title={t('title')}
-        description={t('subtitle')}
-        cancelText={t('cancelButtonText')}
-        confirmText={t('confirmButtonText')}
+        title={t("title")}
+        description={t("subtitle")}
+        cancelText={t("cancelButtonText")}
+        confirmText={t("confirmButtonText")}
         confirmButtonProps={{
           isLoading: isLoading,
         }}

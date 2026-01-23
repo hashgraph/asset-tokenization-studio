@@ -203,25 +203,23 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import ValidationService from '@service/validation/ValidationService';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import ValidationService from "@service/validation/ValidationService";
 import {
   UpdateExternalControlListsCommand,
   UpdateExternalControlListsCommandResponse,
-} from './UpdateExternalControlListsCommand';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ContractService from '@service/contract/ContractService';
-import { UpdateExternalControlListsCommandError } from './error/UpdateExternalControlListsCommandError';
+} from "./UpdateExternalControlListsCommand";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ContractService from "@service/contract/ContractService";
+import { UpdateExternalControlListsCommandError } from "./error/UpdateExternalControlListsCommandError";
 
 @CommandHandler(UpdateExternalControlListsCommand)
-export class UpdateExternalControlListsCommandHandler
-  implements ICommandHandler<UpdateExternalControlListsCommand>
-{
+export class UpdateExternalControlListsCommandHandler implements ICommandHandler<UpdateExternalControlListsCommand> {
   constructor(
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
@@ -233,16 +231,13 @@ export class UpdateExternalControlListsCommandHandler
     public readonly validationService: ValidationService,
   ) {}
 
-  async execute(
-    command: UpdateExternalControlListsCommand,
-  ): Promise<UpdateExternalControlListsCommandResponse> {
+  async execute(command: UpdateExternalControlListsCommand): Promise<UpdateExternalControlListsCommandResponse> {
     try {
       const { securityId, externalControlListsAddresses, actives } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
       await this.validationService.checkPause(securityId);
 
@@ -253,10 +248,7 @@ export class UpdateExternalControlListsCommandHandler
       );
 
       const externalControlListsEvmAddresses = await Promise.all(
-        externalControlListsAddresses.map(
-          async (address) =>
-            await this.contractService.getContractEvmAddress(address),
-        ),
+        externalControlListsAddresses.map(async (address) => await this.contractService.getContractEvmAddress(address)),
       );
 
       const res = await handler.updateExternalControlLists(
@@ -266,12 +258,7 @@ export class UpdateExternalControlListsCommandHandler
         securityId,
       );
 
-      return Promise.resolve(
-        new UpdateExternalControlListsCommandResponse(
-          res.error === undefined,
-          res.id!,
-        ),
-      );
+      return Promise.resolve(new UpdateExternalControlListsCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new UpdateExternalControlListsCommandError(error as Error);
     }

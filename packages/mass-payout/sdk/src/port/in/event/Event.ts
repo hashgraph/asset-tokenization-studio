@@ -204,20 +204,15 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from '@nestjs/common';
-import NetworkService from '@app/services/network/NetworkService';
-import WalletEvent, {
-  ConnectionState,
-  WalletEvents,
-} from '@app/services/event/WalletEvent';
-import EventService from '@app/services/event/EventService';
-import { LogError } from '@core/decorator/LogErrorDecorator';
+import { Injectable } from "@nestjs/common";
+import NetworkService from "@app/services/network/NetworkService";
+import WalletEvent, { ConnectionState, WalletEvents } from "@app/services/event/WalletEvent";
+import EventService from "@app/services/event/EventService";
+import { LogError } from "@core/decorator/LogErrorDecorator";
 
 export { WalletEvent, WalletEvents, ConnectionState };
 
-export type EventParameter<T extends keyof WalletEvent> = Parameters<
-  WalletEvent[T]
->[0];
+export type EventParameter<T extends keyof WalletEvent> = Parameters<WalletEvent[T]>[0];
 
 interface EventInPortBase {
   register(events: Partial<WalletEvent>): void;

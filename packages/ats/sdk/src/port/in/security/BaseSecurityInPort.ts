@@ -203,9 +203,9 @@
 
 */
 
-import { CommandBus } from '@core/command/CommandBus';
-import { QueryBus } from '@core/query/QueryBus';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+import { CommandBus } from "@core/command/CommandBus";
+import { QueryBus } from "@core/query/QueryBus";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 
 export abstract class BaseSecurityInPort {
   protected commandBus!: CommandBus;

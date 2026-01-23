@@ -203,7 +203,7 @@
 
 */
 
-import { BigNumber } from 'ethers';
+import { BigNumber } from "ethers";
 
 export class ScheduledSnapshot {
   constructor(

@@ -203,23 +203,20 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { ErrorCode } from '@core/error/BaseError';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ContractService from '@service/contract/ContractService';
-import AccountService from '@service/account/AccountService';
-import { LocksIdQueryFixture } from '@test/fixtures/lock/LockFixture';
-import { LocksIdQueryHandler } from './LocksIdQueryHandler';
-import { LocksIdQuery, LocksIdQueryResponse } from './LocksIdQuery';
-import { LocksIdQueryError } from './error/LocksIdQueryError';
-import { BigNumber } from 'ethers';
+import { createMock } from "@golevelup/ts-jest";
+import { ErrorMsgFixture, EvmAddressPropsFixture } from "@test/fixtures/shared/DataFixture";
+import { ErrorCode } from "@core/error/BaseError";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ContractService from "@service/contract/ContractService";
+import AccountService from "@service/account/AccountService";
+import { LocksIdQueryFixture } from "@test/fixtures/lock/LockFixture";
+import { LocksIdQueryHandler } from "./LocksIdQueryHandler";
+import { LocksIdQuery, LocksIdQueryResponse } from "./LocksIdQuery";
+import { LocksIdQueryError } from "./error/LocksIdQueryError";
+import { BigNumber } from "ethers";
 
-describe('LocksIdQueryHandler', () => {
+describe("LocksIdQueryHandler", () => {
   let handler: LocksIdQueryHandler;
   let query: LocksIdQuery;
 
@@ -228,17 +225,11 @@ describe('LocksIdQueryHandler', () => {
   const accountServiceMock = createMock<AccountService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const targetEvmAddress = new EvmAddress(
-    EvmAddressPropsFixture.create().value,
-  );
+  const targetEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new LocksIdQueryHandler(
-      queryAdapterServiceMock,
-      accountServiceMock,
-      contractServiceMock,
-    );
+    handler = new LocksIdQueryHandler(queryAdapterServiceMock, accountServiceMock, contractServiceMock);
     query = LocksIdQueryFixture.create();
   });
 
@@ -246,8 +237,8 @@ describe('LocksIdQueryHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('throws LocksIdQueryError when query fails with uncaught error', async () => {
+  describe("execute", () => {
+    it("throws LocksIdQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
@@ -257,39 +248,25 @@ describe('LocksIdQueryHandler', () => {
       await expect(resultPromise).rejects.toBeInstanceOf(LocksIdQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while querying lock IDs: ${errorMsg}`,
-        ),
+        message: expect.stringContaining(`An error occurred while querying lock IDs: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
 
-    it('should successfully get locks id', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
-        targetEvmAddress,
-      );
-      queryAdapterServiceMock.getLocksId.mockResolvedValueOnce([
-        BigNumber.from(1),
-      ]);
+    it("should successfully get locks id", async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
+      queryAdapterServiceMock.getLocksId.mockResolvedValueOnce([BigNumber.from(1)]);
 
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(LocksIdQueryResponse);
 
       expect(result.payload).toStrictEqual([BigNumber.from(1)]);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
-        query.targetId,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(query.targetId);
       expect(queryAdapterServiceMock.getLocksId).toHaveBeenCalledWith(
         evmAddress,
         targetEvmAddress,

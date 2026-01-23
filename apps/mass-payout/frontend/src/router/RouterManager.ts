@@ -202,11 +202,11 @@
  *    limitations under the License.
  */
 
-import type { ReverseParams } from 'named-urls';
-import { reverse } from 'named-urls';
-import { router } from '.';
-import { RouteName } from './RouteName';
-import { RoutePath } from './RoutePath';
+import type { ReverseParams } from "named-urls";
+import { reverse } from "named-urls";
+import { router } from ".";
+import { RouteName } from "./RouteName";
+import { RoutePath } from "./RoutePath";
 
 export interface RouteParams {
   params?: ReverseParams;
@@ -217,7 +217,7 @@ export interface RouteParams {
 export class BaseRouterManager {
   constructor(private routes: Record<RouteName, string> = RoutePath) {}
 
-  #getPath(name: RouteName, { params, extra = '' }: RouteParams) {
+  #getPath(name: RouteName, { params, extra = "" }: RouteParams) {
     const pattern = this.routes[name] + extra;
     return reverse(pattern, params);
   }

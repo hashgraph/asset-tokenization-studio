@@ -203,10 +203,9 @@
 
 */
 
-import { QueryResponse } from '@core/query/QueryResponse';
+import { QueryResponse } from "@core/query/QueryResponse";
 
-export default interface ScheduledBalanceAdjustmentViewModel
-  extends QueryResponse {
+export default interface ScheduledBalanceAdjustmentViewModel extends QueryResponse {
   id: number;
   executionDate: Date;
   factor: string;

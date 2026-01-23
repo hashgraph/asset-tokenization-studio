@@ -203,11 +203,11 @@
 
 */
 
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import BigDecimal from '../shared/BigDecimal';
-import { SecurityDate } from '../shared/SecurityDate';
-import { RateStatus } from './RateStatus';
-import { Bond } from './Bond';
+import ValidatedDomain from "@core/validation/ValidatedArgs";
+import BigDecimal from "../shared/BigDecimal";
+import { SecurityDate } from "../shared/SecurityDate";
+import { RateStatus } from "./RateStatus";
+import { Bond } from "./Bond";
 
 export class Coupon extends ValidatedDomain<Coupon> {
   recordTimeStamp: number;
@@ -236,7 +236,7 @@ export class Coupon extends ValidatedDomain<Coupon> {
         return SecurityDate.checkDateTimestamp(val, this.recordTimeStamp);
       },
       rateStatus: (val) => {
-         return Bond.checkRateStatus(val);
+        return Bond.checkRateStatus(val);
       },
     });
 

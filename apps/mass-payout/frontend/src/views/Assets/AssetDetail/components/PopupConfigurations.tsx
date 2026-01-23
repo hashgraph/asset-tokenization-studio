@@ -1,7 +1,7 @@
-import { PopUp, PhosphorIcon, Weight } from 'io-bricks-ui';
-import { Warning, Info } from '@phosphor-icons/react';
-import { useTranslation } from 'react-i18next';
-import type { Asset } from '@/services/AssetService';
+import { PopUp, PhosphorIcon, Weight } from "io-bricks-ui";
+import { Warning, Info } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
+import type { Asset } from "@/services/AssetService";
 
 interface PopupConfigurationsProps {
   asset: Asset;
@@ -28,45 +28,45 @@ export const PopupConfigurations = ({
   onConfirmPauseUnpause,
   onConfirmImport,
 }: PopupConfigurationsProps) => {
-  const { t } = useTranslation('assets');
+  const { t } = useTranslation("assets");
 
   const popupConfig = isPaused
     ? {
         icon: <PhosphorIcon as={Info} size="md" weight={Weight.Light} />,
-        title: t('detail.popup.unpause.title'),
-        description: t('detail.popup.unpause.description'),
-        confirmText: t('detail.popup.unpause.confirmText'),
-        cancelText: t('detail.popup.unpause.cancelText'),
-        variant: 'info',
+        title: t("detail.popup.unpause.title"),
+        description: t("detail.popup.unpause.description"),
+        confirmText: t("detail.popup.unpause.confirmText"),
+        cancelText: t("detail.popup.unpause.cancelText"),
+        variant: "info",
       }
     : {
         icon: <PhosphorIcon as={Warning} size="md" weight={Weight.Light} />,
-        title: t('detail.popup.pause.title'),
-        description: t('detail.popup.pause.description'),
-        confirmText: t('detail.popup.pause.confirmText'),
-        cancelText: t('detail.popup.pause.cancelText'),
-        variant: 'warning',
+        title: t("detail.popup.pause.title"),
+        description: t("detail.popup.pause.description"),
+        confirmText: t("detail.popup.pause.confirmText"),
+        cancelText: t("detail.popup.pause.cancelText"),
+        variant: "warning",
       };
 
   const importCorporateActionsPopupConfig = {
     icon: <PhosphorIcon as={Info} size="md" weight={Weight.Light} />,
     title: isImportingCorporateActions
-      ? t('detail.popup.stopImportCorporateActions.title', {
+      ? t("detail.popup.stopImportCorporateActions.title", {
           name: asset?.name,
         })
-      : t('detail.popup.importCorporateActions.title', {
+      : t("detail.popup.importCorporateActions.title", {
           name: asset?.name,
         }),
     description: isImportingCorporateActions
-      ? t('detail.popup.stopImportCorporateActions.description')
-      : t('detail.popup.importCorporateActions.description'),
+      ? t("detail.popup.stopImportCorporateActions.description")
+      : t("detail.popup.importCorporateActions.description"),
     confirmText: isImportingCorporateActions
-      ? t('detail.popup.stopImportCorporateActions.confirmText')
-      : t('detail.popup.importCorporateActions.confirmText'),
+      ? t("detail.popup.stopImportCorporateActions.confirmText")
+      : t("detail.popup.importCorporateActions.confirmText"),
     cancelText: isImportingCorporateActions
-      ? t('detail.popup.stopImportCorporateActions.cancelText')
-      : t('detail.popup.importCorporateActions.cancelText'),
-    variant: 'info',
+      ? t("detail.popup.stopImportCorporateActions.cancelText")
+      : t("detail.popup.importCorporateActions.cancelText"),
+    variant: "info",
   };
 
   return (

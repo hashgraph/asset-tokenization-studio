@@ -203,13 +203,13 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { LockCommandHandler } from '@command/security/operations/lock/LockCommandHandler';
-import { ReleaseCommandHandler } from '@command/security/operations/release/ReleaseCommandHandler';
-import { LockedBalanceOfQueryHandler } from '@query/security/lockedBalanceOf/LockedBalanceOfQueryHandler';
-import { GetLockQueryHandler } from '@query/security/getLock/GetLockQueryHandler';
-import { LocksIdQueryHandler } from '@query/security/locksId/LocksIdQueryHandler';
-import { LockCountQueryHandler } from '@query/security/lockCount/LockCountQueryHandler';
+import { TOKENS } from "../Tokens";
+import { LockCommandHandler } from "@command/security/operations/lock/LockCommandHandler";
+import { ReleaseCommandHandler } from "@command/security/operations/release/ReleaseCommandHandler";
+import { LockedBalanceOfQueryHandler } from "@query/security/lockedBalanceOf/LockedBalanceOfQueryHandler";
+import { GetLockQueryHandler } from "@query/security/getLock/GetLockQueryHandler";
+import { LocksIdQueryHandler } from "@query/security/locksId/LocksIdQueryHandler";
+import { LockCountQueryHandler } from "@query/security/lockCount/LockCountQueryHandler";
 
 export const COMMAND_HANDLERS_LOCK = [
   {

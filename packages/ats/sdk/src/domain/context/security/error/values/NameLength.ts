@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export default class NameLength extends BaseError {
   constructor(val: string, len: number) {

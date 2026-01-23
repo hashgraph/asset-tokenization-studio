@@ -203,11 +203,11 @@
 
 */
 
-import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from '@core/Constants';
-import { v4 } from 'uuid';
-import { BaseCommand } from '@core/command/Command';
-import { injectable } from 'tsyringe';
-import { Constructor } from '@core/Type';
+import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from "@core/Constants";
+import { v4 } from "uuid";
+import { BaseCommand } from "@core/command/Command";
+import { injectable } from "tsyringe";
+import { Constructor } from "@core/Type";
 
 /**
  * This decorator determines that a class is a command handler

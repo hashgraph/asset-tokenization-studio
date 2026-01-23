@@ -203,8 +203,8 @@
 
 */
 
-import BaseError from '@core/error/BaseError';
-import { QueryError } from '@query/error/QueryError';
+import BaseError from "@core/error/BaseError";
+import { QueryError } from "@query/error/QueryError";
 
 export class GetSecurityHoldersQueryError extends QueryError {
   constructor(error: Error) {

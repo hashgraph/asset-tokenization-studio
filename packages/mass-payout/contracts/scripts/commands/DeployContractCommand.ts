@@ -203,7 +203,7 @@
 
 */
 
-import { Signer } from 'ethers';
+import { Signer } from "ethers";
 
 interface DeployContractCommandParams {
   name?: string;

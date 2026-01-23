@@ -202,22 +202,14 @@
  *    limitations under the License.
  */
 
-import { apiRequest, buildUrl } from './api';
-import { Asset, SortParam } from './AssetService';
-import { BackendUrls } from './BackendUrls';
+import { apiRequest, buildUrl } from "./api";
+import { Asset, SortParam } from "./AssetService";
+import { BackendUrls } from "./BackendUrls";
 
-export type ProcessStatus =
-  | 'SCHEDULED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'FAILED';
-export type DistributionType = 'PAYOUT' | 'CORPORATE_ACTION';
-export type DistributionSubtype =
-  | 'IMMEDIATE'
-  | 'RECURRING'
-  | 'ONE_OFF'
-  | 'AUTOMATED';
-export type AmountType = 'FIXED' | 'PERCENTAGE';
+export type ProcessStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
+export type DistributionType = "PAYOUT" | "CORPORATE_ACTION";
+export type DistributionSubtype = "IMMEDIATE" | "RECURRING" | "ONE_OFF" | "AUTOMATED";
+export type AmountType = "FIXED" | "PERCENTAGE";
 
 export interface Distribution {
   id: string;
@@ -274,7 +266,7 @@ export interface Holder {
   holderHederaAddress: string;
   holderEvmAddress: string;
   retryCounter: number;
-  status: 'PENDING' | 'RETRYING' | 'SUCCESS' | 'FAILED';
+  status: "PENDING" | "RETRYING" | "SUCCESS" | "FAILED";
   lastError: string | null;
   nextRetryAt: Date | null;
   updatedAt: string;
@@ -288,21 +280,19 @@ export interface GetHoldersParams {
 }
 
 export class DistributionService {
-  static async getDistributions(
-    params: GetDistributionsParams = {},
-  ): Promise<PaginatedResponse<Distribution>> {
+  static async getDistributions(params: GetDistributionsParams = {}): Promise<PaginatedResponse<Distribution>> {
     const { filters, page = 0, sort = [], size = 10, status } = params;
 
     const query = new URLSearchParams();
-    filters?.value && query.append('search', filters.value);
-    query.append('page', (page + 1).toString()); // Backend expects 1-based
-    query.append('limit', size.toString());
-    status && query.append('status', status);
+    filters?.value && query.append("search", filters.value);
+    query.append("page", (page + 1).toString()); // Backend expects 1-based
+    query.append("limit", size.toString());
+    status && query.append("status", status);
 
     if (sort.length > 0) {
       const firstSort = sort[0];
-      query.append('orderBy', firstSort.id);
-      query.append('order', firstSort.desc ? 'DESC' : 'ASC');
+      query.append("orderBy", firstSort.id);
+      query.append("order", firstSort.desc ? "DESC" : "ASC");
     }
 
     const url = buildUrl(BackendUrls.GetDistributions, {});
@@ -313,7 +303,7 @@ export class DistributionService {
       limit: number;
       totalPages: number;
     }>(`${url}?${query.toString()}`, {
-      method: 'GET',
+      method: "GET",
     });
 
     return {
@@ -330,19 +320,17 @@ export class DistributionService {
   static async getDistribution(distributionId: string): Promise<Distribution> {
     const url = buildUrl(BackendUrls.GetDistribution, { distributionId });
     return apiRequest<Distribution>(url, {
-      method: 'GET',
+      method: "GET",
     });
   }
 
-  static async getDistributionHolders(
-    params: GetHoldersParams,
-  ): Promise<PaginatedResponse<Holder>> {
+  static async getDistributionHolders(params: GetHoldersParams): Promise<PaginatedResponse<Holder>> {
     const { distributionId, page = 0, size = 10, search } = params;
 
     const query = new URLSearchParams();
-    search && query.append('search', search);
-    query.append('page', (page + 1).toString()); // Backend expects 1-based
-    query.append('limit', size.toString());
+    search && query.append("search", search);
+    query.append("page", (page + 1).toString()); // Backend expects 1-based
+    query.append("limit", size.toString());
 
     const url = buildUrl(BackendUrls.GetDistributionHolders, {
       distributionId,
@@ -354,7 +342,7 @@ export class DistributionService {
       limit: number;
       totalPages: number;
     }>(`${url}?${query.toString()}`, {
-      method: 'GET',
+      method: "GET",
     });
 
     return {
@@ -371,14 +359,14 @@ export class DistributionService {
   static async cancelDistribution(distributionId: string): Promise<void> {
     const url = buildUrl(BackendUrls.CancelDistribution, { distributionId });
     return apiRequest<void>(url, {
-      method: 'PATCH',
+      method: "PATCH",
     });
   }
 
   static async retryDistribution(distributionId: string): Promise<void> {
     const url = buildUrl(BackendUrls.RetryDistribution, { distributionId });
     return apiRequest<void>(url, {
-      method: 'PATCH',
+      method: "PATCH",
     });
   }
 }

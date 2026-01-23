@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class InvalidBase64 extends BaseError {
   constructor(value: string) {

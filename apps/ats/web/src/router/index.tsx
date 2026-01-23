@@ -203,11 +203,11 @@
 
 */
 
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import { routes } from './Routes';
-import { useAccountStore } from '../store/accountStore';
-import { useEffect } from 'react';
-import { useSecurityStore } from '../store/securityStore';
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { routes } from "./Routes";
+import { useAccountStore } from "../store/accountStore";
+import { useEffect } from "react";
+import { useSecurityStore } from "../store/securityStore";
 
 export const router = createBrowserRouter(routes);
 

@@ -203,16 +203,16 @@
 
 */
 
-import { ComplianceQuery, ComplianceQueryResponse } from './ComplianceQuery';
-import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '@core/query/QueryHandler';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ContractService from '@service/contract/ContractService';
-import { ComplianceQueryError } from './error/ComplianceQueryError';
-import { EVM_ZERO_ADDRESS, HEDERA_ZERO_ADDRESS } from '@core/Constants';
-import AccountService from '@service/account/AccountService';
+import { ComplianceQuery, ComplianceQueryResponse } from "./ComplianceQuery";
+import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
+import { IQueryHandler } from "@core/query/QueryHandler";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ContractService from "@service/contract/ContractService";
+import { ComplianceQueryError } from "./error/ComplianceQueryError";
+import { EVM_ZERO_ADDRESS, HEDERA_ZERO_ADDRESS } from "@core/Constants";
+import AccountService from "@service/account/AccountService";
 
 @QueryHandler(ComplianceQuery)
 export class ComplianceQueryHandler implements IQueryHandler<ComplianceQuery> {
@@ -229,15 +229,12 @@ export class ComplianceQueryHandler implements IQueryHandler<ComplianceQuery> {
     try {
       const { securityId } = query;
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
       let res = await this.queryAdapter.compliance(securityEvmAddress);
 
       res =
-        res === EVM_ZERO_ADDRESS
-          ? HEDERA_ZERO_ADDRESS
-          : (await this.accountService.getAccountInfo(res)).id.toString();
+        res === EVM_ZERO_ADDRESS ? HEDERA_ZERO_ADDRESS : (await this.accountService.getAccountInfo(res)).id.toString();
 
       return new ComplianceQueryResponse(res);
     } catch (error) {

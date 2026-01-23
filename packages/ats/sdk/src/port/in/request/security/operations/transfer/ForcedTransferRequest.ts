@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../../../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../../../FormatValidation";
 
 export default class ForcedTransferRequest extends ValidatedRequest<ForcedTransferRequest> {
   securityId: string;

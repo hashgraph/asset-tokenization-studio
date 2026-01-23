@@ -202,20 +202,14 @@
  *    limitations under the License.
  */
 
-import { screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { FilterControls } from '../components/FilterControls';
-import { render } from '@/test-utils';
+import { screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { FilterControls } from "../components/FilterControls";
+import { render } from "@/test-utils";
 
 // Mock io-bricks-ui components
-jest.mock('io-bricks-ui', () => ({
-  SearchInputController: ({
-    id,
-    placeholder,
-    control,
-    onSearch,
-    ...props
-  }: any) => (
+jest.mock("io-bricks-ui", () => ({
+  SearchInputController: ({ id, placeholder, control, onSearch, ...props }: any) => (
     <input
       data-testid={`search-input-controller`}
       data-id={id}
@@ -227,19 +221,12 @@ jest.mock('io-bricks-ui', () => ({
       {...props}
     />
   ),
-  SelectController: ({
-    id,
-    placeholder,
-    options,
-    control,
-    isSearchable,
-    ...props
-  }: any) => (
+  SelectController: ({ id, placeholder, options, control, isSearchable, ...props }: any) => (
     <div
       data-testid="select-controller"
       data-id={id}
       data-searchable={isSearchable?.toString()}
-      data-options-count={'3'}
+      data-options-count={"3"}
     >
       <select
         data-testid={`select-${id}`}
@@ -259,14 +246,12 @@ jest.mock('io-bricks-ui', () => ({
 }));
 
 // Mock PlaceholderWithIcon
-jest.mock('../../Components/PlaceholderWithIcon', () => ({
-  PlaceholderWithIcon: () => (
-    <div data-testid="placeholder-with-icon">Placeholder Icon</div>
-  ),
+jest.mock("../../Components/PlaceholderWithIcon", () => ({
+  PlaceholderWithIcon: () => <div data-testid="placeholder-with-icon">Placeholder Icon</div>,
 }));
 
 // Mock io-bricks-ui Theme
-jest.mock('io-bricks-ui/Theme', () => ({
+jest.mock("io-bricks-ui/Theme", () => ({
   BasePlatformTheme: {
     colors: {},
     breakpoints: {},
@@ -274,7 +259,7 @@ jest.mock('io-bricks-ui/Theme', () => ({
 }));
 
 // Mock Chakra UI components
-jest.mock('@chakra-ui/react', () => ({
+jest.mock("@chakra-ui/react", () => ({
   Box: ({ children, ...props }: any) => (
     <div className="css-kq3qcu" {...props}>
       {children}
@@ -299,14 +284,14 @@ const mockControl = {
   register: jest.fn(),
   formState: { errors: {} },
   watch: jest.fn(),
-  getValues: jest.fn(() => ({ search: '', distributionType: '' })),
+  getValues: jest.fn(() => ({ search: "", distributionType: "" })),
 };
 
 const mockT = jest.fn((key: string) => {
   const translations: Record<string, string> = {
-    'filters.searchPlaceholder': 'Search distributions...',
-    'filters.distributionType': 'Distribution Type',
-    'filters.all': 'All',
+    "filters.searchPlaceholder": "Search distributions...",
+    "filters.distributionType": "Distribution Type",
+    "filters.all": "All",
   };
   return translations[key] || key;
 });
@@ -320,114 +305,102 @@ const renderFilterControls = (props = {}) => {
   return render(<FilterControls {...defaultProps} {...props} />);
 };
 
-describe('FilterControls', () => {
+describe("FilterControls", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('Basic Rendering', () => {
-    it('should match snapshot', () => {
+  describe("Basic Rendering", () => {
+    it("should match snapshot", () => {
       const component = renderFilterControls();
       expect(component.asFragment()).toMatchSnapshot();
     });
-    it('should render filter controls container', () => {
+    it("should render filter controls container", () => {
       renderFilterControls();
 
-      expect(screen.getByTestId('stack')).toBeInTheDocument();
+      expect(screen.getByTestId("stack")).toBeInTheDocument();
     });
 
-    it('should render distribution type select controller', () => {
+    it("should render distribution type select controller", () => {
       renderFilterControls();
 
-      const selectController = screen.getByTestId('select-controller');
+      const selectController = screen.getByTestId("select-controller");
       expect(selectController).toBeInTheDocument();
-      expect(selectController).toHaveAttribute('data-id', 'distributionType');
-      expect(selectController).toHaveAttribute('data-searchable', 'false');
-      expect(selectController).toHaveAttribute('data-options-count', '3');
+      expect(selectController).toHaveAttribute("data-id", "distributionType");
+      expect(selectController).toHaveAttribute("data-searchable", "false");
+      expect(selectController).toHaveAttribute("data-options-count", "3");
     });
 
-    it('should render placeholder with icon in select', () => {
+    it("should render placeholder with icon in select", () => {
       renderFilterControls();
 
-      expect(screen.getByTestId('placeholder-with-icon')).toBeInTheDocument();
-      expect(screen.getByText('Placeholder Icon')).toBeInTheDocument();
+      expect(screen.getByTestId("placeholder-with-icon")).toBeInTheDocument();
+      expect(screen.getByText("Placeholder Icon")).toBeInTheDocument();
     });
 
-    it('should render distribution type options', () => {
+    it("should render distribution type options", () => {
       renderFilterControls();
 
-      const select = screen.getByTestId('select-distributionType');
+      const select = screen.getByTestId("select-distributionType");
       expect(select).toBeInTheDocument();
 
       // Check if options are rendered
-      expect(screen.getByText('Dividend')).toBeInTheDocument();
-      expect(screen.getByText('Interest')).toBeInTheDocument();
-      expect(screen.getByText('Principal')).toBeInTheDocument();
+      expect(screen.getByText("Dividend")).toBeInTheDocument();
+      expect(screen.getByText("Interest")).toBeInTheDocument();
+      expect(screen.getByText("Principal")).toBeInTheDocument();
     });
   });
 
-  describe('User Interactions', () => {
-    it('should handle distribution type selection', async () => {
+  describe("User Interactions", () => {
+    it("should handle distribution type selection", async () => {
       const user = userEvent.setup();
       renderFilterControls();
 
-      const select = screen.getByTestId('select-distributionType');
-      await user.selectOptions(select, 'dividend');
+      const select = screen.getByTestId("select-distributionType");
+      await user.selectOptions(select, "dividend");
 
-      expect(mockControl.setValue).toHaveBeenCalledWith(
-        'distributionType',
-        'dividend',
-      );
+      expect(mockControl.setValue).toHaveBeenCalledWith("distributionType", "dividend");
     });
 
-    it('should handle select change with fireEvent', () => {
+    it("should handle select change with fireEvent", () => {
       renderFilterControls();
 
-      const select = screen.getByTestId('select-distributionType');
-      fireEvent.change(select, { target: { value: 'interest' } });
+      const select = screen.getByTestId("select-distributionType");
+      fireEvent.change(select, { target: { value: "interest" } });
 
-      expect(mockControl.setValue).toHaveBeenCalledWith(
-        'distributionType',
-        'interest',
-      );
+      expect(mockControl.setValue).toHaveBeenCalledWith("distributionType", "interest");
     });
   });
 
-  describe('Props Integration', () => {
-    it('should pass control to both controllers', () => {
+  describe("Props Integration", () => {
+    it("should pass control to both controllers", () => {
       renderFilterControls();
 
-      const selectController = screen.getByTestId('select-controller');
-      const searchController = screen.getByTestId('search-input-controller');
+      const selectController = screen.getByTestId("select-controller");
+      const searchController = screen.getByTestId("search-input-controller");
 
       expect(selectController).toBeInTheDocument();
       expect(searchController).toBeInTheDocument();
     });
 
-    it('should use translation function for search placeholder', () => {
+    it("should use translation function for search placeholder", () => {
       renderFilterControls();
 
-      expect(mockT).toHaveBeenCalledWith('filters.searchPlaceholder');
+      expect(mockT).toHaveBeenCalledWith("filters.searchPlaceholder");
 
-      const searchController = screen.getByTestId('search-input-controller');
-      expect(searchController).toHaveAttribute(
-        'data-placeholder',
-        'Search distributions...',
-      );
+      const searchController = screen.getByTestId("search-input-controller");
+      expect(searchController).toHaveAttribute("data-placeholder", "Search distributions...");
     });
 
-    it('should handle custom translation function', () => {
+    it("should handle custom translation function", () => {
       const customT = jest.fn((key: string) => `Custom: ${key}`);
 
       renderFilterControls({ t: customT });
 
-      expect(customT).toHaveBeenCalledWith('filters.searchPlaceholder');
+      expect(customT).toHaveBeenCalledWith("filters.searchPlaceholder");
 
-      const searchController = screen.getByTestId('search-input-controller');
-      expect(searchController).toHaveAttribute(
-        'data-placeholder',
-        'Custom: filters.searchPlaceholder',
-      );
+      const searchController = screen.getByTestId("search-input-controller");
+      expect(searchController).toHaveAttribute("data-placeholder", "Custom: filters.searchPlaceholder");
     });
   });
 });

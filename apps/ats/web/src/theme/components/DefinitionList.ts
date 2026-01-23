@@ -203,23 +203,20 @@
 
 */
 
-import {
-  DefinitionListThemeConfiguration,
-  definitionListPartsList,
-} from 'io-bricks-ui';
-import { BasePlatformTheme } from 'io-bricks-ui/Theme';
+import { DefinitionListThemeConfiguration, definitionListPartsList } from "io-bricks-ui";
+import { BasePlatformTheme } from "io-bricks-ui/Theme";
 
 export const DefinitionList: DefinitionListThemeConfiguration = {
   parts: definitionListPartsList,
   baseStyle: {
     listTitle: {
       ...BasePlatformTheme.textStyles.ElementsSemiboldMD,
-      color: 'inherit',
+      color: "inherit",
     },
     container: {
       pb: 8,
-      w: 'full',
-      maxWidth: 'unset',
+      w: "full",
+      maxWidth: "unset",
     },
   },
 };

@@ -203,9 +203,9 @@
 
 */
 
-import { SetNameCommandHandler } from '@command/security/operations/tokenMetadata/setName/SetNameCommandHandler';
-import { TOKENS } from '../Tokens';
-import { SetSymbolCommandHandler } from '@command/security/operations/tokenMetadata/setSymbol/SetSymbolCommandHandler';
+import { SetNameCommandHandler } from "@command/security/operations/tokenMetadata/setName/SetNameCommandHandler";
+import { TOKENS } from "../Tokens";
+import { SetSymbolCommandHandler } from "@command/security/operations/tokenMetadata/setSymbol/SetSymbolCommandHandler";
 
 export const COMMAND_HANDLERS_METADATA = [
   {

@@ -203,28 +203,25 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { ErrorCode } from '@core/error/BaseError';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ContractService from '@service/contract/ContractService';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { Security } from '@domain/context/security/Security';
-import { GetLockQueryHandler } from './GetLockQueryHandler';
-import { GetLockQuery, GetLockQueryResponse } from './GetLockQuery';
-import AccountService from '@service/account/AccountService';
-import SecurityService from '@service/security/SecurityService';
-import { GetLockQueryFixture } from '@test/fixtures/lock/LockFixture';
-import { GetLockQueryError } from './error/GetLockQueryError';
-import { BigNumber } from 'ethers';
-import { Lock } from '@domain/context/security/Lock';
-import BigDecimal from '@domain/context/shared/BigDecimal';
+import { createMock } from "@golevelup/ts-jest";
+import { ErrorMsgFixture, EvmAddressPropsFixture } from "@test/fixtures/shared/DataFixture";
+import { ErrorCode } from "@core/error/BaseError";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ContractService from "@service/contract/ContractService";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { Security } from "@domain/context/security/Security";
+import { GetLockQueryHandler } from "./GetLockQueryHandler";
+import { GetLockQuery, GetLockQueryResponse } from "./GetLockQuery";
+import AccountService from "@service/account/AccountService";
+import SecurityService from "@service/security/SecurityService";
+import { GetLockQueryFixture } from "@test/fixtures/lock/LockFixture";
+import { GetLockQueryError } from "./error/GetLockQueryError";
+import { BigNumber } from "ethers";
+import { Lock } from "@domain/context/security/Lock";
+import BigDecimal from "@domain/context/shared/BigDecimal";
 
-describe('GetLockQueryHandler', () => {
+describe("GetLockQueryHandler", () => {
   let handler: GetLockQueryHandler;
   let query: GetLockQuery;
 
@@ -234,9 +231,7 @@ describe('GetLockQueryHandler', () => {
   const securityServiceMock = createMock<SecurityService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const targetEvmAddress = new EvmAddress(
-    EvmAddressPropsFixture.create().value,
-  );
+  const targetEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
 
   const security = new Security(SecurityPropsFixture.create());
   const errorMsg = ErrorMsgFixture.create().msg;
@@ -256,8 +251,8 @@ describe('GetLockQueryHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('throws GetLockQueryError when query fails with uncaught error', async () => {
+  describe("execute", () => {
+    it("throws GetLockQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       securityServiceMock.get.mockRejectedValue(fakeError);
@@ -267,21 +262,15 @@ describe('GetLockQueryHandler', () => {
       await expect(resultPromise).rejects.toBeInstanceOf(GetLockQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while querying lock: ${errorMsg}`,
-        ),
+        message: expect.stringContaining(`An error occurred while querying lock: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
 
-    it('should successfully get lock info', async () => {
+    it("should successfully get lock info", async () => {
       securityServiceMock.get.mockResolvedValueOnce(security);
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
-        targetEvmAddress,
-      );
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
       queryAdapterServiceMock.getLock.mockResolvedValueOnce(lock);
 
       const result = await handler.execute(query);
@@ -296,22 +285,12 @@ describe('GetLockQueryHandler', () => {
 
       expect(result.payload).toStrictEqual(expectedResult);
       expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
-        query.targetId,
-      );
-      expect(queryAdapterServiceMock.getLock).toHaveBeenCalledWith(
-        evmAddress,
-        targetEvmAddress,
-        query.id,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(query.targetId);
+      expect(queryAdapterServiceMock.getLock).toHaveBeenCalledWith(evmAddress, targetEvmAddress, query.id);
     });
   });
 });

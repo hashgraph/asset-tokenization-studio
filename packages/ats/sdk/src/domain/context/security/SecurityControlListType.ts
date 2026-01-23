@@ -204,6 +204,6 @@
 */
 
 export enum SecurityControlListType {
-  WHITELIST = 'WHITELIST',
-  BLACKLIST = 'BLACKLIST',
+  WHITELIST = "WHITELIST",
+  BLACKLIST = "BLACKLIST",
 }

@@ -203,27 +203,22 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import {
-  UnfreezePartialTokensCommand,
-  UnfreezePartialTokensResponse,
-} from './UnfreezePartialTokensCommand';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { UnfreezePartialTokensCommandError } from './error/UnfreezePartialTokensCommandError';
-import SecurityService from '@service/security/SecurityService';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { UnfreezePartialTokensCommand, UnfreezePartialTokensResponse } from "./UnfreezePartialTokensCommand";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { UnfreezePartialTokensCommandError } from "./error/UnfreezePartialTokensCommandError";
+import SecurityService from "@service/security/SecurityService";
 
 @CommandHandler(UnfreezePartialTokensCommand)
-export class UnfreezePartialTokensCommandHandler
-  implements ICommandHandler<UnfreezePartialTokensCommand>
-{
+export class UnfreezePartialTokensCommandHandler implements ICommandHandler<UnfreezePartialTokensCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
@@ -237,16 +232,13 @@ export class UnfreezePartialTokensCommandHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: UnfreezePartialTokensCommand,
-  ): Promise<UnfreezePartialTokensResponse> {
+  async execute(command: UnfreezePartialTokensCommand): Promise<UnfreezePartialTokensResponse> {
     try {
       const { securityId, amount, targetId } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
       await this.validationService.checkPause(securityId);
       const security = await this.securityService.get(securityId);
@@ -265,9 +257,7 @@ export class UnfreezePartialTokensCommandHandler
         securityId,
       );
 
-      return Promise.resolve(
-        new UnfreezePartialTokensResponse(res.error === undefined, res.id!),
-      );
+      return Promise.resolve(new UnfreezePartialTokensResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new UnfreezePartialTokensCommandError(error as Error);
     }

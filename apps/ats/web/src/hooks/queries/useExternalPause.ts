@@ -203,32 +203,25 @@
 
 */
 
-import { UseQueryOptions, useQueries, useQuery } from '@tanstack/react-query';
-import SDKService from '../../services/SDKService';
+import { UseQueryOptions, useQueries, useQuery } from "@tanstack/react-query";
+import SDKService from "../../services/SDKService";
 import {
   GetExternalPausesCountRequest,
   GetExternalPausesMembersRequest,
   IsExternalPauseRequest,
   IsPausedMockRequest,
-} from '@hashgraph/asset-tokenization-sdk';
+} from "@hashgraph/asset-tokenization-sdk";
 
-export const GET_EXTERNAL_PAUSES_COUNT = (securityId: string) =>
-  `GET_EXTERNAL_PAUSES_COUNT_${securityId}`;
+export const GET_EXTERNAL_PAUSES_COUNT = (securityId: string) => `GET_EXTERNAL_PAUSES_COUNT_${securityId}`;
 
-export const GET_CONTROL_LIST_MEMBERS = (
-  securityId: string,
-  start: number,
-  end: number,
-) => `GET_EXTERNAL_PAUSES_MEMBERS_${securityId}_${start}_${end}`;
+export const GET_CONTROL_LIST_MEMBERS = (securityId: string, start: number, end: number) =>
+  `GET_EXTERNAL_PAUSES_MEMBERS_${securityId}_${start}_${end}`;
 
-export const GET_EXTERNAL_PAUSE = (securityId: string) =>
-  `GET_EXTERNAL_PAUSE_${securityId}`;
+export const GET_EXTERNAL_PAUSE = (securityId: string) => `GET_EXTERNAL_PAUSE_${securityId}`;
 
-export const GET_IS_EXTERNAL_PAUSE = (securityId: string) =>
-  `GET_IS_EXTERNAL_PAUSE_${securityId}`;
+export const GET_IS_EXTERNAL_PAUSE = (securityId: string) => `GET_IS_EXTERNAL_PAUSE_${securityId}`;
 
-export const GET_IS_PAUSE_MOCK = (securityId: string) =>
-  `GET_IS_PAUSE_MOCK_${securityId}`;
+export const GET_IS_PAUSE_MOCK = (securityId: string) => `GET_IS_PAUSE_MOCK_${securityId}`;
 
 export const useGetExternalPausesCount = <TError, TData = number>(
   request: GetExternalPausesCountRequest,
@@ -253,12 +246,9 @@ export const useGetExternalPausesMembers = <TError, TData = string[]>(
 };
 
 export const useGetExternalPauses = (securityId: string, start: number = 0) => {
-  const countQuery = useGetExternalPausesCount(
-    new GetExternalPausesCountRequest({ securityId }),
-    {
-      retry: false,
-    },
-  );
+  const countQuery = useGetExternalPausesCount(new GetExternalPausesCountRequest({ securityId }), {
+    retry: false,
+  });
 
   const membersQuery = useGetExternalPausesMembers(
     new GetExternalPausesMembersRequest({
@@ -283,10 +273,8 @@ export const useGetExternalPauses = (securityId: string, start: number = 0) => {
     })),
   });
 
-  const isLoading =
-    membersQuery.isLoading || pauseStatusQueries.some((q) => q.isLoading);
-  const isError =
-    membersQuery.isError || pauseStatusQueries.some((q) => q.isError);
+  const isLoading = membersQuery.isLoading || pauseStatusQueries.some((q) => q.isLoading);
+  const isError = membersQuery.isError || pauseStatusQueries.some((q) => q.isError);
 
   const data = (membersQuery.data ?? []).map((memberId, index) => ({
     id: memberId,
@@ -304,20 +292,12 @@ export const useIsExternalPause = <TError, TData = string[]>(
   request: IsExternalPauseRequest,
   options?: UseQueryOptions<boolean, TError, TData, [string]>,
 ) => {
-  return useQuery(
-    [GET_IS_EXTERNAL_PAUSE(request.securityId)],
-    () => SDKService.isExternalPause(request),
-    options,
-  );
+  return useQuery([GET_IS_EXTERNAL_PAUSE(request.securityId)], () => SDKService.isExternalPause(request), options);
 };
 
 export const useIsPauseMock = <TError, TData = boolean>(
   request: IsPausedMockRequest,
   options?: UseQueryOptions<boolean, TError, TData, [string]>,
 ) => {
-  return useQuery(
-    [GET_IS_PAUSE_MOCK(request.contractId)],
-    () => SDKService.isPauseMock(request),
-    options,
-  );
+  return useQuery([GET_IS_PAUSE_MOCK(request.contractId)], () => SDKService.isPauseMock(request), options);
 };

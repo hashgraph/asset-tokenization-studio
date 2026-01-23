@@ -203,25 +203,20 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import {
-  TakeSnapshotCommand,
-  TakeSnapshotCommandResponse,
-} from './TakeSnapshotCommand';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import ContractService from '@service/contract/ContractService';
-import TransactionService from '@service/transaction/TransactionService';
-import ValidationService from '@service/validation/ValidationService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { TakeSnapshotCommandError } from './error/TakeSnapshotCommandError';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import { TakeSnapshotCommand, TakeSnapshotCommandResponse } from "./TakeSnapshotCommand";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import ContractService from "@service/contract/ContractService";
+import TransactionService from "@service/transaction/TransactionService";
+import ValidationService from "@service/validation/ValidationService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import { TakeSnapshotCommandError } from "./error/TakeSnapshotCommandError";
 
 @CommandHandler(TakeSnapshotCommand)
-export class TakeSnapshotCommandHandler
-  implements ICommandHandler<TakeSnapshotCommand>
-{
+export class TakeSnapshotCommandHandler implements ICommandHandler<TakeSnapshotCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
@@ -233,24 +228,17 @@ export class TakeSnapshotCommandHandler
     private readonly validationService: ValidationService,
   ) {}
 
-  async execute(
-    command: TakeSnapshotCommand,
-  ): Promise<TakeSnapshotCommandResponse> {
+  async execute(command: TakeSnapshotCommand): Promise<TakeSnapshotCommandResponse> {
     try {
       const { securityId } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
       await this.validationService.checkPause(securityId);
 
-      await this.validationService.checkRole(
-        SecurityRole._SNAPSHOT_ROLE,
-        account.id.toString(),
-        securityId,
-      );
+      await this.validationService.checkRole(SecurityRole._SNAPSHOT_ROLE, account.id.toString(), securityId);
 
       const res = await handler.takeSnapshot(securityEvmAddress, securityId);
 
@@ -262,9 +250,7 @@ export class TakeSnapshotCommandHandler
         numberOfResultsItems: 1,
       });
 
-      return Promise.resolve(
-        new TakeSnapshotCommandResponse(parseInt(snapshotId, 16), res.id!),
-      );
+      return Promise.resolve(new TakeSnapshotCommandResponse(parseInt(snapshotId, 16), res.id!));
     } catch (error) {
       throw new TakeSnapshotCommandError(error as Error);
     }

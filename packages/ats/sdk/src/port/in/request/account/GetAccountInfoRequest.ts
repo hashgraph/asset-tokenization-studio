@@ -203,9 +203,9 @@
 
 */
 
-import { AccountBaseRequest, RequestAccount } from '../BaseRequest';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import { AccountBaseRequest, RequestAccount } from "../BaseRequest";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
 export default class GetAccountInfoRequest
   extends ValidatedRequest<GetAccountInfoRequest>

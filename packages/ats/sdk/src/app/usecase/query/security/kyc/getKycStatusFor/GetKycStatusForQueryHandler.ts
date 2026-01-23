@@ -203,23 +203,18 @@
 
 */
 
-import { IQueryHandler } from '@core/query/QueryHandler';
-import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import AccountService from '@service/account/AccountService';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import {
-  GetKycStatusForQuery,
-  GetKycStatusForQueryResponse,
-} from './GetKycStatusForQuery';
-import ContractService from '@service/contract/ContractService';
-import { GetKycStatusForQueryError } from './error/GetKycStatusForQueryError';
+import { IQueryHandler } from "@core/query/QueryHandler";
+import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import AccountService from "@service/account/AccountService";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { GetKycStatusForQuery, GetKycStatusForQueryResponse } from "./GetKycStatusForQuery";
+import ContractService from "@service/contract/ContractService";
+import { GetKycStatusForQueryError } from "./error/GetKycStatusForQueryError";
 
 @QueryHandler(GetKycStatusForQuery)
-export class GetKycStatusForQueryHandler
-  implements IQueryHandler<GetKycStatusForQuery>
-{
+export class GetKycStatusForQueryHandler implements IQueryHandler<GetKycStatusForQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
@@ -229,21 +224,14 @@ export class GetKycStatusForQueryHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    query: GetKycStatusForQuery,
-  ): Promise<GetKycStatusForQueryResponse> {
+  async execute(query: GetKycStatusForQuery): Promise<GetKycStatusForQueryResponse> {
     try {
       const { securityId, targetId } = query;
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
-      const res = await this.queryAdapter.getKycStatusFor(
-        securityEvmAddress,
-        targetEvmAddress,
-      );
+      const res = await this.queryAdapter.getKycStatusFor(securityEvmAddress, targetEvmAddress);
 
       return new GetKycStatusForQueryResponse(res);
     } catch (error) {

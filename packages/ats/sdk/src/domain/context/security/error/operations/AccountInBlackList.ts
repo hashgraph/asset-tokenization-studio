@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class AccountInBlackList extends BaseError {
   constructor(account: string) {
-    super(
-      ErrorCode.AccountInBlackList,
-      `The account ${account} is in black list`,
-    );
+    super(ErrorCode.AccountInBlackList, `The account ${account} is in black list`);
   }
 }

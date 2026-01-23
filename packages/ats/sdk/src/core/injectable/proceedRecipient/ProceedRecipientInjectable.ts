@@ -203,14 +203,14 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { AddProceedRecipientCommandHandler } from '@command/security/proceedRecipients/addProceedRecipient/AddProceedRecipientCommandHandler';
-import { RemoveProceedRecipientCommandHandler } from '@command/security/proceedRecipients/removeProceedRecipient/RemoveProceedRecipientCommandHandler';
-import { UpdateProceedRecipientDataCommandHandler } from '@command/security/proceedRecipients/updateProceedRecipientData/UpdateProceedRecipientDataCommandHandler';
-import { GetProceedRecipientsQueryHandler } from '@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQueryHandler';
-import { GetProceedRecipientsCountQueryHandler } from '@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQueryHandler';
-import { GetProceedRecipientDataQueryHandler } from '@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQueryHandler';
-import { IsProceedRecipientQueryHandler } from '@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQueryHandler';
+import { TOKENS } from "../Tokens";
+import { AddProceedRecipientCommandHandler } from "@command/security/proceedRecipients/addProceedRecipient/AddProceedRecipientCommandHandler";
+import { RemoveProceedRecipientCommandHandler } from "@command/security/proceedRecipients/removeProceedRecipient/RemoveProceedRecipientCommandHandler";
+import { UpdateProceedRecipientDataCommandHandler } from "@command/security/proceedRecipients/updateProceedRecipientData/UpdateProceedRecipientDataCommandHandler";
+import { GetProceedRecipientsQueryHandler } from "@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQueryHandler";
+import { GetProceedRecipientsCountQueryHandler } from "@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQueryHandler";
+import { GetProceedRecipientDataQueryHandler } from "@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQueryHandler";
+import { IsProceedRecipientQueryHandler } from "@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQueryHandler";
 
 export const COMMAND_HANDLERS_PROCEED_RECIPIENT = [
   {

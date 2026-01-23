@@ -203,27 +203,27 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { ErrorCode } from '@core/error/BaseError';
-import { AddIssuerCommandHandler } from './AddIssuerCommandHandler';
-import { AddIssuerCommand, AddIssuerCommandResponse } from './AddIssuerCommand';
-import { AddIssuerCommandFixture } from '@test/fixtures/ssi/SsiFixture';
-import { AddIssuerCommandError } from './error/AddIssuerCommandError';
-import Account from '@domain/context/account/Account';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
+} from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { ErrorCode } from "@core/error/BaseError";
+import { AddIssuerCommandHandler } from "./AddIssuerCommandHandler";
+import { AddIssuerCommand, AddIssuerCommandResponse } from "./AddIssuerCommand";
+import { AddIssuerCommandFixture } from "@test/fixtures/ssi/SsiFixture";
+import { AddIssuerCommandError } from "./error/AddIssuerCommandError";
+import Account from "@domain/context/account/Account";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
 
-describe('AddIssuerCommandHandler', () => {
+describe("AddIssuerCommandHandler", () => {
   let handler: AddIssuerCommandHandler;
   let command: AddIssuerCommand;
 
@@ -251,29 +251,25 @@ describe('AddIssuerCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws AddIssuerCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws AddIssuerCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          AddIssuerCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(AddIssuerCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while adding issuer: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while adding issuer: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully add issuer', async () => {
+    describe("success cases", () => {
+      it("should successfully add issuer", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
@@ -287,44 +283,33 @@ describe('AddIssuerCommandHandler', () => {
         expect(result).toBeInstanceOf(AddIssuerCommandResponse);
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
-          1,
-          command.issuerId,
-        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(1, command.issuerId);
 
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-          command.securityId,
-        );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
         expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
           SecurityRole._SSI_MANAGER_ROLE,
           account.id.toString(),
           command.securityId,
         );
-        expect(
-          validationServiceMock.checkAccountInIssuersList,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          validationServiceMock.checkAccountInIssuersList,
-        ).toHaveBeenCalledWith(command.securityId, command.issuerId, true);
+        expect(validationServiceMock.checkAccountInIssuersList).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkAccountInIssuersList).toHaveBeenCalledWith(
+          command.securityId,
+          command.issuerId,
+          true,
+        );
 
-        expect(
-          transactionServiceMock.getHandler().addIssuer,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().addIssuer).toHaveBeenCalledTimes(1);
 
-        expect(
-          transactionServiceMock.getHandler().addIssuer,
-        ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
+        expect(transactionServiceMock.getHandler().addIssuer).toHaveBeenCalledWith(
+          evmAddress,
+          evmAddress,
+          command.securityId,
+        );
       });
     });
   });

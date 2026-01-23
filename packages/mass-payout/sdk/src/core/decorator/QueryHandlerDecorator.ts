@@ -203,11 +203,11 @@
 
 */
 
-import { Injectable } from '@nestjs/common';
-import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '../Constants';
-import { v4 } from 'uuid';
-import { BaseQuery } from '../query/Query';
-import { Constructor } from '../Type';
+import { Injectable } from "@nestjs/common";
+import { QUERY_HANDLER_METADATA, QUERY_METADATA } from "../Constants";
+import { v4 } from "uuid";
+import { BaseQuery } from "../query/Query";
+import { Constructor } from "../Type";
 
 /**
  * This decorator determines that a class is a query handler

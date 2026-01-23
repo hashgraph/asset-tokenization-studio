@@ -203,23 +203,18 @@
 
 */
 
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '@core/query/QueryHandler';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import {
-  IsAddressRecoveredQuery,
-  IsAddressRecoveredQueryResponse,
-} from './IsAddressRecoveredQuery';
-import AccountService from '@service/account/AccountService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ContractService from '@service/contract/ContractService';
-import { IsAddressRecoveredQueryError } from './error/IsAddressRecoveredQueryError';
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
+import { IQueryHandler } from "@core/query/QueryHandler";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import { IsAddressRecoveredQuery, IsAddressRecoveredQueryResponse } from "./IsAddressRecoveredQuery";
+import AccountService from "@service/account/AccountService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ContractService from "@service/contract/ContractService";
+import { IsAddressRecoveredQueryError } from "./error/IsAddressRecoveredQueryError";
 
 @QueryHandler(IsAddressRecoveredQuery)
-export class IsAddressRecoveredQueryHandler
-  implements IQueryHandler<IsAddressRecoveredQuery>
-{
+export class IsAddressRecoveredQueryHandler implements IQueryHandler<IsAddressRecoveredQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
@@ -229,21 +224,14 @@ export class IsAddressRecoveredQueryHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    query: IsAddressRecoveredQuery,
-  ): Promise<IsAddressRecoveredQueryResponse> {
+  async execute(query: IsAddressRecoveredQuery): Promise<IsAddressRecoveredQueryResponse> {
     try {
       const { securityId, targetId } = query;
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
-      const res = await this.queryAdapter.isAddressRecovered(
-        securityEvmAddress,
-        targetEvmAddress,
-      );
+      const res = await this.queryAdapter.isAddressRecovered(securityEvmAddress, targetEvmAddress);
       return new IsAddressRecoveredQueryResponse(res);
     } catch (error) {
       throw new IsAddressRecoveredQueryError(error as Error);

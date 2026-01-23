@@ -203,24 +203,18 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { ErrorCode } from '@core/error/BaseError';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ContractService from '@service/contract/ContractService';
-import {
-  GetVotingQueryFixture,
-  VotingRightsFixture,
-} from '@test/fixtures/equity/EquityFixture';
-import { GetVotingQuery, GetVotingQueryResponse } from './GetVotingQuery';
-import { GetVotingQueryHandler } from './GetVotingQueryHandler';
-import { GetVotingQueryError } from './error/GetVotingQueryError';
+import { createMock } from "@golevelup/ts-jest";
+import { ErrorMsgFixture, EvmAddressPropsFixture } from "@test/fixtures/shared/DataFixture";
+import { ErrorCode } from "@core/error/BaseError";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ContractService from "@service/contract/ContractService";
+import { GetVotingQueryFixture, VotingRightsFixture } from "@test/fixtures/equity/EquityFixture";
+import { GetVotingQuery, GetVotingQueryResponse } from "./GetVotingQuery";
+import { GetVotingQueryHandler } from "./GetVotingQueryHandler";
+import { GetVotingQueryError } from "./error/GetVotingQueryError";
 
-describe('GetVotingQueryHandler', () => {
+describe("GetVotingQueryHandler", () => {
   let handler: GetVotingQueryHandler;
   let query: GetVotingQuery;
 
@@ -233,10 +227,7 @@ describe('GetVotingQueryHandler', () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new GetVotingQueryHandler(
-      queryAdapterServiceMock,
-      contractServiceMock,
-    );
+    handler = new GetVotingQueryHandler(queryAdapterServiceMock, contractServiceMock);
     query = GetVotingQueryFixture.create();
   });
 
@@ -244,8 +235,8 @@ describe('GetVotingQueryHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('throws GetVotingQueryError when query fails with uncaught error', async () => {
+  describe("execute", () => {
+    it("throws GetVotingQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
@@ -255,32 +246,21 @@ describe('GetVotingQueryHandler', () => {
       await expect(resultPromise).rejects.toBeInstanceOf(GetVotingQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while querying voting: ${errorMsg}`,
-        ),
+        message: expect.stringContaining(`An error occurred while querying voting: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
-    it('should successfully get voting', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
+    it("should successfully get voting", async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
       queryAdapterServiceMock.getVoting.mockResolvedValue(votingRights);
 
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(GetVotingQueryResponse);
       expect(result.voting).toBe(votingRights);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
-      expect(queryAdapterServiceMock.getVoting).toHaveBeenCalledWith(
-        evmAddress,
-        query.votingId,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
+      expect(queryAdapterServiceMock.getVoting).toHaveBeenCalledWith(evmAddress, query.votingId);
     });
   });
 });

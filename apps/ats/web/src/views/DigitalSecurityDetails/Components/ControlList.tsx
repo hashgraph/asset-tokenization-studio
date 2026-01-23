@@ -212,28 +212,28 @@ import {
   Button,
   ClipboardButton,
   useToast,
-} from 'io-bricks-ui';
-import { CellContext, createColumnHelper } from '@tanstack/react-table';
-import { useTranslation } from 'react-i18next';
-import { Trash } from '@phosphor-icons/react';
-import { HStack, Stack, useDisclosure } from '@chakra-ui/react';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { useEffect, useMemo, useState } from 'react';
-import { useTable } from '../../../hooks/useTable';
-import _chunk from 'lodash/chunk';
-import { isValidHederaId, required } from '../../../utils/rules';
+} from "io-bricks-ui";
+import { CellContext, createColumnHelper } from "@tanstack/react-table";
+import { useTranslation } from "react-i18next";
+import { Trash } from "@phosphor-icons/react";
+import { HStack, Stack, useDisclosure } from "@chakra-ui/react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { useTable } from "../../../hooks/useTable";
+import _chunk from "lodash/chunk";
+import { isValidHederaId, required } from "../../../utils/rules";
 import {
   useAddToControlList,
   useGetControlListCount,
   useGetControlListMembers,
   useRemoveFromControlList,
-} from '../../../hooks/queries/useControlList';
+} from "../../../hooks/queries/useControlList";
 import {
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
-} from '@hashgraph/asset-tokenization-sdk';
-import { useParams } from 'react-router-dom';
+} from "@hashgraph/asset-tokenization-sdk";
+import { useParams } from "react-router-dom";
 
 type securitiesSearch = {
   search: string;
@@ -244,29 +244,27 @@ interface AllowedListFields {
 }
 
 export const ControlList = () => {
-  const { id = '' } = useParams();
+  const { id = "" } = useParams();
   const [accounts, setAccounts] = useState<AllowedListFields[]>([]);
-  const [isRefetchAccountsLoading, setIsRefetchAccountsLoading] =
-    useState<boolean>(true);
+  const [isRefetchAccountsLoading, setIsRefetchAccountsLoading] = useState<boolean>(true);
   const toast = useToast();
 
-  const { data: controlListCount, refetch: refetchControlListCount } =
-    useGetControlListCount(
-      new GetControlListCountRequest({
-        securityId: id,
-      }),
-      {
-        onError: (error) => {
-          console.log('SDK message --> Control list count error: ', error);
-          toast.show({
-            duration: 3000,
-            title: t('messages.error'),
-            status: 'error',
-          });
-          setIsRefetchAccountsLoading(false);
-        },
+  const { data: controlListCount, refetch: refetchControlListCount } = useGetControlListCount(
+    new GetControlListCountRequest({
+      securityId: id,
+    }),
+    {
+      onError: (error) => {
+        console.log("SDK message --> Control list count error: ", error);
+        toast.show({
+          duration: 3000,
+          title: t("messages.error"),
+          status: "error",
+        });
+        setIsRefetchAccountsLoading(false);
       },
-    );
+    },
+  );
 
   const { data: controlListResponse = [] } = useGetControlListMembers(
     new GetControlListMembersRequest({
@@ -275,7 +273,7 @@ export const ControlList = () => {
       end: controlListCount ?? 0,
     }),
     {
-      enabled: typeof controlListCount !== 'undefined',
+      enabled: typeof controlListCount !== "undefined",
       onSettled: () => setIsRefetchAccountsLoading(false),
     },
   );
@@ -288,11 +286,9 @@ export const ControlList = () => {
 
   useEffect(() => {
     if (controlListResponse.length) {
-      const accounts: AllowedListFields[] = controlListResponse.map(
-        (account) => ({
-          account,
-        }),
-      );
+      const accounts: AllowedListFields[] = controlListResponse.map((account) => ({
+        account,
+      }));
 
       setAccounts(accounts);
     }
@@ -301,18 +297,18 @@ export const ControlList = () => {
   }, [controlListResponse]);
 
   const columnsHelper = createColumnHelper<AllowedListFields>();
-  const { t: tTable } = useTranslation('security', {
-    keyPrefix: 'details.allowedList.table',
+  const { t: tTable } = useTranslation("security", {
+    keyPrefix: "details.allowedList.table",
   });
-  const { t } = useTranslation('security', {
-    keyPrefix: 'details.allowedList.search',
+  const { t } = useTranslation("security", {
+    keyPrefix: "details.allowedList.search",
   });
-  const { t: tRemove } = useTranslation('security', {
-    keyPrefix: 'details.allowedList.popUp',
+  const { t: tRemove } = useTranslation("security", {
+    keyPrefix: "details.allowedList.popUp",
   });
 
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const [accountToRemove, setAccountToRemove] = useState<string>('');
+  const [accountToRemove, setAccountToRemove] = useState<string>("");
   const {
     pagination: { pageIndex, pageSize },
     ...table
@@ -326,13 +322,12 @@ export const ControlList = () => {
   };
 
   // ADD TO CONTROL LIST
-  const { mutate: addToControlList, isLoading: isLoadingAdd } =
-    useAddToControlList({
-      onSettled: (data) => refetchAccounts(data),
-      onSuccess: () => {
-        reset();
-      },
-    });
+  const { mutate: addToControlList, isLoading: isLoadingAdd } = useAddToControlList({
+    onSettled: (data) => refetchAccounts(data),
+    onSuccess: () => {
+      reset();
+    },
+  });
 
   const {
     control,
@@ -340,7 +335,7 @@ export const ControlList = () => {
     formState: { isValid },
     reset,
   } = useForm<securitiesSearch>({
-    mode: 'onSubmit',
+    mode: "onSubmit",
   });
 
   const paginatedData = useMemo(
@@ -350,14 +345,11 @@ export const ControlList = () => {
   );
 
   // REMOVE FROM CONTROL LIST
-  const { mutate: removeFromControlList, isLoading: isLoadingRemove } =
-    useRemoveFromControlList({
-      onSettled: (data) => refetchAccounts(data),
-    });
+  const { mutate: removeFromControlList, isLoading: isLoadingRemove } = useRemoveFromControlList({
+    onSettled: (data) => refetchAccounts(data),
+  });
 
-  const renderRemove = (
-    props: CellContext<AllowedListFields, unknown | undefined>,
-  ) => {
+  const renderRemove = (props: CellContext<AllowedListFields, unknown | undefined>) => {
     const {
       row: {
         original: { account },
@@ -375,14 +367,14 @@ export const ControlList = () => {
         size="xs"
         isLoading={isLoadingRemove}
       >
-        <PhosphorIcon as={Trash} sx={{ color: 'secondary.500' }} />
+        <PhosphorIcon as={Trash} sx={{ color: "secondary.500" }} />
       </Button>
     );
   };
 
   const columns = [
-    columnsHelper.accessor('account', {
-      header: tTable('account'),
+    columnsHelper.accessor("account", {
+      header: tTable("account"),
       enableSorting: false,
       size: 995,
       cell: ({ getValue }) => {
@@ -391,14 +383,14 @@ export const ControlList = () => {
         return (
           <HStack gap={1.5}>
             <Text>{account}</Text>
-            <ClipboardButton sx={{ color: 'secondary.500' }} value={account} />
+            <ClipboardButton sx={{ color: "secondary.500" }} value={account} />
           </HStack>
         );
       },
     }),
     columnsHelper.display({
-      id: 'remove',
-      header: tTable('action'),
+      id: "remove",
+      header: tTable("action"),
       size: 5,
       enableSorting: false,
       cell: (props) => renderRemove(props),
@@ -408,46 +400,33 @@ export const ControlList = () => {
   const removeSecurityFromAllowedList = (address: string) => {
     const requestToRemove = new ControlListRequest({
       securityId: id!,
-      targetId: address ?? '',
+      targetId: address ?? "",
     });
-    console.log('request to remove from control list: ', requestToRemove);
+    console.log("request to remove from control list: ", requestToRemove);
     removeFromControlList(requestToRemove);
   };
 
   const onSubmit: SubmitHandler<securitiesSearch> = (params) => {
     const requestToAdd = new ControlListRequest({
       securityId: id!,
-      targetId: params.search ?? '',
+      targetId: params.search ?? "",
     });
-    console.log('request to add to control list: ', requestToAdd);
+    console.log("request to add to control list: ", requestToAdd);
     addToControlList(requestToAdd);
   };
 
   return (
     <>
-      <Stack
-        w="full"
-        h="full"
-        bg="neutral.50"
-        borderRadius={1}
-        p={4}
-        pt={6}
-        gap={4}
-      >
+      <Stack w="full" h="full" bg="neutral.50" borderRadius={1} p={4} pt={6} gap={4}>
         <Text textStyle="ElementsSemiboldLG" color="neutral.light">
-          {t('title')}
+          {t("title")}
         </Text>
-        <HStack
-          as="form"
-          onSubmit={handleSubmit(onSubmit)}
-          gap={4}
-          alignItems="flex-start"
-        >
+        <HStack as="form" onSubmit={handleSubmit(onSubmit)} gap={4} alignItems="flex-start">
           <Stack w="280px">
             <SearchInputController
               id="search"
-              placeholder={t('placeholder')}
-              onSearch={(search) => console.log('SEARCHING: ', search)}
+              placeholder={t("placeholder")}
+              onSearch={(search) => console.log("SEARCHING: ", search)}
               control={control}
               size="sm"
               rules={{
@@ -460,11 +439,9 @@ export const ControlList = () => {
             size="sm"
             isDisabled={!isValid}
             type="submit"
-            isLoading={
-              isLoadingAdd || isLoadingRemove || isRefetchAccountsLoading
-            }
+            isLoading={isLoadingAdd || isLoadingRemove || isRefetchAccountsLoading}
           >
-            {t('button')}
+            {t("button")}
           </Button>
         </HStack>
         <Table
@@ -482,15 +459,15 @@ export const ControlList = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRemove('title')}
-        description={tRemove('description')}
-        confirmText={tRemove('confirmText')}
+        title={tRemove("title")}
+        description={tRemove("description")}
+        confirmText={tRemove("confirmText")}
         onConfirm={() => {
           removeSecurityFromAllowedList(accountToRemove);
           onClose();
         }}
         onCancel={onClose}
-        cancelText={tRemove('cancelText')}
+        cancelText={tRemove("cancelText")}
       />
     </>
   );

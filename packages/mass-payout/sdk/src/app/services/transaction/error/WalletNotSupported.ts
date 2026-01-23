@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class WalletNotSupported extends BaseError {
   constructor() {
-    super(ErrorCode.WalletNotSupported, 'Invalid wallet type');
+    super(ErrorCode.WalletNotSupported, "Invalid wallet type");
   }
 }

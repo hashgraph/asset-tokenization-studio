@@ -203,18 +203,18 @@
 
 */
 
-import { AvatarThemeConfiguration, avatarPartsList } from 'io-bricks-ui';
+import { AvatarThemeConfiguration, avatarPartsList } from "io-bricks-ui";
 
 export const Avatar: AvatarThemeConfiguration = {
   parts: avatarPartsList,
   baseStyle: () => ({
     container: {
-      bg: 'neutral.100',
-      fontWeight: 'medium',
-      justifyContent: 'center',
-      alignContent: 'center',
+      bg: "neutral.100",
+      fontWeight: "medium",
+      justifyContent: "center",
+      alignContent: "center",
       svg: {
-        color: 'neutral.white',
+        color: "neutral.white",
         w: 6,
         h: 6,
       },
@@ -231,12 +231,12 @@ export const Avatar: AvatarThemeConfiguration = {
   variants: {
     light: () => ({
       container: {
-        color: 'black',
+        color: "black",
       },
     }),
   },
 
   defaultProps: {
-    size: 'md',
+    size: "md",
   },
 };

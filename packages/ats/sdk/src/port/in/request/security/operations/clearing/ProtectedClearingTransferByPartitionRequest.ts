@@ -203,10 +203,10 @@
 
 */
 
-import { SecurityDate } from '@domain/context/shared/SecurityDate';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { SecurityDate } from "@domain/context/shared/SecurityDate";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '@port/in/request/FormatValidation';
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class ProtectedClearingTransferByPartitionRequest extends ValidatedRequest<ProtectedClearingTransferByPartitionRequest> {
   securityId: string;
@@ -249,16 +249,10 @@ export default class ProtectedClearingTransferByPartitionRequest extends Validat
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       nonce: FormatValidation.checkNumber({ min: 0 }),
       expirationDate: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          Math.ceil(new Date().getTime() / 1000),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), Math.ceil(new Date().getTime() / 1000));
       },
       deadline: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          Math.ceil(new Date().getTime() / 1000),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), Math.ceil(new Date().getTime() / 1000));
       },
     });
 

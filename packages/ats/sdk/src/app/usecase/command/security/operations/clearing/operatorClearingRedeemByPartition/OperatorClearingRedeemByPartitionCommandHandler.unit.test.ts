@@ -203,32 +203,28 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { ClearingRedeemByPartitionCommandFixture } from '@test/fixtures/clearing/ClearingFixture';
-import SecurityService from '@service/security/SecurityService';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { Security } from '@domain/context/security/Security';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { faker } from '@faker-js/faker/.';
-import { OperatorClearingRedeemByPartitionCommandHandler } from './OperatorClearingRedeemByPartitionCommandHandler';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
+import { ErrorMsgFixture, EvmAddressPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { ClearingRedeemByPartitionCommandFixture } from "@test/fixtures/clearing/ClearingFixture";
+import SecurityService from "@service/security/SecurityService";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { Security } from "@domain/context/security/Security";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { faker } from "@faker-js/faker/.";
+import { OperatorClearingRedeemByPartitionCommandHandler } from "./OperatorClearingRedeemByPartitionCommandHandler";
 import {
   OperatorClearingRedeemByPartitionCommand,
   OperatorClearingRedeemByPartitionCommandResponse,
-} from './OperatorClearingRedeemByPartitionCommand';
-import { OperatorClearingRedeemByPartitionCommandError } from './error/OperatorClearingRedeemByPartitionCommandError';
-import { ErrorCode } from '@core/error/BaseError';
+} from "./OperatorClearingRedeemByPartitionCommand";
+import { OperatorClearingRedeemByPartitionCommandError } from "./error/OperatorClearingRedeemByPartitionCommandError";
+import { ErrorCode } from "@core/error/BaseError";
 
-describe('OperatorClearingRedeemByPartitionCommandHandler', () => {
+describe("OperatorClearingRedeemByPartitionCommandHandler", () => {
   let handler: OperatorClearingRedeemByPartitionCommandHandler;
   let command: OperatorClearingRedeemByPartitionCommand;
 
@@ -245,7 +241,7 @@ describe('OperatorClearingRedeemByPartitionCommandHandler', () => {
 
   const clearingId = faker.string.hexadecimal({
     length: 64,
-    prefix: '0x',
+    prefix: "0x",
   });
 
   beforeEach(() => {
@@ -266,18 +262,16 @@ describe('OperatorClearingRedeemByPartitionCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws OperatorClearingRedeemByPartitionCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws OperatorClearingRedeemByPartitionCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          OperatorClearingRedeemByPartitionCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(OperatorClearingRedeemByPartitionCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
@@ -287,34 +281,24 @@ describe('OperatorClearingRedeemByPartitionCommandHandler', () => {
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully create clearing redeem by operator', async () => {
+    describe("success cases", () => {
+      it("should successfully create clearing redeem by operator", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
         securityServiceMock.get.mockResolvedValue(security);
-        transactionServiceMock
-          .getHandler()
-          .operatorClearingRedeemByPartition.mockResolvedValue({
-            id: transactionId,
-          });
-        transactionServiceMock.getTransactionResult.mockResolvedValue(
-          clearingId,
-        );
+        transactionServiceMock.getHandler().operatorClearingRedeemByPartition.mockResolvedValue({
+          id: transactionId,
+        });
+        transactionServiceMock.getTransactionResult.mockResolvedValue(clearingId);
 
         const result = await handler.execute(command);
 
-        expect(result).toBeInstanceOf(
-          OperatorClearingRedeemByPartitionCommandResponse,
-        );
+        expect(result).toBeInstanceOf(OperatorClearingRedeemByPartitionCommandResponse);
         expect(result.payload).toBe(parseInt(clearingId));
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(
-          contractServiceMock.getContractEvmAddress,
-        ).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(1, command.securityId);
 
         expect(validationServiceMock.checkBalance).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkBalance).toHaveBeenCalledWith(
@@ -323,27 +307,14 @@ describe('OperatorClearingRedeemByPartitionCommandHandler', () => {
           BigDecimal.fromString(command.amount, security.decimals),
         );
         expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
-          security,
-          command.amount,
-        );
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(security, command.amount);
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(
-          validationServiceMock.checkClearingActivated,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          validationServiceMock.checkClearingActivated,
-        ).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkClearingActivated).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkClearingActivated).toHaveBeenCalledWith(command.securityId);
 
-        expect(
-          transactionServiceMock.getHandler().operatorClearingRedeemByPartition,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().operatorClearingRedeemByPartition,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getHandler().operatorClearingRedeemByPartition).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().operatorClearingRedeemByPartition).toHaveBeenCalledWith(
           evmAddress,
           command.partitionId,
           BigDecimal.fromString(command.amount, security.decimals),
@@ -351,12 +322,8 @@ describe('OperatorClearingRedeemByPartitionCommandHandler', () => {
           BigDecimal.fromString(command.expirationDate.substring(0, 10)),
           command.securityId,
         );
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledWith({
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith({
           res: { id: transactionId },
           className: OperatorClearingRedeemByPartitionCommandHandler.name,
           position: 1,

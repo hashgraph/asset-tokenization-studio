@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
 export default class GetScheduledBalanceAdjustmentCountRequest extends ValidatedRequest<GetScheduledBalanceAdjustmentCountRequest> {
   securityId: string;

@@ -203,12 +203,12 @@
 
 */
 
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
 
 export interface ExternalControlStore {
   address: string;
-  type: 'whitelist' | 'blacklist';
+  type: "whitelist" | "blacklist";
 }
 
 interface ExternalControlStoreProps {
@@ -218,7 +218,7 @@ interface ExternalControlStoreProps {
   reset: () => void;
 }
 
-const EXTERNAL_CONTROL_STORE_KEY = 'EXTERNAL_CONTROL_STORE_KEY';
+const EXTERNAL_CONTROL_STORE_KEY = "EXTERNAL_CONTROL_STORE_KEY";
 
 export const useExternalControlStore = create<ExternalControlStoreProps>()(
   persist(
@@ -230,11 +230,7 @@ export const useExternalControlStore = create<ExternalControlStoreProps>()(
         })),
       removeExternalControl: (externalControlAddress) =>
         set((state) => ({
-          externalControls: [
-            ...state.externalControls.filter(
-              (control) => control.address !== externalControlAddress,
-            ),
-          ],
+          externalControls: [...state.externalControls.filter((control) => control.address !== externalControlAddress)],
         })),
       reset: () =>
         set((state) => ({

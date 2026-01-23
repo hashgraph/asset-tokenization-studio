@@ -204,19 +204,19 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Account from '@domain/context/account/Account';
-import PublicKey from '@domain/context/account/PublicKey';
-import { RequestAccount } from '../BaseRequest';
+import Account from "@domain/context/account/Account";
+import PublicKey from "@domain/context/account/PublicKey";
+import { RequestAccount } from "../BaseRequest";
 import {
   AWSKMSConfigRequest,
   DFNSConfigRequest,
   FireblocksConfigRequest,
   HWCRequestSettings,
-} from '../network/ConnectRequest';
-import HWCSettings from '@core/settings/walletConnect/HWCSettings';
-import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
-import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
-import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
+} from "../network/ConnectRequest";
+import HWCSettings from "@core/settings/walletConnect/HWCSettings";
+import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
+import FireblocksSettings from "@core/settings/custodialWalletSettings/FireblocksSettings";
+import AWSKMSSettings from "@core/settings/custodialWalletSettings/AWSKMSSettings";
 
 export default class RequestMapper {
   public static mapAccount(account?: RequestAccount): Account | undefined {
@@ -227,8 +227,8 @@ export default class RequestMapper {
           publicKey:
             account.publicKey?.key && account.publicKey.type
               ? new PublicKey({
-                  key: account.publicKey?.key ?? '',
-                  type: account.publicKey?.type ?? '',
+                  key: account.publicKey?.key ?? "",
+                  type: account.publicKey?.type ?? "",
                 })
               : undefined,
         })
@@ -236,18 +236,10 @@ export default class RequestMapper {
   }
 
   public static hwcRequestToHWCSettings(req: HWCRequestSettings): HWCSettings {
-    return new HWCSettings(
-      req.projectId,
-      req.dappName,
-      req.dappDescription,
-      req.dappURL,
-      req.dappIcons,
-    );
+    return new HWCSettings(req.projectId, req.dappName, req.dappDescription, req.dappURL, req.dappIcons);
   }
 
-  public static dfnsRequestToDfnsSettings(
-    req: DFNSConfigRequest,
-  ): DfnsSettings {
+  public static dfnsRequestToDfnsSettings(req: DFNSConfigRequest): DfnsSettings {
     return new DfnsSettings(
       req.serviceAccountPrivateKey,
       req.credentialId,
@@ -261,9 +253,7 @@ export default class RequestMapper {
     );
   }
 
-  public static fireblocksRequestToFireblocksSettings(
-    req: FireblocksConfigRequest,
-  ): FireblocksSettings {
+  public static fireblocksRequestToFireblocksSettings(req: FireblocksConfigRequest): FireblocksSettings {
     return new FireblocksSettings(
       req.apiKey,
       req.apiSecretKey,
@@ -274,9 +264,7 @@ export default class RequestMapper {
     );
   }
 
-  public static awsKmsRequestToAwsKmsSettings(
-    req: AWSKMSConfigRequest,
-  ): AWSKMSSettings {
+  public static awsKmsRequestToAwsKmsSettings(req: AWSKMSConfigRequest): AWSKMSSettings {
     return new AWSKMSSettings(
       req.awsAccessKeyId,
       req.awsSecretAccessKey,

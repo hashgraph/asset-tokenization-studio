@@ -209,14 +209,10 @@ export default class Mapper {
   public static renamePrivateProps(keys: string[]): string[];
   public static renamePrivateProps(keys: string): string;
   public static renamePrivateProps(keys: string | string[]): any {
-    if (typeof keys === 'string') {
-      return keys.startsWith('_') || keys.startsWith('#')
-        ? keys.substring(1)
-        : keys;
+    if (typeof keys === "string") {
+      return keys.startsWith("_") || keys.startsWith("#") ? keys.substring(1) : keys;
     } else {
-      return keys.map((key) =>
-        key.startsWith('_') || key.startsWith('#') ? key.substring(1) : key,
-      );
+      return keys.map((key) => (key.startsWith("_") || key.startsWith("#") ? key.substring(1) : key));
     }
   }
 }

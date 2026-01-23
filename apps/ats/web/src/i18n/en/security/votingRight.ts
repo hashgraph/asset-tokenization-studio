@@ -205,64 +205,62 @@
 
 export default {
   tabs: {
-    program: 'Program voting rights',
-    see: 'See voting rights',
-    holders: 'Holders',
+    program: "Program voting rights",
+    see: "See voting rights",
+    holders: "Holders",
   },
   program: {
     input: {
       name: {
-        label: 'Name',
-        placeholder: 'Enter name',
+        label: "Name",
+        placeholder: "Enter name",
         tooltip:
-          'Name that will be assigned to the voting right. This name is only used for identification/display purposes. ',
+          "Name that will be assigned to the voting right. This name is only used for identification/display purposes. ",
       },
       date: {
-        label: 'Date',
-        placeholder: 'Select day',
-        tooltip:
-          'Voting right’s record date. A snapshot of Equity holder’s balances will be triggered on this date.',
+        label: "Date",
+        placeholder: "Select day",
+        tooltip: "Voting right’s record date. A snapshot of Equity holder’s balances will be triggered on this date.",
       },
     },
-    button: 'Program vote',
+    button: "Program vote",
   },
   see: {
     input: {
       voting: {
-        label: 'Voting ID',
-        placeholder: 'Add ID',
-        tooltip: 'ID of the voting right to display.',
+        label: "Voting ID",
+        placeholder: "Add ID",
+        tooltip: "ID of the voting right to display.",
       },
       account: {
-        label: 'Account ID',
-        placeholder: 'Add ID',
-        tooltip: 'ID of the account to display the voting right for.',
+        label: "Account ID",
+        placeholder: "Add ID",
+        tooltip: "ID of the account to display the voting right for.",
       },
     },
     details: {
-      title: 'Voting rights programmed as {{ name }}',
-      number: 'Number of votes: {{ number }}',
-      pending: 'The voting is pending',
+      title: "Voting rights programmed as {{ name }}",
+      number: "Number of votes: {{ number }}",
+      pending: "The voting is pending",
     },
   },
   holders: {
-    title: 'Holders',
+    title: "Holders",
     voteIdInput: {
-      label: 'Vote ID',
-      placeholder: '1',
-      tooltip: 'ID of the voting right to display.',
+      label: "Vote ID",
+      placeholder: "1",
+      tooltip: "ID of the voting right to display.",
     },
-    searchButton: 'Search',
-    emptyTable: 'No data',
+    searchButton: "Search",
+    emptyTable: "No data",
     table: {
-      holderAddress: 'Holder address',
+      holderAddress: "Holder address",
     },
   },
   messages: {
-    success: 'Success: ',
-    descriptionSuccess:
-      'The voting rights operation has been executed successfully',
-    error: 'Error: ',
-    descriptionFailed: 'The voting rights operation has failed',
+    success: "Success: ",
+    descriptionSuccess: "The voting rights operation has been executed successfully",
+    error: "Error: ",
+    descriptionFailed: "The voting rights operation has failed",
   },
 };

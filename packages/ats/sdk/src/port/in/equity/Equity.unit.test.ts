@@ -203,8 +203,8 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '@core/command/CommandBus';
+import { createMock } from "@golevelup/ts-jest";
+import { CommandBus } from "@core/command/CommandBus";
 import {
   CreateEquityRequest,
   GetEquityDetailsRequest,
@@ -225,27 +225,21 @@ import {
   GetVotingHoldersRequest,
   GetTotalVotingHoldersRequest,
   CreateTrexSuiteEquityRequest,
-} from '../request';
-import {
-  HederaIdPropsFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import LogService from '@service/log/LogService';
-import { QueryBus } from '@core/query/QueryBus';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { ValidationError } from '@core/validation/ValidationError';
-import NetworkService from '@service/network/NetworkService';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { Security } from '@domain/context/security/Security';
-import ContractId from '@domain/context/contract/ContractId';
-import {
-  CastRegulationSubType,
-  CastRegulationType,
-} from '@domain/context/factory/RegulationType';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
-import { BigNumber } from 'ethers';
-import EquityToken from './Equity';
+} from "../request";
+import { HederaIdPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import LogService from "@service/log/LogService";
+import { QueryBus } from "@core/query/QueryBus";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { ValidationError } from "@core/validation/ValidationError";
+import NetworkService from "@service/network/NetworkService";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { Security } from "@domain/context/security/Security";
+import ContractId from "@domain/context/contract/ContractId";
+import { CastRegulationSubType, CastRegulationType } from "@domain/context/factory/RegulationType";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
+import { BigNumber } from "ethers";
+import EquityToken from "./Equity";
 import {
   CreateEquityRequestFixture,
   CreateTrexSuiteEquityRequestFixture,
@@ -270,28 +264,28 @@ import {
   SetScheduledBalanceAdjustmentRequestFixture,
   SetVotingRightsRequestFixture,
   VotingRightsFixture,
-} from '@test/fixtures/equity/EquityFixture';
-import { CreateEquityCommand } from '@command/equity/create/CreateEquityCommand';
-import { CastDividendType } from '@domain/context/equity/DividendType';
-import { GetEquityDetailsQuery } from '@query/equity/get/getEquityDetails/GetEquityDetailsQuery';
-import { SetVotingRightsCommand } from '@command/equity/votingRights/set/SetVotingRightsCommand';
-import { GetVotingForQuery } from '@query/equity/votingRights/getVotingFor/GetVotingForQuery';
-import { GetVotingQuery } from '@query/equity/votingRights/getVoting/GetVotingQuery';
-import { GetVotingCountQuery } from '@query/equity/votingRights/getVotingCount/GetVotingCountQuery';
-import { SetDividendsCommand } from '@command/equity/dividends/set/SetDividendsCommand';
-import { GetDividendsForQuery } from '@query/equity/dividends/getDividendsFor/GetDividendsForQuery';
-import { GetDividendsQuery } from '@query/equity/dividends/getDividends/GetDividendsQuery';
-import { GetDividendsCountQuery } from '@query/equity/dividends/getDividendsCount/GetDividendsCountQuery';
-import { SetScheduledBalanceAdjustmentCommand } from '@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand';
-import { GetScheduledBalanceAdjustmentQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery';
-import { GetScheduledBalanceAdjustmentCountQuery } from '@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
-import { GetDividendHoldersQuery } from '@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery';
-import { GetTotalDividendHoldersQuery } from '@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery';
-import { GetVotingHoldersQuery } from '@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery';
-import { GetTotalVotingHoldersQuery } from '@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery';
-import { CreateTrexSuiteEquityCommand } from '@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand';
+} from "@test/fixtures/equity/EquityFixture";
+import { CreateEquityCommand } from "@command/equity/create/CreateEquityCommand";
+import { CastDividendType } from "@domain/context/equity/DividendType";
+import { GetEquityDetailsQuery } from "@query/equity/get/getEquityDetails/GetEquityDetailsQuery";
+import { SetVotingRightsCommand } from "@command/equity/votingRights/set/SetVotingRightsCommand";
+import { GetVotingForQuery } from "@query/equity/votingRights/getVotingFor/GetVotingForQuery";
+import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQuery";
+import { GetVotingCountQuery } from "@query/equity/votingRights/getVotingCount/GetVotingCountQuery";
+import { SetDividendsCommand } from "@command/equity/dividends/set/SetDividendsCommand";
+import { GetDividendsForQuery } from "@query/equity/dividends/getDividendsFor/GetDividendsForQuery";
+import { GetDividendsQuery } from "@query/equity/dividends/getDividends/GetDividendsQuery";
+import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCount/GetDividendsCountQuery";
+import { SetScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand";
+import { GetScheduledBalanceAdjustmentQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery";
+import { GetScheduledBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery";
+import { GetDividendHoldersQuery } from "@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery";
+import { GetTotalDividendHoldersQuery } from "@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery";
+import { GetVotingHoldersQuery } from "@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery";
+import { GetTotalVotingHoldersQuery } from "@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery";
+import { CreateTrexSuiteEquityCommand } from "@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand";
 
-describe('Equity', () => {
+describe("Equity", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
   let networkServiceMock: jest.Mocked<NetworkService>;
@@ -326,14 +320,14 @@ describe('Equity', () => {
   beforeEach(() => {
     commandBusMock = createMock<CommandBus>();
     queryBusMock = createMock<QueryBus>();
-    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
+    handleValidationSpy = jest.spyOn(ValidatedRequest, "handleValidation");
     networkServiceMock = createMock<NetworkService>({
       configuration: {
         factoryAddress: factoryAddress,
         resolverAddress: resolverAddress,
       },
     });
-    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    jest.spyOn(LogService, "logError").mockImplementation(() => {});
     (EquityToken as any).commandBus = commandBusMock;
     (EquityToken as any).queryBus = queryBusMock;
     (EquityToken as any).networkService = networkServiceMock;
@@ -344,11 +338,9 @@ describe('Equity', () => {
     jest.restoreAllMocks();
   });
 
-  describe('create', () => {
-    createEquityRequest = new CreateEquityRequest(
-      CreateEquityRequestFixture.create(),
-    );
-    it('should create equity successfully', async () => {
+  describe("create", () => {
+    createEquityRequest = new CreateEquityRequest(CreateEquityRequestFixture.create());
+    it("should create equity successfully", async () => {
       const expectedResponse = {
         securityId: new ContractId(HederaIdPropsFixture.create().value),
         transactionId: transactionId,
@@ -361,10 +353,7 @@ describe('Equity', () => {
 
       const result = await EquityToken.create(createEquityRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CreateEquityRequest',
-        createEquityRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("CreateEquityRequest", createEquityRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
@@ -382,17 +371,10 @@ describe('Equity', () => {
             clearingActive: createEquityRequest.clearingActive,
             internalKycActivated: createEquityRequest.internalKycActivated,
             isMultiPartition: createEquityRequest.isMultiPartition,
-            maxSupply: BigDecimal.fromString(
-              createEquityRequest.numberOfShares,
-            ),
-            regulationType: CastRegulationType.fromNumber(
-              createEquityRequest.regulationType,
-            ),
-            regulationsubType: CastRegulationSubType.fromNumber(
-              createEquityRequest.regulationSubType,
-            ),
-            isCountryControlListWhiteList:
-              createEquityRequest.isCountryControlListWhiteList,
+            maxSupply: BigDecimal.fromString(createEquityRequest.numberOfShares),
+            regulationType: CastRegulationType.fromNumber(createEquityRequest.regulationType),
+            regulationsubType: CastRegulationSubType.fromNumber(createEquityRequest.regulationSubType),
+            isCountryControlListWhiteList: createEquityRequest.isCountryControlListWhiteList,
             countries: createEquityRequest.countries,
             info: createEquityRequest.info,
           }),
@@ -428,18 +410,13 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        'Command execution failed',
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CreateEquityRequest',
-        createEquityRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("CreateEquityRequest", createEquityRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new CreateEquityCommand(
@@ -454,17 +431,10 @@ describe('Equity', () => {
             clearingActive: createEquityRequest.clearingActive,
             internalKycActivated: createEquityRequest.internalKycActivated,
             isMultiPartition: createEquityRequest.isMultiPartition,
-            maxSupply: BigDecimal.fromString(
-              createEquityRequest.numberOfShares,
-            ),
-            regulationType: CastRegulationType.fromNumber(
-              createEquityRequest.regulationType,
-            ),
-            regulationsubType: CastRegulationSubType.fromNumber(
-              createEquityRequest.regulationSubType,
-            ),
-            isCountryControlListWhiteList:
-              createEquityRequest.isCountryControlListWhiteList,
+            maxSupply: BigDecimal.fromString(createEquityRequest.numberOfShares),
+            regulationType: CastRegulationType.fromNumber(createEquityRequest.regulationType),
+            regulationsubType: CastRegulationSubType.fromNumber(createEquityRequest.regulationSubType),
+            isCountryControlListWhiteList: createEquityRequest.isCountryControlListWhiteList,
             countries: createEquityRequest.countries,
             info: createEquityRequest.info,
           }),
@@ -493,210 +463,169 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if name is invalid', async () => {
-      createEquityRequest = new CreateEquityRequest(
-        CreateEquityRequestFixture.create({ name: '' }),
-      );
+    it("should throw error if name is invalid", async () => {
+      createEquityRequest = new CreateEquityRequest(CreateEquityRequestFixture.create({ name: "" }));
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if symbol is invalid', async () => {
+    it("should throw error if symbol is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          symbol: '',
+          symbol: "",
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if isin is invalid', async () => {
+    it("should throw error if isin is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          isin: '',
+          isin: "",
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if decimals is invalid', async () => {
+    it("should throw error if decimals is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
           decimals: 2.85,
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if diamondOwnerAccount is invalid', async () => {
+    it("should throw error if diamondOwnerAccount is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          diamondOwnerAccount: 'invalid',
+          diamondOwnerAccount: "invalid",
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if dividendRight is invalid', async () => {
+    it("should throw error if dividendRight is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
           dividendRight: 100,
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if currency is invalid', async () => {
+    it("should throw error if currency is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          currency: 'invalid',
+          currency: "invalid",
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if numberOfShares is invalid', async () => {
+    it("should throw error if numberOfShares is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          numberOfShares: 'invalid',
+          numberOfShares: "invalid",
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if nominalValue is invalid', async () => {
+    it("should throw error if nominalValue is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          nominalValue: 'invalid',
+          nominalValue: "invalid",
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if regulationType is invalid', async () => {
+    it("should throw error if regulationType is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
           regulationType: 5,
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if regulationSubType is invalid', async () => {
+    it("should throw error if regulationSubType is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
           regulationSubType: 5,
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if configId is invalid', async () => {
+    it("should throw error if configId is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          configId: 'invalid',
+          configId: "invalid",
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalPausesIds is invalid', async () => {
+    it("should throw error if externalPausesIds is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          externalPausesIds: ['invalid'],
+          externalPausesIds: ["invalid"],
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalControlListsIds is invalid', async () => {
+    it("should throw error if externalControlListsIds is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          externalControlListsIds: ['invalid'],
+          externalControlListsIds: ["invalid"],
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalKycListsIds is invalid', async () => {
+    it("should throw error if externalKycListsIds is invalid", async () => {
       createEquityRequest = new CreateEquityRequest(
         CreateEquityRequestFixture.create({
-          externalKycListsIds: ['invalid'],
+          externalKycListsIds: ["invalid"],
         }),
       );
 
-      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(EquityToken.create(createEquityRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getEquityDetails', () => {
-    getEquityDetailsRequest = new GetEquityDetailsRequest(
-      GetEquityDetailsRequestFixture.create(),
-    );
-    it('should get equity details successfully', async () => {
+  describe("getEquityDetails", () => {
+    getEquityDetailsRequest = new GetEquityDetailsRequest(GetEquityDetailsRequestFixture.create());
+    it("should get equity details successfully", async () => {
       const expectedResponse = {
         equity: EquityDetailsFixture.create(),
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getEquityDetails(
-        getEquityDetailsRequest,
-      );
+      const result = await EquityToken.getEquityDetails(getEquityDetailsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetEquityDetailsRequest',
-        getEquityDetailsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetEquityDetailsRequest", getEquityDetailsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetEquityDetailsQuery(getEquityDetailsRequest.equityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetEquityDetailsQuery(getEquityDetailsRequest.equityId));
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -707,9 +636,7 @@ describe('Equity', () => {
           conversionRight: expectedResponse.equity.conversionRight,
           redemptionRight: expectedResponse.equity.redemptionRight,
           putRight: expectedResponse.equity.putRight,
-          dividendRight: CastDividendType.toNumber(
-            expectedResponse.equity.dividendRight,
-          ),
+          dividendRight: CastDividendType.toNumber(expectedResponse.equity.dividendRight),
           currency: expectedResponse.equity.currency,
           nominalValue: expectedResponse.equity.nominalValue.toString(),
           nominalValueDecimals: expectedResponse.equity.nominalValueDecimals,
@@ -717,41 +644,30 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getEquityDetails(getEquityDetailsRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getEquityDetails(getEquityDetailsRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetEquityDetailsRequest',
-        getEquityDetailsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetEquityDetailsRequest", getEquityDetailsRequest);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetEquityDetailsQuery(getEquityDetailsRequest.equityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetEquityDetailsQuery(getEquityDetailsRequest.equityId));
     });
 
-    it('should throw error if equityId is invalid', async () => {
+    it("should throw error if equityId is invalid", async () => {
       getEquityDetailsRequest = new GetEquityDetailsRequest({
         ...GetEquityDetailsRequestFixture.create(),
-        equityId: 'invalid',
+        equityId: "invalid",
       });
 
-      await expect(
-        EquityToken.getEquityDetails(getEquityDetailsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getEquityDetails(getEquityDetailsRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('setVotingRights', () => {
-    setVotingRightsRequest = new SetVotingRightsRequest(
-      SetVotingRightsRequestFixture.create(),
-    );
-    it('should set voting rights successfully', async () => {
+  describe("setVotingRights", () => {
+    setVotingRightsRequest = new SetVotingRightsRequest(SetVotingRightsRequestFixture.create());
+    it("should set voting rights successfully", async () => {
       const expectedResponse = {
         payload: 1,
         transactionId: transactionId,
@@ -761,10 +677,7 @@ describe('Equity', () => {
 
       const result = await EquityToken.setVotingRights(setVotingRightsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'SetVotingRightsRequest',
-        setVotingRightsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("SetVotingRightsRequest", setVotingRightsRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -779,18 +692,13 @@ describe('Equity', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.setVotingRights(setVotingRightsRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(EquityToken.setVotingRights(setVotingRightsRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'SetVotingRightsRequest',
-        setVotingRightsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("SetVotingRightsRequest", setVotingRightsRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new SetVotingRightsCommand(
@@ -801,47 +709,37 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       setVotingRightsRequest = new SetVotingRightsRequest({
         ...SetVotingRightsRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.setVotingRights(setVotingRightsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setVotingRights(setVotingRightsRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if recordTimestamp is invalid', async () => {
+    it("should throw error if recordTimestamp is invalid", async () => {
       setVotingRightsRequest = new SetVotingRightsRequest({
         ...SetVotingRightsRequestFixture.create(),
-        recordTimestamp: (
-          Math.ceil(new Date().getTime() / 1000) - 100
-        ).toString(),
+        recordTimestamp: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
       });
 
-      await expect(
-        EquityToken.setVotingRights(setVotingRightsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setVotingRights(setVotingRightsRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if data is invalid', async () => {
+    it("should throw error if data is invalid", async () => {
       setVotingRightsRequest = new SetVotingRightsRequest({
         ...SetVotingRightsRequestFixture.create(),
-        data: 'invalid',
+        data: "invalid",
       });
 
-      await expect(
-        EquityToken.setVotingRights(setVotingRightsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setVotingRights(setVotingRightsRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getVotingRightsFor', () => {
-    getVotingRightsForRequest = new GetVotingRightsForRequest(
-      GetVotingRightsForRequestFixture.create(),
-    );
-    it('should get voting rights for successfully', async () => {
+  describe("getVotingRightsFor", () => {
+    getVotingRightsForRequest = new GetVotingRightsForRequest(GetVotingRightsForRequestFixture.create());
+    it("should get voting rights for successfully", async () => {
       const expectedResponse = {
         tokenBalance: new BigDecimal(BigNumber.from(10)),
         decimals: 1,
@@ -849,14 +747,9 @@ describe('Equity', () => {
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getVotingRightsFor(
-        getVotingRightsForRequest,
-      );
+      const result = await EquityToken.getVotingRightsFor(getVotingRightsForRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetVotingRightsForRequest',
-        getVotingRightsForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetVotingRightsForRequest", getVotingRightsForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -876,18 +769,13 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getVotingRightsFor(getVotingRightsForRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getVotingRightsFor(getVotingRightsForRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetVotingRightsForRequest',
-        getVotingRightsForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetVotingRightsForRequest", getVotingRightsForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetVotingForQuery(
@@ -898,45 +786,37 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       getVotingRightsForRequest = new GetVotingRightsForRequest({
         ...GetVotingRightsForRequestFixture.create(),
-        targetId: 'invalid',
+        targetId: "invalid",
       });
 
-      await expect(
-        EquityToken.getVotingRightsFor(getVotingRightsForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getVotingRightsFor(getVotingRightsForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getVotingRightsForRequest = new GetVotingRightsForRequest({
         ...GetVotingRightsForRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.getVotingRightsFor(getVotingRightsForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getVotingRightsFor(getVotingRightsForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if votingId is invalid', async () => {
+    it("should throw error if votingId is invalid", async () => {
       getVotingRightsForRequest = new GetVotingRightsForRequest({
         ...GetVotingRightsForRequestFixture.create(),
         votingId: 0,
       });
 
-      await expect(
-        EquityToken.getVotingRightsFor(getVotingRightsForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getVotingRightsFor(getVotingRightsForRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getVotingRights', () => {
-    getVotingRightsRequest = new GetVotingRightsRequest(
-      GetVotingRightsRequestFixture.create(),
-    );
-    it('should get voting rights successfully', async () => {
+  describe("getVotingRights", () => {
+    getVotingRightsRequest = new GetVotingRightsRequest(GetVotingRightsRequestFixture.create());
+    it("should get voting rights successfully", async () => {
       const expectedResponse = {
         voting: VotingRightsFixture.create(),
       };
@@ -945,80 +825,58 @@ describe('Equity', () => {
 
       const result = await EquityToken.getVotingRights(getVotingRightsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetVotingRightsRequest',
-        getVotingRightsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetVotingRightsRequest", getVotingRightsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetVotingQuery(
-          getVotingRightsRequest.securityId,
-          getVotingRightsRequest.votingId,
-        ),
+        new GetVotingQuery(getVotingRightsRequest.securityId, getVotingRightsRequest.votingId),
       );
 
       expect(result).toEqual(
         expect.objectContaining({
           votingId: getVotingRightsRequest.votingId,
-          recordDate: new Date(
-            expectedResponse.voting.recordTimeStamp * ONE_THOUSAND,
-          ),
+          recordDate: new Date(expectedResponse.voting.recordTimeStamp * ONE_THOUSAND),
           data: expectedResponse.voting.data,
         }),
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getVotingRights(getVotingRightsRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getVotingRights(getVotingRightsRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetVotingRightsRequest',
-        getVotingRightsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetVotingRightsRequest", getVotingRightsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetVotingQuery(
-          getVotingRightsRequest.securityId,
-          getVotingRightsRequest.votingId,
-        ),
+        new GetVotingQuery(getVotingRightsRequest.securityId, getVotingRightsRequest.votingId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getVotingRightsRequest = new GetVotingRightsRequest({
         ...GetVotingRightsRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.getVotingRights(getVotingRightsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getVotingRights(getVotingRightsRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if votingId is invalid', async () => {
+    it("should throw error if votingId is invalid", async () => {
       getVotingRightsRequest = new GetVotingRightsRequest({
         ...GetVotingRightsRequestFixture.create(),
         votingId: -1,
       });
 
-      await expect(
-        EquityToken.getVotingRights(getVotingRightsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getVotingRights(getVotingRightsRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getAllVotingRights', () => {
-    getAllVotingRightsRequest = new GetAllVotingRightsRequest(
-      GetAllVotingRightsRequestFixture.create(),
-    );
-    it('should get all voting rights successfully', async () => {
+  describe("getAllVotingRights", () => {
+    getAllVotingRightsRequest = new GetAllVotingRightsRequest(GetAllVotingRightsRequestFixture.create());
+    it("should get all voting rights successfully", async () => {
       const expectedResponse = {
         payload: 1,
       };
@@ -1027,18 +885,11 @@ describe('Equity', () => {
         voting: VotingRightsFixture.create(),
       };
 
-      queryBusMock.execute
-        .mockResolvedValueOnce(expectedResponse)
-        .mockResolvedValueOnce(expectedResponse2);
+      queryBusMock.execute.mockResolvedValueOnce(expectedResponse).mockResolvedValueOnce(expectedResponse2);
 
-      const result = await EquityToken.getAllVotingRights(
-        getAllVotingRightsRequest,
-      );
+      const result = await EquityToken.getAllVotingRights(getAllVotingRightsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllVotingRightsRequest',
-        getAllVotingRightsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllVotingRightsRequest", getAllVotingRightsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
 
@@ -1056,63 +907,45 @@ describe('Equity', () => {
         expect.arrayContaining([
           {
             votingId: 1,
-            recordDate: new Date(
-              expectedResponse2.voting.recordTimeStamp * ONE_THOUSAND,
-            ),
+            recordDate: new Date(expectedResponse2.voting.recordTimeStamp * ONE_THOUSAND),
             data: expectedResponse2.voting.data,
           },
         ]),
       );
     });
 
-    it('should return empty array if count is 0', async () => {
+    it("should return empty array if count is 0", async () => {
       const expectedResponse = {
         payload: 0,
       };
       queryBusMock.execute.mockResolvedValueOnce(expectedResponse);
 
-      const result = await EquityToken.getAllVotingRights(
-        getAllVotingRightsRequest,
-      );
+      const result = await EquityToken.getAllVotingRights(getAllVotingRightsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllVotingRightsRequest',
-        getAllVotingRightsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllVotingRightsRequest", getAllVotingRightsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetVotingCountQuery(getAllVotingRightsRequest.securityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetVotingCountQuery(getAllVotingRightsRequest.securityId));
 
       expect(result).toStrictEqual([]);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getAllVotingRights(getAllVotingRightsRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getAllVotingRights(getAllVotingRightsRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllVotingRightsRequest',
-        getAllVotingRightsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllVotingRightsRequest", getAllVotingRightsRequest);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetVotingCountQuery(getAllVotingRightsRequest.securityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetVotingCountQuery(getAllVotingRightsRequest.securityId));
     });
   });
 
-  describe('setDividends', () => {
-    setDividendsRequest = new SetDividendsRequest(
-      SetDividendsRequestFixture.create(),
-    );
-    it('should set dividends successfully', async () => {
+  describe("setDividends", () => {
+    setDividendsRequest = new SetDividendsRequest(SetDividendsRequestFixture.create());
+    it("should set dividends successfully", async () => {
       const expectedResponse = {
         payload: 1,
         transactionId: transactionId,
@@ -1122,10 +955,7 @@ describe('Equity', () => {
 
       const result = await EquityToken.setDividends(setDividendsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'SetDividendsRequest',
-        setDividendsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("SetDividendsRequest", setDividendsRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -1141,18 +971,13 @@ describe('Equity', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.setDividends(setDividendsRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'SetDividendsRequest',
-        setDividendsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("SetDividendsRequest", setDividendsRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new SetDividendsCommand(
@@ -1164,31 +989,25 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       setDividendsRequest = new SetDividendsRequest({
         ...SetDividendsRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.setDividends(setDividendsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if recordTimestamp is invalid', async () => {
+    it("should throw error if recordTimestamp is invalid", async () => {
       setDividendsRequest = new SetDividendsRequest({
         ...SetDividendsRequestFixture.create(),
-        recordTimestamp: (
-          Math.ceil(new Date().getTime() / 1000) - 100
-        ).toString(),
+        recordTimestamp: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
       });
 
-      await expect(
-        EquityToken.setDividends(setDividendsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if executionTimestamp is invalid', async () => {
+    it("should throw error if executionTimestamp is invalid", async () => {
       const time = Math.ceil(new Date().getTime() / 1000);
       setDividendsRequest = new SetDividendsRequest({
         ...SetDividendsRequestFixture.create(),
@@ -1196,28 +1015,22 @@ describe('Equity', () => {
         executionTimestamp: (time - 100).toString(),
       });
 
-      await expect(
-        EquityToken.setDividends(setDividendsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amountPerUnitOfSecurity is invalid', async () => {
+    it("should throw error if amountPerUnitOfSecurity is invalid", async () => {
       setDividendsRequest = new SetDividendsRequest({
         ...SetDividendsRequestFixture.create(),
-        amountPerUnitOfSecurity: 'invalid',
+        amountPerUnitOfSecurity: "invalid",
       });
 
-      await expect(
-        EquityToken.setDividends(setDividendsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getDividendsFor', () => {
-    getDividendsForRequest = new GetDividendsForRequest(
-      GetDividendsForRequestFixture.create(),
-    );
-    it('should get dividends for successfully', async () => {
+  describe("getDividendsFor", () => {
+    getDividendsForRequest = new GetDividendsForRequest(GetDividendsForRequestFixture.create());
+    it("should get dividends for successfully", async () => {
       const expectedResponse = {
         tokenBalance: new BigDecimal(BigNumber.from(10)),
         decimals: 1,
@@ -1227,10 +1040,7 @@ describe('Equity', () => {
 
       const result = await EquityToken.getDividendsFor(getDividendsForRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetDividendsForRequest',
-        getDividendsForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendsForRequest", getDividendsForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -1250,18 +1060,13 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getDividendsFor(getDividendsForRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getDividendsFor(getDividendsForRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetDividendsForRequest',
-        getDividendsForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendsForRequest", getDividendsForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetDividendsForQuery(
@@ -1272,45 +1077,37 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       getDividendsForRequest = new GetDividendsForRequest({
         ...GetDividendsForRequestFixture.create(),
-        targetId: 'invalid',
+        targetId: "invalid",
       });
 
-      await expect(
-        EquityToken.getDividendsFor(getDividendsForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendsFor(getDividendsForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getDividendsForRequest = new GetDividendsForRequest({
         ...GetDividendsForRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.getDividendsFor(getDividendsForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendsFor(getDividendsForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if dividendId is invalid', async () => {
+    it("should throw error if dividendId is invalid", async () => {
       getDividendsForRequest = new GetDividendsForRequest({
         ...GetDividendsForRequestFixture.create(),
         dividendId: 0,
       });
 
-      await expect(
-        EquityToken.getDividendsFor(getDividendsForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendsFor(getDividendsForRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getDividends', () => {
-    getDividendsRequest = new GetDividendsRequest(
-      GetDividendsRequestFixture.create(),
-    );
-    it('should get dividends successfully', async () => {
+  describe("getDividends", () => {
+    getDividendsRequest = new GetDividendsRequest(GetDividendsRequestFixture.create());
+    it("should get dividends successfully", async () => {
       const expectedResponse = {
         dividend: DividendFixture.create(),
       };
@@ -1319,84 +1116,59 @@ describe('Equity', () => {
 
       const result = await EquityToken.getDividends(getDividendsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetDividendsRequest',
-        getDividendsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendsRequest", getDividendsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendsQuery(
-          getDividendsRequest.securityId,
-          getDividendsRequest.dividendId,
-        ),
+        new GetDividendsQuery(getDividendsRequest.securityId, getDividendsRequest.dividendId),
       );
 
       expect(result).toEqual(
         expect.objectContaining({
           dividendId: getDividendsRequest.dividendId,
-          amountPerUnitOfSecurity:
-            expectedResponse.dividend.amountPerUnitOfSecurity.toString(),
-          recordDate: new Date(
-            expectedResponse.dividend.recordTimeStamp * ONE_THOUSAND,
-          ),
-          executionDate: new Date(
-            expectedResponse.dividend.executionTimeStamp * ONE_THOUSAND,
-          ),
+          amountPerUnitOfSecurity: expectedResponse.dividend.amountPerUnitOfSecurity.toString(),
+          recordDate: new Date(expectedResponse.dividend.recordTimeStamp * ONE_THOUSAND),
+          executionDate: new Date(expectedResponse.dividend.executionTimeStamp * ONE_THOUSAND),
         }),
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getDividends(getDividendsRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getDividends(getDividendsRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetDividendsRequest',
-        getDividendsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendsRequest", getDividendsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendsQuery(
-          getDividendsRequest.securityId,
-          getDividendsRequest.dividendId,
-        ),
+        new GetDividendsQuery(getDividendsRequest.securityId, getDividendsRequest.dividendId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getDividendsRequest = new GetDividendsRequest({
         ...GetDividendsRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.getDividends(getDividendsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividends(getDividendsRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if dividendId is invalid', async () => {
+    it("should throw error if dividendId is invalid", async () => {
       getDividendsRequest = new GetDividendsRequest({
         ...GetDividendsRequestFixture.create(),
         dividendId: -1,
       });
 
-      await expect(
-        EquityToken.getDividends(getDividendsRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividends(getDividendsRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getAllDividends', () => {
-    getAllDividendsRequest = new GetAllDividendsRequest(
-      GetAllDividendsRequestFixture.create(),
-    );
-    it('should get all dividends successfully', async () => {
+  describe("getAllDividends", () => {
+    getAllDividendsRequest = new GetAllDividendsRequest(GetAllDividendsRequestFixture.create());
+    it("should get all dividends successfully", async () => {
       const expectedResponse = {
         payload: 1,
       };
@@ -1405,16 +1177,11 @@ describe('Equity', () => {
         dividend: DividendFixture.create(),
       };
 
-      queryBusMock.execute
-        .mockResolvedValueOnce(expectedResponse)
-        .mockResolvedValueOnce(expectedResponse2);
+      queryBusMock.execute.mockResolvedValueOnce(expectedResponse).mockResolvedValueOnce(expectedResponse2);
 
       const result = await EquityToken.getAllDividends(getAllDividendsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllDividendsRequest',
-        getAllDividendsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllDividendsRequest", getAllDividendsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
 
@@ -1432,20 +1199,15 @@ describe('Equity', () => {
         expect.arrayContaining([
           {
             dividendId: 1,
-            amountPerUnitOfSecurity:
-              expectedResponse2.dividend.amountPerUnitOfSecurity.toString(),
-            recordDate: new Date(
-              expectedResponse2.dividend.recordTimeStamp * ONE_THOUSAND,
-            ),
-            executionDate: new Date(
-              expectedResponse2.dividend.executionTimeStamp * ONE_THOUSAND,
-            ),
+            amountPerUnitOfSecurity: expectedResponse2.dividend.amountPerUnitOfSecurity.toString(),
+            recordDate: new Date(expectedResponse2.dividend.recordTimeStamp * ONE_THOUSAND),
+            executionDate: new Date(expectedResponse2.dividend.executionTimeStamp * ONE_THOUSAND),
           },
         ]),
       );
     });
 
-    it('should return empty array if count is 0', async () => {
+    it("should return empty array if count is 0", async () => {
       const expectedResponse = {
         payload: 0,
       };
@@ -1453,45 +1215,32 @@ describe('Equity', () => {
 
       const result = await EquityToken.getAllDividends(getAllDividendsRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllDividendsRequest',
-        getAllDividendsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllDividendsRequest", getAllDividendsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendsCountQuery(getAllDividendsRequest.securityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetDividendsCountQuery(getAllDividendsRequest.securityId));
 
       expect(result).toStrictEqual([]);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getAllDividends(getAllDividendsRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getAllDividends(getAllDividendsRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllDividendsRequest',
-        getAllDividendsRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllDividendsRequest", getAllDividendsRequest);
 
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetVotingCountQuery(getAllDividendsRequest.securityId),
-      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetVotingCountQuery(getAllDividendsRequest.securityId));
     });
   });
 
-  describe('setScheduledBalanceAdjustment', () => {
-    setScheduledBalanceAdjustmentRequest =
-      new SetScheduledBalanceAdjustmentRequest(
-        SetScheduledBalanceAdjustmentRequestFixture.create(),
-      );
-    it('should set scheduled balance adjustment successfully', async () => {
+  describe("setScheduledBalanceAdjustment", () => {
+    setScheduledBalanceAdjustmentRequest = new SetScheduledBalanceAdjustmentRequest(
+      SetScheduledBalanceAdjustmentRequestFixture.create(),
+    );
+    it("should set scheduled balance adjustment successfully", async () => {
       const expectedResponse = {
         payload: 1,
         transactionId: transactionId,
@@ -1499,12 +1248,10 @@ describe('Equity', () => {
 
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.setScheduledBalanceAdjustment(
-        setScheduledBalanceAdjustmentRequest,
-      );
+      const result = await EquityToken.setScheduledBalanceAdjustment(setScheduledBalanceAdjustmentRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'SetScheduledBalanceAdjustmentRequest',
+        "SetScheduledBalanceAdjustmentRequest",
         setScheduledBalanceAdjustmentRequest,
       );
 
@@ -1522,18 +1269,16 @@ describe('Equity', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.setScheduledBalanceAdjustment(
-          setScheduledBalanceAdjustmentRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+      await expect(EquityToken.setScheduledBalanceAdjustment(setScheduledBalanceAdjustmentRequest)).rejects.toThrow(
+        "Command execution failed",
+      );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'SetScheduledBalanceAdjustmentRequest',
+        "SetScheduledBalanceAdjustmentRequest",
         setScheduledBalanceAdjustmentRequest,
       );
 
@@ -1547,83 +1292,66 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
-      setScheduledBalanceAdjustmentRequest =
-        new SetScheduledBalanceAdjustmentRequest({
-          ...SetScheduledBalanceAdjustmentRequestFixture.create(),
-          securityId: 'invalid',
-        });
+    it("should throw error if securityId is invalid", async () => {
+      setScheduledBalanceAdjustmentRequest = new SetScheduledBalanceAdjustmentRequest({
+        ...SetScheduledBalanceAdjustmentRequestFixture.create(),
+        securityId: "invalid",
+      });
 
-      await expect(
-        EquityToken.setScheduledBalanceAdjustment(
-          setScheduledBalanceAdjustmentRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setScheduledBalanceAdjustment(setScheduledBalanceAdjustmentRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
 
-    it('should throw error if executionDate is invalid', async () => {
-      setScheduledBalanceAdjustmentRequest =
-        new SetScheduledBalanceAdjustmentRequest({
-          ...SetScheduledBalanceAdjustmentRequestFixture.create(),
-          executionDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
-        });
+    it("should throw error if executionDate is invalid", async () => {
+      setScheduledBalanceAdjustmentRequest = new SetScheduledBalanceAdjustmentRequest({
+        ...SetScheduledBalanceAdjustmentRequestFixture.create(),
+        executionDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
+      });
 
-      await expect(
-        EquityToken.setScheduledBalanceAdjustment(
-          setScheduledBalanceAdjustmentRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setScheduledBalanceAdjustment(setScheduledBalanceAdjustmentRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
 
-    it('should throw error if factor is invalid', async () => {
-      setScheduledBalanceAdjustmentRequest =
-        new SetScheduledBalanceAdjustmentRequest({
-          ...SetScheduledBalanceAdjustmentRequestFixture.create(),
-          factor: 'invalid',
-        });
+    it("should throw error if factor is invalid", async () => {
+      setScheduledBalanceAdjustmentRequest = new SetScheduledBalanceAdjustmentRequest({
+        ...SetScheduledBalanceAdjustmentRequestFixture.create(),
+        factor: "invalid",
+      });
 
-      await expect(
-        EquityToken.setScheduledBalanceAdjustment(
-          setScheduledBalanceAdjustmentRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setScheduledBalanceAdjustment(setScheduledBalanceAdjustmentRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
 
-    it('should throw error if decimals is invalid', async () => {
-      setScheduledBalanceAdjustmentRequest =
-        new SetScheduledBalanceAdjustmentRequest({
-          ...SetScheduledBalanceAdjustmentRequestFixture.create(),
-          decimals: 'invalid',
-        });
+    it("should throw error if decimals is invalid", async () => {
+      setScheduledBalanceAdjustmentRequest = new SetScheduledBalanceAdjustmentRequest({
+        ...SetScheduledBalanceAdjustmentRequestFixture.create(),
+        decimals: "invalid",
+      });
 
-      await expect(
-        EquityToken.setScheduledBalanceAdjustment(
-          setScheduledBalanceAdjustmentRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setScheduledBalanceAdjustment(setScheduledBalanceAdjustmentRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 
-  describe('getScheduledBalanceAdjustment', () => {
-    getScheduledBalanceAdjustmentRequest =
-      new GetScheduledBalanceAdjustmentRequest(
-        GetScheduledBalanceAdjustmentRequestFixture.create(),
-      );
-    it('should get scheduled balance adjustment for successfully', async () => {
+  describe("getScheduledBalanceAdjustment", () => {
+    getScheduledBalanceAdjustmentRequest = new GetScheduledBalanceAdjustmentRequest(
+      GetScheduledBalanceAdjustmentRequestFixture.create(),
+    );
+    it("should get scheduled balance adjustment for successfully", async () => {
       const expectedResponse = {
         scheduleBalanceAdjustment: ScheduledBalanceAdjustmentFixture.create(),
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getScheduledBalanceAdjustment(
-        getScheduledBalanceAdjustmentRequest,
-      );
+      const result = await EquityToken.getScheduledBalanceAdjustment(getScheduledBalanceAdjustmentRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetScheduledBalanceAdjustmentRequest',
+        "GetScheduledBalanceAdjustmentRequest",
         getScheduledBalanceAdjustmentRequest,
       );
 
@@ -1639,29 +1367,23 @@ describe('Equity', () => {
       expect(result).toEqual(
         expect.objectContaining({
           id: getScheduledBalanceAdjustmentRequest.balanceAdjustmentId,
-          executionDate: new Date(
-            expectedResponse.scheduleBalanceAdjustment.executionTimeStamp *
-              ONE_THOUSAND,
-          ),
+          executionDate: new Date(expectedResponse.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND),
           factor: expectedResponse.scheduleBalanceAdjustment.factor.toString(),
-          decimals:
-            expectedResponse.scheduleBalanceAdjustment.decimals.toString(),
+          decimals: expectedResponse.scheduleBalanceAdjustment.decimals.toString(),
         }),
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getScheduledBalanceAdjustment(
-          getScheduledBalanceAdjustmentRequest,
-        ),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getScheduledBalanceAdjustment(getScheduledBalanceAdjustmentRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetScheduledBalanceAdjustmentRequest',
+        "GetScheduledBalanceAdjustmentRequest",
         getScheduledBalanceAdjustmentRequest,
       );
 
@@ -1673,110 +1395,91 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
-      getScheduledBalanceAdjustmentRequest =
-        new GetScheduledBalanceAdjustmentRequest({
-          ...GetScheduledBalanceAdjustmentRequestFixture.create(),
-          securityId: 'invalid',
-        });
+    it("should throw error if securityId is invalid", async () => {
+      getScheduledBalanceAdjustmentRequest = new GetScheduledBalanceAdjustmentRequest({
+        ...GetScheduledBalanceAdjustmentRequestFixture.create(),
+        securityId: "invalid",
+      });
 
-      await expect(
-        EquityToken.getScheduledBalanceAdjustment(
-          getScheduledBalanceAdjustmentRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getScheduledBalanceAdjustment(getScheduledBalanceAdjustmentRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
 
-    it('should throw error if balanceAdjustmentId is invalid', async () => {
-      getScheduledBalanceAdjustmentRequest =
-        new GetScheduledBalanceAdjustmentRequest({
-          ...GetScheduledBalanceAdjustmentRequestFixture.create(),
-          balanceAdjustmentId: -1,
-        });
+    it("should throw error if balanceAdjustmentId is invalid", async () => {
+      getScheduledBalanceAdjustmentRequest = new GetScheduledBalanceAdjustmentRequest({
+        ...GetScheduledBalanceAdjustmentRequestFixture.create(),
+        balanceAdjustmentId: -1,
+      });
 
-      await expect(
-        EquityToken.getScheduledBalanceAdjustment(
-          getScheduledBalanceAdjustmentRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getScheduledBalanceAdjustment(getScheduledBalanceAdjustmentRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 
-  describe('getScheduledBalanceAdjustmentsCount', () => {
-    getScheduledBalanceAdjustmentCountRequest =
-      new GetScheduledBalanceAdjustmentCountRequest(
-        GetScheduledBalanceAdjustmentCountRequestFixture.create(),
-      );
-    it('should get scheduled balance adjustments count successfully', async () => {
+  describe("getScheduledBalanceAdjustmentsCount", () => {
+    getScheduledBalanceAdjustmentCountRequest = new GetScheduledBalanceAdjustmentCountRequest(
+      GetScheduledBalanceAdjustmentCountRequestFixture.create(),
+    );
+    it("should get scheduled balance adjustments count successfully", async () => {
       const expectedResponse = {
         payload: 1,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getScheduledBalanceAdjustmentsCount(
-        getScheduledBalanceAdjustmentCountRequest,
-      );
+      const result = await EquityToken.getScheduledBalanceAdjustmentsCount(getScheduledBalanceAdjustmentCountRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetScheduledBalanceAdjustmentCountRequest',
+        "GetScheduledBalanceAdjustmentCountRequest",
         getScheduledBalanceAdjustmentCountRequest,
       );
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetScheduledBalanceAdjustmentCountQuery(
-          getScheduledBalanceAdjustmentCountRequest.securityId,
-        ),
+        new GetScheduledBalanceAdjustmentCountQuery(getScheduledBalanceAdjustmentCountRequest.securityId),
       );
 
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        EquityToken.getScheduledBalanceAdjustmentsCount(
-          getScheduledBalanceAdjustmentCountRequest,
-        ),
-      ).rejects.toThrow('Query execution failed');
+        EquityToken.getScheduledBalanceAdjustmentsCount(getScheduledBalanceAdjustmentCountRequest),
+      ).rejects.toThrow("Query execution failed");
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetScheduledBalanceAdjustmentCountRequest',
+        "GetScheduledBalanceAdjustmentCountRequest",
         getScheduledBalanceAdjustmentCountRequest,
       );
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetScheduledBalanceAdjustmentCountQuery(
-          getScheduledBalanceAdjustmentCountRequest.securityId,
-        ),
+        new GetScheduledBalanceAdjustmentCountQuery(getScheduledBalanceAdjustmentCountRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
-      getScheduledBalanceAdjustmentCountRequest =
-        new GetScheduledBalanceAdjustmentCountRequest({
-          ...GetScheduledBalanceAdjustmentCountRequestFixture.create(),
-          securityId: 'invalid',
-        });
+    it("should throw error if securityId is invalid", async () => {
+      getScheduledBalanceAdjustmentCountRequest = new GetScheduledBalanceAdjustmentCountRequest({
+        ...GetScheduledBalanceAdjustmentCountRequestFixture.create(),
+        securityId: "invalid",
+      });
 
       await expect(
-        EquityToken.getScheduledBalanceAdjustmentsCount(
-          getScheduledBalanceAdjustmentCountRequest,
-        ),
+        EquityToken.getScheduledBalanceAdjustmentsCount(getScheduledBalanceAdjustmentCountRequest),
       ).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getAllScheduledBalanceAdjustments', () => {
-    getAllScheduledBalanceAdjustmentsRequest =
-      new GetAllScheduledBalanceAdjustmentsRequest(
-        GetAllScheduledBalanceAdjustmentsRequestFixture.create(),
-      );
-    it('should get all scheduled balance adjustments successfully', async () => {
+  describe("getAllScheduledBalanceAdjustments", () => {
+    getAllScheduledBalanceAdjustmentsRequest = new GetAllScheduledBalanceAdjustmentsRequest(
+      GetAllScheduledBalanceAdjustmentsRequestFixture.create(),
+    );
+    it("should get all scheduled balance adjustments successfully", async () => {
       const expectedResponse = {
         payload: 1,
       };
@@ -1785,16 +1488,12 @@ describe('Equity', () => {
         scheduleBalanceAdjustment: ScheduledBalanceAdjustmentFixture.create(),
       };
 
-      queryBusMock.execute
-        .mockResolvedValueOnce(expectedResponse)
-        .mockResolvedValueOnce(expectedResponse2);
+      queryBusMock.execute.mockResolvedValueOnce(expectedResponse).mockResolvedValueOnce(expectedResponse2);
 
-      const result = await EquityToken.getAllScheduledBalanceAdjustments(
-        getAllScheduledBalanceAdjustmentsRequest,
-      );
+      const result = await EquityToken.getAllScheduledBalanceAdjustments(getAllScheduledBalanceAdjustmentsRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllScheduledBalanceAdjustmentsRequest',
+        "GetAllScheduledBalanceAdjustmentsRequest",
         getAllScheduledBalanceAdjustmentsRequest,
       );
 
@@ -1802,104 +1501,79 @@ describe('Equity', () => {
 
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         1,
-        new GetScheduledBalanceAdjustmentCountQuery(
-          getAllScheduledBalanceAdjustmentsRequest.securityId,
-        ),
+        new GetScheduledBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
       );
 
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         2,
-        new GetScheduledBalanceAdjustmentQuery(
-          getAllScheduledBalanceAdjustmentsRequest.securityId,
-          1,
-        ),
+        new GetScheduledBalanceAdjustmentQuery(getAllScheduledBalanceAdjustmentsRequest.securityId, 1),
       );
 
       expect(result).toEqual(
         expect.arrayContaining([
           {
-            decimals:
-              expectedResponse2.scheduleBalanceAdjustment.decimals.toString(),
+            decimals: expectedResponse2.scheduleBalanceAdjustment.decimals.toString(),
             id: 1,
-            executionDate: new Date(
-              expectedResponse2.scheduleBalanceAdjustment.executionTimeStamp *
-                ONE_THOUSAND,
-            ),
-            factor:
-              expectedResponse2.scheduleBalanceAdjustment.factor.toString(),
+            executionDate: new Date(expectedResponse2.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND),
+            factor: expectedResponse2.scheduleBalanceAdjustment.factor.toString(),
           },
         ]),
       );
     });
 
-    it('should return empty array if count is 0', async () => {
+    it("should return empty array if count is 0", async () => {
       const expectedResponse = {
         payload: 0,
       };
       queryBusMock.execute.mockResolvedValueOnce(expectedResponse);
 
-      const result = await EquityToken.getAllScheduledBalanceAdjustments(
-        getAllScheduledBalanceAdjustmentsRequest,
-      );
+      const result = await EquityToken.getAllScheduledBalanceAdjustments(getAllScheduledBalanceAdjustmentsRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllScheduledBalanceAdjustmentsRequest',
+        "GetAllScheduledBalanceAdjustmentsRequest",
         getAllScheduledBalanceAdjustmentsRequest,
       );
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetScheduledBalanceAdjustmentCountQuery(
-          getAllScheduledBalanceAdjustmentsRequest.securityId,
-        ),
+        new GetScheduledBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
       );
 
       expect(result).toStrictEqual([]);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        EquityToken.getAllScheduledBalanceAdjustments(
-          getAllScheduledBalanceAdjustmentsRequest,
-        ),
-      ).rejects.toThrow('Query execution failed');
+        EquityToken.getAllScheduledBalanceAdjustments(getAllScheduledBalanceAdjustmentsRequest),
+      ).rejects.toThrow("Query execution failed");
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetAllScheduledBalanceAdjustmentsRequest',
+        "GetAllScheduledBalanceAdjustmentsRequest",
         getAllScheduledBalanceAdjustmentsRequest,
       );
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetScheduledBalanceAdjustmentCountQuery(
-          getAllScheduledBalanceAdjustmentsRequest.securityId,
-        ),
+        new GetScheduledBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
       );
     });
   });
 
-  describe('getDividendHolders', () => {
-    getDividendHoldersRequest = new GetDividendHoldersRequest(
-      GetDividendHoldersRequestFixture.create(),
-    );
-    it('should get dividend token holders successfully', async () => {
+  describe("getDividendHolders", () => {
+    getDividendHoldersRequest = new GetDividendHoldersRequest(GetDividendHoldersRequestFixture.create());
+    it("should get dividend token holders successfully", async () => {
       const expectedResponse = {
         payload: [transactionId],
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getDividendHolders(
-        getDividendHoldersRequest,
-      );
+      const result = await EquityToken.getDividendHolders(getDividendHoldersRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetDividendHoldersRequest.name,
-        getDividendHoldersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetDividendHoldersRequest.name, getDividendHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -1914,18 +1588,13 @@ describe('Equity', () => {
       expect(result).toStrictEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getDividendHolders(getDividendHoldersRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetDividendHoldersRequest.name,
-        getDividendHoldersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetDividendHoldersRequest.name, getDividendHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -1939,64 +1608,52 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getDividendHoldersRequest = new GetDividendHoldersRequest({
         ...GetDividendHoldersRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.getDividendHolders(getDividendHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if dividendId is invalid', async () => {
+    it("should throw error if dividendId is invalid", async () => {
       getDividendHoldersRequest = new GetDividendHoldersRequest({
         ...GetDividendHoldersRequestFixture.create(),
         dividendId: -1,
       });
 
-      await expect(
-        EquityToken.getDividendHolders(getDividendHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if start is invalid', async () => {
+    it("should throw error if start is invalid", async () => {
       getDividendHoldersRequest = new GetDividendHoldersRequest({
         ...GetDividendHoldersRequestFixture.create(),
         start: -1,
       });
 
-      await expect(
-        EquityToken.getDividendHolders(getDividendHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if end is invalid', async () => {
+    it("should throw error if end is invalid", async () => {
       getDividendHoldersRequest = new GetDividendHoldersRequest({
         ...GetDividendHoldersRequestFixture.create(),
         end: -1,
       });
 
-      await expect(
-        EquityToken.getDividendHolders(getDividendHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getTotalDividendHolders', () => {
-    getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest(
-      GetTotalDividendHoldersRequestFixture.create(),
-    );
-    it('should get total dividend holders successfully', async () => {
+  describe("getTotalDividendHolders", () => {
+    getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest(GetTotalDividendHoldersRequestFixture.create());
+    it("should get total dividend holders successfully", async () => {
       const expectedResponse = {
         payload: 1,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getTotalDividendHolders(
-        getTotalDividendHoldersRequest,
-      );
+      const result = await EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
         GetTotalDividendHoldersRequest.name,
@@ -2015,13 +1672,13 @@ describe('Equity', () => {
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
         GetTotalDividendHoldersRequest.name,
@@ -2038,48 +1695,41 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest({
         ...GetTotalDividendHoldersRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
 
-    it('should throw error if dividendId is invalid', async () => {
+    it("should throw error if dividendId is invalid", async () => {
       getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest({
         ...GetTotalDividendHoldersRequestFixture.create(),
         dividendId: -1,
       });
 
-      await expect(
-        EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest)).rejects.toThrow(
+        ValidationError,
+      );
     });
   });
 
-  describe('getVotingHolders', () => {
-    getVotingHoldersRequest = new GetVotingHoldersRequest(
-      GetVotingHoldersRequestFixture.create(),
-    );
-    it('should get voting token holders successfully', async () => {
+  describe("getVotingHolders", () => {
+    getVotingHoldersRequest = new GetVotingHoldersRequest(GetVotingHoldersRequestFixture.create());
+    it("should get voting token holders successfully", async () => {
       const expectedResponse = {
         payload: [transactionId],
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getVotingHolders(
-        getVotingHoldersRequest,
-      );
+      const result = await EquityToken.getVotingHolders(getVotingHoldersRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetVotingHoldersRequest.name,
-        getVotingHoldersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetVotingHoldersRequest.name, getVotingHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -2094,18 +1744,13 @@ describe('Equity', () => {
       expect(result).toStrictEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getVotingHolders(getVotingHoldersRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(EquityToken.getVotingHolders(getVotingHoldersRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetVotingHoldersRequest.name,
-        getVotingHoldersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetVotingHoldersRequest.name, getVotingHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
@@ -2119,133 +1764,103 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getVotingHoldersRequest = new GetVotingHoldersRequest({
         ...GetVotingHoldersRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.getVotingHolders(getVotingHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getVotingHolders(getVotingHoldersRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if voteId is invalid', async () => {
+    it("should throw error if voteId is invalid", async () => {
       getVotingHoldersRequest = new GetVotingHoldersRequest({
         ...GetVotingHoldersRequestFixture.create(),
         voteId: -1,
       });
 
-      await expect(
-        EquityToken.getVotingHolders(getVotingHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getVotingHolders(getVotingHoldersRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if start is invalid', async () => {
+    it("should throw error if start is invalid", async () => {
       getVotingHoldersRequest = new GetVotingHoldersRequest({
         ...GetVotingHoldersRequestFixture.create(),
         start: -1,
       });
 
-      await expect(
-        EquityToken.getVotingHolders(getVotingHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getVotingHolders(getVotingHoldersRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if end is invalid', async () => {
+    it("should throw error if end is invalid", async () => {
       getVotingHoldersRequest = new GetVotingHoldersRequest({
         ...GetVotingHoldersRequestFixture.create(),
         end: -1,
       });
 
-      await expect(
-        EquityToken.getVotingHolders(getVotingHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getVotingHolders(getVotingHoldersRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getTotalVotingHolders', () => {
-    getTotalVotingHoldersRequest = new GetTotalVotingHoldersRequest(
-      GetTotalVotingHoldersRequestFixture.create(),
-    );
-    it('should get total voting holders successfully', async () => {
+  describe("getTotalVotingHolders", () => {
+    getTotalVotingHoldersRequest = new GetTotalVotingHoldersRequest(GetTotalVotingHoldersRequestFixture.create());
+    it("should get total voting holders successfully", async () => {
       const expectedResponse = {
         payload: 1,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getTotalVotingHolders(
-        getTotalVotingHoldersRequest,
-      );
+      const result = await EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetTotalVotingHoldersRequest.name,
-        getTotalVotingHoldersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetTotalVotingHoldersRequest.name, getTotalVotingHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetTotalVotingHoldersQuery(
-          getTotalVotingHoldersRequest.securityId,
-          getTotalVotingHoldersRequest.voteId,
-        ),
+        new GetTotalVotingHoldersQuery(getTotalVotingHoldersRequest.securityId, getTotalVotingHoldersRequest.voteId),
       );
 
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest),
-      ).rejects.toThrow('Query execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetTotalVotingHoldersRequest.name,
-        getTotalVotingHoldersRequest,
+      await expect(EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest)).rejects.toThrow(
+        "Query execution failed",
       );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(GetTotalVotingHoldersRequest.name, getTotalVotingHoldersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetTotalVotingHoldersQuery(
-          getTotalVotingHoldersRequest.securityId,
-          getTotalVotingHoldersRequest.voteId,
-        ),
+        new GetTotalVotingHoldersQuery(getTotalVotingHoldersRequest.securityId, getTotalVotingHoldersRequest.voteId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getTotalVotingHoldersRequest = new GetTotalVotingHoldersRequest({
         ...GetTotalVotingHoldersRequestFixture.create(),
-        securityId: 'invalid',
+        securityId: "invalid",
       });
 
-      await expect(
-        EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if voteId is invalid', async () => {
+    it("should throw error if voteId is invalid", async () => {
       getTotalVotingHoldersRequest = new GetTotalVotingHoldersRequest({
         ...GetTotalVotingHoldersRequestFixture.create(),
         voteId: -1,
       });
 
-      await expect(
-        EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getTotalVotingHolders(getTotalVotingHoldersRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('createTrexSuite', () => {
-    createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
-      CreateTrexSuiteEquityRequestFixture.create(),
-    );
-    it('should create equity successfully', async () => {
+  describe("createTrexSuite", () => {
+    createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(CreateTrexSuiteEquityRequestFixture.create());
+    it("should create equity successfully", async () => {
       const expectedResponse = {
         securityId: new ContractId(HederaIdPropsFixture.create().value),
         transactionId: transactionId,
@@ -2256,14 +1871,9 @@ describe('Equity', () => {
         security: security,
       });
 
-      const result = await EquityToken.createTrexSuite(
-        createTrexSuiteEquityRequest,
-      );
+      const result = await EquityToken.createTrexSuite(createTrexSuiteEquityRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CreateTrexSuiteEquityRequest',
-        createTrexSuiteEquityRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("CreateTrexSuiteEquityRequest", createTrexSuiteEquityRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
@@ -2288,23 +1898,14 @@ describe('Equity', () => {
             decimals: createTrexSuiteEquityRequest.decimals,
             isWhiteList: createTrexSuiteEquityRequest.isWhiteList,
             isControllable: createTrexSuiteEquityRequest.isControllable,
-            arePartitionsProtected:
-              createTrexSuiteEquityRequest.arePartitionsProtected,
+            arePartitionsProtected: createTrexSuiteEquityRequest.arePartitionsProtected,
             clearingActive: createTrexSuiteEquityRequest.clearingActive,
-            internalKycActivated:
-              createTrexSuiteEquityRequest.internalKycActivated,
+            internalKycActivated: createTrexSuiteEquityRequest.internalKycActivated,
             isMultiPartition: createTrexSuiteEquityRequest.isMultiPartition,
-            maxSupply: BigDecimal.fromString(
-              createTrexSuiteEquityRequest.numberOfShares,
-            ),
-            regulationType: CastRegulationType.fromNumber(
-              createTrexSuiteEquityRequest.regulationType,
-            ),
-            regulationsubType: CastRegulationSubType.fromNumber(
-              createTrexSuiteEquityRequest.regulationSubType,
-            ),
-            isCountryControlListWhiteList:
-              createTrexSuiteEquityRequest.isCountryControlListWhiteList,
+            maxSupply: BigDecimal.fromString(createTrexSuiteEquityRequest.numberOfShares),
+            regulationType: CastRegulationType.fromNumber(createTrexSuiteEquityRequest.regulationType),
+            regulationsubType: CastRegulationSubType.fromNumber(createTrexSuiteEquityRequest.regulationSubType),
+            isCountryControlListWhiteList: createTrexSuiteEquityRequest.isCountryControlListWhiteList,
             countries: createTrexSuiteEquityRequest.countries,
             info: createTrexSuiteEquityRequest.info,
           }),
@@ -2315,9 +1916,7 @@ describe('Equity', () => {
           createTrexSuiteEquityRequest.conversionRight,
           createTrexSuiteEquityRequest.redemptionRight,
           createTrexSuiteEquityRequest.putRight,
-          CastDividendType.fromNumber(
-            createTrexSuiteEquityRequest.dividendRight,
-          ),
+          CastDividendType.fromNumber(createTrexSuiteEquityRequest.dividendRight),
           createTrexSuiteEquityRequest.currency,
           createTrexSuiteEquityRequest.nominalValue,
           createTrexSuiteEquityRequest.nominalValueDecimals,
@@ -2342,18 +1941,15 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow('Command execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CreateTrexSuiteEquityRequest',
-        createTrexSuiteEquityRequest,
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(
+        "Command execution failed",
       );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("CreateTrexSuiteEquityRequest", createTrexSuiteEquityRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new CreateTrexSuiteEquityCommand(
@@ -2375,23 +1971,14 @@ describe('Equity', () => {
             decimals: createTrexSuiteEquityRequest.decimals,
             isWhiteList: createTrexSuiteEquityRequest.isWhiteList,
             isControllable: createTrexSuiteEquityRequest.isControllable,
-            arePartitionsProtected:
-              createTrexSuiteEquityRequest.arePartitionsProtected,
+            arePartitionsProtected: createTrexSuiteEquityRequest.arePartitionsProtected,
             clearingActive: createTrexSuiteEquityRequest.clearingActive,
-            internalKycActivated:
-              createTrexSuiteEquityRequest.internalKycActivated,
+            internalKycActivated: createTrexSuiteEquityRequest.internalKycActivated,
             isMultiPartition: createTrexSuiteEquityRequest.isMultiPartition,
-            maxSupply: BigDecimal.fromString(
-              createTrexSuiteEquityRequest.numberOfShares,
-            ),
-            regulationType: CastRegulationType.fromNumber(
-              createTrexSuiteEquityRequest.regulationType,
-            ),
-            regulationsubType: CastRegulationSubType.fromNumber(
-              createTrexSuiteEquityRequest.regulationSubType,
-            ),
-            isCountryControlListWhiteList:
-              createTrexSuiteEquityRequest.isCountryControlListWhiteList,
+            maxSupply: BigDecimal.fromString(createTrexSuiteEquityRequest.numberOfShares),
+            regulationType: CastRegulationType.fromNumber(createTrexSuiteEquityRequest.regulationType),
+            regulationsubType: CastRegulationSubType.fromNumber(createTrexSuiteEquityRequest.regulationSubType),
+            isCountryControlListWhiteList: createTrexSuiteEquityRequest.isCountryControlListWhiteList,
             countries: createTrexSuiteEquityRequest.countries,
             info: createTrexSuiteEquityRequest.info,
           }),
@@ -2402,9 +1989,7 @@ describe('Equity', () => {
           createTrexSuiteEquityRequest.conversionRight,
           createTrexSuiteEquityRequest.redemptionRight,
           createTrexSuiteEquityRequest.putRight,
-          CastDividendType.fromNumber(
-            createTrexSuiteEquityRequest.dividendRight,
-          ),
+          CastDividendType.fromNumber(createTrexSuiteEquityRequest.dividendRight),
           createTrexSuiteEquityRequest.currency,
           createTrexSuiteEquityRequest.nominalValue,
           createTrexSuiteEquityRequest.nominalValueDecimals,
@@ -2422,182 +2007,152 @@ describe('Equity', () => {
       );
     });
 
-    it('should throw error if name is invalid', async () => {
+    it("should throw error if name is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
-        CreateTrexSuiteEquityRequestFixture.create({ name: '' }),
+        CreateTrexSuiteEquityRequestFixture.create({ name: "" }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if symbol is invalid', async () => {
+    it("should throw error if symbol is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          symbol: '',
+          symbol: "",
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if isin is invalid', async () => {
+    it("should throw error if isin is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          isin: '',
+          isin: "",
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if decimals is invalid', async () => {
+    it("should throw error if decimals is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
           decimals: 2.85,
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if diamondOwnerAccount is invalid', async () => {
+    it("should throw error if diamondOwnerAccount is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          diamondOwnerAccount: 'invalid',
+          diamondOwnerAccount: "invalid",
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if dividendRight is invalid', async () => {
+    it("should throw error if dividendRight is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
           dividendRight: 100,
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if currency is invalid', async () => {
+    it("should throw error if currency is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          currency: 'invalid',
+          currency: "invalid",
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if numberOfShares is invalid', async () => {
+    it("should throw error if numberOfShares is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          numberOfShares: 'invalid',
+          numberOfShares: "invalid",
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if nominalValue is invalid', async () => {
+    it("should throw error if nominalValue is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          nominalValue: 'invalid',
+          nominalValue: "invalid",
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if regulationType is invalid', async () => {
+    it("should throw error if regulationType is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
           regulationType: 5,
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if regulationSubType is invalid', async () => {
+    it("should throw error if regulationSubType is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
           regulationSubType: 5,
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if configId is invalid', async () => {
+    it("should throw error if configId is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          configId: 'invalid',
+          configId: "invalid",
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalPauses is invalid', async () => {
+    it("should throw error if externalPauses is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          externalPauses: ['invalid'],
+          externalPauses: ["invalid"],
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalControlLists is invalid', async () => {
+    it("should throw error if externalControlLists is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          externalControlLists: ['invalid'],
+          externalControlLists: ["invalid"],
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if externalKycLists is invalid', async () => {
+    it("should throw error if externalKycLists is invalid", async () => {
       createTrexSuiteEquityRequest = new CreateTrexSuiteEquityRequest(
         CreateTrexSuiteEquityRequestFixture.create({
-          externalKycLists: ['invalid'],
+          externalKycLists: ["invalid"],
         }),
       );
 
-      await expect(
-        EquityToken.createTrexSuite(createTrexSuiteEquityRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
     });
   });
 });

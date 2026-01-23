@@ -204,9 +204,9 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../../FormatValidation';
-import { InvalidValue } from '../../error/InvalidValue';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../../FormatValidation";
+import { InvalidValue } from "../../error/InvalidValue";
 
 export default class ApplyRolesRequest extends ValidatedRequest<ApplyRolesRequest> {
   securityId: string;
@@ -245,11 +245,7 @@ export default class ApplyRolesRequest extends ValidatedRequest<ApplyRolesReques
       },
       actives: (vals) => {
         if (vals.length != this.roles.length) {
-          return [
-            new InvalidValue(
-              `The list of roles and actives must have equal length.`,
-            ),
-          ];
+          return [new InvalidValue(`The list of roles and actives must have equal length.`)];
         }
       },
     });

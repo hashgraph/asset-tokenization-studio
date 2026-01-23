@@ -203,22 +203,22 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { CreateExternalBlackListMockCommandHandler } from './CreateExternalBlackListMockCommandHandler.js';
-import { CreateExternalBlackListMockCommandResponse } from './CreateExternalBlackListMockCommand.js';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Account from '@domain/context/account/Account';
-import { CreateExternalBlackListMockCommandError } from './error/CreateExternalBlackListMockCommandError.js';
-import { ErrorCode } from '@core/error/BaseError';
+} from "@test/fixtures/shared/DataFixture";
+import { CreateExternalBlackListMockCommandHandler } from "./CreateExternalBlackListMockCommandHandler.js";
+import { CreateExternalBlackListMockCommandResponse } from "./CreateExternalBlackListMockCommand.js";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import Account from "@domain/context/account/Account";
+import { CreateExternalBlackListMockCommandError } from "./error/CreateExternalBlackListMockCommandError.js";
+import { ErrorCode } from "@core/error/BaseError";
 
-describe('CreateExternalBlackListMockCommandHandler', () => {
+describe("CreateExternalBlackListMockCommandHandler", () => {
   let handler: CreateExternalBlackListMockCommandHandler;
 
   const transactionServiceMock = createMock<TransactionService>();
@@ -232,65 +232,46 @@ describe('CreateExternalBlackListMockCommandHandler', () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new CreateExternalBlackListMockCommandHandler(
-      mirrorNodeAdapterMock,
-      transactionServiceMock,
-    );
+    handler = new CreateExternalBlackListMockCommandHandler(mirrorNodeAdapterMock, transactionServiceMock);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws CreateExternalBlackListMockCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws CreateExternalBlackListMockCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
-        transactionServiceMock
-          .getHandler()
-          .createExternalBlackListMock.mockRejectedValue(fakeError);
+        transactionServiceMock.getHandler().createExternalBlackListMock.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute();
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          CreateExternalBlackListMockCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(CreateExternalBlackListMockCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while creating external blacklist: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while creating external blacklist: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully create black list mock if return an Id', async () => {
+    describe("success cases", () => {
+      it("should successfully create black list mock if return an Id", async () => {
         mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
 
-        transactionServiceMock
-          .getHandler()
-          .createExternalBlackListMock.mockResolvedValue({
-            id: transactionId,
-          });
-        transactionServiceMock.getTransactionResult.mockResolvedValue(
-          account.evmAddress!,
-        );
+        transactionServiceMock.getHandler().createExternalBlackListMock.mockResolvedValue({
+          id: transactionId,
+        });
+        transactionServiceMock.getTransactionResult.mockResolvedValue(account.evmAddress!);
 
         const result = await handler.execute();
 
-        expect(result).toBeInstanceOf(
-          CreateExternalBlackListMockCommandResponse,
-        );
+        expect(result).toBeInstanceOf(CreateExternalBlackListMockCommandResponse);
         expect(result.payload).toBe(account.id.toString());
 
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledWith({
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith({
           res: { id: transactionId },
           className: CreateExternalBlackListMockCommandHandler.name,
           position: 0,
@@ -299,43 +280,27 @@ describe('CreateExternalBlackListMockCommandHandler', () => {
         });
 
         expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().createExternalBlackListMock,
-        ).toHaveBeenCalledTimes(1);
-        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
-          account.evmAddress,
-        );
-        expect(
-          transactionServiceMock.getHandler().createExternalBlackListMock,
-        ).toHaveBeenCalledWith();
+        expect(transactionServiceMock.getHandler().createExternalBlackListMock).toHaveBeenCalledTimes(1);
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(account.evmAddress);
+        expect(transactionServiceMock.getHandler().createExternalBlackListMock).toHaveBeenCalledWith();
       });
 
-      it('should successfully create black list mock if return an address', async () => {
+      it("should successfully create black list mock if return an address", async () => {
         mirrorNodeAdapterMock.getAccountInfo.mockResolvedValueOnce(account);
 
-        transactionServiceMock
-          .getHandler()
-          .createExternalBlackListMock.mockResolvedValue(account.evmAddress!);
+        transactionServiceMock.getHandler().createExternalBlackListMock.mockResolvedValue(account.evmAddress!);
 
         const result = await handler.execute();
 
-        expect(result).toBeInstanceOf(
-          CreateExternalBlackListMockCommandResponse,
-        );
+        expect(result).toBeInstanceOf(CreateExternalBlackListMockCommandResponse);
         expect(result.payload).toBe(account.id.toString());
 
         expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler().createExternalBlackListMock,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().createExternalBlackListMock).toHaveBeenCalledTimes(1);
 
-        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(
-          account.evmAddress,
-        );
+        expect(mirrorNodeAdapterMock.getAccountInfo).toHaveBeenCalledWith(account.evmAddress);
 
-        expect(
-          transactionServiceMock.getHandler().createExternalBlackListMock,
-        ).toHaveBeenCalledWith();
+        expect(transactionServiceMock.getHandler().createExternalBlackListMock).toHaveBeenCalledWith();
       });
     });
   });

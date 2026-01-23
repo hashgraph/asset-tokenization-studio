@@ -203,10 +203,10 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
-import { SecurityDate } from '@domain/context/shared/SecurityDate';
+import { SecurityDate } from "@domain/context/shared/SecurityDate";
 
 export default class SetDividendsRequest extends ValidatedRequest<SetDividendsRequest> {
   securityId: string;
@@ -235,11 +235,7 @@ export default class SetDividendsRequest extends ValidatedRequest<SetDividendsRe
         );
       },
       executionTimestamp: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          parseInt(this.recordTimestamp),
-          undefined,
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), parseInt(this.recordTimestamp), undefined);
       },
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });

@@ -203,18 +203,16 @@
 
 */
 
-import EventEmitter from '@core/EventEmitter';
-import Service from '@service/Service';
-import { EventListenerNotFound } from './error/EventListenerNotFound';
-import { EventNotFound } from './error/EventNotFound';
-import { singleton } from 'tsyringe';
-import WalletEvent, { WalletEvents } from './WalletEvent';
-import { inject } from 'tsyringe';
+import EventEmitter from "@core/EventEmitter";
+import Service from "@service/Service";
+import { EventListenerNotFound } from "./error/EventListenerNotFound";
+import { EventNotFound } from "./error/EventNotFound";
+import { singleton } from "tsyringe";
+import WalletEvent, { WalletEvents } from "./WalletEvent";
+import { inject } from "tsyringe";
 
 type WalletEventIndex = Record<keyof WalletEvent, WalletEvent>;
-type WalletEventEmitterIndex = Partial<
-  Record<keyof WalletEvent, EventEmitter<WalletEvent>>
->;
+type WalletEventEmitterIndex = Partial<Record<keyof WalletEvent, EventEmitter<WalletEvent>>>;
 
 @singleton()
 export default class EventService extends Service {
@@ -222,7 +220,7 @@ export default class EventService extends Service {
   private emitters: WalletEventEmitterIndex = {};
 
   constructor(
-    @inject('WalletEvents')
+    @inject("WalletEvents")
     events: typeof WalletEvents,
   ) {
     super();
@@ -230,19 +228,12 @@ export default class EventService extends Service {
   }
 
   private registerEvents(events: typeof WalletEvents): void {
-    this.events = Object.keys(events).reduce(
-      (p, c) => ({ ...p, [c]: events }),
-      {},
-    ) as WalletEventIndex;
+    this.events = Object.keys(events).reduce((p, c) => ({ ...p, [c]: events }), {}) as WalletEventIndex;
   }
 
-  private getEventEmitter<E extends keyof WalletEvent>(
-    event: E,
-  ): EventEmitter<WalletEvent> {
+  private getEventEmitter<E extends keyof WalletEvent>(event: E): EventEmitter<WalletEvent> {
     if (!Object.keys(this.events).includes(event.toString())) {
-      throw new EventNotFound(
-        `WalletEvent (${String(event)}) not registered yet`,
-      );
+      throw new EventNotFound(`WalletEvent (${String(event)}) not registered yet`);
     }
     if (!Object.keys(this.emitters).includes(event.toString())) {
       const type = this.events[event];
@@ -252,18 +243,12 @@ export default class EventService extends Service {
     return this.emitters[event]!;
   }
 
-  public on<E extends keyof WalletEvent>(
-    event: E,
-    listener: WalletEvent[E],
-  ): void {
+  public on<E extends keyof WalletEvent>(event: E, listener: WalletEvent[E]): void {
     if (!this.events[event]) throw new EventListenerNotFound(event.toString());
     this.getEventEmitter(event).on(event, listener);
   }
 
-  public emit<E extends keyof WalletEvent>(
-    event: E,
-    ...args: Parameters<WalletEvent[E]>
-  ): boolean {
+  public emit<E extends keyof WalletEvent>(event: E, ...args: Parameters<WalletEvent[E]>): boolean {
     return this.getEventEmitter(event).emit(event, ...args);
   }
 

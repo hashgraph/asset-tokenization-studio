@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '@port/in/request/FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "@port/in/request/FormatValidation";
 
 // eslint-disable-next-line max-len
 export default class ExecuteBondCashOutByAddressesRequest extends ValidatedRequest<ExecuteBondCashOutByAddressesRequest> {
@@ -212,20 +212,11 @@ export default class ExecuteBondCashOutByAddressesRequest extends ValidatedReque
   bond: string;
   holders: string[];
 
-  constructor({
-    lifeCycleCashFlow,
-    bond,
-    holders,
-  }: {
-    lifeCycleCashFlow: string;
-    bond: string;
-    holders: string[];
-  }) {
+  constructor({ lifeCycleCashFlow, bond, holders }: { lifeCycleCashFlow: string; bond: string; holders: string[] }) {
     super({
       lifeCycleCashFlow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       bond: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      holders: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(vals, 'holders', false),
+      holders: (vals) => FormatValidation.checkHederaIdOrEvmAddressArray(vals, "holders", false),
     });
 
     this.lifeCycleCashFlow = lifeCycleCashFlow;

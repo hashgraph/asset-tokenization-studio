@@ -203,21 +203,15 @@
 
 */
 
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 // Load the `.env` file
 dotenv.config();
 
-const EMPTY_STRING = '';
-export const NETWORKS = [
-  'hardhat',
-  'local',
-  'previewnet',
-  'testnet',
-  'mainnet',
-] as const;
+const EMPTY_STRING = "";
+export const NETWORKS = ["hardhat", "local", "previewnet", "testnet", "mainnet"] as const;
 export type Network = (typeof NETWORKS)[number];
-export const DEPLOY_TYPES = ['proxy', 'direct'] as const;
+export const DEPLOY_TYPES = ["proxy", "direct"] as const;
 export type DeployType = (typeof DEPLOY_TYPES)[number];
 
 export interface Endpoints {
@@ -250,9 +244,9 @@ export default class Configuration {
   public static get contractSizerRunOnCompile(): boolean {
     return (
       Configuration._getEnvironmentVariable({
-        name: 'CONTRACT_SIZER_RUN_ON_COMPILE',
-        defaultValue: 'true',
-      }).toLowerCase() === 'true'
+        name: "CONTRACT_SIZER_RUN_ON_COMPILE",
+        defaultValue: "true",
+      }).toLowerCase() === "true"
     );
   }
 
@@ -264,9 +258,9 @@ export default class Configuration {
   public static get reportGas(): boolean {
     return (
       Configuration._getEnvironmentVariable({
-        name: 'REPORT_GAS',
-        defaultValue: 'true',
-      }).toLowerCase() === 'true'
+        name: "REPORT_GAS",
+        defaultValue: "true",
+      }).toLowerCase() === "true"
     );
   }
 
@@ -288,17 +282,11 @@ export default class Configuration {
         result[network] = {
           jsonRpc: Configuration._getEnvironmentVariable({
             name: `${network.toUpperCase()}_JSON_RPC_ENDPOINT`,
-            defaultValue:
-              network === 'local'
-                ? 'http://localhost:7546'
-                : `https://${network}.hash.io/api`,
+            defaultValue: network === "local" ? "http://localhost:7546" : `https://${network}.hash.io/api`,
           }),
           mirror: Configuration._getEnvironmentVariable({
             name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
-            defaultValue:
-              network === 'local'
-                ? 'http://localhost:5551'
-                : `https://${network}.mirrornode.hedera.com`,
+            defaultValue: network === "local" ? "http://localhost:5551" : `https://${network}.mirrornode.hedera.com`,
           }),
         };
         return result;
@@ -312,7 +300,7 @@ export default class Configuration {
       (result, network) => {
         result[network] = Configuration._getEnvironmentVariable({
           name: `${network.toUpperCase()}_USDC_ADDRESS`,
-          defaultValue: '',
+          defaultValue: "",
         });
         return result;
       },
@@ -345,15 +333,8 @@ export default class Configuration {
    * and proxy admin address from environment variables. If the contract address is found, it adds the
    * details to the returned object.
    */
-  private static _getDeployedAddresses({
-    contractName,
-  }: {
-    contractName: string;
-  }): Record<Network, DeployedContract> {
-    const deployedAddresses: Record<Network, DeployedContract> = {} as Record<
-      Network,
-      DeployedContract
-    >;
+  private static _getDeployedAddresses({ contractName }: { contractName: string }): Record<Network, DeployedContract> {
+    const deployedAddresses: Record<Network, DeployedContract> = {} as Record<Network, DeployedContract>;
 
     NETWORKS.forEach((network) => {
       const address = Configuration._getEnvironmentVariable({
@@ -386,7 +367,7 @@ export default class Configuration {
 
   private static _getEnvironmentVariableList({
     name,
-    indexChar = '#',
+    indexChar = "#",
   }: {
     name: string;
     indexChar?: string;
@@ -406,13 +387,7 @@ export default class Configuration {
     return resultList;
   }
 
-  private static _getEnvironmentVariable({
-    name,
-    defaultValue,
-  }: {
-    name: string;
-    defaultValue?: string;
-  }): string {
+  private static _getEnvironmentVariable({ name, defaultValue }: { name: string; defaultValue?: string }): string {
     const value = process.env?.[name];
     if (value) {
       return value;
@@ -423,8 +398,6 @@ export default class Configuration {
       // )
       return defaultValue;
     }
-    throw new Error(
-      `Environment variable "${name}" is not defined. Please set the "${name}" environment variable.`,
-    );
+    throw new Error(`Environment variable "${name}" is not defined. Please set the "${name}" environment variable.`);
   }
 }

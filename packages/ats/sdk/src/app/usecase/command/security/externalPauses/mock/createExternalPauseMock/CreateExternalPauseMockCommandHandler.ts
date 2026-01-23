@@ -203,21 +203,19 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
 import {
   CreateExternalPauseMockCommand,
   CreateExternalPauseMockCommandResponse,
-} from './CreateExternalPauseMockCommand';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '@service/transaction/TransactionService';
-import { CreateExternalPauseMockCommandError } from './error/CreateExternalPauseMockCommandError';
+} from "./CreateExternalPauseMockCommand";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import TransactionService from "@service/transaction/TransactionService";
+import { CreateExternalPauseMockCommandError } from "./error/CreateExternalPauseMockCommandError";
 
 @CommandHandler(CreateExternalPauseMockCommand)
-export class CreateExternalPauseMockCommandHandler
-  implements ICommandHandler<CreateExternalPauseMockCommand>
-{
+export class CreateExternalPauseMockCommandHandler implements ICommandHandler<CreateExternalPauseMockCommand> {
   constructor(
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
@@ -233,7 +231,7 @@ export class CreateExternalPauseMockCommandHandler
 
       let contractAddress: string;
 
-      if (typeof res === 'string') {
+      if (typeof res === "string") {
         contractAddress = res;
       } else {
         contractAddress = await this.transactionService.getTransactionResult({
@@ -245,13 +243,9 @@ export class CreateExternalPauseMockCommandHandler
         });
       }
 
-      const address = (
-        await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-      ).id.toString();
+      const address = (await this.mirrorNodeAdapter.getAccountInfo(contractAddress)).id.toString();
 
-      return Promise.resolve(
-        new CreateExternalPauseMockCommandResponse(address),
-      );
+      return Promise.resolve(new CreateExternalPauseMockCommandResponse(address));
     } catch (error) {
       throw new CreateExternalPauseMockCommandError(error as Error);
     }

@@ -203,20 +203,20 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import SecurityService from '@service/security/SecurityService';
-import { IssueCommand, IssueCommandResponse } from './IssueCommand';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ContractService from '@service/contract/ContractService';
-import { IssueCommandError } from './error/IssueCommandError';
-import { KycStatus } from '@domain/context/kyc/Kyc';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import SecurityService from "@service/security/SecurityService";
+import { IssueCommand, IssueCommandResponse } from "./IssueCommand";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ContractService from "@service/contract/ContractService";
+import { IssueCommandError } from "./error/IssueCommandError";
+import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(IssueCommand)
 export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
@@ -241,10 +241,8 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
       const security = await this.securityService.get(securityId);
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
       const amountBd = BigDecimal.fromString(amount, security.decimals);
 
@@ -252,22 +250,11 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
 
       await this.validationService.checkPause(securityId);
 
-      await this.validationService.checkMaxSupply(
-        securityId,
-        amountBd,
-        security,
-      );
+      await this.validationService.checkMaxSupply(securityId, amountBd, security);
 
-      await this.validationService.checkControlList(
-        securityId,
-        targetEvmAddress.toString(),
-      );
+      await this.validationService.checkControlList(securityId, targetEvmAddress.toString());
 
-      await this.validationService.checkKycAddresses(
-        securityId,
-        [targetId],
-        KycStatus.GRANTED,
-      );
+      await this.validationService.checkKycAddresses(securityId, [targetId], KycStatus.GRANTED);
 
       await this.validationService.checkAnyRole(
         [SecurityRole._ISSUER_ROLE, SecurityRole._AGENT_ROLE],
@@ -281,15 +268,8 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
 
       // Check that the amount to issue + total supply is not greater than max supply
 
-      const res = await handler.issue(
-        securityEvmAddress,
-        targetEvmAddress,
-        amountBd,
-        securityId,
-      );
-      return Promise.resolve(
-        new IssueCommandResponse(res.error === undefined, res.id!),
-      );
+      const res = await handler.issue(securityEvmAddress, targetEvmAddress, amountBd, securityId);
+      return Promise.resolve(new IssueCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new IssueCommandError(error as Error);
     }

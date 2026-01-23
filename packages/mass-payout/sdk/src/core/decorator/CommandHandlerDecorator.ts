@@ -203,11 +203,11 @@
 
 */
 
-import { Injectable } from '@nestjs/common';
-import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from '../Constants';
-import { v4 } from 'uuid';
-import { BaseCommand } from '../command/Command.js';
-import { Constructor } from '../Type.js';
+import { Injectable } from "@nestjs/common";
+import { COMMAND_HANDLER_METADATA, COMMAND_METADATA } from "../Constants";
+import { v4 } from "uuid";
+import { BaseCommand } from "../command/Command.js";
+import { Constructor } from "../Type.js";
 
 /**
  * This decorator determines that a class is a command handler

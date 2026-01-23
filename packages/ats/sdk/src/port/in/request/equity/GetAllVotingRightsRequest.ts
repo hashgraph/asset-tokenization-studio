@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
 export default class GetAllVotingRightsRequest extends ValidatedRequest<GetAllVotingRightsRequest> {
   securityId: string;

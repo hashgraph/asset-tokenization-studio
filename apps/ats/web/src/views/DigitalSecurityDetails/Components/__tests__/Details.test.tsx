@@ -203,19 +203,15 @@
 
 */
 
-import { Details } from '../Details';
-import { render } from '../../../../test-utils';
-import {
-  BondDetailsViewModel,
-  EquityDetailsViewModel,
-  SecurityViewModel,
-} from '@hashgraph/asset-tokenization-sdk';
+import { Details } from "../Details";
+import { render } from "../../../../test-utils";
+import { BondDetailsViewModel, EquityDetailsViewModel, SecurityViewModel } from "@hashgraph/asset-tokenization-sdk";
 
 // TODO Improve tests when it is connected to SDK
 describe(`${Details.name}`, () => {
-  test('should render correctly', () => {
+  test("should render correctly", () => {
     const detailsResponse: SecurityViewModel = {
-      name: 'test',
+      name: "test",
     };
 
     const component = render(

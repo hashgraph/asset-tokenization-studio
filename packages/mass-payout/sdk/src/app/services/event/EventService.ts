@@ -203,17 +203,15 @@
 
 */
 
-import { Injectable } from '@nestjs/common';
-import EventEmitter from '@core/EventEmitter';
-import Service from '../Service';
-import { EventListenerNotFound } from './error/EventListenerNotFound';
-import { EventNotFound } from './error/EventNotFound';
-import WalletEvent, { WalletEvents } from './WalletEvent';
+import { Injectable } from "@nestjs/common";
+import EventEmitter from "@core/EventEmitter";
+import Service from "../Service";
+import { EventListenerNotFound } from "./error/EventListenerNotFound";
+import { EventNotFound } from "./error/EventNotFound";
+import WalletEvent, { WalletEvents } from "./WalletEvent";
 
 type WalletEventIndex = Record<keyof WalletEvent, WalletEvent>;
-type WalletEventEmitterIndex = Partial<
-  Record<keyof WalletEvent, EventEmitter<WalletEvent>>
->;
+type WalletEventEmitterIndex = Partial<Record<keyof WalletEvent, EventEmitter<WalletEvent>>>;
 
 @Injectable()
 export default class EventService extends Service {
@@ -226,19 +224,12 @@ export default class EventService extends Service {
   }
 
   private registerEvents(events: typeof WalletEvents): void {
-    this.events = Object.keys(events).reduce(
-      (p, c) => ({ ...p, [c]: events }),
-      {},
-    ) as WalletEventIndex;
+    this.events = Object.keys(events).reduce((p, c) => ({ ...p, [c]: events }), {}) as WalletEventIndex;
   }
 
-  private getEventEmitter<E extends keyof WalletEvent>(
-    event: E,
-  ): EventEmitter<WalletEvent> {
+  private getEventEmitter<E extends keyof WalletEvent>(event: E): EventEmitter<WalletEvent> {
     if (!Object.keys(this.events).includes(event.toString())) {
-      throw new EventNotFound(
-        `WalletEvent (${String(event)}) not registered yet`,
-      );
+      throw new EventNotFound(`WalletEvent (${String(event)}) not registered yet`);
     }
     if (!Object.keys(this.emitters).includes(event.toString())) {
       // eslint-disable-next-line unused-imports/no-unused-vars
@@ -249,18 +240,12 @@ export default class EventService extends Service {
     return this.emitters[event]!;
   }
 
-  public on<E extends keyof WalletEvent>(
-    event: E,
-    listener: WalletEvent[E],
-  ): void {
+  public on<E extends keyof WalletEvent>(event: E, listener: WalletEvent[E]): void {
     if (!this.events[event]) throw new EventListenerNotFound(event.toString());
     this.getEventEmitter(event).on(event, listener);
   }
 
-  public emit<E extends keyof WalletEvent>(
-    event: E,
-    ...args: Parameters<WalletEvent[E]>
-  ): boolean {
+  public emit<E extends keyof WalletEvent>(event: E, ...args: Parameters<WalletEvent[E]>): boolean {
     return this.getEventEmitter(event).emit(event, ...args);
   }
 

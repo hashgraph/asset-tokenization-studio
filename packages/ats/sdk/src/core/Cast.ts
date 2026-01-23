@@ -205,12 +205,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { BaseContract } from '@ethersproject/contracts';
-import { Constructible } from './Type';
+import { BaseContract } from "@ethersproject/contracts";
+import { Constructible } from "./Type";
 
-export const safeCast = <TYPE>(
-  val?: TYPE | Partial<TYPE> | undefined,
-): TYPE | undefined => {
+export const safeCast = <TYPE>(val?: TYPE | Partial<TYPE> | undefined): TYPE | undefined => {
   if (!val) return val;
   return val as TYPE;
 };
@@ -228,5 +226,4 @@ export const isConstructible = (value: any): value is Constructible => {
   }
 };
 
-export type CallableContract<T extends BaseContract = BaseContract> =
-  T['functions'];
+export type CallableContract<T extends BaseContract = BaseContract> = T["functions"];

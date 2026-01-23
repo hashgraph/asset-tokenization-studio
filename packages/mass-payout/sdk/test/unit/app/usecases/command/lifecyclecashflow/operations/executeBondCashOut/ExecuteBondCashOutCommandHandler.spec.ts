@@ -203,21 +203,18 @@
 
 */
 
-import { ExecuteBondCashOutCommandHandler } from '@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOut/ExecuteBondCashOutCommandHandler';
+import { ExecuteBondCashOutCommandHandler } from "@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOut/ExecuteBondCashOutCommandHandler";
 import {
   ExecuteBondCashOutCommand,
   ExecuteBondCashOutCommandResponse,
-} from '@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOut/ExecuteBondCashOutCommand';
-import { ExecuteBondCashOutCommandError } from '@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOut/error/ExecuteBondCashOutCommandError';
-import ContractService from '@app/services/contract/ContractService';
-import TransactionService from '@app/services/transaction/TransactionService';
-import EvmAddress from '@domain/contract/EvmAddress';
-import {
-  EvmAddressPropsFixture,
-  HederaIdPropsFixture,
-} from '../../../../../../../fixture/DataFixture';
+} from "@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOut/ExecuteBondCashOutCommand";
+import { ExecuteBondCashOutCommandError } from "@app/usecase/command/lifeCycleCashFlow/operations/executeBondCashOut/error/ExecuteBondCashOutCommandError";
+import ContractService from "@app/services/contract/ContractService";
+import TransactionService from "@app/services/transaction/TransactionService";
+import EvmAddress from "@domain/contract/EvmAddress";
+import { EvmAddressPropsFixture, HederaIdPropsFixture } from "../../../../../../../fixture/DataFixture";
 
-describe('ExecuteBondCashOutCommandHandler', () => {
+describe("ExecuteBondCashOutCommandHandler", () => {
   let handler: ExecuteBondCashOutCommandHandler;
   let transactionService: jest.Mocked<TransactionService>;
   let contractService: jest.Mocked<ContractService>;
@@ -236,13 +233,10 @@ describe('ExecuteBondCashOutCommandHandler', () => {
       getContractEvmAddress: jest.fn(),
     } as any;
 
-    handler = new ExecuteBondCashOutCommandHandler(
-      transactionService,
-      contractService,
-    );
+    handler = new ExecuteBondCashOutCommandHandler(transactionService, contractService);
   });
 
-  it('should execute successfully and return a response', async () => {
+  it("should execute successfully and return a response", async () => {
     // Arrange
     const command: ExecuteBondCashOutCommand = {
       lifeCycleCashFlowId: HederaIdPropsFixture.create().value,
@@ -252,12 +246,8 @@ describe('ExecuteBondCashOutCommandHandler', () => {
       paymentTokenDecimals: 6,
     } as any;
 
-    const mockLifeCycleAddress = new EvmAddress(
-      EvmAddressPropsFixture.create().value,
-    );
-    const mockAssetAddress = new EvmAddress(
-      EvmAddressPropsFixture.create().value,
-    );
+    const mockLifeCycleAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
+    const mockAssetAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
 
     (contractService.getContractEvmAddress as jest.Mock)
       .mockResolvedValueOnce(mockLifeCycleAddress)
@@ -268,7 +258,7 @@ describe('ExecuteBondCashOutCommandHandler', () => {
     const succeeded2 = EvmAddressPropsFixture.create().value;
     const mockedRes = {
       response: [[failed], [succeeded1, succeeded2], [1000000, 2000000], true],
-      id: 'tx123',
+      id: "tx123",
     };
 
     transactionHandlerMock.executeBondCashOut.mockResolvedValue(mockedRes);
@@ -277,12 +267,8 @@ describe('ExecuteBondCashOutCommandHandler', () => {
     const result = await handler.execute(command);
 
     // Assert
-    expect(contractService.getContractEvmAddress).toHaveBeenCalledWith(
-      command.lifeCycleCashFlowId,
-    );
-    expect(contractService.getContractEvmAddress).toHaveBeenCalledWith(
-      command.bond,
-    );
+    expect(contractService.getContractEvmAddress).toHaveBeenCalledWith(command.lifeCycleCashFlowId);
+    expect(contractService.getContractEvmAddress).toHaveBeenCalledWith(command.bond);
 
     expect(transactionHandlerMock.executeBondCashOut).toHaveBeenCalledWith(
       mockLifeCycleAddress,
@@ -295,12 +281,12 @@ describe('ExecuteBondCashOutCommandHandler', () => {
     expect(result).toBeInstanceOf(ExecuteBondCashOutCommandResponse);
     expect(result.failed).toStrictEqual([failed]);
     expect(result.succeeded).toStrictEqual([succeeded1, succeeded2]);
-    expect(result.paidAmount).toEqual(['1', '2']);
+    expect(result.paidAmount).toEqual(["1", "2"]);
     expect(result.executed).toBe(true);
-    expect(result.transactionId).toBe('tx123');
+    expect(result.transactionId).toBe("tx123");
   });
 
-  it('should throw ExecuteBondCashOutCommandError on failure', async () => {
+  it("should throw ExecuteBondCashOutCommandError on failure", async () => {
     const command: ExecuteBondCashOutCommand = {
       lifeCycleCashFlowId: HederaIdPropsFixture.create().value,
       bond: HederaIdPropsFixture.create().value,
@@ -309,12 +295,8 @@ describe('ExecuteBondCashOutCommandHandler', () => {
       paymentTokenDecimals: 18,
     } as any;
 
-    contractService.getContractEvmAddress.mockRejectedValue(
-      new Error('Error getting contract address'),
-    );
+    contractService.getContractEvmAddress.mockRejectedValue(new Error("Error getting contract address"));
 
-    await expect(handler.execute(command)).rejects.toThrow(
-      ExecuteBondCashOutCommandError,
-    );
+    await expect(handler.execute(command)).rejects.toThrow(ExecuteBondCashOutCommandError);
   });
 });

@@ -203,34 +203,34 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { ErrorCode } from '@core/error/BaseError';
-import SecurityService from '@service/security/SecurityService';
-import { CreateHoldCommandFixture } from '@test/fixtures/hold/HoldFixture';
-import Account from '@domain/context/account/Account';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { Security } from '@domain/context/security/Security';
-import { faker } from '@faker-js/faker/.';
-import { ProtectedCreateHoldByPartitionCommandHandler } from './ProtectedCreateHoldByPartitionCommandHandler';
+} from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { ErrorCode } from "@core/error/BaseError";
+import SecurityService from "@service/security/SecurityService";
+import { CreateHoldCommandFixture } from "@test/fixtures/hold/HoldFixture";
+import Account from "@domain/context/account/Account";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { Security } from "@domain/context/security/Security";
+import { faker } from "@faker-js/faker/.";
+import { ProtectedCreateHoldByPartitionCommandHandler } from "./ProtectedCreateHoldByPartitionCommandHandler";
 import {
   ProtectedCreateHoldByPartitionCommand,
   ProtectedCreateHoldByPartitionCommandResponse,
-} from './ProtectedCreateHoldByPartitionCommand';
-import { ProtectedCreateHoldByPartitionCommandError } from './error/ProtectedCreateHoldByPartitionCommandError';
+} from "./ProtectedCreateHoldByPartitionCommand";
+import { ProtectedCreateHoldByPartitionCommandError } from "./error/ProtectedCreateHoldByPartitionCommandError";
 
-describe('ProtectedCreateHoldByPartitionCommandHandler', () => {
+describe("ProtectedCreateHoldByPartitionCommandHandler", () => {
   let handler: ProtectedCreateHoldByPartitionCommandHandler;
   let command: ProtectedCreateHoldByPartitionCommand;
 
@@ -248,7 +248,7 @@ describe('ProtectedCreateHoldByPartitionCommandHandler', () => {
 
   const holdId = faker.string.hexadecimal({
     length: 64,
-    prefix: '0x',
+    prefix: "0x",
   });
 
   beforeEach(() => {
@@ -266,119 +266,72 @@ describe('ProtectedCreateHoldByPartitionCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws ProtectedCreateHoldByPartitionCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws ProtectedCreateHoldByPartitionCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          ProtectedCreateHoldByPartitionCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(ProtectedCreateHoldByPartitionCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while creating protected hold: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while creating protected hold: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully create protected hold', async () => {
+    describe("success cases", () => {
+      it("should successfully create protected hold", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
-        accountServiceMock.getAccountEvmAddressOrNull.mockResolvedValue(
-          evmAddress,
-        );
+        accountServiceMock.getAccountEvmAddressOrNull.mockResolvedValue(evmAddress);
         securityServiceMock.get.mockResolvedValue(security);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
-        transactionServiceMock
-          .getHandler()
-          .protectedCreateHoldByPartition.mockResolvedValue({
-            id: transactionId,
-          });
+        transactionServiceMock.getHandler().protectedCreateHoldByPartition.mockResolvedValue({
+          id: transactionId,
+        });
         transactionServiceMock.getTransactionResult.mockResolvedValue(holdId);
 
         const result = await handler.execute(command);
 
-        expect(result).toBeInstanceOf(
-          ProtectedCreateHoldByPartitionCommandResponse,
-        );
+        expect(result).toBeInstanceOf(ProtectedCreateHoldByPartitionCommandResponse);
         expect(result.payload).toBe(parseInt(holdId, 16));
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          2,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
-          1,
-          command.sourceId,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
-          2,
-          command.escrowId,
-        );
-        expect(
-          accountServiceMock.getAccountEvmAddressOrNull,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          accountServiceMock.getAccountEvmAddressOrNull,
-        ).toHaveBeenCalledWith(command.targetId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(2);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(1, command.sourceId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(2, command.escrowId);
+        expect(accountServiceMock.getAccountEvmAddressOrNull).toHaveBeenCalledTimes(1);
+        expect(accountServiceMock.getAccountEvmAddressOrNull).toHaveBeenCalledWith(command.targetId);
 
-        expect(
-          transactionServiceMock.getHandler().protectedCreateHoldByPartition,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().protectedCreateHoldByPartition).toHaveBeenCalledTimes(1);
 
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-          command.securityId,
-        );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
         expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
-          security,
-          command.amount,
-        );
-        expect(
-          validationServiceMock.checkClearingDeactivated,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          validationServiceMock.checkClearingDeactivated,
-        ).toHaveBeenCalledWith(command.securityId);
-        expect(
-          validationServiceMock.checkProtectedPartitionRole,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          validationServiceMock.checkProtectedPartitionRole,
-        ).toHaveBeenCalledWith(
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(security, command.amount);
+        expect(validationServiceMock.checkClearingDeactivated).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkClearingDeactivated).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkProtectedPartitionRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkProtectedPartitionRole).toHaveBeenCalledWith(
           command.partitionId,
           account.id.toString(),
           command.securityId,
         );
-        expect(
-          validationServiceMock.checkProtectedPartitions,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          validationServiceMock.checkProtectedPartitions,
-        ).toHaveBeenCalledWith(security);
+        expect(validationServiceMock.checkProtectedPartitions).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkProtectedPartitions).toHaveBeenCalledWith(security);
         expect(validationServiceMock.checkBalance).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkBalance).toHaveBeenCalledWith(
           command.securityId,
           command.sourceId,
           BigDecimal.fromString(command.amount, security.decimals),
         );
-        expect(
-          transactionServiceMock.getHandler().protectedCreateHoldByPartition,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getHandler().protectedCreateHoldByPartition).toHaveBeenCalledWith(
           evmAddress,
           command.partitionId,
           BigDecimal.fromString(command.amount, security.decimals),
@@ -392,12 +345,8 @@ describe('ProtectedCreateHoldByPartitionCommandHandler', () => {
           command.securityId,
         );
 
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledWith({
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith({
           res: { id: transactionId },
           className: ProtectedCreateHoldByPartitionCommandHandler.name,
           position: 1,

@@ -203,27 +203,22 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import { BatchFreezePartialTokensCommandError } from './error/BatchFreezePartialTokensCommandError';
-import {
-  BatchFreezePartialTokensCommand,
-  BatchFreezePartialTokensResponse,
-} from './BatchFreezePartialTokensCommand';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import SecurityService from '@service/security/SecurityService';
-import { KycStatus } from '@domain/context/kyc/Kyc';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { BatchFreezePartialTokensCommandError } from "./error/BatchFreezePartialTokensCommandError";
+import { BatchFreezePartialTokensCommand, BatchFreezePartialTokensResponse } from "./BatchFreezePartialTokensCommand";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import SecurityService from "@service/security/SecurityService";
+import { KycStatus } from "@domain/context/kyc/Kyc";
 
 @CommandHandler(BatchFreezePartialTokensCommand)
-export class BatchFreezePartialTokensCommandHandler
-  implements ICommandHandler<BatchFreezePartialTokensCommand>
-{
+export class BatchFreezePartialTokensCommandHandler implements ICommandHandler<BatchFreezePartialTokensCommand> {
   constructor(
     @lazyInject(SecurityService)
     private readonly securityService: SecurityService,
@@ -237,56 +232,33 @@ export class BatchFreezePartialTokensCommandHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: BatchFreezePartialTokensCommand,
-  ): Promise<BatchFreezePartialTokensResponse> {
+  async execute(command: BatchFreezePartialTokensCommand): Promise<BatchFreezePartialTokensResponse> {
     try {
       const { securityId, amountList, targetList } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
       await this.validationService.checkPause(securityId);
       await this.validationService.checkClearingDeactivated(securityId);
 
       const security = await this.securityService.get(securityId);
 
-      await this.validationService.checkKycAddresses(
-        securityId,
-        [account.id.toString()],
-        KycStatus.GRANTED,
-      );
+      await this.validationService.checkKycAddresses(securityId, [account.id.toString()], KycStatus.GRANTED);
 
       for (let i = 0; i < amountList.length; i++) {
-        await this.validationService.checkKycAddresses(
-          securityId,
-          [targetList[i]],
-          KycStatus.GRANTED,
-        );
+        await this.validationService.checkKycAddresses(securityId, [targetList[i]], KycStatus.GRANTED);
         await this.validationService.checkDecimals(security, amountList[i]);
       }
 
       const evmAddresses = await Promise.all(
-        targetList.map(
-          async (targetId) =>
-            await this.accountService.getAccountEvmAddress(targetId),
-        ),
+        targetList.map(async (targetId) => await this.accountService.getAccountEvmAddress(targetId)),
       );
-      const bdList = amountList.map((amount) =>
-        BigDecimal.fromString(amount, security.decimals),
-      );
-      const res = await handler.batchFreezePartialTokens(
-        securityEvmAddress,
-        bdList,
-        evmAddresses,
-        securityId,
-      );
+      const bdList = amountList.map((amount) => BigDecimal.fromString(amount, security.decimals));
+      const res = await handler.batchFreezePartialTokens(securityEvmAddress, bdList, evmAddresses, securityId);
 
-      return Promise.resolve(
-        new BatchFreezePartialTokensResponse(res.error === undefined, res.id!),
-      );
+      return Promise.resolve(new BatchFreezePartialTokensResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new BatchFreezePartialTokensCommandError(error as Error);
     }

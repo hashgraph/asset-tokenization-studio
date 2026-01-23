@@ -203,13 +203,13 @@
 
 */
 
-import { OptionalField } from '@core/decorator/OptionalDecorator';
-import { Equity } from '@domain/context/equity/Equity';
-import { Security } from '@domain/context/security/Security';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import { OptionalField } from "@core/decorator/OptionalDecorator";
+import { Equity } from "@domain/context/equity/Equity";
+import { Security } from "@domain/context/security/Security";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
-import { Factory } from '@domain/context/factory/Factories';
+import { Factory } from "@domain/context/factory/Factories";
 
 export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<CreateTrexSuiteEquityRequest> {
   salt: string;
@@ -231,7 +231,7 @@ export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<Creat
     return this._decimals;
   }
   public set decimals(value: number | string) {
-    this._decimals = typeof value === 'number' ? value : parseFloat(value);
+    this._decimals = typeof value === "number" ? value : parseFloat(value);
   }
   isWhiteList: boolean;
   erc20VotesActivated: boolean;
@@ -390,8 +390,7 @@ export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<Creat
       decimals: (val) => {
         return Security.checkInteger(val);
       },
-      diamondOwnerAccount:
-        FormatValidation.checkHederaIdFormatOrEvmAddress(false),
+      diamondOwnerAccount: FormatValidation.checkHederaIdFormatOrEvmAddress(false),
       dividendRight: (val) => {
         return Equity.checkDividend(val);
       },
@@ -406,29 +405,16 @@ export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<Creat
       },
       configId: FormatValidation.checkBytes32Format(),
       externalPauses: (val) => {
-        return FormatValidation.checkHederaIdOrEvmAddressArray(
-          val ?? [],
-          'externalPauses',
-          true,
-        );
+        return FormatValidation.checkHederaIdOrEvmAddressArray(val ?? [], "externalPauses", true);
       },
       externalControlLists: (val) => {
-        return FormatValidation.checkHederaIdOrEvmAddressArray(
-          val ?? [],
-          'externalControlLists',
-          true,
-        );
+        return FormatValidation.checkHederaIdOrEvmAddressArray(val ?? [], "externalControlLists", true);
       },
       externalKycLists: (val) => {
-        return FormatValidation.checkHederaIdOrEvmAddressArray(
-          val ?? [],
-          'externalKycLists',
-          true,
-        );
+        return FormatValidation.checkHederaIdOrEvmAddressArray(val ?? [], "externalKycLists", true);
       },
       complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
-      identityRegistryId:
-        FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      identityRegistryId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       claimTopics: FormatValidation.checkArrayNumber(),
     });
     this.salt = salt;
@@ -446,8 +432,7 @@ export default class CreateTrexSuiteEquityRequest extends ValidatedRequest<Creat
     this.name = name;
     this.symbol = symbol;
     this.isin = isin;
-    this.decimals =
-      typeof decimals === 'number' ? decimals : parseInt(decimals);
+    this.decimals = typeof decimals === "number" ? decimals : parseInt(decimals);
     this.isWhiteList = isWhiteList;
     this.erc20VotesActivated = erc20VotesActivated;
     this.isControllable = isControllable;

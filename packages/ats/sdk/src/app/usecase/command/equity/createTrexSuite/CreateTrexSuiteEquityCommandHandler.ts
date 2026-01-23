@@ -203,39 +203,31 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import ContractId from '@domain/context/contract/ContractId';
-import { Security } from '@domain/context/security/Security';
-import AccountService from '@service/account/AccountService';
-import TransactionService from '@service/transaction/TransactionService';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import ContractService from '@service/contract/ContractService';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import ContractId from "@domain/context/contract/ContractId";
+import { Security } from "@domain/context/security/Security";
+import AccountService from "@service/account/AccountService";
+import TransactionService from "@service/transaction/TransactionService";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import ContractService from "@service/contract/ContractService";
 
-import { Response } from '@domain/context/transaction/Response';
-import { MissingRegulationType } from '@domain/context/factory/error/MissingRegulationType';
-import { MissingRegulationSubType } from '@domain/context/factory/error/MissingRegulationSubType';
-import { EVM_ZERO_ADDRESS } from '@core/Constants';
-import {
-  CreateTrexSuiteEquityCommand,
-  CreateTrexSuiteEquityCommandResponse,
-} from './CreateTrexSuiteEquityCommand';
-import { EquityDetails } from '@domain/context/equity/EquityDetails';
-import { CreateTrexSuiteEquityCommandError } from './error/CreateTrexSuiteEquityError';
-import { InvalidRequest } from '@command/error/InvalidRequest';
-import {
-  TrexTokenDetailsAts,
-  TrexClaimDetails,
-} from '@domain/context/factory/TRexFactory';
-import ValidationService from '@service/validation/ValidationService';
+import { Response } from "@domain/context/transaction/Response";
+import { MissingRegulationType } from "@domain/context/factory/error/MissingRegulationType";
+import { MissingRegulationSubType } from "@domain/context/factory/error/MissingRegulationSubType";
+import { EVM_ZERO_ADDRESS } from "@core/Constants";
+import { CreateTrexSuiteEquityCommand, CreateTrexSuiteEquityCommandResponse } from "./CreateTrexSuiteEquityCommand";
+import { EquityDetails } from "@domain/context/equity/EquityDetails";
+import { CreateTrexSuiteEquityCommandError } from "./error/CreateTrexSuiteEquityError";
+import { InvalidRequest } from "@command/error/InvalidRequest";
+import { TrexTokenDetailsAts, TrexClaimDetails } from "@domain/context/factory/TRexFactory";
+import ValidationService from "@service/validation/ValidationService";
 
 @CommandHandler(CreateTrexSuiteEquityCommand)
-export class CreateTrexSuiteEquityCommandHandler
-  implements ICommandHandler<CreateTrexSuiteEquityCommand>
-{
+export class CreateTrexSuiteEquityCommandHandler implements ICommandHandler<CreateTrexSuiteEquityCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
@@ -249,9 +241,7 @@ export class CreateTrexSuiteEquityCommandHandler
     private readonly validationService: ValidationService,
   ) {}
 
-  async execute(
-    command: CreateTrexSuiteEquityCommand,
-  ): Promise<CreateTrexSuiteEquityCommandResponse> {
+  async execute(command: CreateTrexSuiteEquityCommand): Promise<CreateTrexSuiteEquityCommandResponse> {
     let res: Response;
     try {
       const {
@@ -299,7 +289,7 @@ export class CreateTrexSuiteEquityCommandHandler
       }
 
       if (!salt || salt.length === 0) {
-        throw new InvalidRequest('Salt not found in request');
+        throw new InvalidRequest("Salt not found in request");
       }
       this.validationService.checkTrexTokenSaltExists(factory.toString(), salt);
 
@@ -317,24 +307,20 @@ export class CreateTrexSuiteEquityCommandHandler
         issuers,
         issuerClaims,
       });
-      const diamondOwnerAccountEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(diamondOwnerAccount!);
+      const diamondOwnerAccountEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(
+        diamondOwnerAccount!,
+      );
 
-      const factoryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(factory.toString());
+      const factoryEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(factory.toString());
 
-      const resolverEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(resolver.toString());
+      const resolverEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(resolver.toString());
 
-      const [
-        externalPausesEvmAddresses,
-        externalControlListsEvmAddresses,
-        externalKycListsEvmAddresses,
-      ] = await Promise.all([
-        this.contractService.getEvmAddressesFromHederaIds(externalPauses),
-        this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
-        this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
-      ]);
+      const [externalPausesEvmAddresses, externalControlListsEvmAddresses, externalKycListsEvmAddresses] =
+        await Promise.all([
+          this.contractService.getEvmAddressesFromHederaIds(externalPauses),
+          this.contractService.getEvmAddressesFromHederaIds(externalControlLists),
+          this.contractService.getEvmAddressesFromHederaIds(externalKycLists),
+        ]);
 
       const complianceEvmAddress = compliance
         ? await this.contractService.getContractEvmAddress(compliance)
@@ -388,33 +374,19 @@ export class CreateTrexSuiteEquityCommandHandler
         factory.toString(),
       );
 
-      const contractAddress =
-        await this.transactionService.getTransactionResult({
-          res,
-          result: res.response?._token,
-          className: CreateTrexSuiteEquityCommandHandler.name,
-          position: 0,
-          numberOfResultsItems: 1,
-        });
-      const contractId =
-        await this.mirrorNodeAdapter.getHederaIdfromContractAddress(
-          contractAddress,
-        );
+      const contractAddress = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?._token,
+        className: CreateTrexSuiteEquityCommandHandler.name,
+        position: 0,
+        numberOfResultsItems: 1,
+      });
+      const contractId = await this.mirrorNodeAdapter.getHederaIdfromContractAddress(contractAddress);
 
-      return Promise.resolve(
-        new CreateTrexSuiteEquityCommandResponse(
-          new ContractId(contractId),
-          res.id!,
-        ),
-      );
+      return Promise.resolve(new CreateTrexSuiteEquityCommandResponse(new ContractId(contractId), res.id!));
     } catch (error) {
       if (res?.response == 1)
-        return Promise.resolve(
-          new CreateTrexSuiteEquityCommandResponse(
-            new ContractId('0.0.0'),
-            res.id!,
-          ),
-        );
+        return Promise.resolve(new CreateTrexSuiteEquityCommandResponse(new ContractId("0.0.0"), res.id!));
       else throw new CreateTrexSuiteEquityCommandError(error as Error);
     }
   }

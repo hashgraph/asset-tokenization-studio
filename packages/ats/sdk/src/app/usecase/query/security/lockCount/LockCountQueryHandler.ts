@@ -203,15 +203,15 @@
 
 */
 
-import { LockCountQuery, LockCountQueryResponse } from './LockCountQuery';
-import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '@core/query/QueryHandler';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import AccountService from '@service/account/AccountService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ContractService from '@service/contract/ContractService';
-import { LockCountQueryError } from './error/LockCountQueryError';
+import { LockCountQuery, LockCountQueryResponse } from "./LockCountQuery";
+import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
+import { IQueryHandler } from "@core/query/QueryHandler";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import AccountService from "@service/account/AccountService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ContractService from "@service/contract/ContractService";
+import { LockCountQueryError } from "./error/LockCountQueryError";
 
 @QueryHandler(LockCountQuery)
 export class LockCountQueryHandler implements IQueryHandler<LockCountQuery> {
@@ -228,15 +228,10 @@ export class LockCountQueryHandler implements IQueryHandler<LockCountQuery> {
     try {
       const { targetId, securityId } = query;
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
-      const res = await this.queryAdapter.getLockCount(
-        securityEvmAddress,
-        targetEvmAddress,
-      );
+      const res = await this.queryAdapter.getLockCount(securityEvmAddress, targetEvmAddress);
 
       return new LockCountQueryResponse(res);
     } catch (error) {

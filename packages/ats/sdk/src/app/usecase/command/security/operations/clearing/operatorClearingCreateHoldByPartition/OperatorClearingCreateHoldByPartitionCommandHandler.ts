@@ -203,21 +203,21 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import SecurityService from '@service/security/SecurityService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import EvmAddress from '@domain/context/contract/EvmAddress';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import SecurityService from "@service/security/SecurityService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import EvmAddress from "@domain/context/contract/EvmAddress";
 import {
   OperatorClearingCreateHoldByPartitionCommand,
   OperatorClearingCreateHoldByPartitionCommandResponse,
-} from './OperatorClearingCreateHoldByPartitionCommand';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import { OperatorClearingCreateHoldByPartitionCommandError } from './error/OperatorClearingCreateHoldByPartitionCommandError';
+} from "./OperatorClearingCreateHoldByPartitionCommand";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { OperatorClearingCreateHoldByPartitionCommandError } from "./error/OperatorClearingCreateHoldByPartitionCommandError";
 
 @CommandHandler(OperatorClearingCreateHoldByPartitionCommand)
 export class OperatorClearingCreateHoldByPartitionCommandHandler
@@ -254,28 +254,19 @@ export class OperatorClearingCreateHoldByPartitionCommandHandler
       const account = this.accountService.getCurrentAccount();
       const security = await this.securityService.get(securityId);
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
       await this.validationService.checkPause(securityId);
 
-      await this.validationService.checkOperator(
-        securityId,
-        partitionId,
-        account.id.toString(),
-        sourceId,
-      );
+      await this.validationService.checkOperator(securityId, partitionId, account.id.toString(), sourceId);
       await this.validationService.checkClearingActivated(securityId);
 
       await this.validationService.checkDecimals(security, amount);
 
-      const escrowEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(escrowId);
+      const escrowEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(escrowId);
 
-      const sourceEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(sourceId);
+      const sourceEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(sourceId);
 
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddressOrNull(targetId);
       const amountBd = BigDecimal.fromString(amount, security.decimals);
 
       await this.validationService.checkBalance(securityId, sourceId, amountBd);
@@ -301,15 +292,10 @@ export class OperatorClearingCreateHoldByPartitionCommandHandler
       });
 
       return Promise.resolve(
-        new OperatorClearingCreateHoldByPartitionCommandResponse(
-          parseInt(clearingId, 16),
-          res.id!,
-        ),
+        new OperatorClearingCreateHoldByPartitionCommandResponse(parseInt(clearingId, 16), res.id!),
       );
     } catch (error) {
-      throw new OperatorClearingCreateHoldByPartitionCommandError(
-        error as Error,
-      );
+      throw new OperatorClearingCreateHoldByPartitionCommandError(error as Error);
     }
   }
 }

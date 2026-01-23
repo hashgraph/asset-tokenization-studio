@@ -170,9 +170,9 @@
    limitations under the License.
 */
 
-import ContractId from '@domain/context/contract/ContractId';
-import { Command } from '@core/command/Command';
-import { CommandResponse } from '@core/command/CommandResponse';
+import ContractId from "@domain/context/contract/ContractId";
+import { Command } from "@core/command/Command";
+import { CommandResponse } from "@core/command/CommandResponse";
 
 export class UpdateResolverCommandResponse implements CommandResponse {
   constructor(

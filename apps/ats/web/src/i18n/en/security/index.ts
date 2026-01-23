@@ -203,22 +203,22 @@
 
 */
 
-import add from './add';
-import createSecurity from './createSecurity';
-import createEquity from './equity/create';
-import createBond from './createBond';
-import details from './details';
-import mint from './mint';
-import forceTransfer from './forceTransfer';
-import transfer from './transfer';
-import redeem from './redeem';
-import forceRedeem from './forceRedeem';
-import list from './list';
-import pause from './pause';
-import unpause from './unpause';
-import regulation from './regulation';
-import management from './management';
-import freeze from './freeze';
+import add from "./add";
+import createSecurity from "./createSecurity";
+import createEquity from "./equity/create";
+import createBond from "./createBond";
+import details from "./details";
+import mint from "./mint";
+import forceTransfer from "./forceTransfer";
+import transfer from "./transfer";
+import redeem from "./redeem";
+import forceRedeem from "./forceRedeem";
+import list from "./list";
+import pause from "./pause";
+import unpause from "./unpause";
+import regulation from "./regulation";
+import management from "./management";
+import freeze from "./freeze";
 
 export default {
   add,

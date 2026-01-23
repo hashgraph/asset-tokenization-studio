@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '../../../../../core/error/BaseError.js';
+import BaseError, { ErrorCode } from "../../../../../core/error/BaseError.js";
 
 export class AddressRecovered extends BaseError {
   constructor(address: string) {
-    super(
-      ErrorCode.AddressRecovered,
-      `The address ${address} has been recovered`,
-    );
+    super(ErrorCode.AddressRecovered, `The address ${address} has been recovered`);
   }
 }

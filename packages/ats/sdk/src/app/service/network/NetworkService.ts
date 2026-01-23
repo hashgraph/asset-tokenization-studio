@@ -203,12 +203,12 @@
 
 */
 
-import { singleton, inject } from 'tsyringe';
-import Configuration from '@domain/context/network/Configuration';
-import { Environment } from '@domain/context/network/Environment';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import Service from '@service/Service';
+import { singleton, inject } from "tsyringe";
+import Configuration from "@domain/context/network/Configuration";
+import { Environment } from "@domain/context/network/Environment";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
+import Service from "@service/Service";
 
 export interface NetworkProps {
   environment: Environment;
@@ -266,7 +266,7 @@ export default class NetworkService extends Service implements NetworkProps {
     this._consensusNodes = value;
   }
 
-  constructor(@inject('NetworkProps') props?: NetworkProps) {
+  constructor(@inject("NetworkProps") props?: NetworkProps) {
     super();
     Object.assign(this, props);
   }

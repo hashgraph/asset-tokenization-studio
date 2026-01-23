@@ -203,23 +203,23 @@
 
 */
 
-import { SupportedWallets } from '@domain/context/network/Wallet';
-import { InitializationData, NetworkData } from '@port/out/TransactionAdapter';
+import { SupportedWallets } from "@domain/context/network/Wallet";
+import { InitializationData, NetworkData } from "@port/out/TransactionAdapter";
 
 export enum WalletEvents {
-  walletInit = 'walletInit',
-  walletFound = 'walletFound',
-  walletPaired = 'walletPaired',
-  walletConnectionStatusChanged = 'walletConnectionStatusChanged',
-  walletAcknowledgeMessage = 'walletAcknowledgeMessage',
-  walletDisconnect = 'walletDisconnect',
+  walletInit = "walletInit",
+  walletFound = "walletFound",
+  walletPaired = "walletPaired",
+  walletConnectionStatusChanged = "walletConnectionStatusChanged",
+  walletAcknowledgeMessage = "walletAcknowledgeMessage",
+  walletDisconnect = "walletDisconnect",
 }
 
 export enum ConnectionState {
-  Connecting = 'Connecting',
-  Connected = 'Connected',
-  Disconnected = 'Disconnected',
-  Paired = 'Paired',
+  Connecting = "Connecting",
+  Connected = "Connected",
+  Disconnected = "Disconnected",
+  Paired = "Paired",
 }
 
 export interface WalletBaseEvent {
@@ -249,9 +249,7 @@ type WalletEvent = {
   walletInit: (data: WalletInitEvent) => void;
   walletFound: (data: WalletFoundEvent) => void;
   walletPaired: (data: WalletPairedEvent) => void;
-  walletConnectionStatusChanged: (
-    data: WalletConnectionStatusChangedEvent,
-  ) => void;
+  walletConnectionStatusChanged: (data: WalletConnectionStatusChangedEvent) => void;
   walletAcknowledgeMessage: (data: WalletAcknowledgeMessageEvent) => void;
   walletDisconnect: (data: WalletBaseEvent) => void;
 };

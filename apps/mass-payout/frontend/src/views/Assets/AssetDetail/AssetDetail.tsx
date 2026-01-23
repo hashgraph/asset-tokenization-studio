@@ -202,23 +202,23 @@
  *    limitations under the License.
  */
 
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Text, Spinner } from 'io-bricks-ui';
-import { useDisclosure, Box, Flex } from '@chakra-ui/react';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Text, Spinner } from "io-bricks-ui";
+import { useDisclosure, Box, Flex } from "@chakra-ui/react";
 import {
   useDisableAssetSync,
   useEnableAssetSync,
   useGetAsset,
   usePauseAsset,
   useUnpauseAsset,
-} from '../hooks/queries/AssetQueries';
-import { useBreadcrumbs } from '@/hooks/useBreadcrumbs';
-import { RoutePath } from '@/router/RoutePath';
-import { AssetHeader } from './components/AssetHeader';
-import { TabsConfiguration } from './components/TabsConfiguration';
-import { PopupConfigurations } from './components/PopupConfigurations';
+} from "../hooks/queries/AssetQueries";
+import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
+import { RoutePath } from "@/router/RoutePath";
+import { AssetHeader } from "./components/AssetHeader";
+import { TabsConfiguration } from "./components/TabsConfiguration";
+import { PopupConfigurations } from "./components/PopupConfigurations";
 
 const tabMap = {
   details: 0,
@@ -227,14 +227,10 @@ const tabMap = {
 };
 
 export const AssetDetail = () => {
-  const { id = '' } = useParams();
-  const { t } = useTranslation('assets');
+  const { id = "" } = useParams();
+  const { t } = useTranslation("assets");
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const {
-    isOpen: isImportOpen,
-    onOpen: onImportOpen,
-    onClose: onImportClose,
-  } = useDisclosure();
+  const { isOpen: isImportOpen, onOpen: onImportOpen, onClose: onImportClose } = useDisclosure();
 
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -243,8 +239,7 @@ export const AssetDetail = () => {
 
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
-  const [isImportingCorporateActions, setIsImportingCorporateActions] =
-    useState<boolean>(asset?.syncEnabled ?? true);
+  const [isImportingCorporateActions, setIsImportingCorporateActions] = useState<boolean>(asset?.syncEnabled ?? true);
 
   const pauseAssetMutation = usePauseAsset();
   const unpauseAssetMutation = useUnpauseAsset();
@@ -261,14 +256,14 @@ export const AssetDetail = () => {
   }, [asset]);
 
   useEffect(() => {
-    const tabParam = searchParams.get('tab');
+    const tabParam = searchParams.get("tab");
     if (tabParam && tabMap[tabParam as keyof typeof tabMap] !== undefined) {
       setActiveTabIndex(tabMap[tabParam as keyof typeof tabMap]);
     }
   }, [searchParams]);
 
   const handleNewDistribution = () => {
-    navigate(RoutePath.NEW_DISTRIBUTION.replace(':id', id));
+    navigate(RoutePath.NEW_DISTRIBUTION.replace(":id", id));
   };
 
   const handleImportCorporateActions = () => {
@@ -292,9 +287,9 @@ export const AssetDetail = () => {
 
   if (isLoadingAsset) {
     return (
-      <Flex gap={4} alignItems={'center'} p={6}>
+      <Flex gap={4} alignItems={"center"} p={6}>
         <Spinner />
-        <Text>{t('loading', 'Loading asset...')}</Text>
+        <Text>{t("loading", "Loading asset...")}</Text>
       </Flex>
     );
   }
@@ -302,9 +297,7 @@ export const AssetDetail = () => {
   if (error || !asset) {
     return (
       <Box p={6}>
-        <Text color="red.500">
-          {t('error', 'Error loading asset or asset not found')}
-        </Text>
+        <Text color="red.500">{t("error", "Error loading asset or asset not found")}</Text>
       </Box>
     );
   }
@@ -321,18 +314,17 @@ export const AssetDetail = () => {
       setIsPaused(!isPaused);
       onClose();
     } catch (error) {
-      console.error('Error pausing asset:', error);
+      console.error("Error pausing asset:", error);
     }
   };
 
-  const isMutationLoading =
-    pauseAssetMutation.isPending || unpauseAssetMutation.isPending;
+  const isMutationLoading = pauseAssetMutation.isPending || unpauseAssetMutation.isPending;
 
   const handleTabChange = (index: number) => {
     setActiveTabIndex(index);
-    const tabNames = ['details', 'distributions', 'payments'];
+    const tabNames = ["details", "distributions", "payments"];
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.set('tab', tabNames[index]);
+    newSearchParams.set("tab", tabNames[index]);
     setSearchParams(newSearchParams);
   };
 

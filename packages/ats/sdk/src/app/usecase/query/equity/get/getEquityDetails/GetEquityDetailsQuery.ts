@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
-import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
+import { EquityDetails } from "@domain/context/equity/EquityDetails";
 
 export class GetEquityDetailsQueryResponse implements QueryResponse {
   constructor(public readonly equity: EquityDetails) {}

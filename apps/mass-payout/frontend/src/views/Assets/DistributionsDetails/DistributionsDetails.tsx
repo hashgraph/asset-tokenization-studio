@@ -202,25 +202,22 @@
  *    limitations under the License.
  */
 
-import { useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Holder } from '@/services/DistributionService';
-import { DistributionsDetailsStatus } from '@/types/status';
-import { format } from 'date-fns';
-import {
-  DistributionsDetailsData,
-  useDistributionsDetailsColumns,
-} from '../hooks/useDistributionsDetailsColumns';
-import { formatNumber } from '@/utils/number-fs';
-import { useTable } from '@/hooks/useTable';
-import { useTranslation } from 'react-i18next';
+import { useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Holder } from "@/services/DistributionService";
+import { DistributionsDetailsStatus } from "@/types/status";
+import { format } from "date-fns";
+import { DistributionsDetailsData, useDistributionsDetailsColumns } from "../hooks/useDistributionsDetailsColumns";
+import { formatNumber } from "@/utils/number-fs";
+import { useTable } from "@/hooks/useTable";
+import { useTranslation } from "react-i18next";
 import {
   useGetDistribution,
   useGetDistributionHolders,
   useRetryDistribution,
-} from '../hooks/queries/DistributionQueries';
-import { DistributionHeader } from './components/DistributionHeader';
-import { DistributionTable } from './components/DistributionTable';
+} from "../hooks/queries/DistributionQueries";
+import { DistributionHeader } from "./components/DistributionHeader";
+import { DistributionTable } from "./components/DistributionTable";
 
 const mapHolderToDetailsData = (holder: Holder): DistributionsDetailsData => {
   const statusMap: Record<string, DistributionsDetailsStatus> = {
@@ -233,8 +230,8 @@ const mapHolderToDetailsData = (holder: Holder): DistributionsDetailsData => {
     paymentId: holder.batchPayout.id,
     receieverAddressHedera: holder.holderHederaAddress,
     receieverAddressEvm: holder.holderEvmAddress,
-    amount: holder.amount ? `$ ${formatNumber(holder.amount)}` : '-',
-    executionDate: format(new Date(holder.updatedAt || 0), 'dd/MM/yyyy'),
+    amount: holder.amount ? `$ ${formatNumber(holder.amount)}` : "-",
+    executionDate: format(new Date(holder.updatedAt || 0), "dd/MM/yyyy"),
     txHash: holder.batchPayout.hederaTransactionId,
     status: statusMap[holder.status] || DistributionsDetailsStatus.PENDING,
   };
@@ -250,21 +247,21 @@ export const DistributionsDetails = () => {
 
   const table = useTable();
   const columns = useDistributionsDetailsColumns();
-  const { t } = useTranslation('distributionsDetails');
+  const { t } = useTranslation("distributionsDetails");
 
-  const { data: distribution } = useGetDistribution(distributionId || '');
+  const { data: distribution } = useGetDistribution(distributionId || "");
 
   const breadcrumbItems = [
-    { label: 'Asset list', link: '/assets' },
-    { label: 'Assets details', link: `/assets/${assetId}` },
+    { label: "Asset list", link: "/assets" },
+    { label: "Assets details", link: `/assets/${assetId}` },
     {
-      label: 'Distribution details',
-      link: '#',
+      label: "Distribution details",
+      link: "#",
     },
   ];
 
   const { data: holdersData } = useGetDistributionHolders({
-    distributionId: distributionId || '',
+    distributionId: distributionId || "",
     page: table.pagination.pageIndex,
     size: table.pagination.pageSize,
   });
@@ -282,16 +279,16 @@ export const DistributionsDetails = () => {
 
   const retryAll = () => {
     if (!distributionId) {
-      console.error('Distribution ID not available');
+      console.error("Distribution ID not available");
       return;
     }
 
     retryDistributionMutation.mutate(distributionId, {
       onSuccess: () => {
-        console.log('Retry all successful');
+        console.log("Retry all successful");
       },
       onError: (error) => {
-        console.error('Error retrying distribution:', error);
+        console.error("Error retrying distribution:", error);
       },
     });
   };
@@ -300,7 +297,7 @@ export const DistributionsDetails = () => {
     <>
       <DistributionHeader
         breadcrumbItems={breadcrumbItems}
-        title={t('title')}
+        title={t("title")}
         distribution={distribution}
         onGoBack={handleGoBack}
         onRetryAll={retryAll}
@@ -308,7 +305,7 @@ export const DistributionsDetails = () => {
         t={t}
       />
       <DistributionTable
-        title={t('title')}
+        title={t("title")}
         columns={columns}
         data={distributionDetails}
         totalElements={distributionDetails.length}

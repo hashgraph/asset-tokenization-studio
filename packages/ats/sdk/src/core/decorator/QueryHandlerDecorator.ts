@@ -203,11 +203,11 @@
 
 */
 
-import { QUERY_HANDLER_METADATA, QUERY_METADATA } from '@core/Constants';
-import { v4 } from 'uuid';
-import { BaseQuery } from '@core/query/Query';
-import { Constructor } from '@core/Type';
-import { injectable } from 'tsyringe';
+import { QUERY_HANDLER_METADATA, QUERY_METADATA } from "@core/Constants";
+import { v4 } from "uuid";
+import { BaseQuery } from "@core/query/Query";
+import { Constructor } from "@core/Type";
+import { injectable } from "tsyringe";
 
 /**
  * This decorator determines that a class is a query handler

@@ -204,39 +204,39 @@
 */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Injectable from '@core/injectable/Injectable';
-import { CommandBus } from '@core/command/CommandBus';
-import { InitializationData, NetworkData } from '@port/out/TransactionAdapter';
-import { ConnectCommand } from '@command/network/connect/ConnectCommand';
+import Injectable from "@core/injectable/Injectable";
+import { CommandBus } from "@core/command/CommandBus";
+import { InitializationData, NetworkData } from "@port/out/TransactionAdapter";
+import { ConnectCommand } from "@command/network/connect/ConnectCommand";
 import ConnectRequest, {
   AWSKMSConfigRequest,
   DFNSConfigRequest,
   FireblocksConfigRequest,
   SupportedWallets,
-} from '../request/network/ConnectRequest';
-import RequestMapper from '../request/mapping/RequestMapper';
-import TransactionService from '@service/transaction/TransactionService';
-import NetworkService from '@service/network/NetworkService';
-import SetNetworkRequest from '../request/network/SetNetworkRequest';
-import { SetNetworkCommand } from '@command/network/setNetwork/SetNetworkCommand';
-import { SetConfigurationCommand } from '@command/network/setConfiguration/SetConfigurationCommand';
-import { Environment, unrecognized } from '@domain/context/network/Environment';
-import InitializationRequest from '../request/network/InitializationRequest';
-import Event from '../event/Event';
-import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
-import { LogError } from '@core/decorator/LogErrorDecorator';
-import SetConfigurationRequest from '../request/management/SetConfigurationRequest';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+} from "../request/network/ConnectRequest";
+import RequestMapper from "../request/mapping/RequestMapper";
+import TransactionService from "@service/transaction/TransactionService";
+import NetworkService from "@service/network/NetworkService";
+import SetNetworkRequest from "../request/network/SetNetworkRequest";
+import { SetNetworkCommand } from "@command/network/setNetwork/SetNetworkCommand";
+import { SetConfigurationCommand } from "@command/network/setConfiguration/SetConfigurationCommand";
+import { Environment, unrecognized } from "@domain/context/network/Environment";
+import InitializationRequest from "../request/network/InitializationRequest";
+import Event from "../event/Event";
+import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
+import { LogError } from "@core/decorator/LogErrorDecorator";
+import SetConfigurationRequest from "../request/management/SetConfigurationRequest";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
-import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
-import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
-import { FireblocksTransactionAdapter } from '@port/out/hs/hts/custodial/FireblocksTransactionAdapter';
-import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
-import { AWSKMSTransactionAdapter } from '@port/out/hs/hts/custodial/AWSKMSTransactionAdapter';
-import LogService from '@service/log/LogService';
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
+import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
+import { DFNSTransactionAdapter } from "@port/out/hs/hts/custodial/DFNSTransactionAdapter";
+import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
+import { FireblocksTransactionAdapter } from "@port/out/hs/hts/custodial/FireblocksTransactionAdapter";
+import FireblocksSettings from "@core/settings/custodialWalletSettings/FireblocksSettings";
+import { AWSKMSTransactionAdapter } from "@port/out/hs/hts/custodial/AWSKMSTransactionAdapter";
+import LogService from "@service/log/LogService";
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -266,36 +266,26 @@ interface INetworkInPort {
 class NetworkInPort implements INetworkInPort {
   constructor(
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly transactionService: TransactionService = Injectable.resolve(
-      TransactionService,
-    ),
-    private readonly networkService: NetworkService = Injectable.resolve(
-      NetworkService,
-    ),
+    private readonly transactionService: TransactionService = Injectable.resolve(TransactionService),
+    private readonly networkService: NetworkService = Injectable.resolve(NetworkService),
   ) {}
 
   @LogError
   async setConfig(req: SetConfigurationRequest): Promise<ConfigResponse> {
-    ValidatedRequest.handleValidation('SetConfigurationRequest', req);
+    ValidatedRequest.handleValidation("SetConfigurationRequest", req);
 
-    const res = await this.commandBus.execute(
-      new SetConfigurationCommand(req.factoryAddress, req.resolverAddress),
-    );
+    const res = await this.commandBus.execute(new SetConfigurationCommand(req.factoryAddress, req.resolverAddress));
     return res;
   }
 
   @LogError
   public getFactoryAddress(): string {
-    return this.networkService.configuration
-      ? this.networkService.configuration.factoryAddress
-      : '';
+    return this.networkService.configuration ? this.networkService.configuration.factoryAddress : "";
   }
 
   @LogError
   public getResolverAddress(): string {
-    return this.networkService.configuration
-      ? this.networkService.configuration.resolverAddress
-      : '';
+    return this.networkService.configuration ? this.networkService.configuration.resolverAddress : "";
   }
 
   @LogError
@@ -310,22 +300,17 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async setNetwork(req: SetNetworkRequest): Promise<NetworkResponse> {
-    ValidatedRequest.handleValidation('SetNetworkRequest', req);
+    ValidatedRequest.handleValidation("SetNetworkRequest", req);
 
     const res = await this.commandBus.execute(
-      new SetNetworkCommand(
-        req.environment,
-        req.mirrorNode,
-        req.rpcNode,
-        req.consensusNodes,
-      ),
+      new SetNetworkCommand(req.environment, req.mirrorNode, req.rpcNode, req.consensusNodes),
     );
     return res;
   }
 
   @LogError
   async init(req: InitializationRequest): Promise<SupportedWallets[]> {
-    ValidatedRequest.handleValidation('InitializationRequest', req);
+    ValidatedRequest.handleValidation("InitializationRequest", req);
 
     await this.setNetwork(
       new SetNetworkRequest({
@@ -375,44 +360,19 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async connect(req: ConnectRequest): Promise<InitializationData> {
-    LogService.logInfo('ConnectRequest from network', req);
-    ValidatedRequest.handleValidation('ConnectRequest', req);
+    LogService.logInfo("ConnectRequest from network", req);
+    ValidatedRequest.handleValidation("ConnectRequest", req);
 
-    const account = req.account
-      ? RequestMapper.mapAccount(req.account)
-      : undefined;
+    const account = req.account ? RequestMapper.mapAccount(req.account) : undefined;
     const debug = req.debug ?? false;
-    const hwcSettings = req.hwcSettings
-      ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings)
-      : undefined;
+    const hwcSettings = req.hwcSettings ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings) : undefined;
     const custodialSettings = this.getCustodialSettings(req);
-    LogService.logTrace(
-      'SetNetworkCommand',
-      req.network,
-      req.mirrorNode,
-      req.rpcNode,
-    );
-    await this.commandBus.execute(
-      new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode),
-    );
+    LogService.logTrace("SetNetworkCommand", req.network, req.mirrorNode, req.rpcNode);
+    await this.commandBus.execute(new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode));
 
-    LogService.logTrace(
-      'ConnectRequest',
-      req.wallet,
-      account,
-      hwcSettings,
-      debug,
-      custodialSettings,
-    );
+    LogService.logTrace("ConnectRequest", req.wallet, account, hwcSettings, debug, custodialSettings);
     const res = await this.commandBus.execute(
-      new ConnectCommand(
-        req.network,
-        req.wallet,
-        account,
-        hwcSettings,
-        debug,
-        custodialSettings,
-      ),
+      new ConnectCommand(req.network, req.wallet, account, hwcSettings, debug, custodialSettings),
     );
     return res.payload;
   }
@@ -426,9 +386,7 @@ class NetworkInPort implements INetworkInPort {
 
     switch (req.wallet) {
       case SupportedWallets.DFNS:
-        return RequestMapper.dfnsRequestToDfnsSettings(
-          req.custodialWalletSettings as DFNSConfigRequest,
-        );
+        return RequestMapper.dfnsRequestToDfnsSettings(req.custodialWalletSettings as DFNSConfigRequest);
 
       case SupportedWallets.FIREBLOCKS:
         return RequestMapper.fireblocksRequestToFireblocksSettings(
@@ -436,9 +394,7 @@ class NetworkInPort implements INetworkInPort {
         );
 
       case SupportedWallets.AWSKMS:
-        return RequestMapper.awsKmsRequestToAwsKmsSettings(
-          req.custodialWalletSettings as AWSKMSConfigRequest,
-        );
+        return RequestMapper.awsKmsRequestToAwsKmsSettings(req.custodialWalletSettings as AWSKMSConfigRequest);
 
       default:
         return undefined;

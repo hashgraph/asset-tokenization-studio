@@ -203,14 +203,14 @@
 
 */
 
-import { OptionalField } from '@core/decorator/OptionalDecorator';
-import { Environment } from '@domain/network/Environment';
-import { MirrorNode } from '@domain/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/network/JsonRpcRelay';
-import { SupportedWallets } from '@domain/network/Wallet';
-import { BaseRequest, RequestAccount } from '../BaseRequest';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import { OptionalField } from "@core/decorator/OptionalDecorator";
+import { Environment } from "@domain/network/Environment";
+import { MirrorNode } from "@domain/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/network/JsonRpcRelay";
+import { SupportedWallets } from "@domain/network/Wallet";
+import { BaseRequest, RequestAccount } from "../BaseRequest";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
 export { SupportedWallets };
 
@@ -228,10 +228,7 @@ export interface DFNSConfigRequest {
 
 export type CustodialSettings = DFNSConfigRequest;
 
-export default class ConnectRequest
-  extends ValidatedRequest<ConnectRequest>
-  implements BaseRequest
-{
+export default class ConnectRequest extends ValidatedRequest<ConnectRequest> implements BaseRequest {
   @OptionalField()
   account?: RequestAccount;
 

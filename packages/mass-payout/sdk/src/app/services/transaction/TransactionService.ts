@@ -203,18 +203,18 @@
 
 */
 
-import { Injectable } from '@nestjs/common';
-import Service from '../Service';
-import { EmptyResponse } from './error/EmptyResponse';
-import { WalletNotSupported } from './error/WalletNotSupported';
-import { SupportedWallets } from '@domain/network/Wallet';
-import TransactionResponse from '@domain/transaction/TransactionResponse';
-import { Response } from '@domain/transaction/Response';
-import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import TransactionAdapter from '@port/out/TransactionAdapter';
-import { InvalidResponse } from '@core/error/InvalidResponse';
-import TransactionHandlerRegistration from '@core/TransactionHandlerRegistration';
+import { Injectable } from "@nestjs/common";
+import Service from "../Service";
+import { EmptyResponse } from "./error/EmptyResponse";
+import { WalletNotSupported } from "./error/WalletNotSupported";
+import { SupportedWallets } from "@domain/network/Wallet";
+import TransactionResponse from "@domain/transaction/TransactionResponse";
+import { Response } from "@domain/transaction/Response";
+import { DFNSTransactionAdapter } from "@port/out/hs/hts/custodial/DFNSTransactionAdapter";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import TransactionAdapter from "@port/out/TransactionAdapter";
+import { InvalidResponse } from "@core/error/InvalidResponse";
+import TransactionHandlerRegistration from "@core/TransactionHandlerRegistration";
 
 @Injectable()
 export default class TransactionService extends Service {
@@ -267,16 +267,9 @@ export default class TransactionService extends Service {
     let results;
 
     if (isContractCreation) {
-      results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-        true,
-      );
+      results = await this.mirrorNodeAdapter.getContractResults(res.id.toString(), numberOfResultsItems, true);
     } else {
-      results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
+      results = await this.mirrorNodeAdapter.getContractResults(res.id.toString(), numberOfResultsItems);
     }
 
     if (!results || results.length !== numberOfResultsItems) {

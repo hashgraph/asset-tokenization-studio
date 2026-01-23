@@ -203,19 +203,19 @@
 
 */
 
-import { GetHoldCountForByPartitionQueryHandler } from '@query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQueryHandler';
-import { ControllerCreateHoldByPartitionCommandHandler } from '@command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommandHandler';
-import { CreateHoldByPartitionCommandHandler } from '@command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommandHandler';
-import { CreateHoldFromByPartitionCommandHandler } from '@command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommandHandler';
-import { ProtectedCreateHoldByPartitionCommandHandler } from '@command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommandHandler';
-import { TOKENS } from '../Tokens';
-import { GetHoldsIdForByPartitionQueryHandler } from '@query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQueryHandler';
-import { GetHoldForByPartitionQueryHandler } from '@query/security/hold/getHoldForByPartition/GetHoldForByPartitionQueryHandler';
-import { GetHeldAmountForQueryHandler } from '@query/security/hold/getHeldAmountFor/GetHeldAmountForQueryHandler';
-import { GetHeldAmountForByPartitionQueryHandler } from '@query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQueryHandler';
-import { ReleaseHoldByPartitionCommandHandler } from '@command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommandHandler';
-import { ReclaimHoldByPartitionCommandHandler } from '@command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommandHandler';
-import { ExecuteHoldByPartitionCommandHandler } from '@command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler';
+import { GetHoldCountForByPartitionQueryHandler } from "@query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQueryHandler";
+import { ControllerCreateHoldByPartitionCommandHandler } from "@command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommandHandler";
+import { CreateHoldByPartitionCommandHandler } from "@command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommandHandler";
+import { CreateHoldFromByPartitionCommandHandler } from "@command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommandHandler";
+import { ProtectedCreateHoldByPartitionCommandHandler } from "@command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommandHandler";
+import { TOKENS } from "../Tokens";
+import { GetHoldsIdForByPartitionQueryHandler } from "@query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQueryHandler";
+import { GetHoldForByPartitionQueryHandler } from "@query/security/hold/getHoldForByPartition/GetHoldForByPartitionQueryHandler";
+import { GetHeldAmountForQueryHandler } from "@query/security/hold/getHeldAmountFor/GetHeldAmountForQueryHandler";
+import { GetHeldAmountForByPartitionQueryHandler } from "@query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQueryHandler";
+import { ReleaseHoldByPartitionCommandHandler } from "@command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommandHandler";
+import { ReclaimHoldByPartitionCommandHandler } from "@command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommandHandler";
+import { ExecuteHoldByPartitionCommandHandler } from "@command/security/operations/hold/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler";
 
 export const COMMAND_HANDLERS_HOLD = [
   {

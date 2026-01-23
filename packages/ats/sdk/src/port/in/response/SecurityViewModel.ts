@@ -203,8 +203,8 @@
 
 */
 
-import { QueryResponse } from '@core/query/QueryResponse';
-import RegulationViewModel from './RegulationViewModel';
+import { QueryResponse } from "@core/query/QueryResponse";
+import RegulationViewModel from "./RegulationViewModel";
 
 export default interface SecurityViewModel extends QueryResponse {
   name?: string;

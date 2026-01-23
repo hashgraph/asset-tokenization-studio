@@ -203,20 +203,14 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../../FormatValidation";
 
 export default class SetRevocationRegistryAddressRequest extends ValidatedRequest<SetRevocationRegistryAddressRequest> {
   securityId: string;
   revocationRegistryId: string;
 
-  constructor({
-    securityId,
-    revocationRegistryId,
-  }: {
-    revocationRegistryId: string;
-    securityId: string;
-  }) {
+  constructor({ securityId, revocationRegistryId }: { revocationRegistryId: string; securityId: string }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       revocationRegistryId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

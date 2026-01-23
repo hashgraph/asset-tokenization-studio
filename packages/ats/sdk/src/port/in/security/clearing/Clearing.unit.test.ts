@@ -203,8 +203,8 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '@core/command/CommandBus';
+import { createMock } from "@golevelup/ts-jest";
+import { CommandBus } from "@core/command/CommandBus";
 import {
   ActivateClearingRequest,
   ApproveClearingOperationByPartitionRequest,
@@ -231,15 +231,15 @@ import {
   ProtectedClearingRedeemByPartitionRequest,
   ProtectedClearingTransferByPartitionRequest,
   ReclaimClearingOperationByPartitionRequest,
-} from '../../request';
-import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
-import LogService from '@service/log/LogService';
-import { QueryBus } from '@core/query/QueryBus';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { ValidationError } from '@core/validation/ValidationError';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import Security from '@port/in/security/Security';
-import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
+} from "../../request";
+import { TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import LogService from "@service/log/LogService";
+import { QueryBus } from "@core/query/QueryBus";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { ValidationError } from "@core/validation/ValidationError";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import Security from "@port/in/security/Security";
+import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
 import {
   ActivateClearingRequestFixture,
   ApproveClearingOperationByPartitionRequestFixture,
@@ -269,34 +269,34 @@ import {
   ProtectedClearingRedeemByPartitionRequestFixture,
   ProtectedClearingTransferByPartitionRequestFixture,
   ReclaimClearingOperationByPartitionRequestFixture,
-} from '@test/fixtures/clearing/ClearingFixture';
-import { ActivateClearingCommand } from '@command/security/operations/clearing/activateClearing/ActivateClearingCommand';
-import { DeactivateClearingCommand } from '@command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand';
-import { ClearingTransferByPartitionCommand } from '@command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommand';
-import { ClearingTransferFromByPartitionCommand } from '@command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommand';
-import { CancelClearingOperationByPartitionCommand } from '@command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommand';
-import { ReclaimClearingOperationByPartitionCommand } from '@command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommand';
-import { ClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand';
-import { ProtectedClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand';
-import { ClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommand';
-import { ClearingCreateHoldFromByPartitionCommand } from '@command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand';
-import { ProtectedClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand';
-import { GetClearedAmountForQuery } from '@query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery';
-import { GetClearedAmountForByPartitionQuery } from '@query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery';
-import { GetClearingCountForByPartitionQuery } from '@query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery';
-import { GetClearingCreateHoldForByPartitionQuery } from '@query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery';
-import { GetClearingRedeemForByPartitionQuery } from '@query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery';
-import { GetClearingTransferForByPartitionQuery } from '@query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery';
-import { GetClearingsIdForByPartitionQuery } from '@query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery';
-import { IsClearingActivatedQuery } from '@query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
-import { OperatorClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand';
-import { OperatorClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand';
-import { OperatorClearingTransferByPartitionCommand } from '@command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand';
-import { ClearingRedeemFromByPartitionCommand } from '@command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand';
-import { ProtectedClearingTransferByPartitionCommand } from '@command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
-import { ApproveClearingOperationByPartitionCommand } from '@command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
+} from "@test/fixtures/clearing/ClearingFixture";
+import { ActivateClearingCommand } from "@command/security/operations/clearing/activateClearing/ActivateClearingCommand";
+import { DeactivateClearingCommand } from "@command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand";
+import { ClearingTransferByPartitionCommand } from "@command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommand";
+import { ClearingTransferFromByPartitionCommand } from "@command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommand";
+import { CancelClearingOperationByPartitionCommand } from "@command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommand";
+import { ReclaimClearingOperationByPartitionCommand } from "@command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommand";
+import { ClearingRedeemByPartitionCommand } from "@command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand";
+import { ProtectedClearingRedeemByPartitionCommand } from "@command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand";
+import { ClearingCreateHoldByPartitionCommand } from "@command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommand";
+import { ClearingCreateHoldFromByPartitionCommand } from "@command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand";
+import { ProtectedClearingCreateHoldByPartitionCommand } from "@command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand";
+import { GetClearedAmountForQuery } from "@query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery";
+import { GetClearedAmountForByPartitionQuery } from "@query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery";
+import { GetClearingCountForByPartitionQuery } from "@query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery";
+import { GetClearingCreateHoldForByPartitionQuery } from "@query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery";
+import { GetClearingRedeemForByPartitionQuery } from "@query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery";
+import { GetClearingTransferForByPartitionQuery } from "@query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery";
+import { GetClearingsIdForByPartitionQuery } from "@query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery";
+import { IsClearingActivatedQuery } from "@query/security/clearing/isClearingActivated/IsClearingActivatedQuery";
+import { OperatorClearingCreateHoldByPartitionCommand } from "@command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand";
+import { OperatorClearingRedeemByPartitionCommand } from "@command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand";
+import { OperatorClearingTransferByPartitionCommand } from "@command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand";
+import { ClearingRedeemFromByPartitionCommand } from "@command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand";
+import { ProtectedClearingTransferByPartitionCommand } from "@command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand";
+import { ApproveClearingOperationByPartitionCommand } from "@command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand";
 
-describe('Clearing', () => {
+describe("Clearing", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
   let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
@@ -336,8 +336,8 @@ describe('Clearing', () => {
     queryBusMock = createMock<QueryBus>();
     mirrorNodeMock = createMock<MirrorNodeAdapter>();
 
-    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
-    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    handleValidationSpy = jest.spyOn(ValidatedRequest, "handleValidation");
+    jest.spyOn(LogService, "logError").mockImplementation(() => {});
     (Security as any).commandBus = commandBusMock;
     (Security as any).queryBus = queryBusMock;
     (Security as any).mirrorNode = mirrorNodeMock;
@@ -348,24 +348,19 @@ describe('Clearing', () => {
     jest.restoreAllMocks();
   });
 
-  describe('activateClearing', () => {
-    activateClearingRequest = new ActivateClearingRequest(
-      ActivateClearingRequestFixture.create(),
-    );
+  describe("activateClearing", () => {
+    activateClearingRequest = new ActivateClearingRequest(ActivateClearingRequestFixture.create());
 
     const expectedResponse = {
       payload: true,
       transactionId: transactionId,
     };
-    it('should activate clearing successfully', async () => {
+    it("should activate clearing successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Security.activateClearing(activateClearingRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ActivateClearingRequest',
-        activateClearingRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("ActivateClearingRequest", activateClearingRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new ActivateClearingCommand(activateClearingRequest.securityId),
@@ -373,57 +368,43 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.activateClearing(activateClearingRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(Security.activateClearing(activateClearingRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ActivateClearingRequest',
-        activateClearingRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("ActivateClearingRequest", activateClearingRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new ActivateClearingCommand(activateClearingRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       activateClearingRequest = new ActivateClearingRequest({
         ...ActivateClearingRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.activateClearing(activateClearingRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.activateClearing(activateClearingRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('deactivateClearing', () => {
-    deactivateClearingRequest = new DeactivateClearingRequest(
-      DeactivateClearingRequestFixture.create(),
-    );
+  describe("deactivateClearing", () => {
+    deactivateClearingRequest = new DeactivateClearingRequest(DeactivateClearingRequestFixture.create());
 
     const expectedResponse = {
       payload: true,
       transactionId: transactionId,
     };
-    it('should deactivate clearing successfully', async () => {
+    it("should deactivate clearing successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.deactivateClearing(
-        deactivateClearingRequest,
-      );
+      const result = await Security.deactivateClearing(deactivateClearingRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'DeactivateClearingRequest',
-        deactivateClearingRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("DeactivateClearingRequest", deactivateClearingRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new DeactivateClearingCommand(deactivateClearingRequest.securityId),
@@ -431,52 +412,43 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.deactivateClearing(deactivateClearingRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(Security.deactivateClearing(deactivateClearingRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'DeactivateClearingRequest',
-        deactivateClearingRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("DeactivateClearingRequest", deactivateClearingRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new DeactivateClearingCommand(deactivateClearingRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       deactivateClearingRequest = new DeactivateClearingRequest({
         ...DeactivateClearingRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.deactivateClearing(deactivateClearingRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.deactivateClearing(deactivateClearingRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('clearingTransferByPartition', () => {
+  describe("clearingTransferByPartition", () => {
     clearingTransferByPartitionRequest = new ClearingTransferByPartitionRequest(
       ClearingTransferByPartitionRequestFixture.create(),
     );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should execute clearing transfer successfully', async () => {
+    it("should execute clearing transfer successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.clearingTransferByPartition(
-        clearingTransferByPartitionRequest,
-      );
+      const result = await Security.clearingTransferByPartition(clearingTransferByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingTransferByPartitionRequest',
+        "ClearingTransferByPartitionRequest",
         clearingTransferByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -491,17 +463,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.clearingTransferByPartition(
-          clearingTransferByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+      await expect(Security.clearingTransferByPartition(clearingTransferByPartitionRequest)).rejects.toThrow(
+        "Command execution failed",
+      );
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingTransferByPartitionRequest',
+        "ClearingTransferByPartitionRequest",
         clearingTransferByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -515,73 +485,60 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ClearingTransferByPartitionRequest({
         ...ClearingTransferByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ClearingTransferByPartitionRequest({
         ...ClearingTransferByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new ClearingTransferByPartitionRequest({
         ...ClearingTransferByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if expirationDate is invalid', async () => {
+    it("should throw error if expirationDate is invalid", async () => {
       const invalidRequest = new ClearingTransferByPartitionRequest({
         ...ClearingTransferByPartitionRequestFixture.create({
-          expirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          expirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.clearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('clearingTransferFromByPartition', () => {
-    clearingTransferFromByPartitionRequest =
-      new ClearingTransferFromByPartitionRequest(
-        ClearingTransferFromByPartitionRequestFixture.create(),
-      );
+  describe("clearingTransferFromByPartition", () => {
+    clearingTransferFromByPartitionRequest = new ClearingTransferFromByPartitionRequest(
+      ClearingTransferFromByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should execute clearing transfer from successfully', async () => {
+    it("should execute clearing transfer from successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.clearingTransferFromByPartition(
-        clearingTransferFromByPartitionRequest,
-      );
+      const result = await Security.clearingTransferFromByPartition(clearingTransferFromByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingTransferFromByPartitionRequest',
+        "ClearingTransferFromByPartitionRequest",
         clearingTransferFromByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -597,17 +554,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.clearingTransferFromByPartition(
-          clearingTransferFromByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+      await expect(Security.clearingTransferFromByPartition(clearingTransferFromByPartitionRequest)).rejects.toThrow(
+        "Command execution failed",
+      );
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingTransferFromByPartitionRequest',
+        "ClearingTransferFromByPartitionRequest",
         clearingTransferFromByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -622,85 +577,70 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ClearingTransferFromByPartitionRequest({
         ...ClearingTransferFromByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingTransferFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingTransferFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ClearingTransferFromByPartitionRequest({
         ...ClearingTransferFromByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingTransferFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingTransferFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new ClearingTransferFromByPartitionRequest({
         ...ClearingTransferFromByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingTransferFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingTransferFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if sourceId is invalid', async () => {
+    it("should throw error if sourceId is invalid", async () => {
       const invalidRequest = new ClearingTransferFromByPartitionRequest({
         ...ClearingTransferFromByPartitionRequestFixture.create({
-          sourceId: 'invalid',
+          sourceId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingTransferFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingTransferFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if expirationDate is invalid', async () => {
+    it("should throw error if expirationDate is invalid", async () => {
       const invalidRequest = new ClearingTransferFromByPartitionRequest({
         ...ClearingTransferFromByPartitionRequestFixture.create({
-          expirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          expirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.clearingTransferFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingTransferFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('cancelClearingOperationByPartition', () => {
-    cancelClearingOperationByPartitionRequest =
-      new CancelClearingOperationByPartitionRequest(
-        CancelClearingOperationByPartitionRequestFixture.create(),
-      );
+  describe("cancelClearingOperationByPartition", () => {
+    cancelClearingOperationByPartitionRequest = new CancelClearingOperationByPartitionRequest(
+      CancelClearingOperationByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: true, transactionId };
 
-    it('should cancel clearing operation successfully', async () => {
+    it("should cancel clearing operation successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.cancelClearingOperationByPartition(
-        cancelClearingOperationByPartitionRequest,
-      );
+      const result = await Security.cancelClearingOperationByPartition(cancelClearingOperationByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CancelClearingOperationByPartitionRequest',
+        "CancelClearingOperationByPartitionRequest",
         cancelClearingOperationByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -715,17 +655,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.cancelClearingOperationByPartition(
-          cancelClearingOperationByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.cancelClearingOperationByPartition(cancelClearingOperationByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'CancelClearingOperationByPartitionRequest',
+        "CancelClearingOperationByPartitionRequest",
         cancelClearingOperationByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -739,59 +677,50 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new CancelClearingOperationByPartitionRequest({
         ...CancelClearingOperationByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.cancelClearingOperationByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.cancelClearingOperationByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new CancelClearingOperationByPartitionRequest({
         ...CancelClearingOperationByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.cancelClearingOperationByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.cancelClearingOperationByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if clearingId is invalid', async () => {
+    it("should throw error if clearingId is invalid", async () => {
       const invalidRequest = new CancelClearingOperationByPartitionRequest({
         ...CancelClearingOperationByPartitionRequestFixture.create({
           clearingId: -1,
         }),
       });
 
-      await expect(
-        Security.cancelClearingOperationByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.cancelClearingOperationByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('reclaimClearingOperationByPartition', () => {
-    reclaimClearingOperationByPartitionRequest =
-      new ReclaimClearingOperationByPartitionRequest(
-        ReclaimClearingOperationByPartitionRequestFixture.create(),
-      );
+  describe("reclaimClearingOperationByPartition", () => {
+    reclaimClearingOperationByPartitionRequest = new ReclaimClearingOperationByPartitionRequest(
+      ReclaimClearingOperationByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: true, transactionId };
 
-    it('should reclaim clearing operation successfully', async () => {
+    it("should reclaim clearing operation successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.reclaimClearingOperationByPartition(
-        reclaimClearingOperationByPartitionRequest,
-      );
+      const result = await Security.reclaimClearingOperationByPartition(reclaimClearingOperationByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ReclaimClearingOperationByPartitionRequest',
+        "ReclaimClearingOperationByPartitionRequest",
         reclaimClearingOperationByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -806,17 +735,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.reclaimClearingOperationByPartition(
-          reclaimClearingOperationByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.reclaimClearingOperationByPartition(reclaimClearingOperationByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ReclaimClearingOperationByPartitionRequest',
+        "ReclaimClearingOperationByPartitionRequest",
         reclaimClearingOperationByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -830,58 +757,50 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ReclaimClearingOperationByPartitionRequest({
         ...ReclaimClearingOperationByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.reclaimClearingOperationByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.reclaimClearingOperationByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ReclaimClearingOperationByPartitionRequest({
         ...ReclaimClearingOperationByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.reclaimClearingOperationByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.reclaimClearingOperationByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if clearingId is invalid', async () => {
+    it("should throw error if clearingId is invalid", async () => {
       const invalidRequest = new ReclaimClearingOperationByPartitionRequest({
         ...ReclaimClearingOperationByPartitionRequestFixture.create({
           clearingId: -1,
         }),
       });
 
-      await expect(
-        Security.reclaimClearingOperationByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.reclaimClearingOperationByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('clearingRedeemByPartition', () => {
+  describe("clearingRedeemByPartition", () => {
     clearingRedeemByPartitionRequest = new ClearingRedeemByPartitionRequest(
       ClearingRedeemByPartitionRequestFixture.create(),
     );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should execute clearing redeem successfully', async () => {
+    it("should execute clearing redeem successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.clearingRedeemByPartition(
-        clearingRedeemByPartitionRequest,
-      );
+      const result = await Security.clearingRedeemByPartition(clearingRedeemByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingRedeemByPartitionRequest',
+        "ClearingRedeemByPartitionRequest",
         clearingRedeemByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -895,15 +814,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.clearingRedeemByPartition(clearingRedeemByPartitionRequest),
-      ).rejects.toThrow('Command execution failed');
+      await expect(Security.clearingRedeemByPartition(clearingRedeemByPartitionRequest)).rejects.toThrow(
+        "Command execution failed",
+      );
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingRedeemByPartitionRequest',
+        "ClearingRedeemByPartitionRequest",
         clearingRedeemByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -916,73 +835,60 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ClearingRedeemByPartitionRequest({
         ...ClearingRedeemByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ClearingRedeemByPartitionRequest({
         ...ClearingRedeemByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new ClearingRedeemByPartitionRequest({
         ...ClearingRedeemByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if expirationDate is invalid', async () => {
+    it("should throw error if expirationDate is invalid", async () => {
       const invalidRequest = new ClearingRedeemByPartitionRequest({
         ...ClearingRedeemByPartitionRequestFixture.create({
-          expirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          expirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.clearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('protectedClearingRedeemByPartition', () => {
-    protectedClearingRedeemByPartitionRequest =
-      new ProtectedClearingRedeemByPartitionRequest(
-        ProtectedClearingRedeemByPartitionRequestFixture.create(),
-      );
+  describe("protectedClearingRedeemByPartition", () => {
+    protectedClearingRedeemByPartitionRequest = new ProtectedClearingRedeemByPartitionRequest(
+      ProtectedClearingRedeemByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should execute protected clearing redeem successfully', async () => {
+    it("should execute protected clearing redeem successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.protectedClearingRedeemByPartition(
-        protectedClearingRedeemByPartitionRequest,
-      );
+      const result = await Security.protectedClearingRedeemByPartition(protectedClearingRedeemByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ProtectedClearingRedeemByPartitionRequest',
+        "ProtectedClearingRedeemByPartitionRequest",
         protectedClearingRedeemByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -1000,17 +906,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.protectedClearingRedeemByPartition(
-          protectedClearingRedeemByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.protectedClearingRedeemByPartition(protectedClearingRedeemByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ProtectedClearingRedeemByPartitionRequest',
+        "ProtectedClearingRedeemByPartitionRequest",
         protectedClearingRedeemByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -1027,85 +931,70 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ProtectedClearingRedeemByPartitionRequest({
         ...ProtectedClearingRedeemByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ProtectedClearingRedeemByPartitionRequest({
         ...ProtectedClearingRedeemByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new ProtectedClearingRedeemByPartitionRequest({
         ...ProtectedClearingRedeemByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if sourceId is invalid', async () => {
+    it("should throw error if sourceId is invalid", async () => {
       const invalidRequest = new ProtectedClearingRedeemByPartitionRequest({
         ...ProtectedClearingRedeemByPartitionRequestFixture.create({
-          sourceId: 'invalid',
+          sourceId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if expirationDate is invalid', async () => {
+    it("should throw error if expirationDate is invalid", async () => {
       const invalidRequest = new ProtectedClearingRedeemByPartitionRequest({
         ...ProtectedClearingRedeemByPartitionRequestFixture.create({
-          expirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          expirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.protectedClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('clearingCreateHoldByPartition', () => {
-    clearingCreateHoldByPartitionRequest =
-      new ClearingCreateHoldByPartitionRequest(
-        ClearingCreateHoldByPartitionRequestFixture.create(),
-      );
+  describe("clearingCreateHoldByPartition", () => {
+    clearingCreateHoldByPartitionRequest = new ClearingCreateHoldByPartitionRequest(
+      ClearingCreateHoldByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should create hold successfully', async () => {
+    it("should create hold successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.clearingCreateHoldByPartition(
-        clearingCreateHoldByPartitionRequest,
-      );
+      const result = await Security.clearingCreateHoldByPartition(clearingCreateHoldByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingCreateHoldByPartitionRequest',
+        "ClearingCreateHoldByPartitionRequest",
         clearingCreateHoldByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -1122,17 +1011,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.clearingCreateHoldByPartition(
-          clearingCreateHoldByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+      await expect(Security.clearingCreateHoldByPartition(clearingCreateHoldByPartitionRequest)).rejects.toThrow(
+        "Command execution failed",
+      );
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingCreateHoldByPartitionRequest',
+        "ClearingCreateHoldByPartitionRequest",
         clearingCreateHoldByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -1148,85 +1035,70 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldByPartitionRequest({
         ...ClearingCreateHoldByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldByPartitionRequest({
         ...ClearingCreateHoldByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldByPartitionRequest({
         ...ClearingCreateHoldByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrowId is invalid', async () => {
+    it("should throw error if escrowId is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldByPartitionRequest({
         ...ClearingCreateHoldByPartitionRequestFixture.create({
-          escrowId: 'invalid',
+          escrowId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if clearingExpirationDate is invalid', async () => {
+    it("should throw error if clearingExpirationDate is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldByPartitionRequest({
         ...ClearingCreateHoldByPartitionRequestFixture.create({
-          clearingExpirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          clearingExpirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('clearingCreateHoldFromByPartition', () => {
-    clearingCreateHoldFromByPartitionRequest =
-      new ClearingCreateHoldFromByPartitionRequest(
-        ClearingCreateHoldFromByPartitionRequestFixture.create(),
-      );
+  describe("clearingCreateHoldFromByPartition", () => {
+    clearingCreateHoldFromByPartitionRequest = new ClearingCreateHoldFromByPartitionRequest(
+      ClearingCreateHoldFromByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should create hold from successfully', async () => {
+    it("should create hold from successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.clearingCreateHoldFromByPartition(
-        clearingCreateHoldFromByPartitionRequest,
-      );
+      const result = await Security.clearingCreateHoldFromByPartition(clearingCreateHoldFromByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingCreateHoldFromByPartitionRequest',
+        "ClearingCreateHoldFromByPartitionRequest",
         clearingCreateHoldFromByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -1244,17 +1116,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.clearingCreateHoldFromByPartition(
-          clearingCreateHoldFromByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.clearingCreateHoldFromByPartition(clearingCreateHoldFromByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingCreateHoldFromByPartitionRequest',
+        "ClearingCreateHoldFromByPartitionRequest",
         clearingCreateHoldFromByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -1271,89 +1141,74 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldFromByPartitionRequest({
         ...ClearingCreateHoldFromByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldFromByPartitionRequest({
         ...ClearingCreateHoldFromByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldFromByPartitionRequest({
         ...ClearingCreateHoldFromByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrowId is invalid', async () => {
+    it("should throw error if escrowId is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldFromByPartitionRequest({
         ...ClearingCreateHoldFromByPartitionRequestFixture.create({
-          escrowId: 'invalid',
+          escrowId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if sourceId is invalid', async () => {
+    it("should throw error if sourceId is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldFromByPartitionRequest({
         ...ClearingCreateHoldFromByPartitionRequestFixture.create({
-          sourceId: 'invalid',
+          sourceId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if clearingExpirationDate is invalid', async () => {
+    it("should throw error if clearingExpirationDate is invalid", async () => {
       const invalidRequest = new ClearingCreateHoldFromByPartitionRequest({
         ...ClearingCreateHoldFromByPartitionRequestFixture.create({
-          clearingExpirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          clearingExpirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.clearingCreateHoldFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingCreateHoldFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('protectedClearingCreateHoldByPartition', () => {
-    protectedClearingCreateHoldByPartitionRequest =
-      new ProtectedClearingCreateHoldByPartitionRequest(
-        ProtectedClearingCreateHoldByPartitionRequestFixture.create(),
-      );
+  describe("protectedClearingCreateHoldByPartition", () => {
+    protectedClearingCreateHoldByPartitionRequest = new ProtectedClearingCreateHoldByPartitionRequest(
+      ProtectedClearingCreateHoldByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should create protected hold successfully', async () => {
+    it("should create protected hold successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Security.protectedClearingCreateHoldByPartition(
@@ -1361,7 +1216,7 @@ describe('Clearing', () => {
       );
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ProtectedClearingCreateHoldByPartitionRequest',
+        "ProtectedClearingCreateHoldByPartitionRequest",
         protectedClearingCreateHoldByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -1382,17 +1237,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.protectedClearingCreateHoldByPartition(
-          protectedClearingCreateHoldByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.protectedClearingCreateHoldByPartition(protectedClearingCreateHoldByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ProtectedClearingCreateHoldByPartitionRequest',
+        "ProtectedClearingCreateHoldByPartitionRequest",
         protectedClearingCreateHoldByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -1412,153 +1265,122 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ProtectedClearingCreateHoldByPartitionRequest({
         ...ProtectedClearingCreateHoldByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ProtectedClearingCreateHoldByPartitionRequest({
         ...ProtectedClearingCreateHoldByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new ProtectedClearingCreateHoldByPartitionRequest({
         ...ProtectedClearingCreateHoldByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrowId is invalid', async () => {
+    it("should throw error if escrowId is invalid", async () => {
       const invalidRequest = new ProtectedClearingCreateHoldByPartitionRequest({
         ...ProtectedClearingCreateHoldByPartitionRequestFixture.create({
-          escrowId: 'invalid',
+          escrowId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if sourceId is invalid', async () => {
+    it("should throw error if sourceId is invalid", async () => {
       const invalidRequest = new ProtectedClearingCreateHoldByPartitionRequest({
         ...ProtectedClearingCreateHoldByPartitionRequestFixture.create({
-          sourceId: 'invalid',
+          sourceId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if clearingExpirationDate is invalid', async () => {
+    it("should throw error if clearingExpirationDate is invalid", async () => {
       const invalidRequest = new ProtectedClearingCreateHoldByPartitionRequest({
         ...ProtectedClearingCreateHoldByPartitionRequestFixture.create({
-          clearingExpirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          clearingExpirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.protectedClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getClearedAmountFor', () => {
-    getClearedAmountForRequest = new GetClearedAmountForRequest(
-      GetClearedAmountForRequestFixture.create(),
+  describe("getClearedAmountFor", () => {
+    getClearedAmountForRequest = new GetClearedAmountForRequest(GetClearedAmountForRequestFixture.create());
+    const expectedResponse = { payload: 100 };
+
+    it("should get cleared amount successfully", async () => {
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.getClearedAmountFor(getClearedAmountForRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        "GetClearedAmountForByPartitionRequest",
+        getClearedAmountForRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetClearedAmountForQuery(getClearedAmountForRequest.securityId, getClearedAmountForRequest.targetId),
+      );
+      expect(result).toEqual(expectedResponse.payload);
+    });
+
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.getClearedAmountFor(getClearedAmountForRequest)).rejects.toThrow("Query execution failed");
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        "GetClearedAmountForByPartitionRequest",
+        getClearedAmountForRequest,
+      );
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetClearedAmountForQuery(getClearedAmountForRequest.securityId, getClearedAmountForRequest.targetId),
+      );
+    });
+
+    it("should throw error if securityId is invalid", async () => {
+      const invalidRequest = new GetClearedAmountForRequest({
+        ...GetClearedAmountForRequestFixture.create({ securityId: "invalid" }),
+      });
+
+      await expect(Security.getClearedAmountFor(invalidRequest)).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe("getClearedAmountForByPartition", () => {
+    getClearedAmountForByPartitionRequest = new GetClearedAmountForByPartitionRequest(
+      GetClearedAmountForByPartitionRequestFixture.create(),
     );
     const expectedResponse = { payload: 100 };
 
-    it('should get cleared amount successfully', async () => {
+    it("should get cleared amount by partition successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.getClearedAmountFor(
-        getClearedAmountForRequest,
-      );
+      const result = await Security.getClearedAmountForByPartition(getClearedAmountForByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearedAmountForByPartitionRequest',
-        getClearedAmountForRequest,
-      );
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetClearedAmountForQuery(
-          getClearedAmountForRequest.securityId,
-          getClearedAmountForRequest.targetId,
-        ),
-      );
-      expect(result).toEqual(expectedResponse.payload);
-    });
-
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(
-        Security.getClearedAmountFor(getClearedAmountForRequest),
-      ).rejects.toThrow('Query execution failed');
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearedAmountForByPartitionRequest',
-        getClearedAmountForRequest,
-      );
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetClearedAmountForQuery(
-          getClearedAmountForRequest.securityId,
-          getClearedAmountForRequest.targetId,
-        ),
-      );
-    });
-
-    it('should throw error if securityId is invalid', async () => {
-      const invalidRequest = new GetClearedAmountForRequest({
-        ...GetClearedAmountForRequestFixture.create({ securityId: 'invalid' }),
-      });
-
-      await expect(
-        Security.getClearedAmountFor(invalidRequest),
-      ).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe('getClearedAmountForByPartition', () => {
-    getClearedAmountForByPartitionRequest =
-      new GetClearedAmountForByPartitionRequest(
-        GetClearedAmountForByPartitionRequestFixture.create(),
-      );
-    const expectedResponse = { payload: 100 };
-
-    it('should get cleared amount by partition successfully', async () => {
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await Security.getClearedAmountForByPartition(
-        getClearedAmountForByPartitionRequest,
-      );
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearedAmountForByPartitionRequest',
+        "GetClearedAmountForByPartitionRequest",
         getClearedAmountForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1571,17 +1393,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.getClearedAmountForByPartition(
-          getClearedAmountForByPartitionRequest,
-        ),
-      ).rejects.toThrow('Query execution failed');
+      await expect(Security.getClearedAmountForByPartition(getClearedAmountForByPartitionRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearedAmountForByPartitionRequest',
+        "GetClearedAmountForByPartitionRequest",
         getClearedAmountForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1593,47 +1413,40 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new GetClearedAmountForByPartitionRequest({
         ...GetClearedAmountForByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearedAmountForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearedAmountForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new GetClearedAmountForByPartitionRequest({
         ...GetClearedAmountForByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearedAmountForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearedAmountForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getClearingCountForByPartition', () => {
-    getClearingCountForByPartitionRequest =
-      new GetClearingCountForByPartitionRequest(
-        GetClearingCountForByPartitionRequestFixture.create(),
-      );
+  describe("getClearingCountForByPartition", () => {
+    getClearingCountForByPartitionRequest = new GetClearingCountForByPartitionRequest(
+      GetClearingCountForByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 5 };
 
-    it('should get clearing count successfully', async () => {
+    it("should get clearing count successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.getClearingCountForByPartition(
-        getClearingCountForByPartitionRequest,
-      );
+      const result = await Security.getClearingCountForByPartition(getClearingCountForByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingCountForByPartitionRequest',
+        "GetClearingCountForByPartitionRequest",
         getClearingCountForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1647,17 +1460,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.getClearingCountForByPartition(
-          getClearingCountForByPartitionRequest,
-        ),
-      ).rejects.toThrow('Query execution failed');
+      await expect(Security.getClearingCountForByPartition(getClearingCountForByPartitionRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingCountForByPartitionRequest',
+        "GetClearingCountForByPartitionRequest",
         getClearingCountForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1670,49 +1481,42 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new GetClearingCountForByPartitionRequest({
         ...GetClearingCountForByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingCountForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingCountForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new GetClearingCountForByPartitionRequest({
         ...GetClearingCountForByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingCountForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingCountForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getClearingCreateHoldForByPartition', () => {
-    getClearingCreateHoldForByPartitionRequest =
-      new GetClearingCreateHoldForByPartitionRequest(
-        GetClearingCreateHoldForByPartitionRequestFixture.create(),
-      );
+  describe("getClearingCreateHoldForByPartition", () => {
+    getClearingCreateHoldForByPartitionRequest = new GetClearingCreateHoldForByPartitionRequest(
+      GetClearingCreateHoldForByPartitionRequestFixture.create(),
+    );
     const expectedResponse = {
       payload: ClearingHoldCreationFixture.create(),
     };
 
-    it('should get clearing create hold successfully', async () => {
+    it("should get clearing create hold successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.getClearingCreateHoldForByPartition(
-        getClearingCreateHoldForByPartitionRequest,
-      );
+      const result = await Security.getClearingCreateHoldForByPartition(getClearingCreateHoldForByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingCreateHoldForByPartitionRequest',
+        "GetClearingCreateHoldForByPartitionRequest",
         getClearingCreateHoldForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1727,32 +1531,26 @@ describe('Clearing', () => {
         expect.objectContaining({
           id: getClearingCreateHoldForByPartitionRequest.clearingId,
           amount: expectedResponse.payload.amount.toString(),
-          expirationDate: new Date(
-            expectedResponse.payload.expirationTimestamp * ONE_THOUSAND,
-          ),
+          expirationDate: new Date(expectedResponse.payload.expirationTimestamp * ONE_THOUSAND),
           data: expectedResponse.payload.data,
           operatorData: expectedResponse.payload.operatorData,
           holdEscrowId: expectedResponse.payload.holdEscrowId,
-          holdExpirationDate: new Date(
-            expectedResponse.payload.holdExpirationTimestamp * ONE_THOUSAND,
-          ),
+          holdExpirationDate: new Date(expectedResponse.payload.holdExpirationTimestamp * ONE_THOUSAND),
           holdTo: expectedResponse.payload.holdTo,
           holdData: expectedResponse.payload.holdData,
         }),
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.getClearingCreateHoldForByPartition(
-          getClearingCreateHoldForByPartitionRequest,
-        ),
-      ).rejects.toThrow('Query execution failed');
+        Security.getClearingCreateHoldForByPartition(getClearingCreateHoldForByPartitionRequest),
+      ).rejects.toThrow("Query execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingCreateHoldForByPartitionRequest',
+        "GetClearingCreateHoldForByPartitionRequest",
         getClearingCreateHoldForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1765,49 +1563,42 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new GetClearingCreateHoldForByPartitionRequest({
         ...GetClearingCreateHoldForByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingCreateHoldForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingCreateHoldForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new GetClearingCreateHoldForByPartitionRequest({
         ...GetClearingCreateHoldForByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingCreateHoldForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingCreateHoldForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getClearingRedeemForByPartition', () => {
-    getClearingRedeemForByPartitionRequest =
-      new GetClearingRedeemForByPartitionRequest(
-        GetClearingRedeemForByPartitionRequestFixture.create(),
-      );
+  describe("getClearingRedeemForByPartition", () => {
+    getClearingRedeemForByPartitionRequest = new GetClearingRedeemForByPartitionRequest(
+      GetClearingRedeemForByPartitionRequestFixture.create(),
+    );
     const expectedResponse = {
       payload: ClearingRedeemFixture.create(),
     };
 
-    it('should get clearing redeem successfully', async () => {
+    it("should get clearing redeem successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.getClearingRedeemForByPartition(
-        getClearingRedeemForByPartitionRequest,
-      );
+      const result = await Security.getClearingRedeemForByPartition(getClearingRedeemForByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingRedeemForByPartitionRequest',
+        "GetClearingRedeemForByPartitionRequest",
         getClearingRedeemForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1822,26 +1613,22 @@ describe('Clearing', () => {
         expect.objectContaining({
           id: getClearingRedeemForByPartitionRequest.clearingId,
           amount: expectedResponse.payload.amount.toString(),
-          expirationDate: new Date(
-            expectedResponse.payload.expirationTimestamp * ONE_THOUSAND,
-          ),
+          expirationDate: new Date(expectedResponse.payload.expirationTimestamp * ONE_THOUSAND),
           data: expectedResponse.payload.data,
           operatorData: expectedResponse.payload.operatorData,
         }),
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.getClearingRedeemForByPartition(
-          getClearingRedeemForByPartitionRequest,
-        ),
-      ).rejects.toThrow('Query execution failed');
+      await expect(Security.getClearingRedeemForByPartition(getClearingRedeemForByPartitionRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingRedeemForByPartitionRequest',
+        "GetClearingRedeemForByPartitionRequest",
         getClearingRedeemForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1854,49 +1641,42 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new GetClearingRedeemForByPartitionRequest({
         ...GetClearingRedeemForByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingRedeemForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingRedeemForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new GetClearingRedeemForByPartitionRequest({
         ...GetClearingRedeemForByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingRedeemForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingRedeemForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getClearingTransferForByPartition', () => {
-    getClearingTransferForByPartitionRequest =
-      new GetClearingTransferForByPartitionRequest(
-        GetClearingTransferForByPartitionRequestFixture.create(),
-      );
+  describe("getClearingTransferForByPartition", () => {
+    getClearingTransferForByPartitionRequest = new GetClearingTransferForByPartitionRequest(
+      GetClearingTransferForByPartitionRequestFixture.create(),
+    );
     const expectedResponse = {
       payload: ClearingTransferFixture.create(),
     };
 
-    it('should get clearing transfer successfully', async () => {
+    it("should get clearing transfer successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.getClearingTransferForByPartition(
-        getClearingTransferForByPartitionRequest,
-      );
+      const result = await Security.getClearingTransferForByPartition(getClearingTransferForByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingTransferForByPartitionRequest',
+        "GetClearingTransferForByPartitionRequest",
         getClearingTransferForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1911,9 +1691,7 @@ describe('Clearing', () => {
         expect.objectContaining({
           id: getClearingTransferForByPartitionRequest.clearingId,
           amount: expectedResponse.payload.amount.toString(),
-          expirationDate: new Date(
-            expectedResponse.payload.expirationTimestamp * ONE_THOUSAND,
-          ),
+          expirationDate: new Date(expectedResponse.payload.expirationTimestamp * ONE_THOUSAND),
           destination: expectedResponse.payload.destination,
           data: expectedResponse.payload.data,
           operatorData: expectedResponse.payload.operatorData,
@@ -1921,17 +1699,15 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.getClearingTransferForByPartition(
-          getClearingTransferForByPartitionRequest,
-        ),
-      ).rejects.toThrow('Query execution failed');
+        Security.getClearingTransferForByPartition(getClearingTransferForByPartitionRequest),
+      ).rejects.toThrow("Query execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingTransferForByPartitionRequest',
+        "GetClearingTransferForByPartitionRequest",
         getClearingTransferForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -1944,47 +1720,40 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new GetClearingTransferForByPartitionRequest({
         ...GetClearingTransferForByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingTransferForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingTransferForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new GetClearingTransferForByPartitionRequest({
         ...GetClearingTransferForByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingTransferForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingTransferForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getClearingsIdForByPartition', () => {
-    getClearingsIdForByPartitionRequest =
-      new GetClearingsIdForByPartitionRequest(
-        GetClearingsIdForByPartitionRequestFixture.create(),
-      );
+  describe("getClearingsIdForByPartition", () => {
+    getClearingsIdForByPartitionRequest = new GetClearingsIdForByPartitionRequest(
+      GetClearingsIdForByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: [1, 2, 3] };
 
-    it('should get clearings IDs successfully', async () => {
+    it("should get clearings IDs successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.getClearingsIdForByPartition(
-        getClearingsIdForByPartitionRequest,
-      );
+      const result = await Security.getClearingsIdForByPartition(getClearingsIdForByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingsIdForByPartitionRequest',
+        "GetClearingsIdForByPartitionRequest",
         getClearingsIdForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -2000,17 +1769,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.getClearingsIdForByPartition(
-          getClearingsIdForByPartitionRequest,
-        ),
-      ).rejects.toThrow('Query execution failed');
+      await expect(Security.getClearingsIdForByPartition(getClearingsIdForByPartitionRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetClearingsIdForByPartitionRequest',
+        "GetClearingsIdForByPartitionRequest",
         getClearingsIdForByPartitionRequest,
       );
       expect(queryBusMock.execute).toHaveBeenCalledWith(
@@ -2025,97 +1792,76 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new GetClearingsIdForByPartitionRequest({
         ...GetClearingsIdForByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingsIdForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingsIdForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new GetClearingsIdForByPartitionRequest({
         ...GetClearingsIdForByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.getClearingsIdForByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.getClearingsIdForByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('isClearingActivated', () => {
-    isClearingActivatedRequest = new IsClearingActivatedRequest(
-      IsClearingActivatedRequestFixture.create(),
-    );
+  describe("isClearingActivated", () => {
+    isClearingActivatedRequest = new IsClearingActivatedRequest(IsClearingActivatedRequestFixture.create());
     const expectedResponse = { payload: true };
 
-    it('should check if clearing is activated successfully', async () => {
+    it("should check if clearing is activated successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.isClearingActivated(
-        isClearingActivatedRequest,
-      );
+      const result = await Security.isClearingActivated(isClearingActivatedRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'IsClearingActivatedRequest',
-        isClearingActivatedRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("IsClearingActivatedRequest", isClearingActivatedRequest);
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new IsClearingActivatedQuery(isClearingActivatedRequest.securityId),
       );
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.isClearingActivated(isClearingActivatedRequest),
-      ).rejects.toThrow('Query execution failed');
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'IsClearingActivatedRequest',
-        isClearingActivatedRequest,
-      );
+      await expect(Security.isClearingActivated(isClearingActivatedRequest)).rejects.toThrow("Query execution failed");
+      expect(handleValidationSpy).toHaveBeenCalledWith("IsClearingActivatedRequest", isClearingActivatedRequest);
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new IsClearingActivatedQuery(isClearingActivatedRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new IsClearingActivatedRequest({
-        ...IsClearingActivatedRequestFixture.create({ securityId: 'invalid' }),
+        ...IsClearingActivatedRequestFixture.create({ securityId: "invalid" }),
       });
 
-      await expect(
-        Security.isClearingActivated(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.isClearingActivated(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('operatorClearingCreateHoldByPartition', () => {
-    operatorClearingCreateHoldByPartitionRequest =
-      new OperatorClearingCreateHoldByPartitionRequest(
-        OperatorClearingCreateHoldByPartitionRequestFixture.create(),
-      );
+  describe("operatorClearingCreateHoldByPartition", () => {
+    operatorClearingCreateHoldByPartitionRequest = new OperatorClearingCreateHoldByPartitionRequest(
+      OperatorClearingCreateHoldByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should create operator hold successfully', async () => {
+    it("should create operator hold successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.operatorClearingCreateHoldByPartition(
-        operatorClearingCreateHoldByPartitionRequest,
-      );
+      const result = await Security.operatorClearingCreateHoldByPartition(operatorClearingCreateHoldByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'OperatorClearingCreateHoldByPartitionRequest',
+        "OperatorClearingCreateHoldByPartitionRequest",
         operatorClearingCreateHoldByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2133,17 +1879,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.operatorClearingCreateHoldByPartition(
-          operatorClearingCreateHoldByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.operatorClearingCreateHoldByPartition(operatorClearingCreateHoldByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'OperatorClearingCreateHoldByPartitionRequest',
+        "OperatorClearingCreateHoldByPartitionRequest",
         operatorClearingCreateHoldByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2160,97 +1904,80 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new OperatorClearingCreateHoldByPartitionRequest({
         ...OperatorClearingCreateHoldByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new OperatorClearingCreateHoldByPartitionRequest({
         ...OperatorClearingCreateHoldByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new OperatorClearingCreateHoldByPartitionRequest({
         ...OperatorClearingCreateHoldByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if escrowId is invalid', async () => {
+    it("should throw error if escrowId is invalid", async () => {
       const invalidRequest = new OperatorClearingCreateHoldByPartitionRequest({
         ...OperatorClearingCreateHoldByPartitionRequestFixture.create({
-          escrowId: 'invalid',
+          escrowId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if sourceId is invalid', async () => {
+    it("should throw error if sourceId is invalid", async () => {
       const invalidRequest = new OperatorClearingCreateHoldByPartitionRequest({
         ...OperatorClearingCreateHoldByPartitionRequestFixture.create({
-          sourceId: 'invalid',
+          sourceId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if clearingExpirationDate is invalid', async () => {
+    it("should throw error if clearingExpirationDate is invalid", async () => {
       const invalidRequest = new OperatorClearingCreateHoldByPartitionRequest({
         ...OperatorClearingCreateHoldByPartitionRequestFixture.create({
-          clearingExpirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          clearingExpirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.operatorClearingCreateHoldByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingCreateHoldByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('operatorClearingRedeemByPartition', () => {
-    operatorClearingRedeemByPartitionRequest =
-      new OperatorClearingRedeemByPartitionRequest(
-        OperatorClearingRedeemByPartitionRequestFixture.create(),
-      );
+  describe("operatorClearingRedeemByPartition", () => {
+    operatorClearingRedeemByPartitionRequest = new OperatorClearingRedeemByPartitionRequest(
+      OperatorClearingRedeemByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should execute operator redeem successfully', async () => {
+    it("should execute operator redeem successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.operatorClearingRedeemByPartition(
-        operatorClearingRedeemByPartitionRequest,
-      );
+      const result = await Security.operatorClearingRedeemByPartition(operatorClearingRedeemByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'OperatorClearingRedeemByPartitionRequest',
+        "OperatorClearingRedeemByPartitionRequest",
         operatorClearingRedeemByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2265,17 +1992,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.operatorClearingRedeemByPartition(
-          operatorClearingRedeemByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.operatorClearingRedeemByPartition(operatorClearingRedeemByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'OperatorClearingRedeemByPartitionRequest',
+        "OperatorClearingRedeemByPartitionRequest",
         operatorClearingRedeemByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2289,85 +2014,70 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new OperatorClearingRedeemByPartitionRequest({
         ...OperatorClearingRedeemByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new OperatorClearingRedeemByPartitionRequest({
         ...OperatorClearingRedeemByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new OperatorClearingRedeemByPartitionRequest({
         ...OperatorClearingRedeemByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if sourceId is invalid', async () => {
+    it("should throw error if sourceId is invalid", async () => {
       const invalidRequest = new OperatorClearingRedeemByPartitionRequest({
         ...OperatorClearingRedeemByPartitionRequestFixture.create({
-          sourceId: 'invalid',
+          sourceId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if expirationDate is invalid', async () => {
+    it("should throw error if expirationDate is invalid", async () => {
       const invalidRequest = new OperatorClearingRedeemByPartitionRequest({
         ...OperatorClearingRedeemByPartitionRequestFixture.create({
-          expirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          expirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.operatorClearingRedeemByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingRedeemByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('operatorClearingTransferByPartition', () => {
-    operatorClearingTransferByPartitionRequest =
-      new OperatorClearingTransferByPartitionRequest(
-        OperatorClearingTransferByPartitionRequestFixture.create(),
-      );
+  describe("operatorClearingTransferByPartition", () => {
+    operatorClearingTransferByPartitionRequest = new OperatorClearingTransferByPartitionRequest(
+      OperatorClearingTransferByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should execute operator transfer successfully', async () => {
+    it("should execute operator transfer successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.operatorClearingTransferByPartition(
-        operatorClearingTransferByPartitionRequest,
-      );
+      const result = await Security.operatorClearingTransferByPartition(operatorClearingTransferByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'OperatorClearingTransferByPartitionRequest',
+        "OperatorClearingTransferByPartitionRequest",
         operatorClearingTransferByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2383,17 +2093,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.operatorClearingTransferByPartition(
-          operatorClearingTransferByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.operatorClearingTransferByPartition(operatorClearingTransferByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'OperatorClearingTransferByPartitionRequest',
+        "OperatorClearingTransferByPartitionRequest",
         operatorClearingTransferByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2408,85 +2116,70 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new OperatorClearingTransferByPartitionRequest({
         ...OperatorClearingTransferByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new OperatorClearingTransferByPartitionRequest({
         ...OperatorClearingTransferByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new OperatorClearingTransferByPartitionRequest({
         ...OperatorClearingTransferByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if sourceId is invalid', async () => {
+    it("should throw error if sourceId is invalid", async () => {
       const invalidRequest = new OperatorClearingTransferByPartitionRequest({
         ...OperatorClearingTransferByPartitionRequestFixture.create({
-          sourceId: 'invalid',
+          sourceId: "invalid",
         }),
       });
 
-      await expect(
-        Security.operatorClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if expirationDate is invalid', async () => {
+    it("should throw error if expirationDate is invalid", async () => {
       const invalidRequest = new OperatorClearingTransferByPartitionRequest({
         ...OperatorClearingTransferByPartitionRequestFixture.create({
-          expirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          expirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.operatorClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.operatorClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('clearingRedeemFromByPartition', () => {
-    clearingRedeemFromByPartitionRequest =
-      new ClearingRedeemFromByPartitionRequest(
-        ClearingRedeemFromByPartitionRequestFixture.create(),
-      );
+  describe("clearingRedeemFromByPartition", () => {
+    clearingRedeemFromByPartitionRequest = new ClearingRedeemFromByPartitionRequest(
+      ClearingRedeemFromByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should execute clearing redeem from successfully', async () => {
+    it("should execute clearing redeem from successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.clearingRedeemFromByPartition(
-        clearingRedeemFromByPartitionRequest,
-      );
+      const result = await Security.clearingRedeemFromByPartition(clearingRedeemFromByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingRedeemFromByPartitionRequest',
+        "ClearingRedeemFromByPartitionRequest",
         clearingRedeemFromByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2501,17 +2194,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Security.clearingRedeemFromByPartition(
-          clearingRedeemFromByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+      await expect(Security.clearingRedeemFromByPartition(clearingRedeemFromByPartitionRequest)).rejects.toThrow(
+        "Command execution failed",
+      );
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ClearingRedeemFromByPartitionRequest',
+        "ClearingRedeemFromByPartitionRequest",
         clearingRedeemFromByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2525,85 +2216,70 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ClearingRedeemFromByPartitionRequest({
         ...ClearingRedeemFromByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingRedeemFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingRedeemFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ClearingRedeemFromByPartitionRequest({
         ...ClearingRedeemFromByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingRedeemFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingRedeemFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new ClearingRedeemFromByPartitionRequest({
         ...ClearingRedeemFromByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingRedeemFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingRedeemFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if sourceId is invalid', async () => {
+    it("should throw error if sourceId is invalid", async () => {
       const invalidRequest = new ClearingRedeemFromByPartitionRequest({
         ...ClearingRedeemFromByPartitionRequestFixture.create({
-          sourceId: 'invalid',
+          sourceId: "invalid",
         }),
       });
 
-      await expect(
-        Security.clearingRedeemFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingRedeemFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if expirationDate is invalid', async () => {
+    it("should throw error if expirationDate is invalid", async () => {
       const invalidRequest = new ClearingRedeemFromByPartitionRequest({
         ...ClearingRedeemFromByPartitionRequestFixture.create({
-          expirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          expirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.clearingRedeemFromByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.clearingRedeemFromByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('protectedClearingTransferByPartition', () => {
-    protectedClearingTransferByPartitionRequest =
-      new ProtectedClearingTransferByPartitionRequest(
-        ProtectedClearingTransferByPartitionRequestFixture.create(),
-      );
+  describe("protectedClearingTransferByPartition", () => {
+    protectedClearingTransferByPartitionRequest = new ProtectedClearingTransferByPartitionRequest(
+      ProtectedClearingTransferByPartitionRequestFixture.create(),
+    );
     const expectedResponse = { payload: 100, transactionId };
 
-    it('should execute protected clearing transfer successfully', async () => {
+    it("should execute protected clearing transfer successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.protectedClearingTransferByPartition(
-        protectedClearingTransferByPartitionRequest,
-      );
+      const result = await Security.protectedClearingTransferByPartition(protectedClearingTransferByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ProtectedClearingTransferByPartitionRequest',
+        "ProtectedClearingTransferByPartitionRequest",
         protectedClearingTransferByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2622,17 +2298,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.protectedClearingTransferByPartition(
-          protectedClearingTransferByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.protectedClearingTransferByPartition(protectedClearingTransferByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ProtectedClearingTransferByPartitionRequest',
+        "ProtectedClearingTransferByPartitionRequest",
         protectedClearingTransferByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2650,86 +2324,71 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ProtectedClearingTransferByPartitionRequest({
         ...ProtectedClearingTransferByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ProtectedClearingTransferByPartitionRequest({
         ...ProtectedClearingTransferByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if amount is invalid', async () => {
+    it("should throw error if amount is invalid", async () => {
       const invalidRequest = new ProtectedClearingTransferByPartitionRequest({
         ...ProtectedClearingTransferByPartitionRequestFixture.create({
-          amount: 'invalid',
+          amount: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if sourceId is invalid', async () => {
+    it("should throw error if sourceId is invalid", async () => {
       const invalidRequest = new ProtectedClearingTransferByPartitionRequest({
         ...ProtectedClearingTransferByPartitionRequestFixture.create({
-          sourceId: 'invalid',
+          sourceId: "invalid",
         }),
       });
 
-      await expect(
-        Security.protectedClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if expirationDate is invalid', async () => {
+    it("should throw error if expirationDate is invalid", async () => {
       const invalidRequest = new ProtectedClearingTransferByPartitionRequest({
         ...ProtectedClearingTransferByPartitionRequestFixture.create({
-          expirationDate: (
-            Math.ceil(new Date().getTime() / 1000) - 100
-          ).toString(),
+          expirationDate: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
         }),
       });
 
-      await expect(
-        Security.protectedClearingTransferByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.protectedClearingTransferByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('approveClearingOperationByPartition', () => {
-    approveClearingOperationByPartitionRequest =
-      new ApproveClearingOperationByPartitionRequest(
-        ApproveClearingOperationByPartitionRequestFixture.create(),
-      );
-    const transactionId = 'tx123';
+  describe("approveClearingOperationByPartition", () => {
+    approveClearingOperationByPartitionRequest = new ApproveClearingOperationByPartitionRequest(
+      ApproveClearingOperationByPartitionRequestFixture.create(),
+    );
+    const transactionId = "tx123";
     const expectedResponse = { payload: true, transactionId };
 
-    it('should approve clearing operation successfully', async () => {
+    it("should approve clearing operation successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await Security.approveClearingOperationByPartition(
-        approveClearingOperationByPartitionRequest,
-      );
+      const result = await Security.approveClearingOperationByPartition(approveClearingOperationByPartitionRequest);
 
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ApproveClearingOperationByPartitionRequest',
+        "ApproveClearingOperationByPartitionRequest",
         approveClearingOperationByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2744,17 +2403,15 @@ describe('Clearing', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
       await expect(
-        Security.approveClearingOperationByPartition(
-          approveClearingOperationByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
+        Security.approveClearingOperationByPartition(approveClearingOperationByPartitionRequest),
+      ).rejects.toThrow("Command execution failed");
       expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ApproveClearingOperationByPartitionRequest',
+        "ApproveClearingOperationByPartitionRequest",
         approveClearingOperationByPartitionRequest,
       );
       expect(commandBusMock.execute).toHaveBeenCalledWith(
@@ -2768,40 +2425,34 @@ describe('Clearing', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       const invalidRequest = new ApproveClearingOperationByPartitionRequest({
         ...ApproveClearingOperationByPartitionRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Security.approveClearingOperationByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.approveClearingOperationByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if partitionId is invalid', async () => {
+    it("should throw error if partitionId is invalid", async () => {
       const invalidRequest = new ApproveClearingOperationByPartitionRequest({
         ...ApproveClearingOperationByPartitionRequestFixture.create({
-          partitionId: 'invalid',
+          partitionId: "invalid",
         }),
       });
 
-      await expect(
-        Security.approveClearingOperationByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.approveClearingOperationByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if clearingId is invalid', async () => {
+    it("should throw error if clearingId is invalid", async () => {
       const invalidRequest = new ApproveClearingOperationByPartitionRequest({
         ...ApproveClearingOperationByPartitionRequestFixture.create({
           clearingId: -1,
         }),
       });
 
-      await expect(
-        Security.approveClearingOperationByPartition(invalidRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Security.approveClearingOperationByPartition(invalidRequest)).rejects.toThrow(ValidationError);
     });
   });
 });

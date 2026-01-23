@@ -203,11 +203,11 @@
 
 */
 
-import { Inject, Injectable } from '@nestjs/common';
-import { Environment } from '@domain/network/Environment';
-import { MirrorNode } from '@domain/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/network/JsonRpcRelay';
-import Service from '@app/services/Service';
+import { Inject, Injectable } from "@nestjs/common";
+import { Environment } from "@domain/network/Environment";
+import { MirrorNode } from "@domain/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/network/JsonRpcRelay";
+import Service from "@app/services/Service";
 
 export interface NetworkProps {
   environment: Environment;
@@ -255,7 +255,7 @@ export default class NetworkService extends Service implements NetworkProps {
     this._consensusNodes = value;
   }
 
-  constructor(@Inject('NetworkProps') props?: NetworkProps) {
+  constructor(@Inject("NetworkProps") props?: NetworkProps) {
     super();
     Object.assign(this, props);
   }

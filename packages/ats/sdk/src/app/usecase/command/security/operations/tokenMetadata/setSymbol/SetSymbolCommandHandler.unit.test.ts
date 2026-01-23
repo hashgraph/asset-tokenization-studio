@@ -203,27 +203,27 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
 import {
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   HederaIdPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import Account from '@domain/context/account/Account';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { SetSymbolCommandFixture } from '@test/fixtures/tokenMetadata/TokenMetadataFixture';
-import { ErrorCode } from '@core/error/BaseError';
-import { SetSymbolCommandHandler } from './SetSymbolCommandHandler';
-import { SetSymbolCommand, SetSymbolCommandResponse } from './SetSymbolCommand';
-import { SetSymbolCommandError } from './error/SetSymbolCommandError';
+} from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import Account from "@domain/context/account/Account";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import { SetSymbolCommandFixture } from "@test/fixtures/tokenMetadata/TokenMetadataFixture";
+import { ErrorCode } from "@core/error/BaseError";
+import { SetSymbolCommandHandler } from "./SetSymbolCommandHandler";
+import { SetSymbolCommand, SetSymbolCommandResponse } from "./SetSymbolCommand";
+import { SetSymbolCommandError } from "./error/SetSymbolCommandError";
 
-describe('SetSymbolCommandHandler', () => {
+describe("SetSymbolCommandHandler", () => {
   let handler: SetSymbolCommandHandler;
   let command: SetSymbolCommand;
 
@@ -254,8 +254,8 @@ describe('SetSymbolCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('throws SetSymbolCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    it("throws SetSymbolCommandError when command fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
@@ -264,16 +264,12 @@ describe('SetSymbolCommandHandler', () => {
 
       await expect(resultPromise).rejects.toBeInstanceOf(SetSymbolCommandError);
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while setting token symbol: ${errorMsg}`,
-        ),
+        message: expect.stringContaining(`An error occurred while setting token symbol: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtCommandError,
       });
     });
-    it('should successfully set symbol', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
+    it("should successfully set symbol", async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
       accountServiceMock.getCurrentAccount.mockReturnValue(account);
       validationServiceMock.checkPause.mockResolvedValue(undefined);
       validationServiceMock.checkRole.mockResolvedValue(undefined);
@@ -287,31 +283,25 @@ describe('SetSymbolCommandHandler', () => {
       expect(result.payload).toBe(true);
       expect(result.transactionId).toBe(transactionId);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
       expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getCurrentAccount).toHaveBeenCalledTimes(1);
-      expect(
-        transactionServiceMock.getHandler().setSymbol,
-      ).toHaveBeenCalledTimes(1);
+      expect(transactionServiceMock.getHandler().setSymbol).toHaveBeenCalledTimes(1);
 
-      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-        command.securityId,
-      );
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
       expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
         SecurityRole._TREX_OWNER_ROLE,
         account.id.toString(),
         command.securityId,
       );
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+
+      expect(transactionServiceMock.getHandler().setSymbol).toHaveBeenCalledWith(
+        evmAddress,
+        command.symbol,
         command.securityId,
       );
-
-      expect(
-        transactionServiceMock.getHandler().setSymbol,
-      ).toHaveBeenCalledWith(evmAddress, command.symbol, command.securityId);
     });
   });
 });

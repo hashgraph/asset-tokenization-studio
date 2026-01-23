@@ -202,38 +202,31 @@
  *    limitations under the License.
  */
 
-import { useMemo, useState } from 'react';
-import { createColumnHelper } from '@tanstack/react-table';
-import { useTranslation } from 'react-i18next';
-import {
-  Tag,
-  Progress,
-  IconButton,
-  PhosphorIcon,
-  Weight,
-  PopUp,
-} from 'io-bricks-ui';
-import { Box, Flex, Text, HStack } from '@chakra-ui/react';
-import { useStatusIcons } from './useStatusIcons';
-import { ProcessStatusType } from '../../../types/status';
-import { Warning, XSquare } from '@phosphor-icons/react';
-import { format } from 'date-fns';
-import { formatNumber } from '@/utils/number-fs';
-import { useCancelDistribution } from './queries/DistributionQueries';
-import { AssetDistributionData } from '../AssetDistributions/AssetDistributions.types';
+import { useMemo, useState } from "react";
+import { createColumnHelper } from "@tanstack/react-table";
+import { useTranslation } from "react-i18next";
+import { Tag, Progress, IconButton, PhosphorIcon, Weight, PopUp } from "io-bricks-ui";
+import { Box, Flex, Text, HStack } from "@chakra-ui/react";
+import { useStatusIcons } from "./useStatusIcons";
+import { ProcessStatusType } from "../../../types/status";
+import { Warning, XSquare } from "@phosphor-icons/react";
+import { format } from "date-fns";
+import { formatNumber } from "@/utils/number-fs";
+import { useCancelDistribution } from "./queries/DistributionQueries";
+import { AssetDistributionData } from "../AssetDistributions/AssetDistributions.types";
 
 const statusMap = {
-  COMPLETED: 'Completed' as ProcessStatusType,
-  FAILED: 'Failed' as ProcessStatusType,
-  IN_PROGRESS: 'In Progress' as ProcessStatusType,
-  SCHEDULED: 'Scheduled' as ProcessStatusType,
-  CANCELLED: 'Cancelled' as ProcessStatusType,
+  COMPLETED: "Completed" as ProcessStatusType,
+  FAILED: "Failed" as ProcessStatusType,
+  IN_PROGRESS: "In Progress" as ProcessStatusType,
+  SCHEDULED: "Scheduled" as ProcessStatusType,
+  CANCELLED: "Cancelled" as ProcessStatusType,
 } as const;
 
 const progressByStatus: Record<ProcessStatusType, number> = {
   Failed: 100,
   Completed: 100,
-  'In Progress': 50,
+  "In Progress": 50,
   Scheduled: 0,
   Cancelled: 0,
 };
@@ -242,19 +235,13 @@ const calculateProgressByStatus = (status: ProcessStatusType): number => {
   return progressByStatus[status] ?? 0;
 };
 
-export const useAssetDistributionsColumns = ({
-  tabType,
-}: {
-  tabType?: 'upcoming' | 'ongoing' | 'completed';
-}) => {
+export const useAssetDistributionsColumns = ({ tabType }: { tabType?: "upcoming" | "ongoing" | "completed" }) => {
   const columnHelper = createColumnHelper<AssetDistributionData>();
-  const { t } = useTranslation('distributions', { keyPrefix: 'table.headers' });
-  const { t: tAssets } = useTranslation('assets');
+  const { t } = useTranslation("distributions", { keyPrefix: "table.headers" });
+  const { t: tAssets } = useTranslation("assets");
   const { renderProgressIndicator, getStatusVariants } = useStatusIcons();
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [distributionToCancel, setDistributionToCancel] = useState<
-    string | null
-  >(null);
+  const [distributionToCancel, setDistributionToCancel] = useState<string | null>(null);
 
   const handleConfirmCancel = async () => {
     if (distributionToCancel) {
@@ -263,7 +250,7 @@ export const useAssetDistributionsColumns = ({
         setShowCancelModal(false);
         setDistributionToCancel(null);
       } catch (error) {
-        console.error('Error canceling distribution:', error);
+        console.error("Error canceling distribution:", error);
       }
     }
   };
@@ -315,71 +302,62 @@ export const useAssetDistributionsColumns = ({
       },
     };
 
-    const currentSizes = columnSizes[tabType || 'upcoming'] as Record<
-      string,
-      number
-    >;
+    const currentSizes = columnSizes[tabType || "upcoming"] as Record<string, number>;
 
     const allColumns = {
-      distributionId: columnHelper.accessor('id', {
-        id: 'distributionId',
-        header: t('distributionId'),
+      distributionId: columnHelper.accessor("id", {
+        id: "distributionId",
+        header: t("distributionId"),
         size: currentSizes.distributionId,
         enableSorting: false,
-        cell: ({ getValue }) => getValue() || '-',
+        cell: ({ getValue }) => getValue() || "-",
       }),
-      concept: columnHelper.accessor('concept', {
-        id: 'concept',
-        header: t('concept'),
+      concept: columnHelper.accessor("concept", {
+        id: "concept",
+        header: t("concept"),
         size: currentSizes.concept || 117,
         enableSorting: false,
-        cell: ({ getValue }) => getValue() || '-',
+        cell: ({ getValue }) => getValue() || "-",
       }),
-      type: columnHelper.accessor('type', {
-        id: 'type',
-        header: t('type'),
+      type: columnHelper.accessor("type", {
+        id: "type",
+        header: t("type"),
         size: currentSizes.type || 120,
         enableSorting: false,
         cell: ({ row }) => {
           const typeMap: Record<string, string> = {
-            IMMEDIATE: 'Manual',
-            ONE_OFF: 'Scheduled',
-            RECURRING: 'Recurring',
-            AUTOMATED: 'Automated',
-            CORPORATE_ACTION: 'Corp. Action',
+            IMMEDIATE: "Manual",
+            ONE_OFF: "Scheduled",
+            RECURRING: "Recurring",
+            AUTOMATED: "Automated",
+            CORPORATE_ACTION: "Corp. Action",
           };
           const type = row.original.type;
-          return (
-            typeMap[type] ||
-            (row.original.subtype ? typeMap[row.original.subtype] : type)
-          );
+          return typeMap[type] || (row.original.subtype ? typeMap[row.original.subtype] : type);
         },
       }),
       trigger: columnHelper.accessor((row) => row.type, {
-        id: 'trigger',
-        header: t('trigger'),
+        id: "trigger",
+        header: t("trigger"),
         size: currentSizes.trigger || 120,
         enableSorting: false,
         cell: ({ row }) => {
           let recurrency = row.original?.recurrency?.toLowerCase();
           const typeTriggerMap: Record<string, string> = {
-            IMMEDIATE: 'Single Time',
+            IMMEDIATE: "Single Time",
             ONE_OFF: `Single Time`,
             RECURRING: `${recurrency?.charAt(0)?.toUpperCase()}${recurrency?.slice(1)}`,
-            AUTOMATED: 'On Deposit',
-            CORPORATE_ACTION: 'Single Time',
+            AUTOMATED: "On Deposit",
+            CORPORATE_ACTION: "Single Time",
           };
-          return (
-            typeTriggerMap[row.original.type] ||
-            typeTriggerMap[row.original.subtype || '']
-          );
+          return typeTriggerMap[row.original.type] || typeTriggerMap[row.original.subtype || ""];
         },
       }),
       configuratedAmount: columnHelper.accessor((row) => row.amount, {
-        id: 'configuratedAmount',
+        id: "configuratedAmount",
         header: () => (
           <Text textAlign="left" overflow="hidden" h="40px" w="100px">
-            {t('configuratedAmount')}
+            {t("configuratedAmount")}
           </Text>
         ),
         size: currentSizes.configuratedAmount || 130,
@@ -387,137 +365,117 @@ export const useAssetDistributionsColumns = ({
         cell: ({ row }) => {
           const amountType = row.original.amountType;
           const amount = row.original.amount;
-          if (!amount) return '-';
-          return `${amountType === 'FIXED' ? '$' : '%'} ${formatNumber(amount)}`;
+          if (!amount) return "-";
+          return `${amountType === "FIXED" ? "$" : "%"} ${formatNumber(amount)}`;
         },
       }),
-      distributedAmount: columnHelper.accessor(
-        (row) => row.asset?.distributedAmount,
-        {
-          id: 'distributedAmount',
-          header: () => (
-            <Text textAlign="left" overflow="hidden" h="40px" w="100px">
-              {t('distributedAmount')}
-            </Text>
-          ),
-          size: currentSizes['distributedAmount'] ?? 130,
-          enableSorting: false,
-          cell: ({ row }) => {
-            const amountType = row.original.amountType;
-            const amount = row.original.amount;
-            if (!amount) return '-';
-            return `${amountType === 'FIXED' ? '$' : '%'} ${formatNumber(amount)}`;
-          },
-        },
-      ),
-      recipientHolders: columnHelper.accessor((row) => row?.holdersNumber, {
-        id: 'recipientHolders',
+      distributedAmount: columnHelper.accessor((row) => row.asset?.distributedAmount, {
+        id: "distributedAmount",
         header: () => (
-          <Text textAlign="left" overflow="hidden" h={10} w={25}>
-            {t('recipientHolders')}
+          <Text textAlign="left" overflow="hidden" h="40px" w="100px">
+            {t("distributedAmount")}
           </Text>
         ),
-        size: currentSizes['recipientHolders'] ?? 130,
+        size: currentSizes["distributedAmount"] ?? 130,
+        enableSorting: false,
+        cell: ({ row }) => {
+          const amountType = row.original.amountType;
+          const amount = row.original.amount;
+          if (!amount) return "-";
+          return `${amountType === "FIXED" ? "$" : "%"} ${formatNumber(amount)}`;
+        },
+      }),
+      recipientHolders: columnHelper.accessor((row) => row?.holdersNumber, {
+        id: "recipientHolders",
+        header: () => (
+          <Text textAlign="left" overflow="hidden" h={10} w={25}>
+            {t("recipientHolders")}
+          </Text>
+        ),
+        size: currentSizes["recipientHolders"] ?? 130,
         enableSorting: false,
         cell: ({ getValue }) => getValue(),
       }),
-      nextExecutionTime: columnHelper.accessor('executionDate', {
-        id: 'executionDate',
+      nextExecutionTime: columnHelper.accessor("executionDate", {
+        id: "executionDate",
         header: () => (
           <Text textAlign="left" overflow="hidden" h="40px" w="100px">
-            {t('nextExecutionTime')}
+            {t("nextExecutionTime")}
           </Text>
         ),
-        size: currentSizes['nextExecutionTime'] ?? 130,
+        size: currentSizes["nextExecutionTime"] ?? 130,
         enableSorting: false,
         cell: ({ getValue }) => {
-          if (!getValue()) return '-';
+          if (!getValue()) return "-";
           const date = new Date(getValue() as string);
           return (
-            <Box
-              minH="40px"
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-            >
+            <Box minH="40px" display="flex" flexDirection="column" justifyContent="center">
               <Text fontSize="sm" lineHeight="1.2" whiteSpace="nowrap">
-                {format(date, 'dd/MM/yyyy')}
+                {format(date, "dd/MM/yyyy")}
               </Text>
               <Text fontSize="xs" lineHeight="1.2" whiteSpace="nowrap">
-                {format(date, 'HH:mm:ss')}
+                {format(date, "HH:mm:ss")}
               </Text>
             </Box>
           );
         },
       }),
-      executionStartTime: columnHelper.accessor('executionDate', {
-        id: 'createdAt',
+      executionStartTime: columnHelper.accessor("executionDate", {
+        id: "createdAt",
         header: () => (
           <Text textAlign="left" overflow="hidden" h="40px" w="80px">
-            {t('executionStartTime')}
+            {t("executionStartTime")}
           </Text>
         ),
-        size: currentSizes['executionStartTime'] ?? 130,
+        size: currentSizes["executionStartTime"] ?? 130,
         enableSorting: false,
         cell: ({ getValue }) => {
-          if (!getValue()) return '-';
+          if (!getValue()) return "-";
           const date = new Date(getValue() as string);
           return (
-            <Box
-              minH="40px"
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-            >
+            <Box minH="40px" display="flex" flexDirection="column" justifyContent="center">
               <Text fontSize="sm" lineHeight="1.2" whiteSpace="nowrap">
-                {format(date, 'dd/MM/yyyy')}
+                {format(date, "dd/MM/yyyy")}
               </Text>
               <Text fontSize="xs" lineHeight="1.2" whiteSpace="nowrap">
-                {format(date, 'HH:mm:ss')}
+                {format(date, "HH:mm:ss")}
               </Text>
             </Box>
           );
         },
       }),
-      executionEndTime: columnHelper.accessor('updatedAt', {
-        id: 'updatedAt',
+      executionEndTime: columnHelper.accessor("updatedAt", {
+        id: "updatedAt",
         header: () => (
           <Text textAlign="left" overflow="hidden" h="40px" w="80px">
-            {t('executionEndTime')}
+            {t("executionEndTime")}
           </Text>
         ),
-        size: currentSizes['executionEndTime'] ?? 130,
+        size: currentSizes["executionEndTime"] ?? 130,
         enableSorting: false,
         cell: ({ getValue }) => {
-          if (!getValue()) return '-';
+          if (!getValue()) return "-";
           const date = new Date(getValue());
           return (
-            <Box
-              minH="40px"
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-            >
+            <Box minH="40px" display="flex" flexDirection="column" justifyContent="center">
               <Text fontSize="sm" lineHeight="1.2" whiteSpace="nowrap">
-                {format(date, 'dd/MM/yyyy')}
+                {format(date, "dd/MM/yyyy")}
               </Text>
               <Text fontSize="xs" lineHeight="1.2" whiteSpace="nowrap">
-                {format(date, 'HH:mm:ss')}
+                {format(date, "HH:mm:ss")}
               </Text>
             </Box>
           );
         },
       }),
-      status: columnHelper.accessor('status', {
-        id: 'status',
-        header: 'Status',
+      status: columnHelper.accessor("status", {
+        id: "status",
+        header: "Status",
         size: currentSizes.status ?? 160,
         enableSorting: false,
         cell: ({ row }) => {
           const backendStatus = row.original.status;
-          const status =
-            statusMap[backendStatus as keyof typeof statusMap] ||
-            ('Scheduled' as ProcessStatusType);
+          const status = statusMap[backendStatus as keyof typeof statusMap] || ("Scheduled" as ProcessStatusType);
           const { tagVariant } = getStatusVariants(status);
           return (
             <Tag
@@ -531,49 +489,35 @@ export const useAssetDistributionsColumns = ({
           );
         },
       }),
-      progress: columnHelper.accessor('status', {
-        id: 'progress',
-        header: '',
+      progress: columnHelper.accessor("status", {
+        id: "progress",
+        header: "",
         size: currentSizes.progress ?? 160,
         enableSorting: false,
         cell: ({ row }) => {
           const backendStatus = row.original.status;
-          const status =
-            statusMap[backendStatus as keyof typeof statusMap] ||
-            ('Scheduled' as ProcessStatusType);
+          const status = statusMap[backendStatus as keyof typeof statusMap] || ("Scheduled" as ProcessStatusType);
           const progress = calculateProgressByStatus(status);
           const { progressVariant } = getStatusVariants(status);
           return (
             <Flex align="center" gap={2} w="full">
-              <Progress
-                variant={progressVariant}
-                value={progress}
-                size="md"
-                w="150px"
-                borderRadius="md"
-              />
-              <Box
-                w={10}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
+              <Progress variant={progressVariant} value={progress} size="md" w="150px" borderRadius="md" />
+              <Box w={10} display="flex" alignItems="center" justifyContent="center">
                 {renderProgressIndicator(status, progress)}
               </Box>
             </Flex>
           );
         },
       }),
-      actions: columnHelper.accessor('actions', {
-        id: 'actions',
-        header: t('actions'),
+      actions: columnHelper.accessor("actions", {
+        id: "actions",
+        header: t("actions"),
         size: currentSizes.actions ?? 120,
         enableSorting: false,
         cell: ({ row }) => {
           const distributionId = row.original.id;
           const status = row.original.status;
-          const canCancel =
-            status === 'SCHEDULED' && row.original.type === 'PAYOUT';
+          const canCancel = status === "SCHEDULED" && row.original.type === "PAYOUT";
 
           const handleCancelDistribution = (e: React.MouseEvent) => {
             e.stopPropagation();
@@ -588,14 +532,7 @@ export const useAssetDistributionsColumns = ({
               <HStack spacing={3}>
                 <IconButton
                   aria-label="cancel-distribution"
-                  icon={
-                    <PhosphorIcon
-                      as={XSquare}
-                      size="xs"
-                      weight={Weight.Fill}
-                      fill="red"
-                    />
-                  }
+                  icon={<PhosphorIcon as={XSquare} size="xs" weight={Weight.Fill} fill="red" />}
                   variant="tertiary"
                   size="xxs"
                   isDisabled={!canCancel || cancelDistribution.isPending}
@@ -647,23 +584,23 @@ export const useAssetDistributionsColumns = ({
     };
 
     return {
-      columns: columnSets[tabType || 'upcoming'],
+      columns: columnSets[tabType || "upcoming"],
       modal: (
         <PopUp
           id="cancelDistribution"
           icon={<PhosphorIcon as={Warning} size="md" weight={Weight.Light} />}
           isOpen={showCancelModal}
           onClose={handleCancelModal}
-          title={tAssets('detail.popup.cancelDistribution.title')}
-          description={tAssets('detail.popup.cancelDistribution.description')}
-          confirmText={tAssets('detail.popup.cancelDistribution.confirmText')}
-          cancelText={tAssets('detail.popup.cancelDistribution.cancelText')}
+          title={tAssets("detail.popup.cancelDistribution.title")}
+          description={tAssets("detail.popup.cancelDistribution.description")}
+          confirmText={tAssets("detail.popup.cancelDistribution.confirmText")}
+          cancelText={tAssets("detail.popup.cancelDistribution.cancelText")}
           onConfirm={handleConfirmCancel}
           onCancel={handleCancelModal}
           variant="error"
           confirmButtonProps={{
             isLoading: cancelDistribution.isPending,
-            status: 'danger',
+            status: "danger",
           }}
         />
       ),

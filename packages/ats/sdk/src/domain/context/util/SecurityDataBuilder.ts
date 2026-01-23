@@ -203,21 +203,18 @@
 
 */
 
-import { BondDetails } from '../bond/BondDetails';
-import { CastDividendType } from '../equity/DividendType';
-import { EquityDetails } from '../equity/EquityDetails';
-import { BondDetailsData } from '../factory/BondDetailsData';
-import { EquityDetailsData } from '../factory/EquityDetailsData';
-import { FactoryRegulationData } from '../factory/FactorySecurityToken';
-import { Rbac } from '../factory/Rbac';
-import {
-  CastRegulationType,
-  CastRegulationSubType,
-} from '../factory/RegulationType';
-import { SecurityData } from '../factory/SecurityData';
-import { SecurityRole } from '../security/SecurityRole';
-import { Security } from '../security/Security';
-import EvmAddress from '../contract/EvmAddress';
+import { BondDetails } from "../bond/BondDetails";
+import { CastDividendType } from "../equity/DividendType";
+import { EquityDetails } from "../equity/EquityDetails";
+import { BondDetailsData } from "../factory/BondDetailsData";
+import { EquityDetailsData } from "../factory/EquityDetailsData";
+import { FactoryRegulationData } from "../factory/FactorySecurityToken";
+import { Rbac } from "../factory/Rbac";
+import { CastRegulationType, CastRegulationSubType } from "../factory/RegulationType";
+import { SecurityData } from "../factory/SecurityData";
+import { SecurityRole } from "../security/SecurityRole";
+import { Security } from "../security/Security";
+import EvmAddress from "../contract/EvmAddress";
 
 export class SecurityDataBuilder {
   static buildSecurityData(
@@ -246,7 +243,7 @@ export class SecurityDataBuilder {
       isControllable: securityInfo.isControllable,
       isWhiteList: securityInfo.isWhiteList,
       erc20VotesActivated: securityInfo.erc20VotesActivated,
-      maxSupply: securityInfo.maxSupply?.toString() || '0',
+      maxSupply: securityInfo.maxSupply?.toString() || "0",
       erc20MetadataInfo: {
         name: securityInfo.name,
         symbol: securityInfo.symbol,
@@ -269,8 +266,8 @@ export class SecurityDataBuilder {
       CastRegulationSubType.toNumber(securityInfo.regulationsubType!),
       {
         countriesControlListType: securityInfo.isCountryControlListWhiteList,
-        listOfCountries: securityInfo.countries ?? '',
-        info: securityInfo.info ?? '',
+        listOfCountries: securityInfo.countries ?? "",
+        info: securityInfo.info ?? "",
       },
     );
   }

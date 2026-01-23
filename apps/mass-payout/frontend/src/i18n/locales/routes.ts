@@ -203,14 +203,14 @@
 
 */
 
-import { RouteName } from '../../router/RouteName';
+import { RouteName } from "../../router/RouteName";
 
 export default {
-  configuration: 'Configuration',
-  [RouteName.Assets]: 'Assets',
-  [RouteName.Distributions]: 'Distributions',
-  [RouteName.ImportAsset]: 'Import Asset',
-  [RouteName.AssetDetail]: 'Asset Details',
-  [RouteName.NewDistribution]: 'New Distribution',
-  [RouteName.DistributionsDetails]: 'Distributions Details',
+  configuration: "Configuration",
+  [RouteName.Assets]: "Assets",
+  [RouteName.Distributions]: "Distributions",
+  [RouteName.ImportAsset]: "Import Asset",
+  [RouteName.AssetDetail]: "Asset Details",
+  [RouteName.NewDistribution]: "New Distribution",
+  [RouteName.DistributionsDetails]: "Distributions Details",
 };

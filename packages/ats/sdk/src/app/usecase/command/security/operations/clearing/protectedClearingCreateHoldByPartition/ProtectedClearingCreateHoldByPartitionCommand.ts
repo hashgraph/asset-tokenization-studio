@@ -203,12 +203,10 @@
 
 */
 
-import { Command } from '@core/command/Command';
-import { CommandResponse } from '@core/command/CommandResponse';
+import { Command } from "@core/command/Command";
+import { CommandResponse } from "@core/command/CommandResponse";
 
-export class ProtectedClearingCreateHoldByPartitionCommandResponse
-  implements CommandResponse
-{
+export class ProtectedClearingCreateHoldByPartitionCommandResponse implements CommandResponse {
   constructor(
     public readonly payload: number,
     public readonly transactionId: string,

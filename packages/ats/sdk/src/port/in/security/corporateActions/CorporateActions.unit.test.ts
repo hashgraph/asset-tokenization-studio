@@ -267,7 +267,10 @@ describe("Corporate Actions", () => {
         "Query execution failed",
       );
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("ActionContentHashExistsRequest", actionContentHashExistsRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        "ActionContentHashExistsRequest",
+        actionContentHashExistsRequest,
+      );
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new ActionContentHashExistsQuery(

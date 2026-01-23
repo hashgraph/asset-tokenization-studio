@@ -203,10 +203,10 @@
 
 */
 
-import { BondDetailsData } from './BondDetailsData';
-import { SecurityData } from './SecurityData';
-import { EquityDetailsData } from './EquityDetailsData';
-import { AdditionalSecurityData } from './AdditionalSecurityData';
+import { BondDetailsData } from "./BondDetailsData";
+import { SecurityData } from "./SecurityData";
+import { EquityDetailsData } from "./EquityDetailsData";
+import { AdditionalSecurityData } from "./AdditionalSecurityData";
 
 export class FactoryEquityToken {
   public security: SecurityData;
@@ -242,11 +242,7 @@ export class FactoryRegulationData {
   public regulationSubType: number;
   public additionalSecurityData: AdditionalSecurityData;
 
-  constructor(
-    regulationType: number,
-    regulationSubType: number,
-    additionalSecurityData: AdditionalSecurityData,
-  ) {
+  constructor(regulationType: number, regulationSubType: number, additionalSecurityData: AdditionalSecurityData) {
     this.regulationType = regulationType;
     this.regulationSubType = regulationSubType;
     this.additionalSecurityData = additionalSecurityData;

@@ -204,17 +204,17 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createLogger, LoggerOptions, transports, format } from 'winston';
-import safeStringify from 'fast-safe-stringify';
-import BaseError from '@core/error/BaseError';
+import { createLogger, LoggerOptions, transports, format } from "winston";
+import safeStringify from "fast-safe-stringify";
+import BaseError from "@core/error/BaseError";
 
 const { Console } = transports;
 const { printf } = format;
 
 export enum LogLevel {
-  TRACE = 'TRACE',
-  INFO = 'INFO',
-  ERROR = 'ERROR',
+  TRACE = "TRACE",
+  INFO = "INFO",
+  ERROR = "ERROR",
 }
 
 export const LoggerOptionLevels = {
@@ -225,23 +225,21 @@ export const LoggerOptionLevels = {
 
 export default class LogService {
   public static instance: LogService = new LogService();
-  public static defaultFormat = printf(
-    ({ level, message, timestamp, other }) => {
-      const formatOther = (val: any[]): string => {
-        return val
-          .map((e) => {
-            switch (typeof e) {
-              case 'object':
-                return safeStringify(e);
-              default:
-                return e;
-            }
-          })
-          .join('\t');
-      };
-      return `${timestamp} - [${level}]\t${message}\t${formatOther(other as any[])}`;
-    },
-  );
+  public static defaultFormat = printf(({ level, message, timestamp, other }) => {
+    const formatOther = (val: any[]): string => {
+      return val
+        .map((e) => {
+          switch (typeof e) {
+            case "object":
+              return safeStringify(e);
+            default:
+              return e;
+          }
+        })
+        .join("\t");
+    };
+    return `${timestamp} - [${level}]\t${message}\t${formatOther(other as any[])}`;
+  });
 
   private logger;
   private readonly coreConfig: LoggerOptions = {

@@ -203,42 +203,42 @@
 
 */
 
-import '../environmentMock';
-import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
+import "../environmentMock";
+import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
 
-import TransferRequest from '@port/in/request/security/operations/transfer/TransferRequest';
-import RedeemRequest from '@port/in/request/security/operations/redeem/RedeemRequest';
-import Injectable from '@core/injectable/Injectable';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
+import TransferRequest from "@port/in/request/security/operations/transfer/TransferRequest";
+import RedeemRequest from "@port/in/request/security/operations/redeem/RedeemRequest";
+import Injectable from "@core/injectable/Injectable";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
 import {
   CLIENT_ACCOUNT_ECDSA,
   CLIENT_ACCOUNT_ECDSA_A,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
   CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT,
-} from '@test/config';
-import NetworkService from '@service/network/NetworkService';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { ethers, Wallet } from 'ethers';
-import SecurityViewModel from '@port/in/response/SecurityViewModel';
-import GetSecurityDetailsRequest from '@port/in/request/security/GetSecurityDetailsRequest';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import { SecurityControlListType } from '@domain/context/security/SecurityControlListType';
+} from "@test/config";
+import NetworkService from "@service/network/NetworkService";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { ethers, Wallet } from "ethers";
+import SecurityViewModel from "@port/in/response/SecurityViewModel";
+import GetSecurityDetailsRequest from "@port/in/request/security/GetSecurityDetailsRequest";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import { SecurityControlListType } from "@domain/context/security/SecurityControlListType";
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '@domain/context/factory/RegulationType';
-import Account from '@domain/context/account/Account';
-import { keccak256 } from 'js-sha3';
-import { _PARTITION_ID_1 } from '@core/Constants';
-import createVcT3 from '@test/utils/verifiableCredentials';
-import { ClearingOperationType } from '@domain/context/security/Clearing';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
+} from "@domain/context/factory/RegulationType";
+import Account from "@domain/context/account/Account";
+import { keccak256 } from "js-sha3";
+import { _PARTITION_ID_1 } from "@core/Constants";
+import createVcT3 from "@test/utils/verifiableCredentials";
+import { ClearingOperationType } from "@domain/context/security/Clearing";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
 import {
   SDK,
   LoggerTransports,
@@ -295,15 +295,15 @@ import {
   ProtectedClearingRedeemByPartitionRequest,
   ProtectedClearingTransferByPartitionRequest,
   ProtectedClearingCreateHoldByPartitionRequest,
-} from '@port/in';
+} from "@port/in";
 
-SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
+SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
 const decimals = 0;
-const name = 'TEST_SECURITY_TOKEN';
-const symbol = 'TEST';
-const isin = 'ABCDE123456Z';
-const type = 'EQUITY';
+const name = "TEST_SECURITY_TOKEN";
+const symbol = "TEST";
+const isin = "ABCDE123456Z";
+const type = "EQUITY";
 const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
@@ -312,35 +312,34 @@ const conversionRight = true;
 const redemptionRight = false;
 const putRight = true;
 const dividendRight = 1;
-const currency = '0x345678';
+const currency = "0x345678";
 const numberOfShares = 0;
 const nominalValue = 1000;
 const nominalValueDecimals = 3;
 const regulationType = RegulationType.REG_D;
 const regulationSubType = RegulationSubType.B_506;
-const countries = 'AF,HG,BN';
-const info = 'Anything';
-const configId =
-  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const countries = "AF,HG,BN";
+const info = "Anything";
+const configId = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const configVersion = 1;
 const mirrorNode: MirrorNode = {
-  name: 'testmirrorNode',
-  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+  name: "testmirrorNode",
+  baseUrl: "https://testnet.mirrornode.hedera.com/api/v1/",
 };
 
 const rpcNode: JsonRpcRelay = {
-  name: 'testrpcNode',
-  baseUrl: 'http://127.0.0.1:7546/api',
+  name: "testrpcNode",
+  baseUrl: "http://127.0.0.1:7546/api",
 };
 
 let th: RPCTransactionAdapter;
 let mirrorNodeAdapter: MirrorNodeAdapter;
-describe('🧪 Security tests', () => {
+describe("🧪 Security tests", () => {
   let ns: NetworkService;
   let rpcQueryAdapter: RPCQueryAdapter;
   let equity: SecurityViewModel;
 
-  const url = 'http://127.0.0.1:7546';
+  const url = "http://127.0.0.1:7546";
   const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
   beforeAll(async () => {
@@ -352,7 +351,7 @@ describe('🧪 Security tests', () => {
     rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
 
     rpcQueryAdapter.init();
-    ns.environment = 'testnet';
+    ns.environment = "testnet";
     ns.configuration = {
       factoryAddress: FACTORY_ADDRESS,
       resolverAddress: RESOLVER_ADDRESS,
@@ -370,12 +369,7 @@ describe('🧪 Security tests', () => {
     });
     await th.register(account, true);
 
-    th.setSignerOrProvider(
-      new Wallet(
-        CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-        customHttpProvider,
-      ),
-    );
+    th.setSignerOrProvider(new Wallet(CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? "", customHttpProvider));
 
     const requestST = new CreateEquityRequest({
       name: name,
@@ -520,9 +514,7 @@ describe('🧪 Security tests', () => {
       new GrantKycRequest({
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-        vcBase64: await createVcT3(
-          CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-        ),
+        vcBase64: await createVcT3(CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString()),
       }),
     );
 
@@ -537,7 +529,7 @@ describe('🧪 Security tests', () => {
     await Security.setMaxSupply(
       new SetMaxSupplyRequest({
         securityId: equity.evmDiamondAddress!,
-        maxSupply: '1000000',
+        maxSupply: "1000000",
       }),
     );
   }, 900_000);
@@ -551,7 +543,7 @@ describe('🧪 Security tests', () => {
     );
   });
 
-  it('Get security', async () => {
+  it("Get security", async () => {
     const equityInfo = await Security.getInfo(
       new GetSecurityDetailsRequest({
         securityId: equity.evmDiamondAddress!,
@@ -565,10 +557,8 @@ describe('🧪 Security tests', () => {
     expect(equityInfo.isWhiteList).toEqual(false);
     expect(equityInfo.isControllable).toEqual(true);
     expect(equityInfo.isMultiPartition).toEqual(false);
-    expect(equityInfo.totalSupply).toEqual('0');
-    expect(equityInfo.diamondAddress).toEqual(
-      equity.diamondAddress!.toString(),
-    );
+    expect(equityInfo.totalSupply).toEqual("0");
+    expect(equityInfo.diamondAddress).toEqual(equity.diamondAddress!.toString());
     expect(equityInfo.evmDiamondAddress!.toString().toUpperCase()).toEqual(
       equity.evmDiamondAddress!.toString().toUpperCase(),
     );
@@ -581,7 +571,7 @@ describe('🧪 Security tests', () => {
     expect(equityInfo.info).toEqual(info);
   }, 600_000);
 
-  it('Control List Add & Remove', async () => {
+  it("Control List Add & Remove", async () => {
     let membersCount = await Security.getControlListCount(
       new GetControlListCountRequest({
         securityId: equity.evmDiamondAddress!,
@@ -660,8 +650,8 @@ describe('🧪 Security tests', () => {
     ).toBe(false);
   }, 600_000);
 
-  it('Issue and Redeem', async () => {
-    const issuedAmount = '10';
+  it("Issue and Redeem", async () => {
+    const issuedAmount = "10";
 
     await Security.issue(
       new IssueRequest({
@@ -698,12 +688,12 @@ describe('🧪 Security tests', () => {
           }),
         )
       ).value,
-    ).toEqual('0');
+    ).toEqual("0");
   }, 600_000);
 
-  it('Transfer and Controller Redeem', async () => {
-    const issuedAmount = '10';
-    const transferredAmount = '1';
+  it("Transfer and Controller Redeem", async () => {
+    const issuedAmount = "10";
+    const transferredAmount = "1";
 
     await Security.issue(
       new IssueRequest({
@@ -772,7 +762,7 @@ describe('🧪 Security tests', () => {
           }),
         )
       ).value,
-    ).toEqual('0');
+    ).toEqual("0");
 
     expect(
       (
@@ -783,13 +773,13 @@ describe('🧪 Security tests', () => {
           }),
         )
       ).value,
-    ).toEqual('0');
+    ).toEqual("0");
   }, 600_000);
 
-  it('TransferAndLock and release', async () => {
-    const issuedAmount = '10';
-    const transferredAndLockedAmount = '2';
-    const expirationTimeStamp = '9991976120';
+  it("TransferAndLock and release", async () => {
+    const issuedAmount = "10";
+    const transferredAndLockedAmount = "2";
+    const expirationTimeStamp = "9991976120";
 
     await Security.issue(
       new IssueRequest({
@@ -855,7 +845,7 @@ describe('🧪 Security tests', () => {
 
     expect(locksId.length).toEqual(1);
 
-    expect(locksId[0]).toEqual('1');
+    expect(locksId[0]).toEqual("1");
 
     expect(
       (
@@ -878,7 +868,7 @@ describe('🧪 Security tests', () => {
           }),
         )
       ).value,
-    ).toEqual('0');
+    ).toEqual("0");
 
     expect(
       (
@@ -907,9 +897,9 @@ describe('🧪 Security tests', () => {
     );
   }, 600_000);
 
-  it('Force transfer securities', async () => {
-    const issueAmount = '100';
-    const forceTransferAmount = '50';
+  it("Force transfer securities", async () => {
+    const issueAmount = "100";
+    const forceTransferAmount = "50";
 
     // issue securities in redeemed account
     await Security.issue(
@@ -974,7 +964,7 @@ describe('🧪 Security tests', () => {
     );
   }, 600_000);
 
-  it('Pause and UnPause a security', async () => {
+  it("Pause and UnPause a security", async () => {
     expect(
       (
         await Security.pause(
@@ -1008,7 +998,7 @@ describe('🧪 Security tests', () => {
     ).toBe(false);
   }, 120000);
 
-  it('Get the security control list type', async () => {
+  it("Get the security control list type", async () => {
     expect(
       await Security.getControlListType(
         new GetControlListTypeRequest({
@@ -1018,10 +1008,10 @@ describe('🧪 Security tests', () => {
     ).toBe(SecurityControlListType.BLACKLIST);
   });
 
-  it('Hold balance and Release', async () => {
-    const issuedAmount = '10';
-    const heldAmount = '2';
-    const expirationTimeStamp = '9991976120';
+  it("Hold balance and Release", async () => {
+    const issuedAmount = "10";
+    const heldAmount = "2";
+    const expirationTimeStamp = "9991976120";
 
     await Security.issue(
       new IssueRequest({
@@ -1112,7 +1102,7 @@ describe('🧪 Security tests', () => {
           targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
         }),
       ),
-    ).toEqual('0');
+    ).toEqual("0");
 
     expect(
       (
@@ -1141,7 +1131,7 @@ describe('🧪 Security tests', () => {
     );
   }, 600_000);
 
-  it('Protect and UnProtect a security', async () => {
+  it("Protect and UnProtect a security", async () => {
     expect(
       (
         await Security.protectPartitions(
@@ -1175,12 +1165,11 @@ describe('🧪 Security tests', () => {
     ).toBe(false);
   }, 120000);
 
-  it('Protected transfer and redeem securities', async () => {
-    const issueAmount = '100';
-    const protectedTransferAmount = '50';
-    const protectedRedeemAmount = '5';
-    const partitionBytes32 =
-      '0x0000000000000000000000000000000000000000000000000000000000000001';
+  it("Protected transfer and redeem securities", async () => {
+    const issueAmount = "100";
+    const protectedTransferAmount = "50";
+    const protectedRedeemAmount = "5";
+    const partitionBytes32 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 
     await Security.issue(
       new IssueRequest({
@@ -1197,7 +1186,7 @@ describe('🧪 Security tests', () => {
     );
 
     const encodedValue = ethers.utils.defaultAbiCoder.encode(
-      ['bytes32', 'bytes32'],
+      ["bytes32", "bytes32"],
       [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
     );
     const hash = keccak256(encodedValue);
@@ -1206,7 +1195,7 @@ describe('🧪 Security tests', () => {
       new RoleRequest({
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: '0x' + hash,
+        role: "0x" + hash,
       }),
     );
 
@@ -1219,9 +1208,9 @@ describe('🧪 Security tests', () => {
             sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
             amount: protectedTransferAmount,
-            deadline: '9999999999',
+            deadline: "9999999999",
             nounce: 1,
-            signature: 'vvvv',
+            signature: "vvvv",
           }),
         )
       ).payload,
@@ -1235,9 +1224,9 @@ describe('🧪 Security tests', () => {
             partitionId: partitionBytes32,
             sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             amount: protectedRedeemAmount,
-            deadline: '9999999999',
+            deadline: "9999999999",
             nounce: 2,
-            signature: 'vvvv',
+            signature: "vvvv",
           }),
         )
       ).payload,
@@ -1253,13 +1242,7 @@ describe('🧪 Security tests', () => {
           }),
         )
       ).value,
-    ).toEqual(
-      (
-        +issueAmount -
-        +protectedTransferAmount -
-        +protectedRedeemAmount
-      ).toString(),
-    );
+    ).toEqual((+issueAmount - +protectedTransferAmount - +protectedRedeemAmount).toString());
 
     // check if transfer origin account has correct balance securities
     expect(
@@ -1280,11 +1263,10 @@ describe('🧪 Security tests', () => {
     );
   }, 600_000);
 
-  it('Protected hold securities', async () => {
+  it("Protected hold securities", async () => {
     const issueAmount = BigInt(100);
     const protectedHoldAmount = BigInt(1);
-    const partitionBytes32 =
-      '0x0000000000000000000000000000000000000000000000000000000000000001';
+    const partitionBytes32 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 
     await Security.protectPartitions(
       new PartitionsProtectedRequest({
@@ -1323,7 +1305,7 @@ describe('🧪 Security tests', () => {
     );
 
     const encodedValue = ethers.utils.defaultAbiCoder.encode(
-      ['bytes32', 'bytes32'],
+      ["bytes32", "bytes32"],
       [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
     );
     const hash = keccak256(encodedValue);
@@ -1332,7 +1314,7 @@ describe('🧪 Security tests', () => {
       new RoleRequest({
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: '0x' + hash,
+        role: "0x" + hash,
       }),
     );
 
@@ -1344,11 +1326,11 @@ describe('🧪 Security tests', () => {
             partitionId: partitionBytes32,
             sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-            expirationDate: '9999999999',
+            expirationDate: "9999999999",
             amount: protectedHoldAmount.toString(),
-            deadline: '9999999999',
+            deadline: "9999999999",
             nonce: 3,
-            signature: 'vvvv',
+            signature: "vvvv",
             escrowId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
           }),
         )
@@ -1411,7 +1393,7 @@ describe('🧪 Security tests', () => {
     );
   }, 600_000);
 
-  describe('Clearing tests', () => {
+  describe("Clearing tests", () => {
     beforeAll(async () => {
       await Role.grantRole(
         new RoleRequest({
@@ -1446,14 +1428,11 @@ describe('🧪 Security tests', () => {
       );
     });
 
-    it('Clearing Create Hold', async () => {
-      const issuedAmount = '10';
-      const clearedAmount = '2';
-      const expirationTimeStamp = '9991976120';
-      const date = new Date(
-        BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() *
-          ONE_THOUSAND,
-      );
+    it("Clearing Create Hold", async () => {
+      const issuedAmount = "10";
+      const clearedAmount = "2";
+      const expirationTimeStamp = "9991976120";
+      const date = new Date(BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() * ONE_THOUSAND);
 
       await Security.issue(
         new IssueRequest({
@@ -1511,14 +1490,12 @@ describe('🧪 Security tests', () => {
       expect(clearing.id).toEqual(1);
       expect(clearing.amount).toEqual(clearedAmount);
       expect(clearing.expirationDate).toEqual(date);
-      expect(clearing.data).toEqual('0x');
-      expect(clearing.operatorData).toEqual('0x');
-      expect(clearing.holdEscrowId).toEqual(
-        CLIENT_ACCOUNT_ECDSA_A.id!.toString(),
-      );
+      expect(clearing.data).toEqual("0x");
+      expect(clearing.operatorData).toEqual("0x");
+      expect(clearing.holdEscrowId).toEqual(CLIENT_ACCOUNT_ECDSA_A.id!.toString());
       expect(clearing.holdExpirationDate).toEqual(date);
       expect(clearing.holdTo).toEqual(CLIENT_ACCOUNT_ECDSA.id!.toString());
-      expect(clearing.holdData).toEqual('0x');
+      expect(clearing.holdData).toEqual("0x");
 
       const clearingHoldCount = await Security.getClearingCountForByPartition(
         new GetClearingCountForByPartitionRequest({
@@ -1584,14 +1561,11 @@ describe('🧪 Security tests', () => {
       );
     }, 600_000);
 
-    it('Clearing Create Redeem', async () => {
-      const issuedAmount = '10';
-      const clearedAmount = '2';
-      const expirationTimeStamp = '9991976120';
-      const date = new Date(
-        BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() *
-          ONE_THOUSAND,
-      );
+    it("Clearing Create Redeem", async () => {
+      const issuedAmount = "10";
+      const clearedAmount = "2";
+      const expirationTimeStamp = "9991976120";
+      const date = new Date(BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() * ONE_THOUSAND);
 
       await Security.issue(
         new IssueRequest({
@@ -1646,8 +1620,8 @@ describe('🧪 Security tests', () => {
       expect(clearing.id).toEqual(1);
       expect(clearing.amount).toEqual(clearedAmount);
       expect(clearing.expirationDate).toEqual(date);
-      expect(clearing.data).toEqual('0x');
-      expect(clearing.operatorData).toEqual('0x');
+      expect(clearing.data).toEqual("0x");
+      expect(clearing.operatorData).toEqual("0x");
 
       const clearingRedeemCount = await Security.getClearingCountForByPartition(
         new GetClearingCountForByPartitionRequest({
@@ -1713,14 +1687,11 @@ describe('🧪 Security tests', () => {
       );
     }, 600_000);
 
-    it('Clearing Create Transfer', async () => {
-      const issuedAmount = '10';
-      const clearedAmount = '2';
-      const expirationTimeStamp = '9991976120';
-      const date = new Date(
-        BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() *
-          ONE_THOUSAND,
-      );
+    it("Clearing Create Transfer", async () => {
+      const issuedAmount = "10";
+      const clearedAmount = "2";
+      const expirationTimeStamp = "9991976120";
+      const date = new Date(BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() * ONE_THOUSAND);
 
       await Security.issue(
         new IssueRequest({
@@ -1777,18 +1748,17 @@ describe('🧪 Security tests', () => {
       expect(clearing.amount).toEqual(clearedAmount);
       expect(clearing.expirationDate).toEqual(date);
       expect(clearing.destination).toEqual(CLIENT_ACCOUNT_ECDSA.id!.toString());
-      expect(clearing.data).toEqual('0x');
-      expect(clearing.operatorData).toEqual('0x');
+      expect(clearing.data).toEqual("0x");
+      expect(clearing.operatorData).toEqual("0x");
 
-      const clearingTransferCount =
-        await Security.getClearingCountForByPartition(
-          new GetClearingCountForByPartitionRequest({
-            securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-            partitionId: _PARTITION_ID_1,
-            clearingOperationType: ClearingOperationType.Transfer,
-          }),
-        );
+      const clearingTransferCount = await Security.getClearingCountForByPartition(
+        new GetClearingCountForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: _PARTITION_ID_1,
+          clearingOperationType: ClearingOperationType.Transfer,
+        }),
+      );
 
       expect(clearingTransferCount).toEqual(1);
 
@@ -1844,10 +1814,10 @@ describe('🧪 Security tests', () => {
       );
     }, 600_000);
 
-    it('Operator clearing Create Transfer', async () => {
-      const issuedAmount = '10';
-      const clearedAmount = '2';
-      const expirationTimeStamp = '9991976120';
+    it("Operator clearing Create Transfer", async () => {
+      const issuedAmount = "10";
+      const clearedAmount = "2";
+      const expirationTimeStamp = "9991976120";
 
       await Security.issue(
         new IssueRequest({
@@ -1900,15 +1870,14 @@ describe('🧪 Security tests', () => {
         ),
       ).toEqual(+clearedAmount);
 
-      const clearingTransferCount =
-        await Security.getClearingCountForByPartition(
-          new GetClearingCountForByPartitionRequest({
-            securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-            partitionId: _PARTITION_ID_1,
-            clearingOperationType: ClearingOperationType.Transfer,
-          }),
-        );
+      const clearingTransferCount = await Security.getClearingCountForByPartition(
+        new GetClearingCountForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: _PARTITION_ID_1,
+          clearingOperationType: ClearingOperationType.Transfer,
+        }),
+      );
 
       expect(clearingTransferCount).toEqual(1);
 
@@ -1964,10 +1933,10 @@ describe('🧪 Security tests', () => {
       );
     }, 600_000);
 
-    it('Operator Clearing Create Redeem', async () => {
-      const issuedAmount = '10';
-      const clearedAmount = '2';
-      const expirationTimeStamp = '9991976120';
+    it("Operator Clearing Create Redeem", async () => {
+      const issuedAmount = "10";
+      const clearedAmount = "2";
+      const expirationTimeStamp = "9991976120";
 
       await Security.issue(
         new IssueRequest({
@@ -2075,10 +2044,10 @@ describe('🧪 Security tests', () => {
       );
     }, 600_000);
 
-    it('Operator Clearing Create Hold', async () => {
-      const issuedAmount = '10';
-      const clearedAmount = '2';
-      const expirationTimeStamp = '9991976120';
+    it("Operator Clearing Create Hold", async () => {
+      const issuedAmount = "10";
+      const clearedAmount = "2";
+      const expirationTimeStamp = "9991976120";
 
       await Security.issue(
         new IssueRequest({
@@ -2211,11 +2180,10 @@ describe('🧪 Security tests', () => {
       );
     }, 600_000);
 
-    it('Protected Clearing Hold securities', async () => {
+    it("Protected Clearing Hold securities", async () => {
       const issueAmount = BigInt(100);
       const protectedClearingAmount = BigInt(1);
-      const partitionBytes32 =
-        '0x0000000000000000000000000000000000000000000000000000000000000001';
+      const partitionBytes32 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 
       await Security.protectPartitions(
         new PartitionsProtectedRequest({
@@ -2243,7 +2211,7 @@ describe('🧪 Security tests', () => {
       );
 
       const encodedValue = ethers.utils.defaultAbiCoder.encode(
-        ['bytes32', 'bytes32'],
+        ["bytes32", "bytes32"],
         [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
       );
       const hash = keccak256(encodedValue);
@@ -2252,7 +2220,7 @@ describe('🧪 Security tests', () => {
         new RoleRequest({
           securityId: equity.evmDiamondAddress!,
           targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-          role: '0x' + hash,
+          role: "0x" + hash,
         }),
       );
 
@@ -2264,12 +2232,12 @@ describe('🧪 Security tests', () => {
               partitionId: partitionBytes32,
               sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
               targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-              holdExpirationDate: '9999999999',
-              clearingExpirationDate: '9999999999',
+              holdExpirationDate: "9999999999",
+              clearingExpirationDate: "9999999999",
               amount: protectedClearingAmount.toString(),
-              deadline: '9999999999',
+              deadline: "9999999999",
               nonce: 3,
-              signature: 'vvvv',
+              signature: "vvvv",
               escrowId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             }),
           )
@@ -2333,11 +2301,10 @@ describe('🧪 Security tests', () => {
       );
     }, 600_000);
 
-    it('Protected Clearing Redeem securities', async () => {
+    it("Protected Clearing Redeem securities", async () => {
       const issueAmount = BigInt(100);
       const protectedClearingAmount = BigInt(1);
-      const partitionBytes32 =
-        '0x0000000000000000000000000000000000000000000000000000000000000001';
+      const partitionBytes32 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 
       await Security.protectPartitions(
         new PartitionsProtectedRequest({
@@ -2365,7 +2332,7 @@ describe('🧪 Security tests', () => {
       );
 
       const encodedValue = ethers.utils.defaultAbiCoder.encode(
-        ['bytes32', 'bytes32'],
+        ["bytes32", "bytes32"],
         [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
       );
       const hash = keccak256(encodedValue);
@@ -2374,7 +2341,7 @@ describe('🧪 Security tests', () => {
         new RoleRequest({
           securityId: equity.evmDiamondAddress!,
           targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-          role: '0x' + hash,
+          role: "0x" + hash,
         }),
       );
 
@@ -2385,11 +2352,11 @@ describe('🧪 Security tests', () => {
               securityId: equity.evmDiamondAddress!,
               partitionId: partitionBytes32,
               sourceId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-              expirationDate: '9999999999',
+              expirationDate: "9999999999",
               amount: protectedClearingAmount.toString(),
-              deadline: '9999999999',
+              deadline: "9999999999",
               nonce: 3,
-              signature: 'vvvv',
+              signature: "vvvv",
             }),
           )
         ).payload,
@@ -2451,11 +2418,10 @@ describe('🧪 Security tests', () => {
         }),
       );
     }, 600_000);
-    it('Protected Clearing Transfer securities', async () => {
+    it("Protected Clearing Transfer securities", async () => {
       const issueAmount = BigInt(100);
       const protectedClearingAmount = BigInt(1);
-      const partitionBytes32 =
-        '0x0000000000000000000000000000000000000000000000000000000000000001';
+      const partitionBytes32 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 
       await Security.protectPartitions(
         new PartitionsProtectedRequest({
@@ -2483,7 +2449,7 @@ describe('🧪 Security tests', () => {
       );
 
       const encodedValue = ethers.utils.defaultAbiCoder.encode(
-        ['bytes32', 'bytes32'],
+        ["bytes32", "bytes32"],
         [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
       );
       const hash = keccak256(encodedValue);
@@ -2492,7 +2458,7 @@ describe('🧪 Security tests', () => {
         new RoleRequest({
           securityId: equity.evmDiamondAddress!,
           targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-          role: '0x' + hash,
+          role: "0x" + hash,
         }),
       );
 
@@ -2504,11 +2470,11 @@ describe('🧪 Security tests', () => {
               partitionId: partitionBytes32,
               sourceId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
               targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-              expirationDate: '9999999999',
+              expirationDate: "9999999999",
               amount: protectedClearingAmount.toString(),
-              deadline: '9999999999',
+              deadline: "9999999999",
               nonce: 3,
-              signature: 'vvvv',
+              signature: "vvvv",
             }),
           )
         ).payload,

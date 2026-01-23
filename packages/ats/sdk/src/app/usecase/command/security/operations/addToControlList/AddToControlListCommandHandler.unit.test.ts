@@ -203,27 +203,20 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { AddToControlListCommandHandler } from './AddToControlListCommandHandler';
-import {
-  AddToControlListCommand,
-  AddToControlListCommandResponse,
-} from './AddToControlListCommand';
-import { AddToControlListCommandFixture } from '@test/fixtures/controlList/ControlListFixture';
-import { AddToControlListCommandError } from './error/AddToControlListCommandError';
-import { ErrorCode } from '@core/error/BaseError';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
+import { ErrorMsgFixture, EvmAddressPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { AddToControlListCommandHandler } from "./AddToControlListCommandHandler";
+import { AddToControlListCommand, AddToControlListCommandResponse } from "./AddToControlListCommand";
+import { AddToControlListCommandFixture } from "@test/fixtures/controlList/ControlListFixture";
+import { AddToControlListCommandError } from "./error/AddToControlListCommandError";
+import { ErrorCode } from "@core/error/BaseError";
 
-describe('AddToControlListCommandHandler', () => {
+describe("AddToControlListCommandHandler", () => {
   let handler: AddToControlListCommandHandler;
   let command: AddToControlListCommand;
 
@@ -250,29 +243,25 @@ describe('AddToControlListCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws AddToControlListCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws AddToControlListCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          AddToControlListCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(AddToControlListCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while adding to control list: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while adding to control list: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully add to control list', async () => {
+    describe("success cases", () => {
+      it("should successfully add to control list", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
         transactionServiceMock.getHandler().addToControlList.mockResolvedValue({
@@ -285,32 +274,24 @@ describe('AddToControlListCommandHandler', () => {
         expect(result.payload).toBe(true);
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(
-          transactionServiceMock.getHandler().addToControlList,
-        ).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().addToControlList).toHaveBeenCalledTimes(1);
 
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkAccountInControlList).toHaveBeenCalledWith(
+          command.securityId,
+          command.targetId,
+          true,
+        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(command.targetId);
+
+        expect(transactionServiceMock.getHandler().addToControlList).toHaveBeenCalledWith(
+          evmAddress,
+          evmAddress,
           command.securityId,
         );
-        expect(
-          validationServiceMock.checkAccountInControlList,
-        ).toHaveBeenCalledWith(command.securityId, command.targetId, true);
-        expect(
-          contractServiceMock.getContractEvmAddress,
-        ).toHaveBeenNthCalledWith(1, command.securityId);
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
-          command.targetId,
-        );
-
-        expect(
-          transactionServiceMock.getHandler().addToControlList,
-        ).toHaveBeenCalledWith(evmAddress, evmAddress, command.securityId);
       });
     });
   });

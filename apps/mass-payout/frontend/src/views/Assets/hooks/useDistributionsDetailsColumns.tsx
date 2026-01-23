@@ -202,13 +202,13 @@
  *    limitations under the License.
  */
 
-import { useMemo } from 'react';
-import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
-import { HStack, Text } from '@chakra-ui/react';
-import { Button, ClipboardButton, Link, Tag } from 'io-bricks-ui';
-import { DistributionsDetailsStatus } from '@/types/status';
-import { useTranslation } from 'react-i18next';
-import { useStatusIcons } from './useStatusIcons';
+import { useMemo } from "react";
+import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
+import { HStack, Text } from "@chakra-ui/react";
+import { Button, ClipboardButton, Link, Tag } from "io-bricks-ui";
+import { DistributionsDetailsStatus } from "@/types/status";
+import { useTranslation } from "react-i18next";
+import { useStatusIcons } from "./useStatusIcons";
 
 export interface DistributionsDetailsData {
   paymentId: string;
@@ -229,24 +229,21 @@ const statusMap = {
   Failed: DistributionsDetailsStatus.FAILED,
 } as const;
 
-export const useDistributionsDetailsColumns = (): ColumnDef<
-  DistributionsDetailsData,
-  any
->[] => {
-  const { t } = useTranslation('distributionsDetails');
+export const useDistributionsDetailsColumns = (): ColumnDef<DistributionsDetailsData, any>[] => {
+  const { t } = useTranslation("distributionsDetails");
   const { getStatusVariants } = useStatusIcons();
   return useMemo(
     () => [
-      columnHelper.accessor('paymentId', {
-        header: t('table.headers.paymentId'),
+      columnHelper.accessor("paymentId", {
+        header: t("table.headers.paymentId"),
         size: 169,
         enableSorting: false,
-        cell: ({ getValue }) => getValue() || '-',
+        cell: ({ getValue }) => getValue() || "-",
       }),
-      columnHelper.accessor('receieverAddressHedera', {
+      columnHelper.accessor("receieverAddressHedera", {
         header: () => (
           <Text textAlign="left" overflow="hidden" h="40px" w="110px">
-            {t('table.headers.receieverAddressHedera')}
+            {t("table.headers.receieverAddressHedera")}
           </Text>
         ),
         size: 172,
@@ -263,10 +260,10 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
           );
         },
       }),
-      columnHelper.accessor('receieverAddressEvm', {
+      columnHelper.accessor("receieverAddressEvm", {
         header: () => (
           <Text textAlign="left" overflow="hidden" h="40px" w="110px">
-            {t('table.headers.receieverAddressEvm')}
+            {t("table.headers.receieverAddressEvm")}
           </Text>
         ),
         size: 167,
@@ -283,22 +280,22 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
           );
         },
       }),
-      columnHelper.accessor('amount', {
-        header: t('table.headers.amount'),
+      columnHelper.accessor("amount", {
+        header: t("table.headers.amount"),
         size: 100,
         enableSorting: false,
       }),
-      columnHelper.accessor('executionDate', {
+      columnHelper.accessor("executionDate", {
         header: () => (
           <Text textAlign="left" overflow="hidden" h="40px" w="75px">
-            {t('table.headers.executionDate')}
+            {t("table.headers.executionDate")}
           </Text>
         ),
         size: 200,
         enableSorting: false,
       }),
-      columnHelper.accessor('txHash', {
-        header: t('table.headers.txHash'),
+      columnHelper.accessor("txHash", {
+        header: t("table.headers.txHash"),
         size: 120,
         enableSorting: false,
         cell: ({ getValue }) => {
@@ -317,15 +314,13 @@ export const useDistributionsDetailsColumns = (): ColumnDef<
           );
         },
       }),
-      columnHelper.accessor('status', {
-        header: t('table.headers.status'),
+      columnHelper.accessor("status", {
+        header: t("table.headers.status"),
         size: 120,
         enableSorting: false,
         cell: ({ getValue }) => {
           const backendStatus = getValue();
-          const status =
-            statusMap[backendStatus as keyof typeof statusMap] ||
-            DistributionsDetailsStatus.PENDING;
+          const status = statusMap[backendStatus as keyof typeof statusMap] || DistributionsDetailsStatus.PENDING;
           const { tagVariant } = getStatusVariants(status);
           return <Tag variant={tagVariant} size="sm" label={status} />;
         },

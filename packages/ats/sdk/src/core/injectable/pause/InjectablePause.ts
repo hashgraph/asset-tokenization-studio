@@ -203,19 +203,19 @@
 
 */
 
-import { TOKENS } from '../Tokens';
-import { SetPausedMockCommandHandler } from '@command/security/externalPauses/mock/setPaused/SetPausedMockCommandHandler';
-import { CreateExternalPauseMockCommandHandler } from '@command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommandHandler';
-import { UpdateExternalPausesCommandHandler } from '@command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommandHandler';
-import { AddExternalPauseCommandHandler } from '@command/security/externalPauses/addExternalPause/AddExternalPauseCommandHandler';
-import { RemoveExternalPauseCommandHandler } from '@command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommandHandler';
-import { IsPausedMockQueryHandler } from '@query/security/externalPauses/mock/isPaused/IsPausedMockQueryHandler';
-import { IsPausedQueryHandler } from '@query/security/isPaused/IsPausedQueryHandler';
-import { GetExternalPausesCountQueryHandler } from '@query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQueryHandler';
-import { GetExternalPausesMembersQueryHandler } from '@query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQueryHandler';
-import { IsExternalPauseQueryHandler } from '@query/security/externalPauses/isExternalPause/IsExternalPauseQueryHandler';
-import { PauseCommandHandler } from '@command/security/operations/pause/PauseCommandHandler';
-import { UnpauseCommandHandler } from '@command/security/operations/unpause/UnpauseCommandHandler';
+import { TOKENS } from "../Tokens";
+import { SetPausedMockCommandHandler } from "@command/security/externalPauses/mock/setPaused/SetPausedMockCommandHandler";
+import { CreateExternalPauseMockCommandHandler } from "@command/security/externalPauses/mock/createExternalPauseMock/CreateExternalPauseMockCommandHandler";
+import { UpdateExternalPausesCommandHandler } from "@command/security/externalPauses/updateExternalPauses/UpdateExternalPausesCommandHandler";
+import { AddExternalPauseCommandHandler } from "@command/security/externalPauses/addExternalPause/AddExternalPauseCommandHandler";
+import { RemoveExternalPauseCommandHandler } from "@command/security/externalPauses/removeExternalPause/RemoveExternalPauseCommandHandler";
+import { IsPausedMockQueryHandler } from "@query/security/externalPauses/mock/isPaused/IsPausedMockQueryHandler";
+import { IsPausedQueryHandler } from "@query/security/isPaused/IsPausedQueryHandler";
+import { GetExternalPausesCountQueryHandler } from "@query/security/externalPauses/getExternalPausesCount/GetExternalPausesCountQueryHandler";
+import { GetExternalPausesMembersQueryHandler } from "@query/security/externalPauses/getExternalPausesMembers/GetExternalPausesMembersQueryHandler";
+import { IsExternalPauseQueryHandler } from "@query/security/externalPauses/isExternalPause/IsExternalPauseQueryHandler";
+import { PauseCommandHandler } from "@command/security/operations/pause/PauseCommandHandler";
+import { UnpauseCommandHandler } from "@command/security/operations/unpause/UnpauseCommandHandler";
 
 export const COMMAND_HANDLERS_PAUSE = [
   {

@@ -202,13 +202,13 @@
  *    limitations under the License.
  */
 
-import { apiRequest, buildUrl } from './api';
-import { BackendUrls } from './BackendUrls';
-import { AmountType, DistributionSubtype } from './DistributionService';
+import { apiRequest, buildUrl } from "./api";
+import { BackendUrls } from "./BackendUrls";
+import { AmountType, DistributionSubtype } from "./DistributionService";
 
 export enum AssetType {
-  EQUITY = 'Equity',
-  BOND = 'Bond',
+  EQUITY = "Equity",
+  BOND = "Bond",
 }
 
 export interface Asset {
@@ -281,7 +281,7 @@ export interface CreateManualPayoutParams {
   executeAt?: string;
   amount: string;
   amountType: AmountType;
-  recurrency?: 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  recurrency?: "HOURLY" | "DAILY" | "WEEKLY" | "MONTHLY";
   concept?: string;
 }
 
@@ -294,20 +294,16 @@ export interface AssetMetadata {
 }
 
 export class AssetService {
-  static async getAssets(
-    params: GetAssetsParams = {},
-  ): Promise<PaginatedResponse<Asset>> {
+  static async getAssets(params: GetAssetsParams = {}): Promise<PaginatedResponse<Asset>> {
     const { filters, page = 0, sort = [], size = 10 } = params;
 
     const query = new URLSearchParams();
-    filters?.value && query.append('search', filters.value);
-    query.append('page', (page + 1).toString()); // Backend expects 1-based
-    query.append('limit', size.toString());
+    filters?.value && query.append("search", filters.value);
+    query.append("page", (page + 1).toString()); // Backend expects 1-based
+    query.append("limit", size.toString());
 
     if (sort.length > 0) {
-      sort.forEach((col: SortParam) =>
-        query.append('sort', `${col.id},${col.desc ? 'desc' : 'asc'}`),
-      );
+      sort.forEach((col: SortParam) => query.append("sort", `${col.id},${col.desc ? "desc" : "asc"}`));
     }
 
     const url = buildUrl(BackendUrls.GetAssets, {});
@@ -318,7 +314,7 @@ export class AssetService {
       limit: number;
       totalPages: number;
     }>(`${url}?${query.toString()}`, {
-      method: 'GET',
+      method: "GET",
     });
 
     return {
@@ -335,22 +331,20 @@ export class AssetService {
   static async getAsset(assetId: string): Promise<Asset> {
     const url = buildUrl(BackendUrls.GetAsset, { assetId });
     return apiRequest<Asset>(url, {
-      method: 'GET',
+      method: "GET",
     });
   }
 
-  static async getAssetMetadata(
-    hederaTokenAddress: string,
-  ): Promise<AssetMetadata> {
+  static async getAssetMetadata(hederaTokenAddress: string): Promise<AssetMetadata> {
     const url = buildUrl(BackendUrls.GetAssetMetadata, { hederaTokenAddress });
     return apiRequest<AssetMetadata>(url, {
-      method: 'GET',
+      method: "GET",
     });
   }
 
   static async importAsset(hederaTokenAddress: string): Promise<Asset> {
     return apiRequest<Asset>(BackendUrls.ImportAsset, {
-      method: 'POST',
+      method: "POST",
       body: { hederaTokenAddress },
     });
   }
@@ -358,14 +352,14 @@ export class AssetService {
   static async pauseAsset(assetId: string): Promise<void> {
     const url = buildUrl(BackendUrls.PauseAsset, { assetId });
     return apiRequest<void>(url, {
-      method: 'PATCH',
+      method: "PATCH",
     });
   }
 
   static async unpauseAsset(assetId: string): Promise<void> {
     const url = buildUrl(BackendUrls.UnpauseAsset, { assetId });
     return apiRequest<void>(url, {
-      method: 'PATCH',
+      method: "PATCH",
     });
   }
 
@@ -375,9 +369,9 @@ export class AssetService {
     const { assetId, page = 0, size = 10, search } = params;
 
     const query = new URLSearchParams();
-    if (search) query.append('search', search);
-    query.append('page', (page + 1).toString());
-    query.append('limit', size.toString());
+    if (search) query.append("search", search);
+    query.append("page", (page + 1).toString());
+    query.append("limit", size.toString());
 
     const url = buildUrl(BackendUrls.GetAssetDistributions, { assetId });
     const response = await apiRequest<{
@@ -387,7 +381,7 @@ export class AssetService {
       limit: number;
       totalPages: number;
     }>(`${url}?${query.toString()}`, {
-      method: 'GET',
+      method: "GET",
     });
 
     return {
@@ -401,13 +395,11 @@ export class AssetService {
     };
   }
 
-  static async createManualPayout(
-    params: CreateManualPayoutParams,
-  ): Promise<void> {
+  static async createManualPayout(params: CreateManualPayoutParams): Promise<void> {
     const { assetId, ...body } = params;
     const url = buildUrl(BackendUrls.CreateManualPayout, { assetId });
     return apiRequest<void>(url, {
-      method: 'POST',
+      method: "POST",
       body,
     });
   }
@@ -415,14 +407,14 @@ export class AssetService {
   static async enableAssetSync(assetId: string): Promise<Asset> {
     const url = buildUrl(BackendUrls.EnableAssetSync, { assetId });
     return apiRequest<Asset>(url, {
-      method: 'PATCH',
+      method: "PATCH",
     });
   }
 
   static async disableAssetSync(assetId: string): Promise<Asset> {
     const url = buildUrl(BackendUrls.DisableAssetSync, { assetId });
     return apiRequest<Asset>(url, {
-      method: 'PATCH',
+      method: "PATCH",
     });
   }
 }

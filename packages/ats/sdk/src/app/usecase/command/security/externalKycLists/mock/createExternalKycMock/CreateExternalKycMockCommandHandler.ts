@@ -203,21 +203,19 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
 import {
   CreateExternalKycListMockCommand,
   CreateExternalKycListMockCommandResponse,
-} from './CreateExternalKycMockCommand';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import TransactionService from '@service/transaction/TransactionService';
-import { CreateExternalKycMockCommandError } from './error/CreateExternalKycMockCommandError';
+} from "./CreateExternalKycMockCommand";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import TransactionService from "@service/transaction/TransactionService";
+import { CreateExternalKycMockCommandError } from "./error/CreateExternalKycMockCommandError";
 
 @CommandHandler(CreateExternalKycListMockCommand)
-export class CreateExternalKycListMockCommandHandler
-  implements ICommandHandler<CreateExternalKycListMockCommand>
-{
+export class CreateExternalKycListMockCommandHandler implements ICommandHandler<CreateExternalKycListMockCommand> {
   constructor(
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
@@ -233,7 +231,7 @@ export class CreateExternalKycListMockCommandHandler
 
       let contractAddress: string;
 
-      if (typeof res === 'string') {
+      if (typeof res === "string") {
         contractAddress = res;
       } else {
         contractAddress = await this.transactionService.getTransactionResult({
@@ -245,13 +243,9 @@ export class CreateExternalKycListMockCommandHandler
         });
       }
 
-      const address = (
-        await this.mirrorNodeAdapter.getAccountInfo(contractAddress)
-      ).id.toString();
+      const address = (await this.mirrorNodeAdapter.getAccountInfo(contractAddress)).id.toString();
 
-      return Promise.resolve(
-        new CreateExternalKycListMockCommandResponse(address),
-      );
+      return Promise.resolve(new CreateExternalKycListMockCommandResponse(address));
     } catch (error) {
       throw new CreateExternalKycMockCommandError(error as Error);
     }

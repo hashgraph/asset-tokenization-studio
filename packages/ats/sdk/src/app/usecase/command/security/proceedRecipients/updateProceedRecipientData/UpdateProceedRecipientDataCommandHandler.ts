@@ -170,25 +170,23 @@
    limitations under the License.
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
 import {
   UpdateProceedRecipientDataCommand,
   UpdateProceedRecipientDataCommandResponse,
-} from './UpdateProceedRecipientDataCommand';
-import { UpdateProceedRecipientDataCommandError } from './error/UpdateProceedRecipientDataCommandError';
+} from "./UpdateProceedRecipientDataCommand";
+import { UpdateProceedRecipientDataCommandError } from "./error/UpdateProceedRecipientDataCommandError";
 
 @CommandHandler(UpdateProceedRecipientDataCommand)
-export class UpdateProceedRecipientDataCommandHandler
-  implements ICommandHandler<UpdateProceedRecipientDataCommand>
-{
+export class UpdateProceedRecipientDataCommandHandler implements ICommandHandler<UpdateProceedRecipientDataCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
@@ -200,19 +198,15 @@ export class UpdateProceedRecipientDataCommandHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: UpdateProceedRecipientDataCommand,
-  ): Promise<UpdateProceedRecipientDataCommandResponse> {
+  async execute(command: UpdateProceedRecipientDataCommand): Promise<UpdateProceedRecipientDataCommandResponse> {
     try {
       const { securityId, proceedRecipient, data } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
-      const proceedRecipientEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(proceedRecipient);
+      const proceedRecipientEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(proceedRecipient);
 
       await this.validationService.checkPause(securityId);
 
@@ -222,11 +216,8 @@ export class UpdateProceedRecipientDataCommandHandler
         securityId,
       );
 
-      await this.validationService.checkIsProceedRecipient(
-        securityId,
-        proceedRecipient,
-      );
-      const finalData = data === '' ? '0x' : data;
+      await this.validationService.checkIsProceedRecipient(securityId, proceedRecipient);
+      const finalData = data === "" ? "0x" : data;
 
       const res = await handler.updateProceedRecipientData(
         securityEvmAddress,
@@ -235,12 +226,7 @@ export class UpdateProceedRecipientDataCommandHandler
         securityId,
       );
 
-      return Promise.resolve(
-        new UpdateProceedRecipientDataCommandResponse(
-          res.error === undefined,
-          res.id!,
-        ),
-      );
+      return Promise.resolve(new UpdateProceedRecipientDataCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new UpdateProceedRecipientDataCommandError(error as Error);
     }

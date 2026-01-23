@@ -1,11 +1,11 @@
-import { Box } from '@chakra-ui/react';
-import { RoleManagement } from '../RoleManagement/RoleManagement';
-import { useTranslation } from 'react-i18next';
-import { Management } from '../Management/Management';
-import { useParams } from 'react-router-dom';
-import { useMemo } from 'react';
-import { DangerZone } from '../DangerZone';
-import { PanelTabs } from '../../../../components/PanelTabs/PanelTabs';
+import { Box } from "@chakra-ui/react";
+import { RoleManagement } from "../RoleManagement/RoleManagement";
+import { useTranslation } from "react-i18next";
+import { Management } from "../Management/Management";
+import { useParams } from "react-router-dom";
+import { useMemo } from "react";
+import { DangerZone } from "../DangerZone";
+import { PanelTabs } from "../../../../components/PanelTabs/PanelTabs";
 
 interface ManagementTabProps {
   config: {
@@ -16,10 +16,10 @@ interface ManagementTabProps {
 }
 
 export const ManagementTab = ({ config }: ManagementTabProps) => {
-  const { id = '' } = useParams();
+  const { id = "" } = useParams();
 
-  const { t: tTabs } = useTranslation('security', {
-    keyPrefix: 'details.tabs',
+  const { t: tTabs } = useTranslation("security", {
+    keyPrefix: "details.tabs",
   });
 
   const tabs = useMemo(() => {
@@ -28,16 +28,16 @@ export const ManagementTab = ({ config }: ManagementTabProps) => {
     if (config.showRoleManagement) {
       tabs.push({
         content: <RoleManagement />,
-        header: tTabs('roleManagement'),
+        header: tTabs("roleManagement"),
       });
     }
     if (config.showDangerZone) {
-      tabs.push({ content: <DangerZone />, header: 'Danger Zone' });
+      tabs.push({ content: <DangerZone />, header: "Danger Zone" });
     }
     if (config.showConfiguration) {
       tabs.push({
         content: <Management id={id} />,
-        header: tTabs('configuration'),
+        header: tTabs("configuration"),
       });
     }
 
@@ -45,7 +45,7 @@ export const ManagementTab = ({ config }: ManagementTabProps) => {
   }, [config, tTabs, id]);
 
   return (
-    <Box w={'full'} h={'full'}>
+    <Box w={"full"} h={"full"}>
       <PanelTabs tabs={tabs} />
     </Box>
   );

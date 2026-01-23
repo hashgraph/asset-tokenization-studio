@@ -203,9 +203,9 @@
 
 */
 
-import { Environment } from '@domain/network/Environment';
-import { MirrorNode } from '@domain/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/network/JsonRpcRelay';
+import { Environment } from "@domain/network/Environment";
+import { MirrorNode } from "@domain/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/network/JsonRpcRelay";
 
 export default class SetNetworkResponse {
   constructor(

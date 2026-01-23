@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import BigDecimal from '../shared/BigDecimal';
-import { SecurityDate } from '../shared/SecurityDate';
+import ValidatedDomain from "@core/validation/ValidatedArgs";
+import BigDecimal from "../shared/BigDecimal";
+import { SecurityDate } from "../shared/SecurityDate";
 
 export class Dividend extends ValidatedDomain<Dividend> {
   amountPerUnitOfSecurity: BigDecimal;

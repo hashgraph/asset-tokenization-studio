@@ -203,7 +203,7 @@
 
 */
 
-import '../environmentMock';
+import "../environmentMock";
 import {
   AddIssuerRequest,
   CreateEquityRequest,
@@ -220,42 +220,42 @@ import {
   Role,
   RoleRequest,
   SDK,
-} from '@port/in';
+} from "@port/in";
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '@domain/context/factory/RegulationType';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import NetworkService from '@service/network/NetworkService';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import SecurityViewModel from '@port/in/response/SecurityViewModel';
+} from "@domain/context/factory/RegulationType";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
+import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import NetworkService from "@service/network/NetworkService";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import {
   CLIENT_ACCOUNT_ECDSA,
   CLIENT_ACCOUNT_ECDSA_A,
   CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
-} from '@test/config';
-import Injectable from '@core/injectable/Injectable';
-import Account from '@domain/context/account/Account';
-import { ethers, Wallet } from 'ethers';
-import SsiManagement from '@port/in/ssiManagement/SsiManagement';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import createVcT3 from '@test/utils/verifiableCredentials';
-import { Terminal3Vc } from '@domain/context/kyc/Terminal3';
-import { HederaId } from '@domain/context/shared/HederaId';
+} from "@test/config";
+import Injectable from "@core/injectable/Injectable";
+import Account from "@domain/context/account/Account";
+import { ethers, Wallet } from "ethers";
+import SsiManagement from "@port/in/ssiManagement/SsiManagement";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import createVcT3 from "@test/utils/verifiableCredentials";
+import { Terminal3Vc } from "@domain/context/kyc/Terminal3";
+import { HederaId } from "@domain/context/shared/HederaId";
 
-SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
+SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
 const decimals = 0;
-const name = 'TEST_SECURITY_TOKEN';
-const symbol = 'TEST';
-const isin = 'ABCDE123456Z';
+const name = "TEST_SECURITY_TOKEN";
+const symbol = "TEST";
+const isin = "ABCDE123456Z";
 const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
@@ -264,37 +264,36 @@ const conversionRight = true;
 const redemptionRight = false;
 const putRight = true;
 const dividendRight = 1;
-const currency = '0x345678';
+const currency = "0x345678";
 const numberOfShares = 0;
 const nominalValue = 1000;
 const nominalValueDecimals = 3;
 const regulationType = RegulationType.REG_D;
 const regulationSubType = RegulationSubType.B_506;
-const countries = 'AF,HG,BN';
-const info = 'Anything';
-const configId =
-  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const countries = "AF,HG,BN";
+const info = "Anything";
+const configId = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const configVersion = 1;
 
 const mirrorNode: MirrorNode = {
-  name: 'testmirrorNode',
-  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+  name: "testmirrorNode",
+  baseUrl: "https://testnet.mirrornode.hedera.com/api/v1/",
 };
 
 const rpcNode: JsonRpcRelay = {
-  name: 'testrpcNode',
-  baseUrl: 'http://127.0.0.1:7546/api',
+  name: "testrpcNode",
+  baseUrl: "http://127.0.0.1:7546/api",
 };
 
 let th: RPCTransactionAdapter;
 let mirrorNodeAdapter: MirrorNodeAdapter;
 
-describe('🧪 Kyc tests', () => {
+describe("🧪 Kyc tests", () => {
   let ns: NetworkService;
   let rpcQueryAdapter: RPCQueryAdapter;
   let equity: SecurityViewModel;
 
-  const url = 'http://127.0.0.1:7546';
+  const url = "http://127.0.0.1:7546";
   const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
   beforeAll(async () => {
@@ -307,7 +306,7 @@ describe('🧪 Kyc tests', () => {
       rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
 
       rpcQueryAdapter.init();
-      ns.environment = 'testnet';
+      ns.environment = "testnet";
       ns.configuration = {
         factoryAddress: FACTORY_ADDRESS,
         resolverAddress: RESOLVER_ADDRESS,
@@ -325,12 +324,7 @@ describe('🧪 Kyc tests', () => {
       });
       await th.register(account, true);
 
-      th.setSignerOrProvider(
-        new Wallet(
-          CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-          customHttpProvider,
-        ),
-      );
+      th.setSignerOrProvider(new Wallet(CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? "", customHttpProvider));
 
       const requestST = new CreateEquityRequest({
         name,
@@ -368,7 +362,7 @@ describe('🧪 Kyc tests', () => {
 
       equity = (await Equity.create(requestST)).security;
     } catch (error) {
-      console.error('Error in beforeAll setup:', error);
+      console.error("Error in beforeAll setup:", error);
     }
 
     await Role.grantRole(
@@ -393,10 +387,8 @@ describe('🧪 Kyc tests', () => {
     );
   }, 900_000);
 
-  it('Grant and revoke KYC', async () => {
-    const vcBase64 = await createVcT3(
-      CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-    );
+  it("Grant and revoke KYC", async () => {
+    const vcBase64 = await createVcT3(CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString());
 
     expect(
       (
@@ -419,7 +411,7 @@ describe('🧪 Kyc tests', () => {
 
     // Override mock for this test to get issuer Id from EVM address
     jest
-      .spyOn(mirrorNodeAdapter, 'getAccountInfo')
+      .spyOn(mirrorNodeAdapter, "getAccountInfo")
       .mockResolvedValueOnce({ id: HederaId.from(issuerId) })
       .mockResolvedValueOnce({ id: HederaId.from(accountId) });
 
@@ -519,7 +511,7 @@ describe('🧪 Kyc tests', () => {
     ).toBe(true);
   }, 600_000);
 
-  it('Cannot grant KYC with invalid VC', async () => {
+  it("Cannot grant KYC with invalid VC", async () => {
     const invalidAddress = CLIENT_ACCOUNT_ECDSA.evmAddress!;
     const vcBase64 = await createVcT3(invalidAddress);
 
@@ -534,6 +526,6 @@ describe('🧪 Kyc tests', () => {
             }),
           )
         ).payload,
-    ).rejects.toThrow('The VC holder does not match target account');
+    ).rejects.toThrow("The VC holder does not match target account");
   }, 600_000);
 });

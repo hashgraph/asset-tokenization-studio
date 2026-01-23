@@ -203,53 +203,44 @@
 
 */
 
-import { HStack, Stack, VStack } from '@chakra-ui/react';
-import { Heading, Text, Button, useToast, InputController } from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { RouteName } from '../../router/RouteName';
-import { History } from '../../components/History';
-import { CancelButton } from '../../components/CancelButton';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { AddSecurityFormValues } from './AddSecurityFormValues';
-import { useAddDigitalSecurity } from '../../hooks/queries/useAddDigitalSecurity';
-import {
-  GetRoleCountForRequest,
-  GetSecurityDetailsRequest,
-} from '@hashgraph/asset-tokenization-sdk';
-import { isValidHederaId, required } from '../../utils/rules';
-import { RouterManager } from '../../router/RouterManager';
-import { useEffect, useState } from 'react';
-import { useWalletStore } from '../../store/walletStore';
-import { useGetSecurityRoleCountFor } from '../../hooks/queries/useGetSecurityDetails';
-import { useAccountStore } from '../../store/accountStore';
+import { HStack, Stack, VStack } from "@chakra-ui/react";
+import { Heading, Text, Button, useToast, InputController } from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import { RouteName } from "../../router/RouteName";
+import { History } from "../../components/History";
+import { CancelButton } from "../../components/CancelButton";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { AddSecurityFormValues } from "./AddSecurityFormValues";
+import { useAddDigitalSecurity } from "../../hooks/queries/useAddDigitalSecurity";
+import { GetRoleCountForRequest, GetSecurityDetailsRequest } from "@hashgraph/asset-tokenization-sdk";
+import { isValidHederaId, required } from "../../utils/rules";
+import { RouterManager } from "../../router/RouterManager";
+import { useEffect, useState } from "react";
+import { useWalletStore } from "../../store/walletStore";
+import { useGetSecurityRoleCountFor } from "../../hooks/queries/useGetSecurityDetails";
+import { useAccountStore } from "../../store/accountStore";
 
 export const AddSecurity = () => {
-  const {
-    mutate: addSecurity,
-    isLoading: isAddSecurityLoading,
-    data: addSecurityResult,
-  } = useAddDigitalSecurity();
+  const { mutate: addSecurity, isLoading: isAddSecurityLoading, data: addSecurityResult } = useAddDigitalSecurity();
   const { control, formState, handleSubmit } = useForm<AddSecurityFormValues>({
-    mode: 'all',
+    mode: "all",
   });
-  const { t } = useTranslation('security', { keyPrefix: 'add' });
-  const { t: tRoutes } = useTranslation('routes');
+  const { t } = useTranslation("security", { keyPrefix: "add" });
+  const { t: tRoutes } = useTranslation("routes");
   const { address } = useWalletStore();
   const { addSecurityToAdmin, adminSecurities } = useAccountStore();
-  const [isRoleCountForLoading, setIsRoleCountForLoading] =
-    useState<boolean>(false);
+  const [isRoleCountForLoading, setIsRoleCountForLoading] = useState<boolean>(false);
   const toast = useToast();
 
   const roleCountForRequest = new GetRoleCountForRequest({
-    securityId: addSecurityResult?.diamondAddress ?? '',
+    securityId: addSecurityResult?.diamondAddress ?? "",
     targetId: address,
   });
 
-  const { data: roleCountFor, refetch: getSecurityRoleCountFor } =
-    useGetSecurityRoleCountFor(roleCountForRequest, {
-      enabled: false,
-      onSettled: () => setIsRoleCountForLoading(false),
-    });
+  const { data: roleCountFor, refetch: getSecurityRoleCountFor } = useGetSecurityRoleCountFor(roleCountForRequest, {
+    enabled: false,
+    onSettled: () => setIsRoleCountForLoading(false),
+  });
 
   const submit: SubmitHandler<AddSecurityFormValues> = (params) => {
     const request = new GetSecurityDetailsRequest({
@@ -268,12 +259,10 @@ export const AddSecurity = () => {
   }, [addSecurityResult]);
 
   useEffect(() => {
-    if (typeof roleCountFor !== 'undefined') {
+    if (typeof roleCountFor !== "undefined") {
       if (roleCountFor > 0) {
         const securities = adminSecurities[address];
-        const existsInAdmin = securities?.some(
-          (security) => security.address === addSecurityResult?.diamondAddress,
-        );
+        const existsInAdmin = securities?.some((security) => security.address === addSecurityResult?.diamondAddress);
 
         if (!existsInAdmin) {
           addSecurityToAdmin(address, {
@@ -283,8 +272,8 @@ export const AddSecurity = () => {
 
           toast.show({
             duration: 3000,
-            title: `${t('messages.addedToAdmin')}`,
-            status: 'success',
+            title: `${t("messages.addedToAdmin")}`,
+            status: "success",
           });
         }
 
@@ -298,28 +287,21 @@ export const AddSecurity = () => {
   return (
     <Stack h="full" as="form" onSubmit={handleSubmit(submit)}>
       <History label={tRoutes(RouteName.AddSecurity)} />
-      <HStack
-        w="full"
-        h="full"
-        p="48px"
-        background="neutral.50"
-        justifyContent="center"
-        alignItems="flex-start"
-      >
+      <HStack w="full" h="full" p="48px" background="neutral.50" justifyContent="center" alignItems="flex-start">
         <VStack alignItems="flex-start">
-          <Heading textStyle="HeadingMediumLG">{t('title')}</Heading>
-          <Text textStyle="BodyRegularMD">{t('subtitle')}</Text>
+          <Heading textStyle="HeadingMediumLG">{t("title")}</Heading>
+          <Text textStyle="BodyRegularMD">{t("subtitle")}</Text>
           <Text textStyle="ElementsRegularSM" mt={6}>
-            {t('form.mandatoryFields')}
+            {t("form.mandatoryFields")}
           </Text>
           <Text textStyle="BodyTextRegularSM" mt={4}>
-            {t('form.input.address.label')}
+            {t("form.input.address.label")}
           </Text>
           <VStack w="450px" alignItems="flex-start">
             <InputController
               id="securityId"
               control={control}
-              placeholder={t('form.input.address.placeholder')}
+              placeholder={t("form.input.address.placeholder")}
               backgroundColor="neutral.white"
               size="md"
               rules={{
@@ -339,7 +321,7 @@ export const AddSecurity = () => {
               minW="unset"
               isLoading={isAddSecurityLoading || isRoleCountForLoading}
             >
-              {t('addDigitalSecurity')}
+              {t("addDigitalSecurity")}
             </Button>
           </HStack>
         </VStack>

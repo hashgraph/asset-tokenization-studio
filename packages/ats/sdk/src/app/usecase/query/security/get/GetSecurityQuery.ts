@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
-import { Security } from '@domain/context/security/Security';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
+import { Security } from "@domain/context/security/Security";
 
 export class GetSecurityQueryResponse implements QueryResponse {
   constructor(public readonly security: Security) {}

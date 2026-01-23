@@ -203,34 +203,34 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { ErrorCode } from '@core/error/BaseError';
-import { TransferCommandFixture } from '@test/fixtures/transfer/TransferFixture';
-import Account from '@domain/context/account/Account';
-import { Security } from '@domain/context/security/Security';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { KycStatus } from '@domain/context/kyc/Kyc';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { ProtectedTransferFromByPartitionCommandHandler } from './ProtectedTransferFromByPartitionCommandHandler';
+} from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { ErrorCode } from "@core/error/BaseError";
+import { TransferCommandFixture } from "@test/fixtures/transfer/TransferFixture";
+import Account from "@domain/context/account/Account";
+import { Security } from "@domain/context/security/Security";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { KycStatus } from "@domain/context/kyc/Kyc";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { ProtectedTransferFromByPartitionCommandHandler } from "./ProtectedTransferFromByPartitionCommandHandler";
 import {
   ProtectedTransferFromByPartitionCommand,
   ProtectedTransferFromByPartitionCommandResponse,
-} from './ProtectedTransferFromByPartitionCommand';
-import { ProtectedTransferFromByPartitionCommandError } from './error/ProtectedTransferFromByPartitionCommandError';
-import SecurityService from '@service/security/SecurityService';
+} from "./ProtectedTransferFromByPartitionCommand";
+import { ProtectedTransferFromByPartitionCommandError } from "./error/ProtectedTransferFromByPartitionCommandError";
+import SecurityService from "@service/security/SecurityService";
 
-describe('ProtectedTransferFromByPartitionCommandHandler', () => {
+describe("ProtectedTransferFromByPartitionCommandHandler", () => {
   let handler: ProtectedTransferFromByPartitionCommandHandler;
   let command: ProtectedTransferFromByPartitionCommand;
 
@@ -261,94 +261,59 @@ describe('ProtectedTransferFromByPartitionCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws ProtectedTransferFromByPartitionCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws ProtectedTransferFromByPartitionCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          ProtectedTransferFromByPartitionCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(ProtectedTransferFromByPartitionCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while protected transferring from tokens: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while protected transferring from tokens: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully protected protected transfer from', async () => {
+    describe("success cases", () => {
+      it("should successfully protected protected transfer from", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
         securityServiceMock.get.mockResolvedValue(security);
 
-        transactionServiceMock
-          .getHandler()
-          .protectedTransferFromByPartition.mockResolvedValue({
-            id: transactionId,
-          });
+        transactionServiceMock.getHandler().protectedTransferFromByPartition.mockResolvedValue({
+          id: transactionId,
+        });
 
         const result = await handler.execute(command);
 
-        expect(result).toBeInstanceOf(
-          ProtectedTransferFromByPartitionCommandResponse,
-        );
+        expect(result).toBeInstanceOf(ProtectedTransferFromByPartitionCommandResponse);
         expect(result.payload).toBe(true);
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          2,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
-          1,
-          command.sourceId,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
-          2,
-          command.targetId,
-        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(2);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(1, command.sourceId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(2, command.targetId);
 
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(
-          validationServiceMock.checkProtectedPartitions,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          validationServiceMock.checkProtectedPartitions,
-        ).toHaveBeenCalledWith(security);
-        expect(
-          validationServiceMock.checkProtectedPartitionRole,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          validationServiceMock.checkProtectedPartitionRole,
-        ).toHaveBeenCalledWith(
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkProtectedPartitions).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkProtectedPartitions).toHaveBeenCalledWith(security);
+        expect(validationServiceMock.checkProtectedPartitionRole).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkProtectedPartitionRole).toHaveBeenCalledWith(
           command.partitionId,
           account.id.toString(),
           command.securityId,
         );
         expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
-          security,
-          command.amount,
-        );
-        expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledTimes(
-          1,
-        );
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(security, command.amount);
+        expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkKycAddresses).toHaveBeenCalledWith(
           command.securityId,
           [command.sourceId, command.targetId],
@@ -375,13 +340,9 @@ describe('ProtectedTransferFromByPartitionCommandHandler', () => {
           command.nounce,
         );
 
-        expect(
-          transactionServiceMock.getHandler().protectedTransferFromByPartition,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().protectedTransferFromByPartition).toHaveBeenCalledTimes(1);
 
-        expect(
-          transactionServiceMock.getHandler().protectedTransferFromByPartition,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getHandler().protectedTransferFromByPartition).toHaveBeenCalledWith(
           evmAddress,
           command.partitionId,
           evmAddress,

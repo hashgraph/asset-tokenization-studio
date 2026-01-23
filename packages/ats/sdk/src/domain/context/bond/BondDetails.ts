@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import BigDecimal from '../shared/BigDecimal';
-import { SecurityDate } from '../shared/SecurityDate';
+import ValidatedDomain from "@core/validation/ValidatedArgs";
+import BigDecimal from "../shared/BigDecimal";
+import { SecurityDate } from "../shared/SecurityDate";
 
 export class BondDetails extends ValidatedDomain<BondDetails> {
   currency: string;

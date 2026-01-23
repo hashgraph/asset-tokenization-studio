@@ -203,37 +203,24 @@
 
 */
 
-import { InvalidValue } from '../../../error/InvalidValue';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { InvalidValue } from "../../../error/InvalidValue";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '../../../FormatValidation';
+import FormatValidation from "../../../FormatValidation";
 
 export default class BatchMintRequest extends ValidatedRequest<BatchMintRequest> {
   securityId: string;
   amountList: string[];
   toList: string[];
 
-  constructor({
-    securityId,
-    amountList,
-    toList,
-  }: {
-    securityId: string;
-    amountList: string[];
-    toList: string[];
-  }) {
+  constructor({ securityId, amountList, toList }: { securityId: string; amountList: string[]; toList: string[] }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       amountList: (vals) =>
         vals.length !== toList.length
-          ? [
-              new InvalidValue(
-                `The list of toList and amountList must have equal length.`,
-              ),
-            ]
+          ? [new InvalidValue(`The list of toList and amountList must have equal length.`)]
           : [],
-      toList: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(vals, 'toList'),
+      toList: (vals) => FormatValidation.checkHederaIdOrEvmAddressArray(vals, "toList"),
     });
     this.securityId = securityId;
     this.amountList = amountList;

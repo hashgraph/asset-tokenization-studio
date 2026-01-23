@@ -203,12 +203,10 @@
 
 */
 
-import { Command } from '@core/command/Command';
-import { CommandResponse } from '@core/command/CommandResponse';
+import { Command } from "@core/command/Command";
+import { CommandResponse } from "@core/command/CommandResponse";
 
-export class ExecutePercentageSnapshotByAddressesCommandResponse
-  implements CommandResponse
-{
+export class ExecutePercentageSnapshotByAddressesCommandResponse implements CommandResponse {
   constructor(
     public readonly failed: string[],
     public readonly succeeded: string[],

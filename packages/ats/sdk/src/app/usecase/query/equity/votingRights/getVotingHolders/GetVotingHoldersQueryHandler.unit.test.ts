@@ -203,27 +203,20 @@
 
 */
 
-import { ErrorCode } from '@core/error/BaseError';
-import { createMock } from '@golevelup/ts-jest';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import AccountService from '@service/account/AccountService';
-import ContractService from '@service/contract/ContractService';
-import { GetVotingHoldersQueryFixture } from '@test/fixtures/equity/EquityFixture';
-import {
-  EvmAddressPropsFixture,
-  AccountPropsFixture,
-  ErrorMsgFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { GetVotingHoldersQueryError } from './error/GetVotingHoldersQueryError';
-import {
-  GetVotingHoldersQuery,
-  GetVotingHoldersQueryResponse,
-} from './GetVotingHoldersQuery';
-import { GetVotingHoldersQueryHandler } from './GetVotingHoldersQueryHandler';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import Account from '@domain/context/account/Account';
+import { ErrorCode } from "@core/error/BaseError";
+import { createMock } from "@golevelup/ts-jest";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import AccountService from "@service/account/AccountService";
+import ContractService from "@service/contract/ContractService";
+import { GetVotingHoldersQueryFixture } from "@test/fixtures/equity/EquityFixture";
+import { EvmAddressPropsFixture, AccountPropsFixture, ErrorMsgFixture } from "@test/fixtures/shared/DataFixture";
+import { GetVotingHoldersQueryError } from "./error/GetVotingHoldersQueryError";
+import { GetVotingHoldersQuery, GetVotingHoldersQueryResponse } from "./GetVotingHoldersQuery";
+import { GetVotingHoldersQueryHandler } from "./GetVotingHoldersQueryHandler";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import Account from "@domain/context/account/Account";
 
-describe('GetDividendHoldersQueryHandler', () => {
+describe("GetDividendHoldersQueryHandler", () => {
   let handler: GetVotingHoldersQueryHandler;
   let query: GetVotingHoldersQuery;
 
@@ -236,11 +229,7 @@ describe('GetDividendHoldersQueryHandler', () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new GetVotingHoldersQueryHandler(
-      queryAdapterServiceMock,
-      accountServiceMock,
-      contractServiceMock,
-    );
+    handler = new GetVotingHoldersQueryHandler(queryAdapterServiceMock, accountServiceMock, contractServiceMock);
     query = GetVotingHoldersQueryFixture.create();
   });
 
@@ -248,33 +237,25 @@ describe('GetDividendHoldersQueryHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('throws GetVotingHoldersQueryError when query fails with uncaught error', async () => {
+  describe("execute", () => {
+    it("throws GetVotingHoldersQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
       const resultPromise = handler.execute(query);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(
-        GetVotingHoldersQueryError,
-      );
+      await expect(resultPromise).rejects.toBeInstanceOf(GetVotingHoldersQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while querying voting holders: ${errorMsg}`,
-        ),
+        message: expect.stringContaining(`An error occurred while querying voting holders: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
 
-    it('should successfully get voting holders', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
-      queryAdapterServiceMock.getVotingHolders.mockResolvedValue([
-        evmAddress.toString(),
-      ]);
+    it("should successfully get voting holders", async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      queryAdapterServiceMock.getVotingHolders.mockResolvedValue([evmAddress.toString()]);
       accountServiceMock.getAccountInfo.mockResolvedValueOnce(account);
 
       const result = await handler.execute(query);
@@ -282,23 +263,17 @@ describe('GetDividendHoldersQueryHandler', () => {
       expect(result).toBeInstanceOf(GetVotingHoldersQueryResponse);
       expect(result.payload).toStrictEqual([account.id.toString()]);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountInfo).toHaveBeenCalledTimes(1);
       expect(queryAdapterServiceMock.getVotingHolders).toHaveBeenCalledTimes(1);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
       expect(queryAdapterServiceMock.getVotingHolders).toHaveBeenCalledWith(
         evmAddress,
         query.voteId,
         query.start,
         query.end,
       );
-      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(
-        evmAddress.toString(),
-      );
+      expect(accountServiceMock.getAccountInfo).toHaveBeenCalledWith(evmAddress.toString());
     });
   });
 });

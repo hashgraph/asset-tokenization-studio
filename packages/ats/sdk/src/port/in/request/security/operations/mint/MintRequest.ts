@@ -203,27 +203,16 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../../../FormatValidation';
-import { BaseArgs as BaseRequest } from '@core/validation/BaseArgs';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../../../FormatValidation";
+import { BaseArgs as BaseRequest } from "@core/validation/BaseArgs";
 
-export default class MintRequest
-  extends ValidatedRequest<MintRequest>
-  implements BaseRequest
-{
+export default class MintRequest extends ValidatedRequest<MintRequest> implements BaseRequest {
   securityId: string;
   targetId: string;
   amount: string;
 
-  constructor({
-    securityId,
-    targetId,
-    amount,
-  }: {
-    amount: string;
-    targetId: string;
-    securityId: string;
-  }) {
+  constructor({ securityId, targetId, amount }: { amount: string; targetId: string; securityId: string }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

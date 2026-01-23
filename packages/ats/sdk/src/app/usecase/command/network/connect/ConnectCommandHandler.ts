@@ -203,11 +203,11 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import TransactionService from '@service/transaction/TransactionService';
-import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand';
-import { ConnectCommandError } from './error/ConnectCommandError';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import TransactionService from "@service/transaction/TransactionService";
+import { ConnectCommand, ConnectCommandResponse } from "./ConnectCommand";
+import { ConnectCommandError } from "./error/ConnectCommandError";
 
 @CommandHandler(ConnectCommand)
 export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
@@ -225,9 +225,7 @@ export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
 
       const registration = await handler.register(input, debug);
 
-      return Promise.resolve(
-        new ConnectCommandResponse(registration, command.wallet),
-      );
+      return Promise.resolve(new ConnectCommandResponse(registration, command.wallet));
     } catch (error) {
       throw new ConnectCommandError(error as Error);
     }

@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '@port/in/request/FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class SetNameRequest extends ValidatedRequest<SetNameRequest> {
   securityId: string;

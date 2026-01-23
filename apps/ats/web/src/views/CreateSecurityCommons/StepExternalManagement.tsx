@@ -203,34 +203,21 @@
 
 */
 
-import {
-  FormControl,
-  HStack,
-  SimpleGrid,
-  Stack,
-  VStack,
-} from '@chakra-ui/react';
-import { useTranslation } from 'react-i18next';
-import { X } from '@phosphor-icons/react';
-import {
-  PhosphorIcon,
-  Text,
-  InfoDivider,
-  SelectController,
-  Tag,
-  PanelTitle,
-} from 'io-bricks-ui';
-import { useFormContext, useFormState } from 'react-hook-form';
-import { useEffect, useState } from 'react';
-import { useExternalPauseStore } from '../../store/externalPauseStore';
-import { ICreateEquityFormValues } from '../CreateEquity/ICreateEquityFormValues';
-import { ICreateBondFormValues } from '../CreateBond/ICreateBondFormValues';
-import { FormStepContainer } from '../../components/FormStepContainer';
-import { CancelButton } from '../../components/CancelButton';
-import { PreviousStepButton } from '../CreateEquity/Components/PreviousStepButton';
-import { NextStepButton } from '../CreateEquity/Components/NextStepButton';
-import { useExternalControlStore } from '../../store/externalControlStore';
-import { useExternalKYCStore } from '../../store/externalKYCStore';
+import { FormControl, HStack, SimpleGrid, Stack, VStack } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
+import { X } from "@phosphor-icons/react";
+import { PhosphorIcon, Text, InfoDivider, SelectController, Tag, PanelTitle } from "io-bricks-ui";
+import { useFormContext, useFormState } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useExternalPauseStore } from "../../store/externalPauseStore";
+import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
+import { ICreateBondFormValues } from "../CreateBond/ICreateBondFormValues";
+import { FormStepContainer } from "../../components/FormStepContainer";
+import { CancelButton } from "../../components/CancelButton";
+import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
+import { NextStepButton } from "../CreateEquity/Components/NextStepButton";
+import { useExternalControlStore } from "../../store/externalControlStore";
+import { useExternalKYCStore } from "../../store/externalKYCStore";
 
 type SelectOption = {
   value: string;
@@ -238,42 +225,31 @@ type SelectOption = {
 };
 
 export const StepExternalManagement = () => {
-  const { t } = useTranslation('security', {
-    keyPrefix: 'createEquity.stepExternalManagement',
+  const { t } = useTranslation("security", {
+    keyPrefix: "createEquity.stepExternalManagement",
   });
 
   const { externalPauses } = useExternalPauseStore();
   const { externalControls } = useExternalControlStore();
   const { externalKYCs } = useExternalKYCStore();
 
-  const { control, watch, setValue } = useFormContext<
-    ICreateEquityFormValues | ICreateBondFormValues
-  >();
+  const { control, watch, setValue } = useFormContext<ICreateEquityFormValues | ICreateBondFormValues>();
 
   const stepFormState = useFormState({
     control,
   });
 
-  const [externalPausesSelected, setExternalPausesSelected] = useState<
-    string[]
-  >(watch('externalPausesList') ?? []);
-  const [externalControlsSelected, setExternalControlsSelected] = useState<
-    string[]
-  >(watch('externalControlList') ?? []);
-  const [externalKYCsSelected, setExternalKYCsSelected] = useState<string[]>(
-    watch('externalKYCList') ?? [],
+  const [externalPausesSelected, setExternalPausesSelected] = useState<string[]>(watch("externalPausesList") ?? []);
+  const [externalControlsSelected, setExternalControlsSelected] = useState<string[]>(
+    watch("externalControlList") ?? [],
   );
+  const [externalKYCsSelected, setExternalKYCsSelected] = useState<string[]>(watch("externalKYCList") ?? []);
 
   useEffect(() => {
-    setValue('externalPausesList', externalPausesSelected);
-    setValue('externalControlList', externalControlsSelected);
-    setValue('externalKYCList', externalKYCsSelected);
-  }, [
-    externalPausesSelected,
-    externalControlsSelected,
-    externalKYCsSelected,
-    setValue,
-  ]);
+    setValue("externalPausesList", externalPausesSelected);
+    setValue("externalControlList", externalControlsSelected);
+    setValue("externalKYCList", externalKYCsSelected);
+  }, [externalPausesSelected, externalControlsSelected, externalKYCsSelected, setValue]);
 
   const externalPauseOptions = externalPauses
     .map(({ address }) => ({
@@ -307,9 +283,7 @@ export const StepExternalManagement = () => {
   };
 
   const handlePauseRemove = (addressToRemove: string) => {
-    setExternalPausesSelected((prev) =>
-      prev.filter((address) => address !== addressToRemove),
-    );
+    setExternalPausesSelected((prev) => prev.filter((address) => address !== addressToRemove));
   };
 
   const handleControlSelect = (option: SelectOption[]) => {
@@ -323,9 +297,7 @@ export const StepExternalManagement = () => {
   };
 
   const handleControlRemove = (addressToRemove: string) => {
-    setExternalControlsSelected((prev) =>
-      prev.filter((address) => address !== addressToRemove),
-    );
+    setExternalControlsSelected((prev) => prev.filter((address) => address !== addressToRemove));
   };
 
   const handleKYCSelect = (option: SelectOption[]) => {
@@ -339,38 +311,34 @@ export const StepExternalManagement = () => {
   };
 
   const handleKYCRemove = (addressToRemove: string) => {
-    setExternalKYCsSelected((prev) =>
-      prev.filter((address) => address !== addressToRemove),
-    );
+    setExternalKYCsSelected((prev) => prev.filter((address) => address !== addressToRemove));
   };
 
   return (
     <FormStepContainer>
       <Stack gap={2}>
-        <Text textStyle="HeadingMediumLG">{t('title')}</Text>
-        <Text textStyle="BodyTextRegularMD">{t('subtitle')}</Text>
+        <Text textStyle="HeadingMediumLG">{t("title")}</Text>
+        <Text textStyle="BodyTextRegularMD">{t("subtitle")}</Text>
       </Stack>
-      <InfoDivider title={t('externalPause')} type="main" />
+      <InfoDivider title={t("externalPause")} type="main" />
       <VStack w="full">
         <FormControl gap={4} as={SimpleGrid} columns={{ base: 7, lg: 1 }}>
           <Stack w="full">
             <HStack justifySelf="flex-start">
-              <Text textStyle="BodyTextRegularSM">{t('pauseList')}</Text>
+              <Text textStyle="BodyTextRegularSM">{t("pauseList")}</Text>
             </HStack>
             <SelectController
               control={control}
               id="externalPausesList"
-              placeholder={t('pauseListPlaceholder')}
+              placeholder={t("pauseListPlaceholder")}
               options={externalPauseOptions}
               isMulti
               setsFullOption
-              onChange={(option) =>
-                handlePauseSelect(option as unknown as SelectOption[])
-              }
+              onChange={(option) => handlePauseSelect(option as unknown as SelectOption[])}
             />
           </Stack>
           <VStack w="auto" layerStyle="whiteContainer" mb={3}>
-            <PanelTitle title={t('externalPausesSelected')} />
+            <PanelTitle title={t("externalPausesSelected")} />
             <HStack layerStyle="whiteContainer" noOfLines={20} lineHeight={10}>
               {externalPausesSelected.map((item) => (
                 <Tag
@@ -383,25 +351,23 @@ export const StepExternalManagement = () => {
               ))}
             </HStack>
           </VStack>
-          <InfoDivider title={t('externalControl')} type="main" />
+          <InfoDivider title={t("externalControl")} type="main" />
           <Stack w="full">
             <HStack justifySelf="flex-start">
-              <Text textStyle="BodyTextRegularSM">{t('controlList')}</Text>
+              <Text textStyle="BodyTextRegularSM">{t("controlList")}</Text>
             </HStack>
             <SelectController
               control={control}
               id="externalPausesList"
-              placeholder={t('controlListPlaceholder')}
+              placeholder={t("controlListPlaceholder")}
               options={externalControlOptions}
               isMulti
               setsFullOption
-              onChange={(option) =>
-                handleControlSelect(option as unknown as SelectOption[])
-              }
+              onChange={(option) => handleControlSelect(option as unknown as SelectOption[])}
             />
           </Stack>
           <VStack w="auto" layerStyle="whiteContainer">
-            <PanelTitle title={t('externalControlsSelected')} />
+            <PanelTitle title={t("externalControlsSelected")} />
             <HStack layerStyle="whiteContainer" noOfLines={20} lineHeight={10}>
               {externalControlsSelected.map((item) => (
                 <Tag
@@ -414,25 +380,23 @@ export const StepExternalManagement = () => {
               ))}
             </HStack>
           </VStack>
-          <InfoDivider title={t('externalKYC')} type="main" />
+          <InfoDivider title={t("externalKYC")} type="main" />
           <Stack w="full">
             <HStack justifySelf="flex-start">
-              <Text textStyle="BodyTextRegularSM">{t('kycList')}</Text>
+              <Text textStyle="BodyTextRegularSM">{t("kycList")}</Text>
             </HStack>
             <SelectController
               control={control}
               id="externalKYCList"
-              placeholder={t('kycListPlaceholder')}
+              placeholder={t("kycListPlaceholder")}
               options={externalKYCOptions}
               isMulti
               setsFullOption
-              onChange={(option) =>
-                handleKYCSelect(option as unknown as SelectOption[])
-              }
+              onChange={(option) => handleKYCSelect(option as unknown as SelectOption[])}
             />
           </Stack>
           <VStack w="auto" layerStyle="whiteContainer">
-            <PanelTitle title={t('externalKYCsSelected')} />
+            <PanelTitle title={t("externalKYCsSelected")} />
             <HStack layerStyle="whiteContainer" noOfLines={20} lineHeight={10}>
               {externalKYCsSelected.map((item) => (
                 <Tag
@@ -448,13 +412,7 @@ export const StepExternalManagement = () => {
         </FormControl>
       </VStack>
 
-      <HStack
-        gap={4}
-        w="full"
-        h="100px"
-        align="end"
-        justifyContent={'flex-end'}
-      >
+      <HStack gap={4} w="full" h="100px" align="end" justifyContent={"flex-end"}>
         <CancelButton />
         <PreviousStepButton />
         <NextStepButton isDisabled={!stepFormState.isValid} />

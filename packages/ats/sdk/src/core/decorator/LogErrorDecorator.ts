@@ -203,13 +203,9 @@
 
 */
 
-import LogService from '@service/log/LogService';
+import LogService from "@service/log/LogService";
 
-export const LogError = (
-  target: unknown,
-  propertyKey: string,
-  descriptor: PropertyDescriptor,
-): PropertyDescriptor => {
+export const LogError = (target: unknown, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
   const originalMethod = descriptor.value;
   descriptor.value = async function (...args: unknown[]): Promise<unknown> {
     try {

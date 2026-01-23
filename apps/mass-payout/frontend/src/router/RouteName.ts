@@ -203,11 +203,11 @@
  */
 
 export enum RouteName {
-  Landing = 'LANDING',
-  Assets = 'ASSETS',
-  Distributions = 'DISTRIBUTIONS',
-  ImportAsset = 'IMPORT_ASSET',
-  AssetDetail = 'ASSET_DETAIL',
-  NewDistribution = 'NEW_DISTRIBUTION',
-  DistributionsDetails = 'DISTRIBUTIONS_DETAILS',
+  Landing = "LANDING",
+  Assets = "ASSETS",
+  Distributions = "DISTRIBUTIONS",
+  ImportAsset = "IMPORT_ASSET",
+  AssetDetail = "ASSET_DETAIL",
+  NewDistribution = "NEW_DISTRIBUTION",
+  DistributionsDetails = "DISTRIBUTIONS_DETAILS",
 }

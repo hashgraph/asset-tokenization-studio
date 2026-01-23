@@ -203,10 +203,10 @@
 
 */
 
-import { InvalidValue } from '../../../error/InvalidValue';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { InvalidValue } from "../../../error/InvalidValue";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '../../../FormatValidation';
+import FormatValidation from "../../../FormatValidation";
 
 export default class BatchUnfreezePartialTokensRequest extends ValidatedRequest<BatchUnfreezePartialTokensRequest> {
   securityId: string;
@@ -226,14 +226,9 @@ export default class BatchUnfreezePartialTokensRequest extends ValidatedRequest<
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       amountList: (vals) =>
         vals.length !== targetList.length
-          ? [
-              new InvalidValue(
-                `The list of targetList and amountList must have equal length.`,
-              ),
-            ]
+          ? [new InvalidValue(`The list of targetList and amountList must have equal length.`)]
           : [],
-      targetList: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(vals, 'targetList'),
+      targetList: (vals) => FormatValidation.checkHederaIdOrEvmAddressArray(vals, "targetList"),
     });
     this.securityId = securityId;
     this.amountList = amountList;

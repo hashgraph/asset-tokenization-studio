@@ -203,9 +203,9 @@
 
 */
 
-import PrivateKey from './PrivateKey';
-import PublicKey from './PublicKey';
-import { HederaId } from '../shared/HederaId';
+import PrivateKey from "./PrivateKey";
+import PublicKey from "./PublicKey";
+import { HederaId } from "../shared/HederaId";
 
 export interface AccountProps {
   id: string;
@@ -216,7 +216,7 @@ export interface AccountProps {
 }
 
 export default class Account {
-  public static readonly NULL: Account = new Account({ id: '0.0.0' });
+  public static readonly NULL: Account = new Account({ id: "0.0.0" });
   public id: HederaId;
   public evmAddress?: string;
   public privateKey?: PrivateKey;

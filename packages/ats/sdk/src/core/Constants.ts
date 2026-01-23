@@ -203,13 +203,13 @@
 
 */
 
-export const COMMAND_METADATA = '__command__';
-export const COMMAND_HANDLER_METADATA = '__commandHandler__';
-export const QUERY_METADATA = '__query__';
-export const QUERY_HANDLER_METADATA = '__queryHandler__';
+export const COMMAND_METADATA = "__command__";
+export const COMMAND_HANDLER_METADATA = "__commandHandler__";
+export const QUERY_METADATA = "__query__";
+export const QUERY_HANDLER_METADATA = "__queryHandler__";
 export const TOKEN_CREATION_COST_HBAR = 80;
-export const EVM_ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const HEDERA_ZERO_ADDRESS = '0.0.0';
+export const EVM_ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+export const HEDERA_ZERO_ADDRESS = "0.0.0";
 export const HBAR_DECIMALS = 8;
 export const GAS = {
   CREATE_EQUITY_ST: 15000000,
@@ -354,15 +354,13 @@ export const GAS = {
   UPDATE_PROCEED_RECIPIENT: 7000000,
 } as const;
 
-export const _PARTITION_ID_1 =
-  '0x0000000000000000000000000000000000000000000000000000000000000001';
-export const EMPTY_BYTES = '0x';
+export const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
+export const EMPTY_BYTES = "0x";
 
-export const SET_DIVIDEND_EVENT = 'DividendSet';
-export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
-export const SET_COUPON_EVENT = 'CouponSet';
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT =
-  'ScheduledBalanceAdjustmentSet';
+export const SET_DIVIDEND_EVENT = "DividendSet";
+export const SET_VOTING_RIGHTS_EVENT = "VotingSet";
+export const SET_COUPON_EVENT = "CouponSet";
+export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT = "ScheduledBalanceAdjustmentSet";
 
 // * Generic
 export const BYTES_32_LENGTH = 32 * 2;

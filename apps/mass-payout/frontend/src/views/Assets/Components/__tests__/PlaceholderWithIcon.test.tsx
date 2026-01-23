@@ -202,16 +202,16 @@
  *    limitations under the License.
  */
 
-import { render } from '../../../../test-utils';
-import { PlaceholderWithIcon } from '../PlaceholderWithIcon';
+import { render } from "../../../../test-utils";
+import { PlaceholderWithIcon } from "../PlaceholderWithIcon";
 
-describe('PlaceholderWithIcon', () => {
+describe("PlaceholderWithIcon", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('Rendering', () => {
-    it('should render correctly', () => {
+  describe("Rendering", () => {
+    it("should render correctly", () => {
       const component = render(<PlaceholderWithIcon />);
       expect(component.asFragment()).toMatchSnapshot();
     });

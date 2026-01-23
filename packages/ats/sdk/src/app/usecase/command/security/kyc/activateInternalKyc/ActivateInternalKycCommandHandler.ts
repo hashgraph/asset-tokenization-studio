@@ -203,24 +203,19 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import {
-  ActivateInternalKycCommand,
-  ActivateInternalKycCommandResponse,
-} from './ActivateInternalKycCommand';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ContractService from '@service/contract/ContractService';
-import ValidationService from '@service/validation/ValidationService';
-import { ActivateInternalKycCommandError } from './error/ActivateInternalKycCommandError';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import { ActivateInternalKycCommand, ActivateInternalKycCommandResponse } from "./ActivateInternalKycCommand";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ContractService from "@service/contract/ContractService";
+import ValidationService from "@service/validation/ValidationService";
+import { ActivateInternalKycCommandError } from "./error/ActivateInternalKycCommandError";
 
 @CommandHandler(ActivateInternalKycCommand)
-export class ActivateInternalKycCommandHandler
-  implements ICommandHandler<ActivateInternalKycCommand>
-{
+export class ActivateInternalKycCommandHandler implements ICommandHandler<ActivateInternalKycCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
@@ -232,16 +227,13 @@ export class ActivateInternalKycCommandHandler
     private readonly validationService: ValidationService,
   ) {}
 
-  async execute(
-    command: ActivateInternalKycCommand,
-  ): Promise<ActivateInternalKycCommandResponse> {
+  async execute(command: ActivateInternalKycCommand): Promise<ActivateInternalKycCommandResponse> {
     try {
       const { securityId } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
       await this.validationService.checkPause(securityId);
 
@@ -251,17 +243,9 @@ export class ActivateInternalKycCommandHandler
         securityId,
       );
 
-      const res = await handler.activateInternalKyc(
-        securityEvmAddress,
-        securityId,
-      );
+      const res = await handler.activateInternalKyc(securityEvmAddress, securityId);
 
-      return Promise.resolve(
-        new ActivateInternalKycCommandResponse(
-          res.error === undefined,
-          res.id!,
-        ),
-      );
+      return Promise.resolve(new ActivateInternalKycCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new ActivateInternalKycCommandError(error as Error);
     }

@@ -204,8 +204,8 @@
 */
 
 export enum SecurityType {
-  BOND = 'BOND',
-  EQUITY = 'EQUITY',
+  BOND = "BOND",
+  EQUITY = "EQUITY",
 }
 
 export class CastSecurityType {

@@ -203,33 +203,22 @@
 
 */
 
-import { useEffect, useState } from 'react';
-import { useSDKInit } from '../hooks/queries/SDKConnection';
-import type {
-  EventParameter,
-  InitializationData,
-  NetworkData,
-} from '@hashgraph/asset-tokenization-sdk';
-import { useWalletStore } from '../store/walletStore';
-import { WalletStatus } from '../utils/constants';
-import { useToast } from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { RouterManager } from '../router/RouterManager';
+import { useEffect, useState } from "react";
+import { useSDKInit } from "../hooks/queries/SDKConnection";
+import type { EventParameter, InitializationData, NetworkData } from "@hashgraph/asset-tokenization-sdk";
+import { useWalletStore } from "../store/walletStore";
+import { WalletStatus } from "../utils/constants";
+import { useToast } from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import { RouterManager } from "../router/RouterManager";
 
 export const SDKConnection = () => {
   const { mutate: init } = useSDKInit();
   const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
-  const {
-    reset,
-    setPairedWallet,
-    data,
-    network,
-    connectionStatus,
-    setConnectionStatus,
-  } = useWalletStore();
+  const { reset, setPairedWallet, data, network, connectionStatus, setConnectionStatus } = useWalletStore();
   const toast = useToast();
-  const { t } = useTranslation('globals');
-  const [currentNetworkName, setCurrentNetworkName] = useState<string>('');
+  const { t } = useTranslation("globals");
+  const [currentNetworkName, setCurrentNetworkName] = useState<string>("");
 
   useEffect(() => {
     const isConnected = window.ethereum?.isConnected();
@@ -251,13 +240,13 @@ export const SDKConnection = () => {
     if (data) {
       const currentWallet = data.account?.id.value.toString();
 
-      if (currentWallet != '0.0.0') {
+      if (currentWallet != "0.0.0") {
         toast.show({
           duration: 3000,
-          title: t('walletChanged', {
+          title: t("walletChanged", {
             currentWallet,
           }),
-          status: 'success',
+          status: "success",
         });
       }
     }
@@ -272,10 +261,10 @@ export const SDKConnection = () => {
         if (recognized) {
           toast.show({
             duration: 3000,
-            title: t('networkChanged', {
+            title: t("networkChanged", {
               currentNetwork: name,
             }),
-            status: 'success',
+            status: "success",
           });
         }
       }
@@ -285,12 +274,12 @@ export const SDKConnection = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [network]);
 
-  const walletPaired = (event: EventParameter<'walletPaired'>) => {
-    console.log('SDK message --> Wallet paired', event);
+  const walletPaired = (event: EventParameter<"walletPaired">) => {
+    console.log("SDK message --> Wallet paired", event);
     const { data, network } = event as { data: any; network: any };
 
     showErrors(data, network);
-    if (data.account?.id.value != '0.0.0') {
+    if (data.account?.id.value != "0.0.0") {
       setPairedWallet(data, network);
       RouterManager.goDashboard();
     }
@@ -300,41 +289,39 @@ export const SDKConnection = () => {
     if (network?.name && !network.recognized) {
       toast.show({
         duration: 5000,
-        title: t('changeToRecognizedNetwork'),
-        status: 'error',
+        title: t("changeToRecognizedNetwork"),
+        status: "error",
       });
       reset();
-    } else if (data && data.account?.id.value.toString() == '0.0.0') {
+    } else if (data && data.account?.id.value.toString() == "0.0.0") {
       toast.show({
         duration: 5000,
-        title: t('changeToHederaAccount'),
-        status: 'error',
+        title: t("changeToHederaAccount"),
+        status: "error",
       });
       reset();
     }
   }
 
-  const walletConnectionStatusChanged = (
-    event: EventParameter<'walletConnectionStatusChanged'>,
-  ) => {
-    console.log('SDK message --> Wallet Connection Status Changed', event);
+  const walletConnectionStatusChanged = (event: EventParameter<"walletConnectionStatusChanged">) => {
+    console.log("SDK message --> Wallet Connection Status Changed", event);
     setConnectionStatus(WalletStatus.connecting);
   };
 
-  const walletDisconnect = (event: EventParameter<'walletDisconnect'>) => {
-    console.log('SDK messege --> Wallet disconnected', event);
+  const walletDisconnect = (event: EventParameter<"walletDisconnect">) => {
+    console.log("SDK messege --> Wallet disconnected", event);
     // We need to check if we are waiting on connection process, due if we cancel connection on Landing Page
     // and we try again then reset() put connection status on DISCONNECTED and we loose the Connecting transition page
     const isNotConnecting = connectionStatus !== WalletStatus.connecting;
     if (isNotConnecting) {
-      console.log('ESTAMOS ENTRANDO AQUI', connectionStatus);
+      console.log("ESTAMOS ENTRANDO AQUI", connectionStatus);
       reset();
     }
   };
 
-  const walletFound = (event: EventParameter<'walletFound'>) => {
+  const walletFound = (event: EventParameter<"walletFound">) => {
     if (event) {
-      console.log('SDK message --> Wallet found', event);
+      console.log("SDK message --> Wallet found", event);
     }
   };
 

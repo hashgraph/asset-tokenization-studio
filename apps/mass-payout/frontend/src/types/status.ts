@@ -203,24 +203,24 @@
  */
 
 export enum ProcessStatus {
-  COMPLETED = 'Completed',
-  FAILED = 'Failed',
-  IN_PROGRESS = 'In Progress',
-  SCHEDULED = 'Scheduled',
-  CANCELLED = 'Cancelled',
+  COMPLETED = "Completed",
+  FAILED = "Failed",
+  IN_PROGRESS = "In Progress",
+  SCHEDULED = "Scheduled",
+  CANCELLED = "Cancelled",
 }
 
 export enum DistributionsDetailsStatus {
-  PENDING = 'Pending',
-  RETRYING = 'Retrying',
-  SUCCESS = 'Success',
-  FAILED = 'Failed',
+  PENDING = "Pending",
+  RETRYING = "Retrying",
+  SUCCESS = "Success",
+  FAILED = "Failed",
 }
 
 export enum HolderStatus {
-  FAILED = 'FAILED',
-  PENDING = 'PENDING',
-  RETRYING = 'RETRYING',
+  FAILED = "FAILED",
+  PENDING = "PENDING",
+  RETRYING = "RETRYING",
 }
 
 export type ProcessStatusType = ProcessStatus;

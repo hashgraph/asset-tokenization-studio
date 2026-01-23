@@ -203,20 +203,14 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../../../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../../../FormatValidation";
 
 export default class IsAddressRecoveredRequest extends ValidatedRequest<IsAddressRecoveredRequest> {
   securityId: string;
   targetId: string;
 
-  constructor({
-    securityId,
-    targetId,
-  }: {
-    securityId: string;
-    targetId: string;
-  }) {
+  constructor({ securityId, targetId }: { securityId: string; targetId: string }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

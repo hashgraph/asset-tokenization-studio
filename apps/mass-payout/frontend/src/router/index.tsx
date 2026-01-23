@@ -202,9 +202,9 @@
  *    limitations under the License.
  */
 
-import { Suspense } from 'react';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import { routes } from './Routes';
+import { Suspense } from "react";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { routes } from "./Routes";
 
 export const router = createBrowserRouter(routes);
 

@@ -204,15 +204,15 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable, Inject } from '@nestjs/common';
-import { QUERY_HANDLER_METADATA, QUERY_METADATA, TOKENS } from '../Constants';
-import { QueryMetadata } from '../decorator/QueryMetadata';
-import { Type } from '../Type';
-import { Query } from './Query';
-import { IQueryHandler } from './QueryHandler';
-import { QueryResponse } from './QueryResponse';
-import { QueryHandlerNotFoundException } from './error/QueryHandlerNotFoundException';
-import { InvalidQueryHandlerException } from './error/InvalidQueryHandlerException';
+import { Injectable, Inject } from "@nestjs/common";
+import { QUERY_HANDLER_METADATA, QUERY_METADATA, TOKENS } from "../Constants";
+import { QueryMetadata } from "../decorator/QueryMetadata";
+import { Type } from "../Type";
+import { Query } from "./Query";
+import { IQueryHandler } from "./QueryHandler";
+import { QueryResponse } from "./QueryResponse";
+import { QueryHandlerNotFoundException } from "./error/QueryHandlerNotFoundException";
+import { InvalidQueryHandlerException } from "./error/InvalidQueryHandlerException";
 
 export type QueryHandlerType = IQueryHandler<Query<QueryResponse>>;
 
@@ -222,9 +222,7 @@ export interface IQueryBus<T extends QueryResponse> {
 }
 
 @Injectable()
-export class QueryBus<T extends QueryResponse = QueryResponse>
-  implements IQueryBus<T>
-{
+export class QueryBus<T extends QueryResponse = QueryResponse> implements IQueryBus<T> {
   public handlers = new Map<string, IQueryHandler<Query<T>>>();
 
   constructor(
@@ -249,10 +247,7 @@ export class QueryBus<T extends QueryResponse = QueryResponse>
 
   private getQueryId<X>(query: Query<X>): string {
     const { constructor: queryType } = Object.getPrototypeOf(query);
-    const queryMetadata: QueryMetadata = Reflect.getMetadata(
-      QUERY_METADATA,
-      queryType,
-    );
+    const queryMetadata: QueryMetadata = Reflect.getMetadata(QUERY_METADATA, queryType);
     if (!queryMetadata) {
       throw new QueryHandlerNotFoundException(queryType.name);
     }
@@ -271,14 +266,8 @@ export class QueryBus<T extends QueryResponse = QueryResponse>
 
   private reflectQueryId(handler: QueryHandlerType): string | undefined {
     const { constructor: handlerType } = Object.getPrototypeOf(handler);
-    const query: Type<Query<QueryResponse>> = Reflect.getMetadata(
-      QUERY_HANDLER_METADATA,
-      handlerType,
-    );
-    const queryMetadata: QueryMetadata = Reflect.getMetadata(
-      QUERY_METADATA,
-      query,
-    );
+    const query: Type<Query<QueryResponse>> = Reflect.getMetadata(QUERY_HANDLER_METADATA, handlerType);
+    const queryMetadata: QueryMetadata = Reflect.getMetadata(QUERY_METADATA, query);
     return queryMetadata.id;
   }
 }

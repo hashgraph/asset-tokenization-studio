@@ -203,7 +203,7 @@
 
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import {
   Table,
   PhosphorIcon,
@@ -215,25 +215,25 @@ import {
   ClipboardButton,
   Link,
   Tooltip,
-} from 'io-bricks-ui';
-import { CellContext, createColumnHelper } from '@tanstack/react-table';
-import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+} from "io-bricks-ui";
+import { CellContext, createColumnHelper } from "@tanstack/react-table";
+import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
-import { Star, Trash } from '@phosphor-icons/react';
-import { Header } from '../../components/Header';
-import { useUserStore } from '../../store/userStore';
-import { User } from '../../utils/constants';
-import type { SecurityStore } from '../../store/securityStore';
-import { useSecurityStore } from '../../store/securityStore';
-import { HStack, Stack, useDisclosure } from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
-import { useAccountStore } from '../../store/accountStore';
-import { useWalletStore } from '../../store/walletStore';
-import { RouterManager } from '../../router/RouterManager';
-import { RouteName } from '../../router/RouteName';
-import { useTable } from '../../hooks/useTable';
-import { collapseText } from '../../utils/format';
+import { Star, Trash } from "@phosphor-icons/react";
+import { Header } from "../../components/Header";
+import { useUserStore } from "../../store/userStore";
+import { User } from "../../utils/constants";
+import type { SecurityStore } from "../../store/securityStore";
+import { useSecurityStore } from "../../store/securityStore";
+import { HStack, Stack, useDisclosure } from "@chakra-ui/react";
+import { useForm } from "react-hook-form";
+import { useAccountStore } from "../../store/accountStore";
+import { useWalletStore } from "../../store/walletStore";
+import { RouterManager } from "../../router/RouterManager";
+import { RouteName } from "../../router/RouteName";
+import { useTable } from "../../hooks/useTable";
+import { collapseText } from "../../utils/format";
 
 type securitiesSearch = {
   search: string;
@@ -247,36 +247,30 @@ export const DigitalSecuritiesList = () => {
   const { setType } = useUserStore();
   const { securities, setDetails } = useSecurityStore();
   const columnsHelper = createColumnHelper<SecurityStoreWithRemove>();
-  const { t: tHeader } = useTranslation('security', {
-    keyPrefix: 'list.header',
+  const { t: tHeader } = useTranslation("security", {
+    keyPrefix: "list.header",
   });
-  const { t: tTable } = useTranslation('security', {
-    keyPrefix: 'list.table',
+  const { t: tTable } = useTranslation("security", {
+    keyPrefix: "list.table",
   });
-  const { t: tRemove } = useTranslation('security', {
-    keyPrefix: 'list.removeSecurityPopUp',
+  const { t: tRemove } = useTranslation("security", {
+    keyPrefix: "list.removeSecurityPopUp",
   });
   const { type } = useParams();
-  const {
-    adminSecurities,
-    holderSecurities,
-    removeSecurityFromHolder,
-    toggleAdminFavorite,
-    toggleHolderFavorite,
-  } = useAccountStore();
+  const { adminSecurities, holderSecurities, removeSecurityFromHolder, toggleAdminFavorite, toggleHolderFavorite } =
+    useAccountStore();
   const { address } = useWalletStore();
   const table = useTable();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const [selectedSecurityAddressToRemove, setSelectedSecurityAddressToRemove] =
-    useState('');
+  const [selectedSecurityAddressToRemove, setSelectedSecurityAddressToRemove] = useState("");
 
   const { control, watch } = useForm<securitiesSearch>({
-    mode: 'all',
+    mode: "all",
     defaultValues: {
-      search: '',
+      search: "",
     },
   });
-  const search = watch('search');
+  const search = watch("search");
 
   useEffect(() => {
     setType(type as User);
@@ -284,8 +278,7 @@ export const DigitalSecuritiesList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const userSecurities =
-    type === User.admin ? adminSecurities[address] : holderSecurities[address];
+  const userSecurities = type === User.admin ? adminSecurities[address] : holderSecurities[address];
 
   useEffect(() => {
     if (userSecurities?.length === 0) {
@@ -328,9 +321,7 @@ export const DigitalSecuritiesList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, securitiesToShow]);
 
-  const renderFavorite = (
-    props: CellContext<SecurityStoreWithRemove, unknown>,
-  ) => {
+  const renderFavorite = (props: CellContext<SecurityStoreWithRemove, unknown>) => {
     const {
       row: {
         original: { address: securityAddress, isFavorite },
@@ -354,7 +345,7 @@ export const DigitalSecuritiesList = () => {
         <PhosphorIcon
           as={Star}
           {...(isFavorite && {
-            color: 'neutral.50',
+            color: "neutral.50",
             weight: Weight.Fill,
           })}
         />
@@ -362,9 +353,7 @@ export const DigitalSecuritiesList = () => {
     );
   };
 
-  const renderRemove = (
-    props: CellContext<SecurityStoreWithRemove, unknown | undefined>,
-  ) => {
+  const renderRemove = (props: CellContext<SecurityStoreWithRemove, unknown | undefined>) => {
     const {
       row: {
         original: { address: securityAddress },
@@ -388,46 +377,46 @@ export const DigitalSecuritiesList = () => {
 
   const columns = [
     columnsHelper.display({
-      id: 'isFavorite',
-      header: '',
+      id: "isFavorite",
+      header: "",
       size: 21,
       enableSorting: false,
       cell: (props) => renderFavorite(props),
     }),
-    columnsHelper.accessor('symbol', {
-      header: tTable('fields.symbol'),
+    columnsHelper.accessor("symbol", {
+      header: tTable("fields.symbol"),
       size: 160,
       enableSorting: false,
       cell: ({ getValue }) => getValue(),
     }),
-    columnsHelper.accessor('name', {
-      header: tTable('fields.name'),
+    columnsHelper.accessor("name", {
+      header: tTable("fields.name"),
       size: 160,
       cell: ({ getValue }) => getValue(),
       enableSorting: false,
     }),
-    columnsHelper.accessor('type', {
-      header: tTable('fields.type'),
+    columnsHelper.accessor("type", {
+      header: tTable("fields.type"),
       size: 160,
       enableSorting: false,
       cell: ({ getValue }) => getValue(),
     }),
-    columnsHelper.accessor('isin', {
-      header: tTable('fields.isin'),
+    columnsHelper.accessor("isin", {
+      header: tTable("fields.isin"),
       size: 160,
       cell: ({ getValue }) => {
         const isin = getValue();
         return (
           <HStack gap={1.5}>
             <Text>{isin}</Text>
-            <ClipboardButton sx={{ color: 'secondary.500' }} value={isin} />
+            <ClipboardButton sx={{ color: "secondary.500" }} value={isin} />
           </HStack>
         );
       },
       enableSorting: false,
     }),
-    columnsHelper.accessor('address', {
-      header: tTable('fields.address'),
+    columnsHelper.accessor("address", {
+      header: tTable("fields.address"),
       size: 160,
       enableSorting: false,
       cell: ({ getValue }) => {
@@ -446,8 +435,8 @@ export const DigitalSecuritiesList = () => {
         );
       },
     }),
-    columnsHelper.accessor('evmAddress', {
-      header: tTable('fields.evmAddress'),
+    columnsHelper.accessor("evmAddress", {
+      header: tTable("fields.evmAddress"),
       size: 160,
       enableSorting: false,
       cell: ({ getValue }) => {
@@ -467,10 +456,7 @@ export const DigitalSecuritiesList = () => {
               >
                 {collapseText(evmAddress, 4, 8)}
               </Button>
-              <ClipboardButton
-                sx={{ color: 'secondary.500' }}
-                value={evmAddress}
-              />
+              <ClipboardButton sx={{ color: "secondary.500" }} value={evmAddress} />
             </HStack>
           </Tooltip>
         );
@@ -480,8 +466,8 @@ export const DigitalSecuritiesList = () => {
 
   if (type === User.holder) {
     const removeColumn = columnsHelper.display({
-      id: 'remove',
-      header: '',
+      id: "remove",
+      header: "",
       size: 21,
       enableSorting: false,
       cell: (props) => renderRemove(props),
@@ -492,24 +478,16 @@ export const DigitalSecuritiesList = () => {
 
   return (
     <>
-      <Header page="security" label={tHeader('title')} />
-      <Stack
-        w="full"
-        h="full"
-        bg="neutral.50"
-        borderRadius={1}
-        p={4}
-        pt={6}
-        gap={4}
-      >
+      <Header page="security" label={tHeader("title")} />
+      <Stack w="full" h="full" bg="neutral.50" borderRadius={1} p={4} pt={6} gap={4}>
         <Text textStyle="ElementsSemiboldLG" color="neutral.900">
-          {tTable('title')}
+          {tTable("title")}
         </Text>
         <Stack w="280px">
           <SearchInputController
             id="search"
-            placeholder={tTable('searchPlaceholder')}
-            onSearch={(search) => console.log('SEARCHING: ', search)}
+            placeholder={tTable("searchPlaceholder")}
+            onSearch={(search) => console.log("SEARCHING: ", search)}
             control={control}
             size="md"
             bg="white"
@@ -526,9 +504,7 @@ export const DigitalSecuritiesList = () => {
             });
           }}
           totalElements={digitalSecuritiesList.length}
-          totalPages={Math.ceil(
-            digitalSecuritiesList.length / table.pagination.pageSize,
-          )}
+          totalPages={Math.ceil(digitalSecuritiesList.length / table.pagination.pageSize)}
           {...table}
         />
       </Stack>
@@ -537,16 +513,16 @@ export const DigitalSecuritiesList = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={Trash} size="md" />}
-        title={tRemove('title')}
-        description={tRemove('description')}
-        confirmText={tRemove('confirmText')}
+        title={tRemove("title")}
+        description={tRemove("description")}
+        confirmText={tRemove("confirmText")}
         onConfirm={() => {
           removeSecurityFromHolder(address, selectedSecurityAddressToRemove);
           onClose();
-          setSelectedSecurityAddressToRemove('');
+          setSelectedSecurityAddressToRemove("");
         }}
         onCancel={onClose}
-        cancelText={tRemove('cancelText')}
+        cancelText={tRemove("cancelText")}
       />
     </>
   );

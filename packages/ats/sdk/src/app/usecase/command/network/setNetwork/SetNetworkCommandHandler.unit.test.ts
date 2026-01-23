@@ -203,22 +203,19 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import NetworkService from '@service/network/NetworkService';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import { SetNetworkCommandFixture } from '@test/fixtures/network/NetworkFixture';
-import { SetNetworkCommandHandler } from './SetNetworkCommandHandler';
-import {
-  SetNetworkCommand,
-  SetNetworkCommandResponse,
-} from './SetNetworkCommand';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import Injectable from '@core/injectable/Injectable';
-import { ErrorMsgFixture } from '@test/fixtures/shared/DataFixture';
-import { SetNetworkCommandError } from './error/SetNetworkCommandError';
-import { ErrorCode } from '@core/error/BaseError';
+import { createMock } from "@golevelup/ts-jest";
+import NetworkService from "@service/network/NetworkService";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import { SetNetworkCommandFixture } from "@test/fixtures/network/NetworkFixture";
+import { SetNetworkCommandHandler } from "./SetNetworkCommandHandler";
+import { SetNetworkCommand, SetNetworkCommandResponse } from "./SetNetworkCommand";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import Injectable from "@core/injectable/Injectable";
+import { ErrorMsgFixture } from "@test/fixtures/shared/DataFixture";
+import { SetNetworkCommandError } from "./error/SetNetworkCommandError";
+import { ErrorCode } from "@core/error/BaseError";
 
-describe('SetNetworkCommandHandler', () => {
+describe("SetNetworkCommandHandler", () => {
   let handler: SetNetworkCommandHandler;
   let command: SetNetworkCommand;
 
@@ -228,43 +225,36 @@ describe('SetNetworkCommandHandler', () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new SetNetworkCommandHandler(
-      networkServiceMock,
-      mirrorNodeAdapterMock,
-    );
+    handler = new SetNetworkCommandHandler(networkServiceMock, mirrorNodeAdapterMock);
     command = SetNetworkCommandFixture.create();
-    jest.spyOn(Injectable, 'resolve').mockReturnValue(queryAdapterMock);
+    jest.spyOn(Injectable, "resolve").mockReturnValue(queryAdapterMock);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws SetNetworkCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws SetNetworkCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
-        jest.spyOn(mirrorNodeAdapterMock, 'set').mockImplementation(() => {
+        jest.spyOn(mirrorNodeAdapterMock, "set").mockImplementation(() => {
           throw fakeError;
         });
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          SetNetworkCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(SetNetworkCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while setting network: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while setting network: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully set network', async () => {
+    describe("success cases", () => {
+      it("should successfully set network", async () => {
         const result = await handler.execute(command);
 
         expect(result).toBeInstanceOf(SetNetworkCommandResponse);

@@ -244,9 +244,7 @@ describe("ActionContentHashExistsQueryHandler", () => {
       await expect(resultPromise).rejects.toBeInstanceOf(ActionContentHashExistsQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(
-          `An error occurred while querying action content hash exists: ${errorMsg}`,
-        ),
+        message: expect.stringContaining(`An error occurred while querying action content hash exists: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });

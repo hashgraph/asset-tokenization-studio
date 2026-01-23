@@ -202,25 +202,16 @@
  *    limitations under the License.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient } from '@tanstack/react-query';
-import {
-  usePauseAsset,
-  useUnpauseAsset,
-  useGetAssets,
-  useGetAsset,
-} from '../AssetQueries';
-import { AssetService, Asset } from '../../../../../services/AssetService';
-import { queryWrapper, testQueryClient } from '@/test-utils';
-import {
-  mockAsset,
-  mockAssets,
-  resetAssetMocks,
-} from '@/test-utils/mocks/AssetMocks';
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient } from "@tanstack/react-query";
+import { usePauseAsset, useUnpauseAsset, useGetAssets, useGetAsset } from "../AssetQueries";
+import { AssetService, Asset } from "../../../../../services/AssetService";
+import { queryWrapper, testQueryClient } from "@/test-utils";
+import { mockAsset, mockAssets, resetAssetMocks } from "@/test-utils/mocks/AssetMocks";
 
 const mockSingleAsset: Asset = mockAsset;
 
-jest.mock('../../../../../services/AssetService', () => ({
+jest.mock("../../../../../services/AssetService", () => ({
   AssetService: {
     getAssets: jest.fn(),
     getAsset: jest.fn(),
@@ -228,12 +219,12 @@ jest.mock('../../../../../services/AssetService', () => ({
     unpauseAsset: jest.fn(),
   },
   AssetType: {
-    EQUITY: 'EQUITY',
-    BOND: 'BOND',
+    EQUITY: "EQUITY",
+    BOND: "BOND",
   },
 }));
 
-Object.defineProperty(window, 'location', {
+Object.defineProperty(window, "location", {
   value: {
     reload: jest.fn(),
   },
@@ -241,11 +232,11 @@ Object.defineProperty(window, 'location', {
 });
 
 const consoleSpy = {
-  log: jest.spyOn(console, 'log').mockImplementation(() => {}),
-  error: jest.spyOn(console, 'error').mockImplementation(() => {}),
+  log: jest.spyOn(console, "log").mockImplementation(() => {}),
+  error: jest.spyOn(console, "error").mockImplementation(() => {}),
 };
 
-describe('Asset Queries', () => {
+describe("Asset Queries", () => {
   let queryClient: QueryClient;
   const assetService = AssetService as jest.Mocked<typeof AssetService>;
 
@@ -265,8 +256,8 @@ describe('Asset Queries', () => {
     queryClient.clear();
   });
 
-  describe('useGetAssets', () => {
-    test('should fetch assets successfully', async () => {
+  describe("useGetAssets", () => {
+    test("should fetch assets successfully", async () => {
       const mockPaginatedResponse = {
         queryData: mockAssets,
         page: {
@@ -298,7 +289,7 @@ describe('Asset Queries', () => {
       });
     });
 
-    test('should handle empty assets list', async () => {
+    test("should handle empty assets list", async () => {
       const emptyPaginatedResponse = {
         queryData: [],
         page: {
@@ -322,8 +313,8 @@ describe('Asset Queries', () => {
       expect(result.current.data?.queryData).toHaveLength(0);
     });
 
-    test('should handle API errors', async () => {
-      const error = new Error('Failed to fetch assets');
+    test("should handle API errors", async () => {
+      const error = new Error("Failed to fetch assets");
       assetService.getAssets.mockRejectedValueOnce(error);
 
       const { result } = renderHook(() => useGetAssets(), {
@@ -338,8 +329,8 @@ describe('Asset Queries', () => {
     });
   });
 
-  describe('useGetAsset', () => {
-    test('should fetch single asset successfully', async () => {
+  describe("useGetAsset", () => {
+    test("should fetch single asset successfully", async () => {
       const assetId = mockAsset.id;
       assetService.getAsset.mockResolvedValueOnce(mockSingleAsset);
 
@@ -363,8 +354,8 @@ describe('Asset Queries', () => {
       });
     });
 
-    test('should not fetch when assetId is empty', () => {
-      const { result } = renderHook(() => useGetAsset(''), {
+    test("should not fetch when assetId is empty", () => {
+      const { result } = renderHook(() => useGetAsset(""), {
         wrapper: queryWrapper,
       });
 
@@ -372,9 +363,9 @@ describe('Asset Queries', () => {
       expect(assetService.getAsset).not.toHaveBeenCalled();
     });
 
-    test('should handle asset not found', async () => {
-      const assetId = '0.0.999999';
-      const error = new Error('Asset not found');
+    test("should handle asset not found", async () => {
+      const assetId = "0.0.999999";
+      const error = new Error("Asset not found");
       assetService.getAsset.mockRejectedValueOnce(error);
 
       const { result } = renderHook(() => useGetAsset(assetId), {
@@ -389,9 +380,9 @@ describe('Asset Queries', () => {
     });
   });
 
-  describe('usePauseAsset', () => {
-    describe('Successful pause', () => {
-      test('should call AssetService.pauseAsset with correct assetId', async () => {
+  describe("usePauseAsset", () => {
+    describe("Successful pause", () => {
+      test("should call AssetService.pauseAsset with correct assetId", async () => {
         const assetId = mockAsset.id;
         assetService.pauseAsset.mockResolvedValueOnce(undefined);
 
@@ -406,7 +397,7 @@ describe('Asset Queries', () => {
         });
       });
 
-      test('should log success message on successful pause', async () => {
+      test("should log success message on successful pause", async () => {
         const assetId = mockAsset.id;
         assetService.pauseAsset.mockResolvedValueOnce(undefined);
 
@@ -420,18 +411,13 @@ describe('Asset Queries', () => {
           expect(result.current.isSuccess).toBe(true);
         });
 
-        expect(consoleSpy.log).toHaveBeenCalledWith(
-          'Asset paused successfully',
-        );
+        expect(consoleSpy.log).toHaveBeenCalledWith("Asset paused successfully");
       });
 
-      test('should invalidate assets queries on success', async () => {
+      test("should invalidate assets queries on success", async () => {
         const assetId = mockAsset.id;
         assetService.pauseAsset.mockResolvedValueOnce(undefined);
-        const invalidateQueriesSpy = jest.spyOn(
-          testQueryClient,
-          'invalidateQueries',
-        );
+        const invalidateQueriesSpy = jest.spyOn(testQueryClient, "invalidateQueries");
 
         const { result } = renderHook(() => usePauseAsset(), {
           wrapper: queryWrapper,
@@ -444,17 +430,12 @@ describe('Asset Queries', () => {
         });
 
         expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-          queryKey: ['assets'],
+          queryKey: ["assets"],
         });
       });
 
-      test('should handle different asset ID formats', async () => {
-        const testCases = [
-          mockAsset.id,
-          mockAssets[1].id,
-          '0.0.1',
-          '0.0.999999999',
-        ];
+      test("should handle different asset ID formats", async () => {
+        const testCases = [mockAsset.id, mockAssets[1].id, "0.0.1", "0.0.999999999"];
 
         for (const assetId of testCases) {
           assetService.pauseAsset.mockResolvedValueOnce(undefined);
@@ -472,13 +453,13 @@ describe('Asset Queries', () => {
       });
     });
 
-    describe('Failed pause', () => {
+    describe("Failed pause", () => {
       // TODO: These tests are temporarily failing due to backend changes (new SDKs)
       // causing 500 errors. Uncomment when backend is stable.
 
-      test.skip('should log error message on failed pause', async () => {
+      test.skip("should log error message on failed pause", async () => {
         const assetId = mockAsset.id;
-        const error = new Error('Network error');
+        const error = new Error("Network error");
         assetService.pauseAsset.mockRejectedValueOnce(error);
 
         const { result } = renderHook(() => usePauseAsset(), {
@@ -491,16 +472,13 @@ describe('Asset Queries', () => {
           expect(result.current.isError).toBe(true);
         });
 
-        expect(consoleSpy.error).toHaveBeenCalledWith(
-          'Error pausing asset:',
-          error,
-        );
+        expect(consoleSpy.error).toHaveBeenCalledWith("Error pausing asset:", error);
       });
 
-      test.skip('should handle API errors gracefully', async () => {
+      test.skip("should handle API errors gracefully", async () => {
         const assetId = mockAsset.id;
         const apiError = {
-          message: 'Asset not found',
+          message: "Asset not found",
           status: 404,
         };
         assetService.pauseAsset.mockRejectedValueOnce(apiError);
@@ -516,15 +494,12 @@ describe('Asset Queries', () => {
         });
 
         expect(result.current.error).toEqual(apiError);
-        expect(consoleSpy.error).toHaveBeenCalledWith(
-          'Error pausing asset:',
-          apiError,
-        );
+        expect(consoleSpy.error).toHaveBeenCalledWith("Error pausing asset:", apiError);
       });
 
-      test.skip('should handle network timeout errors', async () => {
+      test.skip("should handle network timeout errors", async () => {
         const assetId = mockAsset.id;
-        const timeoutError = new Error('Request timeout');
+        const timeoutError = new Error("Request timeout");
         assetService.pauseAsset.mockRejectedValueOnce(timeoutError);
 
         const { result } = renderHook(() => usePauseAsset(), {
@@ -537,15 +512,12 @@ describe('Asset Queries', () => {
           expect(result.current.isError).toBe(true);
         });
 
-        expect(consoleSpy.error).toHaveBeenCalledWith(
-          'Error pausing asset:',
-          timeoutError,
-        );
+        expect(consoleSpy.error).toHaveBeenCalledWith("Error pausing asset:", timeoutError);
       });
     });
 
-    describe('Loading states', () => {
-      test('should show loading state during mutation', async () => {
+    describe("Loading states", () => {
+      test("should show loading state during mutation", async () => {
         const assetId = mockAsset.id;
         let resolvePromise: (value?: void) => void;
         const pausePromise = new Promise<void>((resolve) => {
@@ -575,9 +547,9 @@ describe('Asset Queries', () => {
     });
   });
 
-  describe('useUnpauseAsset', () => {
-    describe('Successful unpause', () => {
-      test('should call AssetService.unpauseAsset with correct assetId', async () => {
+  describe("useUnpauseAsset", () => {
+    describe("Successful unpause", () => {
+      test("should call AssetService.unpauseAsset with correct assetId", async () => {
         const assetId = mockAsset.id;
         assetService.unpauseAsset.mockResolvedValueOnce(undefined);
 
@@ -592,7 +564,7 @@ describe('Asset Queries', () => {
         });
       });
 
-      test('should log success message on successful unpause', async () => {
+      test("should log success message on successful unpause", async () => {
         const assetId = mockAsset.id;
         assetService.unpauseAsset.mockResolvedValueOnce(undefined);
 
@@ -606,18 +578,13 @@ describe('Asset Queries', () => {
           expect(result.current.isSuccess).toBe(true);
         });
 
-        expect(consoleSpy.log).toHaveBeenCalledWith(
-          'Asset resumed successfully',
-        );
+        expect(consoleSpy.log).toHaveBeenCalledWith("Asset resumed successfully");
       });
 
-      test('should invalidate assets queries on success', async () => {
+      test("should invalidate assets queries on success", async () => {
         const assetId = mockAsset.id;
         assetService.unpauseAsset.mockResolvedValueOnce(undefined);
-        const invalidateQueriesSpy = jest.spyOn(
-          testQueryClient,
-          'invalidateQueries',
-        );
+        const invalidateQueriesSpy = jest.spyOn(testQueryClient, "invalidateQueries");
 
         const { result } = renderHook(() => useUnpauseAsset(), {
           wrapper: queryWrapper,
@@ -630,17 +597,12 @@ describe('Asset Queries', () => {
         });
 
         expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-          queryKey: ['assets'],
+          queryKey: ["assets"],
         });
       });
 
-      test('should handle different asset ID formats', async () => {
-        const testCases = [
-          mockAsset.id,
-          mockAssets[1].id,
-          '0.0.1',
-          '0.0.999999999',
-        ];
+      test("should handle different asset ID formats", async () => {
+        const testCases = [mockAsset.id, mockAssets[1].id, "0.0.1", "0.0.999999999"];
 
         for (const assetId of testCases) {
           assetService.unpauseAsset.mockResolvedValueOnce(undefined);
@@ -658,13 +620,13 @@ describe('Asset Queries', () => {
       });
     });
 
-    describe('Failed unpause', () => {
+    describe("Failed unpause", () => {
       // TODO: These tests are temporarily failing due to backend changes (new SDKs)
       // causing 500 errors. Uncomment when backend is stable.
 
-      test.skip('should log error message on failed unpause', async () => {
+      test.skip("should log error message on failed unpause", async () => {
         const assetId = mockAsset.id;
-        const error = new Error('Network error');
+        const error = new Error("Network error");
         assetService.unpauseAsset.mockRejectedValueOnce(error);
 
         const { result } = renderHook(() => useUnpauseAsset(), {
@@ -677,16 +639,13 @@ describe('Asset Queries', () => {
           expect(result.current.isError).toBe(true);
         });
 
-        expect(consoleSpy.error).toHaveBeenCalledWith(
-          'Error unpausing asset:',
-          error,
-        );
+        expect(consoleSpy.error).toHaveBeenCalledWith("Error unpausing asset:", error);
       });
 
-      test.skip('should handle API errors gracefully', async () => {
+      test.skip("should handle API errors gracefully", async () => {
         const assetId = mockAsset.id;
         const apiError = {
-          message: 'Asset not found',
+          message: "Asset not found",
           status: 404,
         };
         assetService.unpauseAsset.mockRejectedValueOnce(apiError);
@@ -702,15 +661,12 @@ describe('Asset Queries', () => {
         });
 
         expect(result.current.error).toEqual(apiError);
-        expect(consoleSpy.error).toHaveBeenCalledWith(
-          'Error unpausing asset:',
-          apiError,
-        );
+        expect(consoleSpy.error).toHaveBeenCalledWith("Error unpausing asset:", apiError);
       });
 
-      test.skip('should handle network timeout errors', async () => {
+      test.skip("should handle network timeout errors", async () => {
         const assetId = mockAsset.id;
-        const timeoutError = new Error('Request timeout');
+        const timeoutError = new Error("Request timeout");
         assetService.unpauseAsset.mockRejectedValueOnce(timeoutError);
 
         const { result } = renderHook(() => useUnpauseAsset(), {
@@ -723,15 +679,12 @@ describe('Asset Queries', () => {
           expect(result.current.isError).toBe(true);
         });
 
-        expect(consoleSpy.error).toHaveBeenCalledWith(
-          'Error unpausing asset:',
-          timeoutError,
-        );
+        expect(consoleSpy.error).toHaveBeenCalledWith("Error unpausing asset:", timeoutError);
       });
     });
 
-    describe('Loading states', () => {
-      test('should show loading state during mutation', async () => {
+    describe("Loading states", () => {
+      test("should show loading state during mutation", async () => {
         const assetId = mockAsset.id;
         let resolvePromise: (value?: void) => void;
         const unpausePromise = new Promise<void>((resolve) => {
@@ -761,9 +714,9 @@ describe('Asset Queries', () => {
     });
   });
 
-  describe('Edge cases', () => {
-    test('should handle empty asset ID', async () => {
-      const assetId = '';
+  describe("Edge cases", () => {
+    test("should handle empty asset ID", async () => {
+      const assetId = "";
       assetService.pauseAsset.mockResolvedValueOnce(undefined);
 
       const { result } = renderHook(() => usePauseAsset(), {
@@ -777,8 +730,8 @@ describe('Asset Queries', () => {
       });
     });
 
-    test('should handle special characters in asset ID', async () => {
-      const assetId = '0.0.123-456';
+    test("should handle special characters in asset ID", async () => {
+      const assetId = "0.0.123-456";
       assetService.pauseAsset.mockResolvedValueOnce(undefined);
 
       const { result } = renderHook(() => usePauseAsset(), {
@@ -792,7 +745,7 @@ describe('Asset Queries', () => {
       });
     });
 
-    test('should handle multiple consecutive mutations', async () => {
+    test("should handle multiple consecutive mutations", async () => {
       const assetIds = [mockAsset.id, mockAssets[1].id];
       assetService.pauseAsset.mockResolvedValue(undefined);
 
@@ -816,8 +769,8 @@ describe('Asset Queries', () => {
     });
   });
 
-  describe('Integration scenarios', () => {
-    test('should work correctly when switching between pause and unpause', async () => {
+  describe("Integration scenarios", () => {
+    test("should work correctly when switching between pause and unpause", async () => {
       const assetId = mockAsset.id;
       assetService.pauseAsset.mockResolvedValueOnce(undefined);
       assetService.unpauseAsset.mockResolvedValueOnce(undefined);
@@ -844,13 +797,13 @@ describe('Asset Queries', () => {
 
       expect(assetService.pauseAsset).toHaveBeenCalledWith(assetId);
       expect(assetService.unpauseAsset).toHaveBeenCalledWith(assetId);
-      expect(consoleSpy.log).toHaveBeenCalledWith('Asset paused successfully');
-      expect(consoleSpy.log).toHaveBeenCalledWith('Asset resumed successfully');
+      expect(consoleSpy.log).toHaveBeenCalledWith("Asset paused successfully");
+      expect(consoleSpy.log).toHaveBeenCalledWith("Asset resumed successfully");
     });
 
-    test('should maintain independent state for different hooks', async () => {
+    test("should maintain independent state for different hooks", async () => {
       const assetId = mockAsset.id;
-      assetService.pauseAsset.mockRejectedValueOnce(new Error('Pause failed'));
+      assetService.pauseAsset.mockRejectedValueOnce(new Error("Pause failed"));
       assetService.unpauseAsset.mockResolvedValueOnce(undefined);
 
       const { result: pauseResult } = renderHook(() => usePauseAsset(), {

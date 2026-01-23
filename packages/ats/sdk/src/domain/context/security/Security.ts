@@ -203,31 +203,31 @@
 
 */
 
-import BaseError from '@core/error/BaseError';
-import CheckNums from '@core/checks/numbers/CheckNums';
-import CheckStrings from '@core/checks/strings/CheckStrings';
-import InvalidDecimalRange from './error/values/InvalidDecimalRange';
-import NameEmpty from './error/values/NameEmpty';
-import NameLength from './error/values/NameLength';
-import SymbolEmpty from './error/values/SymbolEmpty';
-import SymbolLength from './error/values/SymbolLength';
-import EvmAddress from '../contract/EvmAddress';
-import BigDecimal from '../shared/BigDecimal';
-import { HederaId } from '../shared/HederaId';
-import { InvalidType } from '@port/in/request/error/InvalidType';
-import InvalidAmount from './error/values/InvalidAmount';
-import { SecurityType } from '../factory/SecurityType';
-import { Regulation } from '../factory/Regulation';
+import BaseError from "@core/error/BaseError";
+import CheckNums from "@core/checks/numbers/CheckNums";
+import CheckStrings from "@core/checks/strings/CheckStrings";
+import InvalidDecimalRange from "./error/values/InvalidDecimalRange";
+import NameEmpty from "./error/values/NameEmpty";
+import NameLength from "./error/values/NameLength";
+import SymbolEmpty from "./error/values/SymbolEmpty";
+import SymbolLength from "./error/values/SymbolLength";
+import EvmAddress from "../contract/EvmAddress";
+import BigDecimal from "../shared/BigDecimal";
+import { HederaId } from "../shared/HederaId";
+import { InvalidType } from "@port/in/request/error/InvalidType";
+import InvalidAmount from "./error/values/InvalidAmount";
+import { SecurityType } from "../factory/SecurityType";
+import { Regulation } from "../factory/Regulation";
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '../factory/RegulationType';
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import { Factory } from '../factory/Factories';
-import { OptionalField } from '@core/decorator/OptionalDecorator';
-import InvalidSupply from './error/values/InvalidSupply';
+} from "../factory/RegulationType";
+import ValidatedDomain from "@core/validation/ValidatedArgs";
+import { Factory } from "../factory/Factories";
+import { OptionalField } from "@core/decorator/OptionalDecorator";
+import InvalidSupply from "./error/values/InvalidSupply";
 
 const TWELVE = 12;
 const TEN = 10;
@@ -262,10 +262,7 @@ export interface SecurityProps {
   info?: string;
 }
 
-export class Security
-  extends ValidatedDomain<Security>
-  implements SecurityProps
-{
+export class Security extends ValidatedDomain<Security> implements SecurityProps {
   name: string;
   symbol: string;
   isin: string;
@@ -369,8 +366,7 @@ export class Security
     const errorList: BaseError[] = [];
 
     if (!CheckStrings.isNotEmpty(value)) errorList.push(new NameEmpty());
-    if (!CheckStrings.isLengthUnder(value, maxNameLength))
-      errorList.push(new NameLength(value, maxNameLength));
+    if (!CheckStrings.isLengthUnder(value, maxNameLength)) errorList.push(new NameLength(value, maxNameLength));
 
     return errorList;
   }
@@ -380,8 +376,7 @@ export class Security
     const errorList: BaseError[] = [];
 
     if (!CheckStrings.isNotEmpty(value)) errorList.push(new SymbolEmpty());
-    if (!CheckStrings.isLengthUnder(value, maxSymbolLength))
-      errorList.push(new SymbolLength(value, maxSymbolLength));
+    if (!CheckStrings.isLengthUnder(value, maxSymbolLength)) errorList.push(new SymbolLength(value, maxSymbolLength));
 
     return errorList;
   }
@@ -391,8 +386,7 @@ export class Security
     const errorList: BaseError[] = [];
 
     if (!CheckStrings.isNotEmpty(value)) errorList.push(new NameEmpty());
-    if (!CheckStrings.isLengthUnder(value, maxIsinLength))
-      errorList.push(new NameLength(value, maxIsinLength));
+    if (!CheckStrings.isLengthUnder(value, maxIsinLength)) errorList.push(new NameLength(value, maxIsinLength));
 
     return errorList;
   }
@@ -405,8 +399,7 @@ export class Security
     if (CheckNums.hasMoreDecimals(value.toString(), 0)) {
       errorList.push(new InvalidType(value));
     }
-    if (!CheckNums.isWithinRange(value, min, max))
-      errorList.push(new InvalidDecimalRange(value, min, max));
+    if (!CheckNums.isWithinRange(value, min, max)) errorList.push(new InvalidDecimalRange(value, min, max));
 
     return errorList;
   }
@@ -434,20 +427,15 @@ export class Security
   }
 
   public isValidAmount(amount: number): boolean {
-    const val = amount.toString().split('.');
+    const val = amount.toString().split(".");
     const decimals = val.length > 1 ? val[1]?.length : 0;
     return decimals <= this.decimals;
   }
 
-  public static checkSupply(
-    totalSupply: BigDecimal,
-    maxSupply: BigDecimal,
-  ): BaseError[] {
+  public static checkSupply(totalSupply: BigDecimal, maxSupply: BigDecimal): BaseError[] {
     const errorList: BaseError[] = [];
     if (totalSupply.isGreaterThan(maxSupply)) {
-      errorList.push(
-        new InvalidSupply(totalSupply.toString(), maxSupply.toString()),
-      );
+      errorList.push(new InvalidSupply(totalSupply.toString(), maxSupply.toString()));
     }
     return errorList;
   }

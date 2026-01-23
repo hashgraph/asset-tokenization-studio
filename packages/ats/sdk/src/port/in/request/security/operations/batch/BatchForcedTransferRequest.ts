@@ -203,10 +203,10 @@
 
 */
 
-import { InvalidValue } from '../../../error/InvalidValue';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { InvalidValue } from "../../../error/InvalidValue";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '../../../FormatValidation';
+import FormatValidation from "../../../FormatValidation";
 
 export default class BatchForcedTransferRequest extends ValidatedRequest<BatchForcedTransferRequest> {
   securityId: string;
@@ -229,16 +229,10 @@ export default class BatchForcedTransferRequest extends ValidatedRequest<BatchFo
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       amountList: (vals) =>
         vals.length !== fromList.length || vals.length !== toList.length
-          ? [
-              new InvalidValue(
-                `The list of amountList, fromList and toList must have equal length.`,
-              ),
-            ]
+          ? [new InvalidValue(`The list of amountList, fromList and toList must have equal length.`)]
           : [],
-      fromList: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(vals, 'fromList'),
-      toList: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(vals, 'toList'),
+      fromList: (vals) => FormatValidation.checkHederaIdOrEvmAddressArray(vals, "fromList"),
+      toList: (vals) => FormatValidation.checkHederaIdOrEvmAddressArray(vals, "toList"),
     });
     this.securityId = securityId;
     this.amountList = amountList;

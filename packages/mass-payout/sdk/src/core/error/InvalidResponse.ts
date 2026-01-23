@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from './BaseError';
+import BaseError, { ErrorCode } from "./BaseError";
 
 export class InvalidResponse extends BaseError {
   constructor(val: unknown) {
-    super(
-      ErrorCode.InvalidResponse,
-      `An invalid response was received from the server: ${val}`,
-    );
+    super(ErrorCode.InvalidResponse, `An invalid response was received from the server: ${val}`);
   }
 }

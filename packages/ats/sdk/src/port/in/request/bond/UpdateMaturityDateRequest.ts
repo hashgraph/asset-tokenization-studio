@@ -203,22 +203,16 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
-import { SecurityDate } from '@domain/context/shared/SecurityDate';
+import { SecurityDate } from "@domain/context/shared/SecurityDate";
 
 export default class UpdateMaturityDateRequest extends ValidatedRequest<UpdateMaturityDateRequest> {
   securityId: string;
   maturityDate: string;
 
-  constructor({
-    securityId,
-    maturityDate,
-  }: {
-    securityId: string;
-    maturityDate: string;
-  }) {
+  constructor({ securityId, maturityDate }: { securityId: string; maturityDate: string }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       maturityDate: (val) => {

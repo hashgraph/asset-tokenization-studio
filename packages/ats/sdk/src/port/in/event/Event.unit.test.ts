@@ -203,20 +203,17 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import EventInPort from './Event';
-import NetworkService from '@service/network/NetworkService';
-import WalletEvent, { WalletEvents } from '@service/event/WalletEvent';
-import LogService from '@service/log/LogService';
+import { createMock } from "@golevelup/ts-jest";
+import EventInPort from "./Event";
+import NetworkService from "@service/network/NetworkService";
+import WalletEvent, { WalletEvents } from "@service/event/WalletEvent";
+import LogService from "@service/log/LogService";
 
 interface MockEventService {
-  on: <T extends keyof WalletEvent>(
-    event: T,
-    callback: WalletEvent[T],
-  ) => Promise<void>;
+  on: <T extends keyof WalletEvent>(event: T, callback: WalletEvent[T]) => Promise<void>;
 }
 
-describe('Event', () => {
+describe("Event", () => {
   let networkServiceMock: jest.Mocked<NetworkService>;
   let eventServiceMock: jest.Mocked<MockEventService>;
 
@@ -227,7 +224,7 @@ describe('Event', () => {
     });
     (EventInPort as any).networkService = networkServiceMock;
     (EventInPort as any).eventService = eventServiceMock;
-    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    jest.spyOn(LogService, "logError").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -235,8 +232,8 @@ describe('Event', () => {
     jest.restoreAllMocks();
   });
 
-  describe('register', () => {
-    it('should register events with eventService', async () => {
+  describe("register", () => {
+    it("should register events with eventService", async () => {
       const mockCallback = jest.fn();
       const events: Partial<WalletEvent> = {
         [WalletEvents.walletInit]: mockCallback,
@@ -244,14 +241,11 @@ describe('Event', () => {
 
       EventInPort.register(events);
 
-      expect(eventServiceMock.on).toHaveBeenCalledWith(
-        WalletEvents.walletInit,
-        mockCallback,
-      );
+      expect(eventServiceMock.on).toHaveBeenCalledWith(WalletEvents.walletInit, mockCallback);
       expect(eventServiceMock.on).toHaveBeenCalledTimes(1);
     });
 
-    it('should ignore events not in WalletEvents', async () => {
+    it("should ignore events not in WalletEvents", async () => {
       const mockCallback = jest.fn();
       const events = {
         invalidEvent: mockCallback,

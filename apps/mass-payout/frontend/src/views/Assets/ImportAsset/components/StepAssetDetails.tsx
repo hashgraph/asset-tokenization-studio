@@ -202,40 +202,28 @@
  *    limitations under the License.
  */
 
-import { Stack, HStack, VStack } from '@chakra-ui/react';
-import { useFormContext } from 'react-hook-form';
-import { useTranslation, Trans } from 'react-i18next';
-import { useEffect } from 'react';
-import {
-  Text,
-  InputController,
-  Button,
-  PhosphorIcon,
-  IconButton,
-  InfoDivider,
-} from 'io-bricks-ui';
-import { RouteName } from '@/router/RouteName';
-import { RouterManager } from '@/router/RouterManager';
-import { Eject } from '@phosphor-icons/react';
-import { ImportAssetFormValues } from '../ImportAsset';
-import { useGetAssetMetadata } from '../../hooks/queries/AssetQueries';
+import { Stack, HStack, VStack } from "@chakra-ui/react";
+import { useFormContext } from "react-hook-form";
+import { useTranslation, Trans } from "react-i18next";
+import { useEffect } from "react";
+import { Text, InputController, Button, PhosphorIcon, IconButton, InfoDivider } from "io-bricks-ui";
+import { RouteName } from "@/router/RouteName";
+import { RouterManager } from "@/router/RouterManager";
+import { Eject } from "@phosphor-icons/react";
+import { ImportAssetFormValues } from "../ImportAsset";
+import { useGetAssetMetadata } from "../../hooks/queries/AssetQueries";
 
 interface StepAssetDetailsProps {
   goToNext: () => void;
 }
 
 export const StepAssetDetails = ({ goToNext }: StepAssetDetailsProps) => {
-  const { t } = useTranslation('importAsset');
+  const { t } = useTranslation("importAsset");
   const { control, watch, setValue } = useFormContext<ImportAssetFormValues>();
 
-  const assetId = watch('assetId');
+  const assetId = watch("assetId");
 
-  const {
-    data: assetMetadata,
-    isLoading,
-    isPending,
-    refetch,
-  } = useGetAssetMetadata(assetId || '');
+  const { data: assetMetadata, isLoading, isPending, refetch } = useGetAssetMetadata(assetId || "");
 
   const handleCancel = () => {
     RouterManager.to(RouteName.Assets);
@@ -248,9 +236,9 @@ export const StepAssetDetails = ({ goToNext }: StepAssetDetailsProps) => {
 
   useEffect(() => {
     if (assetMetadata) {
-      setValue('assetName', assetMetadata.name);
-      setValue('assetSymbol', assetMetadata.symbol);
-      setValue('assetType', assetMetadata.assetType);
+      setValue("assetName", assetMetadata.name);
+      setValue("assetSymbol", assetMetadata.symbol);
+      setValue("assetType", assetMetadata.assetType);
     }
   }, [assetMetadata, setValue]);
 
@@ -258,19 +246,19 @@ export const StepAssetDetails = ({ goToNext }: StepAssetDetailsProps) => {
     <Stack gap={8} w="full" maxW="500px" align="flex-start" mt={12}>
       <Stack gap={2} align="flex-start">
         <Text textStyle="HeadingMediumLG" color="neutral.800">
-          {t('details.title')}
+          {t("details.title")}
         </Text>
         <Text textStyle="BodyTextRegularMD" color="neutral.800">
-          {t('details.subtitle')}
+          {t("details.subtitle")}
         </Text>
       </Stack>
       <Text textStyle="BodyTextRegularMD" color="neutral.800">
-        {t('details.description')}
+        {t("details.description")}
       </Text>
       <Stack gap={6} w="full">
         <Stack gap={2} w="full">
           <Text textStyle="BodyTextRegularSM" fontWeight="medium">
-            {t('form.assetId.label')}
+            {t("form.assetId.label")}
           </Text>
           <HStack spacing={4} alignItems="flex-start">
             <InputController
@@ -278,9 +266,9 @@ export const StepAssetDetails = ({ goToNext }: StepAssetDetailsProps) => {
               control={control}
               id="assetId"
               rules={{
-                required: t('form.assetId.required'),
+                required: t("form.assetId.required"),
               }}
-              placeholder={t('form.assetId.placeholder')}
+              placeholder={t("form.assetId.placeholder")}
               size="md"
               w="full"
             />
@@ -298,7 +286,7 @@ export const StepAssetDetails = ({ goToNext }: StepAssetDetailsProps) => {
       </Stack>
       {assetMetadata && (
         <VStack gap={6} w="full" align="flex-start">
-          <InfoDivider title={t('details.assetInfo')} type="main" />
+          <InfoDivider title={t("details.assetInfo")} type="main" />
           <Text textStyle="BodyTextRegularMD" color="neutral.800">
             <Trans
               i18nKey="importAsset:details.assetName"
@@ -330,15 +318,10 @@ export const StepAssetDetails = ({ goToNext }: StepAssetDetailsProps) => {
       )}
       <HStack w="full" pt={4} justifyContent="space-between">
         <Button variant="secondary" onClick={handleCancel} size="md">
-          {t('buttons.cancel')}
+          {t("buttons.cancel")}
         </Button>
-        <Button
-          variant="primary"
-          isDisabled={isPending}
-          onClick={goToNext}
-          size="md"
-        >
-          {t('buttons.nextStep')}
+        <Button variant="primary" isDisabled={isPending} onClick={goToNext} size="md">
+          {t("buttons.nextStep")}
         </Button>
       </HStack>
     </Stack>

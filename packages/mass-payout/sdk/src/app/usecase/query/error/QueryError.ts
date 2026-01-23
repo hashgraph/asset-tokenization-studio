@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class QueryError extends BaseError {
   constructor(msg: string, errorCode?: ErrorCode) {

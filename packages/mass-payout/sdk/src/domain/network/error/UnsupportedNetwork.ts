@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class UnsupportedNetwork extends BaseError {
   constructor() {
-    super(ErrorCode.UnsupportedNetwork, 'Network not supported');
+    super(ErrorCode.UnsupportedNetwork, "Network not supported");
   }
 }

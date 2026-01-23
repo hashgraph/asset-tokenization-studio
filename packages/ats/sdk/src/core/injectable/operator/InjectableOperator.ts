@@ -203,9 +203,9 @@
 
 */
 
-import { IsOperatorForPartitionQueryHandler } from '@query/security/operator/isOperatorForPartition/IsOperatorForPartitionQueryHandler';
-import { TOKENS } from '../Tokens';
-import { IsOperatorQueryHandler } from '@query/security/operator/isOperator/IsOperatorQueryHandler';
+import { IsOperatorForPartitionQueryHandler } from "@query/security/operator/isOperatorForPartition/IsOperatorForPartitionQueryHandler";
+import { TOKENS } from "../Tokens";
+import { IsOperatorQueryHandler } from "@query/security/operator/isOperator/IsOperatorQueryHandler";
 
 export const QUERY_HANDLERS_OPERATOR = [
   {

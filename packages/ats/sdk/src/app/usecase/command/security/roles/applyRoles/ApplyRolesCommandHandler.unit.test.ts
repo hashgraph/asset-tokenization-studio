@@ -203,27 +203,20 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { ErrorCode } from '@core/error/BaseError';
-import { ApplyRolesCommandHandler } from './ApplyRolesCommandHandler';
-import {
-  ApplyRolesCommand,
-  ApplyRolesCommandResponse,
-} from './ApplyRolesCommand';
-import { ApplyRolesCommandFixture } from '@test/fixtures/role/RoleFixture';
-import { ApplyRolesCommandError } from './error/ApplyRolesCommandError';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
+import { ErrorMsgFixture, EvmAddressPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { ErrorCode } from "@core/error/BaseError";
+import { ApplyRolesCommandHandler } from "./ApplyRolesCommandHandler";
+import { ApplyRolesCommand, ApplyRolesCommandResponse } from "./ApplyRolesCommand";
+import { ApplyRolesCommandFixture } from "@test/fixtures/role/RoleFixture";
+import { ApplyRolesCommandError } from "./error/ApplyRolesCommandError";
 
-describe('ApplyRolesCommandHandler', () => {
+describe("ApplyRolesCommandHandler", () => {
   let handler: ApplyRolesCommandHandler;
   let command: ApplyRolesCommand;
 
@@ -250,29 +243,25 @@ describe('ApplyRolesCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws ApplyRolesCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws ApplyRolesCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          ApplyRolesCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(ApplyRolesCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while applying roles: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while applying roles: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully apply roles', async () => {
+    describe("success cases", () => {
+      it("should successfully apply roles", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
 
@@ -285,32 +274,17 @@ describe('ApplyRolesCommandHandler', () => {
         expect(result).toBeInstanceOf(ApplyRolesCommandResponse);
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
-          1,
-          command.targetId,
-        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(1, command.targetId);
 
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-          command.securityId,
-        );
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
 
-        expect(
-          transactionServiceMock.getHandler().applyRoles,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().applyRoles).toHaveBeenCalledTimes(1);
 
-        expect(
-          transactionServiceMock.getHandler().applyRoles,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getHandler().applyRoles).toHaveBeenCalledWith(
           evmAddress,
           evmAddress,
           command.roles,

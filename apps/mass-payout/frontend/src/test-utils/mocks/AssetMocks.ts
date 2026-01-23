@@ -206,7 +206,7 @@
  *    limitations under the License.
  */
 
-import { Asset, AssetType } from '@/services/AssetService';
+import { Asset, AssetType } from "@/services/AssetService";
 
 /**
  * Centralized mock data for Asset-related tests
@@ -227,18 +227,18 @@ export interface BackendMocks {
  * Mock asset data that reflects the actual backend Asset interface
  */
 export const mockAsset: Asset = {
-  id: '0.0.890123',
-  name: 'Test Asset',
+  id: "0.0.890123",
+  name: "Test Asset",
   type: AssetType.EQUITY,
-  hederaTokenAddress: '0.0.123456',
-  evmTokenAddress: '0x1234567890abcdef1234567890abcdef12345678',
-  lifeCycleCashFlowHederaAddress: '0.0.654321',
-  lifeCycleCashFlowEvmAddress: '0xabcdef1234567890abcdef1234567890abcdef12',
+  hederaTokenAddress: "0.0.123456",
+  evmTokenAddress: "0x1234567890abcdef1234567890abcdef12345678",
+  lifeCycleCashFlowHederaAddress: "0.0.654321",
+  lifeCycleCashFlowEvmAddress: "0xabcdef1234567890abcdef1234567890abcdef12",
   isPaused: false,
   syncEnabled: true,
-  createdAt: '2024-01-15T10:30:00Z',
-  updatedAt: '2024-01-15T10:30:00Z',
-  symbol: 'TEST',
+  createdAt: "2024-01-15T10:30:00Z",
+  updatedAt: "2024-01-15T10:30:00Z",
+  symbol: "TEST",
 };
 
 /**
@@ -247,18 +247,18 @@ export const mockAsset: Asset = {
 export const mockAssets: Asset[] = [
   mockAsset,
   {
-    id: '0.0.456789',
-    name: 'Bond Asset',
+    id: "0.0.456789",
+    name: "Bond Asset",
     type: AssetType.BOND,
-    hederaTokenAddress: '0.0.789012',
-    evmTokenAddress: '0x9876543210fedcba9876543210fedcba98765432',
-    lifeCycleCashFlowHederaAddress: '0.0.210987',
-    lifeCycleCashFlowEvmAddress: '0xfedcba0987654321fedcba0987654321fedcba09',
+    hederaTokenAddress: "0.0.789012",
+    evmTokenAddress: "0x9876543210fedcba9876543210fedcba98765432",
+    lifeCycleCashFlowHederaAddress: "0.0.210987",
+    lifeCycleCashFlowEvmAddress: "0xfedcba0987654321fedcba0987654321fedcba09",
     isPaused: true,
     syncEnabled: false,
-    createdAt: '2024-01-10T08:15:00Z',
-    updatedAt: '2024-01-12T14:45:00Z',
-    symbol: 'BOND',
+    createdAt: "2024-01-10T08:15:00Z",
+    updatedAt: "2024-01-12T14:45:00Z",
+    symbol: "BOND",
   },
 ];
 
@@ -292,10 +292,7 @@ export const createMockAsset = (overrides: Partial<Asset> = {}): Asset => ({
 /**
  * Utility function to create multiple mock assets
  */
-export const createMockAssets = (
-  count: number,
-  baseOverrides: Partial<Asset> = {},
-): Asset[] => {
+export const createMockAssets = (count: number, baseOverrides: Partial<Asset> = {}): Asset[] => {
   return Array.from({ length: count }, (_, index) =>
     createMockAsset({
       ...baseOverrides,

@@ -203,23 +203,18 @@
 
 */
 
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '@core/query/QueryHandler';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import {
-  IsInControlListQuery,
-  IsInControlListQueryResponse,
-} from './IsInControlListQuery';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import AccountService from '@service/account/AccountService';
-import ContractService from '@service/contract/ContractService';
-import { IsInControlListQueryError } from './error/IsInControlListQueryError';
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
+import { IQueryHandler } from "@core/query/QueryHandler";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import { IsInControlListQuery, IsInControlListQueryResponse } from "./IsInControlListQuery";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import AccountService from "@service/account/AccountService";
+import ContractService from "@service/contract/ContractService";
+import { IsInControlListQueryError } from "./error/IsInControlListQueryError";
 
 @QueryHandler(IsInControlListQuery)
-export class IsInControlListQueryHandler
-  implements IQueryHandler<IsInControlListQuery>
-{
+export class IsInControlListQueryHandler implements IQueryHandler<IsInControlListQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
@@ -229,21 +224,14 @@ export class IsInControlListQueryHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    query: IsInControlListQuery,
-  ): Promise<IsInControlListQueryResponse> {
+  async execute(query: IsInControlListQuery): Promise<IsInControlListQueryResponse> {
     try {
       const { securityId, targetId } = query;
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
-      const res = await this.queryAdapter.isAccountInControlList(
-        securityEvmAddress,
-        targetEvmAddress,
-      );
+      const res = await this.queryAdapter.isAccountInControlList(securityEvmAddress, targetEvmAddress);
 
       return new IsInControlListQueryResponse(res);
     } catch (error) {

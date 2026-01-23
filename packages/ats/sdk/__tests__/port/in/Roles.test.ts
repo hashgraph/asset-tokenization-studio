@@ -203,8 +203,8 @@
 
 */
 
-import '../environmentMock';
-import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
+import "../environmentMock";
+import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
 import {
   SDK,
   LoggerTransports,
@@ -218,38 +218,31 @@ import {
   GetRoleMembersRequest,
   Equity,
   ApplyRolesRequest,
-} from '@port/in';
-import Injectable from '@core/injectable/Injectable';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import ConnectRequest, {
-  SupportedWallets,
-} from '@port/in/request/network/ConnectRequest';
-import { Wallet, ethers } from 'ethers';
-import {
-  CLIENT_ACCOUNT_ECDSA,
-  CLIENT_ACCOUNT_ECDSA_A,
-  FACTORY_ADDRESS,
-  RESOLVER_ADDRESS,
-} from '@test/config';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import NetworkService from '@service/network/NetworkService';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import SecurityViewModel from '@port/in/response/SecurityViewModel';
+} from "@port/in";
+import Injectable from "@core/injectable/Injectable";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
+import ConnectRequest, { SupportedWallets } from "@port/in/request/network/ConnectRequest";
+import { Wallet, ethers } from "ethers";
+import { CLIENT_ACCOUNT_ECDSA, CLIENT_ACCOUNT_ECDSA_A, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import NetworkService from "@service/network/NetworkService";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '@domain/context/factory/RegulationType';
+} from "@domain/context/factory/RegulationType";
 
-SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
+SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
 const decimals = 6;
-const name = 'TEST_SECURITY_TOKEN';
-const symbol = 'TEST';
-const isin = 'ABCDE123456Z';
+const name = "TEST_SECURITY_TOKEN";
+const symbol = "TEST";
+const isin = "ABCDE123456Z";
 const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
@@ -258,29 +251,28 @@ const conversionRight = true;
 const redemptionRight = false;
 const putRight = true;
 const dividendRight = 1;
-const currency = '0x345678';
+const currency = "0x345678";
 const numberOfShares = 0;
 const nominalValue = 1000;
 const nominalValueDecimals = 3;
 const regulationType = RegulationType.REG_D;
 const regulationSubType = RegulationSubType.C_506;
-const countries = 'AF,HG,BN';
-const info = 'Anything';
-const configId =
-  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const countries = "AF,HG,BN";
+const info = "Anything";
+const configId = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const configVersion = 1;
 
 const mirrorNode: MirrorNode = {
-  name: 'testmirrorNode',
-  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+  name: "testmirrorNode",
+  baseUrl: "https://testnet.mirrornode.hedera.com/api/v1/",
 };
 
 const rpcNode: JsonRpcRelay = {
-  name: 'testrpcNode',
-  baseUrl: 'http://127.0.0.1:7546/api',
+  name: "testrpcNode",
+  baseUrl: "http://127.0.0.1:7546/api",
 };
 
-describe('🧪 Role test', () => {
+describe("🧪 Role test", () => {
   let th: RPCTransactionAdapter;
   let ns: NetworkService;
   let mirrorNodeAdapter: MirrorNodeAdapter;
@@ -301,7 +293,7 @@ describe('🧪 Role test', () => {
     rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
 
     rpcQueryAdapter.init();
-    ns.environment = 'testnet';
+    ns.environment = "testnet";
     ns.configuration = {
       factoryAddress: FACTORY_ADDRESS,
       resolverAddress: RESOLVER_ADDRESS,
@@ -312,15 +304,10 @@ describe('🧪 Role test', () => {
     await th.init(true);
     await th.register(undefined, true);
 
-    const url = 'http://127.0.0.1:7546';
+    const url = "http://127.0.0.1:7546";
     const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-    th.setSignerOrProvider(
-      new Wallet(
-        CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-        customHttpProvider,
-      ),
-    );
+    th.setSignerOrProvider(new Wallet(CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? "", customHttpProvider));
 
     await Network.connect(
       new ConnectRequest({
@@ -328,7 +315,7 @@ describe('🧪 Role test', () => {
           accountId: CLIENT_ACCOUNT_ECDSA.id.toString(),
           privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
         },
-        network: 'testnet',
+        network: "testnet",
         wallet: SupportedWallets.METAMASK,
         mirrorNode: mirrorNode,
         rpcNode: rpcNode,
@@ -375,7 +362,7 @@ describe('🧪 Role test', () => {
     await delay();
   }, 600_000);
 
-  it('Grant and Revoke CONTROLLIST_ROLE role', async () => {
+  it("Grant and Revoke CONTROLLIST_ROLE role", async () => {
     expect(
       (
         await Role.grantRole(
@@ -435,12 +422,8 @@ describe('🧪 Role test', () => {
 
     expect(rolesFor.length).toEqual(1);
     expect(membersFor.length).toEqual(1);
-    expect(rolesFor[0].toUpperCase()).toEqual(
-      SecurityRole._CONTROLLIST_ROLE.toUpperCase(),
-    );
-    expect(membersFor[0].toUpperCase()).toEqual(
-      CLIENT_ACCOUNT_ECDSA_A.id.toString().toUpperCase(),
-    );
+    expect(rolesFor[0].toUpperCase()).toEqual(SecurityRole._CONTROLLIST_ROLE.toUpperCase());
+    expect(membersFor[0].toUpperCase()).toEqual(CLIENT_ACCOUNT_ECDSA_A.id.toString().toUpperCase());
 
     await Role.revokeRole(
       new RoleRequest({
@@ -489,7 +472,7 @@ describe('🧪 Role test', () => {
     expect(membersFor.length).toEqual(0);
   }, 60000);
 
-  it('grant all roles then revoke all roles using apply', async () => {
+  it("grant all roles then revoke all roles using apply", async () => {
     expect(
       (
         await Role.applyRoles(

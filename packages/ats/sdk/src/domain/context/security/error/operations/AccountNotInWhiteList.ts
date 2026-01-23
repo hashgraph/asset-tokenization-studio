@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class AccountNotInWhiteList extends BaseError {
   constructor(account: string) {
-    super(
-      ErrorCode.AccountNotInWhiteList,
-      `The account ${account} is not in white list`,
-    );
+    super(ErrorCode.AccountNotInWhiteList, `The account ${account} is not in white list`);
   }
 }

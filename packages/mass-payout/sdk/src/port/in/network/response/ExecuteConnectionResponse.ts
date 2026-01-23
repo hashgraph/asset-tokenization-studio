@@ -203,8 +203,8 @@
 
 */
 
-import { SupportedWallets } from '@domain/network/Wallet';
-import { InitializationData } from '@port/out/TransactionAdapter';
+import { SupportedWallets } from "@domain/network/Wallet";
+import { InitializationData } from "@port/out/TransactionAdapter";
 
 export default class ExecuteConnectionResponse {
   constructor(

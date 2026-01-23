@@ -203,12 +203,10 @@
 
 */
 
-import { Command } from '@core/command/Command';
-import { CommandResponse } from '@core/command/CommandResponse';
+import { Command } from "@core/command/Command";
+import { CommandResponse } from "@core/command/CommandResponse";
 
-export class CreateExternalKycListMockCommandResponse
-  implements CommandResponse
-{
+export class CreateExternalKycListMockCommandResponse implements CommandResponse {
   constructor(public readonly payload: string) {}
 }
 

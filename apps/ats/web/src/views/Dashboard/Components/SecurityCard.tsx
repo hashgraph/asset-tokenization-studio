@@ -203,17 +203,17 @@
 
 */
 
-import { HStack, Stack, StackProps, VStack } from '@chakra-ui/react';
-import { PhosphorIcon, Weight, Text } from 'io-bricks-ui';
-import { Star } from '@phosphor-icons/react';
-import { SecurityStore } from '../../../store/securityStore';
-import { useWalletStore } from '../../../store/walletStore';
-import { useAccountStore } from '../../../store/accountStore';
-import { RouterManager } from '../../../router/RouterManager';
-import { RouteName } from '../../../router/RouteName';
-import { Link as RouterLink } from 'react-router-dom';
-import { useUserStore } from '../../../store/userStore';
-import { User } from '../../../utils/constants';
+import { HStack, Stack, StackProps, VStack } from "@chakra-ui/react";
+import { PhosphorIcon, Weight, Text } from "io-bricks-ui";
+import { Star } from "@phosphor-icons/react";
+import { SecurityStore } from "../../../store/securityStore";
+import { useWalletStore } from "../../../store/walletStore";
+import { useAccountStore } from "../../../store/accountStore";
+import { RouterManager } from "../../../router/RouterManager";
+import { RouteName } from "../../../router/RouteName";
+import { Link as RouterLink } from "react-router-dom";
+import { useUserStore } from "../../../store/userStore";
+import { User } from "../../../utils/constants";
 
 export interface SecurityProps extends StackProps {
   isAdmin: boolean;
@@ -228,16 +228,14 @@ export const SecurityCard = (props: SecurityProps) => {
   const { setType } = useUserStore();
 
   const handleClickOnFavorite = () => {
-    isAdmin
-      ? toggleAdminFavorite(walletAddress, address)
-      : toggleHolderFavorite(walletAddress, address);
+    isAdmin ? toggleAdminFavorite(walletAddress, address) : toggleHolderFavorite(walletAddress, address);
   };
 
   return (
     <Stack
       w="full"
       h="144px"
-      bg={isAdmin ? 'adminUI.100' : 'holderUI.100'}
+      bg={isAdmin ? "adminUI.100" : "holderUI.100"}
       borderRadius="normal"
       p={4}
       as={RouterLink}
@@ -247,13 +245,9 @@ export const SecurityCard = (props: SecurityProps) => {
       onClick={() => setType(isAdmin ? User.admin : User.holder)}
       {...stackProps}
     >
-      <VStack alignItems={'flex-start'} w="full">
+      <VStack alignItems={"flex-start"} w="full">
         <HStack w="full" justify="space-between">
-          <Text
-            textStyle="ElementsRegularSM"
-            color="neutral.900"
-            textTransform="capitalize"
-          >
+          <Text textStyle="ElementsRegularSM" color="neutral.900" textTransform="capitalize">
             {type?.toLowerCase()}
           </Text>
           <PhosphorIcon
@@ -263,7 +257,7 @@ export const SecurityCard = (props: SecurityProps) => {
               e.preventDefault();
               handleClickOnFavorite();
             }}
-            sx={{ color: 'neutral.white' }}
+            sx={{ color: "neutral.white" }}
           />
         </HStack>
         <Text textStyle="ElementsSemiboldMD">

@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class QueryHandlerNotFoundException extends BaseError {
   constructor(queryName: string) {
-    super(
-      ErrorCode.RuntimeError,
-      `The query handler for the "${queryName}" query was not found!`,
-    );
+    super(ErrorCode.RuntimeError, `The query handler for the "${queryName}" query was not found!`);
   }
 }

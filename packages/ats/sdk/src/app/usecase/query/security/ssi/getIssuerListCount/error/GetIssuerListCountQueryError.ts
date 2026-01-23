@@ -203,8 +203,8 @@
 
 */
 
-import { QueryError } from '@query/error/QueryError';
-import BaseError from '@core/error/BaseError';
+import { QueryError } from "@query/error/QueryError";
+import BaseError from "@core/error/BaseError";
 
 export class GetIssuerListCountQueryError extends QueryError {
   constructor(error: Error) {

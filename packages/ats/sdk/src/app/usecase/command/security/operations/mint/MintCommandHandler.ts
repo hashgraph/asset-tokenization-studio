@@ -203,20 +203,20 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import SecurityService from '@service/security/SecurityService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ContractService from '@service/contract/ContractService';
-import { KycStatus } from '@domain/context/kyc/Kyc';
-import { MintCommand, MintCommandResponse } from './MintCommand';
-import { MintCommandError } from './error/MintCommandError';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import SecurityService from "@service/security/SecurityService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ContractService from "@service/contract/ContractService";
+import { KycStatus } from "@domain/context/kyc/Kyc";
+import { MintCommand, MintCommandResponse } from "./MintCommand";
+import { MintCommandError } from "./error/MintCommandError";
 
 @CommandHandler(MintCommand)
 export class MintCommandHandler implements ICommandHandler<MintCommand> {
@@ -243,26 +243,16 @@ export class MintCommandHandler implements ICommandHandler<MintCommand> {
 
       const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
       await this.validationService.checkDecimals(security, amount);
 
-      await this.validationService.checkMaxSupply(
-        securityId,
-        amountBd,
-        security,
-      );
+      await this.validationService.checkMaxSupply(securityId, amountBd, security);
 
       await this.validationService.checkControlList(securityId, targetId);
 
-      await this.validationService.checkKycAddresses(
-        securityId,
-        [targetId],
-        KycStatus.GRANTED,
-      );
+      await this.validationService.checkKycAddresses(securityId, [targetId], KycStatus.GRANTED);
 
       await this.validationService.checkMultiPartition(security);
 
@@ -276,15 +266,8 @@ export class MintCommandHandler implements ICommandHandler<MintCommand> {
 
       // Check that the amount to issue + total supply is not greater than max supply
 
-      const res = await handler.mint(
-        securityEvmAddress,
-        targetEvmAddress,
-        amountBd,
-        securityId,
-      );
-      return Promise.resolve(
-        new MintCommandResponse(res.error === undefined, res.id!),
-      );
+      const res = await handler.mint(securityEvmAddress, targetEvmAddress, amountBd, securityId);
+      return Promise.resolve(new MintCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new MintCommandError(error as Error);
     }

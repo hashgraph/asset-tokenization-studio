@@ -203,14 +203,14 @@
 
 */
 
-import { OptionalField } from '@core/decorator/OptionalDecorator';
-import { Environment } from '@domain/context/network/Environment';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import { SupportedWallets } from '@domain/context/network/Wallet';
-import { BaseRequest, RequestAccount } from '../BaseRequest';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import { OptionalField } from "@core/decorator/OptionalDecorator";
+import { Environment } from "@domain/context/network/Environment";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
+import { SupportedWallets } from "@domain/context/network/Wallet";
+import { BaseRequest, RequestAccount } from "../BaseRequest";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
 export { SupportedWallets };
 
@@ -243,10 +243,7 @@ export interface AWSKMSConfigRequest {
   hederaAccountId: string;
 }
 
-export type CustodialSettings =
-  | DFNSConfigRequest
-  | FireblocksConfigRequest
-  | AWSKMSConfigRequest;
+export type CustodialSettings = DFNSConfigRequest | FireblocksConfigRequest | AWSKMSConfigRequest;
 
 export type HWCRequestSettings = {
   projectId: string;
@@ -256,10 +253,7 @@ export type HWCRequestSettings = {
   dappIcons: string[];
 };
 
-export default class ConnectRequest
-  extends ValidatedRequest<ConnectRequest>
-  implements BaseRequest
-{
+export default class ConnectRequest extends ValidatedRequest<ConnectRequest> implements BaseRequest {
   @OptionalField()
   account?: RequestAccount;
   network: Environment;

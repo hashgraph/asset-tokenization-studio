@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '@port/in/request/FormatValidation';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "@port/in/request/FormatValidation";
 
 // eslint-disable-next-line max-len
 export default class ExecuteDistributionByAddressesRequest extends ValidatedRequest<ExecuteDistributionByAddressesRequest> {
@@ -227,8 +227,7 @@ export default class ExecuteDistributionByAddressesRequest extends ValidatedRequ
     super({
       lifeCycleCashFlow: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       asset: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      holders: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(vals, 'holders', false),
+      holders: (vals) => FormatValidation.checkHederaIdOrEvmAddressArray(vals, "holders", false),
       distributionId: FormatValidation.checkNumber(),
     });
 

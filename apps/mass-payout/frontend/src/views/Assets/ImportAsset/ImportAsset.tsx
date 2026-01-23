@@ -218,11 +218,11 @@
  * limitations under the License.
  */
 
-import { FormProvider, useForm } from 'react-hook-form';
-import { useSteps } from 'io-bricks-ui';
-import { useBreadcrumbs } from '@/hooks/useBreadcrumbs';
-import { ImportHeader } from './components/ImportHeader';
-import { WizardConfiguration } from './components/WizardConfiguration';
+import { FormProvider, useForm } from "react-hook-form";
+import { useSteps } from "io-bricks-ui";
+import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
+import { ImportHeader } from "./components/ImportHeader";
+import { WizardConfiguration } from "./components/WizardConfiguration";
 
 export interface ImportAssetFormValues {
   assetId: string;
@@ -236,10 +236,10 @@ export const ImportAsset = () => {
 
   const steps = useSteps();
   const form = useForm<ImportAssetFormValues>({
-    mode: 'all',
+    mode: "all",
     defaultValues: {
-      assetId: '',
-      assetName: '',
+      assetId: "",
+      assetName: "",
     },
   });
 

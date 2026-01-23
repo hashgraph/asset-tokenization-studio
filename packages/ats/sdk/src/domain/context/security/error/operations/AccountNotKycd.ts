@@ -203,7 +203,7 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class AccountNotKycd extends BaseError {
   constructor(account: string, kycStatus: number) {
@@ -216,9 +216,9 @@ export class AccountNotKycd extends BaseError {
   private static getKycStatusLabel(kycStatus: number): string {
     switch (kycStatus) {
       case 1:
-        return 'Granted';
+        return "Granted";
       case 0:
-        return 'Not Granted';
+        return "Not Granted";
       default:
         return `Unknown (${kycStatus})`;
     }

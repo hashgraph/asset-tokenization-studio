@@ -203,16 +203,16 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import EvmAddress from '@domain/contract/EvmAddress';
-import ContractService from '@app/services/contract/ContractService';
-import TransactionService from '@app/services/transaction/TransactionService';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import EvmAddress from "@domain/contract/EvmAddress";
+import ContractService from "@app/services/contract/ContractService";
+import TransactionService from "@app/services/transaction/TransactionService";
 import {
   UnpauseCommand,
   UnpauseCommandResponse,
-} from '@app/usecase/command/lifeCycleCashFlow/operations/unpause/UnpauseCommand';
-import { UnpauseCommandError } from './error/UnpauseCommandError';
+} from "@app/usecase/command/lifeCycleCashFlow/operations/unpause/UnpauseCommand";
+import { UnpauseCommandError } from "./error/UnpauseCommandError";
 
 @CommandHandler(UnpauseCommand)
 export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
@@ -231,14 +231,9 @@ export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
       const lifeCycleCashFlowEvmAddress: EvmAddress =
         await this.contractService.getContractEvmAddress(lifeCycleCashFlowId);
 
-      const res = await handler.unpause(
-        lifeCycleCashFlowEvmAddress,
-        lifeCycleCashFlowId,
-      );
+      const res = await handler.unpause(lifeCycleCashFlowEvmAddress, lifeCycleCashFlowId);
 
-      return Promise.resolve(
-        new UnpauseCommandResponse(res.error === undefined, res.id!),
-      );
+      return Promise.resolve(new UnpauseCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new UnpauseCommandError(error as Error);
     }

@@ -203,9 +203,9 @@
 
 */
 
-import { SecurityDate } from '@domain/context/shared/SecurityDate';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '@port/in/request/FormatValidation';
+import { SecurityDate } from "@domain/context/shared/SecurityDate";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class ClearingCreateHoldFromByPartitionRequest extends ValidatedRequest<ClearingCreateHoldFromByPartitionRequest> {
   securityId: string;
@@ -244,16 +244,10 @@ export default class ClearingCreateHoldFromByPartitionRequest extends ValidatedR
       sourceId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       clearingExpirationDate: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          Math.ceil(new Date().getTime() / 1000),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), Math.ceil(new Date().getTime() / 1000));
       },
       holdExpirationDate: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          Math.ceil(new Date().getTime() / 1000),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), Math.ceil(new Date().getTime() / 1000));
       },
     });
 

@@ -203,8 +203,8 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
 
 export class GetTokenHoldersAtSnapshotQueryResponse implements QueryResponse {
   constructor(public readonly payload: string[]) {}

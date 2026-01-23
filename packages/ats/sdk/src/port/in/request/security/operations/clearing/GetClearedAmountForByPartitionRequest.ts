@@ -203,24 +203,16 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '@port/in/request/FormatValidation';
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class GetClearedAmountForByPartitionRequest extends ValidatedRequest<GetClearedAmountForByPartitionRequest> {
   securityId: string;
   targetId: string;
   partitionId: string;
 
-  constructor({
-    securityId,
-    targetId,
-    partitionId,
-  }: {
-    securityId: string;
-    targetId: string;
-    partitionId: string;
-  }) {
+  constructor({ securityId, targetId, partitionId }: { securityId: string; targetId: string; partitionId: string }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

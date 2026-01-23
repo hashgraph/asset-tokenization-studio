@@ -203,32 +203,32 @@
 
 */
 
-import { ActivateClearingCommandHandler } from '@command/security/operations/clearing/activateClearing/ActivateClearingCommandHandler';
-import { TOKENS } from '../Tokens';
-import { DeactivateClearingCommandHandler } from '@command/security/operations/clearing/deactivateClearing/DeactivateClearingCommandHandler';
-import { ClearingTransferByPartitionCommandHandler } from '@command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommandHandler';
-import { ClearingTransferFromByPartitionCommandHandler } from '@command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommandHandler';
-import { ProtectedClearingTransferByPartitionCommandHandler } from '@command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommandHandler';
-import { ApproveClearingOperationByPartitionCommandHandler } from '@command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommandHandler';
-import { CancelClearingOperationByPartitionCommandHandler } from '@command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommandHandler';
-import { ReclaimClearingOperationByPartitionCommandHandler } from '@command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommandHandler';
-import { ClearingRedeemByPartitionCommandHandler } from '@command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommandHandler';
-import { ClearingRedeemFromByPartitionCommandHandler } from '@command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommandHandler';
-import { ProtectedClearingRedeemByPartitionCommandHandler } from '@command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommandHandler';
-import { ClearingCreateHoldByPartitionCommandHandler } from '@command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommandHandler';
-import { ClearingCreateHoldFromByPartitionCommandHandler } from '@command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommandHandler';
-import { ProtectedClearingCreateHoldByPartitionCommandHandler } from '@command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommandHandler';
-import { OperatorClearingCreateHoldByPartitionCommandHandler } from '@command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommandHandler';
-import { OperatorClearingRedeemByPartitionCommandHandler } from '@command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommandHandler';
-import { OperatorClearingTransferByPartitionCommandHandler } from '@command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommandHandler';
-import { GetClearedAmountForQueryHandler } from '@query/security/clearing/getClearedAmountFor/GetClearedAmountForQueryHandler';
-import { GetClearedAmountForByPartitionQueryHandler } from '@query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQueryHandler';
-import { GetClearingCountForByPartitionQueryHandler } from '@query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQueryHandler';
-import { GetClearingCreateHoldForByPartitionQueryHandler } from '@query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler';
-import { GetClearingTransferForByPartitionQueryHandler } from '@query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler';
-import { GetClearingRedeemForByPartitionQueryHandler } from '@query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler';
-import { GetClearingsIdForByPartitionQueryHandler } from '@query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQueryHandler';
-import { IsClearingActivatedQueryHandler } from '@query/security/clearing/isClearingActivated/IsClearingActivatedQueryHandler';
+import { ActivateClearingCommandHandler } from "@command/security/operations/clearing/activateClearing/ActivateClearingCommandHandler";
+import { TOKENS } from "../Tokens";
+import { DeactivateClearingCommandHandler } from "@command/security/operations/clearing/deactivateClearing/DeactivateClearingCommandHandler";
+import { ClearingTransferByPartitionCommandHandler } from "@command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommandHandler";
+import { ClearingTransferFromByPartitionCommandHandler } from "@command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommandHandler";
+import { ProtectedClearingTransferByPartitionCommandHandler } from "@command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommandHandler";
+import { ApproveClearingOperationByPartitionCommandHandler } from "@command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommandHandler";
+import { CancelClearingOperationByPartitionCommandHandler } from "@command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommandHandler";
+import { ReclaimClearingOperationByPartitionCommandHandler } from "@command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommandHandler";
+import { ClearingRedeemByPartitionCommandHandler } from "@command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommandHandler";
+import { ClearingRedeemFromByPartitionCommandHandler } from "@command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommandHandler";
+import { ProtectedClearingRedeemByPartitionCommandHandler } from "@command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommandHandler";
+import { ClearingCreateHoldByPartitionCommandHandler } from "@command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommandHandler";
+import { ClearingCreateHoldFromByPartitionCommandHandler } from "@command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommandHandler";
+import { ProtectedClearingCreateHoldByPartitionCommandHandler } from "@command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommandHandler";
+import { OperatorClearingCreateHoldByPartitionCommandHandler } from "@command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommandHandler";
+import { OperatorClearingRedeemByPartitionCommandHandler } from "@command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommandHandler";
+import { OperatorClearingTransferByPartitionCommandHandler } from "@command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommandHandler";
+import { GetClearedAmountForQueryHandler } from "@query/security/clearing/getClearedAmountFor/GetClearedAmountForQueryHandler";
+import { GetClearedAmountForByPartitionQueryHandler } from "@query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQueryHandler";
+import { GetClearingCountForByPartitionQueryHandler } from "@query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQueryHandler";
+import { GetClearingCreateHoldForByPartitionQueryHandler } from "@query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQueryHandler";
+import { GetClearingTransferForByPartitionQueryHandler } from "@query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQueryHandler";
+import { GetClearingRedeemForByPartitionQueryHandler } from "@query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQueryHandler";
+import { GetClearingsIdForByPartitionQueryHandler } from "@query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQueryHandler";
+import { IsClearingActivatedQueryHandler } from "@query/security/clearing/isClearingActivated/IsClearingActivatedQueryHandler";
 
 export const COMMAND_HANDLERS_CLEARING = [
   {

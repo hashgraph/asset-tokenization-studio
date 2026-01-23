@@ -203,24 +203,16 @@
 
 */
 
-import { MIN_ID } from '@domain/context/security/CorporateAction';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import { MIN_ID } from "@domain/context/security/CorporateAction";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
 export default class GetVotingRightsForRequest extends ValidatedRequest<GetVotingRightsForRequest> {
   securityId: string;
   targetId: string;
   votingId: number;
 
-  constructor({
-    targetId,
-    securityId,
-    votingId,
-  }: {
-    targetId: string;
-    securityId: string;
-    votingId: number;
-  }) {
+  constructor({ targetId, securityId, votingId }: { targetId: string; securityId: string; votingId: number }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

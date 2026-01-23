@@ -203,8 +203,8 @@
 
 */
 
-import { Contract, ContractReceipt } from 'ethers';
-import DeployContractWithFactoryResult from './DeployContractWithFactoryResult';
+import { Contract, ContractReceipt } from "ethers";
+import DeployContractWithFactoryResult from "./DeployContractWithFactoryResult";
 
 export default class DeployContractResult extends DeployContractWithFactoryResult<Contract> {
   public readonly name: string;

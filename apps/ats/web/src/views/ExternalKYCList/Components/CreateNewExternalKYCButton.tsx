@@ -203,23 +203,21 @@
 
 */
 
-import { Button } from 'io-bricks-ui';
-import type { ButtonProps } from 'io-bricks-ui';
-import { useTranslation } from 'react-i18next';
-import { useCreateExternalKYCMock } from '../../../hooks/mutations/useExternalKYC';
-import { useExternalKYCStore } from '../../../store/externalKYCStore';
+import { Button } from "io-bricks-ui";
+import type { ButtonProps } from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import { useCreateExternalKYCMock } from "../../../hooks/mutations/useExternalKYC";
+import { useExternalKYCStore } from "../../../store/externalKYCStore";
 
 export const CreateNewExternalKYCButton = (props: ButtonProps) => {
-  const { t: tHeader } = useTranslation('externalKYC', {
-    keyPrefix: 'list.header',
+  const { t: tHeader } = useTranslation("externalKYC", {
+    keyPrefix: "list.header",
   });
 
   const { addExternalKYC } = useExternalKYCStore();
 
-  const {
-    mutateAsync: createExternalKYCMock,
-    isLoading: isLoadingCreatingExternalKYCMock,
-  } = useCreateExternalKYCMock();
+  const { mutateAsync: createExternalKYCMock, isLoading: isLoadingCreatingExternalKYCMock } =
+    useCreateExternalKYCMock();
 
   const handleCreate = async () => {
     createExternalKYCMock().then((response) => {
@@ -239,7 +237,7 @@ export const CreateNewExternalKYCButton = (props: ButtonProps) => {
       isLoading={isLoadingCreatingExternalKYCMock}
       {...props}
     >
-      {tHeader('createNewExternalKYC')}
+      {tHeader("createNewExternalKYC")}
     </Button>
   );
 };

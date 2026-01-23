@@ -202,15 +202,14 @@
  *    limitations under the License.
  */
 
-import { RouteName } from './RouteName';
+import { RouteName } from "./RouteName";
 
 export const RoutePath: Record<RouteName, string> = {
-  [RouteName.Landing]: '/',
-  [RouteName.Assets]: '/assets',
-  [RouteName.Distributions]: '/distributions',
-  [RouteName.ImportAsset]: '/assets/import',
-  [RouteName.AssetDetail]: '/assets/:id',
-  [RouteName.NewDistribution]: '/assets/:id/new-distribution',
-  [RouteName.DistributionsDetails]:
-    '/assets/:id/:type/:itemId/distributions-details',
+  [RouteName.Landing]: "/",
+  [RouteName.Assets]: "/assets",
+  [RouteName.Distributions]: "/distributions",
+  [RouteName.ImportAsset]: "/assets/import",
+  [RouteName.AssetDetail]: "/assets/:id",
+  [RouteName.NewDistribution]: "/assets/:id/new-distribution",
+  [RouteName.DistributionsDetails]: "/assets/:id/:type/:itemId/distributions-details",
 };

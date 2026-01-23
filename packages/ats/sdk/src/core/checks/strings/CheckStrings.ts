@@ -203,7 +203,7 @@
 
 */
 
-import { HederaId } from '@domain/context/shared/HederaId';
+import { HederaId } from "@domain/context/shared/HederaId";
 
 export default class CheckStrings {
   public static isNotEmpty(value?: string): boolean {
@@ -222,11 +222,7 @@ export default class CheckStrings {
     return true;
   }
 
-  public static isLengthBetween(
-    value: string,
-    min: number,
-    max: number,
-  ): boolean {
+  public static isLengthBetween(value: string, min: number, max: number): boolean {
     if (value.length > max || value.length < min) return false;
     return true;
   }

@@ -202,7 +202,7 @@
  *    limitations under the License.
  */
 
-import { ProcessStatusType } from '../../types/status';
+import { ProcessStatusType } from "../../types/status";
 
 export interface PaymentData {
   paymentId: string;
@@ -217,33 +217,33 @@ export interface PaymentData {
 
 export const mockPayments: PaymentData[] = [
   {
-    paymentId: '0.0.123456',
-    creationDate: '09/10/2024',
+    paymentId: "0.0.123456",
+    creationDate: "09/10/2024",
     paidAmount: 1500.5,
     batchCount: 80,
     holders: 90,
-    status: 'In Progress' as ProcessStatusType,
-    paymentType: 'Dividend',
+    status: "In Progress" as ProcessStatusType,
+    paymentType: "Dividend",
     progress: 75,
   },
   {
-    paymentId: '0.0.234567',
-    creationDate: '08/10/2024',
+    paymentId: "0.0.234567",
+    creationDate: "08/10/2024",
     paidAmount: 2300.75,
     batchCount: 80,
     holders: 90,
-    status: 'Failed' as ProcessStatusType,
-    paymentType: 'Coupon',
+    status: "Failed" as ProcessStatusType,
+    paymentType: "Coupon",
     progress: 45,
   },
   {
-    paymentId: '0.0.345678',
-    creationDate: '04/10/2024',
+    paymentId: "0.0.345678",
+    creationDate: "04/10/2024",
     paidAmount: 5000.0,
     batchCount: 80,
     holders: 90,
-    status: 'Completed' as ProcessStatusType,
-    paymentType: 'Dividend',
+    status: "Completed" as ProcessStatusType,
+    paymentType: "Dividend",
     progress: 100,
   },
 ];

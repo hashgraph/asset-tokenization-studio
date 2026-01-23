@@ -203,9 +203,9 @@
 
 */
 
-import { SecurityDate } from '@domain/context/shared/SecurityDate';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '@port/in/request/FormatValidation';
+import { SecurityDate } from "@domain/context/shared/SecurityDate";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class CreateHoldByPartitionRequest extends ValidatedRequest<CreateHoldByPartitionRequest> {
   securityId: string;
@@ -237,10 +237,7 @@ export default class CreateHoldByPartitionRequest extends ValidatedRequest<Creat
       escrowId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       expirationDate: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          Math.ceil(new Date().getTime() / 1000),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), Math.ceil(new Date().getTime() / 1000));
       },
     });
 

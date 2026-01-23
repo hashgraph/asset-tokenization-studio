@@ -203,8 +203,8 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import { CommandBus } from '@core/command/CommandBus';
+import { createMock } from "@golevelup/ts-jest";
+import { CommandBus } from "@core/command/CommandBus";
 import {
   ApplyRolesRequest,
   GetRoleCountForRequest,
@@ -212,13 +212,13 @@ import {
   GetRoleMembersRequest,
   GetRolesForRequest,
   RoleRequest,
-} from '../request';
-import { TransactionIdFixture } from '@test/fixtures/shared/DataFixture';
-import LogService from '@service/log/LogService';
-import { QueryBus } from '@core/query/QueryBus';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import { ValidationError } from '@core/validation/ValidationError';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
+} from "../request";
+import { TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import LogService from "@service/log/LogService";
+import { QueryBus } from "@core/query/QueryBus";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { ValidationError } from "@core/validation/ValidationError";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import {
   ApplyRolesRequestFixture,
   GetRoleCountForRequestFixture,
@@ -226,21 +226,21 @@ import {
   GetRoleMembersRequestFixture,
   GetRolesForRequestFixture,
   RoleRequestFixture,
-} from '@test/fixtures/role/RoleFixture';
-import Role from './Role';
-import { HasRoleQuery } from '@query/security/roles/hasRole/HasRoleQuery';
-import { GrantRoleCommand } from '@command/security/roles/grantRole/GrantRoleCommand';
-import { RevokeRoleCommand } from '@command/security/roles/revokeRole/RevokeRoleCommand';
-import { GetRoleCountForQuery } from '@query/security/roles/getRoleCountFor/GetRoleCountForQuery';
-import { GetRolesForQuery } from '@query/security/roles/getRolesFor/GetRolesForQuery';
-import { GetRoleMemberCountQuery } from '@query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery';
-import { GetRoleMembersQuery } from '@query/security/roles/getRoleMembers/GetRoleMembersQuery';
-import Account from '@domain/context/account/Account';
-import { AccountPropsFixture } from '@test/fixtures/account/AccountFixture';
-import { ApplyRolesCommand } from '@command/security/roles/applyRoles/ApplyRolesCommand';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
+} from "@test/fixtures/role/RoleFixture";
+import Role from "./Role";
+import { HasRoleQuery } from "@query/security/roles/hasRole/HasRoleQuery";
+import { GrantRoleCommand } from "@command/security/roles/grantRole/GrantRoleCommand";
+import { RevokeRoleCommand } from "@command/security/roles/revokeRole/RevokeRoleCommand";
+import { GetRoleCountForQuery } from "@query/security/roles/getRoleCountFor/GetRoleCountForQuery";
+import { GetRolesForQuery } from "@query/security/roles/getRolesFor/GetRolesForQuery";
+import { GetRoleMemberCountQuery } from "@query/security/roles/getRoleMemberCount/GetRoleMemberCountQuery";
+import { GetRoleMembersQuery } from "@query/security/roles/getRoleMembers/GetRoleMembersQuery";
+import Account from "@domain/context/account/Account";
+import { AccountPropsFixture } from "@test/fixtures/account/AccountFixture";
+import { ApplyRolesCommand } from "@command/security/roles/applyRoles/ApplyRolesCommand";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
 
-describe('Role', () => {
+describe("Role", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
   let queryBusMock: jest.Mocked<QueryBus>;
   let mirrorNodeMock: jest.Mocked<MirrorNodeAdapter>;
@@ -267,8 +267,8 @@ describe('Role', () => {
     queryBusMock = createMock<QueryBus>();
     mirrorNodeMock = createMock<MirrorNodeAdapter>();
 
-    handleValidationSpy = jest.spyOn(ValidatedRequest, 'handleValidation');
-    jest.spyOn(LogService, 'logError').mockImplementation(() => {});
+    handleValidationSpy = jest.spyOn(ValidatedRequest, "handleValidation");
+    jest.spyOn(LogService, "logError").mockImplementation(() => {});
     (Role as any).commandBus = commandBusMock;
     (Role as any).queryBus = queryBusMock;
     (Role as any).mirrorNode = mirrorNodeMock;
@@ -279,78 +279,62 @@ describe('Role', () => {
     jest.restoreAllMocks();
   });
 
-  describe('hasRole', () => {
+  describe("hasRole", () => {
     roleRequest = new RoleRequest(RoleRequestFixture.create());
 
     const expectedResponse = {
       payload: true,
     };
-    it('should get has role successfully', async () => {
+    it("should get has role successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Role.hasRole(roleRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'RoleRequest',
-        roleRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("RoleRequest", roleRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new HasRoleQuery(
-          roleRequest.role,
-          roleRequest.targetId,
-          roleRequest.securityId,
-        ),
+        new HasRoleQuery(roleRequest.role, roleRequest.targetId, roleRequest.securityId),
       );
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(Role.hasRole(roleRequest)).rejects.toThrow(
-        'Query execution failed',
-      );
+      await expect(Role.hasRole(roleRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'RoleRequest',
-        roleRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("RoleRequest", roleRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new HasRoleQuery(
-          roleRequest.role,
-          roleRequest.targetId,
-          roleRequest.securityId,
-        ),
+        new HasRoleQuery(roleRequest.role, roleRequest.targetId, roleRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       roleRequest = new RoleRequest({
         ...RoleRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
       await expect(Role.hasRole(roleRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       roleRequest = new RoleRequest({
         ...RoleRequestFixture.create({
-          targetId: 'invalid',
+          targetId: "invalid",
         }),
       });
 
       await expect(Role.hasRole(roleRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if role is invalid', async () => {
+    it("should throw error if role is invalid", async () => {
       roleRequest = new RoleRequest({
         ...RoleRequestFixture.create({
-          role: 'invalid',
+          role: "invalid",
         }),
       });
 
@@ -358,261 +342,192 @@ describe('Role', () => {
     });
   });
 
-  describe('grantRole', () => {
-    it('should grant role successfully', async () => {
+  describe("grantRole", () => {
+    it("should grant role successfully", async () => {
       roleRequest = new RoleRequest(RoleRequestFixture.create());
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Role.grantRole(roleRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'RoleRequest',
-        roleRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("RoleRequest", roleRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new GrantRoleCommand(
-          roleRequest.role,
-          roleRequest.targetId,
-          roleRequest.securityId,
-        ),
+        new GrantRoleCommand(roleRequest.role, roleRequest.targetId, roleRequest.securityId),
       );
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
+    it("should throw an error if command execution fails", async () => {
       roleRequest = new RoleRequest(RoleRequestFixture.create());
 
-      const error = new Error('Command execution failed');
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(Role.grantRole(roleRequest)).rejects.toThrow(
-        'Command execution failed',
-      );
+      await expect(Role.grantRole(roleRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'RoleRequest',
-        roleRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("RoleRequest", roleRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new GrantRoleCommand(
-          roleRequest.role,
-          roleRequest.targetId,
-          roleRequest.securityId,
-        ),
+        new GrantRoleCommand(roleRequest.role, roleRequest.targetId, roleRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       roleRequest = new RoleRequest({
         ...RoleRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(Role.grantRole(roleRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.grantRole(roleRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       roleRequest = new RoleRequest({
         ...RoleRequestFixture.create({
-          targetId: 'invalid',
+          targetId: "invalid",
         }),
       });
 
-      await expect(Role.grantRole(roleRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.grantRole(roleRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if role is invalid', async () => {
+    it("should throw error if role is invalid", async () => {
       roleRequest = new RoleRequest({
         ...RoleRequestFixture.create({
-          role: 'invalid',
+          role: "invalid",
         }),
       });
 
-      await expect(Role.grantRole(roleRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.grantRole(roleRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('revokeRole', () => {
-    it('should revoke role successfully', async () => {
+  describe("revokeRole", () => {
+    it("should revoke role successfully", async () => {
       roleRequest = new RoleRequest(RoleRequestFixture.create());
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Role.revokeRole(roleRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'RoleRequest',
-        roleRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("RoleRequest", roleRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new RevokeRoleCommand(
-          roleRequest.role,
-          roleRequest.targetId,
-          roleRequest.securityId,
-        ),
+        new RevokeRoleCommand(roleRequest.role, roleRequest.targetId, roleRequest.securityId),
       );
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
+    it("should throw an error if command execution fails", async () => {
       roleRequest = new RoleRequest(RoleRequestFixture.create());
-      const error = new Error('Command execution failed');
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(Role.revokeRole(roleRequest)).rejects.toThrow(
-        'Command execution failed',
-      );
+      await expect(Role.revokeRole(roleRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'RoleRequest',
-        roleRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("RoleRequest", roleRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new RevokeRoleCommand(
-          roleRequest.role,
-          roleRequest.targetId,
-          roleRequest.securityId,
-        ),
+        new RevokeRoleCommand(roleRequest.role, roleRequest.targetId, roleRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       roleRequest = new RoleRequest({
         ...RoleRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(Role.revokeRole(roleRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.revokeRole(roleRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       roleRequest = new RoleRequest({
         ...RoleRequestFixture.create({
-          targetId: 'invalid',
+          targetId: "invalid",
         }),
       });
 
-      await expect(Role.revokeRole(roleRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.revokeRole(roleRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if role is invalid', async () => {
+    it("should throw error if role is invalid", async () => {
       roleRequest = new RoleRequest({
         ...RoleRequestFixture.create({
-          role: 'invalid',
+          role: "invalid",
         }),
       });
 
-      await expect(Role.revokeRole(roleRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.revokeRole(roleRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getRoleCountFor', () => {
-    getRoleCountForRequest = new GetRoleCountForRequest(
-      GetRoleCountForRequestFixture.create(),
-    );
+  describe("getRoleCountFor", () => {
+    getRoleCountForRequest = new GetRoleCountForRequest(GetRoleCountForRequestFixture.create());
 
     const expectedResponse = {
       payload: 1,
     };
-    it('should get role count for successfully', async () => {
+    it("should get role count for successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Role.getRoleCountFor(getRoleCountForRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetRoleCountForRequest',
-        getRoleCountForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRoleCountForRequest", getRoleCountForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetRoleCountForQuery(
-          getRoleCountForRequest.targetId,
-          getRoleCountForRequest.securityId,
-        ),
+        new GetRoleCountForQuery(getRoleCountForRequest.targetId, getRoleCountForRequest.securityId),
       );
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Role.getRoleCountFor(getRoleCountForRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(Role.getRoleCountFor(getRoleCountForRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetRoleCountForRequest',
-        getRoleCountForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRoleCountForRequest", getRoleCountForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetRoleCountForQuery(
-          getRoleCountForRequest.targetId,
-          getRoleCountForRequest.securityId,
-        ),
+        new GetRoleCountForQuery(getRoleCountForRequest.targetId, getRoleCountForRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getRoleCountForRequest = new GetRoleCountForRequest({
         ...GetRoleCountForRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Role.getRoleCountFor(getRoleCountForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Role.getRoleCountFor(getRoleCountForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       getRoleCountForRequest = new GetRoleCountForRequest({
         ...GetRoleCountForRequestFixture.create({
-          targetId: 'invalid',
+          targetId: "invalid",
         }),
       });
 
-      await expect(
-        Role.getRoleCountFor(getRoleCountForRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Role.getRoleCountFor(getRoleCountForRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getRolesFor', () => {
-    getRolesForRequest = new GetRolesForRequest(
-      GetRolesForRequestFixture.create(),
-    );
+  describe("getRolesFor", () => {
+    getRolesForRequest = new GetRolesForRequest(GetRolesForRequestFixture.create());
 
     const expectedResponse = {
-      payload: ['role'],
+      payload: ["role"],
     };
-    it('should get role for successfully', async () => {
+    it("should get role for successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Role.getRolesFor(getRolesForRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetRolesForRequest',
-        getRolesForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRolesForRequest", getRolesForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetRolesForQuery(
@@ -625,18 +540,13 @@ describe('Role', () => {
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(Role.getRolesFor(getRolesForRequest)).rejects.toThrow(
-        'Query execution failed',
-      );
+      await expect(Role.getRolesFor(getRolesForRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetRolesForRequest',
-        getRolesForRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRolesForRequest", getRolesForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetRolesForQuery(
@@ -648,122 +558,93 @@ describe('Role', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getRolesForRequest = new GetRolesForRequest({
         ...GetRolesForRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(Role.getRolesFor(getRolesForRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.getRolesFor(getRolesForRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       getRolesForRequest = new GetRolesForRequest({
         ...GetRolesForRequestFixture.create({
-          targetId: 'invalid',
+          targetId: "invalid",
         }),
       });
 
-      await expect(Role.getRolesFor(getRolesForRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.getRolesFor(getRolesForRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getRoleMemberCount', () => {
-    getRoleMemberCountRequest = new GetRoleMemberCountRequest(
-      GetRoleMemberCountRequestFixture.create(),
-    );
+  describe("getRoleMemberCount", () => {
+    getRoleMemberCountRequest = new GetRoleMemberCountRequest(GetRoleMemberCountRequestFixture.create());
 
     const expectedResponse = {
       payload: 1,
     };
-    it('should get role member count successfully', async () => {
+    it("should get role member count successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Role.getRoleMemberCount(getRoleMemberCountRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetRoleMemberCountRequest',
-        getRoleMemberCountRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRoleMemberCountRequest", getRoleMemberCountRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetRoleMemberCountQuery(
-          getRoleMemberCountRequest.role,
-          getRoleMemberCountRequest.securityId,
-        ),
+        new GetRoleMemberCountQuery(getRoleMemberCountRequest.role, getRoleMemberCountRequest.securityId),
       );
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(
-        Role.getRoleMemberCount(getRoleMemberCountRequest),
-      ).rejects.toThrow('Query execution failed');
+      await expect(Role.getRoleMemberCount(getRoleMemberCountRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetRoleMemberCountRequest',
-        getRoleMemberCountRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRoleMemberCountRequest", getRoleMemberCountRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetRoleMemberCountQuery(
-          getRoleMemberCountRequest.role,
-          getRoleMemberCountRequest.securityId,
-        ),
+        new GetRoleMemberCountQuery(getRoleMemberCountRequest.role, getRoleMemberCountRequest.securityId),
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getRoleMemberCountRequest = new GetRoleMemberCountRequest({
         ...GetRoleMemberCountRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(
-        Role.getRoleMemberCount(getRoleMemberCountRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Role.getRoleMemberCount(getRoleMemberCountRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if role is invalid', async () => {
+    it("should throw error if role is invalid", async () => {
       getRoleMemberCountRequest = new GetRoleMemberCountRequest({
         ...GetRoleMemberCountRequestFixture.create({
-          role: 'invalid',
+          role: "invalid",
         }),
       });
 
-      await expect(
-        Role.getRoleMemberCount(getRoleMemberCountRequest),
-      ).rejects.toThrow(ValidationError);
+      await expect(Role.getRoleMemberCount(getRoleMemberCountRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('getRoleMembers', () => {
-    getRoleMembersRequest = new GetRoleMembersRequest(
-      GetRoleMembersRequestFixture.create(),
-    );
+  describe("getRoleMembers", () => {
+    getRoleMembersRequest = new GetRoleMembersRequest(GetRoleMembersRequestFixture.create());
 
     const expectedResponse = {
       payload: [account.id.toString()],
     };
-    it('should get role members successfully', async () => {
+    it("should get role members successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
       mirrorNodeMock.getAccountInfo.mockResolvedValue(account);
 
       const result = await Role.getRoleMembers(getRoleMembersRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetRoleMembersRequest',
-        getRoleMembersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRoleMembersRequest", getRoleMembersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetRoleMembersQuery(
@@ -773,24 +654,17 @@ describe('Role', () => {
           getRoleMembersRequest.end,
         ),
       );
-      expect(mirrorNodeMock.getAccountInfo).toHaveBeenCalledWith(
-        account.id.toString(),
-      );
+      expect(mirrorNodeMock.getAccountInfo).toHaveBeenCalledWith(account.id.toString());
       expect(result).toEqual(expectedResponse.payload);
     });
 
-    it('should throw an error if query execution fails', async () => {
-      const error = new Error('Query execution failed');
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(Role.getRoleMembers(getRoleMembersRequest)).rejects.toThrow(
-        'Query execution failed',
-      );
+      await expect(Role.getRoleMembers(getRoleMembersRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'GetRoleMembersRequest',
-        getRoleMembersRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRoleMembersRequest", getRoleMembersRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetRoleMembersQuery(
@@ -802,44 +676,35 @@ describe('Role', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       getRoleMembersRequest = new GetRoleMembersRequest({
         ...GetRoleMembersRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(Role.getRoleMembers(getRoleMembersRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.getRoleMembers(getRoleMembersRequest)).rejects.toThrow(ValidationError);
     });
-    it('should throw error if role is invalid', async () => {
+    it("should throw error if role is invalid", async () => {
       getRoleMembersRequest = new GetRoleMembersRequest({
         ...GetRoleMembersRequestFixture.create({
-          role: 'invalid',
+          role: "invalid",
         }),
       });
 
-      await expect(Role.getRoleMembers(getRoleMembersRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.getRoleMembers(getRoleMembersRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe('applyRoles', () => {
-    applyRolesRequest = new ApplyRolesRequest(
-      ApplyRolesRequestFixture.create(),
-    );
+  describe("applyRoles", () => {
+    applyRolesRequest = new ApplyRolesRequest(ApplyRolesRequestFixture.create());
 
-    it('should apply roles successfully', async () => {
+    it("should apply roles successfully", async () => {
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
       const result = await Role.applyRoles(applyRolesRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ApplyRolesRequest',
-        applyRolesRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("ApplyRolesRequest", applyRolesRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new ApplyRolesCommand(
@@ -852,18 +717,13 @@ describe('Role', () => {
       expect(result).toEqual(expectedResponse);
     });
 
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(
-        'Command execution failed',
-      );
+      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ApplyRolesRequest',
-        applyRolesRequest,
-      );
+      expect(handleValidationSpy).toHaveBeenCalledWith("ApplyRolesRequest", applyRolesRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
         new ApplyRolesCommand(
@@ -875,70 +735,57 @@ describe('Role', () => {
       );
     });
 
-    it('should throw error if securityId is invalid', async () => {
+    it("should throw error if securityId is invalid", async () => {
       applyRolesRequest = new ApplyRolesRequest({
         ...ApplyRolesRequestFixture.create({
-          securityId: 'invalid',
+          securityId: "invalid",
         }),
       });
 
-      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if targetId is invalid', async () => {
+    it("should throw error if targetId is invalid", async () => {
       applyRolesRequest = new ApplyRolesRequest({
         ...ApplyRolesRequestFixture.create({
-          targetId: 'invalid',
+          targetId: "invalid",
         }),
       });
 
-      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if roles is empty', async () => {
+    it("should throw error if roles is empty", async () => {
       applyRolesRequest = new ApplyRolesRequest({
         ...ApplyRolesRequestFixture.create({
           roles: [],
         }),
       });
 
-      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if roles not exist', async () => {
+    it("should throw error if roles not exist", async () => {
       applyRolesRequest = new ApplyRolesRequest({
         ...ApplyRolesRequestFixture.create({
-          roles: ['invalid'],
+          roles: ["invalid"],
         }),
       });
 
-      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if roles is duplicated', async () => {
+    it("should throw error if roles is duplicated", async () => {
       applyRolesRequest = new ApplyRolesRequest({
         ...ApplyRolesRequestFixture.create({
-          roles: [
-            SecurityRole._DEFAULT_ADMIN_ROLE,
-            SecurityRole._DEFAULT_ADMIN_ROLE,
-          ],
+          roles: [SecurityRole._DEFAULT_ADMIN_ROLE, SecurityRole._DEFAULT_ADMIN_ROLE],
         }),
       });
 
-      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw error if roles list and active list are different', async () => {
+    it("should throw error if roles list and active list are different", async () => {
       applyRolesRequest = new ApplyRolesRequest({
         ...ApplyRolesRequestFixture.create({
           roles: [SecurityRole._DEFAULT_ADMIN_ROLE],
@@ -946,9 +793,7 @@ describe('Role', () => {
         }),
       });
 
-      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(
-        ValidationError,
-      );
+      await expect(Role.applyRoles(applyRolesRequest)).rejects.toThrow(ValidationError);
     });
   });
 });

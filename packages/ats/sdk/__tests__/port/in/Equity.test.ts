@@ -203,7 +203,7 @@
 
 */
 
-import '../environmentMock';
+import "../environmentMock";
 import {
   SDK,
   LoggerTransports,
@@ -227,38 +227,34 @@ import {
   GetScheduledBalanceAdjustmentRequest,
   GetScheduledBalanceAdjustmentCountRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
-} from '@port/in';
-import {
-  CLIENT_ACCOUNT_ECDSA,
-  FACTORY_ADDRESS,
-  RESOLVER_ADDRESS,
-} from '@test/config';
-import ConnectRequest from '@port/in/request/network/ConnectRequest';
-import { Wallet, ethers } from 'ethers';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import { JsonRpcRelay } from '@domain/context/network/JsonRpcRelay';
-import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
-import NetworkService from '@service/network/NetworkService';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import SecurityViewModel from '@port/in/response/SecurityViewModel';
-import Injectable from '@core/injectable/Injectable';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
+} from "@port/in";
+import { CLIENT_ACCOUNT_ECDSA, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
+import ConnectRequest from "@port/in/request/network/ConnectRequest";
+import { Wallet, ethers } from "ethers";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
+import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
+import NetworkService from "@service/network/NetworkService";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import SecurityViewModel from "@port/in/response/SecurityViewModel";
+import Injectable from "@core/injectable/Injectable";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
-} from '@domain/context/factory/RegulationType';
+} from "@domain/context/factory/RegulationType";
 
-SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
+SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
 const decimals = 0;
 const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
-const factor = '1';
-const name = 'TEST_SECURITY_TOKEN';
-const symbol = 'TEST';
-const isin = 'ABCDE123456Z';
+const factor = "1";
+const name = "TEST_SECURITY_TOKEN";
+const symbol = "TEST";
+const isin = "ABCDE123456Z";
 const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
@@ -267,29 +263,28 @@ const conversionRight = true;
 const redemptionRight = false;
 const putRight = true;
 const dividendRight = 1;
-const currency = '0x858368';
+const currency = "0x858368";
 const numberOfShares = 200000;
 const nominalValue = 1000;
 const nominalValueDecimals = 3;
 const regulationType = RegulationType.REG_D;
 const regulationSubType = RegulationSubType.C_506;
-const countries = 'AF,HG,BN';
-const info = 'Anything';
-const configId =
-  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const countries = "AF,HG,BN";
+const info = "Anything";
+const configId = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const configVersion = 1;
 
 const mirrorNode: MirrorNode = {
-  name: 'testmirrorNode',
-  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+  name: "testmirrorNode",
+  baseUrl: "https://testnet.mirrornode.hedera.com/api/v1/",
 };
 
 const rpcNode: JsonRpcRelay = {
-  name: 'testrpcNode',
-  baseUrl: 'http://127.0.0.1:7546/api',
+  name: "testrpcNode",
+  baseUrl: "http://127.0.0.1:7546/api",
 };
 
-describe('🧪 Equity test', () => {
+describe("🧪 Equity test", () => {
   let th: RPCTransactionAdapter;
   let ns: NetworkService;
   let mirrorNodeAdapter: MirrorNodeAdapter;
@@ -305,7 +300,7 @@ describe('🧪 Equity test', () => {
     rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
 
     rpcQueryAdapter.init();
-    ns.environment = 'testnet';
+    ns.environment = "testnet";
     ns.configuration = {
       factoryAddress: FACTORY_ADDRESS,
       resolverAddress: RESOLVER_ADDRESS,
@@ -316,15 +311,10 @@ describe('🧪 Equity test', () => {
     await th.init(true);
     await th.register(undefined, true);
 
-    const url = 'http://127.0.0.1:7546';
+    const url = "http://127.0.0.1:7546";
     const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-    th.setSignerOrProvider(
-      new Wallet(
-        CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
-        customHttpProvider,
-      ),
-    );
+    th.setSignerOrProvider(new Wallet(CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? "", customHttpProvider));
 
     await Network.connect(
       new ConnectRequest({
@@ -333,7 +323,7 @@ describe('🧪 Equity test', () => {
           privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
           evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress?.toString(),
         },
-        network: 'testnet',
+        network: "testnet",
         wallet: SupportedWallets.METAMASK,
         mirrorNode: mirrorNode,
         rpcNode: rpcNode,
@@ -377,10 +367,10 @@ describe('🧪 Equity test', () => {
 
     equity = (await Equity.create(requestST)).security;
 
-    console.log('equity: ' + JSON.stringify(equity));
+    console.log("equity: " + JSON.stringify(equity));
   }, 600_000);
 
-  it('Dividends', async () => {
+  it("Dividends", async () => {
     await Role.grantRole(
       new RoleRequest({
         securityId: equity.evmDiamondAddress!.toString(),
@@ -389,7 +379,7 @@ describe('🧪 Equity test', () => {
       }),
     );
 
-    const amount = '1';
+    const amount = "1";
     const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
     const executionTimestamp = recordTimestamp + 1000;
 
@@ -428,8 +418,8 @@ describe('🧪 Equity test', () => {
     expect(dividend.dividendId).toEqual(1);
     expect(dividend.executionDate.getTime() / 1000).toEqual(executionTimestamp);
     expect(dividend.recordDate.getTime() / 1000).toEqual(recordTimestamp);
-    expect(dividendFor.tokenBalance).toEqual('0');
-    expect(dividendFor.decimals).toEqual('0');
+    expect(dividendFor.tokenBalance).toEqual("0");
+    expect(dividendFor.decimals).toEqual("0");
     expect(allDividends.length).toEqual(1);
 
     await Role.revokeRole(
@@ -441,7 +431,7 @@ describe('🧪 Equity test', () => {
     );
   }, 60_000);
 
-  it('VotingRights', async () => {
+  it("VotingRights", async () => {
     await Role.grantRole(
       new RoleRequest({
         securityId: equity.evmDiamondAddress!.toString(),
@@ -451,7 +441,7 @@ describe('🧪 Equity test', () => {
     );
 
     const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
-    const data = '0x0123456789ABCDEF';
+    const data = "0x0123456789ABCDEF";
 
     await Equity.setVotingRights(
       new SetVotingRightsRequest({
@@ -485,8 +475,8 @@ describe('🧪 Equity test', () => {
     expect(voting.votingId).toEqual(1);
     expect(voting.recordDate.getTime() / 1000).toEqual(recordTimestamp);
     expect(voting.data.toUpperCase()).toEqual(data.toUpperCase());
-    expect(votingFor.tokenBalance).toEqual('0');
-    expect(votingFor.decimals).toEqual('0');
+    expect(votingFor.tokenBalance).toEqual("0");
+    expect(votingFor.decimals).toEqual("0");
     expect(allVotings.length).toEqual(1);
 
     await Role.revokeRole(
@@ -498,7 +488,7 @@ describe('🧪 Equity test', () => {
     );
   }, 60_000);
 
-  it('Should set and get scheduled balance adjustment correctly', async () => {
+  it("Should set and get scheduled balance adjustment correctly", async () => {
     await Role.grantRole(
       new RoleRequest({
         securityId: equity.evmDiamondAddress!.toString(),
@@ -516,18 +506,15 @@ describe('🧪 Equity test', () => {
       }),
     );
 
-    const scheduledBalanceAdjustment =
-      await Equity.getScheduledBalanceAdjustment(
-        new GetScheduledBalanceAdjustmentRequest({
-          securityId: equity.evmDiamondAddress!.toString(),
-          balanceAdjustmentId: 1,
-        }),
-      );
+    const scheduledBalanceAdjustment = await Equity.getScheduledBalanceAdjustment(
+      new GetScheduledBalanceAdjustmentRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        balanceAdjustmentId: 1,
+      }),
+    );
 
     expect(scheduledBalanceAdjustment.id).toEqual(1);
-    expect(scheduledBalanceAdjustment.executionDate.getTime() / 1000).toEqual(
-      recordTimestamp,
-    );
+    expect(scheduledBalanceAdjustment.executionDate.getTime() / 1000).toEqual(recordTimestamp);
     expect(scheduledBalanceAdjustment.factor).toEqual(factor);
     expect(scheduledBalanceAdjustment.decimals).toEqual(decimals.toString());
 
@@ -540,7 +527,7 @@ describe('🧪 Equity test', () => {
     );
   }, 60_000);
 
-  it('Should return error if try to set a scheduled balance adjust and do not have the role', async () => {
+  it("Should return error if try to set a scheduled balance adjust and do not have the role", async () => {
     let thrownError;
     try {
       await Equity.setScheduledBalanceAdjustment(
@@ -557,7 +544,7 @@ describe('🧪 Equity test', () => {
     expect(thrownError).toBeInstanceOf(Error);
   }, 600_000);
 
-  it('Should return error if try to set a scheduled balance adjust and the token is paused', async () => {
+  it("Should return error if try to set a scheduled balance adjust and the token is paused", async () => {
     await Role.grantRole(
       new RoleRequest({
         securityId: equity.evmDiamondAddress!.toString(),
@@ -594,7 +581,7 @@ describe('🧪 Equity test', () => {
     );
   }, 600_000);
 
-  it('Should return scheduled balance adjustments count correctly', async () => {
+  it("Should return scheduled balance adjustments count correctly", async () => {
     await Role.grantRole(
       new RoleRequest({
         securityId: equity.evmDiamondAddress!.toString(),
@@ -610,7 +597,7 @@ describe('🧪 Equity test', () => {
     );
 
     expect(count).toBeDefined();
-    expect(typeof count).toBe('number');
+    expect(typeof count).toBe("number");
 
     await Role.revokeRole(
       new RoleRequest({
@@ -621,7 +608,7 @@ describe('🧪 Equity test', () => {
     );
   }, 60_000);
 
-  it('Get All Scheduled Balance Adjustments', async () => {
+  it("Get All Scheduled Balance Adjustments", async () => {
     await Role.grantRole(
       new RoleRequest({
         securityId: equity.evmDiamondAddress!.toString(),
@@ -630,7 +617,7 @@ describe('🧪 Equity test', () => {
       }),
     );
 
-    const decimals = '2';
+    const decimals = "2";
     const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
     const executionTimestamp = recordTimestamp + 1000;
 
@@ -643,19 +630,16 @@ describe('🧪 Equity test', () => {
       }),
     );
 
-    const allScheduledAdjustments =
-      await Equity.getAllScheduledBalanceAdjustments(
-        new GetAllScheduledBalanceAdjustmentsRequest({
-          securityId: equity.evmDiamondAddress!.toString(),
-        }),
-      );
+    const allScheduledAdjustments = await Equity.getAllScheduledBalanceAdjustments(
+      new GetAllScheduledBalanceAdjustmentsRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+      }),
+    );
 
     expect(allScheduledAdjustments.length).toEqual(1);
     expect(allScheduledAdjustments[0].factor).toEqual(factor);
     expect(allScheduledAdjustments[0].decimals).toEqual(decimals);
-    expect(allScheduledAdjustments[0].executionDate.getTime() / 1000).toEqual(
-      executionTimestamp,
-    );
+    expect(allScheduledAdjustments[0].executionDate.getTime() / 1000).toEqual(executionTimestamp);
 
     await Role.revokeRole(
       new RoleRequest({

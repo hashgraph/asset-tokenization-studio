@@ -203,28 +203,21 @@
 
 */
 
-import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { RoutePath } from '../RoutePath';
-import { useWalletStore } from '../../store/walletStore';
-import { WalletStatus } from '../../utils/constants';
-import { useLocationStore } from '../../store/locationStore';
+import React, { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { RoutePath } from "../RoutePath";
+import { useWalletStore } from "../../store/walletStore";
+import { WalletStatus } from "../../utils/constants";
+import { useLocationStore } from "../../store/locationStore";
 
-export const PrivateRoute = ({
-  children,
-}: {
-  children: React.ReactElement;
-}) => {
+export const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
   const { connectionStatus } = useWalletStore();
   const connected = connectionStatus === WalletStatus.connected;
   const location = useLocation();
   const { locations, setLocations } = useLocationStore();
 
   useEffect(() => {
-    if (
-      location.pathname !==
-      locations[locations.length ? locations.length - 1 : 0]
-    ) {
+    if (location.pathname !== locations[locations.length ? locations.length - 1 : 0]) {
       setLocations(location.pathname);
     }
 

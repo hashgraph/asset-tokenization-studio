@@ -202,9 +202,9 @@
    limitations under the License.
 
 */
-import { useWatch } from 'react-hook-form';
-import { HStack, Stack, VStack } from '@chakra-ui/react';
-import { useTranslation } from 'react-i18next';
+import { useWatch } from "react-hook-form";
+import { HStack, Stack, VStack } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
 import {
   Text,
   InputController,
@@ -213,21 +213,15 @@ import {
   ToggleController,
   Tooltip,
   PhosphorIcon,
-} from 'io-bricks-ui';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { useParams } from 'react-router';
-import { Info } from '@phosphor-icons/react';
-import {
-  UnfreezePartialTokensRequest,
-  FreezePartialTokensRequest,
-} from '@hashgraph/asset-tokenization-sdk';
-import { useSecurityStore } from '../../../../store/securityStore';
-import { CancelButton } from '../../../../components/CancelButton';
-import { min, required } from '../../../../utils/rules';
-import {
-  useFreezeSecurity,
-  useUnfreezeSecurity,
-} from '../../../../hooks/mutations/useFreezeSecurity';
+} from "io-bricks-ui";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useParams } from "react-router";
+import { Info } from "@phosphor-icons/react";
+import { UnfreezePartialTokensRequest, FreezePartialTokensRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useSecurityStore } from "../../../../store/securityStore";
+import { CancelButton } from "../../../../components/CancelButton";
+import { min, required } from "../../../../utils/rules";
+import { useFreezeSecurity, useUnfreezeSecurity } from "../../../../hooks/mutations/useFreezeSecurity";
 
 interface MintFormValues {
   amount: number;
@@ -236,26 +230,24 @@ interface MintFormValues {
 }
 
 export const Freeze = () => {
-  const { t: tForm } = useTranslation('security', {
-    keyPrefix: 'freeze.input',
+  const { t: tForm } = useTranslation("security", {
+    keyPrefix: "freeze.input",
   });
-  const { t } = useTranslation('security', { keyPrefix: 'freeze' });
-  const { t: tGlobal } = useTranslation('globals');
+  const { t } = useTranslation("security", { keyPrefix: "freeze" });
+  const { t: tGlobal } = useTranslation("globals");
   const { control, formState, handleSubmit, reset } = useForm<MintFormValues>({
-    mode: 'onChange',
+    mode: "onChange",
   });
 
-  const { id = '' } = useParams();
+  const { id = "" } = useParams();
   const { details } = useSecurityStore();
 
-  const { mutate: freezeSecurity, isLoading: isFreezeLoading } =
-    useFreezeSecurity();
-  const { mutate: unfreezeSecurity, isLoading: isUnfreezeLoading } =
-    useUnfreezeSecurity();
+  const { mutate: freezeSecurity, isLoading: isFreezeLoading } = useFreezeSecurity();
+  const { mutate: unfreezeSecurity, isLoading: isUnfreezeLoading } = useUnfreezeSecurity();
 
   const isUnfreeze = useWatch({
     control,
-    name: 'isUnfreeze',
+    name: "isUnfreeze",
     defaultValue: false,
   });
 
@@ -303,17 +295,17 @@ export const Freeze = () => {
           onSubmit={handleSubmit(submit)}
           gap={3}
         >
-          <Text textStyle="HeadingMediumLG">{t('title')}</Text>
+          <Text textStyle="HeadingMediumLG">{t("title")}</Text>
           <Text textStyle="BodyRegularMD" mt={2}>
-            {t('subtitle')}
+            {t("subtitle")}
           </Text>
           <Text textStyle="ElementsRegularSM" mt={8}>
-            {tGlobal('mandatoryFields')}
+            {tGlobal("mandatoryFields")}
           </Text>
           <VStack>
-            <Tooltip label={tForm('isUnfreeze.tooltip')} placement="right">
+            <Tooltip label={tForm("isUnfreeze.tooltip")} placement="right">
               <HStack>
-                <Text>{tForm('isUnfreeze.label')}</Text>
+                <Text>{tForm("isUnfreeze.label")}</Text>
                 <PhosphorIcon as={Info} />
               </HStack>
             </Tooltip>
@@ -330,14 +322,8 @@ export const Freeze = () => {
               }}
               size="md"
               allowNegative={false}
-              label={tForm(
-                isUnfreeze ? 'amountUnfreeze.label' : 'amountFreeze.label',
-              )}
-              placeholder={tForm(
-                isUnfreeze
-                  ? 'amountUnfreeze.placeholder'
-                  : 'amountFreeze.placeholder',
-              )}
+              label={tForm(isUnfreeze ? "amountUnfreeze.label" : "amountFreeze.label")}
+              placeholder={tForm(isUnfreeze ? "amountUnfreeze.placeholder" : "amountFreeze.placeholder")}
               decimalScale={details?.decimals}
               fixedDecimalScale={true}
               thousandSeparator=","
@@ -350,18 +336,12 @@ export const Freeze = () => {
               control={control}
               id="destination"
               rules={{ required }}
-              label={tForm('destination.label')}
-              placeholder={tForm('destination.placeholder')}
+              label={tForm("destination.label")}
+              placeholder={tForm("destination.placeholder")}
               size="md"
             />
           </Stack>
-          <HStack
-            gap={4}
-            w="full"
-            mt={10}
-            align="end"
-            justifyContent={'flex-end'}
-          >
+          <HStack gap={4} w="full" mt={10} align="end" justifyContent={"flex-end"}>
             <CancelButton />
             <Button
               data-testid="mint-security-button"
@@ -372,7 +352,7 @@ export const Freeze = () => {
               minW="unset"
               isLoading={isFreezeLoading || isUnfreezeLoading}
             >
-              {tGlobal('submit')}
+              {tGlobal("submit")}
             </Button>
           </HStack>
         </VStack>

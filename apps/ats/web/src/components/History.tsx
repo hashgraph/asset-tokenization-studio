@@ -203,17 +203,17 @@
 
 */
 
-import { Flex, VStack } from '@chakra-ui/react';
-import type { StackProps } from '@chakra-ui/react';
-import { Breadcrumb } from 'io-bricks-ui';
-import { GobackButton, GobackButtonProps } from './GobackButton';
-import { useBreadcrumbs } from '../hooks/useBreadcrumbs';
-import type { Options } from 'use-react-router-breadcrumbs';
+import { Flex, VStack } from "@chakra-ui/react";
+import type { StackProps } from "@chakra-ui/react";
+import { Breadcrumb } from "io-bricks-ui";
+import { GobackButton, GobackButtonProps } from "./GobackButton";
+import { useBreadcrumbs } from "../hooks/useBreadcrumbs";
+import type { Options } from "use-react-router-breadcrumbs";
 
 export interface HistoryProps extends StackProps {
-  label: GobackButtonProps['label'];
-  to?: GobackButtonProps['to'];
-  excludePaths?: Options['excludePaths'];
+  label: GobackButtonProps["label"];
+  to?: GobackButtonProps["to"];
+  excludePaths?: Options["excludePaths"];
 }
 
 export const History = (props: HistoryProps) => {

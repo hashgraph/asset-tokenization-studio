@@ -203,9 +203,9 @@
 
 */
 
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
 
 export class GetFrozenPartialTokensQueryResponse implements QueryResponse {
   constructor(public readonly payload: BigDecimal) {}

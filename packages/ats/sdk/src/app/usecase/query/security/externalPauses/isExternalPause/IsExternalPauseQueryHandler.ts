@@ -203,21 +203,16 @@
 
 */
 
-import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '@core/query/QueryHandler';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import SecurityService from '@service/security/SecurityService';
-import {
-  IsExternalPauseQuery,
-  IsExternalPauseQueryResponse,
-} from './IsExternalPauseQuery';
-import ContractService from '@service/contract/ContractService';
+import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
+import { IQueryHandler } from "@core/query/QueryHandler";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import SecurityService from "@service/security/SecurityService";
+import { IsExternalPauseQuery, IsExternalPauseQueryResponse } from "./IsExternalPauseQuery";
+import ContractService from "@service/contract/ContractService";
 
 @QueryHandler(IsExternalPauseQuery)
-export class IsExternalPauseQueryHandler
-  implements IQueryHandler<IsExternalPauseQuery>
-{
+export class IsExternalPauseQueryHandler implements IQueryHandler<IsExternalPauseQuery> {
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
@@ -227,22 +222,15 @@ export class IsExternalPauseQueryHandler
     public readonly queryAdapter: RPCQueryAdapter,
   ) {}
 
-  async execute(
-    query: IsExternalPauseQuery,
-  ): Promise<IsExternalPauseQueryResponse> {
+  async execute(query: IsExternalPauseQuery): Promise<IsExternalPauseQueryResponse> {
     const { securityId, externalPauseAddress } = query;
     await this.securityService.get(securityId);
 
-    const securityEvmAddress =
-      await this.contractService.getContractEvmAddress(securityId);
+    const securityEvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
-    const externalPauseEvmAddress =
-      await this.contractService.getContractEvmAddress(externalPauseAddress);
+    const externalPauseEvmAddress = await this.contractService.getContractEvmAddress(externalPauseAddress);
 
-    const res = await this.queryAdapter.isExternalPause(
-      securityEvmAddress,
-      externalPauseEvmAddress,
-    );
+    const res = await this.queryAdapter.isExternalPause(securityEvmAddress, externalPauseEvmAddress);
     return new IsExternalPauseQueryResponse(res);
   }
 }

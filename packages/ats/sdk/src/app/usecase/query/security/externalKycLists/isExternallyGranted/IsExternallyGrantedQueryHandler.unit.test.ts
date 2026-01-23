@@ -203,23 +203,20 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import { EvmAddressPropsFixture } from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import SecurityService from '@service/security/SecurityService';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { Security } from '@domain/context/security/Security';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { IsExternallyGrantedQueryHandler } from './IsExternallyGrantedQueryHandler';
-import {
-  IsExternallyGrantedQuery,
-  IsExternallyGrantedQueryResponse,
-} from './IsExternallyGrantedQuery';
-import AccountService from '@service/account/AccountService';
-import { IsExternallyGrantedQueryFixture } from '@test/fixtures/externalKycLists/ExternalKycListsFixture';
+import { createMock } from "@golevelup/ts-jest";
+import { EvmAddressPropsFixture } from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import SecurityService from "@service/security/SecurityService";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { Security } from "@domain/context/security/Security";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { IsExternallyGrantedQueryHandler } from "./IsExternallyGrantedQueryHandler";
+import { IsExternallyGrantedQuery, IsExternallyGrantedQueryResponse } from "./IsExternallyGrantedQuery";
+import AccountService from "@service/account/AccountService";
+import { IsExternallyGrantedQueryFixture } from "@test/fixtures/externalKycLists/ExternalKycListsFixture";
 
-describe('IsExternallyGrantedQueryHandler', () => {
+describe("IsExternallyGrantedQueryHandler", () => {
   let handler: IsExternallyGrantedQueryHandler;
   let query: IsExternallyGrantedQuery;
 
@@ -229,9 +226,7 @@ describe('IsExternallyGrantedQueryHandler', () => {
   const accountServiceMock = createMock<AccountService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
-  const targetEvmAddress = new EvmAddress(
-    EvmAddressPropsFixture.create().value,
-  );
+  const targetEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
 
   const security = new Security(SecurityPropsFixture.create());
 
@@ -249,15 +244,11 @@ describe('IsExternallyGrantedQueryHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('should successfully validate if is externally granted', async () => {
+  describe("execute", () => {
+    it("should successfully validate if is externally granted", async () => {
       securityServiceMock.get.mockResolvedValueOnce(security);
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
-      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(
-        targetEvmAddress,
-      );
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
 
       queryAdapterServiceMock.isExternallyGranted.mockResolvedValue(true);
 
@@ -266,22 +257,14 @@ describe('IsExternallyGrantedQueryHandler', () => {
       expect(result).toBeInstanceOf(IsExternallyGrantedQueryResponse);
       expect(result.payload).toBe(true);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
-      expect(queryAdapterServiceMock.isExternallyGranted).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(queryAdapterServiceMock.isExternallyGranted).toHaveBeenCalledTimes(1);
 
       expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
-      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(
-        query.targetId,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(query.targetId);
 
       expect(queryAdapterServiceMock.isExternallyGranted).toHaveBeenCalledWith(
         evmAddress,

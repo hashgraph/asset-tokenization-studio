@@ -203,9 +203,9 @@
 
 */
 
-import { Query } from '@core/query/Query';
-import { QueryResponse } from '@core/query/QueryResponse';
-import { Coupon } from '@domain/context/bond/Coupon';
+import { Query } from "@core/query/Query";
+import { QueryResponse } from "@core/query/QueryResponse";
+import { Coupon } from "@domain/context/bond/Coupon";
 
 export class GetCouponQueryResponse implements QueryResponse {
   constructor(public readonly coupon: Coupon) {}

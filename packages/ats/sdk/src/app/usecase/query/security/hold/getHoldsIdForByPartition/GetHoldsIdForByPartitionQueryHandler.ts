@@ -203,23 +203,18 @@
 
 */
 
-import {
-  GetHoldsIdForByPartitionQuery,
-  GetHoldsIdForByPartitionQueryResponse,
-} from './GetHoldsIdForByPartitionQuery';
-import { QueryHandler } from '@core/decorator/QueryHandlerDecorator';
-import { IQueryHandler } from '@core/query/QueryHandler';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import AccountService from '@service/account/AccountService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ContractService from '@service/contract/ContractService';
-import { GetHoldsIdForByPartitionQueryError } from './error/GetHoldsIdForByPartitionQueryError';
+import { GetHoldsIdForByPartitionQuery, GetHoldsIdForByPartitionQueryResponse } from "./GetHoldsIdForByPartitionQuery";
+import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
+import { IQueryHandler } from "@core/query/QueryHandler";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import AccountService from "@service/account/AccountService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ContractService from "@service/contract/ContractService";
+import { GetHoldsIdForByPartitionQueryError } from "./error/GetHoldsIdForByPartitionQueryError";
 
 @QueryHandler(GetHoldsIdForByPartitionQuery)
-export class GetHoldsIdForByPartitionQueryHandler
-  implements IQueryHandler<GetHoldsIdForByPartitionQuery>
-{
+export class GetHoldsIdForByPartitionQueryHandler implements IQueryHandler<GetHoldsIdForByPartitionQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
@@ -229,16 +224,12 @@ export class GetHoldsIdForByPartitionQueryHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    query: GetHoldsIdForByPartitionQuery,
-  ): Promise<GetHoldsIdForByPartitionQueryResponse> {
+  async execute(query: GetHoldsIdForByPartitionQuery): Promise<GetHoldsIdForByPartitionQueryResponse> {
     try {
       const { securityId, partitionId, targetId, start, end } = query;
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(targetId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
       const res = await this.queryAdapter.getHoldsIdForByPartition(
         securityEvmAddress,

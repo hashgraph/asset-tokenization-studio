@@ -203,58 +203,47 @@
 
 */
 
-import {
-  registry,
-  container,
-  InjectionToken,
-  ValueProvider,
-  DependencyContainer,
-  delay,
-} from 'tsyringe';
-import { RPCTransactionAdapter } from '@port/out/rpc/RPCTransactionAdapter';
-import { Constructor } from '../Type';
-import { WalletEvents } from '@service/event/WalletEvent';
-import { CommandHandlerType } from '../command/CommandBus';
-import { QueryHandlerType } from '../query/QueryBus';
-import { NetworkProps } from '@service/network/NetworkService';
-import TransactionAdapter from '@port/out/TransactionAdapter';
-import { RuntimeError } from '../error/RuntimeError';
-import { SDK } from '@port/in/Common';
-import { HederaWalletConnectTransactionAdapter } from '@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
-import { DFNSTransactionAdapter } from '@port/out/hs/hts/custodial/DFNSTransactionAdapter';
-import { FireblocksTransactionAdapter } from '@port/out/hs/hts/custodial/FireblocksTransactionAdapter';
-import { AWSKMSTransactionAdapter } from '@port/out/hs/hts/custodial/AWSKMSTransactionAdapter';
-import { TOKENS } from './Tokens';
-import {
-  COMMAND_HANDLERS,
-  QUERY_HANDLERS,
-  TRANSACTION_HANDLER,
-} from './Handlers';
+import { registry, container, InjectionToken, ValueProvider, DependencyContainer, delay } from "tsyringe";
+import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
+import { Constructor } from "../Type";
+import { WalletEvents } from "@service/event/WalletEvent";
+import { CommandHandlerType } from "../command/CommandBus";
+import { QueryHandlerType } from "../query/QueryBus";
+import { NetworkProps } from "@service/network/NetworkService";
+import TransactionAdapter from "@port/out/TransactionAdapter";
+import { RuntimeError } from "../error/RuntimeError";
+import { SDK } from "@port/in/Common";
+import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
+import { DFNSTransactionAdapter } from "@port/out/hs/hts/custodial/DFNSTransactionAdapter";
+import { FireblocksTransactionAdapter } from "@port/out/hs/hts/custodial/FireblocksTransactionAdapter";
+import { AWSKMSTransactionAdapter } from "@port/out/hs/hts/custodial/AWSKMSTransactionAdapter";
+import { TOKENS } from "./Tokens";
+import { COMMAND_HANDLERS, QUERY_HANDLERS, TRANSACTION_HANDLER } from "./Handlers";
 
 const defaultNetworkProps: NetworkProps = {
-  environment: 'testnet',
+  environment: "testnet",
   mirrorNode: {
-    name: 'default',
-    baseUrl: 'https://testnet.mirrornode.hedera.com',
+    name: "default",
+    baseUrl: "https://testnet.mirrornode.hedera.com",
   },
   rpcNode: {
-    name: 'default',
-    baseUrl: 'https://testnet.hashio.io/api',
+    name: "default",
+    baseUrl: "https://testnet.hashio.io/api",
   },
 };
 
 // Network default props
-container.register<NetworkProps>('NetworkProps', {
+container.register<NetworkProps>("NetworkProps", {
   useValue: defaultNetworkProps,
 });
 
 // Wallet events
-container.register<typeof WalletEvents>('WalletEvents', {
+container.register<typeof WalletEvents>("WalletEvents", {
   useValue: WalletEvents,
 });
 
 // SDK Logs
-container.register<typeof SDK>('SDK', {
+container.register<typeof SDK>("SDK", {
   useValue: SDK,
 });
 
@@ -280,22 +269,15 @@ export default class Injectable {
     return container.resolveAll<CommandHandlerType>(TOKENS.COMMAND_HANDLER);
   }
 
-  static register<T = unknown>(
-    token: InjectionToken<T>,
-    value: ValueProvider<T>,
-  ): DependencyContainer {
+  static register<T = unknown>(token: InjectionToken<T>, value: ValueProvider<T>): DependencyContainer {
     return container.register(token, value);
   }
 
-  static registerCommandHandler<T = unknown>(
-    cls: ValueProvider<T>,
-  ): DependencyContainer {
+  static registerCommandHandler<T = unknown>(cls: ValueProvider<T>): DependencyContainer {
     return container.register(TOKENS.COMMAND_HANDLER, cls);
   }
 
-  static registerTransactionHandler<T extends TransactionAdapter>(
-    cls: T,
-  ): boolean {
+  static registerTransactionHandler<T extends TransactionAdapter>(cls: T): boolean {
     if (this.currentTransactionHandler) this.currentTransactionHandler.stop();
     this.currentTransactionHandler = cls;
     return true;
@@ -303,7 +285,7 @@ export default class Injectable {
 
   static resolveTransactionHandler(): TransactionAdapter {
     if (!this.currentTransactionHandler) {
-      throw new RuntimeError('No Transaction Handler registered!');
+      throw new RuntimeError("No Transaction Handler registered!");
     } else {
       return this.currentTransactionHandler;
     }

@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../../FormatValidation';
-import { InvalidValue } from '../../error/InvalidValue';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../../FormatValidation";
+import { InvalidValue } from "../../error/InvalidValue";
 
 export default class UpdateExternalPausesRequest extends ValidatedRequest<UpdateExternalPausesRequest> {
   securityId: string;
@@ -224,17 +224,10 @@ export default class UpdateExternalPausesRequest extends ValidatedRequest<Update
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       externalPausesAddresses: (vals) =>
-        FormatValidation.checkHederaIdOrEvmAddressArray(
-          vals,
-          'externalPausesAddresses',
-        ),
+        FormatValidation.checkHederaIdOrEvmAddressArray(vals, "externalPausesAddresses"),
       actives: (vals) =>
         vals.length !== externalPausesAddresses.length
-          ? [
-              new InvalidValue(
-                `The list of externalPausesAddresses and actives must have equal length.`,
-              ),
-            ]
+          ? [new InvalidValue(`The list of externalPausesAddresses and actives must have equal length.`)]
           : [],
     });
 

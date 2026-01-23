@@ -203,21 +203,21 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import SecurityService from '@service/security/SecurityService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import EvmAddress from '@domain/context/contract/EvmAddress';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import SecurityService from "@service/security/SecurityService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import EvmAddress from "@domain/context/contract/EvmAddress";
 import {
   ProtectedClearingCreateHoldByPartitionCommand,
   ProtectedClearingCreateHoldByPartitionCommandResponse,
-} from './ProtectedClearingCreateHoldByPartitionCommand';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import { ProtectedClearingCreateHoldByPartitionCommandError } from './error/ProtectedClearingCreateHoldByPartitionCommandError';
+} from "./ProtectedClearingCreateHoldByPartitionCommand";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { ProtectedClearingCreateHoldByPartitionCommandError } from "./error/ProtectedClearingCreateHoldByPartitionCommandError";
 
 @CommandHandler(ProtectedClearingCreateHoldByPartitionCommand)
 export class ProtectedClearingCreateHoldByPartitionCommandHandler
@@ -257,16 +257,12 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
       const account = this.accountService.getCurrentAccount();
       const security = await this.securityService.get(securityId);
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
-      const sourceEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(sourceId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const sourceEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(sourceId);
 
-      const escrowEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddress(escrowId);
+      const escrowEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(escrowId);
 
-      const targetEvmAddress: EvmAddress =
-        await this.accountService.getAccountEvmAddressOrNull(targetId);
+      const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddressOrNull(targetId);
       const amountBd = BigDecimal.fromString(amount, security.decimals);
 
       await this.validationService.checkPause(securityId);
@@ -275,21 +271,13 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
 
       await this.validationService.checkProtectedPartitions(security);
 
-      await this.validationService.checkProtectedPartitionRole(
-        partitionId,
-        account.id.toString(),
-        securityId,
-      );
+      await this.validationService.checkProtectedPartitionRole(partitionId, account.id.toString(), securityId);
 
       await this.validationService.checkDecimals(security, amount);
 
       await this.validationService.checkBalance(securityId, sourceId, amountBd);
 
-      await this.validationService.checkValidNounce(
-        securityId,
-        sourceId,
-        nonce,
-      );
+      await this.validationService.checkValidNounce(securityId, sourceId, nonce);
 
       const res = await handler.protectedClearingCreateHoldByPartition(
         securityEvmAddress,
@@ -315,15 +303,10 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
       });
 
       return Promise.resolve(
-        new ProtectedClearingCreateHoldByPartitionCommandResponse(
-          parseInt(clearingId, 16),
-          res.id!,
-        ),
+        new ProtectedClearingCreateHoldByPartitionCommandResponse(parseInt(clearingId, 16), res.id!),
       );
     } catch (error) {
-      throw new ProtectedClearingCreateHoldByPartitionCommandError(
-        error as Error,
-      );
+      throw new ProtectedClearingCreateHoldByPartitionCommandError(error as Error);
     }
   }
 }

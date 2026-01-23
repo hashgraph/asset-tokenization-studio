@@ -203,24 +203,16 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '@port/in/request/FormatValidation';
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class FreezePartialTokensRequest extends ValidatedRequest<FreezePartialTokensRequest> {
   securityId: string;
   amount: string;
   targetId: string;
 
-  constructor({
-    securityId,
-    amount,
-    targetId,
-  }: {
-    securityId: string;
-    amount: string;
-    targetId: string;
-  }) {
+  constructor({ securityId, amount, targetId }: { securityId: string; amount: string; targetId: string }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       amount: FormatValidation.checkAmount(),

@@ -203,8 +203,8 @@
 
 */
 
-import { StackProps, VStack } from '@chakra-ui/react';
-import { PanelTitle } from 'io-bricks-ui';
+import { StackProps, VStack } from "@chakra-ui/react";
+import { PanelTitle } from "io-bricks-ui";
 
 export const Panel = ({ children, title, ...rest }: StackProps) => (
   <VStack layerStyle="container" {...rest}>

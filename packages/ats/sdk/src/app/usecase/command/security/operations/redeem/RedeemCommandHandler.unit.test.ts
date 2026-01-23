@@ -203,32 +203,28 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
-import {
-  ErrorMsgFixture,
-  EvmAddressPropsFixture,
-  TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import ValidationService from '@service/validation/ValidationService';
-import { ErrorCode } from '@core/error/BaseError';
-import SecurityService from '@service/security/SecurityService';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { Security } from '@domain/context/security/Security';
-import Account from '@domain/context/account/Account';
-import { AccountPropsFixture } from '@test/fixtures/shared/DataFixture';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { RedeemCommandFixture } from '@test/fixtures/redeem/RedeemFixture';
-import { _PARTITION_ID_1 } from '@core/Constants';
-import { RedeemCommandHandler } from './RedeemCommandHandler';
-import { RedeemCommand, RedeemCommandResponse } from './RedeemCommand';
-import { RedeemCommandError } from './error/RedeemCommandError';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
+import { ErrorMsgFixture, EvmAddressPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import ValidationService from "@service/validation/ValidationService";
+import { ErrorCode } from "@core/error/BaseError";
+import SecurityService from "@service/security/SecurityService";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { Security } from "@domain/context/security/Security";
+import Account from "@domain/context/account/Account";
+import { AccountPropsFixture } from "@test/fixtures/shared/DataFixture";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { RedeemCommandFixture } from "@test/fixtures/redeem/RedeemFixture";
+import { _PARTITION_ID_1 } from "@core/Constants";
+import { RedeemCommandHandler } from "./RedeemCommandHandler";
+import { RedeemCommand, RedeemCommandResponse } from "./RedeemCommand";
+import { RedeemCommandError } from "./error/RedeemCommandError";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-describe('RedeemCommandHandler', () => {
+describe("RedeemCommandHandler", () => {
   let handler: RedeemCommandHandler;
   let command: RedeemCommand;
 
@@ -253,14 +249,7 @@ describe('RedeemCommandHandler', () => {
       contractServiceMock,
     );
     const commandRaw = RedeemCommandFixture.create();
-    const {
-      deadline,
-      nounce,
-      signature,
-      partitionId,
-      sourceId,
-      ...commandFiltered
-    } = commandRaw;
+    const { deadline, nounce, signature, partitionId, sourceId, ...commandFiltered } = commandRaw;
     command = commandFiltered;
   });
 
@@ -268,9 +257,9 @@ describe('RedeemCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws RedeemCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws RedeemCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
@@ -280,15 +269,13 @@ describe('RedeemCommandHandler', () => {
         await expect(resultPromise).rejects.toBeInstanceOf(RedeemCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(
-            `An error occurred while redeeming tokens: ${errorMsg}`,
-          ),
+          message: expect.stringContaining(`An error occurred while redeeming tokens: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully redeem tokens', async () => {
+    describe("success cases", () => {
+      it("should successfully redeem tokens", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
         securityServiceMock.get.mockResolvedValue(security);
@@ -303,16 +290,10 @@ describe('RedeemCommandHandler', () => {
         expect(result.payload).toBe(true);
         expect(result.transactionId).toBe(transactionId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-          command.securityId,
-        );
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(command.securityId);
 
-        expect(
-          transactionServiceMock.getHandler().redeem,
-        ).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().redeem).toHaveBeenCalledTimes(1);
 
         expect(validationServiceMock.checkCanRedeem).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkCanRedeem).toHaveBeenCalledWith(

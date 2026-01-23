@@ -203,9 +203,9 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
-import { OptionalField } from '@core/decorator/OptionalDecorator';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
+import { OptionalField } from "@core/decorator/OptionalDecorator";
 
 export default class AddProceedRecipientRequest extends ValidatedRequest<AddProceedRecipientRequest> {
   securityId: string;
@@ -226,7 +226,7 @@ export default class AddProceedRecipientRequest extends ValidatedRequest<AddProc
       proceedRecipientId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       data: (val) => {
         const validation = FormatValidation.checkBytesFormat();
-        if (val == '') return;
+        if (val == "") return;
         const result = validation(val);
         if (result) return result;
       },

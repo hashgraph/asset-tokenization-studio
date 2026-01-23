@@ -203,8 +203,8 @@
 
 */
 
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
 
 export interface AccountData {
   address: string;
@@ -220,34 +220,25 @@ interface AccountArrayStore {
   holderSecurities: AccountStore;
   addSecurityToAdmin: (key: string, account: AccountData) => void;
   addSecurityToHolder: (key: string, account: AccountData) => void;
-  removeSecurityFromHolder: (
-    walletAddress: string,
-    securityAddress: string,
-  ) => void;
+  removeSecurityFromHolder: (walletAddress: string, securityAddress: string) => void;
   toggleAdminFavorite: (walletAddress: string, securityAddress: string) => void;
-  toggleHolderFavorite: (
-    walletAddress: string,
-    securityAddress: string,
-  ) => void;
+  toggleHolderFavorite: (walletAddress: string, securityAddress: string) => void;
   isResetted: boolean;
   reset: () => void;
 }
 
-const ACCOUNT_STORE_KEY = 'ACCOUNT_STORE_KEY';
+const ACCOUNT_STORE_KEY = "ACCOUNT_STORE_KEY";
 
 const toggleFavorite = (
   state: AccountArrayStore,
-  key: 'adminSecurities' | 'holderSecurities',
+  key: "adminSecurities" | "holderSecurities",
   walletAddress: string,
   securityAddress: string,
 ) => {
   const securities = state[key];
 
-  const securityIndex = securities[walletAddress].findIndex(
-    (security) => security.address === securityAddress,
-  );
-  securities[walletAddress][securityIndex].isFavorite =
-    !securities[walletAddress][securityIndex].isFavorite;
+  const securityIndex = securities[walletAddress].findIndex((security) => security.address === securityAddress);
+  securities[walletAddress][securityIndex].isFavorite = !securities[walletAddress][securityIndex].isFavorite;
 
   return {
     ...state,
@@ -292,23 +283,9 @@ export const useAccountStore = create<AccountArrayStore>()(
           };
         }),
       toggleAdminFavorite: (walletAddress, securityAddress) =>
-        set((state) =>
-          toggleFavorite(
-            state,
-            'adminSecurities',
-            walletAddress,
-            securityAddress,
-          ),
-        ),
+        set((state) => toggleFavorite(state, "adminSecurities", walletAddress, securityAddress)),
       toggleHolderFavorite: (walletAddress, securityAddress) =>
-        set((state) =>
-          toggleFavorite(
-            state,
-            'holderSecurities',
-            walletAddress,
-            securityAddress,
-          ),
-        ),
+        set((state) => toggleFavorite(state, "holderSecurities", walletAddress, securityAddress)),
       isResetted: false,
       reset: () =>
         set((state) => ({

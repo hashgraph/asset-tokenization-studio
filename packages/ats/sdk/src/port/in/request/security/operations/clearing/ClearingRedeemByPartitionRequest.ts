@@ -203,10 +203,10 @@
 
 */
 
-import { SecurityDate } from '@domain/context/shared/SecurityDate';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { SecurityDate } from "@domain/context/shared/SecurityDate";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '@port/in/request/FormatValidation';
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class ClearingRedeemByPartitionRequest extends ValidatedRequest<ClearingRedeemByPartitionRequest> {
   securityId: string;
@@ -230,10 +230,7 @@ export default class ClearingRedeemByPartitionRequest extends ValidatedRequest<C
       partitionId: FormatValidation.checkBytes32Format(),
       amount: FormatValidation.checkAmount(),
       expirationDate: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          Math.ceil(new Date().getTime() / 1000),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), Math.ceil(new Date().getTime() / 1000));
       },
     });
 

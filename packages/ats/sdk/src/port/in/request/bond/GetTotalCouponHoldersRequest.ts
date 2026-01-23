@@ -203,20 +203,14 @@
 
 */
 
-import FormatValidation from '@port/in/request/FormatValidation';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import FormatValidation from "@port/in/request/FormatValidation";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
 export default class GetTotalCouponHoldersRequest extends ValidatedRequest<GetTotalCouponHoldersRequest> {
   securityId: string;
   couponId: number;
 
-  constructor({
-    securityId,
-    couponId,
-  }: {
-    securityId: string;
-    couponId: number;
-  }) {
+  constructor({ securityId, couponId }: { securityId: string; couponId: number }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       couponId: FormatValidation.checkNumber({ min: 0 }),

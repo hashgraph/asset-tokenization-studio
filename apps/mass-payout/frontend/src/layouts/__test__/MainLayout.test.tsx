@@ -202,11 +202,11 @@
  *    limitations under the License.
  */
 
-import { render } from '@/test-utils';
-import { MainLayout } from '../MainLayout';
+import { render } from "@/test-utils";
+import { MainLayout } from "../MainLayout";
 
-describe('<MainLayout />', () => {
-  test('should render correctly', async () => {
+describe("<MainLayout />", () => {
+  test("should render correctly", async () => {
     const component = render(<MainLayout />);
 
     expect(component.asFragment()).toMatchSnapshot();

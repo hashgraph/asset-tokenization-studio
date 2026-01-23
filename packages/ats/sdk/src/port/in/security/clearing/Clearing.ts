@@ -203,7 +203,7 @@
 
 */
 
-import { LogError } from '@core/decorator/LogErrorDecorator';
+import { LogError } from "@core/decorator/LogErrorDecorator";
 import {
   ActivateClearingRequest,
   ApproveClearingOperationByPartitionRequest,
@@ -230,48 +230,40 @@ import {
   ProtectedClearingRedeemByPartitionRequest,
   ProtectedClearingTransferByPartitionRequest,
   ReclaimClearingOperationByPartitionRequest,
-} from '../../request';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import {
-  ClearingCreateHoldViewModel,
-  ClearingRedeemViewModel,
-  ClearingTransferViewModel,
-} from '../../response';
-import { ActivateClearingCommand } from '@command/security/operations/clearing/activateClearing/ActivateClearingCommand';
-import { DeactivateClearingCommand } from '@command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand';
-import { ClearingTransferByPartitionCommand } from '@command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommand';
-import { ClearingTransferFromByPartitionCommand } from '@command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommand';
-import { ApproveClearingOperationByPartitionCommand } from '@command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand';
-import { CancelClearingOperationByPartitionCommand } from '@command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommand';
-import { ReclaimClearingOperationByPartitionCommand } from '@command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommand';
-import { ClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand';
-import { ClearingRedeemFromByPartitionCommand } from '@command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand';
-import { ProtectedClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand';
-import { ClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommand';
-import { ClearingCreateHoldFromByPartitionCommand } from '@command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand';
-import { ProtectedClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand';
-import { GetClearedAmountForQuery } from '@query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery';
-import { GetClearedAmountForByPartitionQuery } from '@query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery';
-import { GetClearingCountForByPartitionQuery } from '@query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery';
-import { GetClearingCreateHoldForByPartitionQuery } from '@query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery';
-import { ONE_THOUSAND } from '@domain/context/shared/SecurityDate';
-import { GetClearingRedeemForByPartitionQuery } from '@query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery';
-import { GetClearingTransferForByPartitionQuery } from '@query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery';
-import { GetClearingsIdForByPartitionQuery } from '@query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery';
-import { IsClearingActivatedQuery } from '@query/security/clearing/isClearingActivated/IsClearingActivatedQuery';
-import { OperatorClearingCreateHoldByPartitionCommand } from '@command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand';
-import { OperatorClearingRedeemByPartitionCommand } from '@command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand';
-import { OperatorClearingTransferByPartitionCommand } from '@command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand';
-import { ProtectedClearingTransferByPartitionCommand } from '@command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand';
-import { BaseSecurityInPort } from '../BaseSecurityInPort';
+} from "../../request";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { ClearingCreateHoldViewModel, ClearingRedeemViewModel, ClearingTransferViewModel } from "../../response";
+import { ActivateClearingCommand } from "@command/security/operations/clearing/activateClearing/ActivateClearingCommand";
+import { DeactivateClearingCommand } from "@command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand";
+import { ClearingTransferByPartitionCommand } from "@command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommand";
+import { ClearingTransferFromByPartitionCommand } from "@command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommand";
+import { ApproveClearingOperationByPartitionCommand } from "@command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand";
+import { CancelClearingOperationByPartitionCommand } from "@command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommand";
+import { ReclaimClearingOperationByPartitionCommand } from "@command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommand";
+import { ClearingRedeemByPartitionCommand } from "@command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand";
+import { ClearingRedeemFromByPartitionCommand } from "@command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand";
+import { ProtectedClearingRedeemByPartitionCommand } from "@command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand";
+import { ClearingCreateHoldByPartitionCommand } from "@command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommand";
+import { ClearingCreateHoldFromByPartitionCommand } from "@command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand";
+import { ProtectedClearingCreateHoldByPartitionCommand } from "@command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand";
+import { GetClearedAmountForQuery } from "@query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery";
+import { GetClearedAmountForByPartitionQuery } from "@query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery";
+import { GetClearingCountForByPartitionQuery } from "@query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery";
+import { GetClearingCreateHoldForByPartitionQuery } from "@query/security/clearing/getClearingCreateHoldForByPartition/GetClearingCreateHoldForByPartitionQuery";
+import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
+import { GetClearingRedeemForByPartitionQuery } from "@query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery";
+import { GetClearingTransferForByPartitionQuery } from "@query/security/clearing/getClearingTransferForByPartition/GetClearingTransferForByPartitionQuery";
+import { GetClearingsIdForByPartitionQuery } from "@query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery";
+import { IsClearingActivatedQuery } from "@query/security/clearing/isClearingActivated/IsClearingActivatedQuery";
+import { OperatorClearingCreateHoldByPartitionCommand } from "@command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand";
+import { OperatorClearingRedeemByPartitionCommand } from "@command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand";
+import { OperatorClearingTransferByPartitionCommand } from "@command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand";
+import { ProtectedClearingTransferByPartitionCommand } from "@command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand";
+import { BaseSecurityInPort } from "../BaseSecurityInPort";
 
 export interface ISecurityInPortClearing {
-  activateClearing(
-    request: ActivateClearingRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  deactivateClearing(
-    request: DeactivateClearingRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
+  activateClearing(request: ActivateClearingRequest): Promise<{ payload: boolean; transactionId: string }>;
+  deactivateClearing(request: DeactivateClearingRequest): Promise<{ payload: boolean; transactionId: string }>;
   clearingTransferByPartition(
     request: ClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
@@ -309,24 +301,16 @@ export interface ISecurityInPortClearing {
     request: ProtectedClearingCreateHoldByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
   getClearedAmountFor(request: GetClearedAmountForRequest): Promise<number>;
-  getClearedAmountForByPartition(
-    request: GetClearedAmountForByPartitionRequest,
-  ): Promise<number>;
-  getClearingCountForByPartition(
-    request: GetClearingCountForByPartitionRequest,
-  ): Promise<number>;
+  getClearedAmountForByPartition(request: GetClearedAmountForByPartitionRequest): Promise<number>;
+  getClearingCountForByPartition(request: GetClearingCountForByPartitionRequest): Promise<number>;
   getClearingCreateHoldForByPartition(
     request: GetClearingCreateHoldForByPartitionRequest,
   ): Promise<ClearingCreateHoldViewModel>;
-  getClearingRedeemForByPartition(
-    request: GetClearingRedeemForByPartitionRequest,
-  ): Promise<ClearingRedeemViewModel>;
+  getClearingRedeemForByPartition(request: GetClearingRedeemForByPartitionRequest): Promise<ClearingRedeemViewModel>;
   getClearingTransferForByPartition(
     request: GetClearingTransferForByPartitionRequest,
   ): Promise<ClearingTransferViewModel>;
-  getClearingsIdForByPartition(
-    request: GetClearingsIdForByPartitionRequest,
-  ): Promise<number[]>;
+  getClearingsIdForByPartition(request: GetClearingsIdForByPartitionRequest): Promise<number[]>;
   isClearingActivated(request: IsClearingActivatedRequest): Promise<boolean>;
   operatorClearingCreateHoldByPartition(
     request: OperatorClearingCreateHoldByPartitionRequest,
@@ -339,40 +323,26 @@ export interface ISecurityInPortClearing {
   ): Promise<{ payload: number; transactionId: string }>;
 }
 
-export class SecurityInPortClearing
-  extends BaseSecurityInPort
-  implements ISecurityInPortClearing
-{
+export class SecurityInPortClearing extends BaseSecurityInPort implements ISecurityInPortClearing {
   @LogError
-  async activateClearing(
-    request: ActivateClearingRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    ValidatedRequest.handleValidation('ActivateClearingRequest', request);
+  async activateClearing(request: ActivateClearingRequest): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation("ActivateClearingRequest", request);
 
-    return await this.commandBus.execute(
-      new ActivateClearingCommand(request.securityId),
-    );
+    return await this.commandBus.execute(new ActivateClearingCommand(request.securityId));
   }
 
   @LogError
-  async deactivateClearing(
-    request: DeactivateClearingRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    ValidatedRequest.handleValidation('DeactivateClearingRequest', request);
+  async deactivateClearing(request: DeactivateClearingRequest): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation("DeactivateClearingRequest", request);
 
-    return await this.commandBus.execute(
-      new DeactivateClearingCommand(request.securityId),
-    );
+    return await this.commandBus.execute(new DeactivateClearingCommand(request.securityId));
   }
 
   @LogError
   async clearingTransferByPartition(
     request: ClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ClearingTransferByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ClearingTransferByPartitionRequest", request);
     return await this.commandBus.execute(
       new ClearingTransferByPartitionCommand(
         request.securityId,
@@ -388,10 +358,7 @@ export class SecurityInPortClearing
   async clearingTransferFromByPartition(
     request: ClearingTransferFromByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ClearingTransferFromByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ClearingTransferFromByPartitionRequest", request);
     return await this.commandBus.execute(
       new ClearingTransferFromByPartitionCommand(
         request.securityId,
@@ -408,10 +375,7 @@ export class SecurityInPortClearing
   async approveClearingOperationByPartition(
     request: ApproveClearingOperationByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ApproveClearingOperationByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ApproveClearingOperationByPartitionRequest", request);
     return await this.commandBus.execute(
       new ApproveClearingOperationByPartitionCommand(
         request.securityId,
@@ -427,10 +391,7 @@ export class SecurityInPortClearing
   async cancelClearingOperationByPartition(
     request: CancelClearingOperationByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'CancelClearingOperationByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("CancelClearingOperationByPartitionRequest", request);
     return await this.commandBus.execute(
       new CancelClearingOperationByPartitionCommand(
         request.securityId,
@@ -446,10 +407,7 @@ export class SecurityInPortClearing
   async reclaimClearingOperationByPartition(
     request: ReclaimClearingOperationByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ReclaimClearingOperationByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ReclaimClearingOperationByPartitionRequest", request);
     return await this.commandBus.execute(
       new ReclaimClearingOperationByPartitionCommand(
         request.securityId,
@@ -465,10 +423,7 @@ export class SecurityInPortClearing
   async clearingRedeemByPartition(
     request: ClearingRedeemByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ClearingRedeemByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ClearingRedeemByPartitionRequest", request);
     return await this.commandBus.execute(
       new ClearingRedeemByPartitionCommand(
         request.securityId,
@@ -483,10 +438,7 @@ export class SecurityInPortClearing
   async clearingRedeemFromByPartition(
     request: ClearingRedeemFromByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ClearingRedeemFromByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ClearingRedeemFromByPartitionRequest", request);
     return await this.commandBus.execute(
       new ClearingRedeemFromByPartitionCommand(
         request.securityId,
@@ -502,10 +454,7 @@ export class SecurityInPortClearing
   async protectedClearingRedeemByPartition(
     request: ProtectedClearingRedeemByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ProtectedClearingRedeemByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ProtectedClearingRedeemByPartitionRequest", request);
     return await this.commandBus.execute(
       new ProtectedClearingRedeemByPartitionCommand(
         request.securityId,
@@ -524,10 +473,7 @@ export class SecurityInPortClearing
   async clearingCreateHoldByPartition(
     request: ClearingCreateHoldByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ClearingCreateHoldByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ClearingCreateHoldByPartitionRequest", request);
     return await this.commandBus.execute(
       new ClearingCreateHoldByPartitionCommand(
         request.securityId,
@@ -545,10 +491,7 @@ export class SecurityInPortClearing
   async clearingCreateHoldFromByPartition(
     request: ClearingCreateHoldFromByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ClearingCreateHoldFromByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ClearingCreateHoldFromByPartitionRequest", request);
     return await this.commandBus.execute(
       new ClearingCreateHoldFromByPartitionCommand(
         request.securityId,
@@ -567,10 +510,7 @@ export class SecurityInPortClearing
   async protectedClearingCreateHoldByPartition(
     request: ProtectedClearingCreateHoldByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ProtectedClearingCreateHoldByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ProtectedClearingCreateHoldByPartitionRequest", request);
     return await this.commandBus.execute(
       new ProtectedClearingCreateHoldByPartitionCommand(
         request.securityId,
@@ -589,47 +529,24 @@ export class SecurityInPortClearing
   }
 
   @LogError
-  async getClearedAmountFor(
-    request: GetClearedAmountForRequest,
-  ): Promise<number> {
-    ValidatedRequest.handleValidation(
-      'GetClearedAmountForByPartitionRequest',
-      request,
-    );
+  async getClearedAmountFor(request: GetClearedAmountForRequest): Promise<number> {
+    ValidatedRequest.handleValidation("GetClearedAmountForByPartitionRequest", request);
+    return (await this.queryBus.execute(new GetClearedAmountForQuery(request.securityId, request.targetId))).payload;
+  }
+
+  @LogError
+  async getClearedAmountForByPartition(request: GetClearedAmountForByPartitionRequest): Promise<number> {
+    ValidatedRequest.handleValidation("GetClearedAmountForByPartitionRequest", request);
     return (
       await this.queryBus.execute(
-        new GetClearedAmountForQuery(request.securityId, request.targetId),
+        new GetClearedAmountForByPartitionQuery(request.securityId, request.partitionId, request.targetId),
       )
     ).payload;
   }
 
   @LogError
-  async getClearedAmountForByPartition(
-    request: GetClearedAmountForByPartitionRequest,
-  ): Promise<number> {
-    ValidatedRequest.handleValidation(
-      'GetClearedAmountForByPartitionRequest',
-      request,
-    );
-    return (
-      await this.queryBus.execute(
-        new GetClearedAmountForByPartitionQuery(
-          request.securityId,
-          request.partitionId,
-          request.targetId,
-        ),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getClearingCountForByPartition(
-    request: GetClearingCountForByPartitionRequest,
-  ): Promise<number> {
-    ValidatedRequest.handleValidation(
-      'GetClearingCountForByPartitionRequest',
-      request,
-    );
+  async getClearingCountForByPartition(request: GetClearingCountForByPartitionRequest): Promise<number> {
+    ValidatedRequest.handleValidation("GetClearingCountForByPartitionRequest", request);
     return (
       await this.queryBus.execute(
         new GetClearingCountForByPartitionQuery(
@@ -646,10 +563,7 @@ export class SecurityInPortClearing
   async getClearingCreateHoldForByPartition(
     request: GetClearingCreateHoldForByPartitionRequest,
   ): Promise<ClearingCreateHoldViewModel> {
-    ValidatedRequest.handleValidation(
-      'GetClearingCreateHoldForByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("GetClearingCreateHoldForByPartitionRequest", request);
 
     const res = (
       await this.queryBus.execute(
@@ -681,10 +595,7 @@ export class SecurityInPortClearing
   async getClearingRedeemForByPartition(
     request: GetClearingRedeemForByPartitionRequest,
   ): Promise<ClearingRedeemViewModel> {
-    ValidatedRequest.handleValidation(
-      'GetClearingRedeemForByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("GetClearingRedeemForByPartitionRequest", request);
 
     const res = (
       await this.queryBus.execute(
@@ -712,10 +623,7 @@ export class SecurityInPortClearing
   async getClearingTransferForByPartition(
     request: GetClearingTransferForByPartitionRequest,
   ): Promise<ClearingTransferViewModel> {
-    ValidatedRequest.handleValidation(
-      'GetClearingTransferForByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("GetClearingTransferForByPartitionRequest", request);
     const res = (
       await this.queryBus.execute(
         new GetClearingTransferForByPartitionQuery(
@@ -740,13 +648,8 @@ export class SecurityInPortClearing
   }
 
   @LogError
-  async getClearingsIdForByPartition(
-    request: GetClearingsIdForByPartitionRequest,
-  ): Promise<number[]> {
-    ValidatedRequest.handleValidation(
-      'GetClearingsIdForByPartitionRequest',
-      request,
-    );
+  async getClearingsIdForByPartition(request: GetClearingsIdForByPartitionRequest): Promise<number[]> {
+    ValidatedRequest.handleValidation("GetClearingsIdForByPartitionRequest", request);
     return (
       await this.queryBus.execute(
         new GetClearingsIdForByPartitionQuery(
@@ -762,25 +665,16 @@ export class SecurityInPortClearing
   }
 
   @LogError
-  async isClearingActivated(
-    request: IsClearingActivatedRequest,
-  ): Promise<boolean> {
-    ValidatedRequest.handleValidation('IsClearingActivatedRequest', request);
-    return (
-      await this.queryBus.execute(
-        new IsClearingActivatedQuery(request.securityId),
-      )
-    ).payload;
+  async isClearingActivated(request: IsClearingActivatedRequest): Promise<boolean> {
+    ValidatedRequest.handleValidation("IsClearingActivatedRequest", request);
+    return (await this.queryBus.execute(new IsClearingActivatedQuery(request.securityId))).payload;
   }
 
   @LogError
   async operatorClearingCreateHoldByPartition(
     request: OperatorClearingCreateHoldByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'OperatorClearingCreateHoldByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("OperatorClearingCreateHoldByPartitionRequest", request);
     return await this.commandBus.execute(
       new OperatorClearingCreateHoldByPartitionCommand(
         request.securityId,
@@ -799,10 +693,7 @@ export class SecurityInPortClearing
   async operatorClearingRedeemByPartition(
     request: OperatorClearingRedeemByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'OperatorClearingRedeemByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("OperatorClearingRedeemByPartitionRequest", request);
     return await this.commandBus.execute(
       new OperatorClearingRedeemByPartitionCommand(
         request.securityId,
@@ -818,10 +709,7 @@ export class SecurityInPortClearing
   async operatorClearingTransferByPartition(
     request: OperatorClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'OperatorClearingTransferByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("OperatorClearingTransferByPartitionRequest", request);
     return await this.commandBus.execute(
       new OperatorClearingTransferByPartitionCommand(
         request.securityId,
@@ -837,10 +725,7 @@ export class SecurityInPortClearing
   async protectedClearingTransferByPartition(
     request: ProtectedClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
-    ValidatedRequest.handleValidation(
-      'ProtectedClearingTransferByPartitionRequest',
-      request,
-    );
+    ValidatedRequest.handleValidation("ProtectedClearingTransferByPartitionRequest", request);
     return await this.commandBus.execute(
       new ProtectedClearingTransferByPartitionCommand(
         request.securityId,

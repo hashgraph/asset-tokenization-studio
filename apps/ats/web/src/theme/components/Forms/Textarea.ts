@@ -203,39 +203,39 @@
 
 */
 
-import { textareaPartsList, TextareaThemeConfiguration } from 'io-bricks-ui';
+import { textareaPartsList, TextareaThemeConfiguration } from "io-bricks-ui";
 
 export const Textarea: TextareaThemeConfiguration = {
   parts: textareaPartsList,
   baseStyle: () => ({
     labelContainer: {
-      width: '100%',
-      position: 'relative',
+      width: "100%",
+      position: "relative",
     },
     label: {
-      apply: 'textStyles.BodyRegularSM',
-      color: 'neutral.200',
+      apply: "textStyles.BodyRegularSM",
+      color: "neutral.200",
       mb: 2,
     },
     container: {
-      bg: 'neutral.white',
-      apply: 'textStyles.ElementsRegularSM',
-      color: 'neutral.800',
+      bg: "neutral.white",
+      apply: "textStyles.ElementsRegularSM",
+      color: "neutral.800",
       _placeholder: {
-        apply: 'textStyles.ElementsRegularSM',
-        color: 'neutral.500',
+        apply: "textStyles.ElementsRegularSM",
+        color: "neutral.500",
       },
-      '&:focus ~ p': {
-        color: 'neutral.200',
+      "&:focus ~ p": {
+        color: "neutral.200",
       },
     },
     length: {
-      position: 'absolute',
+      position: "absolute",
       right: 3,
-      apply: 'textStyles.BodyRegularXS',
+      apply: "textStyles.BodyRegularXS",
       bottom: 2,
-      color: 'neutral.500',
-      transition: 'all .2s ease-in',
+      color: "neutral.500",
+      transition: "all .2s ease-in",
     },
   }),
   variants: {
@@ -243,46 +243,46 @@ export const Textarea: TextareaThemeConfiguration = {
       container: {
         px: 3,
         py: 2,
-        borderRadius: 'simple',
-        border: '1px',
-        borderColor: isSuccess ? 'status.success.500' : 'neutral.500',
+        borderRadius: "simple",
+        border: "1px",
+        borderColor: isSuccess ? "status.success.500" : "neutral.500",
         _hover: {
-          borderColor: 'neutral.200',
+          borderColor: "neutral.200",
         },
         _focus: {
-          borderColor: isSuccess ? 'status.success.500' : 'primary.500',
+          borderColor: isSuccess ? "status.success.500" : "primary.500",
           _hover: {
-            borderColor: isSuccess ? 'status.success.500' : 'primary.500',
+            borderColor: isSuccess ? "status.success.500" : "primary.500",
           },
         },
         _active: {
-          borderColor: isSuccess ? 'status.success.500' : 'primary.500',
+          borderColor: isSuccess ? "status.success.500" : "primary.500",
           _hover: {
-            borderColor: isSuccess ? 'status.success.500' : 'primary.500',
+            borderColor: isSuccess ? "status.success.500" : "primary.500",
           },
         },
-        _focusVisible: { boxShadow: 'none' },
+        _focusVisible: { boxShadow: "none" },
         _invalid: {
-          borderColor: 'status.error.500',
+          borderColor: "status.error.500",
           _focus: {
-            borderColor: 'status.error.500',
-            boxShadow: 'none',
+            borderColor: "status.error.500",
+            boxShadow: "none",
           },
           _active: {
-            borderColor: 'status.error.500',
-            boxShadow: 'none',
+            borderColor: "status.error.500",
+            boxShadow: "none",
           },
         },
         _disabled: {
-          borderColor: 'neutral.100',
-          bg: 'neutral.200',
-          color: 'neutral.500',
-          cursor: 'not-allowed',
+          borderColor: "neutral.100",
+          bg: "neutral.200",
+          color: "neutral.500",
+          cursor: "not-allowed",
         },
       },
     }),
   },
   defaultProps: {
-    variant: 'outline',
+    variant: "outline",
   },
 };

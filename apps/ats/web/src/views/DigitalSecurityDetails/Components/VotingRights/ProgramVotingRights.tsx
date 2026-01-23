@@ -203,23 +203,17 @@
 
 */
 
-import { Button, Center, HStack, Stack, VStack } from '@chakra-ui/react';
-import {
-  CalendarInputController,
-  InputController,
-  PhosphorIcon,
-  Text,
-  Tooltip,
-} from 'io-bricks-ui';
-import { Info } from '@phosphor-icons/react';
-import { required } from '../../../../utils/rules';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import { SetVotingRightsRequest } from '@hashgraph/asset-tokenization-sdk';
-import { useSetVotingRights } from '../../../../hooks/queries/VotingRights';
-import { dateToUnixTimestamp, textToHex } from '../../../../utils/format';
-import { DATE_TIME_FORMAT } from '../../../../utils/constants';
+import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import { CalendarInputController, InputController, PhosphorIcon, Text, Tooltip } from "io-bricks-ui";
+import { Info } from "@phosphor-icons/react";
+import { required } from "../../../../utils/rules";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import { SetVotingRightsRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useSetVotingRights } from "../../../../hooks/queries/VotingRights";
+import { dateToUnixTimestamp, textToHex } from "../../../../utils/format";
+import { DATE_TIME_FORMAT } from "../../../../utils/constants";
 
 interface ProgramVotingRightsFormValues {
   name: string;
@@ -227,25 +221,21 @@ interface ProgramVotingRightsFormValues {
 }
 
 export const ProgramVotingRights = () => {
-  const { control, formState, handleSubmit, reset } =
-    useForm<ProgramVotingRightsFormValues>({
-      mode: 'all',
-    });
-  const { t: tForm } = useTranslation('security', {
-    keyPrefix: 'details.votingRights.program.input',
+  const { control, formState, handleSubmit, reset } = useForm<ProgramVotingRightsFormValues>({
+    mode: "all",
   });
-  const { t: t } = useTranslation('security', {
-    keyPrefix: 'details.votingRights.program',
+  const { t: tForm } = useTranslation("security", {
+    keyPrefix: "details.votingRights.program.input",
+  });
+  const { t: t } = useTranslation("security", {
+    keyPrefix: "details.votingRights.program",
   });
 
-  const { id = '' } = useParams();
+  const { id = "" } = useParams();
 
   const { mutate: setVotingRights, isLoading } = useSetVotingRights();
 
-  const submit: SubmitHandler<ProgramVotingRightsFormValues> = ({
-    date,
-    name,
-  }) => {
+  const submit: SubmitHandler<ProgramVotingRightsFormValues> = ({ date, name }) => {
     const recordTimestamp = dateToUnixTimestamp(date);
     const data = textToHex(name);
 
@@ -264,18 +254,11 @@ export const ProgramVotingRights = () => {
 
   return (
     <Center h="full" bg="neutral.dark.600">
-      <VStack
-        as="form"
-        onSubmit={handleSubmit(submit)}
-        w="500px"
-        gap={6}
-        py={6}
-        data-testid="program-voting-form"
-      >
+      <VStack as="form" onSubmit={handleSubmit(submit)} w="500px" gap={6} py={6} data-testid="program-voting-form">
         <Stack w="full">
           <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">{tForm('name.label')}*</Text>
-            <Tooltip label={tForm('name.tooltip')} placement="right">
+            <Text textStyle="BodyTextRegularSM">{tForm("name.label")}*</Text>
+            <Tooltip label={tForm("name.tooltip")} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -284,13 +267,13 @@ export const ProgramVotingRights = () => {
             control={control}
             id="name"
             rules={{ required }}
-            placeholder={tForm('name.placeholder')}
+            placeholder={tForm("name.placeholder")}
           />
         </Stack>
         <Stack w="full">
           <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">{tForm('date.label')}*</Text>
-            <Tooltip label={tForm('date.tooltip')} placement="right">
+            <Text textStyle="BodyTextRegularSM">{tForm("date.label")}*</Text>
+            <Tooltip label={tForm("date.tooltip")} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -299,7 +282,7 @@ export const ProgramVotingRights = () => {
             id="date"
             rules={{ required }}
             fromDate={new Date()}
-            placeholder={tForm('date.placeholder')}
+            placeholder={tForm("date.placeholder")}
             withTimeInput
             format={DATE_TIME_FORMAT}
           />
@@ -311,7 +294,7 @@ export const ProgramVotingRights = () => {
           isDisabled={!formState.isValid}
           type="submit"
         >
-          {t('button')}
+          {t("button")}
         </Button>
       </VStack>
     </Center>

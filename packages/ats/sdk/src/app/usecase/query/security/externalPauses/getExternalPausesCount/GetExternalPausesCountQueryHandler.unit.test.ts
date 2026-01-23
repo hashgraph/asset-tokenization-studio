@@ -203,22 +203,19 @@
 
 */
 
-import { createMock } from '@golevelup/ts-jest';
-import { EvmAddressPropsFixture } from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import SecurityService from '@service/security/SecurityService';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import { Security } from '@domain/context/security/Security';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import {
-  GetExternalPausesCountQuery,
-  GetExternalPausesCountQueryResponse,
-} from './GetExternalPausesCountQuery';
-import { GetExternalPausesCountQueryHandler } from './GetExternalPausesCountQueryHandler';
-import { GetExternalPausesCountQueryFixture } from '@test/fixtures/externalPauses/ExternalPausesFixture';
+import { createMock } from "@golevelup/ts-jest";
+import { EvmAddressPropsFixture } from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import SecurityService from "@service/security/SecurityService";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { Security } from "@domain/context/security/Security";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { GetExternalPausesCountQuery, GetExternalPausesCountQueryResponse } from "./GetExternalPausesCountQuery";
+import { GetExternalPausesCountQueryHandler } from "./GetExternalPausesCountQueryHandler";
+import { GetExternalPausesCountQueryFixture } from "@test/fixtures/externalPauses/ExternalPausesFixture";
 
-describe('GetExternalPausesCountQueryHandler', () => {
+describe("GetExternalPausesCountQueryHandler", () => {
   let handler: GetExternalPausesCountQueryHandler;
   let query: GetExternalPausesCountQuery;
 
@@ -230,11 +227,7 @@ describe('GetExternalPausesCountQueryHandler', () => {
   const security = new Security(SecurityPropsFixture.create());
 
   beforeEach(() => {
-    handler = new GetExternalPausesCountQueryHandler(
-      securityServiceMock,
-      contractServiceMock,
-      queryAdapterServiceMock,
-    );
+    handler = new GetExternalPausesCountQueryHandler(securityServiceMock, contractServiceMock, queryAdapterServiceMock);
     query = GetExternalPausesCountQueryFixture.create();
   });
 
@@ -242,12 +235,10 @@ describe('GetExternalPausesCountQueryHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('should successfully get external pauses count', async () => {
+  describe("execute", () => {
+    it("should successfully get external pauses count", async () => {
       securityServiceMock.get.mockResolvedValueOnce(security);
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
 
       queryAdapterServiceMock.getExternalPausesCount.mockResolvedValue(1);
 
@@ -256,22 +247,14 @@ describe('GetExternalPausesCountQueryHandler', () => {
       expect(result).toBeInstanceOf(GetExternalPausesCountQueryResponse);
       expect(result.payload).toBe(1);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(securityServiceMock.get).toHaveBeenCalledTimes(1);
-      expect(
-        queryAdapterServiceMock.getExternalPausesCount,
-      ).toHaveBeenCalledTimes(1);
+      expect(queryAdapterServiceMock.getExternalPausesCount).toHaveBeenCalledTimes(1);
 
       expect(securityServiceMock.get).toHaveBeenCalledWith(query.securityId);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
 
-      expect(
-        queryAdapterServiceMock.getExternalPausesCount,
-      ).toHaveBeenCalledWith(evmAddress);
+      expect(queryAdapterServiceMock.getExternalPausesCount).toHaveBeenCalledWith(evmAddress);
     });
   });
 });

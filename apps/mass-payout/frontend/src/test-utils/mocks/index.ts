@@ -221,8 +221,8 @@ export {
   createMockAsset,
   createMockAssets,
   resetAssetMocks,
-} from './AssetMocks';
+} from "./AssetMocks";
 
 // Future mocks can be added here as the application grows
-export * from './DistributionMocks';
-export * from './PaymentMocks';
+export * from "./DistributionMocks";
+export * from "./PaymentMocks";

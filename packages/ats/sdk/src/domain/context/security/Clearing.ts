@@ -203,12 +203,12 @@
 
 */
 
-import { BigNumber } from 'ethers';
-import BigDecimal from '../shared/BigDecimal';
+import { BigNumber } from "ethers";
+import BigDecimal from "../shared/BigDecimal";
 import {
   InvalidClearingOperationType,
   InvalidClearingOperationTypeNumber,
-} from './error/values/InvalidClearingOperationType';
+} from "./error/values/InvalidClearingOperationType";
 
 export class ClearingOperation {
   partition: string;
@@ -304,12 +304,7 @@ export class ClearingRedeem {
   expirationTimestamp: number;
   data: string;
   operatorData: string;
-  constructor(
-    amount: BigDecimal,
-    expirationTimestamp: number,
-    data: string,
-    operatorData: string,
-  ) {
+  constructor(amount: BigDecimal, expirationTimestamp: number, data: string, operatorData: string) {
     this.amount = amount;
     this.expirationTimestamp = expirationTimestamp;
     this.data = data;

@@ -203,34 +203,34 @@
 
 */
 
-import TransactionService from '@service/transaction/TransactionService';
-import { createMock } from '@golevelup/ts-jest';
-import AccountService from '@service/account/AccountService';
+import TransactionService from "@service/transaction/TransactionService";
+import { createMock } from "@golevelup/ts-jest";
+import AccountService from "@service/account/AccountService";
 import {
   AccountPropsFixture,
   ErrorMsgFixture,
   EvmAddressPropsFixture,
   TransactionIdFixture,
-} from '@test/fixtures/shared/DataFixture';
-import ContractService from '@service/contract/ContractService';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import ValidationService from '@service/validation/ValidationService';
-import { ClearingTransferByPartitionCommandFixture } from '@test/fixtures/clearing/ClearingFixture';
-import SecurityService from '@service/security/SecurityService';
-import { SecurityPropsFixture } from '@test/fixtures/shared/SecurityFixture';
-import { Security } from '@domain/context/security/Security';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import { faker } from '@faker-js/faker/.';
-import { OperatorClearingTransferByPartitionCommandHandler } from './OperatorClearingTransferByPartitionCommandHandler';
+} from "@test/fixtures/shared/DataFixture";
+import ContractService from "@service/contract/ContractService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidationService from "@service/validation/ValidationService";
+import { ClearingTransferByPartitionCommandFixture } from "@test/fixtures/clearing/ClearingFixture";
+import SecurityService from "@service/security/SecurityService";
+import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
+import { Security } from "@domain/context/security/Security";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { faker } from "@faker-js/faker/.";
+import { OperatorClearingTransferByPartitionCommandHandler } from "./OperatorClearingTransferByPartitionCommandHandler";
 import {
   OperatorClearingTransferByPartitionCommand,
   OperatorClearingTransferByPartitionCommandResponse,
-} from './OperatorClearingTransferByPartitionCommand';
-import Account from '@domain/context/account/Account';
-import { OperatorClearingTransferByPartitionCommandError } from './error/OperatorClearingTransferByPartitionCommandError';
-import { ErrorCode } from '@core/error/BaseError';
+} from "./OperatorClearingTransferByPartitionCommand";
+import Account from "@domain/context/account/Account";
+import { OperatorClearingTransferByPartitionCommandError } from "./error/OperatorClearingTransferByPartitionCommandError";
+import { ErrorCode } from "@core/error/BaseError";
 
-describe('OperatorClearingTransferByPartitionCommandHandler', () => {
+describe("OperatorClearingTransferByPartitionCommandHandler", () => {
   let handler: OperatorClearingTransferByPartitionCommandHandler;
   let command: OperatorClearingTransferByPartitionCommand;
 
@@ -248,7 +248,7 @@ describe('OperatorClearingTransferByPartitionCommandHandler', () => {
 
   const clearingId = faker.string.hexadecimal({
     length: 64,
-    prefix: '0x',
+    prefix: "0x",
   });
 
   beforeEach(() => {
@@ -269,18 +269,16 @@ describe('OperatorClearingTransferByPartitionCommandHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    describe('error cases', () => {
-      it('throws OperatorClearingTransferByPartitionCommandError when command fails with uncaught error', async () => {
+  describe("execute", () => {
+    describe("error cases", () => {
+      it("throws OperatorClearingTransferByPartitionCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
 
         contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
         const resultPromise = handler.execute(command);
 
-        await expect(resultPromise).rejects.toBeInstanceOf(
-          OperatorClearingTransferByPartitionCommandError,
-        );
+        await expect(resultPromise).rejects.toBeInstanceOf(OperatorClearingTransferByPartitionCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
           message: expect.stringContaining(
@@ -290,47 +288,29 @@ describe('OperatorClearingTransferByPartitionCommandHandler', () => {
         });
       });
     });
-    describe('success cases', () => {
-      it('should successfully create clearing transfer by operator', async () => {
+    describe("success cases", () => {
+      it("should successfully create clearing transfer by operator", async () => {
         contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getAccountEvmAddress.mockResolvedValue(evmAddress);
         accountServiceMock.getCurrentAccount.mockReturnValue(account);
         securityServiceMock.get.mockResolvedValue(security);
-        transactionServiceMock
-          .getHandler()
-          .operatorClearingTransferByPartition.mockResolvedValue({
-            id: transactionId,
-          });
-        transactionServiceMock.getTransactionResult.mockResolvedValue(
-          clearingId,
-        );
+        transactionServiceMock.getHandler().operatorClearingTransferByPartition.mockResolvedValue({
+          id: transactionId,
+        });
+        transactionServiceMock.getTransactionResult.mockResolvedValue(clearingId);
 
         const result = await handler.execute(command);
 
-        expect(result).toBeInstanceOf(
-          OperatorClearingTransferByPartitionCommandResponse,
-        );
+        expect(result).toBeInstanceOf(OperatorClearingTransferByPartitionCommandResponse);
         expect(result.payload).toBe(parseInt(clearingId));
         expect(result.transactionId).toBe(transactionId);
 
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(
-          2,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
-          1,
-          command.sourceId,
-        );
-        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(
-          2,
-          command.targetId,
-        );
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(2);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(1, command.sourceId);
+        expect(accountServiceMock.getAccountEvmAddress).toHaveBeenNthCalledWith(2, command.targetId);
 
-        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(
-          contractServiceMock.getContractEvmAddress,
-        ).toHaveBeenNthCalledWith(1, command.securityId);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+        expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(1, command.securityId);
 
         expect(validationServiceMock.checkOperator).toHaveBeenCalledTimes(1);
         expect(validationServiceMock.checkOperator).toHaveBeenCalledWith(
@@ -346,29 +326,14 @@ describe('OperatorClearingTransferByPartitionCommandHandler', () => {
           BigDecimal.fromString(command.amount, security.decimals),
         );
         expect(validationServiceMock.checkDecimals).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(
-          security,
-          command.amount,
-        );
+        expect(validationServiceMock.checkDecimals).toHaveBeenCalledWith(security, command.amount);
         expect(validationServiceMock.checkPause).toHaveBeenCalledTimes(1);
-        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(
-          command.securityId,
-        );
-        expect(
-          validationServiceMock.checkClearingActivated,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          validationServiceMock.checkClearingActivated,
-        ).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
+        expect(validationServiceMock.checkClearingActivated).toHaveBeenCalledTimes(1);
+        expect(validationServiceMock.checkClearingActivated).toHaveBeenCalledWith(command.securityId);
 
-        expect(
-          transactionServiceMock.getHandler()
-            .operatorClearingTransferByPartition,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getHandler()
-            .operatorClearingTransferByPartition,
-        ).toHaveBeenCalledWith(
+        expect(transactionServiceMock.getHandler().operatorClearingTransferByPartition).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getHandler().operatorClearingTransferByPartition).toHaveBeenCalledWith(
           evmAddress,
           command.partitionId,
           BigDecimal.fromString(command.amount, security.decimals),
@@ -377,12 +342,8 @@ describe('OperatorClearingTransferByPartitionCommandHandler', () => {
           BigDecimal.fromString(command.expirationDate.substring(0, 10)),
           command.securityId,
         );
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          transactionServiceMock.getTransactionResult,
-        ).toHaveBeenCalledWith({
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledTimes(1);
+        expect(transactionServiceMock.getTransactionResult).toHaveBeenCalledWith({
           res: { id: transactionId },
           className: OperatorClearingTransferByPartitionCommandHandler.name,
           position: 1,

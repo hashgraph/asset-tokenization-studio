@@ -203,24 +203,21 @@
 
 */
 
-import { ErrorCode } from '@core/error/BaseError';
-import { createMock } from '@golevelup/ts-jest';
-import { RPCQueryAdapter } from '@port/out/rpc/RPCQueryAdapter';
-import ContractService from '@service/contract/ContractService';
-import {
-  EvmAddressPropsFixture,
-  ErrorMsgFixture,
-} from '@test/fixtures/shared/DataFixture';
-import { GetTotalTokenHoldersAtSnapshotQueryFixture } from '@test/fixtures/snapshot/SnapshotFixture';
-import { GetTotalTokenHoldersAtSnapshotQueryError } from './error/GetTotalTokenHoldersAtSnapshotQueryError';
+import { ErrorCode } from "@core/error/BaseError";
+import { createMock } from "@golevelup/ts-jest";
+import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import ContractService from "@service/contract/ContractService";
+import { EvmAddressPropsFixture, ErrorMsgFixture } from "@test/fixtures/shared/DataFixture";
+import { GetTotalTokenHoldersAtSnapshotQueryFixture } from "@test/fixtures/snapshot/SnapshotFixture";
+import { GetTotalTokenHoldersAtSnapshotQueryError } from "./error/GetTotalTokenHoldersAtSnapshotQueryError";
 import {
   GetTotalTokenHoldersAtSnapshotQuery,
   GetTotalTokenHoldersAtSnapshotQueryResponse,
-} from './GetTotalTokenHoldersAtSnapshotQuery';
-import { GetTotalTokenHoldersAtSnapshotQueryHandler } from './GetTotalTokenHoldersAtSnapshotQueryHandler';
-import EvmAddress from '@domain/context/contract/EvmAddress';
+} from "./GetTotalTokenHoldersAtSnapshotQuery";
+import { GetTotalTokenHoldersAtSnapshotQueryHandler } from "./GetTotalTokenHoldersAtSnapshotQueryHandler";
+import EvmAddress from "@domain/context/contract/EvmAddress";
 
-describe('GetTotalTokenHoldersAtSnapshotQueryHandler', () => {
+describe("GetTotalTokenHoldersAtSnapshotQueryHandler", () => {
   let handler: GetTotalTokenHoldersAtSnapshotQueryHandler;
   let query: GetTotalTokenHoldersAtSnapshotQuery;
 
@@ -231,10 +228,7 @@ describe('GetTotalTokenHoldersAtSnapshotQueryHandler', () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new GetTotalTokenHoldersAtSnapshotQueryHandler(
-      queryAdapterServiceMock,
-      contractServiceMock,
-    );
+    handler = new GetTotalTokenHoldersAtSnapshotQueryHandler(queryAdapterServiceMock, contractServiceMock);
     query = GetTotalTokenHoldersAtSnapshotQueryFixture.create();
   });
 
@@ -242,17 +236,15 @@ describe('GetTotalTokenHoldersAtSnapshotQueryHandler', () => {
     jest.resetAllMocks();
   });
 
-  describe('execute', () => {
-    it('throws GetTotalTokenHoldersAtSnapshotQueryError when query fails with uncaught error', async () => {
+  describe("execute", () => {
+    it("throws GetTotalTokenHoldersAtSnapshotQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
       const resultPromise = handler.execute(query);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(
-        GetTotalTokenHoldersAtSnapshotQueryError,
-      );
+      await expect(resultPromise).rejects.toBeInstanceOf(GetTotalTokenHoldersAtSnapshotQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(
@@ -262,33 +254,19 @@ describe('GetTotalTokenHoldersAtSnapshotQueryHandler', () => {
       });
     });
 
-    it('should successfully get total token holders at snapshot', async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(
-        evmAddress,
-      );
-      queryAdapterServiceMock.getTotalTokenHoldersAtSnapshot.mockResolvedValue(
-        1,
-      );
+    it("should successfully get total token holders at snapshot", async () => {
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      queryAdapterServiceMock.getTotalTokenHoldersAtSnapshot.mockResolvedValue(1);
 
       const result = await handler.execute(query);
 
-      expect(result).toBeInstanceOf(
-        GetTotalTokenHoldersAtSnapshotQueryResponse,
-      );
+      expect(result).toBeInstanceOf(GetTotalTokenHoldersAtSnapshotQueryResponse);
       expect(result.payload).toStrictEqual(1);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(
-        1,
-      );
-      expect(
-        queryAdapterServiceMock.getTotalTokenHoldersAtSnapshot,
-      ).toHaveBeenCalledTimes(1);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(
-        query.securityId,
-      );
-      expect(
-        queryAdapterServiceMock.getTotalTokenHoldersAtSnapshot,
-      ).toHaveBeenCalledWith(evmAddress, query.snapshotId);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+      expect(queryAdapterServiceMock.getTotalTokenHoldersAtSnapshot).toHaveBeenCalledTimes(1);
+      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
+      expect(queryAdapterServiceMock.getTotalTokenHoldersAtSnapshot).toHaveBeenCalledWith(evmAddress, query.snapshotId);
     });
   });
 });

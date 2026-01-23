@@ -204,9 +204,9 @@
 
 const enTranslation = {
   app: {
-    title: 'Scheduler Payment Distribution',
-    description: 'Admin panel for managing scheduler payment distribution',
-    testButton: 'Test-button',
+    title: "Scheduler Payment Distribution",
+    description: "Admin panel for managing scheduler payment distribution",
+    testButton: "Test-button",
   },
 };
 

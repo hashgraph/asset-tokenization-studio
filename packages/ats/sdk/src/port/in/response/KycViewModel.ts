@@ -203,7 +203,7 @@
 
 */
 
-import { QueryResponse } from '@core/query/QueryResponse';
+import { QueryResponse } from "@core/query/QueryResponse";
 
 export default interface KycViewModel extends QueryResponse {
   validFrom: string;

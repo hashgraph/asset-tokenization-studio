@@ -203,11 +203,11 @@
 
 */
 
-import { useLocation } from 'react-router-dom';
-import { Link as RouterLink } from 'react-router-dom';
-import { RoutePath } from '../router/RoutePath';
-import { RouteName } from '../router/RouteName';
-import i18n from 'i18next';
+import { useLocation } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import { RoutePath } from "../router/RoutePath";
+import { RouteName } from "../router/RouteName";
+import i18n from "i18next";
 
 export interface BreadcrumbItem {
   label: string;
@@ -230,16 +230,14 @@ const routeBreadcrumbMap: Record<string, string> = {
   [RoutePath.IMPORT_ASSET]: t(RouteName.ImportAsset),
 };
 
-export const useBreadcrumbs = (
-  options?: RouterBreadcrumbsOptions,
-): BreadcrumbItem[] => {
+export const useBreadcrumbs = (options?: RouterBreadcrumbsOptions): BreadcrumbItem[] => {
   const location = useLocation();
   const { excludePaths = [] } = options || {};
 
-  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const pathSegments = location.pathname.split("/").filter(Boolean);
   const breadcrumbs: BreadcrumbItem[] = [];
 
-  let currentPath = '';
+  let currentPath = "";
 
   for (let i = 0; i < pathSegments.length; i++) {
     const segment = pathSegments[i];
@@ -251,13 +249,9 @@ export const useBreadcrumbs = (
 
     let breadcrumbLabel = routeBreadcrumbMap[currentPath];
 
-    if (
-      !breadcrumbLabel &&
-      currentPath.startsWith('/assets/') &&
-      currentPath !== '/assets'
-    ) {
-      if (currentPath.endsWith('/make-payment')) {
-        breadcrumbLabel = 'Make Payment';
+    if (!breadcrumbLabel && currentPath.startsWith("/assets/") && currentPath !== "/assets") {
+      if (currentPath.endsWith("/make-payment")) {
+        breadcrumbLabel = "Make Payment";
       } else {
         breadcrumbLabel = t(RouteName.AssetDetail);
       }
@@ -273,7 +267,7 @@ export const useBreadcrumbs = (
       label: breadcrumbLabel,
       link: {
         as: RouterLink,
-        to: isLastElement ? '#' : currentPath,
+        to: isLastElement ? "#" : currentPath,
       },
       isActive: isLastElement,
     });

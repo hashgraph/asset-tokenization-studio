@@ -203,8 +203,8 @@
 
 */
 
-import { CommandError } from '../../../../error/CommandError';
-import BaseError from '@core/error/BaseError';
+import { CommandError } from "../../../../error/CommandError";
+import BaseError from "@core/error/BaseError";
 
 export class ExecuteBondCashOutByAddressesCommandError extends CommandError {
   constructor(error: Error) {

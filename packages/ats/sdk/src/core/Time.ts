@@ -203,23 +203,18 @@
 
 */
 
-import { InvalidTimeUnits } from './error/InvalidTimeUnits';
+import { InvalidTimeUnits } from "./error/InvalidTimeUnits";
 
 export class Time {
-  public static delay(
-    time: number,
-    unit: 'seconds' | 'milliseconds' | 'sec' | 'ms',
-  ): Promise<boolean> {
+  public static delay(time: number, unit: "seconds" | "milliseconds" | "sec" | "ms"): Promise<boolean> {
     let delayInMilliseconds: number;
-    if (unit === 'seconds' || unit === 'sec') {
+    if (unit === "seconds" || unit === "sec") {
       delayInMilliseconds = time * 1000;
-    } else if (unit === 'milliseconds' || unit === 'ms') {
+    } else if (unit === "milliseconds" || unit === "ms") {
       delayInMilliseconds = time;
     } else {
       throw new InvalidTimeUnits();
     }
-    return new Promise<boolean>((resolve) =>
-      setTimeout(() => resolve(true), delayInMilliseconds),
-    );
+    return new Promise<boolean>((resolve) => setTimeout(() => resolve(true), delayInMilliseconds));
   }
 }

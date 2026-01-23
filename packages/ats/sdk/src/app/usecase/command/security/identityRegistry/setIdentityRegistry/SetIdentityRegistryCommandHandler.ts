@@ -170,25 +170,20 @@
    limitations under the License.
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
-import AccountService from '@service/account/AccountService';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import {
-  SetIdentityRegistryCommand,
-  SetIdentityRegistryCommandResponse,
-} from './SetIdentityRegistryCommand';
-import { SetIdentityRegistryCommandError } from './error/SetIdentityRegistryCommandError';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
+import AccountService from "@service/account/AccountService";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { SetIdentityRegistryCommand, SetIdentityRegistryCommandResponse } from "./SetIdentityRegistryCommand";
+import { SetIdentityRegistryCommandError } from "./error/SetIdentityRegistryCommandError";
 
 @CommandHandler(SetIdentityRegistryCommand)
-export class SetIdentityRegistryCommandHandler
-  implements ICommandHandler<SetIdentityRegistryCommand>
-{
+export class SetIdentityRegistryCommandHandler implements ICommandHandler<SetIdentityRegistryCommand> {
   constructor(
     @lazyInject(AccountService)
     private readonly accountService: AccountService,
@@ -200,40 +195,23 @@ export class SetIdentityRegistryCommandHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: SetIdentityRegistryCommand,
-  ): Promise<SetIdentityRegistryCommandResponse> {
+  async execute(command: SetIdentityRegistryCommand): Promise<SetIdentityRegistryCommandResponse> {
     try {
       const { securityId, identityRegistry } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
-      const identityRegistryEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(identityRegistry);
+      const identityRegistryEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(identityRegistry);
 
       await this.validationService.checkPause(securityId);
 
-      await this.validationService.checkRole(
-        SecurityRole._TREX_OWNER_ROLE,
-        account.id.toString(),
-        securityId,
-      );
+      await this.validationService.checkRole(SecurityRole._TREX_OWNER_ROLE, account.id.toString(), securityId);
 
-      const res = await handler.setIdentityRegistry(
-        securityEvmAddress,
-        identityRegistryEvmAddress,
-        securityId,
-      );
+      const res = await handler.setIdentityRegistry(securityEvmAddress, identityRegistryEvmAddress, securityId);
 
-      return Promise.resolve(
-        new SetIdentityRegistryCommandResponse(
-          res.error === undefined,
-          res.id!,
-        ),
-      );
+      return Promise.resolve(new SetIdentityRegistryCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new SetIdentityRegistryCommandError(error as Error);
     }

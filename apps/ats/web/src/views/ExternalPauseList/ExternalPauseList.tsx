@@ -1,33 +1,16 @@
-import {
-  Box,
-  HStack,
-  Menu,
-  MenuButton,
-  Stack,
-  useDisclosure,
-} from '@chakra-ui/react';
-import { Header } from './Components/Header';
-import {
-  Button,
-  Dropdown,
-  DropdownItem,
-  PhosphorIcon,
-  PopUp,
-  Spinner,
-  Table,
-  Text,
-  useToast,
-} from 'io-bricks-ui';
-import { createColumnHelper } from '@tanstack/table-core';
-import { DotsThreeVertical, Question, Trash } from '@phosphor-icons/react';
-import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
-import { useExternalPauseStore } from '../../store/externalPauseStore';
-import { useUserStore } from '../../store/userStore';
-import { useRolesStore } from '../../store/rolesStore';
-import { User } from '../../utils/constants';
-import { useSetPausedMock } from '../../hooks/mutations/useExternalPause';
-import { SetPausedMockRequest } from '@hashgraph/asset-tokenization-sdk';
+import { Box, HStack, Menu, MenuButton, Stack, useDisclosure } from "@chakra-ui/react";
+import { Header } from "./Components/Header";
+import { Button, Dropdown, DropdownItem, PhosphorIcon, PopUp, Spinner, Table, Text, useToast } from "io-bricks-ui";
+import { createColumnHelper } from "@tanstack/table-core";
+import { DotsThreeVertical, Question, Trash } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import { useExternalPauseStore } from "../../store/externalPauseStore";
+import { useUserStore } from "../../store/userStore";
+import { useRolesStore } from "../../store/rolesStore";
+import { User } from "../../utils/constants";
+import { useSetPausedMock } from "../../hooks/mutations/useExternalPause";
+import { SetPausedMockRequest } from "@hashgraph/asset-tokenization-sdk";
 
 type ExternalPause = {
   address: string;
@@ -37,23 +20,20 @@ type ExternalPause = {
 export const ExternalPauseList = () => {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { t: tTable } = useTranslation('externalPause', {
-    keyPrefix: 'list.table',
+  const { t: tTable } = useTranslation("externalPause", {
+    keyPrefix: "list.table",
   });
-  const { t: tModal } = useTranslation('externalPause', {
-    keyPrefix: 'list.modal',
+  const { t: tModal } = useTranslation("externalPause", {
+    keyPrefix: "list.modal",
   });
-  const { t: tMessages } = useTranslation('externalPause', {
-    keyPrefix: 'list.messages',
+  const { t: tMessages } = useTranslation("externalPause", {
+    keyPrefix: "list.messages",
   });
 
   const [loadingRow, setLoadingRow] = useState<string | null>(null);
-  const [externalPauseSelected, setExternalPauseSelected] = useState<
-    string | undefined
-  >(undefined);
+  const [externalPauseSelected, setExternalPauseSelected] = useState<string | undefined>(undefined);
 
-  const { externalPauses, removeExternalPause, toggleExternalPause } =
-    useExternalPauseStore();
+  const { externalPauses, removeExternalPause, toggleExternalPause } = useExternalPauseStore();
   const { setType } = useUserStore();
   const { setRoles } = useRolesStore();
 
@@ -67,24 +47,24 @@ export const ExternalPauseList = () => {
   const columnHelper = createColumnHelper<ExternalPause>();
 
   const columns = [
-    columnHelper.accessor('address', {
-      header: tTable('address'),
+    columnHelper.accessor("address", {
+      header: tTable("address"),
       enableSorting: false,
     }),
-    columnHelper.accessor('isPaused', {
-      header: tTable('state'),
+    columnHelper.accessor("isPaused", {
+      header: tTable("state"),
       enableSorting: false,
       cell({ getValue }) {
         const value = getValue();
         return (
-          <Text _firstLetter={{ textTransform: 'uppercase' }}>
-            {value ? tTable('activated') : tTable('deactivated')}
+          <Text _firstLetter={{ textTransform: "uppercase" }}>
+            {value ? tTable("activated") : tTable("deactivated")}
           </Text>
         );
       },
     }),
     columnHelper.display({
-      header: tTable('actions'),
+      header: tTable("actions"),
       maxSize: 1,
       minSize: 1,
       enableSorting: false,
@@ -98,7 +78,7 @@ export const ExternalPauseList = () => {
         return (
           <HStack>
             <Menu>
-              <MenuButton as={Button} size="xs" variant={'outline'}>
+              <MenuButton as={Button} size="xs" variant={"outline"}>
                 {isLoading && loadingRow === address ? (
                   <Spinner color="secondary.500" />
                 ) : (
@@ -107,7 +87,7 @@ export const ExternalPauseList = () => {
               </MenuButton>
               <Dropdown w="180px">
                 <DropdownItem
-                  label={isPaused ? tTable('deactivated') : tTable('activated')}
+                  label={isPaused ? tTable("deactivated") : tTable("activated")}
                   onClick={() => {
                     handleState(address, !isPaused);
                   }}
@@ -117,7 +97,7 @@ export const ExternalPauseList = () => {
             <Button variant="table" size="xs">
               <PhosphorIcon
                 as={Trash}
-                sx={{ color: 'secondary.500' }}
+                sx={{ color: "secondary.500" }}
                 onClick={() => {
                   setExternalPauseSelected(address);
                   onOpen();
@@ -154,15 +134,15 @@ export const ExternalPauseList = () => {
       removeExternalPause(externalPauseSelected);
 
       toast.show({
-        status: 'success',
-        title: tMessages('removeExternalPause.success'),
-        description: tMessages('removeExternalPause.descriptionSuccess'),
+        status: "success",
+        title: tMessages("removeExternalPause.success"),
+        description: tMessages("removeExternalPause.descriptionSuccess"),
       });
     } catch (error) {
       toast.show({
-        status: 'error',
-        title: tMessages('removeExternalPause.error'),
-        description: tMessages('removeExternalPause.descriptionFailed'),
+        status: "error",
+        title: tMessages("removeExternalPause.error"),
+        description: tMessages("removeExternalPause.descriptionFailed"),
       });
     }
   };
@@ -174,24 +154,24 @@ export const ExternalPauseList = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={Question} size="md" />}
-        title={tModal('removeExternalPausePopUp.title')}
-        description={tModal('removeExternalPausePopUp.description')}
-        confirmText={tModal('removeExternalPausePopUp.confirmText')}
+        title={tModal("removeExternalPausePopUp.title")}
+        description={tModal("removeExternalPausePopUp.description")}
+        confirmText={tModal("removeExternalPausePopUp.confirmText")}
         onConfirm={() => {
           handleDelete();
           onClose();
         }}
         onCancel={onClose}
-        cancelText={tModal('removeExternalPausePopUp.cancelText')}
+        cancelText={tModal("removeExternalPausePopUp.cancelText")}
       />
 
       <Header />
-      <Box layerStyle={'container'}>
+      <Box layerStyle={"container"}>
         <Table
           data={externalPauses}
           columns={columns}
           name="externalPauseList"
-          emptyComponent={<Text>{tTable('empty')}</Text>}
+          emptyComponent={<Text>{tTable("empty")}</Text>}
         />
       </Box>
     </Stack>

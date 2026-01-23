@@ -203,15 +203,9 @@
 
 */
 
-import {
-  FormControl,
-  HStack,
-  SimpleGrid,
-  Stack,
-  VStack,
-} from '@chakra-ui/react';
-import { useTranslation } from 'react-i18next';
-import { Info } from '@phosphor-icons/react';
+import { FormControl, HStack, SimpleGrid, Stack, VStack } from "@chakra-ui/react";
+import { useTranslation } from "react-i18next";
+import { Info } from "@phosphor-icons/react";
 import {
   PhosphorIcon,
   Tooltip,
@@ -220,22 +214,16 @@ import {
   InputNumberController,
   ToggleController,
   InfoDivider,
-} from 'io-bricks-ui';
-import {
-  greaterOrEqualThan,
-  isISINValid,
-  lowerOrEqualThan,
-  maxLength,
-  required,
-} from '../../../utils/rules';
-import { useFormContext, useFormState } from 'react-hook-form';
-import { ICreateBondFormValues } from '../ICreateBondFormValues';
-import { CancelButton } from '../../../components/CancelButton';
-import { NextStepButton } from './NextStepButton';
-import { FormStepContainer } from '../../../components/FormStepContainer';
+} from "io-bricks-ui";
+import { greaterOrEqualThan, isISINValid, lowerOrEqualThan, maxLength, required } from "../../../utils/rules";
+import { useFormContext, useFormState } from "react-hook-form";
+import { ICreateBondFormValues } from "../ICreateBondFormValues";
+import { CancelButton } from "../../../components/CancelButton";
+import { NextStepButton } from "./NextStepButton";
+import { FormStepContainer } from "../../../components/FormStepContainer";
 
 export const StepTokenDetails = () => {
-  const { t } = useTranslation('security', { keyPrefix: 'createBond' });
+  const { t } = useTranslation("security", { keyPrefix: "createBond" });
 
   const { control, setValue } = useFormContext<ICreateBondFormValues>();
 
@@ -246,24 +234,17 @@ export const StepTokenDetails = () => {
   return (
     <FormStepContainer>
       <Stack gap={2}>
-        <Text textStyle="HeadingMediumLG">{t('stepTokenDetails.title')}</Text>
-        <Text textStyle="BodyTextRegularMD">
-          {t('stepTokenDetails.subtitle')}
-        </Text>
+        <Text textStyle="HeadingMediumLG">{t("stepTokenDetails.title")}</Text>
+        <Text textStyle="BodyTextRegularMD">{t("stepTokenDetails.subtitle")}</Text>
         <Text textStyle="ElementsRegularSM" mt={6}>
-          {t('stepTokenDetails.mandatoryFields')}
+          {t("stepTokenDetails.mandatoryFields")}
         </Text>
       </Stack>
-      <InfoDivider
-        title={t('stepTokenDetails.generalInformation')}
-        type="main"
-      />
+      <InfoDivider title={t("stepTokenDetails.generalInformation")} type="main" />
       <Stack w="full">
         <HStack justifySelf="flex-start">
-          <Text textStyle="BodyTextRegularSM">
-            {t('stepTokenDetails.name')}*
-          </Text>
-          <Tooltip label={t('stepTokenDetails.nameTooltip')} placement="right">
+          <Text textStyle="BodyTextRegularSM">{t("stepTokenDetails.name")}*</Text>
+          <Tooltip label={t("stepTokenDetails.nameTooltip")} placement="right">
             <PhosphorIcon as={Info} />
           </Tooltip>
         </HStack>
@@ -272,27 +253,22 @@ export const StepTokenDetails = () => {
           control={control}
           id="name"
           rules={{ required, maxLength: maxLength(100) }}
-          placeholder={t('stepTokenDetails.placeholderName')}
+          placeholder={t("stepTokenDetails.placeholderName")}
           backgroundColor="neutral.600"
           size="md"
         />
       </Stack>
       <Stack w="full">
         <HStack justifySelf="flex-start">
-          <Text textStyle="BodyTextRegularSM">
-            {t('stepTokenDetails.symbol')}*
-          </Text>
-          <Tooltip
-            label={t('stepTokenDetails.symbolTooltip')}
-            placement="right"
-          >
+          <Text textStyle="BodyTextRegularSM">{t("stepTokenDetails.symbol")}*</Text>
+          <Tooltip label={t("stepTokenDetails.symbolTooltip")} placement="right">
             <PhosphorIcon as={Info} />
           </Tooltip>
         </HStack>
         <InputController
           id="symbol"
           control={control}
-          placeholder={t('stepTokenDetails.placeholderSymbol')}
+          placeholder={t("stepTokenDetails.placeholderSymbol")}
           backgroundColor="neutral.600"
           size="md"
           rules={{ required, maxLength: maxLength(100) }}
@@ -300,20 +276,15 @@ export const StepTokenDetails = () => {
       </Stack>
       <Stack w="full">
         <HStack justifySelf="flex-start">
-          <Text textStyle="BodyTextRegularSM">
-            {t('stepTokenDetails.decimals')}*
-          </Text>
-          <Tooltip
-            label={t('stepTokenDetails.decimalsTooltip')}
-            placement="right"
-          >
+          <Text textStyle="BodyTextRegularSM">{t("stepTokenDetails.decimals")}*</Text>
+          <Tooltip label={t("stepTokenDetails.decimalsTooltip")} placement="right">
             <PhosphorIcon as={Info} />
           </Tooltip>
         </HStack>
         <InputNumberController
           id="decimals"
           control={control}
-          placeholder={t('stepTokenDetails.placeholderDecimals')}
+          placeholder={t("stepTokenDetails.placeholderDecimals")}
           backgroundColor="neutral.600"
           size="md"
           rules={{
@@ -328,17 +299,15 @@ export const StepTokenDetails = () => {
       </Stack>
       <Stack w="full">
         <HStack justifySelf="flex-start">
-          <Text textStyle="BodyTextRegularSM">
-            {t('stepTokenDetails.isin')}*
-          </Text>
-          <Tooltip label={t('stepTokenDetails.isinTooltip')} placement="right">
+          <Text textStyle="BodyTextRegularSM">{t("stepTokenDetails.isin")}*</Text>
+          <Tooltip label={t("stepTokenDetails.isinTooltip")} placement="right">
             <PhosphorIcon as={Info} />
           </Tooltip>
         </HStack>
         <InputController
           id="isin"
           control={control}
-          placeholder={t('stepTokenDetails.placeholderIsin')}
+          placeholder={t("stepTokenDetails.placeholderIsin")}
           backgroundColor="neutral.600"
           size="md"
           rules={{
@@ -347,19 +316,16 @@ export const StepTokenDetails = () => {
           }}
         />
       </Stack>
-      <InfoDivider title={t('stepTokenDetails.bondPermissions')} type="main" />
+      <InfoDivider title={t("stepTokenDetails.bondPermissions")} type="main" />
       <Stack w="full" gap={6}>
         <FormControl gap={6} as={SimpleGrid} columns={{ base: 3, lg: 1 }}>
           <HStack justifySelf="flex-start">
             <ToggleController
               control={control}
               id="isControllable"
-              label={t('stepTokenDetails.permissionControllable')}
+              label={t("stepTokenDetails.permissionControllable")}
             />
-            <Tooltip
-              label={t('stepTokenDetails.permissionControllableTooltip')}
-              placement="right"
-            >
+            <Tooltip label={t("stepTokenDetails.permissionControllableTooltip")} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -367,13 +333,10 @@ export const StepTokenDetails = () => {
             <ToggleController
               control={control}
               id="isBlocklist"
-              label={t('stepTokenDetails.permissionBlocklist')}
-              onChange={(e) => setValue('isApproval', !e.target.checked)}
+              label={t("stepTokenDetails.permissionBlocklist")}
+              onChange={(e) => setValue("isApproval", !e.target.checked)}
             />
-            <Tooltip
-              label={t('stepTokenDetails.permissionBlocklistTooltip')}
-              placement="right"
-            >
+            <Tooltip label={t("stepTokenDetails.permissionBlocklistTooltip")} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -381,31 +344,21 @@ export const StepTokenDetails = () => {
             <ToggleController
               control={control}
               id="isApproval"
-              label={t('stepTokenDetails.permissionApprovalList')}
-              onChange={(e) => setValue('isBlocklist', !e.target.checked)}
+              label={t("stepTokenDetails.permissionApprovalList")}
+              onChange={(e) => setValue("isBlocklist", !e.target.checked)}
             />
-            <Tooltip
-              label={t('stepTokenDetails.permissionApprovalListTooltip')}
-              placement="right"
-            >
+            <Tooltip label={t("stepTokenDetails.permissionApprovalListTooltip")} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
         </FormControl>
       </Stack>
-      <InfoDivider title={t('stepTokenDetails.configuration')} type="main" />
+      <InfoDivider title={t("stepTokenDetails.configuration")} type="main" />
       <VStack w="full">
         <FormControl gap="15px" as={SimpleGrid} columns={{ base: 3, lg: 1 }}>
           <HStack justifySelf="flex-start">
-            <ToggleController
-              control={control}
-              id="isClearing"
-              label={t('stepTokenDetails.isClearing')}
-            />
-            <Tooltip
-              label={t('stepTokenDetails.isClearingTooltip')}
-              placement="right"
-            >
+            <ToggleController control={control} id="isClearing" label={t("stepTokenDetails.isClearing")} />
+            <Tooltip label={t("stepTokenDetails.isClearingTooltip")} placement="right">
               <PhosphorIcon as={Info} />
             </Tooltip>
           </HStack>
@@ -413,18 +366,12 @@ export const StepTokenDetails = () => {
             <ToggleController
               control={control}
               id="internalKycActivated"
-              label={t('stepTokenDetails.internalKycActivated')}
+              label={t("stepTokenDetails.internalKycActivated")}
             />
           </HStack>
         </FormControl>
       </VStack>
-      <HStack
-        gap={4}
-        w="full"
-        h="100px"
-        align="end"
-        justifyContent={'flex-end'}
-      >
+      <HStack gap={4} w="full" h="100px" align="end" justifyContent={"flex-end"}>
         <CancelButton />
         <NextStepButton isDisabled={!stepFormState.isValid} />
       </HStack>

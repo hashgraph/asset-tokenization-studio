@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class AccountNotInControlList extends BaseError {
   constructor(account: string) {
-    super(
-      ErrorCode.AccountNotInControlList,
-      `The account ${account} is not in the control list`,
-    );
+    super(ErrorCode.AccountNotInControlList, `The account ${account} is not in the control list`);
   }
 }

@@ -203,13 +203,13 @@
 
 */
 
-import { HeaderThemeConfiguration, headerPartsList } from 'io-bricks-ui';
+import { HeaderThemeConfiguration, headerPartsList } from "io-bricks-ui";
 
 export const Header: HeaderThemeConfiguration = {
   parts: headerPartsList,
   baseStyle: {
     container: {
-      bg: 'neutral.50',
+      bg: "neutral.50",
       h: 16,
       pl: 6,
       pr: 8,
@@ -217,7 +217,7 @@ export const Header: HeaderThemeConfiguration = {
     },
 
     contentContainer: {
-      maxW: 'full',
+      maxW: "full",
     },
   },
 };

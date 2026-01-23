@@ -203,8 +203,8 @@
 
 */
 
-import ValidatedDomain from '@core/validation/ValidatedArgs';
-import { SecurityDate } from '../shared/SecurityDate';
+import ValidatedDomain from "@core/validation/ValidatedArgs";
+import { SecurityDate } from "../shared/SecurityDate";
 
 export class BondDetailsData extends ValidatedDomain<BondDetailsData> {
   public currency: string;
@@ -222,10 +222,7 @@ export class BondDetailsData extends ValidatedDomain<BondDetailsData> {
   ) {
     super({
       maturityDate: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          parseInt(this.startingDate),
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), parseInt(this.startingDate));
       },
     });
 

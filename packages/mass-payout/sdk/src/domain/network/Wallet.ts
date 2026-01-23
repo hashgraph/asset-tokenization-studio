@@ -203,12 +203,12 @@
 
 */
 
-import Account from '../account/Account';
+import Account from "../account/Account";
 
 export enum SupportedWallets {
-  DFNS = 'DFNS',
-  FIREBLOCKS = 'Fireblocks',
-  AWSKMS = 'AWSKMS',
+  DFNS = "DFNS",
+  FIREBLOCKS = "Fireblocks",
+  AWSKMS = "AWSKMS",
 }
 
 export default interface Wallet {

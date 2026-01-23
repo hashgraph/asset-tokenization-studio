@@ -203,24 +203,16 @@
 
 */
 
-import { MIN_ID } from '@domain/context/security/CorporateAction';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import { MIN_ID } from "@domain/context/security/CorporateAction";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
 export default class GetDividendsForRequest extends ValidatedRequest<GetDividendsForRequest> {
   securityId: string;
   targetId: string;
   dividendId: number;
 
-  constructor({
-    securityId,
-    targetId,
-    dividendId,
-  }: {
-    securityId: string;
-    targetId: string;
-    dividendId: number;
-  }) {
+  constructor({ securityId, targetId, dividendId }: { securityId: string; targetId: string; dividendId: number }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

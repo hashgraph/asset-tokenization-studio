@@ -203,24 +203,16 @@
 
 */
 
-import { MIN_ID } from '@domain/context/security/CorporateAction';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import { MIN_ID } from "@domain/context/security/CorporateAction";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
 export default class GetCouponForRequest extends ValidatedRequest<GetCouponForRequest> {
   securityId: string;
   targetId: string;
   couponId: number;
 
-  constructor({
-    targetId,
-    securityId,
-    couponId,
-  }: {
-    targetId: string;
-    securityId: string;
-    couponId: number;
-  }) {
+  constructor({ targetId, securityId, couponId }: { targetId: string; securityId: string; couponId: number }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       targetId: FormatValidation.checkHederaIdFormatOrEvmAddress(),

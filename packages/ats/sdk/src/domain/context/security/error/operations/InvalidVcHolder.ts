@@ -203,13 +203,10 @@
 
 */
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export class InvalidVcHolder extends BaseError {
   constructor() {
-    super(
-      ErrorCode.InvalidVcHolder,
-      `The VC holder does not match target account`,
-    );
+    super(ErrorCode.InvalidVcHolder, `The VC holder does not match target account`);
   }
 }

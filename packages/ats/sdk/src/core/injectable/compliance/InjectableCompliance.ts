@@ -203,9 +203,9 @@
 
 */
 
-import { SetComplianceCommandHandler } from '@command/security/compliance/setCompliance/SetComplianceCommandHandler';
-import { TOKENS } from '../Tokens';
-import { ComplianceQueryHandler } from '@query/security/compliance/compliance/ComplianceQueryHandler';
+import { SetComplianceCommandHandler } from "@command/security/compliance/setCompliance/SetComplianceCommandHandler";
+import { TOKENS } from "../Tokens";
+import { ComplianceQueryHandler } from "@query/security/compliance/compliance/ComplianceQueryHandler";
 
 export const COMMAND_HANDLERS_COMPLIANCE = [
   {

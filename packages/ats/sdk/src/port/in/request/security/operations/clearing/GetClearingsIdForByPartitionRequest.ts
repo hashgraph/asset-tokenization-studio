@@ -203,10 +203,10 @@
 
 */
 
-import { ClearingOperationType } from '@domain/context/security/Clearing';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import { ClearingOperationType } from "@domain/context/security/Clearing";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '@port/in/request/FormatValidation';
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class GetClearingsIdForByPartitionRequest extends ValidatedRequest<GetClearingsIdForByPartitionRequest> {
   securityId: string;

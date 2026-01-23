@@ -203,24 +203,16 @@
 
 */
 
-import ValidatedRequest from '@core/validation/ValidatedArgs';
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import FormatValidation from '@port/in/request/FormatValidation';
+import FormatValidation from "@port/in/request/FormatValidation";
 
 export default class GetControlListMembersRequest extends ValidatedRequest<GetControlListMembersRequest> {
   securityId: string;
   start: number;
   end: number;
 
-  constructor({
-    securityId,
-    start,
-    end,
-  }: {
-    securityId: string;
-    start: number;
-    end: number;
-  }) {
+  constructor({ securityId, start, end }: { securityId: string; start: number; end: number }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
     });

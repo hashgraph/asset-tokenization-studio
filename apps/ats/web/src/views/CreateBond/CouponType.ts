@@ -204,8 +204,8 @@
 */
 
 export enum CouponType {
-  FIXED = 'Fixed',
-  CUSTOM = 'Custom',
+  FIXED = "Fixed",
+  CUSTOM = "Custom",
 }
 
 export function transformCouponType(value: number): CouponType {

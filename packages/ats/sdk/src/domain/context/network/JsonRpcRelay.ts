@@ -203,7 +203,7 @@
 
 */
 
-import { Environment } from './Environment';
+import { Environment } from "./Environment";
 
 export class JsonRpcRelay {
   name?: string;
@@ -211,12 +211,7 @@ export class JsonRpcRelay {
   apiKey?: string;
   headerName?: string;
 
-  constructor(
-    baseUrl: string,
-    name?: string,
-    apiKey?: string,
-    headerName?: string,
-  ) {
+  constructor(baseUrl: string, name?: string, apiKey?: string, headerName?: string) {
     this.name = name;
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
