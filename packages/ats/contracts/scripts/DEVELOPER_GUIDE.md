@@ -8,10 +8,14 @@ This guide provides practical, step-by-step instructions for the most common dev
 2. [Quick Start - Using the CLI](#quick-start---using-the-cli)
 3. [Scenario 1: Add/Remove Facet from Existing Asset](#scenario-1-addremove-facet-from-existing-asset)
 4. [Scenario 2: Create New Asset Type (Configuration ID)](#scenario-2-create-new-asset-type-configuration-id)
-5. [Complete Deployment Workflows](#complete-deployment-workflows)
-6. [Registry System](#registry-system)
-7. [Advanced Topics](#advanced-topics)
-8. [Troubleshooting](#troubleshooting)
+5. [Scenario 3: Upgrading Facet Implementations](#scenario-3-upgrading-facet-implementations)
+6. [Scenario 4: Selective Configuration Upgrades](#scenario-4-selective-configuration-upgrades)
+7. [Scenario 5: Multi-Environment Rollout](#scenario-5-multi-environment-rollout)
+8. [Scenario 6: Upgrading TUP Proxy Implementations (BLR/Factory)](#scenario-6-upgrading-tup-proxy-implementations-blrfactory)
+9. [Complete Deployment Workflows](#complete-deployment-workflows)
+10. [Registry System](#registry-system)
+11. [Advanced Topics](#advanced-topics)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -117,49 +121,32 @@ const resolverKey = facetDef.resolverKey.value; // Looked up from registry
 
 ## Quick Start - Using the CLI
 
-### Hardhat Mode
-
-Deploy using Hardhat's built-in ethers and network configuration:
+Deploy to different networks using the unified CLI:
 
 ```bash
-# Default network (from hardhat.config.ts)
-npm run deploy:hardhat
+# Local testing (requires running Hardhat node)
+npm run deploy:local
 
-# Specific network
-npm run deploy:hardhat -- --network hedera-testnet
-npm run deploy:hardhat -- --network hedera-mainnet
-npm run deploy:hardhat -- --network hardhat  # Local in-memory
-```
-
-**When to use**: Working within Hardhat project, need access to Hardhat tasks/helpers.
-
-### Standalone Mode
-
-Deploy without Hardhat runtime (~3x faster startup):
-
-```bash
-# Default to hedera-testnet
-npm run deploy
-
-# Specific network
+# Hedera networks
 npm run deploy:hedera:testnet
 npm run deploy:hedera:mainnet
+npm run deploy:hedera:previewnet
 ```
 
-**When to use**: Production deployments, CI/CD pipelines, faster iteration cycles.
+**Note**: The `NETWORK` environment variable is required (no default fallback).
 
 ### Network Configuration
 
-Both modes read from `.env` files for network configuration:
+The CLI reads from `.env` files for network configuration:
 
 ```bash
-# Required environment variables
-HEDERA_TESTNET_RPC_URL=https://testnet.hashio.io/api
-HEDERA_TESTNET_PRIVATE_KEY=0x...
-HEDERA_TESTNET_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com
+# Required environment variables (pattern: {NETWORK}_*)
+HEDERA_TESTNET_JSON_RPC_ENDPOINT=https://testnet.hashio.io/api
+HEDERA_TESTNET_PRIVATE_KEY_0=0x...
+HEDERA_TESTNET_MIRROR_NODE_ENDPOINT=https://testnet.mirrornode.hedera.com
 ```
 
-See [Configuration.ts](/Users/work/Projects/asset-tokenization-studio/packages/ats/contracts/scripts/infrastructure/config.ts) for all network options.
+See [Configuration.ts](../Configuration.ts) for all network options.
 
 ---
 
@@ -479,11 +466,40 @@ Add exports to [domain/index.ts](domain/index.ts):
 
 ```typescript
 // Fund configuration
+export * from "./factory/deployFundToken";
 export { createFundConfiguration } from "./fund/createConfiguration";
 export { FUND_CONFIG_ID } from "./constants";
 ```
 
-### Step 4: Deploy Custom Facets (if any)
+### Step 4: Add factory
+
+Add 'deployFundToken.ts' factory to [domain/factory](domain/factory/deployFundToken.ts):
+
+### Step 5: Add to workflows scripts
+
+Add new asset to
+
+- [domain/workflows/deploySystemWithExistingBlr](domain/factory/workflows/deploySystemWithExistingBlr.ts):
+- [domain/workflows/deploySystemWithNewBlr](domain/factory/workflows/deploySystemWithNewBlr.ts):
+
+### Step 6: Add to checkpoint scripts
+
+Add new asset to
+
+- [infrastructure/checkpoint/utils](infrastructure/checkpoint/utils.ts):
+- [infrastructure/types/checkpoint](infrastructure/types/checkpoint.ts):
+
+### Step 7: (Only for Testing) Add token fixture
+
+Add new fixture to
+
+- [test/fixture/tokens](test/fixture/tokens/fund.fixture.ts):
+
+Add fixture to index
+
+- [test/fixture/index](test/fixture/index.ts):
+
+### Step 8: Deploy Custom Facets (if any)
 
 If you have fund-specific facets, deploy them:
 
@@ -505,7 +521,7 @@ console.log("Fund facets deployed:", {
 });
 ```
 
-### Step 5: Register All Facets
+### Step 9: Register All Facets
 
 Register both common facets and fund-specific facets:
 
@@ -536,7 +552,7 @@ const result = await registerFacets(blr, {
 
 **Note**: Registering an already-registered facet is safe and will update to the new address.
 
-### Step 6: Create Initial Configuration
+### Step 10: Create Initial Configuration
 
 Create the first version of your fund configuration:
 
@@ -571,7 +587,7 @@ if (result.success) {
 }
 ```
 
-### Step 7: Update Workflows (Optional)
+### Step 11: Update Workflows (Optional)
 
 If you want to include your new asset in complete deployment workflows, update [workflows/deployCompleteSystem.ts](workflows/deployCompleteSystem.ts):
 
@@ -593,7 +609,7 @@ output.configurations.fund = {
 };
 ```
 
-### Step 8: Verify
+### Step 12: Verify
 
 Verify your new asset configuration:
 
@@ -618,8 +634,433 @@ When creating a new asset, touch these files:
 - [ ] `domain/constants.ts` - Add `FUND_CONFIG_ID`
 - [ ] `domain/fund/createConfiguration.ts` - Create module with `FUND_FACETS` array
 - [ ] `domain/index.ts` - Export `createFundConfiguration` and `FUND_CONFIG_ID`
+- [ ] `domain/factory/deployFund.ts`
+- [ ] `infrastructure/checkpoint/utils.ts`
+- [ ] `infrastructure/types/checkpoint.ts`
+- [ ] `workflows/deploySystemWithExistingBlr.ts` - Add to deployment workflow
+- [ ] `workflows/deploySystemWithNewBlr.ts` - Add to deployment workflow
+- [ ] `tests/fixtures/tokens/fund.fixture.ts`
+- [ ] `tests/fixtures/index.ts`
 - [ ] `contracts/layer_3/jurisdiction/usa/FundUSAFacet.sol` - Implement custom facets (if needed)
 - [ ] `workflows/deployCompleteSystem.ts` - Add to deployment workflow (optional)
+
+---
+
+## Scenario 3: Upgrading Facet Implementations
+
+**Use case:** You've fixed a bug or added a feature to facets and need to upgrade production tokens.
+
+### Prerequisites
+
+- Existing BusinessLogicResolver (BLR) address
+- Private key with deployment permissions
+- (Optional) Addresses of ResolverProxy tokens to update
+
+### Step 1: Deploy New Facets and Create New Configuration
+
+```bash
+# Upgrade on testnet first
+BLR_ADDRESS=0x123abc... npm run upgrade:testnet
+```
+
+This creates new configuration v2 with updated facets.
+
+### Step 2: Test with New Token
+
+Deploy a test token using v2:
+
+```typescript
+import { Factory__factory } from "@contract-types";
+import { ethers } from "ethers";
+
+const factory = Factory__factory.connect("0xfactory...", signer);
+
+// Deploy test equity token using v2
+const tx = await factory.deployEquity(
+  { configId: "0x01", version: 2 }, // ← Use v2
+  "Test Token",
+  "TEST",
+  {
+    /* other params */
+  },
+);
+```
+
+### Step 3: Update Production Tokens
+
+Once tested, update existing tokens:
+
+```bash
+BLR_ADDRESS=0x123abc... \
+PROXY_ADDRESSES=0xtoken1...,0xtoken2... \
+npm run upgrade:testnet
+```
+
+### Step 4: Verify Updates
+
+Check each token is using v2:
+
+```typescript
+import { ResolverProxy__factory } from "@contract-types";
+
+const proxy = ResolverProxy__factory.connect("0xtoken1...", signer);
+const version = await proxy.version();
+console.log(`Token version: ${version}`); // Should print: 2
+```
+
+---
+
+## Scenario 4: Selective Configuration Upgrades
+
+**Use case:** You only want to upgrade equity tokens, not bonds.
+
+```bash
+BLR_ADDRESS=0x123abc... \
+CONFIGURATIONS=equity \
+npm run upgrade:testnet
+```
+
+This creates only equity v2, leaving bonds at v1.
+
+---
+
+## Scenario 5: Multi-Environment Rollout
+
+**Use case:** Controlled rollout across testnet → previewnet → mainnet.
+
+### Testnet
+
+```bash
+BLR_ADDRESS=0xTestnetBLR... npm run upgrade:testnet
+```
+
+### Previewnet (after testing)
+
+```bash
+BLR_ADDRESS=0xPreviewnetBLR... npm run upgrade:previewnet
+```
+
+### Mainnet (after validation)
+
+```bash
+BLR_ADDRESS=0xMainnetBLR... npm run upgrade:mainnet
+```
+
+Each environment maintains independent configuration versions.
+
+---
+
+## Scenario 6: Upgrading TUP Proxy Implementations (BLR/Factory)
+
+**Use case:** Upgrade the implementation contracts for BLR (BusinessLogicResolver) or Factory proxies using the TransparentUpgradeableProxy (TUP) pattern.
+
+**Important distinction:** This is different from `upgradeConfigurations` (Scenario 3), which upgrades ResolverProxy (Diamond pattern) token contracts. Use `upgradeTupProxies` only for BLR/Factory infrastructure upgrades.
+
+### When to Use This Workflow
+
+**Use `upgradeTupProxies` when:**
+
+- Upgrading BLR implementation to a new version
+- Upgrading Factory implementation to a new version
+- Both BLR and Factory need to be upgraded simultaneously
+- You have a tested implementation ready to deploy
+
+**Use `upgradeConfigurations` instead when:**
+
+- Updating equity/bond token configurations
+- Changing facet versions for existing token contracts
+- Creating new configuration versions in BusinessLogicResolver
+
+### Architecture Context
+
+The ATS uses **two different proxy patterns**:
+
+| Feature               | TransparentUpgradeableProxy (TUP) | ResolverProxy (Diamond)   |
+| --------------------- | --------------------------------- | ------------------------- |
+| **Used for**          | BLR, Factory                      | Equity/Bond tokens        |
+| **Upgrade mechanism** | ProxyAdmin.upgrade()              | DiamondCutFacet delegates |
+| **What changes**      | Implementation address            | Facet registry pointer    |
+| **Who controls**      | ProxyAdmin contract               | DEFAULT_ADMIN_ROLE        |
+
+### Pattern A: Deploy New Implementation and Upgrade
+
+Deploy a new implementation contract and upgrade the proxy in one workflow:
+
+#### Step 1: Set Environment Variables
+
+```bash
+# ProxyAdmin contract address (manages proxies)
+export PROXY_ADMIN=0x1234567890123456789012345678901234567890
+
+# BLR proxy to upgrade
+export BLR_PROXY=0xabcdefabcdefabcdefabcdefabcdefabcdefabcd
+
+# Signal to deploy new BLR implementation
+export DEPLOY_NEW_BLR_IMPL=true
+```
+
+#### Step 2: Run Upgrade
+
+```bash
+npm run upgrade:tup:testnet
+```
+
+**What happens:**
+
+1. ✓ Validates ProxyAdmin exists on-chain
+2. ✓ Deploys new BLR implementation contract
+3. ✓ Verifies new implementation matches expected bytecode
+4. ✓ Calls ProxyAdmin.upgrade() to update BLR proxy
+5. ✓ Verifies BLR proxy now points to new implementation
+
+#### Step 3: Verify Upgrade
+
+```typescript
+import { getProxyImplementation } from "@scripts/infrastructure";
+import { ethers } from "ethers";
+
+const provider = ethers.getDefaultProvider();
+
+// Check which implementation BLR proxy is using
+const currentImpl = await getProxyImplementation(provider, "0xabcdefabcd...");
+console.log(`BLR implementation: ${currentImpl}`);
+```
+
+### Pattern B: Upgrade to Existing Implementation
+
+Upgrade to an implementation that was deployed separately (useful for tested implementations):
+
+#### Step 1: Set Environment Variables
+
+```bash
+# ProxyAdmin contract address
+export PROXY_ADMIN=0x1234567890123456789012345678901234567890
+
+# BLR proxy to upgrade
+export BLR_PROXY=0xabcdefabcdefabcdefabcdefabcdefabcdefabcd
+
+# Address of existing BLR implementation
+export BLR_IMPLEMENTATION=0x9876543210987654321098765432109876543210
+```
+
+**Note:** No `DEPLOY_NEW_BLR_IMPL` flag - workflow will use provided address.
+
+#### Step 2: Run Upgrade
+
+```bash
+npm run upgrade:tup:testnet
+```
+
+#### Step 3: Verify
+
+Same as Pattern A above.
+
+### Upgrading Both BLR and Factory
+
+Upgrade both infrastructure proxies simultaneously:
+
+```bash
+# Both proxies and implementations
+export PROXY_ADMIN=0x1234567890123456789012345678901234567890
+export BLR_PROXY=0xabcdefabcdefabcdefabcdefabcdefabcdefabcd
+export FACTORY_PROXY=0xfedcbafedcbafedcbafedcbafedcbafedcbafeda
+
+# Deploy new implementations
+export DEPLOY_NEW_BLR_IMPL=true
+export DEPLOY_NEW_FACTORY_IMPL=true
+
+npm run upgrade:tup:testnet
+```
+
+### Multi-Network Rollout
+
+Use the same workflow across networks with different ProxyAdmin and proxy addresses:
+
+```bash
+# Testnet
+export PROXY_ADMIN=0xTestnetProxyAdmin...
+export BLR_PROXY=0xTestnetBLRProxy...
+export DEPLOY_NEW_BLR_IMPL=true
+npm run upgrade:tup:testnet
+
+# After testing, previewnet
+export PROXY_ADMIN=0xPreviewnetProxyAdmin...
+export BLR_PROXY=0xPreviewnetBLRProxy...
+export DEPLOY_NEW_BLR_IMPL=true
+npm run upgrade:tup:previewnet
+
+# Finally, mainnet
+export PROXY_ADMIN=0xMainnetProxyAdmin...
+export BLR_PROXY=0xMainnetBLRProxy...
+export DEPLOY_NEW_BLR_IMPL=true
+npm run upgrade:tup:mainnet
+```
+
+### Available NPM Scripts
+
+```bash
+# Testnet upgrade
+npm run upgrade:tup:testnet
+
+# Previewnet upgrade
+npm run upgrade:tup:previewnet
+
+# Mainnet upgrade
+npm run upgrade:tup:mainnet
+
+# Custom options (advanced)
+npx ts-node scripts/cli/upgradeTup.ts --help
+```
+
+### Resumable Upgrades (Checkpoints)
+
+For long-running upgrades on slow networks, the workflow uses checkpoints to resume on failure:
+
+**If upgrade fails:**
+
+1. Check the error message
+2. Fix the issue (e.g., insufficient balance, wrong address)
+3. Re-run the same command
+
+**The workflow will:**
+
+- ✓ Detect previous checkpoint
+- ✓ Skip already-completed phases
+- ✓ Resume from last failed step
+- ✓ Complete the upgrade
+
+**Example resumption:**
+
+```bash
+# Initial attempt (fails)
+BLR_PROXY=0x... npm run upgrade:tup:testnet
+# Error: Insufficient balance
+
+# Fix the issue (get more balance)
+
+# Resume - workflow automatically continues
+BLR_PROXY=0x... npm run upgrade:tup:testnet
+```
+
+Upgrade progress is tracked in `deployments/{network}/.checkpoints/` directory and automatically cleaned up on success.
+
+### Troubleshooting
+
+#### "ProxyAdmin address is required"
+
+**Cause:** `PROXY_ADMIN` environment variable not set.
+
+**Solution:**
+
+```bash
+export PROXY_ADMIN=0x...  # Get address from deployment output
+npm run upgrade:tup:testnet
+```
+
+#### "BLR proxy specified but no implementation provided"
+
+**Cause:** Set `BLR_PROXY` but forgot to set either:
+
+- `DEPLOY_NEW_BLR_IMPL=true`, OR
+- `BLR_IMPLEMENTATION=0x...`
+
+**Solution:**
+
+```bash
+export BLR_PROXY=0x...
+export DEPLOY_NEW_BLR_IMPL=true  # Deploy new, OR
+export BLR_IMPLEMENTATION=0x...  # Use existing
+npm run upgrade:tup:testnet
+```
+
+#### "Insufficient balance"
+
+**Cause:** Account doesn't have enough balance for deployment.
+
+**Solution:** Fund the account and retry:
+
+```bash
+# Send funds to deployer account
+# Then retry
+npm run upgrade:tup:testnet
+```
+
+#### "BLR already at target implementation"
+
+**Cause:** BLR proxy is already using the target implementation.
+
+**Solution:** This is not an error - no upgrade needed. Check if you're targeting the correct implementation address.
+
+#### "Upgrade verification failed"
+
+**Cause:** After upgrade, on-chain verification shows implementation doesn't match expected.
+
+**Solution:**
+
+1. Wait a few blocks for transaction finality
+2. Retry the upgrade:
+   ```bash
+   npm run upgrade:tup:testnet
+   ```
+3. If issue persists, check ProxyAdmin has authority to upgrade the proxy
+
+### Environment Variables Reference
+
+| Variable                     | Required | Example    | Purpose                           |
+| ---------------------------- | -------- | ---------- | --------------------------------- |
+| `PROXY_ADMIN`                | Yes      | `0x123...` | ProxyAdmin contract address       |
+| `BLR_PROXY`                  | No\*     | `0x456...` | BLR proxy address to upgrade      |
+| `FACTORY_PROXY`              | No\*     | `0x789...` | Factory proxy address to upgrade  |
+| `DEPLOY_NEW_BLR_IMPL`        | No\*\*   | `true`     | Deploy new BLR implementation     |
+| `DEPLOY_NEW_FACTORY_IMPL`    | No\*\*   | `true`     | Deploy new Factory implementation |
+| `BLR_IMPLEMENTATION`         | No\*\*   | `0xabc...` | Existing BLR implementation       |
+| `FACTORY_IMPLEMENTATION`     | No\*\*   | `0xdef...` | Existing Factory implementation   |
+| `HEDERA_TESTNET_PRIVATE_KEY` | Yes      | `0x...`    | Private key for transactions      |
+
+\*At least one proxy address required
+\*\*For each proxy, either deploy new OR provide existing implementation
+
+### Output
+
+Upgrade results are saved to `deployments/{network}/{network}-upgrade-tup-{timestamp}.json`:
+
+```json
+{
+  "network": "hedera-testnet",
+  "timestamp": "2025-12-17T10:30:00Z",
+  "deployer": "0x1234...",
+  "proxyAdmin": { "address": "0x5678..." },
+  "implementations": {
+    "blr": {
+      "address": "0xabcd...",
+      "transactionHash": "0x9876...",
+      "gasUsed": 1234567
+    }
+  },
+  "blrUpgrade": {
+    "proxyAddress": "0xabcd...",
+    "success": true,
+    "upgraded": true,
+    "oldImplementation": "0x5555...",
+    "newImplementation": "0xabcd...",
+    "transactionHash": "0x9999...",
+    "gasUsed": 123456
+  },
+  "summary": {
+    "proxiesUpgraded": 1,
+    "proxiesFailed": 0,
+    "deploymentTime": 45000,
+    "gasUsed": "1357623",
+    "success": true
+  }
+}
+```
+
+### See Also
+
+- [Scenario 3: Upgrading Facet Implementations](#scenario-3-upgrading-facet-implementations) - For upgrading ResolverProxy tokens
+- [Upgrading Configurations in README.md](README.md#upgrading-configurations) - Complete API reference
+- [CLAUDE.md - TUP vs ResolverProxy Architecture](#repositry-claude-md) - Architecture details
 
 ---
 
@@ -668,7 +1109,7 @@ async function main() {
 - ✅ Bond configuration (version 1)
 - ✅ Factory contract with TransparentUpgradeableProxy
 
-**Output File**: Saves `deployments/deployment-{network}-{timestamp}.json` with all addresses and Hedera contract IDs.
+**Output File**: Saves `deployments/{network}/{network}-deployment-{timestamp}.json` with all addresses and Hedera contract IDs.
 
 ### Workflow 2: Deploy to Existing BLR
 
@@ -994,6 +1435,40 @@ export async function deployAndRegisterCustomFacets(signer: Signer, blr: Contrac
 ```
 
 **Pattern**: Small, focused operations that can be composed into custom workflows.
+
+---
+
+### Type Declaration Patterns
+
+Two patterns are used for TypeScript types in this codebase:
+
+**Co-located (default)**: Define types in the same file as the function that uses them.
+
+```typescript
+// operations/blrDeployment.ts
+export interface DeployBlrOptions { ... }
+export interface DeployBlrResult { ... }
+export async function deployBlr(...): Promise<DeployBlrResult> { ... }
+```
+
+**Centralized**: Import from `types/` when shared across 3+ files.
+
+```typescript
+// operations/blrConfigurations.ts
+import type { ConfigurationData, ConfigurationError } from "../types";
+```
+
+**When to use each:**
+
+| Use Co-located           | Use Centralized          |
+| ------------------------ | ------------------------ |
+| Type used by 1-2 files   | Type used by 3+ files    |
+| Specific to one function | Core infrastructure type |
+| May evolve with feature  | Stable, rarely changes   |
+
+**Rule of thumb**: Start co-located. Extract to `types/` only when you need to import into a 3rd file.
+
+See [`types/core.ts:9-30`](infrastructure/types/core.ts#L9-L30) for detailed guidelines.
 
 ---
 

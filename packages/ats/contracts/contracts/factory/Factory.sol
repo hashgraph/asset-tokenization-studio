@@ -7,7 +7,6 @@ import { IResolverProxy } from "../interfaces/resolver/resolverProxy/IResolverPr
 import { _DEFAULT_ADMIN_ROLE } from "../layer_1/constants/roles.sol";
 import { IControlList } from "../layer_1/interfaces/controlList/IControlList.sol";
 import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
-import { IERC20Permit } from "../layer_1/interfaces/ERC1400/IERC20Permit.sol";
 import { IERC20Votes } from "../layer_1/interfaces/ERC1400/IERC20Votes.sol";
 import { IERC1644 } from "../layer_1/interfaces/ERC1400/IERC1644.sol";
 import { IERC1410 } from "../layer_1/interfaces/ERC1400/IERC1410.sol";
@@ -15,7 +14,6 @@ import { ICap } from "../layer_1/interfaces/cap/ICap.sol";
 import { IERC1594 } from "../layer_1/interfaces/ERC1400/IERC1594.sol";
 import { IClearingActions } from "../layer_1/interfaces/clearing/IClearingActions.sol";
 import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
-import { LocalContext } from "../layer_0/context/LocalContext.sol";
 import {
     FactoryRegulationData,
     buildRegulationData,
@@ -36,8 +34,14 @@ import { IExternalKycListManagement } from "../layer_1/interfaces/externalKycLis
 import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
 import { IERC3643 } from "../layer_1/interfaces/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
+import { IFixedRate } from "../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { Common } from "../layer_0/common/Common.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { ISustainabilityPerformanceTargetRate } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 
-contract Factory is IFactory, LocalContext {
+contract Factory is IFactory, Common {
     modifier checkResolver(IBusinessLogicResolver resolver) {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
@@ -118,6 +122,99 @@ contract Factory is IFactory, LocalContext {
         checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address bondAddress_)
     {
+        bondAddress_ = _deployBond(_bondData, _factoryRegulationData);
+
+        emit BondDeployed(_msgSender(), bondAddress_, _bondData, _factoryRegulationData);
+    }
+
+    function deployBondFixedRate(
+        BondFixedRateData calldata _bondFixedRateData
+    )
+        external
+        checkResolver(_bondFixedRateData.bondData.security.resolver)
+        checkISIN(_bondFixedRateData.bondData.security.erc20MetadataInfo.isin)
+        checkAdmins(_bondFixedRateData.bondData.security.rbacs)
+        checkRegulation(
+            _bondFixedRateData.factoryRegulationData.regulationType,
+            _bondFixedRateData.factoryRegulationData.regulationSubType
+        )
+        returns (address bondAddress_)
+    {
+        bondAddress_ = _deployBond(_bondFixedRateData.bondData, _bondFixedRateData.factoryRegulationData);
+
+        IFixedRate(bondAddress_).initialize_FixedRate(_bondFixedRateData.fixedRateData);
+
+        emit BondFixedRateDeployed(_msgSender(), bondAddress_, _bondFixedRateData);
+    }
+
+    function deployBondKpiLinkedRate(
+        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
+    )
+        external
+        checkResolver(_bondKpiLinkedRateData.bondData.security.resolver)
+        checkISIN(_bondKpiLinkedRateData.bondData.security.erc20MetadataInfo.isin)
+        checkAdmins(_bondKpiLinkedRateData.bondData.security.rbacs)
+        checkRegulation(
+            _bondKpiLinkedRateData.factoryRegulationData.regulationType,
+            _bondKpiLinkedRateData.factoryRegulationData.regulationSubType
+        )
+        checkInterestRate(_bondKpiLinkedRateData.interestRate)
+        checkImpactData(_bondKpiLinkedRateData.impactData)
+        returns (address bondAddress_)
+    {
+        bondAddress_ = _deployBond(_bondKpiLinkedRateData.bondData, _bondKpiLinkedRateData.factoryRegulationData);
+
+        IKpiLinkedRate(bondAddress_).initialize_KpiLinkedRate(
+            _bondKpiLinkedRateData.interestRate,
+            _bondKpiLinkedRateData.impactData,
+            _bondKpiLinkedRateData.kpiOracle
+        );
+
+        emit BondKpiLinkedRateDeployed(_msgSender(), bondAddress_, _bondKpiLinkedRateData);
+    }
+
+    function deployBondSustainabilityPerformanceTargetRate(
+        BondSustainabilityPerformanceTargetRateData calldata _bondSustainabilityPerformanceTargetRateData
+    )
+        external
+        checkResolver(_bondSustainabilityPerformanceTargetRateData.bondData.security.resolver)
+        checkISIN(_bondSustainabilityPerformanceTargetRateData.bondData.security.erc20MetadataInfo.isin)
+        checkAdmins(_bondSustainabilityPerformanceTargetRateData.bondData.security.rbacs)
+        checkRegulation(
+            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationType,
+            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationSubType
+        )
+        returns (address bondAddress_)
+    {
+        bondAddress_ = _deployBond(
+            _bondSustainabilityPerformanceTargetRateData.bondData,
+            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData
+        );
+
+        ISustainabilityPerformanceTargetRate(bondAddress_).initialize_SustainabilityPerformanceTargetRate(
+            _bondSustainabilityPerformanceTargetRateData.interestRate,
+            _bondSustainabilityPerformanceTargetRateData.impactData,
+            _bondSustainabilityPerformanceTargetRateData.projects
+        );
+
+        emit BondSustainabilityPerformanceTargetRateDeployed(
+            _msgSender(),
+            bondAddress_,
+            _bondSustainabilityPerformanceTargetRateData
+        );
+    }
+
+    function getAppliedRegulationData(
+        RegulationType _regulationType,
+        RegulationSubType _regulationSubType
+    ) external pure override returns (RegulationData memory regulationData_) {
+        regulationData_ = buildRegulationData(_regulationType, _regulationSubType);
+    }
+
+    function _deployBond(
+        BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) internal returns (address bondAddress_) {
         bondAddress_ = _deploySecurity(_bondData.security, SecurityType.Bond);
 
         IBondUSA(bondAddress_)._initialize_bondUSA(
@@ -130,15 +227,6 @@ contract Factory is IFactory, LocalContext {
             _bondData.proceedRecipients,
             _bondData.proceedRecipientsData
         );
-
-        emit BondDeployed(_msgSender(), bondAddress_, _bondData, _factoryRegulationData);
-    }
-
-    function getAppliedRegulationData(
-        RegulationType _regulationType,
-        RegulationSubType _regulationSubType
-    ) external pure override returns (RegulationData memory regulationData_) {
-        regulationData_ = buildRegulationData(_regulationType, _regulationSubType);
     }
 
     function _deploySecurity(
@@ -193,7 +281,6 @@ contract Factory is IFactory, LocalContext {
 
         IERC20Votes(securityAddress_).initialize_ERC20Votes(_securityData.erc20VotesActivated);
 
-        IERC20Permit(securityAddress_).initialize_ERC20Permit();
         IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
     }
 }

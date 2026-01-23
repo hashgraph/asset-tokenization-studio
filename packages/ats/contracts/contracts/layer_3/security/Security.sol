@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ISecurity } from "../interfaces/ISecurity.sol";
-import { Common } from "../../layer_1/common/Common.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 
-abstract contract Security is ISecurity, Common {
+abstract contract Security is ISecurity, Internals {
     function getSecurityHolders(
         uint256 _pageIndex,
         uint256 _pageLength

@@ -209,7 +209,7 @@ import {
   Transaction,
   TransactionReceipt,
   TransactionResponse as HTransactionResponse,
-} from "@hashgraph/sdk"
+} from "@hiero-ledger/sdk"
 import {
   CustodialWalletService,
   SignatureRequest,
@@ -235,6 +235,7 @@ import { HTSTransactionResponseAdapter } from "../HTSTransactionResponseAdapter"
 import { HederaId } from "@domain/shared/HederaId"
 import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings"
 import { PublickKeyNotFound } from "./error/PublickKeyNotFound"
+import { EvmAddressNotFound } from "./error/EvmAddressNotFound"
 import { UnsupportedNetwork } from "@domain/network/error/UnsupportedNetwork"
 
 export abstract class CustodialTransactionAdapter extends HederaTransactionAdapter {
@@ -362,10 +363,14 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
     if (!accountMirror.publicKey) {
       throw new PublickKeyNotFound()
     }
+    if (!accountMirror.evmAddress) {
+      throw new EvmAddressNotFound()
+    }
 
     this.account = new Account({
       id: settings.hederaAccountId,
       publicKey: accountMirror.publicKey,
+      evmAddress: accountMirror.evmAddress,
     })
 
     this.initCustodialWalletService(settings)

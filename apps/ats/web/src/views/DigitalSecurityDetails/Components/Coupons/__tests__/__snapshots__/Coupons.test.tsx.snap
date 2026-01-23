@@ -170,7 +170,33 @@ exports[`Coupons should render correctly 1`] = `
                         <div
                           class="css-zvlevn"
                         >
-                          Period
+                          Start Date
+                        </div>
+                      </div>
+                    </th>
+                    <th
+                      class="css-u4onf3"
+                    >
+                      <div
+                        class="css-1lekzkb"
+                      >
+                        <div
+                          class="css-zvlevn"
+                        >
+                          End Date
+                        </div>
+                      </div>
+                    </th>
+                    <th
+                      class="css-u4onf3"
+                    >
+                      <div
+                        class="css-1lekzkb"
+                      >
+                        <div
+                          class="css-zvlevn"
+                        >
+                          Fixing Date
                         </div>
                       </div>
                     </th>
@@ -192,6 +218,28 @@ exports[`Coupons should render correctly 1`] = `
                     class="css-1wpwesf"
                     data-testid="row-0"
                   >
+                    <td
+                      class="css-1kbbn1r"
+                    >
+                      <div
+                        class="css-zvlevn"
+                      >
+                        <div
+                          class="chakra-skeleton css-yixgko"
+                        />
+                      </div>
+                    </td>
+                    <td
+                      class="css-1kbbn1r"
+                    >
+                      <div
+                        class="css-zvlevn"
+                      >
+                        <div
+                          class="chakra-skeleton css-yixgko"
+                        />
+                      </div>
+                    </td>
                     <td
                       class="css-1kbbn1r"
                     >
@@ -498,6 +546,321 @@ exports[`Coupons should render correctly 1`] = `
                   <p
                     class="css-0"
                   >
+                    Start date*
+                  </p>
+                  <div
+                    class="css-k008qs"
+                  >
+                    <svg
+                      class="chakra-icon css-kpbtv0"
+                      fill="currentColor"
+                      focusable="false"
+                      height="1em"
+                      viewBox="0 0 256 256"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div
+                  class="chakra-form-control css-1kxonj9"
+                  role="group"
+                >
+                  <label
+                    class="css-1fey8w1"
+                    for="popover-trigger-:rf:"
+                  >
+                    <div
+                      class="chakra-input__group css-pwmwmr"
+                      data-group="true"
+                    >
+                      <div
+                        class="chakra-input__left-element css-irrpsr"
+                      >
+                        <svg
+                          class="chakra-icon css-kpbtv0"
+                          fill="currentColor"
+                          focusable="false"
+                          height="1em"
+                          viewBox="0 0 256 256"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"
+                          />
+                        </svg>
+                      </div>
+                      <input
+                        aria-controls="popover-content-:rf:"
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        aria-label="Date"
+                        autocomplete="off"
+                        class="chakra-input css-p6x41e"
+                        data-testid="startTimestamp"
+                        id="popover-trigger-:rf:"
+                        name="startTimestamp"
+                        placeholder="Select start date"
+                        value=""
+                      />
+                      <div
+                        class="chakra-input__right-element css-1akgnmh"
+                      >
+                        <svg
+                          aria-label="Select a date"
+                          class="chakra-icon css-c6odlo"
+                          fill="currentColor"
+                          focusable="false"
+                          height="1em"
+                          viewBox="0 0 256 256"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </label>
+                  <div
+                    class="chakra-popover__popper css-1qq679y"
+                    style="visibility: hidden; position: absolute; min-width: max-content; inset: 0 auto auto 0;"
+                  >
+                    <section
+                      class="chakra-popover__content css-19djqmd"
+                      id="popover-content-:rf:"
+                      role="dialog"
+                      style="transform-origin: var(--popper-transform-origin); opacity: 0; visibility: hidden; transform: scale(0.95) translateZ(0);"
+                      tabindex="-1"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div
+                class="chakra-stack css-1h0sumw"
+              >
+                <div
+                  class="chakra-stack css-1nqqhpy"
+                >
+                  <p
+                    class="css-0"
+                  >
+                    End date*
+                  </p>
+                  <div
+                    class="css-k008qs"
+                  >
+                    <svg
+                      class="chakra-icon css-kpbtv0"
+                      fill="currentColor"
+                      focusable="false"
+                      height="1em"
+                      viewBox="0 0 256 256"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div
+                  class="chakra-form-control css-1kxonj9"
+                  role="group"
+                >
+                  <label
+                    class="css-1fey8w1"
+                    for="popover-trigger-:rk:"
+                  >
+                    <div
+                      class="chakra-input__group css-pwmwmr"
+                      data-group="true"
+                    >
+                      <div
+                        class="chakra-input__left-element css-irrpsr"
+                      >
+                        <svg
+                          class="chakra-icon css-kpbtv0"
+                          fill="currentColor"
+                          focusable="false"
+                          height="1em"
+                          viewBox="0 0 256 256"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"
+                          />
+                        </svg>
+                      </div>
+                      <input
+                        aria-controls="popover-content-:rk:"
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        aria-label="Date"
+                        autocomplete="off"
+                        class="chakra-input css-p6x41e"
+                        data-testid="endTimestamp"
+                        id="popover-trigger-:rk:"
+                        name="endTimestamp"
+                        placeholder="Select end date"
+                        value=""
+                      />
+                      <div
+                        class="chakra-input__right-element css-1akgnmh"
+                      >
+                        <svg
+                          aria-label="Select a date"
+                          class="chakra-icon css-c6odlo"
+                          fill="currentColor"
+                          focusable="false"
+                          height="1em"
+                          viewBox="0 0 256 256"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </label>
+                  <div
+                    class="chakra-popover__popper css-1qq679y"
+                    style="visibility: hidden; position: absolute; min-width: max-content; inset: 0 auto auto 0;"
+                  >
+                    <section
+                      class="chakra-popover__content css-19djqmd"
+                      id="popover-content-:rk:"
+                      role="dialog"
+                      style="transform-origin: var(--popper-transform-origin); opacity: 0; visibility: hidden; transform: scale(0.95) translateZ(0);"
+                      tabindex="-1"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div
+                class="chakra-stack css-1h0sumw"
+              >
+                <div
+                  class="chakra-stack css-1nqqhpy"
+                >
+                  <p
+                    class="css-0"
+                  >
+                    Fixing date*
+                  </p>
+                  <div
+                    class="css-k008qs"
+                  >
+                    <svg
+                      class="chakra-icon css-kpbtv0"
+                      fill="currentColor"
+                      focusable="false"
+                      height="1em"
+                      viewBox="0 0 256 256"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div
+                  class="chakra-form-control css-1kxonj9"
+                  role="group"
+                >
+                  <label
+                    class="css-1fey8w1"
+                    for="popover-trigger-:rp:"
+                  >
+                    <div
+                      class="chakra-input__group css-pwmwmr"
+                      data-group="true"
+                    >
+                      <div
+                        class="chakra-input__left-element css-irrpsr"
+                      >
+                        <svg
+                          class="chakra-icon css-kpbtv0"
+                          fill="currentColor"
+                          focusable="false"
+                          height="1em"
+                          viewBox="0 0 256 256"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"
+                          />
+                        </svg>
+                      </div>
+                      <input
+                        aria-controls="popover-content-:rp:"
+                        aria-expanded="false"
+                        aria-haspopup="dialog"
+                        aria-label="Date"
+                        autocomplete="off"
+                        class="chakra-input css-p6x41e"
+                        data-testid="fixingTimestamp"
+                        id="popover-trigger-:rp:"
+                        name="fixingTimestamp"
+                        placeholder="Select fixing date"
+                        value=""
+                      />
+                      <div
+                        class="chakra-input__right-element css-1akgnmh"
+                      >
+                        <svg
+                          aria-label="Select a date"
+                          class="chakra-icon css-c6odlo"
+                          fill="currentColor"
+                          focusable="false"
+                          height="1em"
+                          viewBox="0 0 256 256"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </label>
+                  <div
+                    class="chakra-popover__popper css-1qq679y"
+                    style="visibility: hidden; position: absolute; min-width: max-content; inset: 0 auto auto 0;"
+                  >
+                    <section
+                      class="chakra-popover__content css-19djqmd"
+                      id="popover-content-:rp:"
+                      role="dialog"
+                      style="transform-origin: var(--popper-transform-origin); opacity: 0; visibility: hidden; transform: scale(0.95) translateZ(0);"
+                      tabindex="-1"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div
+                class="chakra-stack css-1h0sumw"
+              >
+                <div
+                  class="chakra-stack css-1nqqhpy"
+                >
+                  <p
+                    class="css-0"
+                  >
                     Coupon rate*
                   </p>
                   <div
@@ -532,132 +895,11 @@ exports[`Coupons should render correctly 1`] = `
                       <input
                         class="chakra-input css-ifstuv"
                         data-testid="rate"
-                        id="field-:rd:"
+                        id="field-:rs:"
                         inputmode="numeric"
                         name="rate"
                         placeholder="0,123%"
                         type="text"
-                        value=""
-                      />
-                    </div>
-                  </label>
-                </div>
-              </div>
-              <div
-                class="chakra-stack css-1h0sumw"
-              >
-                <div
-                  class="chakra-stack css-1nqqhpy"
-                >
-                  <p
-                    class="css-0"
-                  >
-                    Coupon period*
-                  </p>
-                  <div
-                    class="css-k008qs"
-                  >
-                    <svg
-                      class="chakra-icon css-kpbtv0"
-                      fill="currentColor"
-                      focusable="false"
-                      height="1em"
-                      viewBox="0 0 256 256"
-                      width="1em"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div
-                  class="chakra-form-control css-1kxonj9"
-                  role="group"
-                >
-                  <label
-                    class="chakra-form__label css-1egrqbi"
-                    for="period"
-                    id="field-:rg:-label"
-                  >
-                    <div
-                      class="css-kjafn5"
-                    >
-                      <span
-                        class="css-1f43avz-a11yText-A11yText"
-                        id="react-select-2-live-region"
-                      />
-                      <span
-                        aria-atomic="false"
-                        aria-live="polite"
-                        aria-relevant="additions text"
-                        class="css-1f43avz-a11yText-A11yText"
-                      />
-                      <div
-                        class="css-13cymwt-control"
-                      >
-                        <div
-                          class="css-hlgwow"
-                        >
-                          <div
-                            class="css-1jqq78o-placeholder"
-                            id="react-select-2-placeholder"
-                          >
-                            Select coupon period
-                          </div>
-                          <div
-                            class="css-19bb58m"
-                            data-value=""
-                          >
-                            <input
-                              aria-autocomplete="list"
-                              aria-describedby="react-select-2-placeholder"
-                              aria-expanded="false"
-                              aria-haspopup="true"
-                              autocapitalize="none"
-                              autocomplete="off"
-                              autocorrect="off"
-                              class=""
-                              id="period"
-                              role="combobox"
-                              spellcheck="false"
-                              style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
-                              tabindex="0"
-                              type="text"
-                              value=""
-                            />
-                          </div>
-                        </div>
-                        <div
-                          class="css-1wy0on6"
-                        >
-                          <div
-                            class="css-sppt3c"
-                          >
-                            <div
-                              class="css-amv3mm"
-                            >
-                              <svg
-                                class="chakra-icon css-1bnjyrz"
-                                fill="currentColor"
-                                focusable="false"
-                                height="1em"
-                                viewBox="0 0 256 256"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
-                                />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <input
-                        name="period"
-                        type="hidden"
                         value=""
                       />
                     </div>
@@ -737,7 +979,7 @@ exports[`Coupons should render correctly 1`] = `
                         <input
                           class="chakra-input css-ifstuv"
                           data-testid="couponId"
-                          id="field-:rj:"
+                          id="field-:rv:"
                           inputmode="numeric"
                           name="couponId"
                           placeholder="Add ID"

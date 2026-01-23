@@ -1,7 +1,8 @@
 {
   "name": "@hashgraph/asset-tokenization-sdk",
   "description": "Asset Tokenization SDK for Hedera",
-  "version": "1.17.0",
+  "version": "4.0.0",
+  "repository": "https://github.com/hashgraph/asset-tokenization-studio",
   "main": "./build/cjs/src/index.js",
   "module": "./build/esm/src/index.js",
   "types": "./build/esm/src/index.d.ts",

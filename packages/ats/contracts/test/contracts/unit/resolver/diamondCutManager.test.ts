@@ -1,6 +1,4 @@
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { expect } from "chai";
-import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   AccessControl,
@@ -9,16 +7,27 @@ import {
   DiamondCutManager,
   IDiamondCutManager,
   IDiamondLoupe,
+  DiamondCutManager__factory,
+  AccessControlFacet__factory,
+  Pause__factory,
 } from "@contract-types";
-import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
+import {
+  ATS_ROLES,
+  BOND_CONFIG_ID,
+  BOND_FIXED_RATE_CONFIG_ID,
+  BOND_KPI_LINKED_RATE_CONFIG_ID,
+  BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+  EQUITY_CONFIG_ID,
+} from "@scripts";
 import { deployAtsInfrastructureFixture } from "@test";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 // Test-specific configuration IDs for negative test cases
 // These are separate from EQUITY_CONFIG_ID/BOND_CONFIG_ID to avoid conflicts
 const TEST_CONFIG_IDS = {
-  PAUSE_TEST: "0x0000000000000000000000000000000000000000000000000000000000000003",
-  PAUSE_BATCH_TEST: "0x0000000000000000000000000000000000000000000000000000000000000004",
-  BLACKLIST_TEST: "0x0000000000000000000000000000000000000000000000000000000000000005",
+  PAUSE_TEST: "0x0000000000000000000000000000000000000000000000000000000000000004",
+  PAUSE_BATCH_TEST: "0x0000000000000000000000000000000000000000000000000000000000000005",
+  BLACKLIST_TEST: "0x0000000000000000000000000000000000000000000000000000000000000006",
 };
 
 describe("DiamondCutManager", () => {
@@ -31,24 +40,37 @@ describe("DiamondCutManager", () => {
   let pause: Pause;
   let equityFacetIdList: string[] = [];
   let bondFacetIdList: string[] = [];
+  let bondFixedRateFacetIdList: string[] = [];
+  let bondKpiLinkedRateFacetIdList: string[] = [];
+  let bondSustainabilityPerformanceTargetRateFacetIdList: string[] = [];
   let equityFacetVersionList: number[] = [];
 
+  async function atsInfrastructureFixture() {
+    return await deployAtsInfrastructureFixture();
+  }
+
   beforeEach(async () => {
-    const infrastructure = await deployAtsInfrastructureFixture();
+    const infrastructure = await loadFixture(atsInfrastructureFixture);
 
     businessLogicResolver = infrastructure.blr;
 
     signer_A = infrastructure.deployer;
     signer_B = infrastructure.user2;
 
-    accessControl = await ethers.getContractAt("AccessControlFacet", businessLogicResolver.address, signer_A);
+    // Use TypeChain factories instead of ethers.getContractAt for proper ABI resolution
+    accessControl = AccessControlFacet__factory.connect(businessLogicResolver.address, signer_A);
     await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
 
-    pause = await ethers.getContractAt("Pause", businessLogicResolver.address, signer_A);
+    pause = Pause__factory.connect(businessLogicResolver.address, signer_A);
 
-    diamondCutManager = await ethers.getContractAt("DiamondCutManager", businessLogicResolver.address, signer_A);
+    diamondCutManager = DiamondCutManager__factory.connect(businessLogicResolver.address, signer_A);
     equityFacetIdList = Object.values(infrastructure.equityFacetKeys);
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
+    bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
+    bondKpiLinkedRateFacetIdList = Object.values(infrastructure.bondKpiLinkedRateFacetKeys);
+    bondSustainabilityPerformanceTargetRateFacetIdList = Object.values(
+      infrastructure.bondSustainabilityPerformanceTargetRateFacetKeys,
+    );
     equityFacetVersionList = Array(equityFacetIdList.length).fill(1);
   });
 
@@ -58,7 +80,12 @@ describe("DiamondCutManager", () => {
       await pause.connect(signer_B).unpause();
     }
     const pauseSelector = "0x8456cb59";
-    const configIdsToCleanup = [EQUITY_CONFIG_ID, TEST_CONFIG_IDS.BLACKLIST_TEST];
+    const configIdsToCleanup = [
+      EQUITY_CONFIG_ID,
+      TEST_CONFIG_IDS.PAUSE_TEST,
+      TEST_CONFIG_IDS.PAUSE_BATCH_TEST,
+      TEST_CONFIG_IDS.BLACKLIST_TEST,
+    ];
 
     for (const configId of configIdsToCleanup) {
       try {
@@ -247,7 +274,17 @@ describe("DiamondCutManager", () => {
     expect(facetAddresses).to.have.members(facetAddresses_2);
 
     const expectedFacetIdList =
-      configId === EQUITY_CONFIG_ID ? equityFacetIdList : configId === BOND_CONFIG_ID ? bondFacetIdList : null;
+      configId === EQUITY_CONFIG_ID
+        ? equityFacetIdList
+        : configId === BOND_CONFIG_ID
+          ? bondFacetIdList
+          : configId == BOND_FIXED_RATE_CONFIG_ID
+            ? bondFixedRateFacetIdList
+            : configId == BOND_KPI_LINKED_RATE_CONFIG_ID
+              ? bondKpiLinkedRateFacetIdList
+              : configId == BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID
+                ? bondSustainabilityPerformanceTargetRateFacetIdList
+                : null;
 
     if (!expectedFacetIdList) {
       expect.fail("Unknown configId");
@@ -259,10 +296,16 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = (await diamondCutManager.getConfigurationsLength()).toNumber();
-    expect(configLength).to.equal(2);
+    expect(configLength).to.equal(5);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
-    expect(configIds).to.have.members([EQUITY_CONFIG_ID, BOND_CONFIG_ID]);
+    expect(configIds).to.have.members([
+      EQUITY_CONFIG_ID,
+      BOND_CONFIG_ID,
+      BOND_FIXED_RATE_CONFIG_ID,
+      BOND_KPI_LINKED_RATE_CONFIG_ID,
+      BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+    ]);
 
     for (const configId of configIds) {
       const configLatestVersion = (await diamondCutManager.getLatestVersionByConfiguration(configId)).toNumber();
@@ -385,7 +428,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_A).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations),
-    ).to.be.rejectedWith("DuplicatedFacetInConfiguration");
+    ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
   it("GIVEN a batch deploying WHEN run cancelBatchConfiguration THEN all the related information is removed", async () => {
@@ -393,18 +436,10 @@ describe("DiamondCutManager", () => {
 
     const batchBusinessLogicResolver = batchInfrastructure.blr;
 
-    const batchAccessControl = await ethers.getContractAt(
-      "AccessControlFacet",
-      batchBusinessLogicResolver.address,
-      signer_A,
-    );
+    const batchAccessControl = AccessControlFacet__factory.connect(batchBusinessLogicResolver.address, signer_A);
     await batchAccessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
 
-    const batchDiamondCutManager = await ethers.getContractAt(
-      "DiamondCutManager",
-      batchBusinessLogicResolver.address,
-      signer_A,
-    );
+    const batchDiamondCutManager = DiamondCutManager__factory.connect(batchBusinessLogicResolver.address, signer_A);
 
     const configLength = (await batchDiamondCutManager.getConfigurationsLength()).toNumber();
     expect(configLength).to.equal(0);
@@ -415,7 +450,7 @@ describe("DiamondCutManager", () => {
     const originalDiamondCutManager = diamondCutManager;
     diamondCutManager = batchDiamondCutManager;
 
-    for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID]) {
+    for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID, BOND_FIXED_RATE_CONFIG_ID]) {
       const configLatestVersion = (await batchDiamondCutManager.getLatestVersionByConfiguration(configId)).toNumber();
       expect(configLatestVersion).to.equal(0);
 
@@ -510,7 +545,7 @@ describe("DiamondCutManager", () => {
 
     await expect(
       diamondCutManager.connect(signer_A).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false),
-    ).to.be.rejectedWith("DuplicatedFacetInConfiguration");
+    ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
   it("GIVEN a resolver WHEN a selector is blacklisted THEN transaction fails with SelectorBlacklisted", async () => {

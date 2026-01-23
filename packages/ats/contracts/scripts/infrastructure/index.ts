@@ -24,9 +24,10 @@
  */
 
 // ============================================================================
-// Types
+// Types (consolidated in types/ folder)
 // ============================================================================
 
+// Core types
 export type {
   RegistryProvider,
   FacetDefinition,
@@ -36,10 +37,16 @@ export type {
   DeploymentResult,
   UpgradeProxyOptions,
   UpgradeProxyResult,
-  CreateConfigOptions,
-  CreateConfigResult,
   OperationResult,
   SignerOptions,
+  AnyDeploymentOutput,
+  SaveDeploymentOptions,
+  SaveResult,
+  LoadDeploymentOptions,
+  DeploymentOutputType,
+  DeploymentWithExistingBlrOutputType,
+  UpgradeConfigurationsOutputType,
+  UpgradeTupProxiesOutputType,
 } from "./types";
 
 export { ok, err, createSigner, createSignerFromEnv } from "./types";
@@ -51,8 +58,22 @@ export type {
   ConfigurationResult,
   CheckpointStatus,
   WorkflowType,
+  AtsWorkflowType,
   ResumeOptions,
-} from "./types/checkpoint";
+} from "./types";
+
+// Type guards
+export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./types";
+
+// BLR configuration types
+export type {
+  FacetConfiguration,
+  BatchFacetConfiguration,
+  CreateBlrConfigurationResult,
+  ConfigurationError,
+  ConfigurationData,
+  FacetConfigurationData,
+} from "./types";
 
 // ============================================================================
 // Constants
@@ -76,7 +97,9 @@ export {
   PROXY_CONTRACTS,
   ENV_VAR_PATTERNS,
   DEPLOYMENT_OUTPUT_DIR,
-  DEPLOYMENT_OUTPUT_PATTERN,
+  ATS_WORKFLOW_DESCRIPTORS,
+  WORKFLOW_DESCRIPTORS,
+  registerWorkflowDescriptor,
 } from "./constants";
 
 export type { Network } from "./constants";
@@ -97,10 +120,23 @@ export {
 // Configuration
 // ============================================================================
 
-export { getNetworkConfig, getAllNetworks } from "./config";
+export { getNetworkConfig, getAllNetworks, getPrivateKey, getPrivateKeys } from "./config";
 
-export { getDeploymentConfig, isLocalNetwork, isInstantMiningNetwork, DEPLOYMENT_CONFIGS } from "./networkConfig";
-export type { DeploymentConfig } from "./networkConfig";
+// ============================================================================
+// Signer
+// ============================================================================
+
+export { createNetworkSigner } from "./signer";
+export type { NetworkSignerResult } from "./signer";
+
+export {
+  getDeploymentConfig,
+  isLocalNetwork,
+  isInstantMiningNetwork,
+  DEPLOYMENT_CONFIGS,
+  KNOWN_NETWORKS,
+} from "./networkConfig";
+export type { DeploymentConfig, KnownNetwork } from "./networkConfig";
 
 // ============================================================================
 // Operations
@@ -120,13 +156,7 @@ export { registerFacets, type RegisterFacetsOptions, type RegisterFacetsResult }
 
 export { registerAdditionalFacets, type RegisterAdditionalFacetsOptions } from "./operations/registerAdditionalFacets";
 
-export {
-  createBatchConfiguration,
-  type FacetConfiguration,
-  type CreateBlrConfigurationResult,
-  type ConfigurationData,
-  type ConfigurationError,
-} from "./operations/blrConfigurations";
+export { createBatchConfiguration } from "./operations/blrConfigurations";
 
 export { deployBlr, type DeployBlrOptions, type DeployBlrResult } from "./operations/blrDeployment";
 
@@ -172,9 +202,19 @@ export {
 // Utilities
 // ============================================================================
 
-export { validateAddress, validateBytes32 } from "./utils/validation";
+export { isValidAddress, validateAddress, isValidBytes32, validateBytes32 } from "./utils/validation";
 
-export { loadDeployment, findLatestDeployment, listDeploymentFiles } from "./utils/deploymentFiles";
+export {
+  saveDeploymentOutput,
+  loadDeployment,
+  loadDeploymentByWorkflow,
+  findLatestDeployment,
+  listDeploymentsByWorkflow,
+  listDeploymentFiles,
+  getDeploymentsDir,
+  getNetworkDeploymentDir,
+  generateDeploymentFilename,
+} from "./utils/deploymentFiles";
 
 export {
   waitForTransaction,
@@ -215,6 +255,8 @@ export {
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 
 export { getSelector } from "./utils/selector";
+
+export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
 // ============================================================================
 // Checkpoint System

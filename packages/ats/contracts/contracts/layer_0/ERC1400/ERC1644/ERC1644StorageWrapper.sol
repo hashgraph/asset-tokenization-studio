@@ -11,9 +11,15 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         bool initialized;
     }
 
-    modifier onlyControllable() {
+    modifier onlyControllable() override {
         _checkControllable();
         _;
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_ERC1644(bool _controllable) internal override {
+        _erc1644Storage().isControllable = _controllable;
+        _erc1644Storage().initialized = true;
     }
 
     function _controllerTransfer(
@@ -22,7 +28,7 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal {
+    ) internal override {
         _transfer(_from, _to, _value);
         emit ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
     }
@@ -32,18 +38,22 @@ abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643Storag
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal {
+    ) internal override {
         _burn(_tokenHolder, _value);
         emit ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 
-    function _finalizeControllable() internal {
+    function _finalizeControllable() internal override {
         _erc1644Storage().isControllable = false;
         emit FinalizedControllerFeature(_msgSender());
     }
 
-    function _isControllable() internal view returns (bool) {
+    function _isControllable() internal view override returns (bool) {
         return _erc1644Storage().isControllable;
+    }
+
+    function _isERC1644Initialized() internal view override returns (bool) {
+        return _erc1644Storage().initialized;
     }
 
     function _erc1644Storage() internal pure returns (ERC1644Storage storage erc1644Storage_) {

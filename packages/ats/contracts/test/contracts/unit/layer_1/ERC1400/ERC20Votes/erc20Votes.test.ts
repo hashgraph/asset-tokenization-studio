@@ -6,7 +6,7 @@ import {
   type IERC1410,
   type Pause,
   AdjustBalances,
-  ERC20Votes,
+  ERC20VotesFacet,
   EquityUSA,
   TimeTravelFacet as TimeTravel,
 } from "@contract-types";
@@ -25,7 +25,7 @@ describe("ERC20Votes Tests", () => {
   let signer_C: SignerWithAddress;
   let signer_D: SignerWithAddress;
 
-  let erc20VotesFacet: ERC20Votes;
+  let erc20VotesFacet: ERC20VotesFacet;
   let pauseFacet: Pause;
   let erc1410Facet: IERC1410;
   let adjustBalancesFacet: AdjustBalances;
@@ -88,7 +88,7 @@ describe("ERC20Votes Tests", () => {
       },
     ]);
 
-    erc20VotesFacet = await ethers.getContractAt("ERC20Votes", diamond.address);
+    erc20VotesFacet = await ethers.getContractAt("ERC20VotesFacet", diamond.address);
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
     adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
@@ -106,6 +106,28 @@ describe("ERC20Votes Tests", () => {
         erc20VotesFacet,
         "AlreadyInitialized",
       );
+    });
+
+    it("GIVEN ERC20Votes activated WHEN calling isActivated THEN returns true", async () => {
+      const isActivated = await erc20VotesFacet.isActivated();
+      expect(isActivated).to.equal(true);
+    });
+
+    it("GIVEN ERC20Votes not activated WHEN calling isActivated THEN returns false", async () => {
+      // Deploy new fixture with erc20VotesActivated = false
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: true,
+            internalKycActivated: false,
+            erc20VotesActivated: false,
+          },
+        },
+      });
+
+      const erc20VotesFacetInactive = await ethers.getContractAt("ERC20Votes", base.diamond.address);
+      const isActivated = await erc20VotesFacetInactive.isActivated();
+      expect(isActivated).to.equal(false);
     });
   });
 
@@ -366,8 +388,8 @@ describe("ERC20Votes Tests", () => {
       await erc20VotesFacet.delegate(signer_B.address);
 
       const checkpoint = await erc20VotesFacet.checkpoints(signer_B.address, 0);
-      expect(checkpoint.fromBlock).to.be.gt(0);
-      expect(checkpoint.votes).to.equal(amount);
+      expect(checkpoint.from).to.be.gt(0);
+      expect(checkpoint.value).to.equal(amount);
     });
   });
 

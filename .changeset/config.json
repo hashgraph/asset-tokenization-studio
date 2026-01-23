@@ -7,6 +7,12 @@
       "@hashgraph/asset-tokenization-contracts",
       "@hashgraph/asset-tokenization-sdk",
       "@hashgraph/asset-tokenization-dapp"
+    ],
+    [
+      "@hashgraph/mass-payout-contracts",
+      "@hashgraph/mass-payout-sdk",
+      "@hashgraph/mass-payout-backend",
+      "@hashgraph/mass-payout-frontend"
     ]
   ],
   "linked": [],

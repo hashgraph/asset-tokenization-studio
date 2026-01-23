@@ -102,5 +102,28 @@ export async function deployAtsInfrastructureFixture(
       },
       {} as Record<string, string>,
     ),
+    bondFixedRateFacetKeys: deployment.helpers.getBondFixedRateFacets().reduce(
+      (acc, f) => {
+        acc[f.name] = f.key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+    bondKpiLinkedRateFacetKeys: deployment.helpers.getBondKpiLinkedRateFacets().reduce(
+      (acc, f) => {
+        acc[f.name] = f.key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+    bondSustainabilityPerformanceTargetRateFacetKeys: deployment.helpers
+      .getBondSustainabilityPerformanceTargetRateFacets()
+      .reduce(
+        (acc, f) => {
+          acc[f.name] = f.key;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
   };
 }

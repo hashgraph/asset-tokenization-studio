@@ -13,6 +13,8 @@
  * @module infrastructure/checkpoint/NullCheckpointManager
  */
 
+// Import directly from source files to avoid circular dependency
+// (barrel export @scripts/infrastructure includes this file, creating circular import)
 import type { DeploymentCheckpoint, CheckpointStatus } from "../types/checkpoint";
 import { CheckpointManager } from "./CheckpointManager";
 
@@ -44,10 +46,13 @@ export class NullCheckpointManager extends CheckpointManager {
   /**
    * Create a null checkpoint manager.
    *
-   * Directory parameter is accepted for API compatibility but ignored.
+   * Network and directory parameters are accepted for API compatibility but ignored.
+   *
+   * @param network - Network name (optional, for API compatibility)
+   * @param checkpointsDir - Directory path (optional, for API compatibility)
    */
-  constructor(checkpointsDir?: string) {
-    super(checkpointsDir);
+  constructor(network?: string, checkpointsDir?: string) {
+    super(network, checkpointsDir);
   }
 
   /**

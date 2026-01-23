@@ -48,20 +48,20 @@ The Mass Payout contracts provide a framework for executing bulk payment distrib
 ### Building
 
 ```bash
-# From project root
-npm run mass-payout:build
+# All mass payout modules from project root
+npm run build
 
-# Or build contracts specifically
+# Or only contracts module from contracts directory
 npx hardhat compile
 ```
 
 ## Testing
 
 ```bash
-# From project root
+# All mass payout tests from project root
 npm run mass-payout:test
 
-# Or run tests directly
+# Or run only contracts tests from contracts directory
 npx hardhat test
 ```
 
@@ -85,6 +85,16 @@ These contracts are designed to work with:
 - Asset Tokenization Studio (ATS) token contracts
 - Mass Payout SDK for programmatic interaction
 - Mass Payout frontend and backend applications
+
+---
+
+## 📚 Documentation
+
+For more information about the project, see:
+
+- [Guides](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/guides)
+- [API Documentation](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/api)
+- [References](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/references)
 
 ## License
 

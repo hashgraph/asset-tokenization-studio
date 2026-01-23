@@ -129,4 +129,31 @@ describe("Control List Tests", () => {
     const listType = await controlListFacet.getControlListType();
     expect(listType).to.equal(false);
   });
+
+  it("GIVEN an account already in control list WHEN addToControlList is called again THEN transaction fails with ListedAccount", async () => {
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_B.address);
+
+    // Add account to control list
+    await controlListFacet.connect(signer_B).addToControlList(signer_C.address);
+
+    // Verify account is in the list
+    expect(await controlListFacet.isInControlList(signer_C.address)).to.equal(true);
+
+    // Try to add the same account again
+    await expect(controlListFacet.connect(signer_B).addToControlList(signer_C.address))
+      .to.be.revertedWithCustomError(controlListFacet, "ListedAccount")
+      .withArgs(signer_C.address);
+  });
+
+  it("GIVEN an account not in control list WHEN removeFromControlList is called THEN transaction fails with UnlistedAccount", async () => {
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_B.address);
+
+    // Verify account is not in the list
+    expect(await controlListFacet.isInControlList(signer_C.address)).to.equal(false);
+
+    // Try to remove an account that's not in the list
+    await expect(controlListFacet.connect(signer_B).removeFromControlList(signer_C.address))
+      .to.be.revertedWithCustomError(controlListFacet, "UnlistedAccount")
+      .withArgs(signer_C.address);
+  });
 });

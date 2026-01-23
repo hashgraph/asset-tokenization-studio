@@ -203,10 +203,10 @@
 
 */
 
-import KeyProps, { KeyType } from './KeyProps';
-import { PrivateKey as HPrivateKey } from '@hashgraph/sdk';
-import PublicKey from './PublicKey';
-import BaseError from '@core/error/BaseError';
+import KeyProps, { KeyType } from "./KeyProps";
+import { PrivateKey as HPrivateKey } from "@hiero-ledger/sdk";
+import PublicKey from "./PublicKey";
+import BaseError from "@core/error/BaseError";
 
 export default class PrivateKey implements KeyProps {
   public readonly key: string;

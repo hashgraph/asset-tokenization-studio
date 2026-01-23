@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 import { _SSI_MANAGER_ROLE } from "../constants/roles.sol";
 import { ISsiManagement } from "../interfaces/ssi/ISsiManagement.sol";
 
-abstract contract SsiManagement is ISsiManagement, Common {
+abstract contract SsiManagement is ISsiManagement, Internals {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
     ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {

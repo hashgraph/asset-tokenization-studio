@@ -4,7 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import { _SNAPSHOT_STORAGE_POSITION } from "../constants/storagePositions.sol";
-import { ISnapshotsStorageWrapper } from "../../layer_1/interfaces/snapshots/ISnapshots.sol";
+import {
+    ISnapshotsStorageWrapper,
+    Snapshots,
+    SnapshotsAddress,
+    PartitionSnapshots,
+    ListOfPartitions
+} from "../../layer_1/interfaces/snapshots/ISnapshots.sol";
 import { CorporateActionsStorageWrapper } from "../corporateActions/CorporateActionsStorageWrapper.sol";
 
 abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, CorporateActionsStorageWrapper {
@@ -13,23 +19,6 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
 
     // Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
     // Snapshot struct, but that would impede usage of functions that work on an array.
-    struct Snapshots {
-        uint256[] ids;
-        uint256[] values;
-    }
-
-    struct SnapshotsAddress {
-        uint256[] ids;
-        address[] values;
-    }
-
-    struct ListOfPartitions {
-        bytes32[] partitions;
-    }
-    struct PartitionSnapshots {
-        uint256[] ids;
-        ListOfPartitions[] values;
-    }
 
     struct SnapshotStorage {
         /// @dev Snapshots for total balances per account
@@ -71,22 +60,22 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         Snapshots totalTokenHoldersSnapshots;
     }
 
-    function _takeSnapshot() internal returns (uint256 snapshotID_) {
+    function _takeSnapshot() internal override returns (uint256 snapshotID_) {
         snapshotID_ = _snapshot();
         emit SnapshotTaken(_msgSender(), snapshotID_);
     }
 
-    function _snapshot() internal returns (uint256) {
+    function _snapshot() internal override returns (uint256) {
         _snapshotStorage().currentSnapshotId.increment();
 
         uint256 currentId = _getCurrentSnapshotId();
 
-        emit SnapshotTriggered(_msgSender(), currentId);
+        emit SnapshotTriggered(currentId);
 
         return currentId;
     }
 
-    function _updateSnapshot(Snapshots storage snapshots, uint256 currentValue) internal {
+    function _updateSnapshot(Snapshots storage snapshots, uint256 currentValue) internal override {
         uint256 currentId = _getCurrentSnapshotId();
         if (_lastSnapshotId(snapshots.ids) < currentId) {
             snapshots.ids.push(currentId);
@@ -94,7 +83,7 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         }
     }
 
-    function _updateSnapshotAddress(SnapshotsAddress storage snapshots, address currentValue) internal {
+    function _updateSnapshotAddress(SnapshotsAddress storage snapshots, address currentValue) internal override {
         uint256 currentId = _getCurrentSnapshotId();
         if (_lastSnapshotId(snapshots.ids) < currentId) {
             snapshots.ids.push(currentId);
@@ -106,10 +95,8 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         Snapshots storage snapshots,
         PartitionSnapshots storage partitionSnapshots,
         uint256 currentValueForPartition,
-        // There is a limitation in the number of partitions an account can have, if it has to many the snapshot
-        // transaction will run out of gas
         bytes32[] memory partitionIds
-    ) internal {
+    ) internal override {
         uint256 currentId = _getCurrentSnapshotId();
         if (_lastSnapshotId(snapshots.ids) < currentId) {
             snapshots.ids.push(currentId);
@@ -122,11 +109,11 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         }
     }
 
-    function _getCurrentSnapshotId() internal view returns (uint256) {
+    function _getCurrentSnapshotId() internal view override returns (uint256) {
         return _snapshotStorage().currentSnapshotId.current();
     }
 
-    function _valueAt(uint256 snapshotId, Snapshots storage snapshots) internal view returns (bool, uint256) {
+    function _valueAt(uint256 snapshotId, Snapshots storage snapshots) internal view override returns (bool, uint256) {
         (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
 
         return (found, found ? snapshots.values[index] : 0);
@@ -135,13 +122,13 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
     function _addressValueAt(
         uint256 snapshotId,
         SnapshotsAddress storage snapshots
-    ) internal view returns (bool, address) {
+    ) internal view override returns (bool, address) {
         (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
 
         return (found, found ? snapshots.values[index] : address(0));
     }
 
-    function _indexFor(uint256 snapshotId, uint256[] storage ids) internal view returns (bool, uint256) {
+    function _indexFor(uint256 snapshotId, uint256[] storage ids) internal view override returns (bool, uint256) {
         if (snapshotId == 0) {
             revert SnapshotIdNull();
         }
@@ -158,7 +145,7 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
         }
     }
 
-    function _lastSnapshotId(uint256[] storage ids) internal view returns (uint256) {
+    function _lastSnapshotId(uint256[] storage ids) internal view override returns (uint256) {
         if (ids.length == 0) {
             return 0;
         } else {

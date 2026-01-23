@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
-import { AtsRoleName, AtsRoleHash } from "@scripts/domain";
+import { AtsRoleName, AtsRoleHash } from "../constants";
 export interface Rbac {
-  role: AtsRoleName | AtsRoleHash;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  role: AtsRoleName | AtsRoleHash | (string & {});
   members: string[];
 }
 
@@ -95,6 +96,11 @@ export interface FactoryRegulationDataParams {
     /** Additional security information */
     info: string;
   };
+}
+
+export interface FixedRateDataParams {
+  rate: number;
+  rateDecimals: number;
 }
 
 export enum SecurityType {

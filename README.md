@@ -34,7 +34,7 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
   - Gas-optimized operations and proxy-based upgradeable contracts.
 
 - **Enterprise Development Practices**
-  - **Domain-Driven Design (DDD)**, **Hexagonal Architecture**, and **CQS pattern**.
+  - **Domain-Driven Design (DDD)**, **Hexagonal Architecture**, and **CQRS pattern**.
   - Separation of concerns across smart contracts, SDKs, frontends, and backends.
   - Strong CI/CD workflows with conditional builds and tests for each module.
   - Custodian integration at the SDK level (Dfns, Fireblocks, AWS KMS).
@@ -43,19 +43,39 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
 
 ```
 ├── packages/
-│ ├── ats/
-│ │ ├── contracts # Solidity smart contracts for ATS
-│ │ └── sdk # TypeScript SDK for ATS contracts
-│ └── mass-payout/
-│ ├── contracts # Solidity smart contracts for payout flows
-│ └── sdk # TypeScript SDK for payout flows
+│   ├── ats/
+│   │   ├── contracts         # Solidity smart contracts for ATS
+│   │   └── sdk               # TypeScript SDK for ATS contracts
+│   └── mass-payout/
+│       ├── contracts         # Solidity smart contracts for payout flows
+│       └── sdk               # TypeScript SDK for payout flows
 ├── apps/
-│ ├── ats/
-│ │ └── web # Frontend dApp for Asset Tokenization Studio
-│ └── mass-payout/
-│ ├── backend # API backend for payout orchestration
-│ └── frontend # Admin panel for managing payouts
-└── package.json # Workspace configuration and root scripts
+│   ├── ats/
+│   │   └── web               # Frontend dApp for Asset Tokenization Studio
+│   ├── mass-payout/
+│   │   ├── backend           # API backend for payout orchestration
+│   │   └── frontend          # Admin panel for managing payouts
+│   └── docs                  # Documentation site (Docusaurus)
+├── docs/                     # Technical documentation
+│   ├── ats/                  # ATS documentation
+│   ├── mass-payout/          # Mass Payout documentation
+│   └── references/           # Cross-product documentation
+│       ├── adr/              # Architecture Decision Records
+│       ├── proposals/        # Enhancement Proposals
+│       └── guides/           # General Guides
+└── package.json              # Workspace configuration and root scripts
+```
+
+## Documentation
+
+**Complete documentation:** [docs/index.md](docs/index.md)
+
+This project follows a **"Docs-as-Code"** philosophy, treating documentation with the same rigor as software. We maintain comprehensive documentation organized by product.
+
+You can also run the documentation site locally:
+
+```bash
+npm run docs:dev
 ```
 
 ## Architecture
@@ -117,17 +137,39 @@ flowchart TD
 From the monorepo root:
 
 ```bash
-
-# Install all dependencies
-npm ci
-```
-
-```bash
-# Build all packages and applications
 npm run setup
 ```
 
-This command will compile contracts, build SDKs, and set up web and backend environments.
+This command will install dependencies, compile contracts, build SDKs, and set up web and backend environments.
+
+### Selective Setup (ATS or Mass Payout only)
+
+You can set up only the product you need without installing all dependencies:
+
+```bash
+# Setup only ATS (contracts, SDK, and web app)
+npm run ats:setup
+
+# Setup only Mass Payout (contracts, SDK, backend, and frontend)
+npm run mass-payout:setup
+```
+
+### Clean Installation
+
+If you had a previous installation and want to start fresh:
+
+```bash
+# Clean install for ATS
+npm run ats:setup:clean
+
+# Clean install for Mass Payout
+npm run mass-payout:setup:clean
+
+# Clean install for everything
+npm run setup:clean
+```
+
+This will remove previous build artifacts and reinstall dependencies before building.
 
 ### Environment Configuration
 
@@ -162,14 +204,17 @@ npm run ats:test        # Run tests for all ATS modules
 
 ```bash
 npm run mass-payout:build         # Build contracts, SDK, backend, and frontend
-npm run mass-payout:backend:dev   # Start backend in dev mode
 npm run mass-payout:frontend:dev  # Start frontend in dev mode
 npm run mass-payout:test          # Run all payout-related tests
+
+# Backend must be started from its directory:
+cd apps/mass-payout/backend
+npm run start:dev                  # Start backend in dev mode
 ```
 
 - Contracts (packages/mass-payout/contracts) → Solidity payout contracts
 - SDK (packages/mass-payout/sdk) → TypeScript SDK for payout execution
-- Backend (apps/mass-payout/backend) → API with PostgreSQL
+- Backend (apps/mass-payout/backend) → API with PostgreSQL (must run from its directory)
 - Frontend (apps/mass-payout/frontend) → Admin panel in React + Chakra UI
 
 ## Testing
@@ -213,9 +258,12 @@ The project uses separate GitHub Actions workflows for different components:
 
 - **ATS Tests** (`.github/workflows/test-ats.yml`): Runs when ATS-related files change
 - **Mass Payout Tests** (`.github/workflows/test-mp.yml`): Runs when Mass Payout files change
-- **Publishing** (`.github/workflows/publish.yml`): Handles publishing to npm with conditional logic based on release tags
+- **ATS Release** (`.github/workflows/ats.release.yml`): Semi-automated release workflow (manual version bump + automated tag/release)
+- **Mass Payout Release** (`.github/workflows/mp.release.yml`): Semi-automated release workflow (manual version bump + automated tag/release)
+- **ATS Publish** (`.github/workflows/ats.publish.yml`): Automatically publishes ATS packages to npm when release tags are pushed
+- **Mass Payout Publish** (`.github/workflows/mp.publish.yml`): Automatically publishes Mass Payout packages to npm when release tags are pushed
 
-Tests are automatically triggered only when relevant files are modified, improving CI efficiency.
+Tests are automatically triggered only when relevant files are modified, improving CI efficiency. For detailed release process documentation, see [`.github/WORKFLOWS.md`](.github/WORKFLOWS.md).
 
 ## Support
 

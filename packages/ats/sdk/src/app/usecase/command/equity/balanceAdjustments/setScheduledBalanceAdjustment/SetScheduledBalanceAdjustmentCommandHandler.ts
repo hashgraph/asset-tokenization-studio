@@ -203,21 +203,21 @@
 
 */
 
-import { ICommandHandler } from '@core/command/CommandHandler';
-import { CommandHandler } from '@core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from "@core/command/CommandHandler";
+import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
 import {
   SetScheduledBalanceAdjustmentCommand,
   SetScheduledBalanceAdjustmentCommandResponse,
-} from './SetScheduledBalanceAdjustmentCommand';
-import TransactionService from '@service/transaction/TransactionService';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import AccountService from '@service/account/AccountService';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
-import ValidationService from '@service/validation/ValidationService';
-import ContractService from '@service/contract/ContractService';
-import { SetScheduledBalanceAdjustmentCommandError } from './error/SetScheduledBalanceAdjustmentCommandError';
+} from "./SetScheduledBalanceAdjustmentCommand";
+import TransactionService from "@service/transaction/TransactionService";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import AccountService from "@service/account/AccountService";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import ValidationService from "@service/validation/ValidationService";
+import ContractService from "@service/contract/ContractService";
+import { SetScheduledBalanceAdjustmentCommandError } from "./error/SetScheduledBalanceAdjustmentCommandError";
 
 @CommandHandler(SetScheduledBalanceAdjustmentCommand)
 export class SetScheduledBalanceAdjustmentCommandHandler
@@ -234,24 +234,17 @@ export class SetScheduledBalanceAdjustmentCommandHandler
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(
-    command: SetScheduledBalanceAdjustmentCommand,
-  ): Promise<SetScheduledBalanceAdjustmentCommandResponse> {
+  async execute(command: SetScheduledBalanceAdjustmentCommand): Promise<SetScheduledBalanceAdjustmentCommandResponse> {
     try {
       const { securityId, executionDate, factor, decimals } = command;
       const handler = this.transactionService.getHandler();
       const account = this.accountService.getCurrentAccount();
 
-      const securityEvmAddress: EvmAddress =
-        await this.contractService.getContractEvmAddress(securityId);
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
       await this.validationService.checkPause(securityId);
 
-      await this.validationService.checkRole(
-        SecurityRole._CORPORATEACTIONS_ROLE,
-        account.evmAddress!,
-        securityId,
-      );
+      await this.validationService.checkRole(SecurityRole._CORPORATEACTIONS_ROLE, account.evmAddress!, securityId);
 
       const res = await handler.setScheduledBalanceAdjustment(
         securityEvmAddress,
@@ -261,20 +254,16 @@ export class SetScheduledBalanceAdjustmentCommandHandler
         securityId,
       );
 
-      const balanceAdjustmentId =
-        await this.transactionService.getTransactionResult({
-          res,
-          result: res.response?.balanceAdjustmentID,
-          className: SetScheduledBalanceAdjustmentCommandHandler.name,
-          position: 1,
-          numberOfResultsItems: 2,
-        });
+      const balanceAdjustmentId = await this.transactionService.getTransactionResult({
+        res,
+        result: res.response?.balanceAdjustmentID,
+        className: SetScheduledBalanceAdjustmentCommandHandler.name,
+        position: 0,
+        numberOfResultsItems: 1,
+      });
 
       return Promise.resolve(
-        new SetScheduledBalanceAdjustmentCommandResponse(
-          parseInt(balanceAdjustmentId, 16),
-          res.id!,
-        ),
+        new SetScheduledBalanceAdjustmentCommandResponse(parseInt(balanceAdjustmentId, 16), res.id!),
       );
     } catch (error) {
       throw new SetScheduledBalanceAdjustmentCommandError(error as Error);

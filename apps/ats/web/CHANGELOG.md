@@ -1,5 +1,78 @@
 # @hashgraph/asset-tokenization-dapp
 
+## 4.0.0
+
+### Major Changes
+
+- 6950d41: Code refactor plus Coupon fixing, start and end date added. Four type of bonds exist : standard, fixed rate, kpi linked rate and sustainability performance target rate
+
+### Minor Changes
+
+- 902fea1: Added Docusaurus and project documentation, renamed the MP package organization, and added a Claude documentation command.
+
+### Patch Changes
+
+- Updated dependencies [3ba32c9]
+- Updated dependencies [902fea1]
+- Updated dependencies [650874b]
+- Updated dependencies [6950d41]
+- Updated dependencies [8f7487a]
+- Updated dependencies [c10a8ee]
+- Updated dependencies [cbcc1db]
+  - @hashgraph/asset-tokenization-sdk@4.0.0
+
+## 3.1.0
+
+### Patch Changes
+
+- @hashgraph/asset-tokenization-sdk@3.1.0
+
+## 3.0.0
+
+### Minor Changes
+
+- e0a3f03: Add getCouponAmountFor info (numerator, denominator, recordDateReached) to see coupon view
+- e0a3f03: [ATS-SDK] Add tokenBalance and decimals to getCouponFor and [ATS-WEB] add fullRedeem in forceRedeem view and balance in seeCoupons and seeDividend views
+- e0a3f03: Add a checkbox in force redeem view to redeem every tokens if the maturity date has arrived
+- e0a3f03: Add getDividendAmountFor info (numerator, denominator, recordDateReached) in see dividend view
+
+### Patch Changes
+
+- Updated dependencies [e0a3f03]
+- Updated dependencies [e0a3f03]
+- Updated dependencies [e0a3f03]
+  - @hashgraph/asset-tokenization-sdk@3.0.0
+
+## 2.0.0
+
+### Major Changes
+
+- c62eb6e: **BREAKING:** Nominal value decimals integration
+
+  Web application now displays and requires nominal value decimals for all Bond and Equity operations. UI components updated to handle decimal precision consistently across all asset views.
+
+### Minor Changes
+
+- c62eb6e: Dividend Amount For display added to see dividend view with calculation details (numerator, denominator, recordDateReached)
+
+- c62eb6e: Coupon Amount For and Principal For display added to bond views with full calculation breakdown
+
+### Patch Changes
+
+- c62eb6e: Add decimal precision display to nominal value in bonds and equity views
+
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+- Updated dependencies [c62eb6e]
+  - @hashgraph/asset-tokenization-sdk@2.0.0
+
+## 1.17.1
+
+### Patch Changes
+
+- Update publishing workflows to enable non production with provenance publishing
+
 ## 1.17.0
 
 ### Minor Changes
