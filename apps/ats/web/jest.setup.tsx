@@ -1,27 +1,27 @@
-process.env.VITE_API_URL = 'http://localhost:8080/api/v1';
+process.env.VITE_API_URL = "http://localhost:8080/api/v1";
 
 // Mock Terminal3 modules to avoid LRU cache issues
-jest.mock('@terminal3/verify_vc');
-jest.mock('@terminal3/bbs_vc');
+jest.mock("@terminal3/verify_vc");
+jest.mock("@terminal3/bbs_vc");
 
-import Select from 'react-select';
+import Select from "react-select";
 
 // Polyfill for TextEncoder and TextDecoder
-import { TextEncoder, TextDecoder } from 'util';
-if (typeof (global as any).TextEncoder === 'undefined') {
+import { TextEncoder, TextDecoder } from "util";
+if (typeof (global as any).TextEncoder === "undefined") {
   (global as any).TextEncoder = TextEncoder;
 }
-if (typeof (global as any).TextDecoder === 'undefined') {
+if (typeof (global as any).TextDecoder === "undefined") {
   (global as any).TextDecoder = TextDecoder;
 }
 
-jest.doMock('chakra-react-select', () => ({
-  ...jest.requireActual('chakra-react-select'),
+jest.doMock("chakra-react-select", () => ({
+  ...jest.requireActual("chakra-react-select"),
   // @ts-ignore
   Select: ({ _components, ...props }) => <Select {...props} />,
 }));
 
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: jest.fn().mockImplementation((query) => ({
     matches: false,
@@ -36,4 +36,4 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 const noop = () => {};
-Object.defineProperty(window, 'scrollTo', { value: noop, writable: true });
+Object.defineProperty(window, "scrollTo", { value: noop, writable: true });

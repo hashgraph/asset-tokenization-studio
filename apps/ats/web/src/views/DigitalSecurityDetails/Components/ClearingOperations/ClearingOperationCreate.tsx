@@ -1,4 +1,4 @@
-import { Center, HStack, Stack, useDisclosure, VStack } from '@chakra-ui/react';
+import { Center, HStack, Stack, useDisclosure, VStack } from "@chakra-ui/react";
 import {
   Button,
   CalendarInputController,
@@ -9,33 +9,30 @@ import {
   PopUp,
   SelectController,
   Text,
-} from 'io-bricks-ui';
-import { isValidHederaId, min, required } from '../../../../utils/rules';
-import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
-import { WarningCircle } from '@phosphor-icons/react';
-import { useState } from 'react';
-import {
-  DATE_TIME_FORMAT,
-  DEFAULT_PARTITION,
-} from '../../../../utils/constants';
+} from "io-bricks-ui";
+import { isValidHederaId, min, required } from "../../../../utils/rules";
+import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useForm } from "react-hook-form";
+import { WarningCircle } from "@phosphor-icons/react";
+import { useState } from "react";
+import { DATE_TIME_FORMAT, DEFAULT_PARTITION } from "../../../../utils/constants";
 import {
   useCreateClearingHoldByPartition,
   useCreateClearingRedeemByPartition,
   useCreateClearingTransferByPartition,
-} from '../../../../hooks/mutations/useClearingOperations';
+} from "../../../../hooks/mutations/useClearingOperations";
 import {
   ClearingCreateHoldByPartitionRequest,
   ClearingRedeemByPartitionRequest,
   ClearingTransferByPartitionRequest,
-} from '@hashgraph/asset-tokenization-sdk';
-import { dateToUnixTimestamp } from '../../../../utils/format';
+} from "@hashgraph/asset-tokenization-sdk";
+import { dateToUnixTimestamp } from "../../../../utils/format";
 
 enum ClearingOperationType {
-  TRANSFER = 'Transfer',
-  REDEEM = 'Redeem',
-  HOLD = 'Hold',
+  TRANSFER = "Transfer",
+  REDEEM = "Redeem",
+  HOLD = "Hold",
 }
 
 interface FormValues {
@@ -51,43 +48,33 @@ interface FormValues {
 export const ClearingOperationsCreate = () => {
   const { isOpen, onClose, onOpen } = useDisclosure();
 
-  const { id: securityId = '' } = useParams();
+  const { id: securityId = "" } = useParams();
 
   const [isMutating, setIsMutating] = useState(false);
 
-  const { t: tCreate } = useTranslation('security', {
-    keyPrefix: 'details.clearingOperations.create',
+  const { t: tCreate } = useTranslation("security", {
+    keyPrefix: "details.clearingOperations.create",
   });
-  const { t: tForm } = useTranslation('security', {
-    keyPrefix: 'details.clearingOperations.create.form',
+  const { t: tForm } = useTranslation("security", {
+    keyPrefix: "details.clearingOperations.create.form",
   });
-  const { t: tActions } = useTranslation('security', {
-    keyPrefix: 'details.clearingOperations.actions.confirmCreate',
+  const { t: tActions } = useTranslation("security", {
+    keyPrefix: "details.clearingOperations.actions.confirmCreate",
   });
-  const { t: tGlobal } = useTranslation('globals');
+  const { t: tGlobal } = useTranslation("globals");
 
   const { control, formState, getValues, watch, reset } = useForm<FormValues>({
-    mode: 'onChange',
+    mode: "onChange",
   });
 
-  const { mutate: createClearingTransferByPartition } =
-    useCreateClearingTransferByPartition();
-  const { mutate: createClearingRedeemByPartition } =
-    useCreateClearingRedeemByPartition();
-  const { mutate: createClearingHoldByPartition } =
-    useCreateClearingHoldByPartition();
+  const { mutate: createClearingTransferByPartition } = useCreateClearingTransferByPartition();
+  const { mutate: createClearingRedeemByPartition } = useCreateClearingRedeemByPartition();
+  const { mutate: createClearingHoldByPartition } = useCreateClearingHoldByPartition();
 
   const onSubmit = () => {
     setIsMutating(true);
 
-    const {
-      operationType,
-      amount,
-      expirationDate,
-      escrowAccount,
-      holdExpirationDate,
-      targetId,
-    } = getValues();
+    const { operationType, amount, expirationDate, escrowAccount, holdExpirationDate, targetId } = getValues();
 
     if (operationType === ClearingOperationType.TRANSFER.valueOf()) {
       const transferRequest = new ClearingTransferByPartitionRequest({
@@ -156,10 +143,10 @@ export const ClearingOperationsCreate = () => {
         isOpen={isOpen}
         onClose={onClose}
         icon={<PhosphorIcon as={WarningCircle} size="md" />}
-        title={tActions('title')}
-        description={tActions('description')}
-        confirmText={tActions('confirmText')}
-        cancelText={tActions('cancelText')}
+        title={tActions("title")}
+        description={tActions("description")}
+        confirmText={tActions("confirmText")}
+        cancelText={tActions("cancelText")}
         onConfirm={() => {
           onSubmit();
           onClose();
@@ -171,7 +158,7 @@ export const ClearingOperationsCreate = () => {
       <Center w="full" h="full" bg="neutral.dark.600">
         <VStack align="flex-start" p={6} gap={4}>
           <VStack align="flex-start" gap={0}>
-            <Heading textStyle="HeadingMediumLG">{tCreate('title')}</Heading>
+            <Heading textStyle="HeadingMediumLG">{tCreate("title")}</Heading>
           </VStack>
           <VStack
             as="form"
@@ -185,9 +172,7 @@ export const ClearingOperationsCreate = () => {
           >
             <Stack w="full">
               <HStack justifySelf="flex-start">
-                <Text textStyle="BodyTextRegularSM">
-                  {tForm('operationType.label')}*
-                </Text>
+                <Text textStyle="BodyTextRegularSM">{tForm("operationType.label")}*</Text>
               </HStack>
               <SelectController
                 id="operationType"
@@ -211,46 +196,39 @@ export const ClearingOperationsCreate = () => {
             </Stack>
             <Stack w="full">
               <HStack justifySelf="flex-start">
-                <Text textStyle="BodyTextRegularSM">
-                  {tForm('amount.label')}*
-                </Text>
+                <Text textStyle="BodyTextRegularSM">{tForm("amount.label")}*</Text>
               </HStack>
               <InputNumberController
                 control={control}
                 id="amount"
                 rules={{ required, min: min(0) }}
-                placeholder={tForm('amount.placeholder')}
+                placeholder={tForm("amount.placeholder")}
               />
             </Stack>
             <Stack w="full">
               <HStack justifySelf="flex-start">
-                <Text textStyle="BodyTextRegularSM">
-                  {tForm('expirationDate.label')}*
-                </Text>
+                <Text textStyle="BodyTextRegularSM">{tForm("expirationDate.label")}*</Text>
               </HStack>
               <CalendarInputController
                 control={control}
                 id="expirationDate"
                 rules={{ required }}
                 fromDate={new Date()}
-                placeholder={tForm('expirationDate.placeholder')}
+                placeholder={tForm("expirationDate.placeholder")}
                 withTimeInput
                 format={DATE_TIME_FORMAT}
               />
             </Stack>
 
-            {watch('operationType') ===
-              ClearingOperationType.TRANSFER.valueOf() && (
+            {watch("operationType") === ClearingOperationType.TRANSFER.valueOf() && (
               <Stack w="full">
                 <HStack justifySelf="flex-start">
-                  <Text textStyle="BodyTextRegularSM">
-                    {tForm('targetId.label')}*
-                  </Text>
+                  <Text textStyle="BodyTextRegularSM">{tForm("targetId.label")}*</Text>
                 </HStack>
                 <InputController
                   control={control}
                   id="targetId"
-                  placeholder={tForm('targetId.placeholder')}
+                  placeholder={tForm("targetId.placeholder")}
                   isRequired={true}
                   rules={{
                     required,
@@ -260,35 +238,30 @@ export const ClearingOperationsCreate = () => {
               </Stack>
             )}
 
-            {watch('operationType') ===
-              ClearingOperationType.HOLD.valueOf() && (
+            {watch("operationType") === ClearingOperationType.HOLD.valueOf() && (
               <VStack gap={6} w="full">
                 <Stack w="full">
                   <HStack justifySelf="flex-start">
-                    <Text textStyle="BodyTextRegularSM">
-                      {tForm('holdExpirationDate.label')}*
-                    </Text>
+                    <Text textStyle="BodyTextRegularSM">{tForm("holdExpirationDate.label")}*</Text>
                   </HStack>
                   <CalendarInputController
                     control={control}
                     id="holdExpirationDate"
                     rules={{ required }}
                     fromDate={new Date()}
-                    placeholder={tForm('holdExpirationDate.placeholder')}
+                    placeholder={tForm("holdExpirationDate.placeholder")}
                     withTimeInput
                     format={DATE_TIME_FORMAT}
                   />
                 </Stack>
                 <Stack w="full">
                   <HStack justifySelf="flex-start">
-                    <Text textStyle="BodyTextRegularSM">
-                      {tForm('escrowAccount.label')}*
-                    </Text>
+                    <Text textStyle="BodyTextRegularSM">{tForm("escrowAccount.label")}*</Text>
                   </HStack>
                   <InputController
                     control={control}
                     id="escrowAccount"
-                    placeholder={tForm('escrowAccount.placeholder')}
+                    placeholder={tForm("escrowAccount.placeholder")}
                     isRequired={true}
                     rules={{
                       required,
@@ -298,14 +271,12 @@ export const ClearingOperationsCreate = () => {
                 </Stack>
                 <Stack w="full">
                   <HStack justifySelf="flex-start">
-                    <Text textStyle="BodyTextRegularSM">
-                      {tForm('sourceId.label')}*
-                    </Text>
+                    <Text textStyle="BodyTextRegularSM">{tForm("sourceId.label")}*</Text>
                   </HStack>
                   <InputController
                     control={control}
                     id="sourceId"
-                    placeholder={tForm('sourceId.placeholder')}
+                    placeholder={tForm("sourceId.placeholder")}
                     isRequired={true}
                     rules={{
                       required,
@@ -315,14 +286,12 @@ export const ClearingOperationsCreate = () => {
                 </Stack>
                 <Stack w="full">
                   <HStack justifySelf="flex-start">
-                    <Text textStyle="BodyTextRegularSM">
-                      {tForm('targetId.label')}*
-                    </Text>
+                    <Text textStyle="BodyTextRegularSM">{tForm("targetId.label")}*</Text>
                   </HStack>
                   <InputController
                     control={control}
                     id="targetId"
-                    placeholder={tForm('targetId.placeholder')}
+                    placeholder={tForm("targetId.placeholder")}
                     isRequired={true}
                     rules={{
                       required,
@@ -342,7 +311,7 @@ export const ClearingOperationsCreate = () => {
                 onOpen();
               }}
             >
-              {tGlobal('execute')}
+              {tGlobal("execute")}
             </Button>
           </VStack>
         </VStack>
