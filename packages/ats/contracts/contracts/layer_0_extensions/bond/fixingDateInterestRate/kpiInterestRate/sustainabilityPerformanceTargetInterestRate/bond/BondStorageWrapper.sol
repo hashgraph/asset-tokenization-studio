@@ -75,7 +75,7 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
         uint256 totalRateToAdd = 0;
         uint256 totalRateToSubtract = 0;
 
-        for (uint256 index = 0; index < projects.length; ) {
+        for (uint256 index = 0; index < projects.length; index++) {
             ISustainabilityPerformanceTargetRate.ImpactData memory impactData = _getSPTImpactDataFor(projects[index]);
 
             (uint256 value, bool exists) = _getLatestKpiData(
@@ -115,10 +115,6 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
                         continue;
                     }
                 }
-            }
-
-            unchecked {
-                ++index;
             }
         }
 
