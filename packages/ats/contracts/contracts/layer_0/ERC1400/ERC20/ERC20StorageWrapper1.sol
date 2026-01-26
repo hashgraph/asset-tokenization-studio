@@ -32,14 +32,6 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         _erc20Storage().decimals += decimals;
     }
 
-    function _decimalsAdjusted() internal view override returns (uint8) {
-        return _decimalsAdjustedAt(_blockTimestamp());
-    }
-
-    function _allowanceAdjusted(address _owner, address _spender) internal view override returns (uint256) {
-        return _allowanceAdjustedAt(_owner, _spender, _blockTimestamp());
-    }
-
     function _allowance(address _owner, address _spender) internal view override returns (uint256) {
         return _erc20Storage().allowed[_owner][_spender];
     }
@@ -55,10 +47,6 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
     ) internal view override returns (uint256) {
         uint256 factor = _calculateFactor(_getAbafAdjustedAt(_timestamp), _getAllowanceLabaf(_owner, _spender));
         return _allowance(_owner, _spender) * factor;
-    }
-
-    function _getERC20MetadataAdjusted() internal view override returns (IERC20.ERC20Metadata memory erc20Metadata_) {
-        erc20Metadata_ = _getERC20MetadataAdjustedAt(_blockTimestamp());
     }
 
     function _getERC20MetadataAdjustedAt(

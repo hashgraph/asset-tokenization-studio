@@ -108,7 +108,7 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
     function _getMinDateAdjusted() internal view override returns (uint256 minDate_) {
         minDate_ = _kpisDataStorage().minDate;
 
-        uint256 total = _getCouponsOrderedListTotalAdjusted();
+        uint256 total = _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp());
 
         if (total == 0) return minDate_;
 

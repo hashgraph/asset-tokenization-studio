@@ -53,7 +53,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
         override(Internals, BondStorageWrapper)
         returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
     {
-        return _getCouponAdjusted(_couponID, _calculateKpiLinkedInterestRate);
+        return _getCouponAdjustedAt(_couponID, _calculateKpiLinkedInterestRate, _blockTimestamp());
     }
 
     function _calculateKpiLinkedInterestRate(

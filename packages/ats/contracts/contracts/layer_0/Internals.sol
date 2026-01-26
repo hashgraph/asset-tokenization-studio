@@ -430,7 +430,6 @@ abstract contract Internals is Modifiers {
         SnapshotsAddress storage snapshots
     ) internal view virtual returns (bool, address);
     function _allowance(address _owner, address _spender) internal view virtual returns (uint256);
-    function _allowanceAdjusted(address _owner, address _spender) internal view virtual returns (uint256);
     function _allowanceAdjustedAt(
         address _owner,
         address _spender,
@@ -438,7 +437,6 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (uint256);
     function _arePartitionsProtected() internal view virtual returns (bool);
     function _balanceOf(address _tokenHolder) internal view virtual returns (uint256);
-    function _balanceOfAdjusted(address _tokenHolder) internal view virtual returns (uint256);
     function _balanceOfAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view virtual returns (uint256);
     function _balanceOfAt(address _tokenHolder, uint256 _snapshotId) internal view virtual returns (uint256);
     function _balanceOfAtAdjusted(
@@ -461,10 +459,6 @@ abstract contract Internals is Modifiers {
         address _tokenHolder
     ) internal view virtual returns (uint256 balance_);
     function _balanceOfByPartition(bytes32 _partition, address _tokenHolder) internal view virtual returns (uint256);
-    function _balanceOfByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256);
     function _balanceOfByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
@@ -566,7 +560,6 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (uint256 balance_);
     function _clock() internal view virtual returns (uint48);
     function _decimals() internal view virtual returns (uint8);
-    function _decimalsAdjusted() internal view virtual returns (uint8);
     function _decimalsAdjustedAt(uint256 _timestamp) internal view virtual returns (uint8);
     function _decimalsAtSnapshot(uint256 _snapshotID) internal view virtual returns (uint8 decimals_);
     function _delegates(address account) internal view virtual returns (address);
@@ -596,12 +589,10 @@ abstract contract Internals is Modifiers {
         uint256 timestamp
     ) internal view virtual returns (uint256 factor);
     function _getAbaf() internal view virtual returns (uint256);
-    function _getAbafAdjusted() internal view virtual returns (uint256);
     function _getAbafAdjustedAt(uint256 _timestamp) internal view virtual returns (uint256);
     function _getAllowanceLabaf(address _owner, address _spender) internal view virtual returns (uint256);
     function _getBondDetails() internal view virtual returns (IBondRead.BondDetailsData memory bondDetails_);
     function _getClearedAmountFor(address _tokenHolder) internal view virtual returns (uint256 amount_);
-    function _getClearedAmountForAdjusted(address _tokenHolder) internal view virtual returns (uint256 amount_);
     function _getClearedAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -610,9 +601,10 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_);
-    function _getClearedAmountForByPartitionAdjusted(
+    function _getClearedAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_);
     function _getClearingBasicInfo(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
@@ -627,10 +619,11 @@ abstract contract Internals is Modifiers {
         address _tokenHolder,
         uint256 _clearingId
     ) internal view virtual returns (IClearingHoldCreation.ClearingHoldCreationData memory clearingHoldCreationData_);
-    function _getClearingHoldCreationForByPartitionAdjusted(
+    function _getClearingHoldCreationForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _clearingId
+        uint256 _clearingId,
+        uint256 _timestamp
     ) internal view virtual returns (IClearingTransfer.ClearingHoldCreationData memory clearingHoldCreationData_);
     function _getClearingLabafById(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
@@ -643,10 +636,11 @@ abstract contract Internals is Modifiers {
         address _tokenHolder,
         uint256 _clearingId
     ) internal view virtual returns (IClearingRedeem.ClearingRedeemData memory clearingRedeemData_);
-    function _getClearingRedeemForByPartitionAdjusted(
+    function _getClearingRedeemForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _clearingId
+        uint256 _clearingId,
+        uint256 _timestamp
     ) internal view virtual returns (IClearingTransfer.ClearingRedeemData memory clearingRedeemData_);
     function _getClearingThirdParty(
         bytes32 _partition,
@@ -659,10 +653,11 @@ abstract contract Internals is Modifiers {
         address _tokenHolder,
         uint256 _clearingId
     ) internal view virtual returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_);
-    function _getClearingTransferForByPartitionAdjusted(
+    function _getClearingTransferForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _clearingId
+        uint256 _clearingId,
+        uint256 _timestamp
     ) internal view virtual returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_);
     function _getClearingsIdForByPartition(
         bytes32 _partition,
@@ -726,7 +721,7 @@ abstract contract Internals is Modifiers {
         uint256 _pageLength
     ) internal view virtual returns (uint256[] memory couponIDs_);
     function _getCouponsOrderedListTotal() internal view virtual returns (uint256 total_);
-    function _getCouponsOrderedListTotalAdjusted() internal view virtual returns (uint256 total_);
+    function _getCouponsOrderedListTotalAdjustedAt(uint256 _timestamp) internal view virtual returns (uint256 total_);
     function _getCurrentSnapshotId() internal view virtual returns (uint256);
     function _getDividendAmountFor(
         uint256 _dividendID,
@@ -747,7 +742,6 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (IEquity.DividendFor memory dividendFor_);
     function _getERC20Metadata() internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
     function _getName() internal view virtual returns (string memory);
-    function _getERC20MetadataAdjusted() internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
     function _getERC20MetadataAdjustedAt(
         uint256 _timestamp
     ) internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
@@ -759,7 +753,6 @@ abstract contract Internals is Modifiers {
         uint256 _pageLength
     ) internal view virtual returns (address[] memory members_);
     function _getFrozenAmountFor(address _userAddress) internal view virtual returns (uint256);
-    function _getFrozenAmountForAdjusted(address _tokenHolder) internal view virtual returns (uint256 amount_);
     function _getFrozenAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -768,12 +761,12 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _userAddress
     ) internal view virtual returns (uint256);
-    function _getFrozenAmountForByPartitionAdjusted(
+    function _getFrozenAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_);
     function _getHeldAmountFor(address _tokenHolder) internal view virtual returns (uint256 amount_);
-    function _getHeldAmountForAdjusted(address _tokenHolder) internal view virtual returns (uint256 amount_);
     function _getHeldAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -782,9 +775,10 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_);
-    function _getHeldAmountForByPartitionAdjusted(
+    function _getHeldAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_);
     function _getHold(HoldIdentifier memory _holdIdentifier) internal view virtual returns (HoldData memory);
     function _getHoldCountForByPartition(
@@ -806,8 +800,9 @@ abstract contract Internals is Modifiers {
             bytes memory operatorData_,
             ThirdPartyType thirdPartType_
         );
-    function _getHoldForByPartitionAdjusted(
-        HoldIdentifier calldata _holdIdentifier
+    function _getHoldForByPartitionAdjustedAt(
+        HoldIdentifier calldata _holdIdentifier,
+        uint256 _timestamp
     )
         internal
         view
@@ -877,10 +872,11 @@ abstract contract Internals is Modifiers {
         address tokenHolder,
         uint256 lockId
     ) internal view virtual returns (uint256 amount, uint256 expirationTimestamp);
-    function _getLockForByPartitionAdjusted(
+    function _getLockForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _lockId
+        uint256 _lockId,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_, uint256 expirationTimestamp_);
     function _getLockLabafById(
         bytes32 _partition,
@@ -896,9 +892,10 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256);
-    function _getLockedAmountForByPartitionAdjusted(
+    function _getLockedAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_);
     function _getLocksIdForByPartition(
         bytes32 _partition,
@@ -908,10 +905,8 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (uint256[] memory locksId_);
     function _getMaturityDate() internal view virtual returns (uint256 maturityDate_);
     function _getMaxSupply() internal view virtual returns (uint256);
-    function _getMaxSupplyAdjusted() internal view virtual returns (uint256 maxSupply_);
     function _getMaxSupplyAdjustedAt(uint256 timestamp) internal view virtual returns (uint256);
     function _getMaxSupplyByPartition(bytes32 partition) internal view virtual returns (uint256);
-    function _getMaxSupplyByPartitionAdjusted(bytes32 _partition) internal view virtual returns (uint256 maxSupply_);
     function _getMaxSupplyByPartitionAdjustedAt(
         bytes32 partition,
         uint256 timestamp
@@ -991,14 +986,14 @@ abstract contract Internals is Modifiers {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory holders_);
-    function _getTotalBalance(address _tokenHolder) internal view virtual returns (uint256 totalBalance);
     function _getTotalBalanceForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
     ) internal view virtual returns (uint256 totalBalance);
-    function _getTotalBalanceForByPartitionAdjusted(
+    function _getTotalBalanceForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256);
     function _getTotalBalanceOfAtSnapshot(
         uint256 _snapshotId,
@@ -1036,7 +1031,7 @@ abstract contract Internals is Modifiers {
     function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view virtual returns (uint256);
     function _actionContentHashExists(bytes32 _contentHash) internal view virtual returns (bool);
     function _getVotes(address account) internal view virtual returns (uint256);
-    function _getVotesAdjusted(
+    function _getVotesAdjustedAt(
         uint256 timepoint,
         CheckpointsLib.Checkpoint[] storage ckpts
     ) internal view virtual returns (uint256);
@@ -1364,7 +1359,6 @@ abstract contract Internals is Modifiers {
         uint256 _pageLength
     ) internal view virtual returns (address[] memory);
     function _totalSupply() internal view virtual returns (uint256);
-    function _totalSupplyAdjusted() internal view virtual returns (uint256);
     function _totalSupplyAdjustedAt(uint256 _timestamp) internal view virtual returns (uint256);
     function _totalSupplyAt(uint256 _snapshotId) internal view virtual returns (uint256);
     function _totalSupplyAtSnapshot(uint256 _snapshotID) internal view virtual returns (uint256 totalSupply_);
@@ -1373,7 +1367,10 @@ abstract contract Internals is Modifiers {
         uint256 _snapshotID
     ) internal view virtual returns (uint256 totalSupply_);
     function _totalSupplyByPartition(bytes32 _partition) internal view virtual returns (uint256);
-    function _totalSupplyByPartitionAdjusted(bytes32 _partition) internal view virtual returns (uint256);
+    function _totalSupplyByPartitionAdjustedAt(
+        bytes32 _partition,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256);
     function _totalTokenHoldersAt(uint256 snapshotId) internal view virtual returns (uint256);
     function _validPartition(bytes32 _partition, address _holder) internal view virtual returns (bool);
     function _validPartitionForReceiver(bytes32 _partition, address _to) internal view virtual returns (bool);
