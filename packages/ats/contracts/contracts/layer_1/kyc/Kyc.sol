@@ -3,13 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE } from "../constants/roles.sol";
 import { IKyc } from "../interfaces/kyc/IKyc.sol";
-import { Common } from "../common/Common.sol";
+import { Internals } from "contracts/layer_0/Internals.sol";
 
-abstract contract Kyc is IKyc, Common {
-    function initializeInternalKyc(bool _internalKycActivated) external onlyUninitialized(_kycStorage().initialized) {
-        KycStorage storage kycStorage = _kycStorage();
-        kycStorage.initialized = true;
-        kycStorage.internalKycActivated = _internalKycActivated;
+abstract contract Kyc is IKyc, Internals {
+    function initializeInternalKyc(bool _internalKycActivated) external onlyUninitialized(_isKycInitialized()) {
+        _initializeInternalKyc(_internalKycActivated);
     }
 
     function activateInternalKyc() external onlyRole(_INTERNAL_KYC_MANAGER_ROLE) onlyUnpaused returns (bool success_) {

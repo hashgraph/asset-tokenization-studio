@@ -6,8 +6,9 @@ import { Pause } from "../../layer_1/pause/Pause.sol";
 import { AccessControl } from "../../layer_1/accessControl/AccessControl.sol";
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
 import { IDiamondLoupe } from "../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
+import { Common } from "contracts/layer_0/common/Common.sol";
 
-abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper {
+abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper, Common {
     modifier validateConfigurationId(bytes32 _configurationId) {
         _checkConfigurationId(_configurationId);
         _;

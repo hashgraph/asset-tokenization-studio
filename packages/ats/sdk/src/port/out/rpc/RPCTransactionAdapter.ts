@@ -221,7 +221,7 @@ import { MirrorNodes } from '@domain/context/network/MirrorNode';
 import { JsonRpcRelays } from '@domain/context/network/JsonRpcRelay';
 import { Factories } from '@domain/context/factory/Factories';
 import BigDecimal from '@domain/context/shared/BigDecimal';
-import { ContractId } from '@hashgraph/sdk';
+import { ContractId } from '@hiero-ledger/sdk';
 import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter';
 import {
   _PARTITION_ID_1,
@@ -309,6 +309,8 @@ import {
 import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
 import NetworkService from '@service/network/NetworkService';
 import MetamaskService from '@service/wallet/metamask/MetamaskService';
+import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
+import { ProtectionData } from '@domain/context/factory/ProtectionData';
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
@@ -856,7 +858,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-    period: BigDecimal,
+    startDate: BigDecimal,
+    endDate: BigDecimal,
+    fixingDate: BigDecimal,
+    rateStatus: RateStatus,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
@@ -864,14 +869,20 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
       rate : ${rate},
-      period: ${period}`,
+      rateStatus : ${rateStatus},
+      startDate: ${startDate},
+      endDate: ${endDate},
+      fixingDate: ${fixingDate}`,
     );
     const couponStruct: IBondRead.CouponStruct = {
       recordDate: recordDate.toBigNumber(),
       executionDate: executionDate.toBigNumber(),
       rate: rate.toBigNumber(),
       rateDecimals: rate.decimals,
-      period: period.toBigNumber(),
+      startDate: startDate.toBigNumber(),
+      endDate: endDate.toBigNumber(),
+      fixingDate: fixingDate.toBigNumber(),
+      rateStatus: CastRateStatus.toNumber(rateStatus),
     };
 
     return this.executeTransaction(
@@ -1297,6 +1308,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
     );
 
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeTransaction(
       ERC1410ManagementFacet__factory.connect(
         security.toString(),
@@ -1307,9 +1324,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         partitionId,
         sourceId.toString(),
         amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
       GAS.PROTECTED_REDEEM,
     );
@@ -1329,6 +1344,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
+    const protectionData: ProtectionData = {
+      deadline: deadline.toBigNumber(),
+      nounce: nounce.toBigNumber(),
+      signature: signature
+    }
+
     return this.executeTransaction(
       ERC1410ManagementFacet__factory.connect(
         security.toString(),
@@ -1340,51 +1361,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         sourceId.toString(),
         targetId.toString(),
         amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
+        protectionData,
       ],
       GAS.PROTECTED_TRANSFER,
-    );
-  }
-
-  async protectedTransferAndLockByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-  ): Promise<TransactionResponse> {
-    LogService.logTrace(
-      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
-    );
-
-    const transferAndLockData: TransferAndLock = {
-      from: sourceId.toString(),
-      to: targetId.toString(),
-      amount: amount.toBigNumber(),
-      data: '0x',
-      expirationTimestamp: expirationDate.toBigNumber(),
-    };
-
-    return this.executeTransaction(
-      TransferAndLockFacet__factory.connect(
-        security.toString(),
-        this.getSignerOrProvider(),
-      ),
-      'protectedTransferAndLockByPartition',
-      [
-        partitionId,
-        transferAndLockData,
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
-      ],
-      GAS.PROTECTED_TRANSFER_AND_LOCK,
     );
   }
 

@@ -1,17 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.17;
 
-// A loupe is a small magnifying glass used to look at resolverProxys.
-// These functions look at resolverProxys
-/// #### Structs
-/// ```
-///    struct Facet {
-///        bytes32 facetId;
-///        address facetAddress;
-///        bytes4[] selectors;
-///    }
-///```
-// HACK: I think that Loupe and Cut should be only one contract.
 interface TRexIDiamondLoupe {
     struct Facet {
         bytes32 id;

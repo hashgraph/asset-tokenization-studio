@@ -25,7 +25,7 @@ export const DetailsTotalSupply = ({
   const nominalValue = useMemo(() => {
     return toNumber(
       equityDetailsResponse?.nominalValue || bondDetailsResponse?.nominalValue,
-      equityDetailsResponse?.nominalValueDecimals || bondDetailsResponse?.nominalValueDecimals || 2,
+      equityDetailsResponse?.nominalValueDecimals || bondDetailsResponse?.nominalValueDecimals || 0,
     );
   }, [equityDetailsResponse, bondDetailsResponse]);
 

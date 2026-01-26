@@ -2,22 +2,16 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Common } from "../../common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 import { IERC20 } from "../../interfaces/ERC1400/IERC20.sol";
 import { _DEFAULT_PARTITION } from "../../../layer_0/constants/values.sol";
 
-abstract contract ERC20 is IERC20, Common {
+abstract contract ERC20 is IERC20, Internals {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(
         ERC20Metadata calldata erc20Metadata
-    ) external override onlyUninitialized(_erc20Storage().initialized) {
-        ERC20Storage storage erc20Storage = _erc20Storage();
-        erc20Storage.name = erc20Metadata.info.name;
-        erc20Storage.symbol = erc20Metadata.info.symbol;
-        erc20Storage.isin = erc20Metadata.info.isin;
-        erc20Storage.decimals = erc20Metadata.info.decimals;
-        erc20Storage.securityType = erc20Metadata.securityType;
-        erc20Storage.initialized = true;
+    ) external override onlyUninitialized(_isERC20Initialized()) {
+        _initialize_ERC20(erc20Metadata);
     }
 
     function approve(

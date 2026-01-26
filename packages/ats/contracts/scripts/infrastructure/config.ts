@@ -181,6 +181,29 @@ export function getPrivateKeys(network: string): string[] {
 }
 
 /**
+ * Get a single private key for a network by index.
+ *
+ * Convenience wrapper around getPrivateKeys() for getting a specific key.
+ * Resolves network aliases for backward compatibility.
+ *
+ * @param network - Network identifier (e.g., 'hedera-testnet', 'local')
+ * @param index - Key index (default: 0)
+ * @returns Private key string, or undefined if not found
+ *
+ * @example
+ * ```typescript
+ * const privateKey = getPrivateKey('hedera-testnet');
+ * if (!privateKey) {
+ *   throw new Error('Set HEDERA_TESTNET_PRIVATE_KEY_0 in .env');
+ * }
+ * ```
+ */
+export function getPrivateKey(network: string, index: number = 0): string | undefined {
+  const keys = getPrivateKeys(network);
+  return keys[index];
+}
+
+/**
  * Get deployed contract address for a network.
  *
  * Integrates with Configuration.ts to read deployed addresses from environment

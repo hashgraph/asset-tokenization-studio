@@ -3,10 +3,10 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type Equity,
-  type ScheduledSnapshots,
+  type EquityUSAFacet,
+  type ScheduledSnapshotsFacet,
   type AccessControl,
-  ScheduledCrossOrderedTasks,
+  ScheduledCrossOrderedTasksFacet,
   TimeTravelFacet,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
@@ -20,9 +20,9 @@ describe("Scheduled Snapshots Tests", () => {
   let signer_B: SignerWithAddress;
   let signer_C: SignerWithAddress;
 
-  let equityFacet: Equity;
-  let scheduledSnapshotsFacet: ScheduledSnapshots;
-  let scheduledTasksFacet: ScheduledCrossOrderedTasks;
+  let equityFacet: EquityUSAFacet;
+  let scheduledSnapshotsFacet: ScheduledSnapshotsFacet;
+  let scheduledTasksFacet: ScheduledCrossOrderedTasksFacet;
   let accessControlFacet: AccessControl;
   let timeTravelFacet: TimeTravelFacet;
 
@@ -45,9 +45,9 @@ describe("Scheduled Snapshots Tests", () => {
 
   async function setFacets(diamond: ResolverProxy) {
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
-    scheduledSnapshotsFacet = await ethers.getContractAt("ScheduledSnapshots", diamond.address, signer_A);
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.address, signer_A);
+    equityFacet = await ethers.getContractAt("EquityUSAFacet", diamond.address, signer_A);
+    scheduledSnapshotsFacet = await ethers.getContractAt("ScheduledSnapshotsFacet", diamond.address, signer_A);
+    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacet", diamond.address, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
   }
 
@@ -108,7 +108,7 @@ describe("Scheduled Snapshots Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_1 + 1);
     await expect(scheduledTasksFacet.connect(signer_A).triggerPendingScheduledCrossOrderedTasks())
       .to.emit(scheduledSnapshotsFacet, "SnapshotTriggered")
-      .withArgs(signer_A.address, 1);
+      .withArgs(1);
 
     scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
     scheduledSnapshots = await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);
@@ -124,7 +124,7 @@ describe("Scheduled Snapshots Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_2 + 1);
     await expect(scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(100))
       .to.emit(scheduledSnapshotsFacet, "SnapshotTriggered")
-      .withArgs(signer_A.address, 2);
+      .withArgs(2);
 
     scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
     scheduledSnapshots = await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);
@@ -138,7 +138,7 @@ describe("Scheduled Snapshots Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_3 + 1);
     await expect(scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(0))
       .to.emit(scheduledSnapshotsFacet, "SnapshotTriggered")
-      .withArgs(signer_A.address, 3);
+      .withArgs(3);
 
     scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
     scheduledSnapshots = await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100);
