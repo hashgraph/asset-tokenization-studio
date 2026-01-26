@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Tests for deployment file utilities.
+ * Unit tests for deployment file utilities.
  *
- * These tests validate the functionality of loading, listing, and finding
- * deployment output files. Uses temporary test deployments to avoid
- * dependency on actual deployment files.
+ * Tests loading, listing, finding, and saving deployment output files.
+ * Uses temporary test deployments to avoid dependency on actual deployment files.
+ *
+ * @module test/scripts/unit/utils/deploymentFiles.test
  */
 
 import { expect } from "chai";
@@ -19,17 +20,18 @@ import {
   generateTimestamp,
   type DeploymentOutputType,
 } from "@scripts/infrastructure";
+import { TEST_ADDRESSES, TEST_CONFIG_IDS, TEST_WORKFLOWS } from "@test";
 
 describe("Deployment File Utilities", () => {
   const TEST_DEPLOYMENTS_DIR = join(__dirname, "../../../../deployments");
   const TEST_NETWORK = "test-network";
-  const TEST_WORKFLOW = "newBlr" as const;
+  const TEST_WORKFLOW = TEST_WORKFLOWS.NEW_BLR;
 
   // Sample deployment data
   const createSampleDeployment = (timestamp: string): DeploymentOutputType => ({
     network: TEST_NETWORK,
     timestamp,
-    deployer: "0x1234567890123456789012345678901234567890",
+    deployer: TEST_ADDRESSES.VALID_0,
     infrastructure: {
       proxyAdmin: {
         address: "0xProxyAdmin123456789012345678901234567890",
@@ -46,32 +48,32 @@ describe("Deployment File Utilities", () => {
     facets: [
       {
         name: "AccessControlFacet",
-        address: "0xFacet1234567890123456789012345678901234",
-        key: "0x0000000000000000000000000000000000000000000000000000000000000001",
+        address: TEST_ADDRESSES.VALID_2,
+        key: TEST_CONFIG_IDS.EQUITY,
       },
     ],
     configurations: {
       equity: {
-        configId: "0x0000000000000000000000000000000000000000000000000000000000000001",
+        configId: TEST_CONFIG_IDS.EQUITY,
         version: 1,
         facetCount: 43,
         facets: [
           {
             facetName: "AccessControlFacet",
-            key: "0x0000000000000000000000000000000000000000000000000000000000000001",
-            address: "0xFacet1234567890123456789012345678901234",
+            key: TEST_CONFIG_IDS.EQUITY,
+            address: TEST_ADDRESSES.VALID_2,
           },
         ],
       },
       bond: {
-        configId: "0x0000000000000000000000000000000000000000000000000000000000000002",
+        configId: TEST_CONFIG_IDS.BOND,
         version: 1,
         facetCount: 43,
         facets: [
           {
             facetName: "AccessControlFacet",
-            key: "0x0000000000000000000000000000000000000000000000000000000000000001",
-            address: "0xFacet1234567890123456789012345678901234",
+            key: TEST_CONFIG_IDS.EQUITY,
+            address: TEST_ADDRESSES.VALID_2,
           },
         ],
       },
@@ -98,12 +100,7 @@ describe("Deployment File Utilities", () => {
     const filepath = join(networkDir, filename);
 
     // Ensure network directory exists
-    try {
-      await fs.mkdir(networkDir, { recursive: true });
-    } catch (error) {
-      // Directory may already exist
-    }
-
+    await fs.mkdir(networkDir, { recursive: true }).catch(() => {});
     await fs.writeFile(filepath, JSON.stringify(deployment, null, 2));
   }
 
@@ -112,23 +109,17 @@ describe("Deployment File Utilities", () => {
     const networkDir = join(TEST_DEPLOYMENTS_DIR, TEST_NETWORK);
     const filename = `${TEST_WORKFLOW}-${timestamp}.json`;
     const filepath = join(networkDir, filename);
-
-    try {
-      await fs.unlink(filepath);
-    } catch (error) {
-      // File may not exist
-    }
+    await fs.unlink(filepath).catch(() => {});
   }
 
   // Cleanup all test deployment files
   async function cleanupAllTestDeployments(): Promise<void> {
+    const networkDir = join(TEST_DEPLOYMENTS_DIR, TEST_NETWORK);
     try {
-      const networkDir = join(TEST_DEPLOYMENTS_DIR, TEST_NETWORK);
       const files = await fs.readdir(networkDir);
       const testFiles = files.filter((f) => f.startsWith(`${TEST_WORKFLOW}-`));
-
       await Promise.all(testFiles.map((f) => fs.unlink(join(networkDir, f))));
-    } catch (error) {
+    } catch {
       // Directory may not exist
     }
   }
@@ -403,7 +394,7 @@ describe("Deployment File Utilities", () => {
       try {
         await fs.unlink(windowsPath);
         await fs.rm("C:\\deployments", { recursive: true, force: true });
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     });
@@ -428,7 +419,7 @@ describe("Deployment File Utilities", () => {
       try {
         await fs.unlink(nestedPath);
         await fs.rm(join(TEST_DEPLOYMENTS_DIR, "very"), { recursive: true, force: true });
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     });
