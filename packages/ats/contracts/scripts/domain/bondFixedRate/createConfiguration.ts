@@ -45,6 +45,7 @@ const BOND_FIXED_RATE_FACETS = [
   "KycFixedRateFacet",
   "PauseFixedRateFacet",
   "SnapshotsFixedRateFacet",
+  "TotalBalanceFixedRateFacet",
 
   // ERC Standards
   "ERC1410IssuerFixedRateFacet",

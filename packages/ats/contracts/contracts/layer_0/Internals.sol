@@ -239,179 +239,6 @@ abstract contract Internals is Modifiers {
     function _operatorTransferByPartition(
         OperatorTransferData calldata _operatorTransferData
     ) internal virtual returns (bytes32);
-    function _permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) internal virtual;
-    function _protectedClearingCreateHoldByPartition(
-        IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
-        Hold calldata _hold,
-        bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 clearingId_);
-    function _protectedClearingRedeemByPartition(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
-        uint256 _amount,
-        bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 clearingId_);
-    function _protectedClearingTransferByPartition(
-        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
-        uint256 _amount,
-        address _to,
-        bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 clearingId_);
-    function _protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        ProtectedHold memory _protectedHold,
-        bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 holdId_);
-    function _protectedRedeemFromByPartition(
-        bytes32 _partition,
-        address _from,
-        uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal virtual;
-    function _protectedTransferFromByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) internal virtual returns (bytes32);
-    function _pushLabafUserPartition(address _tokenHolder, uint256 _labaf) internal virtual;
-    function _reclaimClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) internal virtual returns (bool success_);
-    function _reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    ) internal virtual returns (bool success_, uint256 amount_);
-    function _recoveryAddress(
-        address _lostWallet,
-        address _newWallet,
-        address _investorOnchainID
-    ) internal virtual returns (bool);
-    function _redeem(uint256 _value, bytes memory _data) internal virtual;
-    function _redeemByPartition(
-        bytes32 _partition,
-        address _from,
-        address _operator,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal virtual;
-    function _redeemFrom(address _tokenHolder, uint256 _value, bytes memory _data) internal virtual;
-    function _reduceBalanceByPartition(address _from, uint256 _value, bytes32 _partition) internal virtual;
-    function _reduceTotalSupplyByPartition(bytes32 _partition, uint256 _value) internal virtual;
-    function _releaseByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal virtual returns (bool success_);
-    function _releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        uint256 _amount
-    ) internal virtual returns (bool success_);
-    function _removeAgent(address _agent) internal virtual;
-    function _removeClearing(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
-    ) internal virtual;
-    function _removeExternalList(bytes32 _position, address _list) internal virtual returns (bool success_);
-    function _removeFromControlList(address _account) internal virtual returns (bool success_);
-    function _removeHold(HoldIdentifier calldata _holdIdentifier) internal virtual;
-    function _removeIssuer(address _issuer) internal virtual returns (bool success_);
-    function _removeLabafClearing(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
-    ) internal virtual;
-    function _removeLabafHold(bytes32 _partition, address _tokenHolder, uint256 _holdId) internal virtual;
-    function _removeLabafLock(bytes32 _partition, address _tokenHolder, uint256 _lockId) internal virtual;
-    function _removeProceedRecipient(address _proceedRecipient) internal virtual;
-    function _removeProceedRecipientData(address _proceedRecipient) internal virtual;
-    function _removeTokenHolder(address tokenHolder) internal virtual;
-    function _replaceTokenHolder(address newTokenHolder, address oldTokenHolder) internal virtual;
-    function _revokeKyc(address _account) internal virtual returns (bool success_);
-    function _revokeOperator(address _operator) internal virtual;
-    function _revokeOperatorByPartition(bytes32 _partition, address _operator) internal virtual;
-    function _revokeRole(bytes32 _role, address _account) internal virtual returns (bool success_);
-    function _setActivate(bool _activated) internal virtual;
-    function _setAddressFrozen(address _userAddress, bool _freezeStatus) internal virtual;
-    function _setClearedLabafById(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
-        uint256 _labaf
-    ) internal virtual;
-    function _setClearing(bool _activated) internal virtual returns (bool success_);
-    function _setCompliance(address _compliance) internal virtual;
-    function _setCoupon(
-        IBondRead.Coupon memory _newCoupon
-    ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_);
-    function _setDividends(
-        IEquity.Dividend calldata _newDividend
-    ) internal virtual returns (bytes32 corporateActionId_, uint256 dividendId_);
-    function _setHeldLabafById(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId,
-        uint256 _labaf
-    ) internal virtual;
-    function _setIdentityRegistry(address _identityRegistry) internal virtual;
-    function _setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal virtual;
-    function _setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal virtual;
-    function _setInternalKyc(bool _activated) internal virtual returns (bool success_);
-    function _setKpiOracle(address _kpiOracle) internal virtual;
-    function _setLockLabafById(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId,
-        uint256 _labaf
-    ) internal virtual;
-    function _setMaturityDate(uint256 _maturityDate) internal virtual returns (bool success_);
-    function _setMaxSupply(uint256 _maxSupply) internal virtual;
-    function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal virtual;
-    function _setNonceFor(uint256 _nounce, address _account) internal virtual;
-    function _setPause(bool _paused) internal virtual;
-    function _setProceedRecipientData(address _proceedRecipient, bytes calldata _data) internal virtual;
-    function _setProtectedPartitions(bool _protected) internal virtual;
-    function _setRate(uint256 _newRate, uint8 _newRateDecimals) internal virtual;
-    function _setRevocationRegistryAddress(address _revocationRegistryAddress) internal virtual returns (bool success_);
-    function _setSPTImpactData(
-        ISustainabilityPerformanceTargetRate.ImpactData calldata _newImpactData,
-        address _project
-    ) internal virtual;
-    function _setSPTInterestRate(
-        ISustainabilityPerformanceTargetRate.InterestRate calldata _newInterestRate
-    ) internal virtual;
-    function _setScheduledBalanceAdjustment(
-        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) internal virtual returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_);
-    function _setTotalClearedLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
-    function _setTotalClearedLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _labaf
-    ) internal virtual;
-    function _setTotalFreezeLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
-    function _setTotalFreezeLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal virtual;
-    function _setTotalHeldLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
-    function _setTotalHeldLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal virtual;
-    function _setTotalLockLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
-    function _setTotalLockLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal virtual;
-    function _setVoting(
-        IEquity.Voting calldata _newVoting
-    ) internal virtual returns (bytes32 corporateActionId_, uint256 voteID_);
-    function _snapshot() internal virtual returns (uint256);
-    function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal virtual;
-    function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal virtual;
-    function _storeRegulationData(
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) internal virtual;
-    function _syncBalanceAdjustments(bytes32 _partition, address _from, address _to) internal virtual;
-    function _takeAbafCheckpoint() internal virtual;
-    function _takeSnapshot() internal virtual returns (uint256 snapshotID_);
     function _transfer(address from, address to, uint256 value) internal virtual returns (bool);
     function _transferByPartition(
         address _from,
@@ -603,7 +430,6 @@ abstract contract Internals is Modifiers {
         SnapshotsAddress storage snapshots
     ) internal view virtual returns (bool, address);
     function _allowance(address _owner, address _spender) internal view virtual returns (uint256);
-    function _allowanceAdjusted(address _owner, address _spender) internal view virtual returns (uint256);
     function _allowanceAdjustedAt(
         address _owner,
         address _spender,
@@ -611,7 +437,6 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (uint256);
     function _arePartitionsProtected() internal view virtual returns (bool);
     function _balanceOf(address _tokenHolder) internal view virtual returns (uint256);
-    function _balanceOfAdjusted(address _tokenHolder) internal view virtual returns (uint256);
     function _balanceOfAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view virtual returns (uint256);
     function _balanceOfAt(address _tokenHolder, uint256 _snapshotId) internal view virtual returns (uint256);
     function _balanceOfAtAdjusted(
@@ -634,10 +459,6 @@ abstract contract Internals is Modifiers {
         address _tokenHolder
     ) internal view virtual returns (uint256 balance_);
     function _balanceOfByPartition(bytes32 _partition, address _tokenHolder) internal view virtual returns (uint256);
-    function _balanceOfByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256);
     function _balanceOfByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
@@ -739,7 +560,6 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (uint256 balance_);
     function _clock() internal view virtual returns (uint48);
     function _decimals() internal view virtual returns (uint8);
-    function _decimalsAdjusted() internal view virtual returns (uint8);
     function _decimalsAdjustedAt(uint256 _timestamp) internal view virtual returns (uint8);
     function _decimalsAtSnapshot(uint256 _snapshotID) internal view virtual returns (uint8 decimals_);
     function _delegates(address account) internal view virtual returns (address);
@@ -769,12 +589,10 @@ abstract contract Internals is Modifiers {
         uint256 timestamp
     ) internal view virtual returns (uint256 factor);
     function _getAbaf() internal view virtual returns (uint256);
-    function _getAbafAdjusted() internal view virtual returns (uint256);
     function _getAbafAdjustedAt(uint256 _timestamp) internal view virtual returns (uint256);
     function _getAllowanceLabaf(address _owner, address _spender) internal view virtual returns (uint256);
     function _getBondDetails() internal view virtual returns (IBondRead.BondDetailsData memory bondDetails_);
     function _getClearedAmountFor(address _tokenHolder) internal view virtual returns (uint256 amount_);
-    function _getClearedAmountForAdjusted(address _tokenHolder) internal view virtual returns (uint256 amount_);
     function _getClearedAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -783,9 +601,10 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_);
-    function _getClearedAmountForByPartitionAdjusted(
+    function _getClearedAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_);
     function _getClearingBasicInfo(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
@@ -800,10 +619,11 @@ abstract contract Internals is Modifiers {
         address _tokenHolder,
         uint256 _clearingId
     ) internal view virtual returns (IClearingHoldCreation.ClearingHoldCreationData memory clearingHoldCreationData_);
-    function _getClearingHoldCreationForByPartitionAdjusted(
+    function _getClearingHoldCreationForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _clearingId
+        uint256 _clearingId,
+        uint256 _timestamp
     ) internal view virtual returns (IClearingTransfer.ClearingHoldCreationData memory clearingHoldCreationData_);
     function _getClearingLabafById(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
@@ -816,10 +636,11 @@ abstract contract Internals is Modifiers {
         address _tokenHolder,
         uint256 _clearingId
     ) internal view virtual returns (IClearingRedeem.ClearingRedeemData memory clearingRedeemData_);
-    function _getClearingRedeemForByPartitionAdjusted(
+    function _getClearingRedeemForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _clearingId
+        uint256 _clearingId,
+        uint256 _timestamp
     ) internal view virtual returns (IClearingTransfer.ClearingRedeemData memory clearingRedeemData_);
     function _getClearingThirdParty(
         bytes32 _partition,
@@ -832,10 +653,11 @@ abstract contract Internals is Modifiers {
         address _tokenHolder,
         uint256 _clearingId
     ) internal view virtual returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_);
-    function _getClearingTransferForByPartitionAdjusted(
+    function _getClearingTransferForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _clearingId
+        uint256 _clearingId,
+        uint256 _timestamp
     ) internal view virtual returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_);
     function _getClearingsIdForByPartition(
         bytes32 _partition,
@@ -899,7 +721,7 @@ abstract contract Internals is Modifiers {
         uint256 _pageLength
     ) internal view virtual returns (uint256[] memory couponIDs_);
     function _getCouponsOrderedListTotal() internal view virtual returns (uint256 total_);
-    function _getCouponsOrderedListTotalAdjusted() internal view virtual returns (uint256 total_);
+    function _getCouponsOrderedListTotalAdjustedAt(uint256 _timestamp) internal view virtual returns (uint256 total_);
     function _getCurrentSnapshotId() internal view virtual returns (uint256);
     function _getDividendAmountFor(
         uint256 _dividendID,
@@ -920,7 +742,6 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (IEquity.DividendFor memory dividendFor_);
     function _getERC20Metadata() internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
     function _getName() internal view virtual returns (string memory);
-    function _getERC20MetadataAdjusted() internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
     function _getERC20MetadataAdjustedAt(
         uint256 _timestamp
     ) internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
@@ -932,7 +753,6 @@ abstract contract Internals is Modifiers {
         uint256 _pageLength
     ) internal view virtual returns (address[] memory members_);
     function _getFrozenAmountFor(address _userAddress) internal view virtual returns (uint256);
-    function _getFrozenAmountForAdjusted(address _tokenHolder) internal view virtual returns (uint256 amount_);
     function _getFrozenAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -941,12 +761,12 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _userAddress
     ) internal view virtual returns (uint256);
-    function _getFrozenAmountForByPartitionAdjusted(
+    function _getFrozenAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_);
     function _getHeldAmountFor(address _tokenHolder) internal view virtual returns (uint256 amount_);
-    function _getHeldAmountForAdjusted(address _tokenHolder) internal view virtual returns (uint256 amount_);
     function _getHeldAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -955,9 +775,10 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_);
-    function _getHeldAmountForByPartitionAdjusted(
+    function _getHeldAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_);
     function _getHold(HoldIdentifier memory _holdIdentifier) internal view virtual returns (HoldData memory);
     function _getHoldCountForByPartition(
@@ -979,8 +800,9 @@ abstract contract Internals is Modifiers {
             bytes memory operatorData_,
             ThirdPartyType thirdPartType_
         );
-    function _getHoldForByPartitionAdjusted(
-        HoldIdentifier calldata _holdIdentifier
+    function _getHoldForByPartitionAdjustedAt(
+        HoldIdentifier calldata _holdIdentifier,
+        uint256 _timestamp
     )
         internal
         view
@@ -1020,7 +842,6 @@ abstract contract Internals is Modifiers {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory members_);
-    function _getKpiOracle() internal view virtual returns (address kpiOracle_);
     function _getKycAccountsCount(IKyc.KycStatus _kycStatus) internal view virtual returns (uint256 kycAccountsCount_);
     function _getKycAccountsData(
         IKyc.KycStatus _kycStatus,
@@ -1051,10 +872,11 @@ abstract contract Internals is Modifiers {
         address tokenHolder,
         uint256 lockId
     ) internal view virtual returns (uint256 amount, uint256 expirationTimestamp);
-    function _getLockForByPartitionAdjusted(
+    function _getLockForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _lockId
+        uint256 _lockId,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_, uint256 expirationTimestamp_);
     function _getLockLabafById(
         bytes32 _partition,
@@ -1070,9 +892,10 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256);
-    function _getLockedAmountForByPartitionAdjusted(
+    function _getLockedAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256 amount_);
     function _getLocksIdForByPartition(
         bytes32 _partition,
@@ -1082,10 +905,8 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (uint256[] memory locksId_);
     function _getMaturityDate() internal view virtual returns (uint256 maturityDate_);
     function _getMaxSupply() internal view virtual returns (uint256);
-    function _getMaxSupplyAdjusted() internal view virtual returns (uint256 maxSupply_);
     function _getMaxSupplyAdjustedAt(uint256 timestamp) internal view virtual returns (uint256);
     function _getMaxSupplyByPartition(bytes32 partition) internal view virtual returns (uint256);
-    function _getMaxSupplyByPartitionAdjusted(bytes32 _partition) internal view virtual returns (uint256 maxSupply_);
     function _getMaxSupplyByPartitionAdjustedAt(
         bytes32 partition,
         uint256 timestamp
@@ -1165,14 +986,14 @@ abstract contract Internals is Modifiers {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory holders_);
-    function _getTotalBalance(address _tokenHolder) internal view virtual returns (uint256 totalBalance);
     function _getTotalBalanceForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
     ) internal view virtual returns (uint256 totalBalance);
-    function _getTotalBalanceForByPartitionAdjusted(
+    function _getTotalBalanceForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual returns (uint256);
     function _getTotalBalanceOfAtSnapshot(
         uint256 _snapshotId,
@@ -1210,7 +1031,7 @@ abstract contract Internals is Modifiers {
     function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view virtual returns (uint256);
     function _actionContentHashExists(bytes32 _contentHash) internal view virtual returns (bool);
     function _getVotes(address account) internal view virtual returns (uint256);
-    function _getVotesAdjusted(
+    function _getVotesAdjustedAt(
         uint256 timepoint,
         CheckpointsLib.Checkpoint[] storage ckpts
     ) internal view virtual returns (uint256);
@@ -1360,13 +1181,184 @@ abstract contract Internals is Modifiers {
         uint256 _snapshotID,
         address _tokenHolder
     ) internal view virtual returns (bytes32[] memory);
+    function _permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal virtual;
+    function _protectedClearingCreateHoldByPartition(
+        IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
+        Hold calldata _hold,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 clearingId_);
+    function _protectedClearingRedeemByPartition(
+        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 clearingId_);
+    function _protectedClearingTransferByPartition(
+        IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        address _to,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 clearingId_);
+    function _protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 holdId_);
+    function _protectedRedeemFromByPartition(
+        bytes32 _partition,
+        address _from,
+        uint256 _amount,
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal virtual;
+    function _protectedTransferFromByPartition(
+        bytes32 _partition,
+        address _from,
+        address _to,
+        uint256 _amount,
+        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+    ) internal virtual returns (bytes32);
+    function _pushLabafUserPartition(address _tokenHolder, uint256 _labaf) internal virtual;
+    function _reclaimClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    ) internal virtual returns (bool success_);
+    function _reclaimHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier
+    ) internal virtual returns (bool success_, uint256 amount_);
+    function _recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) internal virtual returns (bool);
+    function _redeem(uint256 _value, bytes memory _data) internal virtual;
+    function _redeemByPartition(
+        bytes32 _partition,
+        address _from,
+        address _operator,
+        uint256 _value,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) internal virtual;
+    function _redeemFrom(address _tokenHolder, uint256 _value, bytes memory _data) internal virtual;
+    function _reduceBalanceByPartition(address _from, uint256 _value, bytes32 _partition) internal virtual;
+    function _reduceTotalSupplyByPartition(bytes32 _partition, uint256 _value) internal virtual;
+    function _releaseByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal virtual returns (bool success_);
+    function _releaseHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier,
+        uint256 _amount
+    ) internal virtual returns (bool success_);
+    function _removeAgent(address _agent) internal virtual;
+    function _removeClearing(
+        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
+    ) internal virtual;
+    function _removeExternalList(bytes32 _position, address _list) internal virtual returns (bool success_);
+    function _removeFromControlList(address _account) internal virtual returns (bool success_);
+    function _removeHold(HoldIdentifier calldata _holdIdentifier) internal virtual;
+    function _removeIssuer(address _issuer) internal virtual returns (bool success_);
+    function _removeLabafClearing(
+        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
+    ) internal virtual;
+    function _removeLabafHold(bytes32 _partition, address _tokenHolder, uint256 _holdId) internal virtual;
+    function _removeLabafLock(bytes32 _partition, address _tokenHolder, uint256 _lockId) internal virtual;
+    function _removeProceedRecipient(address _proceedRecipient) internal virtual;
+    function _removeProceedRecipientData(address _proceedRecipient) internal virtual;
+    function _removeTokenHolder(address tokenHolder) internal virtual;
+    function _replaceTokenHolder(address newTokenHolder, address oldTokenHolder) internal virtual;
+    function _revokeKyc(address _account) internal virtual returns (bool success_);
+    function _revokeOperator(address _operator) internal virtual;
+    function _revokeOperatorByPartition(bytes32 _partition, address _operator) internal virtual;
+    function _revokeRole(bytes32 _role, address _account) internal virtual returns (bool success_);
+    function _setActivate(bool _activated) internal virtual;
+    function _setAddressFrozen(address _userAddress, bool _freezeStatus) internal virtual;
+    function _setClearedLabafById(
+        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
+        uint256 _labaf
+    ) internal virtual;
+    function _setClearing(bool _activated) internal virtual returns (bool success_);
+    function _setCompliance(address _compliance) internal virtual;
+    function _setCoupon(
+        IBondRead.Coupon memory _newCoupon
+    ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_);
+    function _setDividends(
+        IEquity.Dividend calldata _newDividend
+    ) internal virtual returns (bytes32 corporateActionId_, uint256 dividendId_);
+    function _setHeldLabafById(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _labaf
+    ) internal virtual;
+    function _setIdentityRegistry(address _identityRegistry) internal virtual;
+    function _setImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) internal virtual;
+    function _setInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) internal virtual;
+    function _setInternalKyc(bool _activated) internal virtual returns (bool success_);
+    function _setLockLabafById(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId,
+        uint256 _labaf
+    ) internal virtual;
+    function _setMaturityDate(uint256 _maturityDate) internal virtual returns (bool success_);
+    function _setMaxSupply(uint256 _maxSupply) internal virtual;
+    function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal virtual;
+    function _setNonceFor(uint256 _nounce, address _account) internal virtual;
+    function _setPause(bool _paused) internal virtual;
+    function _setProceedRecipientData(address _proceedRecipient, bytes calldata _data) internal virtual;
+    function _setProtectedPartitions(bool _protected) internal virtual;
+    function _setRate(uint256 _newRate, uint8 _newRateDecimals) internal virtual;
+    function _setRevocationRegistryAddress(address _revocationRegistryAddress) internal virtual returns (bool success_);
+    function _setSPTImpactData(
+        ISustainabilityPerformanceTargetRate.ImpactData calldata _newImpactData,
+        address _project
+    ) internal virtual;
+    function _setSPTInterestRate(
+        ISustainabilityPerformanceTargetRate.InterestRate calldata _newInterestRate
+    ) internal virtual;
+    function _setScheduledBalanceAdjustment(
+        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    ) internal virtual returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_);
+    function _setTotalClearedLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
+    function _setTotalClearedLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal virtual;
+    function _setTotalFreezeLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
+    function _setTotalFreezeLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal virtual;
+    function _setTotalHeldLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
+    function _setTotalHeldLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal virtual;
+    function _setTotalLockLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
+    function _setTotalLockLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal virtual;
+    function _setVoting(
+        IEquity.Voting calldata _newVoting
+    ) internal virtual returns (bytes32 corporateActionId_, uint256 voteID_);
+    function _snapshot() internal virtual returns (uint256);
+    function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal virtual;
+    function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal virtual;
+    function _storeRegulationData(
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
+    ) internal virtual;
+    function _syncBalanceAdjustments(bytes32 _partition, address _from, address _to) internal virtual;
+    function _takeAbafCheckpoint() internal virtual;
+    function _takeSnapshot() internal virtual returns (uint256 snapshotID_);
     function _tokenHoldersAt(
         uint256 snapshotId,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory);
     function _totalSupply() internal view virtual returns (uint256);
-    function _totalSupplyAdjusted() internal view virtual returns (uint256);
     function _totalSupplyAdjustedAt(uint256 _timestamp) internal view virtual returns (uint256);
     function _totalSupplyAt(uint256 _snapshotId) internal view virtual returns (uint256);
     function _totalSupplyAtSnapshot(uint256 _snapshotID) internal view virtual returns (uint256 totalSupply_);
@@ -1375,7 +1367,10 @@ abstract contract Internals is Modifiers {
         uint256 _snapshotID
     ) internal view virtual returns (uint256 totalSupply_);
     function _totalSupplyByPartition(bytes32 _partition) internal view virtual returns (uint256);
-    function _totalSupplyByPartitionAdjusted(bytes32 _partition) internal view virtual returns (uint256);
+    function _totalSupplyByPartitionAdjustedAt(
+        bytes32 _partition,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256);
     function _totalTokenHoldersAt(uint256 snapshotId) internal view virtual returns (uint256);
     function _validPartition(bytes32 _partition, address _holder) internal view virtual returns (bool);
     function _validPartitionForReceiver(bytes32 _partition, address _to) internal view virtual returns (bool);

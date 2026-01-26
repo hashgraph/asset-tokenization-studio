@@ -370,7 +370,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         bytes32 _partition
     ) private view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         if (_checkAllowance) {
-            uint256 currentAllowance = _allowanceAdjusted(_from, _msgSender());
+            uint256 currentAllowance = _allowanceAdjustedAt(_from, _msgSender(), _blockTimestamp());
             if (currentAllowance < _value) {
                 return (
                     false,
@@ -387,7 +387,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
         }
 
         // Balance check - check partition-specific balance
-        uint256 currentPartitionBalance = _balanceOfByPartitionAdjusted(_partition, _from);
+        uint256 currentPartitionBalance = _balanceOfByPartitionAdjustedAt(_partition, _from, _blockTimestamp());
         if (currentPartitionBalance < _value) {
             return (
                 false,

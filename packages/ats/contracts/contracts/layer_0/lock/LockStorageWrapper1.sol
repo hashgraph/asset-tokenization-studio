@@ -72,12 +72,16 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         expirationTimestamp = lock.expirationTimestamp;
     }
 
-    function _getLockForByPartitionAdjusted(
+    function _getLockForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _lockId
+        uint256 _lockId,
+        uint256 _timestamp
     ) internal view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        uint256 factor = _calculateFactor(_getAbafAdjusted(), _getLockLabafById(_partition, _tokenHolder, _lockId));
+        uint256 factor = _calculateFactor(
+            _getAbafAdjustedAt(_timestamp),
+            _getLockLabafById(_partition, _tokenHolder, _lockId)
+        );
 
         (amount_, expirationTimestamp_) = _getLockForByPartition(_partition, _tokenHolder, _lockId);
         amount_ *= factor;
@@ -96,13 +100,14 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         return _getLockedAmountFor(tokenHolder) * factor;
     }
 
-    function _getTotalBalanceForByPartitionAdjusted(
+    function _getTotalBalanceForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual override returns (uint256) {
         return
-            super._getTotalBalanceForByPartitionAdjusted(_partition, _tokenHolder) +
-            _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+            super._getTotalBalanceForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
+            _getLockedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
     }
 
     function _getTotalBalanceForAdjustedAt(
@@ -114,15 +119,15 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
             _getLockedAmountForAdjustedAt(_tokenHolder, _timestamp);
     }
 
-    function _getTotalBalance(address _tokenHolder) internal view virtual override returns (uint256) {
-        return super._getTotalBalance(_tokenHolder) + _getLockedAmountForAdjustedAt(_tokenHolder, _blockTimestamp());
-    }
-
-    function _getLockedAmountForByPartitionAdjusted(
+    function _getLockedAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view override returns (uint256 amount_) {
-        uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalLockLabafByPartition(_partition, _tokenHolder));
+        uint256 factor = _calculateFactor(
+            _getAbafAdjustedAt(_timestamp),
+            _getTotalLockLabafByPartition(_partition, _tokenHolder)
+        );
         return _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
     }
 

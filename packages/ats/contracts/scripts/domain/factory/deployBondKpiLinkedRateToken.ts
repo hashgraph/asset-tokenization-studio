@@ -71,7 +71,6 @@ export async function deployBondKpiLinkedRateFromFactory(
   regulationTypeParams: FactoryRegulationDataParams,
   interestRateParams: InterestRateParams,
   impactDataParams: ImpactDataParams,
-  kpiOracle: string,
 ): Promise<ResolverProxy> {
   const {
     factory,
@@ -156,7 +155,6 @@ export async function deployBondKpiLinkedRateFromFactory(
     factoryRegulationData: factoryRegulationData,
     interestRate: interestRateParams,
     impactData: impactDataParams,
-    kpiOracle,
   };
 
   // Deploy bond token via factory

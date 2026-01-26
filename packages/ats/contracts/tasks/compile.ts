@@ -70,7 +70,6 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     },
     // Coupon Interest Rates interfaces
     { original: "IFixedRate" },
-    { original: "IKpi" },
     { original: "IKpiLinkedRate" },
     {
       original: "IScheduledCouponListing",

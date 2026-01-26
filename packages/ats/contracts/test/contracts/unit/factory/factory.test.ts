@@ -1127,7 +1127,6 @@ describe("Factory Tests", () => {
           impactDataDecimals: 2,
           adjustmentPrecision: 100,
         },
-        kpiOracle: signer_A.address,
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
@@ -1184,7 +1183,6 @@ describe("Factory Tests", () => {
           impactDataDecimals: 2,
           adjustmentPrecision: 100,
         },
-        kpiOracle: signer_A.address,
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
@@ -1226,7 +1224,6 @@ describe("Factory Tests", () => {
           impactDataDecimals: 2,
           adjustmentPrecision: 100,
         },
-        kpiOracle: signer_A.address,
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
@@ -1268,7 +1265,6 @@ describe("Factory Tests", () => {
           impactDataDecimals: 2,
           adjustmentPrecision: 100,
         },
-        kpiOracle: signer_A.address,
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
@@ -1310,7 +1306,6 @@ describe("Factory Tests", () => {
           impactDataDecimals: 2,
           adjustmentPrecision: 100,
         },
-        kpiOracle: signer_A.address,
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
@@ -1352,7 +1347,6 @@ describe("Factory Tests", () => {
           impactDataDecimals: 2,
           adjustmentPrecision: 100,
         },
-        kpiOracle: signer_A.address,
       };
 
       bondKpiLinkedRateData.bondData.security.resolver = ADDRESS_ZERO;
@@ -1393,7 +1387,6 @@ describe("Factory Tests", () => {
           impactDataDecimals: 2,
           adjustmentPrecision: 100,
         },
-        kpiOracle: signer_A.address,
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
@@ -1430,7 +1423,6 @@ describe("Factory Tests", () => {
           impactDataDecimals: 2,
           adjustmentPrecision: 100,
         },
-        kpiOracle: signer_A.address,
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
@@ -1472,7 +1464,6 @@ describe("Factory Tests", () => {
           impactDataDecimals: 2,
           adjustmentPrecision: 100,
         },
-        kpiOracle: signer_A.address,
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {

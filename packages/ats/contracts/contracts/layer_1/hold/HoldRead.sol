@@ -8,14 +8,14 @@ import { Internals } from "contracts/layer_0/Internals.sol";
 
 abstract contract HoldRead is IHoldRead, Internals {
     function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return _getHeldAmountForAdjusted(_tokenHolder);
+        return _getHeldAmountForAdjustedAt(_tokenHolder, _blockTimestamp());
     }
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+        return _getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
     }
 
     function getHoldCountForByPartition(
@@ -50,7 +50,7 @@ abstract contract HoldRead is IHoldRead, Internals {
             ThirdPartyType thirdPartyType_
         )
     {
-        return _getHoldForByPartitionAdjusted(_holdIdentifier);
+        return _getHoldForByPartitionAdjustedAt(_holdIdentifier, _blockTimestamp());
     }
 
     function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) external view override returns (address) {

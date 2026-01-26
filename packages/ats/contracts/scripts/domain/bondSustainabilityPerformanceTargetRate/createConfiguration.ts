@@ -45,6 +45,7 @@ const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   "KycSustainabilityPerformanceTargetRateFacet",
   "PauseSustainabilityPerformanceTargetRateFacet",
   "SnapshotsSustainabilityPerformanceTargetRateFacet",
+  "TotalBalanceSustainabilityPerformanceTargetRateFacet",
 
   // ERC Standards
   "ERC1410IssuerSustainabilityPerformanceTargetRateFacet",

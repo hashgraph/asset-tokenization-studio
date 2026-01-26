@@ -28,105 +28,6 @@ const BASE_CLASSES_TO_EXCLUDE = new Set([
 ]);
 
 /**
- * Represents a multi-line comment with its content and position.
- */
-interface MultiLineComment {
-  /** The content between the comment delimiters (without the delimiters) */
-  content: string;
-  /** Start position in the source */
-  start: number;
-  /** End position in the source (after closing delimiter) */
-  end: number;
-  /** Whether this is a doc comment (starts with /**) */
-  isDocComment: boolean;
-}
-
-/**
- * Extract all multi-line comments from source code using iterative parsing.
- *
- * This avoids ReDoS vulnerability that can occur with regex patterns like /\/\*[\s\S]*?\*\//g
- * on pathological inputs (e.g., strings with many '/*' sequences).
- *
- * @param source - Source code potentially containing multi-line comments
- * @returns Array of comments with their content and positions
- */
-function extractMultiLineComments(source: string): MultiLineComment[] {
-  const comments: MultiLineComment[] = [];
-  let i = 0;
-  while (i < source.length) {
-    // Check for start of multi-line comment
-    if (source[i] === "/" && i + 1 < source.length && source[i + 1] === "*") {
-      const start = i;
-      const isDocComment = i + 2 < source.length && source[i + 2] === "*";
-      // Skip the opening /* or /**
-      i += 2;
-      const contentStart = i;
-      // Find the closing */
-      while (i < source.length) {
-        if (source[i] === "*" && i + 1 < source.length && source[i + 1] === "/") {
-          const content = source.substring(contentStart, i);
-          comments.push({ content, start, end: i + 2, isDocComment });
-          i += 2;
-          break;
-        }
-        i++;
-      }
-    } else {
-      i++;
-    }
-  }
-  return comments;
-}
-
-/**
- * Remove multi-line comments from source code using iterative parsing.
- *
- * This avoids ReDoS vulnerability that can occur with regex patterns like /\/\*[\s\S]*?\*\//g
- * on pathological inputs (e.g., strings with many '/*' sequences).
- *
- * @param source - Source code potentially containing multi-line comments
- * @returns Source code with multi-line comments removed
- */
-function removeMultiLineComments(source: string): string {
-  const comments = extractMultiLineComments(source);
-  if (comments.length === 0) {
-    return source;
-  }
-
-  // Build result by copying non-comment parts
-  let result = "";
-  let lastEnd = 0;
-  for (const comment of comments) {
-    result += source.substring(lastEnd, comment.start);
-    lastEnd = comment.end;
-  }
-  result += source.substring(lastEnd);
-  return result;
-}
-
-/**
- * Normalize whitespace in a string by collapsing multiple spaces/tabs to single space.
- * This is a safe operation that doesn't use regex with quantifiers on uncontrolled input.
- */
-function normalizeWhitespace(str: string): string {
-  let result = "";
-  let lastWasSpace = false;
-  for (let i = 0; i < str.length; i++) {
-    const char = str[i];
-    if (char === " " || char === "\t") {
-      if (!lastWasSpace) {
-        result += " ";
-        lastWasSpace = true;
-      }
-    } else {
-      result += char;
-      lastWasSpace = false;
-    }
-  }
-  return result;
-}
-
-/**
  * Extract contract names from Solidity source code.
  *
  * Matches: contract ContractName, abstract contract ContractName, interface IName
@@ -135,83 +36,25 @@ function normalizeWhitespace(str: string): string {
  * @returns Array of contract names
  */
 export function extractContractNames(source: string): string[] {
-  // Remove single-line comments (// ... and /// ...) using line-by-line processing
-  // to avoid ReDoS vulnerability with regex on uncontrolled input
-  const lines = source.split("\n");
-  const cleanLines = lines.map((line) => {
-    const commentIndex = line.indexOf("//");
-    if (commentIndex !== -1) {
-      // Check if // is inside a string literal (simple heuristic)
-      const beforeComment = line.substring(0, commentIndex);
-      let singleQuotes = 0;
-      let doubleQuotes = 0;
-      for (const char of beforeComment) {
-        if (char === "'") singleQuotes++;
-        if (char === '"') doubleQuotes++;
-      }
-      // If odd number of quotes, we're inside a string - don't remove
-      if (singleQuotes % 2 === 0 && doubleQuotes % 2 === 0) {
-        return line.substring(0, commentIndex);
-      }
-    }
-    return line;
-  });
-  let cleanSource = cleanLines.join("\n");
+  // Remove single-line comments (// ...)
+  let cleanSource = source.replace(/\/\/.*$/gm, "");
 
-  // Remove multi-line comments (/* ... */ and /** ... */) using iterative parsing
-  // to avoid ReDoS vulnerability with regex on uncontrolled input
-  cleanSource = removeMultiLineComments(cleanSource);
+  // Remove multi-line comments (/* ... */)
+  cleanSource = cleanSource.replace(/\/\*[\s\S]*?\*\//g, "");
 
+  // Remove natspec comments (/// ... and /** ... */)
+  cleanSource = cleanSource.replace(/\/\/\/.*$/gm, "");
+  cleanSource = cleanSource.replace(/\/\*\*[\s\S]*?\*\//g, "");
+
+  const contractRegex = /(?:abstract\s+)?(?:contract|interface|library)\s+(\w+)/g;
   const matches: string[] = [];
 
-  // Process line by line using string operations to avoid ReDoS
-  for (const line of cleanSource.split("\n")) {
-    const normalized = normalizeWhitespace(line.trim());
-    const name = parseContractDeclaration(normalized);
-    if (name) {
-      matches.push(name);
-    }
+  let match;
+  while ((match = contractRegex.exec(cleanSource)) !== null) {
+    matches.push(match[1]);
   }
 
   return matches;
-}
-
-/**
- * Parse a contract/interface/library declaration from a normalized line.
- */
-function parseContractDeclaration(line: string): string | null {
-  let rest = line;
-
-  // Skip "abstract " if present
-  if (rest.startsWith("abstract ")) {
-    rest = rest.slice(9);
-  }
-
-  // Check for contract, interface, or library
-  let keyword: string | null = null;
-  for (const kw of ["contract ", "interface ", "library "]) {
-    if (rest.startsWith(kw)) {
-      keyword = kw;
-      rest = rest.slice(kw.length);
-      break;
-    }
-  }
-
-  if (!keyword) {
-    return null;
-  }
-
-  // Extract the name (word characters until space, { or end)
-  let name = "";
-  for (const char of rest) {
-    if (/\w/.test(char)) {
-      name += char;
-    } else {
-      break;
-    }
-  }
-
-  return name || null;
 }
 
 /**
@@ -246,74 +89,20 @@ export interface RoleDefinition {
  * ```
  */
 export function extractRoles(source: string): RoleDefinition[] {
+  // Match: bytes32 [public] constant [_]ROLE_NAME = value;
+  // Underscore prefix is optional (legacy ATS uses it incorrectly)
+  const roleRegex = /bytes32\s+(?:public\s+)?constant\s+(_?\w+_ROLE)\s*=\s*([^;]+);/g;
   const roles: RoleDefinition[] = [];
-  const lines = source.split("\n");
 
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("_ROLE") || !line.includes("bytes32") || !line.includes("constant")) {
-      continue;
-    }
+  let match;
+  while ((match = roleRegex.exec(source)) !== null) {
+    const name = match[1];
+    const value = match[2].trim();
 
-    // Parse using string operations to avoid ReDoS
-    const role = parseConstantDefinition(line, "_ROLE");
-    if (role) {
-      roles.push(role);
-    }
+    roles.push({ name, value });
   }
 
   return roles;
-}
-
-/**
- * Parse a constant definition (role or resolver key) using string operations.
- * Matches: bytes32 [public] constant NAME = value;
- */
-function parseConstantDefinition(line: string, suffix: string): { name: string; value: string } | null {
-  const normalized = normalizeWhitespace(line.trim());
-
-  // Must contain "bytes32 "
-  const bytes32Idx = normalized.indexOf("bytes32 ");
-  if (bytes32Idx === -1) {
-    return null;
-  }
-
-  let rest = normalized.slice(bytes32Idx + 8);
-
-  // Skip optional "public "
-  if (rest.startsWith("public ")) {
-    rest = rest.slice(7);
-  }
-
-  // Must have "constant "
-  if (!rest.startsWith("constant ")) {
-    return null;
-  }
-  rest = rest.slice(9);
-
-  // Find "="
-  const eqIdx = rest.indexOf("=");
-  if (eqIdx === -1) {
-    return null;
-  }
-
-  const name = rest.slice(0, eqIdx).trim();
-
-  // Must end with the expected suffix
-  if (!name.endsWith(suffix)) {
-    return null;
-  }
-
-  // Find ";"
-  const afterEq = rest.slice(eqIdx + 1);
-  const semiIdx = afterEq.indexOf(";");
-  if (semiIdx === -1) {
-    return null;
-  }
-
-  const value = afterEq.slice(0, semiIdx).trim();
-
-  return { name, value };
 }
 
 /**
@@ -348,20 +137,17 @@ export interface ResolverKeyDefinition {
  * ```
  */
 export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
+  // Match: bytes32 [public] constant [_]RESOLVER_KEY_NAME = value;
+  // Underscore prefix is optional (legacy ATS uses it incorrectly)
+  const keyRegex = /bytes32\s+(?:public\s+)?constant\s+(_?\w+_RESOLVER_KEY)\s*=\s*([^;]+);/g;
   const keys: ResolverKeyDefinition[] = [];
-  const lines = source.split("\n");
 
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("_RESOLVER_KEY") || !line.includes("bytes32") || !line.includes("constant")) {
-      continue;
-    }
+  let match;
+  while ((match = keyRegex.exec(source)) !== null) {
+    const name = match[1];
+    const value = match[2].trim();
 
-    // Parse using string operations to avoid ReDoS
-    const key = parseConstantDefinition(line, "_RESOLVER_KEY");
-    if (key) {
-      keys.push(key);
-    }
+    keys.push({ name, value });
   }
 
   return keys;
@@ -391,147 +177,54 @@ export function extractResolverKeys(source: string): ResolverKeyDefinition[] {
  * ```
  */
 export function extractNatspecDescription(source: string, contractName: string): string | undefined {
-  // Search line by line to find the contract declaration
-  const lines = source.split("\n");
-  let charIndex = 0;
-  let foundIndex = -1;
+  // Find contract declaration with optional abstract/interface keywords
+  const contractDecl = new RegExp(`(?:abstract\\s+)?(?:contract|interface|library)\\s+${contractName}\\b`, "g");
 
-  for (const line of lines) {
-    const normalized = normalizeWhitespace(line.trim());
-    // Check if this line contains the contract declaration
-    if (lineContainsContractDeclaration(normalized, contractName)) {
-      foundIndex = charIndex;
-      break;
-    }
-    charIndex += line.length + 1; // +1 for newline
-  }
-
-  if (foundIndex === -1) {
+  const contractMatch = contractDecl.exec(source);
+  if (!contractMatch) {
     return undefined;
   }
 
   // Extract everything before the contract declaration
-  const beforeContract = source.substring(0, foundIndex);
+  const beforeContract = source.substring(0, contractMatch.index);
 
-  // Find all natspec comment blocks (/** ... */) before the contract using safe iterative parsing
-  const comments = extractMultiLineComments(beforeContract);
-  const docComments = comments.filter((c) => c.isDocComment);
+  // Find the last natspec comment block (/** ... */) before the contract
+  // This regex matches multiline comments that start with /**
+  const natspecRegex = /\/\*\*([\s\S]*?)\*\//g;
+  let lastNatspec: RegExpExecArray | null = null;
+  let match: RegExpExecArray | null;
 
-  if (docComments.length === 0) {
+  while ((match = natspecRegex.exec(beforeContract)) !== null) {
+    lastNatspec = match;
+  }
+
+  if (!lastNatspec) {
     return undefined;
   }
 
-  // Get the last doc comment (closest to the contract declaration)
-  const lastNatspec = docComments[docComments.length - 1];
-  const natspecContent = lastNatspec.content;
+  const natspecContent = lastNatspec[1];
 
-  // Try to extract @notice first (priority) using string operations
-  const noticeValue = extractNatspecTag(natspecContent, "@notice");
-  if (noticeValue) {
-    return cleanNatspecValue(noticeValue);
+  // Try to extract @notice first (priority)
+  const noticeMatch = /@notice\s+([^\n@]+)/i.exec(natspecContent);
+  if (noticeMatch) {
+    return noticeMatch[1]
+      .trim()
+      .replace(/\s*\*\s*/g, " ") // Remove asterisks from multi-line comments
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .trim();
   }
 
   // Fallback to @title if @notice not found
-  const titleValue = extractNatspecTag(natspecContent, "@title");
-  if (titleValue) {
-    return cleanNatspecValue(titleValue);
+  const titleMatch = /@title\s+([^\n@]+)/i.exec(natspecContent);
+  if (titleMatch) {
+    return titleMatch[1]
+      .trim()
+      .replace(/\s*\*\s*/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   return undefined;
-}
-
-/**
- * Check if a normalized line contains a contract declaration for the given name.
- */
-function lineContainsContractDeclaration(line: string, contractName: string): boolean {
-  let rest = line;
-
-  // Skip "abstract " if present
-  if (rest.startsWith("abstract ")) {
-    rest = rest.slice(9);
-  }
-
-  // Check for contract, interface, or library followed by the name
-  for (const kw of ["contract ", "interface ", "library "]) {
-    if (rest.startsWith(kw)) {
-      rest = rest.slice(kw.length);
-      // Check if it starts with the contract name followed by space, {, or end
-      if (rest.startsWith(contractName)) {
-        const afterName = rest.slice(contractName.length);
-        if (afterName.length === 0 || afterName[0] === " " || afterName[0] === "{" || afterName[0] === "(") {
-          return true;
-        }
-      }
-      break;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Extract a natspec tag value using string operations.
- */
-function extractNatspecTag(content: string, tag: string): string | null {
-  const tagIdx = content.indexOf(tag);
-  if (tagIdx === -1) {
-    return null;
-  }
-
-  // Find the start of the value (after tag and whitespace)
-  let start = tagIdx + tag.length;
-  while (start < content.length && (content[start] === " " || content[start] === "\t")) {
-    start++;
-  }
-
-  // Find the end (newline or next @tag)
-  let end = start;
-  while (end < content.length) {
-    if (content[end] === "\n") {
-      // Check if next non-whitespace is @ (new tag)
-      let nextNonWs = end + 1;
-      while (
-        nextNonWs < content.length &&
-        (content[nextNonWs] === " " || content[nextNonWs] === "\t" || content[nextNonWs] === "*")
-      ) {
-        nextNonWs++;
-      }
-      if (nextNonWs < content.length && content[nextNonWs] === "@") {
-        break;
-      }
-    }
-    if (content[end] === "@" && end > start) {
-      break;
-    }
-    end++;
-  }
-
-  return content.slice(start, end);
-}
-
-/**
- * Clean a natspec value by removing asterisks and normalizing whitespace.
- */
-function cleanNatspecValue(value: string): string {
-  let result = "";
-  let lastWasSpace = false;
-
-  for (const char of value) {
-    if (char === "*") {
-      continue; // Skip asterisks
-    }
-    if (char === " " || char === "\t" || char === "\n" || char === "\r") {
-      if (!lastWasSpace && result.length > 0) {
-        result += " ";
-        lastWasSpace = true;
-      }
-    } else {
-      result += char;
-      lastWasSpace = false;
-    }
-  }
-
-  return result.trim();
 }
 
 /**
@@ -551,11 +244,15 @@ function cleanNatspecValue(value: string): string {
  * ```
  */
 export function extractFacetResolverKeyImport(source: string): string | undefined {
-  // First try: Look for resolver key in import statements
-  // Handle both single-line and multi-line imports
-  const keyName = parseResolverKeyFromImports(source);
-  if (keyName) {
-    return keyName;
+  // First try: Match import statement
+  const importRegex = /import\s+\{([^}]*_RESOLVER_KEY[^}]*)\}\s+from\s+["'][^"']+["']/g;
+
+  const match = importRegex.exec(source);
+  if (match) {
+    // Extract just the key name (might have whitespace or other imports)
+    const importedNames = match[1].split(",").map((s) => s.trim());
+    const keyName = importedNames.find((name) => name.endsWith("_RESOLVER_KEY"));
+    if (keyName) return keyName;
   }
 
   // Second try: Check for inline constant definition (e.g., TimeTravelFacet)
@@ -568,61 +265,6 @@ export function extractFacetResolverKeyImport(source: string): string | undefine
 }
 
 /**
- * Parse resolver key from import statements, handling multi-line imports.
- */
-function parseResolverKeyFromImports(source: string): string | null {
-  // Find all import { ... } blocks and look for resolver keys
-  let i = 0;
-  while (i < source.length) {
-    // Find "import"
-    const importIdx = source.indexOf("import", i);
-    if (importIdx === -1) {
-      break;
-    }
-
-    // Find opening brace
-    const braceStart = source.indexOf("{", importIdx);
-    if (braceStart === -1) {
-      i = importIdx + 6;
-      continue;
-    }
-
-    // Make sure the brace is part of this import (not too far away)
-    const nextSemi = source.indexOf(";", importIdx);
-    if (nextSemi !== -1 && braceStart > nextSemi) {
-      i = importIdx + 6;
-      continue;
-    }
-
-    // Find closing brace
-    const braceEnd = source.indexOf("}", braceStart);
-    if (braceEnd === -1) {
-      i = importIdx + 6;
-      continue;
-    }
-
-    // Extract content between braces
-    const content = source.slice(braceStart + 1, braceEnd);
-
-    // Check if this import contains a resolver key
-    if (content.includes("_RESOLVER_KEY")) {
-      // Split by comma and find the resolver key
-      const parts = content.split(",");
-      for (const part of parts) {
-        const trimmed = part.trim();
-        if (trimmed.endsWith("_RESOLVER_KEY")) {
-          return trimmed;
-        }
-      }
-    }
-
-    i = braceEnd + 1;
-  }
-
-  return null;
-}
-
-/**
  * Extract imported contract paths.
  *
  * Matches: import "path/to/Contract.sol"
@@ -631,59 +273,15 @@ function parseResolverKeyFromImports(source: string): string | null {
  * @returns Array of import paths
  */
 export function extractImports(source: string): string[] {
+  const importRegex = /import\s+["']([^"']+)["']/g;
   const imports: string[] = [];
-  const lines = source.split("\n");
 
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("import")) {
-      continue;
-    }
-
-    // Parse using string operations to avoid ReDoS
-    const path = parseSimpleImport(line);
-    if (path) {
-      imports.push(path);
-    }
+  let match;
+  while ((match = importRegex.exec(source)) !== null) {
+    imports.push(match[1]);
   }
 
   return imports;
-}
-
-/**
- * Parse a simple import statement using string operations.
- */
-function parseSimpleImport(line: string): string | null {
-  // Find quote after "import"
-  const importIdx = line.indexOf("import");
-  if (importIdx === -1) {
-    return null;
-  }
-
-  const rest = line.slice(importIdx + 6);
-
-  // Find opening quote
-  let quoteChar: string | null = null;
-  let quoteStart = -1;
-  for (let i = 0; i < rest.length; i++) {
-    if (rest[i] === '"' || rest[i] === "'") {
-      quoteChar = rest[i];
-      quoteStart = i;
-      break;
-    }
-  }
-
-  if (!quoteChar || quoteStart === -1) {
-    return null;
-  }
-
-  // Find closing quote
-  const quoteEnd = rest.indexOf(quoteChar, quoteStart + 1);
-  if (quoteEnd === -1) {
-    return null;
-  }
-
-  return rest.slice(quoteStart + 1, quoteEnd);
 }
 
 /**
@@ -714,7 +312,7 @@ export function isTimeTravelVariant(contractName: string): boolean {
  */
 export function getBaseName(contractName: string): string {
   if (isTimeTravelVariant(contractName)) {
-    return contractName.slice(0, -10); // Remove "TimeTravel"
+    return contractName.replace(/TimeTravel$/, "");
   }
   return contractName;
 }
@@ -726,46 +324,9 @@ export function getBaseName(contractName: string): string {
  * @returns Solidity version or null
  */
 export function extractSolidityVersion(source: string): string | null {
-  const lines = source.split("\n");
-
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("pragma") || !line.includes("solidity")) {
-      continue;
-    }
-
-    // Parse using string operations to avoid ReDoS
-    const version = parsePragmaVersion(line);
-    if (version) {
-      return version;
-    }
-  }
-
-  return null;
-}
-
-/**
- * Parse pragma solidity version using string operations.
- */
-function parsePragmaVersion(line: string): string | null {
-  const pragmaIdx = line.indexOf("pragma");
-  if (pragmaIdx === -1) {
-    return null;
-  }
-
-  const solidityIdx = line.indexOf("solidity", pragmaIdx);
-  if (solidityIdx === -1) {
-    return null;
-  }
-
-  const semiIdx = line.indexOf(";", solidityIdx);
-  if (semiIdx === -1) {
-    return null;
-  }
-
-  // Extract version between "solidity" and ";"
-  const version = line.slice(solidityIdx + 8, semiIdx).trim();
-  return version || null;
+  const pragmaRegex = /pragma\s+solidity\s+([^;]+);/;
+  const match = source.match(pragmaRegex);
+  return match ? match[1].trim() : null;
 }
 
 /**
@@ -776,55 +337,8 @@ function parsePragmaVersion(line: string): string | null {
  * @returns true if contract implements interface
  */
 export function implementsInterface(source: string, interfaceName: string): boolean {
-  const lines = source.split("\n");
-
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("contract") || !line.includes("is")) {
-      continue;
-    }
-
-    const normalized = normalizeWhitespace(line.trim());
-
-    // Check if line has "contract X is ... InterfaceName"
-    if (lineImplementsInterface(normalized, interfaceName)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Check if a line implements a specific interface.
- */
-function lineImplementsInterface(line: string, interfaceName: string): boolean {
-  const contractIdx = line.indexOf("contract ");
-  if (contractIdx === -1) {
-    return false;
-  }
-
-  const isIdx = line.indexOf(" is ", contractIdx);
-  if (isIdx === -1) {
-    return false;
-  }
-
-  // Get the inheritance part
-  const inheritance = line.slice(isIdx + 4);
-
-  // Check if interfaceName appears as a word boundary
-  const idx = inheritance.indexOf(interfaceName);
-  if (idx === -1) {
-    return false;
-  }
-
-  // Check word boundaries
-  const before = idx > 0 ? inheritance[idx - 1] : " ";
-  const after = idx + interfaceName.length < inheritance.length ? inheritance[idx + interfaceName.length] : " ";
-
-  const isWordBoundary = (c: string) => !/\w/.test(c);
-
-  return isWordBoundary(before) && isWordBoundary(after);
+  const implementsRegex = new RegExp(`contract\\s+\\w+\\s+is\\s+[^{]*\\b${interfaceName}\\b`);
+  return implementsRegex.test(source);
 }
 
 /**
@@ -837,49 +351,18 @@ function lineImplementsInterface(line: string, interfaceName: string): boolean {
  * @returns Array of parent contract names
  */
 export function extractInheritance(source: string, contractName: string): string[] {
-  const lines = source.split("\n");
+  const regex = new RegExp(`contract\\s+${contractName}\\s+is\\s+([^{]+)`);
+  const match = source.match(regex);
 
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("contract") || !line.includes(contractName) || !line.includes("is")) {
-      continue;
-    }
-
-    const normalized = normalizeWhitespace(line.trim());
-    const parents = parseInheritance(normalized, contractName);
-    if (parents.length > 0) {
-      return parents;
-    }
-  }
-
-  return [];
-}
-
-/**
- * Parse inheritance from a line using string operations.
- */
-function parseInheritance(line: string, contractName: string): string[] {
-  // Find "contract ContractName is"
-  const pattern = `contract ${contractName} is `;
-  const idx = line.indexOf(pattern);
-  if (idx === -1) {
+  if (!match) {
     return [];
   }
 
-  // Get everything after "is "
-  let rest = line.slice(idx + pattern.length);
-
-  // Remove everything after "{"
-  const braceIdx = rest.indexOf("{");
-  if (braceIdx !== -1) {
-    rest = rest.slice(0, braceIdx);
-  }
-
-  // Split by comma and clean up
-  return rest
+  // Split by comma and clean up whitespace
+  return match[1]
     .split(",")
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0 && /^\w+$/.test(s));
+    .map((name) => name.trim())
+    .filter((name) => name.length > 0);
 }
 
 /**
@@ -898,25 +381,17 @@ function parseInheritance(line: string, contractName: string): string[] {
  * ```
  */
 export function extractPublicMethods(source: string): MethodDefinition[] {
+  // Match: function name(...) external|public [view|pure|payable] [...]
+  // Exclude: constructor, receive, fallback
+  const functionRegex =
+    /function\s+(\w+)\s*\([^)]*\)\s+(?:external|public)(?:\s+(?:view|pure|payable|virtual|override|returns))*[^{;]*/g;
+
   const methods: MethodDefinition[] = [];
   const seen = new Set<string>();
-  const lines = source.split("\n");
 
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("function")) {
-      continue;
-    }
-    if (!line.includes("external") && !line.includes("public")) {
-      continue;
-    }
-
-    // Parse using string operations to avoid ReDoS
-    const methodName = parseFunctionName(line);
-
-    if (!methodName) {
-      continue;
-    }
+  let match;
+  while ((match = functionRegex.exec(source)) !== null) {
+    const methodName = match[1];
 
     // Exclude special functions
     if (methodName === "constructor" || methodName === "receive" || methodName === "fallback") {
@@ -946,34 +421,6 @@ export function extractPublicMethods(source: string): MethodDefinition[] {
 }
 
 /**
- * Parse a function name from a line using string operations.
- */
-function parseFunctionName(line: string): string | null {
-  const funcIdx = line.indexOf("function");
-  if (funcIdx === -1) {
-    return null;
-  }
-
-  // Skip "function " and whitespace
-  let start = funcIdx + 8;
-  while (start < line.length && (line[start] === " " || line[start] === "\t")) {
-    start++;
-  }
-
-  // Read the function name (word characters)
-  let name = "";
-  for (let i = start; i < line.length; i++) {
-    if (/\w/.test(line[i])) {
-      name += line[i];
-    } else {
-      break;
-    }
-  }
-
-  return name || null;
-}
-
-/**
  * Extract all methods from Solidity code (including internal/private).
  *
  * Used for StorageWrapper contracts that contain internal helper methods.
@@ -995,22 +442,16 @@ function parseFunctionName(line: string): string | null {
  * ```
  */
 export function extractAllMethods(source: string): MethodDefinition[] {
+  // Match: function name(...) [visibility] [modifiers] [...]
+  // Exclude: constructor, receive, fallback
+  const functionRegex = /function\s+(\w+)\s*\([^)]*\)/g;
+
   const methods: MethodDefinition[] = [];
   const seen = new Set<string>();
-  const lines = source.split("\n");
 
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("function")) {
-      continue;
-    }
-
-    // Parse using string operations to avoid ReDoS
-    const methodName = parseFunctionName(line);
-
-    if (!methodName) {
-      continue;
-    }
+  let match;
+  while ((match = functionRegex.exec(source)) !== null) {
+    const methodName = match[1];
 
     // Exclude special functions
     if (methodName === "constructor" || methodName === "receive" || methodName === "fallback") {
@@ -1037,7 +478,6 @@ export function extractAllMethods(source: string): MethodDefinition[] {
 
   return methods.sort((a, b) => a.name.localeCompare(b.name));
 }
-
 /**
  * Extract public/external methods from a contract and its entire inheritance chain.
  *
@@ -1139,24 +579,17 @@ export function extractPublicMethodsWithInheritance(
  * ```
  */
 export function normalizeType(type: string): string {
-  // Remove storage location keywords using string operations to avoid ReDoS
-  let normalized = type;
-  for (const keyword of [" calldata", " memory", " storage"]) {
-    const idx = normalized.indexOf(keyword);
-    if (idx !== -1) {
-      normalized = normalized.slice(0, idx) + normalized.slice(idx + keyword.length);
-    }
-  }
-  normalized = normalized.trim();
+  // Remove storage location keywords (calldata, memory, storage)
+  let normalized = type.replace(/\s+(calldata|memory|storage)\s*/, "").trim();
 
   // Normalize uint to uint256
   if (normalized === "uint" || normalized.startsWith("uint[")) {
-    normalized = "uint256" + normalized.slice(4);
+    normalized = normalized.replace(/^uint/, "uint256");
   }
 
   // Normalize int to int256
   if (normalized === "int" || normalized.startsWith("int[")) {
-    normalized = "int256" + normalized.slice(3);
+    normalized = normalized.replace(/^int/, "int256");
   }
 
   return normalized;
@@ -1189,48 +622,22 @@ export function parseParameterTypes(params: string): string[] {
   const types: string[] = [];
 
   for (const param of paramList) {
-    // Extract type using string operations
-    const type = extractTypeFromParam(param);
-    if (type) {
+    // Extract type (first token before space or array bracket)
+    // Handles: "uint256 _value", "bytes32[]  _data", "address"
+    const match = param.match(/^([a-zA-Z0-9_]+(?:\[\])?)\s/);
+    if (match) {
+      const type = match[1];
       types.push(normalizeType(type));
-    }
-  }
-
-  return types;
-}
-
-/**
- * Extract type from a parameter string using string operations.
- */
-function extractTypeFromParam(param: string): string | null {
-  if (!param) {
-    return null;
-  }
-
-  // Find the first space (type ends at first space or at array brackets)
-  let typeEnd = param.length;
-  let hasArrayBrackets = false;
-
-  for (let i = 0; i < param.length; i++) {
-    if (param[i] === "[") {
-      hasArrayBrackets = true;
-    } else if (param[i] === "]") {
-      // Include the closing bracket
-    } else if (param[i] === " " && !hasArrayBrackets) {
-      typeEnd = i;
-      break;
-    } else if (param[i] === " " && hasArrayBrackets) {
-      // Check if we've finished the array brackets
-      const beforeSpace = param.slice(0, i);
-      if (beforeSpace.includes("]")) {
-        typeEnd = i;
-        break;
+    } else {
+      // Fallback: just the type with no parameter name
+      const typeOnly = param.split(/\s+/)[0];
+      if (typeOnly) {
+        types.push(normalizeType(typeOnly));
       }
     }
   }
 
-  const type = param.slice(0, typeEnd).trim();
-  return type || null;
+  return types;
 }
 
 /**
@@ -1274,33 +681,19 @@ export function calculateSelector(signature: string): string {
  * ```
  */
 export function extractFunctionSignature(source: string, methodName: string): string | undefined {
-  // Find "function methodName(" using string operations
-  const searchStr = `function ${methodName}`;
-  const funcIdx = source.indexOf(searchStr);
-  if (funcIdx === -1) {
+  // Match function declaration with parameters
+  // Handles multiline, various modifiers, return types
+  const functionRegex = new RegExp(
+    `function\\s+${methodName}\\s*\\(([^)]*)\\)`,
+    "s", // dotall flag - allows . to match newlines
+  );
+
+  const match = source.match(functionRegex);
+  if (!match) {
     return undefined;
   }
 
-  // Find the opening parenthesis
-  const parenStart = source.indexOf("(", funcIdx);
-  if (parenStart === -1) {
-    return undefined;
-  }
-
-  // Find the matching closing parenthesis
-  let depth = 1;
-  let parenEnd = parenStart + 1;
-  while (parenEnd < source.length && depth > 0) {
-    if (source[parenEnd] === "(") depth++;
-    if (source[parenEnd] === ")") depth--;
-    parenEnd++;
-  }
-
-  if (depth !== 0) {
-    return undefined;
-  }
-
-  const paramsString = source.slice(parenStart + 1, parenEnd - 1);
+  const paramsString = match[1];
   const types = parseParameterTypes(paramsString);
 
   // Build canonical signature: functionName(type1,type2,...)
@@ -1348,61 +741,20 @@ export function calculateTopic0(signature: string): string {
  * ```
  */
 export function extractEventSignature(source: string, eventName: string): string | undefined {
-  // Find "event eventName(" using string operations
-  const searchStr = `event ${eventName}`;
-  const eventIdx = source.indexOf(searchStr);
-  if (eventIdx === -1) {
+  // Match event declaration with parameters
+  // Handles indexed keyword and multiline declarations
+  const eventRegex = new RegExp(`event\\s+${eventName}\\s*\\(([^)]*)\\)`, "s");
+
+  const match = source.match(eventRegex);
+  if (!match) {
     return undefined;
   }
 
-  // Find the opening parenthesis
-  const parenStart = source.indexOf("(", eventIdx);
-  if (parenStart === -1) {
-    return undefined;
-  }
-
-  // Find the matching closing parenthesis
-  let depth = 1;
-  let parenEnd = parenStart + 1;
-  while (parenEnd < source.length && depth > 0) {
-    if (source[parenEnd] === "(") depth++;
-    if (source[parenEnd] === ")") depth--;
-    parenEnd++;
-  }
-
-  if (depth !== 0) {
-    return undefined;
-  }
-
-  // Remove "indexed" keywords using string operations
-  let paramsString = source.slice(parenStart + 1, parenEnd - 1);
-  paramsString = removeIndexedKeyword(paramsString);
-
+  // Remove "indexed" keywords and parse parameters
+  const paramsString = match[1].replace(/\s+indexed\s+/g, " ");
   const types = parseParameterTypes(paramsString);
 
   return `${eventName}(${types.join(",")})`;
-}
-
-/**
- * Remove "indexed" keyword from parameters using string operations.
- */
-function removeIndexedKeyword(params: string): string {
-  let result = "";
-  let i = 0;
-  while (i < params.length) {
-    // Check for " indexed " or " indexed," or " indexed)"
-    if (i + 8 <= params.length && params.slice(i, i + 8) === " indexed") {
-      const nextChar = params[i + 8];
-      if (nextChar === " " || nextChar === "," || nextChar === ")" || nextChar === undefined) {
-        // Skip " indexed"
-        i += 8;
-        continue;
-      }
-    }
-    result += params[i];
-    i++;
-  }
-  return result;
 }
 
 /**
@@ -1423,66 +775,34 @@ function removeIndexedKeyword(params: string): string {
  * ```
  */
 export function extractEvents(source: string): EventDefinition[] {
+  // Match: event EventName(...) [anonymous];
+  const eventRegex = /event\s+(\w+)\s*\([^)]*\)/g;
+
   const events: EventDefinition[] = [];
   const seen = new Set<string>();
-  const lines = source.split("\n");
 
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("event")) {
-      continue;
-    }
+  let match;
+  while ((match = eventRegex.exec(source)) !== null) {
+    const eventName = match[1];
 
-    // Parse using string operations to avoid ReDoS
-    const eventName = parseEventOrErrorName(line, "event");
-    if (!eventName || seen.has(eventName)) {
-      continue;
+    if (!seen.has(eventName)) {
+      const signature = extractEventSignature(source, eventName);
+      if (signature) {
+        const topic0 = calculateTopic0(signature);
+        events.push({ name: eventName, signature, topic0 });
+      } else {
+        // Fallback if signature extraction fails
+        events.push({
+          name: eventName,
+          signature: `${eventName}()`,
+          topic0: calculateTopic0(`${eventName}()`),
+        });
+      }
+      seen.add(eventName);
     }
-
-    const signature = extractEventSignature(source, eventName);
-    if (signature) {
-      const topic0 = calculateTopic0(signature);
-      events.push({ name: eventName, signature, topic0 });
-    } else {
-      // Fallback if signature extraction fails
-      events.push({
-        name: eventName,
-        signature: `${eventName}()`,
-        topic0: calculateTopic0(`${eventName}()`),
-      });
-    }
-    seen.add(eventName);
   }
 
   return events.sort((a, b) => a.name.localeCompare(b.name));
-}
-
-/**
- * Parse an event or error name from a line using string operations.
- */
-function parseEventOrErrorName(line: string, keyword: string): string | null {
-  const keywordIdx = line.indexOf(keyword);
-  if (keywordIdx === -1) {
-    return null;
-  }
-
-  // Skip keyword and whitespace
-  let start = keywordIdx + keyword.length;
-  while (start < line.length && (line[start] === " " || line[start] === "\t")) {
-    start++;
-  }
-
-  // Read the name (word characters)
-  let name = "";
-  for (let i = start; i < line.length; i++) {
-    if (/\w/.test(line[i])) {
-      name += line[i];
-    } else {
-      break;
-    }
-  }
-
-  return name || null;
 }
 
 /**
@@ -1560,33 +880,15 @@ export function extractEventsWithInheritance(
  * ```
  */
 export function extractErrorSignature(source: string, errorName: string): string | undefined {
-  // Find "error errorName(" using string operations
-  const searchStr = `error ${errorName}`;
-  const errorIdx = source.indexOf(searchStr);
-  if (errorIdx === -1) {
+  // Match error declaration with parameters
+  const errorRegex = new RegExp(`error\\s+${errorName}\\s*\\(([^)]*)\\)`, "s");
+
+  const match = source.match(errorRegex);
+  if (!match) {
     return undefined;
   }
 
-  // Find the opening parenthesis
-  const parenStart = source.indexOf("(", errorIdx);
-  if (parenStart === -1) {
-    return undefined;
-  }
-
-  // Find the matching closing parenthesis
-  let depth = 1;
-  let parenEnd = parenStart + 1;
-  while (parenEnd < source.length && depth > 0) {
-    if (source[parenEnd] === "(") depth++;
-    if (source[parenEnd] === ")") depth--;
-    parenEnd++;
-  }
-
-  if (depth !== 0) {
-    return undefined;
-  }
-
-  const paramsString = source.slice(parenStart + 1, parenEnd - 1);
+  const paramsString = match[1];
   const types = parseParameterTypes(paramsString);
 
   return `${errorName}(${types.join(",")})`;
@@ -1610,35 +912,31 @@ export function extractErrorSignature(source: string, errorName: string): string
  * ```
  */
 export function extractErrors(source: string): ErrorDefinition[] {
+  // Match: error ErrorName(...);
+  const errorRegex = /error\s+(\w+)\s*\([^)]*\)/g;
+
   const errors: ErrorDefinition[] = [];
   const seen = new Set<string>();
-  const lines = source.split("\n");
 
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("error")) {
-      continue;
-    }
+  let match;
+  while ((match = errorRegex.exec(source)) !== null) {
+    const errorName = match[1];
 
-    // Parse using string operations to avoid ReDoS
-    const errorName = parseEventOrErrorName(line, "error");
-    if (!errorName || seen.has(errorName)) {
-      continue;
+    if (!seen.has(errorName)) {
+      const signature = extractErrorSignature(source, errorName);
+      if (signature) {
+        const selector = calculateSelector(signature);
+        errors.push({ name: errorName, signature, selector });
+      } else {
+        // Fallback if signature extraction fails
+        errors.push({
+          name: errorName,
+          signature: `${errorName}()`,
+          selector: calculateSelector(`${errorName}()`),
+        });
+      }
+      seen.add(errorName);
     }
-
-    const signature = extractErrorSignature(source, errorName);
-    if (signature) {
-      const selector = calculateSelector(signature);
-      errors.push({ name: errorName, signature, selector });
-    } else {
-      // Fallback if signature extraction fails
-      errors.push({
-        name: errorName,
-        signature: `${errorName}()`,
-        selector: calculateSelector(`${errorName}()`),
-      });
-    }
-    seen.add(errorName);
   }
 
   return errors.sort((a, b) => a.name.localeCompare(b.name));
