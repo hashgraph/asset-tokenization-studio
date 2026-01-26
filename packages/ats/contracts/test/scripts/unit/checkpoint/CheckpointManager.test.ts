@@ -1,12 +1,30 @@
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * Unit tests for CheckpointManager class.
+ *
+ * Tests the checkpoint system that enables resumable deployment workflows
+ * by persisting deployment state to disk with support for Map serialization.
+ *
+ * @module test/scripts/unit/checkpoint/CheckpointManager.test
+ */
+
 import { expect } from "chai";
 import { promises as fs } from "fs";
 import { join } from "path";
-import { CheckpointManager } from "../../../../scripts/infrastructure/checkpoint/CheckpointManager";
+import { CheckpointManager } from "@scripts/infrastructure";
+import {
+  TEST_ADDRESSES,
+  TEST_NETWORKS,
+  TEST_WORKFLOWS,
+  TEST_CHECKPOINT_STATUS,
+  TEST_TX_HASHES,
+  TEST_DIRS,
+  TEST_TIME,
+} from "@test";
 
 describe("CheckpointManager", () => {
-  const testCheckpointsDir = join(__dirname, "../../../../deployments/test/unit/.checkpoints");
+  const testCheckpointsDir = TEST_DIRS.UNIT_CHECKPOINTS;
   let manager: CheckpointManager;
 
   beforeEach(async () => {
@@ -14,29 +32,24 @@ describe("CheckpointManager", () => {
     manager = new CheckpointManager(undefined, testCheckpointsDir);
 
     // Ensure test directory exists and is empty
-    try {
-      await fs.rm(testCheckpointsDir, { recursive: true });
-    } catch (error) {
-      // Ignore if directory doesn't exist
-    }
+    await fs.rm(testCheckpointsDir, { recursive: true }).catch(() => {});
     await fs.mkdir(testCheckpointsDir, { recursive: true });
   });
 
   afterEach(async () => {
     // Cleanup test directory
-    try {
-      await fs.rm(testCheckpointsDir, { recursive: true });
-    } catch (error) {
-      // Ignore cleanup errors
-    }
+    await fs.rm(testCheckpointsDir, { recursive: true }).catch(() => {});
   });
 
   describe("createCheckpoint", () => {
     it("should create a checkpoint with correct structure", () => {
+      const deployer = TEST_ADDRESSES.VALID_0;
+      const network = TEST_NETWORKS.TESTNET;
+
       const checkpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network,
+        deployer,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {
           useTimeTravel: false,
           confirmations: 2,
@@ -45,11 +58,11 @@ describe("CheckpointManager", () => {
 
       expect(checkpoint).to.have.property("checkpointId");
       expect(checkpoint.checkpointId).to.match(/^hedera-testnet-\d+$/);
-      expect(checkpoint.network).to.equal("hedera-testnet");
-      expect(checkpoint.deployer).to.equal("0x1234567890123456789012345678901234567890");
-      expect(checkpoint.status).to.equal("in-progress");
+      expect(checkpoint.network).to.equal(network);
+      expect(checkpoint.deployer).to.equal(deployer);
+      expect(checkpoint.status).to.equal(TEST_CHECKPOINT_STATUS.IN_PROGRESS);
       expect(checkpoint.currentStep).to.equal(-1);
-      expect(checkpoint.workflowType).to.equal("newBlr");
+      expect(checkpoint.workflowType).to.equal(TEST_WORKFLOWS.NEW_BLR);
       expect(checkpoint).to.have.property("startTime");
       expect(checkpoint).to.have.property("lastUpdate");
       expect(checkpoint.steps).to.deep.equal({});
@@ -60,24 +73,24 @@ describe("CheckpointManager", () => {
       expect(checkpoint).to.not.have.property("failure");
     });
 
-    it("should create unique checkpoint IDs", () => {
+    it("should create unique checkpoint IDs", async () => {
+      const deployer = TEST_ADDRESSES.VALID_0;
+      const network = TEST_NETWORKS.TESTNET;
+
       const checkpoint1 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network,
+        deployer,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
-      // Wait a bit to ensure different timestamp
-      const now = Date.now();
-      while (Date.now() === now) {
-        // Busy wait
-      }
+      // Wait to ensure different timestamp (non-blocking)
+      await new Promise((resolve) => setTimeout(resolve, 5));
 
       const checkpoint2 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network,
+        deployer,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
@@ -86,16 +99,16 @@ describe("CheckpointManager", () => {
 
     it("should support existingBlr workflow type", () => {
       const checkpoint = manager.createCheckpoint({
-        network: "hedera-mainnet",
-        deployer: "0xabcdef0123456789012345678901234567890123",
-        workflowType: "existingBlr",
+        network: TEST_NETWORKS.MAINNET,
+        deployer: TEST_ADDRESSES.VALID_1,
+        workflowType: TEST_WORKFLOWS.EXISTING_BLR,
         options: {
           deployFacets: true,
           deployFactory: false,
         },
       });
 
-      expect(checkpoint.workflowType).to.equal("existingBlr");
+      expect(checkpoint.workflowType).to.equal(TEST_WORKFLOWS.EXISTING_BLR);
       expect(checkpoint.options).to.deep.equal({
         deployFacets: true,
         deployFactory: false,
@@ -106,9 +119,9 @@ describe("CheckpointManager", () => {
   describe("saveCheckpoint", () => {
     it("should save checkpoint to disk", async () => {
       const checkpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
@@ -125,9 +138,9 @@ describe("CheckpointManager", () => {
 
     it("should update lastUpdate timestamp on save", async () => {
       const checkpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
@@ -143,15 +156,15 @@ describe("CheckpointManager", () => {
 
     it("should serialize checkpoint with valid JSON", async () => {
       const checkpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
       checkpoint.steps.proxyAdmin = {
-        address: "0x1111111111111111111111111111111111111111",
-        txHash: "0xabc123",
+        address: TEST_ADDRESSES.VALID_2,
+        txHash: TEST_TX_HASHES.SAMPLE_0,
         deployedAt: new Date().toISOString(),
       };
 
@@ -167,9 +180,9 @@ describe("CheckpointManager", () => {
 
     it("should handle Map serialization for facets", async () => {
       const checkpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
@@ -177,16 +190,16 @@ describe("CheckpointManager", () => {
         [
           "AccessControlFacet",
           {
-            address: "0x2222222222222222222222222222222222222222",
-            txHash: "0xdef456",
+            address: TEST_ADDRESSES.VALID_3,
+            txHash: TEST_TX_HASHES.SAMPLE_1,
             deployedAt: new Date().toISOString(),
           },
         ],
         [
           "PausableFacet",
           {
-            address: "0x3333333333333333333333333333333333333333",
-            txHash: "0xghi789",
+            address: TEST_ADDRESSES.VALID_4,
+            txHash: TEST_TX_HASHES.SAMPLE_2,
             deployedAt: new Date().toISOString(),
           },
         ],
@@ -209,15 +222,15 @@ describe("CheckpointManager", () => {
   describe("loadCheckpoint", () => {
     it("should load checkpoint from disk", async () => {
       const original = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: { useTimeTravel: true },
       });
 
       original.steps.proxyAdmin = {
-        address: "0x1111111111111111111111111111111111111111",
-        txHash: "0xabc123",
+        address: TEST_ADDRESSES.VALID_2,
+        txHash: TEST_TX_HASHES.SAMPLE_0,
         deployedAt: new Date().toISOString(),
       };
 
@@ -235,28 +248,28 @@ describe("CheckpointManager", () => {
     });
 
     it("should return null for non-existent checkpoint", async () => {
-      const loaded = await manager.loadCheckpoint("hedera-testnet-99999999999");
+      const loaded = await manager.loadCheckpoint(`${TEST_NETWORKS.TESTNET}-99999999999`);
 
       expect(loaded).to.be.null;
     });
 
     it("should deserialize Map for facets", async () => {
       const original = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
       const facet1 = {
-        address: "0x2222222222222222222222222222222222222222",
-        txHash: "0xdef456",
+        address: TEST_ADDRESSES.VALID_3,
+        txHash: TEST_TX_HASHES.SAMPLE_1,
         deployedAt: new Date().toISOString(),
       };
 
       const facet2 = {
-        address: "0x3333333333333333333333333333333333333333",
-        txHash: "0xghi789",
+        address: TEST_ADDRESSES.VALID_4,
+        txHash: TEST_TX_HASHES.SAMPLE_2,
         deployedAt: new Date().toISOString(),
       };
 
@@ -278,13 +291,13 @@ describe("CheckpointManager", () => {
 
     it("should handle checkpoint with failure information", async () => {
       const original = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
-      original.status = "failed";
+      original.status = TEST_CHECKPOINT_STATUS.FAILED;
       original.failure = {
         step: 2,
         stepName: "Facets",
@@ -298,7 +311,7 @@ describe("CheckpointManager", () => {
       const loaded = await manager.loadCheckpoint(original.checkpointId);
 
       expect(loaded).to.not.be.null;
-      expect(loaded!.status).to.equal("failed");
+      expect(loaded!.status).to.equal(TEST_CHECKPOINT_STATUS.FAILED);
       expect(loaded!.failure).to.deep.equal(original.failure);
     });
   });
@@ -306,9 +319,9 @@ describe("CheckpointManager", () => {
   describe("findCheckpoints", () => {
     it("should find all checkpoints for a network", async () => {
       const checkpoint1 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
       await manager.saveCheckpoint(checkpoint1);
@@ -317,14 +330,14 @@ describe("CheckpointManager", () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       const checkpoint2 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0xabcdef0123456789012345678901234567890123",
-        workflowType: "existingBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_1,
+        workflowType: TEST_WORKFLOWS.EXISTING_BLR,
         options: {},
       });
       await manager.saveCheckpoint(checkpoint2);
 
-      const found = await manager.findCheckpoints("hedera-testnet");
+      const found = await manager.findCheckpoints(TEST_NETWORKS.TESTNET);
 
       expect(found).to.have.lengthOf(2);
       expect(found.map((c) => c.checkpointId)).to.include.members([checkpoint1.checkpointId, checkpoint2.checkpointId]);
@@ -332,41 +345,41 @@ describe("CheckpointManager", () => {
 
     it("should filter by status", async () => {
       const checkpoint1 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
-      checkpoint1.status = "in-progress";
+      checkpoint1.status = TEST_CHECKPOINT_STATUS.IN_PROGRESS;
       await manager.saveCheckpoint(checkpoint1);
 
       // Wait to ensure different timestamp
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       const checkpoint2 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0xabcdef0123456789012345678901234567890123",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_1,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
-      checkpoint2.status = "completed";
+      checkpoint2.status = TEST_CHECKPOINT_STATUS.COMPLETED;
       await manager.saveCheckpoint(checkpoint2);
 
       // Wait to ensure different timestamp
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       const checkpoint3 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0xfedcba9876543210987654321098765432109876",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.NO_CODE,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
-      checkpoint3.status = "failed";
+      checkpoint3.status = TEST_CHECKPOINT_STATUS.FAILED;
       await manager.saveCheckpoint(checkpoint3);
 
-      const inProgress = await manager.findCheckpoints("hedera-testnet", "in-progress");
-      const completed = await manager.findCheckpoints("hedera-testnet", "completed");
-      const failed = await manager.findCheckpoints("hedera-testnet", "failed");
+      const inProgress = await manager.findCheckpoints(TEST_NETWORKS.TESTNET, TEST_CHECKPOINT_STATUS.IN_PROGRESS);
+      const completed = await manager.findCheckpoints(TEST_NETWORKS.TESTNET, TEST_CHECKPOINT_STATUS.COMPLETED);
+      const failed = await manager.findCheckpoints(TEST_NETWORKS.TESTNET, TEST_CHECKPOINT_STATUS.FAILED);
 
       expect(inProgress).to.have.lengthOf(1);
       expect(inProgress[0].checkpointId).to.equal(checkpoint1.checkpointId);
@@ -388,9 +401,9 @@ describe("CheckpointManager", () => {
     it("should sort checkpoints by timestamp (newest first)", async () => {
       // Create checkpoints with slight delays to ensure different timestamps
       const checkpoint1 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1111111111111111111111111111111111111111",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_2,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
       await manager.saveCheckpoint(checkpoint1);
@@ -398,9 +411,9 @@ describe("CheckpointManager", () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       const checkpoint2 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x2222222222222222222222222222222222222222",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_3,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
       await manager.saveCheckpoint(checkpoint2);
@@ -408,14 +421,14 @@ describe("CheckpointManager", () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       const checkpoint3 = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x3333333333333333333333333333333333333333",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_4,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
       await manager.saveCheckpoint(checkpoint3);
 
-      const found = await manager.findCheckpoints("hedera-testnet");
+      const found = await manager.findCheckpoints(TEST_NETWORKS.TESTNET);
 
       expect(found).to.have.lengthOf(3);
       // Should be sorted newest first
@@ -426,24 +439,24 @@ describe("CheckpointManager", () => {
 
     it("should not return checkpoints from other networks", async () => {
       const testnetCheckpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
       const mainnetCheckpoint = manager.createCheckpoint({
-        network: "hedera-mainnet",
-        deployer: "0xabcdef0123456789012345678901234567890123",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.MAINNET,
+        deployer: TEST_ADDRESSES.VALID_1,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
       await manager.saveCheckpoint(testnetCheckpoint);
       await manager.saveCheckpoint(mainnetCheckpoint);
 
-      const testnetFound = await manager.findCheckpoints("hedera-testnet");
-      const mainnetFound = await manager.findCheckpoints("hedera-mainnet");
+      const testnetFound = await manager.findCheckpoints(TEST_NETWORKS.TESTNET);
+      const mainnetFound = await manager.findCheckpoints(TEST_NETWORKS.MAINNET);
 
       expect(testnetFound).to.have.lengthOf(1);
       expect(testnetFound[0].checkpointId).to.equal(testnetCheckpoint.checkpointId);
@@ -456,9 +469,9 @@ describe("CheckpointManager", () => {
   describe("deleteCheckpoint", () => {
     it("should delete checkpoint from disk", async () => {
       const checkpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
 
@@ -481,86 +494,86 @@ describe("CheckpointManager", () => {
     });
 
     it("should not throw error when deleting non-existent checkpoint", async () => {
-      await expect(manager.deleteCheckpoint("hedera-testnet-99999999999")).to.not.be.rejected;
+      await expect(manager.deleteCheckpoint(`${TEST_NETWORKS.TESTNET}-99999999999`)).to.not.be.rejected;
     });
   });
 
   describe("cleanupOldCheckpoints", () => {
     it("should delete completed checkpoints older than specified days", async () => {
       // Create old checkpoint (simulate by manually setting timestamp in ID)
-      const oldTimestamp = Date.now() - 40 * 24 * 60 * 60 * 1000; // 40 days ago
+      const oldTimestamp = Date.now() - TEST_TIME.OLD_CHECKPOINT_DAYS * TEST_TIME.MS_PER_DAY;
       const oldCheckpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
       // Override checkpointId with old timestamp
-      (oldCheckpoint as any).checkpointId = `hedera-testnet-${oldTimestamp}`;
-      oldCheckpoint.status = "completed";
+      (oldCheckpoint as any).checkpointId = `${TEST_NETWORKS.TESTNET}-${oldTimestamp}`;
+      oldCheckpoint.status = TEST_CHECKPOINT_STATUS.COMPLETED;
       await manager.saveCheckpoint(oldCheckpoint);
 
       // Create recent checkpoint
       const recentCheckpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0xabcdef0123456789012345678901234567890123",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_1,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
-      recentCheckpoint.status = "completed";
+      recentCheckpoint.status = TEST_CHECKPOINT_STATUS.COMPLETED;
       await manager.saveCheckpoint(recentCheckpoint);
 
-      const deleted = await manager.cleanupOldCheckpoints("hedera-testnet", 30);
+      const deleted = await manager.cleanupOldCheckpoints(TEST_NETWORKS.TESTNET, TEST_TIME.CLEANUP_THRESHOLD_DAYS);
 
       expect(deleted).to.equal(1);
 
-      const remaining = await manager.findCheckpoints("hedera-testnet", "completed");
+      const remaining = await manager.findCheckpoints(TEST_NETWORKS.TESTNET, TEST_CHECKPOINT_STATUS.COMPLETED);
       expect(remaining).to.have.lengthOf(1);
       expect(remaining[0].checkpointId).to.equal(recentCheckpoint.checkpointId);
     });
 
     it("should not delete failed checkpoints", async () => {
-      const oldTimestamp = Date.now() - 40 * 24 * 60 * 60 * 1000; // 40 days ago
+      const oldTimestamp = Date.now() - TEST_TIME.OLD_CHECKPOINT_DAYS * TEST_TIME.MS_PER_DAY;
       const oldFailedCheckpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
-      (oldFailedCheckpoint as any).checkpointId = `hedera-testnet-${oldTimestamp}`;
-      oldFailedCheckpoint.status = "failed";
+      (oldFailedCheckpoint as any).checkpointId = `${TEST_NETWORKS.TESTNET}-${oldTimestamp}`;
+      oldFailedCheckpoint.status = TEST_CHECKPOINT_STATUS.FAILED;
       await manager.saveCheckpoint(oldFailedCheckpoint);
 
-      const deleted = await manager.cleanupOldCheckpoints("hedera-testnet", 30);
+      const deleted = await manager.cleanupOldCheckpoints(TEST_NETWORKS.TESTNET, TEST_TIME.CLEANUP_THRESHOLD_DAYS);
 
       expect(deleted).to.equal(0);
 
-      const remaining = await manager.findCheckpoints("hedera-testnet", "failed");
+      const remaining = await manager.findCheckpoints(TEST_NETWORKS.TESTNET, TEST_CHECKPOINT_STATUS.FAILED);
       expect(remaining).to.have.lengthOf(1);
     });
 
     it("should not delete in-progress checkpoints", async () => {
-      const oldTimestamp = Date.now() - 40 * 24 * 60 * 60 * 1000; // 40 days ago
+      const oldTimestamp = Date.now() - TEST_TIME.OLD_CHECKPOINT_DAYS * TEST_TIME.MS_PER_DAY;
       const oldInProgressCheckpoint = manager.createCheckpoint({
-        network: "hedera-testnet",
-        deployer: "0x1234567890123456789012345678901234567890",
-        workflowType: "newBlr",
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         options: {},
       });
-      (oldInProgressCheckpoint as any).checkpointId = `hedera-testnet-${oldTimestamp}`;
-      oldInProgressCheckpoint.status = "in-progress";
+      (oldInProgressCheckpoint as any).checkpointId = `${TEST_NETWORKS.TESTNET}-${oldTimestamp}`;
+      oldInProgressCheckpoint.status = TEST_CHECKPOINT_STATUS.IN_PROGRESS;
       await manager.saveCheckpoint(oldInProgressCheckpoint);
 
-      const deleted = await manager.cleanupOldCheckpoints("hedera-testnet", 30);
+      const deleted = await manager.cleanupOldCheckpoints(TEST_NETWORKS.TESTNET, TEST_TIME.CLEANUP_THRESHOLD_DAYS);
 
       expect(deleted).to.equal(0);
 
-      const remaining = await manager.findCheckpoints("hedera-testnet", "in-progress");
+      const remaining = await manager.findCheckpoints(TEST_NETWORKS.TESTNET, TEST_CHECKPOINT_STATUS.IN_PROGRESS);
       expect(remaining).to.have.lengthOf(1);
     });
 
     it("should return 0 when no checkpoints to cleanup", async () => {
-      const deleted = await manager.cleanupOldCheckpoints("hedera-testnet", 30);
+      const deleted = await manager.cleanupOldCheckpoints(TEST_NETWORKS.TESTNET, TEST_TIME.CLEANUP_THRESHOLD_DAYS);
 
       expect(deleted).to.equal(0);
     });
