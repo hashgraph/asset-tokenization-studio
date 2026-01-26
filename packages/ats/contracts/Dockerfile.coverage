@@ -1,0 +1,45 @@
+# Use an official Node runtime as a parent image
+FROM node:24.13.0
+
+# Install dependencies for native solc (glibc etc)
+RUN apt-get update && apt-get install -y libusb-1.0-0-dev libudev-dev && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy monorepo configuration
+COPY package*.json ./
+
+# Copy workspace package.json files for better caching
+COPY packages/ats/contracts/package*.json ./packages/ats/contracts/
+
+# Install dependencies (using workspaces)
+# We use --include-workspace-root to ensure root devDependencies are available
+# We install all dependencies because workers will need full node_modules
+RUN npm ci --include-workspace-root --ignore-scripts
+
+# Create directories for Hardhat cache and artifacts to ensure they are writeable
+RUN mkdir -p packages/ats/contracts/cache packages/ats/contracts/artifacts packages/ats/contracts/typechain-types
+
+# Copy the rest of the application code
+COPY . .
+
+# Build the contracts and generate types if needed
+WORKDIR /usr/src/app/packages/ats/contracts
+RUN npm i
+# Ensure global HOME is set and writeable for .coverage_parallel_temp
+ENV HOME=/usr/src/app
+RUN npm run compile
+
+# Add these lines before the RUN npm run compile command
+RUN useradd -m hardhatuser && \
+    chown -R hardhatuser /usr/src/app && \
+    chown -R hardhatuser /usr/src/app/packages/ats/contracts
+
+USER hardhatuser
+
+# Set the working directory again after switching user
+WORKDIR /usr/src/app/packages/ats/contracts
+
+# The command to run parallel coverage
+CMD ["npx", "hardhat", "coverage"]
