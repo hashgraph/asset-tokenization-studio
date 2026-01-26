@@ -45,6 +45,7 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "KycKpiLinkedRateFacet",
   "PauseKpiLinkedRateFacet",
   "SnapshotsKpiLinkedRateFacet",
+  "TotalBalanceKpiLinkedRateFacet",
 
   // ERC Standards
   "ERC1410IssuerKpiLinkedRateFacet",

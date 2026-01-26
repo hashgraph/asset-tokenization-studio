@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-22T07:37:26.380Z
- * Facets: 194
+ * Generated: 2026-01-26T14:11:54.721Z
+ * Facets: 198
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -398,6 +398,14 @@ import {
   SustainabilityPerformanceTargetRateFacet__factory,
   SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   TimeTravelFacet__factory,
+  TotalBalanceFacet__factory,
+  TotalBalanceFacetTimeTravel__factory,
+  TotalBalanceFixedRateFacet__factory,
+  TotalBalanceFixedRateFacetTimeTravel__factory,
+  TotalBalanceKpiLinkedRateFacet__factory,
+  TotalBalanceKpiLinkedRateFacetTimeTravel__factory,
+  TotalBalanceSustainabilityPerformanceTargetRateFacet__factory,
+  TotalBalanceSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   TransferAndLockFacet__factory,
   TransferAndLockFacetTimeTravel__factory,
   TransferAndLockFixedRateFacet__factory,
@@ -11550,6 +11558,125 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     factory: (signer) => new TimeTravelFacet__factory(signer),
   },
 
+  TotalBalanceFacet: {
+    name: "TotalBalanceFacet",
+    resolverKey: {
+      name: "_TOTAL_BALANCE_RESOLVER_KEY",
+      value: "0xd1873ecc41f0658d1ac1c9bf3fe6a4da2071b04edc7f7d3b4520d029c3ce64d5",
+    },
+    inheritance: ["TotalBalanceFacetBase", "Common"],
+    methods: [
+      {
+        name: "getTotalBalanceFor",
+        signature: "function getTotalBalanceFor(address _account) view returns (uint256)",
+        selector: "0xa8f9868e",
+      },
+      {
+        name: "getTotalBalanceForByPartition",
+        signature:
+          "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
+        selector: "0xf29416ed",
+      },
+    ],
+    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new TotalBalanceFacetTimeTravel__factory(signer) : new TotalBalanceFacet__factory(signer),
+  },
+
+  TotalBalanceFixedRateFacet: {
+    name: "TotalBalanceFixedRateFacet",
+    resolverKey: {
+      name: "_TOTAL_BALANCE_FIXED_RATE_RESOLVER_KEY",
+      value: "0x0f902d5eda4d9e41f9c3ad2bb5367bb6a2e9df580335d82a5210bbda16cc76f2",
+    },
+    inheritance: ["TotalBalanceFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getTotalBalanceFor",
+        signature: "function getTotalBalanceFor(address _account) view returns (uint256)",
+        selector: "0xa8f9868e",
+      },
+      {
+        name: "getTotalBalanceForByPartition",
+        signature:
+          "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
+        selector: "0xf29416ed",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new TotalBalanceFixedRateFacetTimeTravel__factory(signer)
+        : new TotalBalanceFixedRateFacet__factory(signer),
+  },
+
+  TotalBalanceKpiLinkedRateFacet: {
+    name: "TotalBalanceKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_TOTAL_BALANCE_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xc162f5370d292bd42da32ccacfbbb9560b4cc23623a5089545a314ae29bf2be0",
+    },
+    inheritance: ["TotalBalanceFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getTotalBalanceFor",
+        signature: "function getTotalBalanceFor(address _account) view returns (uint256)",
+        selector: "0xa8f9868e",
+      },
+      {
+        name: "getTotalBalanceForByPartition",
+        signature:
+          "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
+        selector: "0xf29416ed",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new TotalBalanceKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new TotalBalanceKpiLinkedRateFacet__factory(signer),
+  },
+
+  TotalBalanceSustainabilityPerformanceTargetRateFacet: {
+    name: "TotalBalanceSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_TOTAL_BALANCE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x70b68464eff2e356899f071ddcf4cc232d6aa181ec8f142f2251291b3cd73f3e",
+    },
+    inheritance: ["TotalBalanceFacetBase", "CommonSustainabilityPerformanceTargetInterestRate"],
+    methods: [
+      {
+        name: "getTotalBalanceFor",
+        signature: "function getTotalBalanceFor(address _account) view returns (uint256)",
+        selector: "0xa8f9868e",
+      },
+      {
+        name: "getTotalBalanceForByPartition",
+        signature:
+          "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
+        selector: "0xf29416ed",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new TotalBalanceSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new TotalBalanceSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
   TransferAndLockFacet: {
     name: "TransferAndLockFacet",
     resolverKey: {
@@ -11705,7 +11832,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 194 as const;
+export const TOTAL_FACETS = 198 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
