@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
-import { IKpi } from "contracts/layer_2/interfaces/interestRates/kpiLinkedRate/IKpi.sol";
 import { IKpiLinkedRate } from "contracts/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { LowLevelCall } from "contracts/layer_0/common/libraries/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
