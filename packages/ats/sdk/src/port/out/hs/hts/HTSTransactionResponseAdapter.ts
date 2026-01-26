@@ -211,7 +211,7 @@ import {
   TransactionReceipt,
   TransactionRecord,
   TransactionId,
-} from '@hashgraph/sdk';
+} from '@hiero-ledger/sdk';
 import TransactionResponse from '@domain/context/transaction/TransactionResponse';
 import { TransactionResponseError } from '@port/out/error/TransactionResponseError';
 import { TransactionResponseAdapter } from '@port/out/TransactionResponseAdapter';

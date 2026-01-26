@@ -58,7 +58,7 @@ interface IClearingActions {
      */
     function approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) external returns (bool success_);
+    ) external returns (bool success_, bytes32 partition_);
 
     /**
      * @notice Cancels a clearing operation returning funds back to the token holder

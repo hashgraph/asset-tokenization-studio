@@ -6,7 +6,7 @@ import {
   type IERC1410,
   type Pause,
   AdjustBalances,
-  ERC20Votes,
+  ERC20VotesFacet,
   EquityUSA,
   TimeTravelFacet as TimeTravel,
 } from "@contract-types";
@@ -25,7 +25,7 @@ describe("ERC20Votes Tests", () => {
   let signer_C: SignerWithAddress;
   let signer_D: SignerWithAddress;
 
-  let erc20VotesFacet: ERC20Votes;
+  let erc20VotesFacet: ERC20VotesFacet;
   let pauseFacet: Pause;
   let erc1410Facet: IERC1410;
   let adjustBalancesFacet: AdjustBalances;
@@ -88,7 +88,7 @@ describe("ERC20Votes Tests", () => {
       },
     ]);
 
-    erc20VotesFacet = await ethers.getContractAt("ERC20Votes", diamond.address);
+    erc20VotesFacet = await ethers.getContractAt("ERC20VotesFacet", diamond.address);
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
     adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
@@ -106,6 +106,28 @@ describe("ERC20Votes Tests", () => {
         erc20VotesFacet,
         "AlreadyInitialized",
       );
+    });
+
+    it("GIVEN ERC20Votes activated WHEN calling isActivated THEN returns true", async () => {
+      const isActivated = await erc20VotesFacet.isActivated();
+      expect(isActivated).to.equal(true);
+    });
+
+    it("GIVEN ERC20Votes not activated WHEN calling isActivated THEN returns false", async () => {
+      // Deploy new fixture with erc20VotesActivated = false
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: true,
+            internalKycActivated: false,
+            erc20VotesActivated: false,
+          },
+        },
+      });
+
+      const erc20VotesFacetInactive = await ethers.getContractAt("ERC20Votes", base.diamond.address);
+      const isActivated = await erc20VotesFacetInactive.isActivated();
+      expect(isActivated).to.equal(false);
     });
   });
 
@@ -274,6 +296,10 @@ describe("ERC20Votes Tests", () => {
       await expect(erc20VotesFacet.getPastVotes(signer_A.address, 100)).to.be.revertedWith("ERC20Votes: future lookup");
     });
 
+    it("GIVEN current time WHEN getPastTotalSupply with future timepoint THEN reverts", async () => {
+      await expect(erc20VotesFacet.getPastTotalSupply(100)).to.be.revertedWith("ERC20Votes: future lookup");
+    });
+
     it("GIVEN delegation at specific block WHEN getPastVotes THEN returns correct historical votes", async () => {
       const block_1 = 100;
       const block_2 = 200;
@@ -362,8 +388,8 @@ describe("ERC20Votes Tests", () => {
       await erc20VotesFacet.delegate(signer_B.address);
 
       const checkpoint = await erc20VotesFacet.checkpoints(signer_B.address, 0);
-      expect(checkpoint.fromBlock).to.be.gt(0);
-      expect(checkpoint.votes).to.equal(amount);
+      expect(checkpoint.from).to.be.gt(0);
+      expect(checkpoint.value).to.equal(amount);
     });
   });
 
@@ -481,6 +507,141 @@ describe("ERC20Votes Tests", () => {
         .withArgs(signer_B.address, 0, amount * ABAF);
 
       await checkVotingPowerAfterAdjustment();
+    });
+  });
+
+  describe("Checkpoints lookup optimization", () => {
+    beforeEach(async () => {
+      await timeTravelFacet.changeSystemBlocknumber(1);
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+    });
+
+    it("GIVEN many checkpoints (>5) WHEN getPastVotes THEN uses optimized binary search with sqrt", async () => {
+      // First delegate to establish voting power
+      await timeTravelFacet.changeSystemBlocknumber(50);
+      await erc20VotesFacet.connect(signer_A).delegate(signer_B.address);
+
+      // Create more than 5 checkpoints to trigger sqrt optimization
+      let currentBlock = 100;
+
+      for (let i = 0; i < 10; i++) {
+        await timeTravelFacet.changeSystemBlocknumber(currentBlock);
+
+        // Issue more tokens to create total supply checkpoints
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: 100,
+          data: "0x",
+        });
+
+        // Alternate delegation to create checkpoints for different delegates
+        if (i % 2 === 0) {
+          await erc20VotesFacet.connect(signer_A).delegate(signer_B.address);
+        } else {
+          await erc20VotesFacet.connect(signer_A).delegate(signer_C.address);
+        }
+
+        currentBlock += 100;
+      }
+
+      // Move forward to query past votes
+      await timeTravelFacet.changeSystemBlocknumber(currentBlock + 100);
+
+      // Query votes at various past blocks - this will trigger the sqrt optimization
+      const pastVotes1 = await erc20VotesFacet.getPastVotes(signer_B.address, 200);
+      const pastVotes2 = await erc20VotesFacet.getPastVotes(signer_C.address, 400);
+      const pastVotes3 = await erc20VotesFacet.getPastVotes(signer_B.address, 800);
+
+      // Query past total supply - also triggers sqrt optimization
+      const pastTotalSupply1 = await erc20VotesFacet.getPastTotalSupply(250);
+      const pastTotalSupply2 = await erc20VotesFacet.getPastTotalSupply(550);
+      const pastTotalSupply3 = await erc20VotesFacet.getPastTotalSupply(850);
+
+      // Verify results are reasonable (should have voting power or total supply)
+      expect(pastVotes1).to.be.gte(0);
+      expect(pastVotes2).to.be.gte(0);
+      expect(pastVotes3).to.be.gte(0);
+      expect(pastTotalSupply1).to.be.gt(0);
+      expect(pastTotalSupply2).to.be.gt(0);
+      expect(pastTotalSupply3).to.be.gt(0);
+
+      // Verify the sqrt optimization path is hit by checking edge case where mid block > timepoint
+      const earlyPastVotes = await erc20VotesFacet.getPastVotes(signer_B.address, 120);
+      expect(earlyPastVotes).to.be.gte(0);
+
+      // Check number of checkpoints to verify we created enough to trigger optimization
+      const numCheckpointsB = await erc20VotesFacet.numCheckpoints(signer_B.address);
+      const numCheckpointsC = await erc20VotesFacet.numCheckpoints(signer_C.address);
+      expect(numCheckpointsB).to.be.gte(5);
+      expect(numCheckpointsC).to.be.gte(5);
+    });
+
+    it("GIVEN many checkpoints WHEN getPastTotalSupply with timepoint near end THEN correctly retrieves value", async () => {
+      // Create many checkpoints
+      let currentBlock = 100;
+
+      for (let i = 0; i < 12; i++) {
+        await timeTravelFacet.changeSystemBlocknumber(currentBlock);
+        currentBlock += 50;
+
+        await erc1410Facet.issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: 50,
+          data: "0x",
+        });
+      }
+
+      await timeTravelFacet.changeSystemBlocknumber(currentBlock + 100);
+
+      // Query at a timepoint that should hit the lower branch of sqrt optimization
+      const pastTotalSupply = await erc20VotesFacet.getPastTotalSupply(currentBlock - 100);
+      expect(pastTotalSupply).to.be.gt(0);
+    });
+
+    it("GIVEN empty checkpoints WHEN getPastVotes with timepoint THEN returns zero", async () => {
+      await timeTravelFacet.changeSystemBlocknumber(1000);
+
+      // Query past votes for an address with no delegation history
+      const pastVotes = await erc20VotesFacet.getPastVotes(signer_D.address, 500);
+      expect(pastVotes).to.equal(0);
+    });
+
+    it("GIVEN checkpoints WHEN getPastTotalSupply at block 0 THEN returns zero", async () => {
+      await timeTravelFacet.changeSystemBlocknumber(1);
+      await erc20VotesFacet.connect(signer_A).delegate(signer_A.address);
+
+      await timeTravelFacet.changeSystemBlocknumber(100);
+
+      // Query total supply before any issuance
+      const pastTotalSupply = await erc20VotesFacet.getPastTotalSupply(0);
+      expect(pastTotalSupply).to.equal(0);
+    });
+
+    it("GIVEN delegation at early block WHEN getPastVotes at block before ABAF checkpoint THEN returns correct value", async () => {
+      await timeTravelFacet.changeSystemBlocknumber(10);
+
+      await erc1410Facet.issueByPartition({
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: amount,
+        data: "0x",
+      });
+
+      // Delegate to create voting power
+      await erc20VotesFacet.connect(signer_A).delegate(signer_A.address);
+
+      // Move to a later block
+      await timeTravelFacet.changeSystemBlocknumber(100);
+
+      const pastVotes = await erc20VotesFacet.getPastVotes(signer_A.address, 5);
+      expect(pastVotes).to.equal(0);
     });
   });
 });

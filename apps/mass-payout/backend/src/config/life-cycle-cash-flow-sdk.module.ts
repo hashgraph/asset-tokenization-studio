@@ -203,7 +203,13 @@
  */
 
 import { Logger, Module, OnModuleInit, Provider } from "@nestjs/common"
-import { ConnectRequest, InitializationRequest, MassPayoutSDK, Network, SupportedWallets } from "@mass-payout/sdk"
+import {
+  ConnectRequest,
+  InitializationRequest,
+  MassPayoutSDK,
+  Network,
+  SupportedWallets,
+} from "@hashgraph/mass-payout-sdk"
 import { LifeCycleCashFlowSdkService } from "@infrastructure/adapters/life-cycle-cash-flow-sdk.service"
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { ConfigKeys } from "./config-keys"

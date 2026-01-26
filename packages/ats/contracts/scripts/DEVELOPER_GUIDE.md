@@ -121,49 +121,32 @@ const resolverKey = facetDef.resolverKey.value; // Looked up from registry
 
 ## Quick Start - Using the CLI
 
-### Hardhat Mode
-
-Deploy using Hardhat's built-in ethers and network configuration:
+Deploy to different networks using the unified CLI:
 
 ```bash
-# Default network (from hardhat.config.ts)
-npm run deploy:hardhat
+# Local testing (requires running Hardhat node)
+npm run deploy:local
 
-# Specific network
-npm run deploy:hardhat -- --network hedera-testnet
-npm run deploy:hardhat -- --network hedera-mainnet
-npm run deploy:hardhat -- --network hardhat  # Local in-memory
-```
-
-**When to use**: Working within Hardhat project, need access to Hardhat tasks/helpers.
-
-### Standalone Mode
-
-Deploy without Hardhat runtime (~3x faster startup):
-
-```bash
-# Default to hedera-testnet
-npm run deploy
-
-# Specific network
+# Hedera networks
 npm run deploy:hedera:testnet
 npm run deploy:hedera:mainnet
+npm run deploy:hedera:previewnet
 ```
 
-**When to use**: Production deployments, CI/CD pipelines, faster iteration cycles.
+**Note**: The `NETWORK` environment variable is required (no default fallback).
 
 ### Network Configuration
 
-Both modes read from `.env` files for network configuration:
+The CLI reads from `.env` files for network configuration:
 
 ```bash
-# Required environment variables
-HEDERA_TESTNET_RPC_URL=https://testnet.hashio.io/api
-HEDERA_TESTNET_PRIVATE_KEY=0x...
-HEDERA_TESTNET_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com
+# Required environment variables (pattern: {NETWORK}_*)
+HEDERA_TESTNET_JSON_RPC_ENDPOINT=https://testnet.hashio.io/api
+HEDERA_TESTNET_PRIVATE_KEY_0=0x...
+HEDERA_TESTNET_MIRROR_NODE_ENDPOINT=https://testnet.mirrornode.hedera.com
 ```
 
-See [Configuration.ts](/Users/work/Projects/asset-tokenization-studio/packages/ats/contracts/scripts/infrastructure/config.ts) for all network options.
+See [Configuration.ts](../Configuration.ts) for all network options.
 
 ---
 
@@ -483,11 +466,40 @@ Add exports to [domain/index.ts](domain/index.ts):
 
 ```typescript
 // Fund configuration
+export * from "./factory/deployFundToken";
 export { createFundConfiguration } from "./fund/createConfiguration";
 export { FUND_CONFIG_ID } from "./constants";
 ```
 
-### Step 4: Deploy Custom Facets (if any)
+### Step 4: Add factory
+
+Add 'deployFundToken.ts' factory to [domain/factory](domain/factory/deployFundToken.ts):
+
+### Step 5: Add to workflows scripts
+
+Add new asset to
+
+- [domain/workflows/deploySystemWithExistingBlr](domain/factory/workflows/deploySystemWithExistingBlr.ts):
+- [domain/workflows/deploySystemWithNewBlr](domain/factory/workflows/deploySystemWithNewBlr.ts):
+
+### Step 6: Add to checkpoint scripts
+
+Add new asset to
+
+- [infrastructure/checkpoint/utils](infrastructure/checkpoint/utils.ts):
+- [infrastructure/types/checkpoint](infrastructure/types/checkpoint.ts):
+
+### Step 7: (Only for Testing) Add token fixture
+
+Add new fixture to
+
+- [test/fixture/tokens](test/fixture/tokens/fund.fixture.ts):
+
+Add fixture to index
+
+- [test/fixture/index](test/fixture/index.ts):
+
+### Step 8: Deploy Custom Facets (if any)
 
 If you have fund-specific facets, deploy them:
 
@@ -509,7 +521,7 @@ console.log("Fund facets deployed:", {
 });
 ```
 
-### Step 5: Register All Facets
+### Step 9: Register All Facets
 
 Register both common facets and fund-specific facets:
 
@@ -540,7 +552,7 @@ const result = await registerFacets(blr, {
 
 **Note**: Registering an already-registered facet is safe and will update to the new address.
 
-### Step 6: Create Initial Configuration
+### Step 10: Create Initial Configuration
 
 Create the first version of your fund configuration:
 
@@ -575,7 +587,7 @@ if (result.success) {
 }
 ```
 
-### Step 7: Update Workflows (Optional)
+### Step 11: Update Workflows (Optional)
 
 If you want to include your new asset in complete deployment workflows, update [workflows/deployCompleteSystem.ts](workflows/deployCompleteSystem.ts):
 
@@ -597,7 +609,7 @@ output.configurations.fund = {
 };
 ```
 
-### Step 8: Verify
+### Step 12: Verify
 
 Verify your new asset configuration:
 
@@ -622,6 +634,13 @@ When creating a new asset, touch these files:
 - [ ] `domain/constants.ts` - Add `FUND_CONFIG_ID`
 - [ ] `domain/fund/createConfiguration.ts` - Create module with `FUND_FACETS` array
 - [ ] `domain/index.ts` - Export `createFundConfiguration` and `FUND_CONFIG_ID`
+- [ ] `domain/factory/deployFund.ts`
+- [ ] `infrastructure/checkpoint/utils.ts`
+- [ ] `infrastructure/types/checkpoint.ts`
+- [ ] `workflows/deploySystemWithExistingBlr.ts` - Add to deployment workflow
+- [ ] `workflows/deploySystemWithNewBlr.ts` - Add to deployment workflow
+- [ ] `tests/fixtures/tokens/fund.fixture.ts`
+- [ ] `tests/fixtures/index.ts`
 - [ ] `contracts/layer_3/jurisdiction/usa/FundUSAFacet.sol` - Implement custom facets (if needed)
 - [ ] `workflows/deployCompleteSystem.ts` - Add to deployment workflow (optional)
 
@@ -1416,6 +1435,40 @@ export async function deployAndRegisterCustomFacets(signer: Signer, blr: Contrac
 ```
 
 **Pattern**: Small, focused operations that can be composed into custom workflows.
+
+---
+
+### Type Declaration Patterns
+
+Two patterns are used for TypeScript types in this codebase:
+
+**Co-located (default)**: Define types in the same file as the function that uses them.
+
+```typescript
+// operations/blrDeployment.ts
+export interface DeployBlrOptions { ... }
+export interface DeployBlrResult { ... }
+export async function deployBlr(...): Promise<DeployBlrResult> { ... }
+```
+
+**Centralized**: Import from `types/` when shared across 3+ files.
+
+```typescript
+// operations/blrConfigurations.ts
+import type { ConfigurationData, ConfigurationError } from "../types";
+```
+
+**When to use each:**
+
+| Use Co-located           | Use Centralized          |
+| ------------------------ | ------------------------ |
+| Type used by 1-2 files   | Type used by 3+ files    |
+| Specific to one function | Core infrastructure type |
+| May evolve with feature  | Stable, rarely changes   |
+
+**Rule of thumb**: Start co-located. Extract to `types/` only when you need to import into a 3rd file.
+
+See [`types/core.ts:9-30`](infrastructure/types/core.ts#L9-L30) for detailed guidelines.
 
 ---
 

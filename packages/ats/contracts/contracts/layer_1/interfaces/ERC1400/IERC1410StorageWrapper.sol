@@ -42,7 +42,6 @@ interface IERC1410StorageWrapper {
 
     error NotAllowedInMultiPartitionMode();
     error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
-    error ZeroAddressNotAllowed();
     error ZeroPartition();
     error ZeroValue();
     error InvalidPartition(address account, bytes32 partition);

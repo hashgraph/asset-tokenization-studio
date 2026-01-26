@@ -207,6 +207,7 @@ import { LifeCycleCashFlowPort } from "@domain/ports/life-cycle-cash-flow.port"
 import { LifeCycleCashFlowAddress } from "@domain/model/life-cycle-cash-flow-address.value-object"
 import {
   DeployRequest,
+  RbacRequest,
   ExecuteAmountSnapshotByAddressesRequest,
   ExecuteAmountSnapshotRequest,
   ExecuteBondCashOutByAddressesRequest,
@@ -221,33 +222,56 @@ import {
   LifeCycleCashFlow,
   PauseRequest,
   UnpauseRequest,
-} from "@mass-payout/sdk"
+} from "@hashgraph/mass-payout-sdk"
 import { ExecuteDistributionResponse } from "@domain/ports/execute-distribution-response.interface"
 import { HederaService } from "@domain/ports/hedera.port"
+import { ConfigModule, ConfigService } from "@nestjs/config"
+import { ConfigKeys } from "@config/config-keys"
 
 @Injectable()
 export class LifeCycleCashFlowSdkService implements LifeCycleCashFlowPort {
+  lifeCycleCashFlowRoles = [
+    "0x0000000000000000000000000000000000000000000000000000000000000000", // DEFAULT_ADMIN_ROLE
+    "0x8943226357c41253cf6ffc651e04f2a3a7cf1255138972ce150e207c0393cbce", // PAUSER_ROLE
+    "0x88ad01da1e5558735d5b478c04a0f1667377fb68a98cb0278159d0b790f08c10", // PAYOUT_ROLE
+    "0xe0d6eef1076057afbcdc5a0534cf7ab9071fa4fdd3750e202da3d49c8913a144", // CASHOUT_ROLE
+    "0x4a16419d45be80f6de7609caac23eb8c7bfe6336a71da3cefd43ea62183ad211", // TRANSFERER_ROLE
+    "0x15e92345f55818ea6e01143954b5841c1ba74302c2b157a2b4d0f21f9ad40286", // PAYMENT_TOKEN_MANAGER_ROLE
+  ]
+
   constructor(
     private readonly lifeCycleCashFlow: LifeCycleCashFlow,
     @Inject("HederaService")
     private readonly hederaService: HederaService,
+    private readonly config: ConfigService,
   ) {}
 
   async deployContract(hederaAssetTokenAddress: string, hederaTokenAddress: string): Promise<LifeCycleCashFlowAddress> {
+    const defaultRbac: RbacRequest[] = this.getDefaultRbac(this.config.get<string>(ConfigKeys.DFNS_HEDERA_ACCOUNT_ID))
+
     console.log(
       "[LifeCycleCashFlowService] deployContract called with:",
       `\nToken: ${hederaAssetTokenAddress}`,
-      `\nUSDC: ${hederaTokenAddress}`,
+      `\nUSDC : ${hederaTokenAddress}`,
+      `\nrbac : ${defaultRbac}`,
     )
 
     const response = await this.lifeCycleCashFlow.deploy(
-      new DeployRequest({ asset: hederaAssetTokenAddress, paymentToken: hederaTokenAddress }),
+      new DeployRequest({
+        asset: hederaAssetTokenAddress,
+        paymentToken: hederaTokenAddress,
+        rbac: defaultRbac,
+      }),
     )
 
     const evmLifeCycleCashFlowAddress = response.payload
     const hederaLifeCycleCashFlowAddress = await this.hederaService.getHederaAddressFromEvm(evmLifeCycleCashFlowAddress)
 
     return LifeCycleCashFlowAddress.create(hederaLifeCycleCashFlowAddress, evmLifeCycleCashFlowAddress)
+  }
+
+  private getDefaultRbac(accountId: string): RbacRequest[] {
+    return this.lifeCycleCashFlowRoles.map((role) => ({ role, members: [accountId] }))
   }
 
   async pause(lifeCycleCashFlowId: string): Promise<boolean> {

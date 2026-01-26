@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { ProceedRecipients, ResolverProxy, AccessControl, Pause } from "@contract-types";
-import { GAS_LIMIT, ATS_ROLES } from "@scripts";
+import { ProceedRecipientsFacet, ResolverProxy, AccessControl, PauseFacet } from "@contract-types";
+import { GAS_LIMIT, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
 import { deployBondTokenFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -16,9 +16,9 @@ describe("Proceed Recipients Tests", () => {
   let signer_B: SignerWithAddress;
 
   let diamond: ResolverProxy;
-  let proceedRecipientsFacet: ProceedRecipients;
+  let proceedRecipientsFacet: ProceedRecipientsFacet;
   let accessControlFacet: AccessControl;
-  let pauseFacet: Pause;
+  let pauseFacet: PauseFacet;
 
   async function deploySecurityFixtureR() {
     const base = await deployBondTokenFixture({
@@ -32,10 +32,10 @@ describe("Proceed Recipients Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user2;
 
-    proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipients", diamond.address, signer_A);
+    proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipientsFacet", diamond.address, signer_A);
 
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
 
     await accessControlFacet.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
 
@@ -105,6 +105,14 @@ describe("Proceed Recipients Tests", () => {
         PROCEED_RECIPIENT_1,
       ]);
     });
+
+    it("GIVEN an invalid address WHEN adding it THEN it reverts with ZeroAddressNotAllowed", async () => {
+      await expect(
+        proceedRecipientsFacet.addProceedRecipient(ADDRESS_ZERO, PROCEED_RECIPIENT_1_DATA, {
+          gasLimit: GAS_LIMIT.default,
+        }),
+      ).to.be.revertedWithCustomError(proceedRecipientsFacet, "ZeroAddressNotAllowed");
+    });
   });
 
   describe("Remove Tests", () => {
@@ -151,6 +159,14 @@ describe("Proceed Recipients Tests", () => {
   });
 
   describe("Update Data Tests", () => {
+    it("GIVEN invalid address WHEN updated THEN it reverts with ZeroAddressNotAllowed", async () => {
+      await expect(
+        proceedRecipientsFacet.updateProceedRecipientData(ADDRESS_ZERO, "0x", {
+          gasLimit: GAS_LIMIT.high,
+        }),
+      ).to.be.revertedWithCustomError(proceedRecipientsFacet, "ZeroAddressNotAllowed");
+    });
+
     it("GIVEN a listed proceed recipient WHEN unauthorized user updates its data THEN it reverts with AccountHasNoRole", async () => {
       await expect(
         proceedRecipientsFacet

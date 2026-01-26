@@ -3,19 +3,19 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _ISSUER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
 import { IERC1594 } from "../../interfaces/ERC1400/IERC1594.sol";
-import { Common } from "../../common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 import { _DEFAULT_PARTITION } from "../../../layer_0/constants/values.sol";
 
-abstract contract ERC1594 is IERC1594, Common {
+abstract contract ERC1594 is IERC1594, Internals {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external override onlyUninitialized(_erc1594Storage().initialized) {
-        super._initialize_ERC1594();
+    function initialize_ERC1594() external override onlyUninitialized(_isERC1594Initialized()) {
+        _initialize_ERC1594();
     }
 
     function transferWithData(
         address _to,
         uint256 _value,
-        bytes calldata /*_data*/
+        bytes calldata _data // ignored in the current implementation
     )
         external
         override
@@ -25,13 +25,14 @@ abstract contract ERC1594 is IERC1594, Common {
     {
         // Add a function to validate the `_data` parameter
         _transfer(_msgSender(), _to, _value);
+        emit TransferWithData(_msgSender(), _to, _value, _data);
     }
 
     function transferFromWithData(
         address _from,
         address _to,
         uint256 _value,
-        bytes calldata /*_data*/
+        bytes calldata _data // ignored in the current implementation
     )
         external
         override
@@ -46,6 +47,7 @@ abstract contract ERC1594 is IERC1594, Common {
         }
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
+        emit TransferFromWithData(_msgSender(), _from, _to, _value, _data);
     }
 
     function issue(
@@ -59,7 +61,6 @@ abstract contract ERC1594 is IERC1594, Common {
         onlyWithinMaxSupply(_value)
         onlyIdentified(address(0), _tokenHolder)
         onlyCompliant(address(0), _tokenHolder, false)
-        onlyIssuable
         onlyUnpaused
     {
         {
