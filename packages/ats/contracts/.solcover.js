@@ -1,3 +1,5 @@
 module.exports = {
-  istanbulFolder: "../../../coverage/contracts",
+  // istanbulFolder: "../../../coverage/contracts",
+  istanbulReporter: ["html", "json", "lcov"],
+  skipFiles: ["mocks/", "test/"],
 };

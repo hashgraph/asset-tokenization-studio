@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../constants/roles.sol";
 import { IERC3643Operations } from "../interfaces/ERC3643/IERC3643Operations.sol";
-import { Common } from "../common/Common.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 
-abstract contract ERC3643Operations is IERC3643Operations, Common {
+abstract contract ERC3643Operations is IERC3643Operations, Internals {
     function burn(
         address _userAddress,
         uint256 _amount
@@ -29,7 +29,6 @@ abstract contract ERC3643Operations is IERC3643Operations, Common {
         onlyWithinMaxSupply(_amount)
         onlyIdentified(address(0), _to)
         onlyCompliant(address(0), _to, false)
-        onlyIssuable
     {
         {
             bytes32[] memory roles = new bytes32[](2);

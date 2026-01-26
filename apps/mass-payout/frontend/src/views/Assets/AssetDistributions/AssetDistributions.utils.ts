@@ -1,4 +1,4 @@
-import { TFunction } from 'i18next';
+import { TFunction } from "i18next";
 import {
   DistributionFilterType,
   StatusFilterMap,
@@ -6,7 +6,7 @@ import {
   ColumnsByTab,
   AssetDistributionData,
   AssetDistributionColumn,
-} from './AssetDistributions.types';
+} from "./AssetDistributions.types";
 
 /**
  * Filters distributions by status based on the filter type
@@ -34,19 +34,12 @@ export const filterByDistributionType = (
   distributions: AssetDistributionData[],
   selectedDistributionType: string,
 ): AssetDistributionData[] => {
-  if (
-    !selectedDistributionType ||
-    selectedDistributionType === 'all' ||
-    selectedDistributionType === ''
-  ) {
+  if (!selectedDistributionType || selectedDistributionType === "all" || selectedDistributionType === "") {
     return distributions;
   }
 
   return distributions.filter((distribution) => {
-    return (
-      distribution.type === selectedDistributionType ||
-      distribution.subtype === selectedDistributionType
-    );
+    return distribution.type === selectedDistributionType || distribution.subtype === selectedDistributionType;
   });
 };
 
@@ -107,11 +100,7 @@ export const getProcessedDistributions = ({
   pageIndex: number;
   pageSize: number;
 }): FilteredDistributionsResult => {
-  let filtered = getFilteredDistributionsByStatus(
-    data,
-    activeFilter,
-    statusFilterMap,
-  );
+  let filtered = getFilteredDistributionsByStatus(data, activeFilter, statusFilterMap);
   filtered = filterByDistributionType(filtered, selectedDistributionType);
   filtered = filterBySearchTerm(filtered, searchTerm);
 
@@ -122,16 +111,13 @@ export const getProcessedDistributions = ({
  * Checks if a distribution row is clickable based on its status
  */
 export const isDistributionRowClickable = (status: string): boolean => {
-  return status === 'FAILED' || status === 'COMPLETED';
+  return status === "FAILED" || status === "COMPLETED";
 };
 
 /**
  * Calculates total pages for pagination
  */
-export const calculateTotalPages = (
-  totalElements: number,
-  pageSize: number,
-): number => {
+export const calculateTotalPages = (totalElements: number, pageSize: number): number => {
   return Math.ceil(totalElements / pageSize);
 };
 
@@ -167,15 +153,15 @@ export const createDistributionTabs = (
   t: TFunction,
 ) => [
   {
-    content: createTabContentFn('upcoming'),
-    header: t('subTabs.upcoming'),
+    content: createTabContentFn("upcoming"),
+    header: t("subTabs.upcoming"),
   },
   {
-    content: createTabContentFn('ongoing'),
-    header: t('subTabs.ongoing'),
+    content: createTabContentFn("ongoing"),
+    header: t("subTabs.ongoing"),
   },
   {
-    content: createTabContentFn('completed'),
-    header: t('subTabs.completed'),
+    content: createTabContentFn("completed"),
+    header: t("subTabs.completed"),
   },
 ];

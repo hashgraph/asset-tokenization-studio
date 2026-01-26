@@ -164,6 +164,12 @@ export interface DeploymentCheckpoint {
       equity?: ConfigurationResult;
       /** Bond configuration */
       bond?: ConfigurationResult;
+      /** Bond Fixed Rate configuration */
+      bondFixedRate?: ConfigurationResult;
+      /** Bond KpiLinked Rate configuration */
+      bondKpiLinkedRate?: ConfigurationResult;
+      /** Bond Sustainability Performance Target Rate configuration */
+      bondSustainabilityPerformanceTargetRate?: ConfigurationResult;
     };
 
     /** Factory deployment (step 6) */
@@ -310,7 +316,7 @@ export interface ResumeOptions {
 // Type Guards
 // ============================================================================
 
-import type { SaveResult } from "../types";
+import type { SaveResult } from "./core";
 
 /**
  * Type guard for SaveResult success case.

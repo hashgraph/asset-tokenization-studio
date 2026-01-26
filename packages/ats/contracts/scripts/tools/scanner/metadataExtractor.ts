@@ -14,9 +14,7 @@ import {
   extractInheritance,
   extractSolidityVersion,
   extractFacetResolverKeyImport,
-  extractPublicMethods,
   extractAllMethods,
-  extractPublicMethodsWithInheritance,
   extractEvents,
   extractEventsWithInheritance,
   extractErrors,
@@ -24,7 +22,7 @@ import {
   extractNatspecDescription,
   type RoleDefinition,
 } from "../utils/solidityUtils";
-import { loadABI, extractMethodsFromABI, validateAndMerge } from "../utils/abiValidator";
+import { extractMethodsFromABI } from "../utils/abiValidator";
 import { MethodDefinition, EventDefinition, ErrorDefinition } from "../../infrastructure/types";
 
 /**
@@ -112,23 +110,15 @@ export function extractMetadata(
   // - Facets: Extract from entire inheritance chain (excluding static methods)
   // - StorageWrappers: Extract ALL methods (internal/private/public)
   // - Other contracts: Extract only public/external methods
-  let methods: MethodDefinition[];
-  if (name.endsWith("Facet") && allContracts) {
-    methods = extractPublicMethodsWithInheritance(contract.source, name, allContracts);
-  } else if (name.endsWith("StorageWrapper")) {
+
+  let methods: MethodDefinition[] = [];
+
+  if (name.endsWith("StorageWrapper")) {
     methods = extractAllMethods(contract.source);
-  } else {
-    methods = extractPublicMethods(contract.source);
   }
 
-  // Validate methods against ABI if available
   // This provides 100% accurate signatures from compiled artifacts
-  const contractsDir = path.dirname(contract.filePath);
-  const abi = loadABI(name, contractsDir);
-  if (abi) {
-    const abiMethods = extractMethodsFromABI(abi);
-    methods = validateAndMerge(methods, abiMethods, name);
-  }
+  methods = extractMethodsFromABI(contract.artifactData.abi);
 
   // Extract events based on contract type:
   // - Facets: Extract from entire inheritance chain

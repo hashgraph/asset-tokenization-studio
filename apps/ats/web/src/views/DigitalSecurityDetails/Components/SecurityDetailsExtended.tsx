@@ -59,12 +59,12 @@ export const SecurityDetailsExtended = ({
   const nominalValue = useMemo(() => {
     return toNumber(
       equityDetailsResponse?.nominalValue || bondDetailsResponse?.nominalValue,
-      equityDetailsResponse?.nominalValueDecimals || bondDetailsResponse?.nominalValueDecimals || 2,
+      equityDetailsResponse?.nominalValueDecimals || bondDetailsResponse?.nominalValueDecimals || 0,
     );
   }, [equityDetailsResponse, bondDetailsResponse]);
 
   const nominalValueDecimals = useMemo(() => {
-    return equityDetailsResponse?.nominalValueDecimals || bondDetailsResponse?.nominalValueDecimals || 2;
+    return equityDetailsResponse?.nominalValueDecimals || bondDetailsResponse?.nominalValueDecimals || 0;
   }, [equityDetailsResponse, bondDetailsResponse]);
 
   const listItems = useMemo(() => {
@@ -155,6 +155,7 @@ export const SecurityDetailsExtended = ({
     }
 
     return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, id, nominalValue, tProperties, bondDetailsResponse, compliance, identityRegistry]);
 
   return (

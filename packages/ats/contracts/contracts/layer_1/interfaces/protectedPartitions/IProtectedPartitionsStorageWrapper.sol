@@ -2,6 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IProtectedPartitionsStorageWrapper {
+    struct ProtectionData {
+        uint256 deadline;
+        uint256 nounce;
+        bytes signature;
+    }
+
     event PartitionsProtected(address indexed operator);
 
     event PartitionsUnProtected(address indexed operator);

@@ -20,7 +20,8 @@ import {
   OperationResult,
   DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
-import { BOND_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import { BOND_CONFIG_ID } from "../constants";
+import { atsRegistry } from "../atsRegistry";
 
 /**
  * Bond-specific facets list (41 facets total).
@@ -55,6 +56,7 @@ const BOND_FACETS = [
   "ERC1643Facet",
   "ERC1644Facet",
   "ERC20PermitFacet",
+  "NoncesFacet",
   "ERC20VotesFacet",
   "ERC3643BatchFacet",
   "ERC3643ManagementFacet",
@@ -83,6 +85,7 @@ const BOND_FACETS = [
   "ProtectedPartitionsFacet",
   "ScheduledBalanceAdjustmentsFacet",
   "ScheduledCrossOrderedTasksFacet",
+  "ScheduledCouponListingFacet",
   "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",

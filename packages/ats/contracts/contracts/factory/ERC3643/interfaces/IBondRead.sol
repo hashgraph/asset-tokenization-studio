@@ -2,6 +2,11 @@
 pragma solidity ^0.8.17;
 
 interface TRexIBondRead {
+    enum RateCalculationStatus {
+        PENDING,
+        SET
+    }
+
     struct BondDetailsData {
         bytes3 currency;
         uint256 nominalValue;
@@ -13,9 +18,12 @@ interface TRexIBondRead {
     struct Coupon {
         uint256 recordDate;
         uint256 executionDate;
+        uint256 startDate;
+        uint256 endDate;
+        uint256 fixingDate;
         uint256 rate;
         uint8 rateDecimals;
-        uint256 period;
+        RateCalculationStatus rateStatus;
     }
 
     struct RegisteredCoupon {
@@ -25,13 +33,9 @@ interface TRexIBondRead {
 
     struct CouponFor {
         uint256 tokenBalance;
-        uint256 rate;
-        uint8 rateDecimals;
-        uint256 recordDate;
-        uint256 executionDate;
-        uint256 period;
         uint8 decimals;
         bool recordDateReached;
+        Coupon coupon;
     }
 
     struct CouponAmountFor {
@@ -93,4 +97,13 @@ interface TRexIBondRead {
      * @dev It is the list of token holders at the snapshot taken at the record date
      */
     function getTotalCouponHolders(uint256 _couponID) external view returns (uint256);
+
+    function getCouponFromOrderedListAt(uint256 _pos) external view returns (uint256 couponID_);
+
+    function getCouponsOrderedList(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory couponIDs_);
+
+    function getCouponsOrderedListTotal() external view returns (uint256 total_);
 }

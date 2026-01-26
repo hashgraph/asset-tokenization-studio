@@ -15,9 +15,6 @@
  * @module workflows/upgradeConfigurations
  */
 
-import { promises as fs } from "fs";
-import { dirname } from "path";
-
 import { ContractFactory, Signer } from "ethers";
 import { z } from "zod";
 
@@ -26,7 +23,6 @@ import {
   registerFacets,
   updateResolverProxyVersion,
   getResolverProxyConfigInfo,
-  success,
   info,
   warn,
   error as logError,
@@ -42,7 +38,7 @@ import {
   formatCheckpointStatus,
   getStepName,
   validateAddress,
-  generateTimestamp,
+  saveDeploymentOutput,
 } from "@scripts/infrastructure";
 import { atsRegistry, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
@@ -594,7 +590,7 @@ async function registerFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
     throw new Error(`Facet registration failed: ${registerResult.error}`);
   }
 
-  ctx.totalGasUsed += registerResult.gasUsed || 0;
+  ctx.totalGasUsed += registerResult.transactionGas?.reduce((sum, gas) => sum + gas, 0) ?? 0;
   info(`✅ Registered ${registerResult.registered.length} facets in BLR`);
 
   if (registerResult.failed.length > 0) {
@@ -1112,11 +1108,17 @@ export async function upgradeConfigurations(
 
     // Save output to file if requested
     if (saveOutput) {
-      const timestamp = generateTimestamp();
-      const finalOutputPath = outputPath || `deployments/${network}/${network}-upgrade-${timestamp}.json`;
-
-      await saveUpgradeOutput(output, finalOutputPath);
-      info(`\n💾 Upgrade output saved: ${finalOutputPath}`);
+      const result = await saveDeploymentOutput({
+        network,
+        workflow: "upgradeConfigurations",
+        data: output,
+        customPath: outputPath,
+      });
+      if (result.success) {
+        info(`\n💾 Upgrade output saved: ${result.filepath}`);
+      } else {
+        warn(`\n⚠️  Warning: Could not save upgrade output: ${result.error}`);
+      }
     }
 
     // Print summary
@@ -1160,26 +1162,5 @@ export async function upgradeConfigurations(
     }
 
     throw error;
-  }
-}
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-/**
- * Save upgrade output to JSON file.
- *
- * @param output - Upgrade output
- * @param filePath - File path to save to
- */
-async function saveUpgradeOutput(output: UpgradeConfigurationsOutput, filePath: string): Promise<void> {
-  try {
-    const dir = dirname(filePath);
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(filePath, JSON.stringify(output, null, 2), "utf-8");
-    success("Upgrade output saved", { path: filePath });
-  } catch (error) {
-    warn(`Warning: Could not save upgrade output: ${error}`);
   }
 }

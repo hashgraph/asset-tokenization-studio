@@ -19,6 +19,7 @@ import {
 } from "@contract-types";
 import { DividendRight, EquityDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
 import { getRegulationData, getSecurityData } from "./common.fixture";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 /**
  * Default equity token parameters.
@@ -66,11 +67,15 @@ export function getEquityDetails(params?: DeepPartial<EquityDetailsDataParams>) 
 export async function deployEquityTokenFixture({
   equityDataParams,
   regulationTypeParams,
+  useLoadFixture = true,
 }: {
   equityDataParams?: DeepPartial<DeployEquityFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
+  useLoadFixture?: boolean;
 } = {}) {
-  const infrastructure = await deployAtsInfrastructureFixture();
+  const infrastructure = useLoadFixture
+    ? await loadFixture(deployAtsInfrastructureFixture)
+    : await deployAtsInfrastructureFixture();
   const { factory, blr, deployer } = infrastructure;
   const securityData = getSecurityData(blr, equityDataParams?.securityData);
   const equityDetails = getEquityDetails(equityDataParams?.equityDetails);

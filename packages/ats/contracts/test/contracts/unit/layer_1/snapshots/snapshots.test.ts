@@ -13,6 +13,8 @@ import {
   Kyc,
   Equity,
   TimeTravelFacet,
+  FreezeFacet,
+  ClearingTransferFacet,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
@@ -50,6 +52,8 @@ describe("Snapshots Tests", () => {
   let ssiManagementFacet: SsiManagement;
   let equityFacet: Equity;
   let timeTravelFacet: TimeTravelFacet;
+  let freezeFacet: FreezeFacet;
+  let clearingTransferFacet: ClearingTransferFacet;
 
   async function deploySecurityFixtureMultiPartition() {
     const base = await deployEquityTokenFixture({
@@ -83,6 +87,8 @@ describe("Snapshots Tests", () => {
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
     equityFacet = await ethers.getContractAt("Equity", diamond.address);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
+    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address);
+    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address);
   }
 
   function set_initRbacs(): any[] {
@@ -106,6 +112,18 @@ describe("Snapshots Tests", () => {
       {
         role: ATS_ROLES._SSI_MANAGER_ROLE,
         members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES._FREEZE_MANAGER_ROLE,
+        members: [signer_B.address],
+      },
+      {
+        role: ATS_ROLES._CLEARING_ROLE,
+        members: [signer_B.address],
+      },
+      {
+        role: ATS_ROLES._CLEARING_VALIDATOR_ROLE,
+        members: [signer_B.address],
       },
     ];
   }
@@ -468,6 +486,243 @@ describe("Snapshots Tests", () => {
     expect(snapshot_TotalTokenHolders_2).to.equal(2);
     expect(snapshot_TokenHolders_2.length).to.equal(snapshot_TotalTokenHolders_2);
     expect(snapshot_TokenHolders_2).to.have.members([signer_A.address, signer_C.address]);
+  });
+
+  it("GIVEN snapshot exists WHEN querying cleared balances THEN returns correct values", async () => {
+    const base = await deployEquityTokenFixture({
+      equityDataParams: {
+        securityData: {
+          isMultiPartition: true,
+          clearingActive: true,
+        },
+      },
+    });
+    const diamond = base.diamond;
+
+    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await setFacets(diamond);
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+
+    await ssiManagementFacet.addIssuer(signer_A.address);
+    await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+    // Issue tokens to signer_C in two partitions
+    await erc1410Facet.connect(signer_A).issueByPartition({
+      partition: _PARTITION_ID_1,
+      tokenHolder: signer_C.address,
+      value: balanceOf_C_Original,
+      data: "0x",
+    });
+
+    await erc1410Facet.connect(signer_A).issueByPartition({
+      partition: _PARTITION_ID_2,
+      tokenHolder: signer_C.address,
+      value: amount,
+      data: "0x",
+    });
+
+    // Take snapshot before clearing
+    await snapshotFacet.connect(signer_C).takeSnapshot();
+
+    const clearedBalance_C_1 = await snapshotFacet.clearedBalanceOfAtSnapshot(1, signer_C.address);
+    const clearedBalance_C_1_Partition_1 = await snapshotFacet.clearedBalanceOfAtSnapshotByPartition(
+      _PARTITION_ID_1,
+      1,
+      signer_C.address,
+    );
+    const clearedBalance_C_1_Partition_2 = await snapshotFacet.clearedBalanceOfAtSnapshotByPartition(
+      _PARTITION_ID_2,
+      1,
+      signer_C.address,
+    );
+
+    expect(clearedBalance_C_1).to.equal(0);
+    expect(clearedBalance_C_1_Partition_1).to.equal(0);
+    expect(clearedBalance_C_1_Partition_2).to.equal(0);
+
+    // Create clearing transfer in partition 1
+    const clearedAmount_Partition_1 = 800;
+    await clearingTransferFacet.connect(signer_C).clearingTransferByPartition(
+      {
+        partition: _PARTITION_ID_1,
+        expirationTimestamp: MAX_UINT256,
+        data: "0x",
+      },
+      clearedAmount_Partition_1,
+      signer_A.address,
+    );
+
+    // Create clearing transfer in partition 2
+    const clearedAmount_Partition_2 = 500;
+    await clearingTransferFacet.connect(signer_C).clearingTransferByPartition(
+      {
+        partition: _PARTITION_ID_2,
+        expirationTimestamp: MAX_UINT256,
+        data: "0x",
+      },
+      clearedAmount_Partition_2,
+      signer_A.address,
+    );
+
+    // Take snapshot after clearing
+    await snapshotFacet.connect(signer_C).takeSnapshot();
+
+    const clearedBalance_C_2 = await snapshotFacet.clearedBalanceOfAtSnapshot(2, signer_C.address);
+    const clearedBalance_C_2_Partition_1 = await snapshotFacet.clearedBalanceOfAtSnapshotByPartition(
+      _PARTITION_ID_1,
+      2,
+      signer_C.address,
+    );
+    const clearedBalance_C_2_Partition_2 = await snapshotFacet.clearedBalanceOfAtSnapshotByPartition(
+      _PARTITION_ID_2,
+      2,
+      signer_C.address,
+    );
+
+    expect(clearedBalance_C_2).to.equal(clearedAmount_Partition_1 + clearedAmount_Partition_2);
+    expect(clearedBalance_C_2_Partition_1).to.equal(clearedAmount_Partition_1);
+    expect(clearedBalance_C_2_Partition_2).to.equal(clearedAmount_Partition_2);
+
+    // Verify that cleared balances reduce the available balance
+    const currentBalance_C = await erc1410Facet.balanceOf(signer_C.address);
+    expect(currentBalance_C).to.equal(
+      balanceOf_C_Original + amount - clearedAmount_Partition_1 - clearedAmount_Partition_2,
+    );
+
+    const currentBalance_C_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_C.address);
+    expect(currentBalance_C_Partition_1).to.equal(balanceOf_C_Original - clearedAmount_Partition_1);
+
+    const currentBalance_C_Partition_2 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_2, signer_C.address);
+    expect(currentBalance_C_Partition_2).to.equal(amount - clearedAmount_Partition_2);
+  });
+
+  it("GIVEN snapshot exists WHEN querying frozen balances THEN returns correct values", async () => {
+    const base = await deployEquityTokenFixture({
+      equityDataParams: {
+        securityData: {
+          isMultiPartition: false,
+        },
+      },
+    });
+    const diamond = base.diamond;
+
+    await executeRbac(base.accessControlFacet, set_initRbacs());
+    await setFacets(diamond);
+
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+
+    await ssiManagementFacet.addIssuer(signer_A.address);
+    await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+    await erc1410Facet.connect(signer_A).issueByPartition({
+      partition: _PARTITION_ID_1,
+      tokenHolder: signer_C.address,
+      value: balanceOf_C_Original,
+      data: "0x",
+    });
+
+    await snapshotFacet.connect(signer_C).takeSnapshot();
+
+    const frozenBalance_C_1 = await snapshotFacet.frozenBalanceOfAtSnapshot(1, signer_C.address);
+    const frozenBalance_C_1_Partition_1 = await snapshotFacet.frozenBalanceOfAtSnapshotByPartition(
+      _PARTITION_ID_1,
+      1,
+      signer_C.address,
+    );
+
+    expect(frozenBalance_C_1).to.equal(0);
+    expect(frozenBalance_C_1_Partition_1).to.equal(0);
+
+    // Freeze some tokens
+    const frozenAmount = 500;
+    await freezeFacet.connect(signer_B).freezePartialTokens(signer_C.address, frozenAmount);
+
+    // Take snapshot after freezing
+    await snapshotFacet.connect(signer_C).takeSnapshot();
+
+    const frozenBalance_C_2 = await snapshotFacet.frozenBalanceOfAtSnapshot(2, signer_C.address);
+    const frozenBalance_C_2_Partition_1 = await snapshotFacet.frozenBalanceOfAtSnapshotByPartition(
+      _PARTITION_ID_1,
+      2,
+      signer_C.address,
+    );
+
+    expect(frozenBalance_C_2).to.equal(frozenAmount);
+    expect(frozenBalance_C_2_Partition_1).to.equal(frozenAmount);
+
+    // Verify current frozen balance
+    const currentFrozenBalance = await freezeFacet.getFrozenTokens(signer_C.address);
+    expect(currentFrozenBalance).to.equal(frozenAmount);
+
+    // Verify free balance is reduced
+    const currentFreeBalance = await erc1410Facet.balanceOf(signer_C.address);
+    expect(currentFreeBalance).to.equal(balanceOf_C_Original - frozenAmount);
+  });
+
+  it("GIVEN multiple snapshots WHEN querying token holders pagination THEN returns correct holders list", async () => {
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+
+    await ssiManagementFacet.addIssuer(signer_A.address);
+    await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await kycFacet.grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+
+    await erc1410Facet.connect(signer_A).issueByPartition({
+      partition: _PARTITION_ID_1,
+      tokenHolder: signer_C.address,
+      value: balanceOf_C_Original,
+      data: "0x",
+    });
+
+    await erc1410Facet.connect(signer_A).issueByPartition({
+      partition: _PARTITION_ID_1,
+      tokenHolder: signer_A.address,
+      value: amount,
+      data: "0x",
+    });
+
+    await erc1410Facet.connect(signer_A).issueByPartition({
+      partition: _PARTITION_ID_1,
+      tokenHolder: signer_B.address,
+      value: amount,
+      data: "0x",
+    });
+
+    await snapshotFacet.connect(signer_C).takeSnapshot();
+
+    const totalHolders = await snapshotFacet.getTotalTokenHoldersAtSnapshot(1);
+    expect(totalHolders).to.equal(3);
+
+    // Test pagination - get 2 holders per page
+    const holders_page_0 = await snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 2);
+    expect(holders_page_0.length).to.equal(2);
+    // Verify page 0 contains 2 of the expected holders
+    const expectedHolders = [signer_C.address, signer_A.address, signer_B.address];
+    holders_page_0.forEach((holder) => {
+      expect(expectedHolders).to.include(holder);
+    });
+
+    const holders_page_1 = await snapshotFacet.getTokenHoldersAtSnapshot(1, 1, 2);
+    expect(holders_page_1.length).to.equal(1);
+    // Verify page 1 contains 1 of the expected holders
+    holders_page_1.forEach((holder) => {
+      expect(expectedHolders).to.include(holder);
+    });
+
+    // Combine all holders from both pages
+    const allHolders = [...holders_page_0, ...holders_page_1];
+    const uniqueHolders = [...new Set(allHolders)];
+    expect(uniqueHolders.length).to.equal(2);
+
+    // Get all holders in one call to verify consistency
+    const allHolders_single_call = await snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 10);
+    expect(allHolders_single_call.length).to.equal(3);
+    expect(allHolders_single_call).to.have.members([signer_C.address, signer_A.address, signer_B.address]);
   });
 
   describe("Scheduled tasks", async () => {

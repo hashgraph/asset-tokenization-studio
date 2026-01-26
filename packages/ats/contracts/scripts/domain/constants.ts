@@ -25,12 +25,37 @@
 export const EQUITY_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000001";
 
 /**
- * Bond configuration ID.
+ * Bond Variable Rate configuration ID.
  *
  * bytes32(uint256(2)) = 0x00...02
- * Used by BusinessLogicResolver to identify bond facet configuration.
+ * Used by BusinessLogicResolver to identify bond variable rate facet configuration.
  */
 export const BOND_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
+
+/**
+ * Bond Fixed Rate configuration ID.
+ *
+ * bytes32(uint256(3)) = 0x00...03
+ * Used by BusinessLogicResolver to identify bond fixed rate facet configuration.
+ */
+export const BOND_FIXED_RATE_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000003";
+
+/**
+ * Bond Kpi Linked Rate configuration ID.
+ *
+ * bytes32(uint256(3)) = 0x00...04
+ * Used by BusinessLogicResolver to identify bond kpi linked rate facet configuration.
+ */
+export const BOND_KPI_LINKED_RATE_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000004";
+
+/**
+ * Bond Kpi Sustainability Performance Target Rate configuration ID.
+ *
+ * bytes32(uint256(3)) = 0x00...05
+ * Used by BusinessLogicResolver to identify bond sustainability performance target rate facet configuration.
+ */
+export const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID =
+  "0x0000000000000000000000000000000000000000000000000000000000000005";
 
 // ============================================================================
 // ATS-Specific Contract Names
@@ -55,7 +80,7 @@ export const ATS_CONTRACTS = {
  *
  * These types provide type-safe access to roles from the auto-generated registry.
  */
-import { ROLES } from "@scripts/domain";
+import { ROLES } from "./atsRegistry.data";
 
 export type AtsRoleName = keyof typeof ROLES;
 export type AtsRoleHash = (typeof ROLES)[AtsRoleName];
@@ -130,3 +155,5 @@ export const CURRENCIES = {
   CHF: "0x434846", // Swiss Franc
   JPY: "0x4a5059", // Japanese Yen
 } as const;
+
+export const FACET_REGISTRATION_BATCH_SIZE = 20;

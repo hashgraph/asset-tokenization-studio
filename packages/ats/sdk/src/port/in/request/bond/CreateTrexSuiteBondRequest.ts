@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { OptionalField } from '@core/decorator/OptionalDecorator';
-import { Security } from '@domain/context/security/Security';
-import ValidatedRequest from '@core/validation/ValidatedArgs';
-import FormatValidation from '../FormatValidation';
+import { OptionalField } from "@core/decorator/OptionalDecorator";
+import { Security } from "@domain/context/security/Security";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
-import { SecurityDate } from '@domain/context/shared/SecurityDate';
-import { Factory } from '@domain/context/factory/Factories';
-import { InvalidValue } from '../error/InvalidValue';
+import { SecurityDate } from "@domain/context/shared/SecurityDate";
+import { Factory } from "@domain/context/factory/Factories";
+import { InvalidValue } from "../error/InvalidValue";
 
 export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateTrexSuiteBondRequest> {
   salt: string;
@@ -30,7 +30,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     return this._decimals;
   }
   public set decimals(value: number | string) {
-    this._decimals = typeof value === 'number' ? value : parseFloat(value);
+    this._decimals = typeof value === "number" ? value : parseFloat(value);
   }
   isWhiteList: boolean;
   erc20VotesActivated: boolean;
@@ -181,8 +181,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
       decimals: (val) => {
         return Security.checkInteger(val);
       },
-      diamondOwnerAccount:
-        FormatValidation.checkHederaIdFormatOrEvmAddress(false),
+      diamondOwnerAccount: FormatValidation.checkHederaIdFormatOrEvmAddress(false),
       currency: FormatValidation.checkBytes3Format(),
       numberOfUnits: FormatValidation.checkNumber(),
       nominalValue: FormatValidation.checkNumber(),
@@ -194,11 +193,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
         );
       },
       maturityDate: (val) => {
-        return SecurityDate.checkDateTimestamp(
-          parseInt(val),
-          parseInt(this.startingDate),
-          undefined,
-        );
+        return SecurityDate.checkDateTimestamp(parseInt(val), parseInt(this.startingDate), undefined);
       },
       regulationType: (val) => {
         return Factory.checkRegulationType(val);
@@ -208,48 +203,29 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
       },
       configId: FormatValidation.checkBytes32Format(),
       externalPauses: (val) => {
-        return FormatValidation.checkHederaIdOrEvmAddressArray(
-          val ?? [],
-          'externalPauses',
-          true,
-        );
+        return FormatValidation.checkHederaIdOrEvmAddressArray(val ?? [], "externalPauses", true);
       },
       externalControlLists: (val) => {
-        return FormatValidation.checkHederaIdOrEvmAddressArray(
-          val ?? [],
-          'externalControlLists',
-          true,
-        );
+        return FormatValidation.checkHederaIdOrEvmAddressArray(val ?? [], "externalControlLists", true);
       },
       externalKycLists: (val) => {
-        return FormatValidation.checkHederaIdOrEvmAddressArray(
-          val ?? [],
-          'externalKycLists',
-          true,
-        );
+        return FormatValidation.checkHederaIdOrEvmAddressArray(val ?? [], "externalKycLists", true);
       },
       complianceId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
-      identityRegistryId:
-        FormatValidation.checkHederaIdFormatOrEvmAddress(true),
+      identityRegistryId: FormatValidation.checkHederaIdFormatOrEvmAddress(true),
       claimTopics: FormatValidation.checkArrayNumber(),
       proceedRecipientsIds: (val) => {
-        return FormatValidation.checkHederaIdOrEvmAddressArray(
-          val ?? [],
-          'proceedRecipientsIds',
-          true,
-        );
+        return FormatValidation.checkHederaIdOrEvmAddressArray(val ?? [], "proceedRecipientsIds", true);
       },
       proceedRecipientsData: (val) => {
         const validation = FormatValidation.checkBytesFormat();
         if (val?.length != this.proceedRecipientsIds?.length) {
           return [
-            new InvalidValue(
-              `The list of proceedRecipientsIds and proceedRecipientsData must have equal length.`,
-            ),
+            new InvalidValue(`The list of proceedRecipientsIds and proceedRecipientsData must have equal length.`),
           ];
         }
         for (const data of val ?? []) {
-          if (data == '') continue;
+          if (data == "") continue;
           const result = validation(data);
           if (result) return result;
         }
@@ -271,8 +247,7 @@ export default class CreateTrexSuiteBondRequest extends ValidatedRequest<CreateT
     this.name = name;
     this.symbol = symbol;
     this.isin = isin;
-    this.decimals =
-      typeof decimals === 'number' ? decimals : parseInt(decimals);
+    this.decimals = typeof decimals === "number" ? decimals : parseInt(decimals);
     this.isWhiteList = isWhiteList;
     this.erc20VotesActivated = erc20VotesActivated;
     this.isControllable = isControllable;

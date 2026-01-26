@@ -16,8 +16,6 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 interface IBusinessLogicResolverWrapper {
     error BusinessLogicVersionDoesNotExist(uint256 version);
-    error BusinessLogicNotActive(bytes32 businessLogicKey);
     error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
-    error AllBusinessLogicKeysMustBeenInformed();
     error ZeroKeyNotValidForBusinessLogic();
 }

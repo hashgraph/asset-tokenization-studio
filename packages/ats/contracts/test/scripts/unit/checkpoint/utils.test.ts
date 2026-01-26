@@ -75,6 +75,24 @@ describe("Checkpoint Utilities", () => {
               facetCount: 43,
               txHash: "0xpqr678",
             },
+            bondFixedRate: {
+              configId: "0x0000000000000000000000000000000000000000000000000000000000000003",
+              version: 1,
+              facetCount: 47,
+              txHash: "0xabc789",
+            },
+            bondKpiLinkedRate: {
+              configId: "0x0000000000000000000000000000000000000000000000000000000000000004",
+              version: 1,
+              facetCount: 47,
+              txHash: "0xdef123",
+            },
+            bondSustainabilityPerformanceTargetRate: {
+              configId: "0x0000000000000000000000000000000000000000000000000000000000000005",
+              version: 1,
+              facetCount: 47,
+              txHash: "0xghi456",
+            },
           },
           factory: {
             address: "0x5555555555555555555555555555555555555555",
@@ -129,11 +147,16 @@ describe("Checkpoint Utilities", () => {
       );
       expect(output.configurations.bond.version).to.equal(1);
       expect(output.configurations.bond.facetCount).to.equal(43);
+      expect(output.configurations.bondFixedRate.configId).to.equal(
+        "0x0000000000000000000000000000000000000000000000000000000000000003",
+      );
+      expect(output.configurations.bondFixedRate.version).to.equal(1);
+      expect(output.configurations.bondFixedRate.facetCount).to.equal(47);
 
       // Summary
       expect(output.summary.totalContracts).to.equal(5); // ProxyAdmin + BLR + Factory + 2 facets
       expect(output.summary.totalFacets).to.equal(2);
-      expect(output.summary.totalConfigurations).to.equal(2);
+      expect(output.summary.totalConfigurations).to.equal(3);
       expect(output.summary.success).to.be.true;
       expect(output.summary.deploymentTime).to.be.a("number");
       expect(output.summary.gasUsed).to.equal("1750000"); // 500000 + 450000 + 800000
@@ -215,6 +238,18 @@ describe("Checkpoint Utilities", () => {
               version: 1,
               facetCount: 0,
               txHash: "0xpqr678",
+            },
+            bondFixedRate: {
+              configId: "0x0000000000000000000000000000000000000000000000000000000000000003",
+              version: 1,
+              facetCount: 0,
+              txHash: "0xabc789",
+            },
+            bondKpiLinkedRate: {
+              configId: "0x0000000000000000000000000000000000000000000000000000000000000004",
+              version: 1,
+              facetCount: 0,
+              txHash: "0xdef123",
             },
           },
         },
@@ -318,7 +353,9 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(3, "newBlr")).to.equal("Register Facets");
         expect(getStepName(4, "newBlr")).to.equal("Equity Configuration");
         expect(getStepName(5, "newBlr")).to.equal("Bond Configuration");
-        expect(getStepName(6, "newBlr")).to.equal("Factory");
+        expect(getStepName(6, "newBlr")).to.equal("Bond Fixed Rate Configuration");
+        expect(getStepName(7, "newBlr")).to.equal("Bond KpiLinked Rate Configuration");
+        expect(getStepName(8, "newBlr")).to.equal("Factory");
       });
 
       it("should handle unknown step numbers", () => {
@@ -334,7 +371,9 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(2, "existingBlr")).to.equal("Register Facets");
         expect(getStepName(3, "existingBlr")).to.equal("Equity Configuration");
         expect(getStepName(4, "existingBlr")).to.equal("Bond Configuration");
-        expect(getStepName(5, "existingBlr")).to.equal("Factory");
+        expect(getStepName(5, "existingBlr")).to.equal("Bond Fixed Rate Configuration");
+        expect(getStepName(6, "existingBlr")).to.equal("Bond KpiLinked Rate Configuration");
+        expect(getStepName(7, "existingBlr")).to.equal("Factory");
       });
 
       it("should handle unknown step numbers", () => {
@@ -345,12 +384,12 @@ describe("Checkpoint Utilities", () => {
   });
 
   describe("getTotalSteps", () => {
-    it("should return 7 for newBlr workflow", () => {
-      expect(getTotalSteps("newBlr")).to.equal(7);
+    it("should return 8 for newBlr workflow", () => {
+      expect(getTotalSteps("newBlr")).to.equal(8);
     });
 
-    it("should return 6 for existingBlr workflow", () => {
-      expect(getTotalSteps("existingBlr")).to.equal(6);
+    it("should return 7 for existingBlr workflow", () => {
+      expect(getTotalSteps("existingBlr")).to.equal(7);
     });
   });
 
@@ -373,7 +412,7 @@ describe("Checkpoint Utilities", () => {
 
       expect(formatted).to.include("Checkpoint: hedera-testnet-1731085200000");
       expect(formatted).to.include("Status: in-progress");
-      expect(formatted).to.include("Step: 3/7 - Facets");
+      expect(formatted).to.include("Step: 3/8 - Facets");
       expect(formatted).to.include("Started: 2025-11-08T10:00:00.000Z");
       expect(formatted).to.include("Last Update: 2025-11-08T10:05:00.000Z");
       expect(formatted).to.not.include("Failed:");
@@ -411,7 +450,7 @@ describe("Checkpoint Utilities", () => {
         network: "hedera-testnet",
         deployer: "0x1234567890123456789012345678901234567890",
         status: "completed",
-        currentStep: 6,
+        currentStep: 8,
         workflowType: "newBlr",
         startTime: "2025-11-08T10:00:00.000Z",
         lastUpdate: "2025-11-08T10:15:00.000Z",
@@ -422,7 +461,7 @@ describe("Checkpoint Utilities", () => {
       const formatted = formatCheckpointStatus(checkpoint);
 
       expect(formatted).to.include("Status: completed");
-      expect(formatted).to.include("Step: 7/7 - Factory");
+      expect(formatted).to.include("Step: 9/8 - Factory");
     });
 
     it("should format existingBlr workflow correctly", () => {
@@ -441,7 +480,7 @@ describe("Checkpoint Utilities", () => {
 
       const formatted = formatCheckpointStatus(checkpoint);
 
-      expect(formatted).to.include("Step: 2/6 - Facets");
+      expect(formatted).to.include("Step: 2/7 - Facets");
     });
   });
 
