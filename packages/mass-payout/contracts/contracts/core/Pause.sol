@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.22;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import { IPause } from "./interfaces/IPause.sol";
 import { _PAUSER_ROLE } from "../constants/roles.sol";

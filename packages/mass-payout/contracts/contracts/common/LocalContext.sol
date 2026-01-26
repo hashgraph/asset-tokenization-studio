@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pragma solidity 0.8.22;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 
