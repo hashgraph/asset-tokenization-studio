@@ -10,6 +10,7 @@ import {
   ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel,
   ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel,
   KpisSustainabilityPerformanceTargetRateFacetTimeTravel,
+  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -47,6 +48,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
   let erc1594Facet: ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel;
   let proceedRecipientsFacet: ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel;
   let kpisFacet: KpisSustainabilityPerformanceTargetRateFacetTimeTravel;
+  let scheduledTasksFacet: ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel;
 
   let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
@@ -123,6 +125,11 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       diamond.address,
       signer_A,
     );
+    scheduledTasksFacet = await ethers.getContractAt(
+      "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel",
+      diamond.address,
+      signer_A,
+    );
 
     await erc1594Facet.issue(signer_A.address, amount, "0x");
     await proceedRecipientsFacet.addProceedRecipient(project1, "0x");
@@ -173,6 +180,11 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
     expect(couponAmountForPostFixingDate.denominator.toString()).to.equal(denominator.toString());
   }
 
+  async function checkMinDates(expectedMinDate: string) {
+    let minDate = await kpisFacet.getMinDate();
+    expect(minDate.toString()).to.equal(expectedMinDate);
+  }
+
   beforeEach(async () => {
     couponRecordDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
     couponExecutionDateInSeconds = dateToUnixTimestamp(`2030-05-01T00:10:00Z`);
@@ -194,43 +206,33 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
 
   describe("Sustainability Performance Target Rate Calculations", () => {
     it("GIVEN a coupon with fixing date before start period WHEN rate is calculated THEN rate is start rate", async () => {
-      const startPeriod = couponFixingDateInSeconds + 1000;
-      const startRate = 3000;
-      const rateDecimals = 3;
+      couponData.fixingDate = (newInterestRate.startPeriod - 1000).toString();
+      couponData.recordDate = (parseInt(couponData.fixingDate) + 1).toString();
+      couponData.executionDate = (parseInt(couponData.recordDate) + 1).toString();
 
-      newInterestRate = {
-        baseRate: 5000,
-        startPeriod: startPeriod,
-        startRate: startRate,
-        rateDecimals: rateDecimals,
-      };
-
-      await sptRateFacet.connect(signer_A).setInterestRate(newInterestRate);
-
-      // Set impact data for both projects with PENALTY mode
-      await sptRateFacet.connect(signer_A).setImpactData(
-        [
-          {
-            baseLine: 1000,
-            baseLineMode: 0, // MINIMUM
-            deltaRate: 100,
-            impactDataMode: 0, // PENALTY
-          },
-          {
-            baseLine: 2000,
-            baseLineMode: 1, // MAXIMUM
-            deltaRate: 200,
-            impactDataMode: 1, // BONUS
-          },
-        ],
-        [project1, project2],
-      );
+      let originalFixingDate = couponData.fixingDate;
 
       await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+      const tasks_count_Before = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) + 1);
 
-      await checkCouponPostValues(startRate, rateDecimals, amount, 1, signer_A.address);
+      await checkMinDates(originalFixingDate);
+
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
+
+      await checkCouponPostValues(newInterestRate.startRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
+
+      await scheduledTasksFacet.connect(signer_A).triggerPendingScheduledCrossOrderedTasks();
+
+      const tasks_count_After = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
+
+      await checkMinDates(originalFixingDate);
+
+      expect(tasks_count_Before).to.equal(2);
+      expect(tasks_count_After).to.equal(0);
+
+      await checkCouponPostValues(newInterestRate.startRate, newInterestRate.rateDecimals, amount, 1, signer_A.address);
     });
 
     describe("PENALTY mode tests", () => {
