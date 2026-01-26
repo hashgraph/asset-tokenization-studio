@@ -138,8 +138,20 @@ export const TEST_TIMESTAMPS = {
   /** Filename-safe format sample timestamp */
   FILENAME_SAMPLE: "2025-11-08T10-00-00",
 
+  /** Alternative ISO sample (5 min later - for lastUpdate) */
+  ISO_SAMPLE_5MIN_LATER: "2025-11-08T10:05:00.000Z",
+
   /** Alternative ISO sample (15 min later) */
   ISO_SAMPLE_LATER: "2025-11-08T10:15:00.000Z",
+
+  /** ISO timestamp with subseconds for formatTimestamp tests */
+  ISO_WITH_MILLIS: "2025-11-08T10:30:45.123Z",
+
+  /** ISO timestamp for year start */
+  YEAR_START: "2025-01-01T00:00:00.000Z",
+
+  /** ISO timestamp for year end */
+  YEAR_END: "2025-12-31T23:59:59.999Z",
 } as const;
 
 // ============================================================================
@@ -167,6 +179,15 @@ export const TEST_TX_HASHES = {
 
   /** Sixth sample tx hash */
   SAMPLE_5: "0xpqr678",
+
+  /** Seventh sample tx hash */
+  SAMPLE_6: "0xabc789",
+
+  /** Eighth sample tx hash */
+  SAMPLE_7: "0xdef123",
+
+  /** Ninth sample tx hash */
+  SAMPLE_8: "0xstu901",
 } as const;
 
 // ============================================================================
@@ -330,4 +351,197 @@ export const TEST_TIME = {
 
   /** Milliseconds in a day */
   MS_PER_DAY: 24 * 60 * 60 * 1000,
+} as const;
+
+// ============================================================================
+// Validation Test Constants
+// ============================================================================
+
+/**
+ * Invalid input values for validation tests.
+ */
+export const TEST_INVALID_INPUTS = {
+  /** Empty string */
+  EMPTY: "",
+
+  /** Whitespace only string */
+  WHITESPACE: "   ",
+
+  /** String with leading whitespace */
+  LEADING_WHITESPACE: " value",
+
+  /** String with trailing whitespace */
+  TRAILING_WHITESPACE: "value ",
+
+  /** Non-hex characters */
+  NON_HEX_CHARS: "gggg",
+
+  /** Invalid format string */
+  INVALID_FORMAT: "invalid",
+} as const;
+
+/**
+ * Valid bytes32 values for validation tests.
+ */
+export const TEST_BYTES32 = {
+  /** All zeros bytes32 */
+  ALL_ZEROS: "0x" + "0".repeat(64),
+
+  /** All f's bytes32 */
+  ALL_FS: "0x" + "f".repeat(64),
+
+  /** Too short bytes32 */
+  TOO_SHORT: "0x1234",
+
+  /** Too long bytes32 */
+  TOO_LONG: "0x" + "0".repeat(65),
+
+  /** Without 0x prefix */
+  NO_PREFIX: "0".repeat(64),
+
+  /** Non-hex characters */
+  NON_HEX: "0x" + "g".repeat(64),
+} as const;
+
+/**
+ * Contract ID values for validation tests.
+ */
+export const TEST_INVALID_CONTRACT_IDS = {
+  /** Missing parts */
+  MISSING_PARTS: "0.0",
+
+  /** Single number */
+  SINGLE_NUMBER: "12345",
+
+  /** Too many parts */
+  TOO_MANY_PARTS: "0.0.0.12345",
+
+  /** Non-numeric parts */
+  NON_NUMERIC: "0.0.abc",
+
+  /** All non-numeric */
+  ALL_NON_NUMERIC: "a.b.c",
+
+  /** Negative number */
+  NEGATIVE: "0.0.-1",
+
+  /** Leading zeros in parts */
+  LEADING_ZEROS: "0.0.01",
+} as const;
+
+/**
+ * Valid test values for validation (non-duplicate values only).
+ * Note: For network names, use TEST_NETWORKS constant.
+ */
+export const TEST_VALID_VALUES = {
+  /** Simple facet name */
+  FACET_NAME: "AccessControlFacet",
+
+  /** Short facet name */
+  FACET_NAME_SHORT: "Facet",
+
+  /** Contract ID with non-zero shard/realm */
+  CONTRACT_ID_FULL: "1.2.12345",
+
+  /** Large contract number */
+  CONTRACT_ID_LARGE: "0.0.999999999",
+
+  /** Mainnet contract ID */
+  CONTRACT_ID_MAINNET: "0.0.1",
+} as const;
+
+/**
+ * Duration values in milliseconds for formatDuration tests.
+ */
+export const TEST_DURATIONS_MS = {
+  /** Zero duration */
+  ZERO: 0,
+
+  /** 5 seconds */
+  FIVE_SECONDS: 5000,
+
+  /** 30 seconds */
+  THIRTY_SECONDS: 30000,
+
+  /** 1 minute exactly */
+  ONE_MINUTE: 60000,
+
+  /** 1 minute 5 seconds */
+  ONE_MINUTE_FIVE_SECONDS: 65000,
+
+  /** 2 minutes 5 seconds */
+  TWO_MINUTES_FIVE_SECONDS: 125000,
+
+  /** 1 hour 1 minute 1 second */
+  ONE_HOUR_ONE_MIN_ONE_SEC: 3661000,
+
+  /** 1 hour 2 minutes 5 seconds */
+  ONE_HOUR_TWO_MIN_FIVE_SEC: 3725000,
+
+  /** 2 hours exactly */
+  TWO_HOURS: 7200000,
+} as const;
+
+/**
+ * Expected formatted duration outputs.
+ */
+export const TEST_DURATION_OUTPUTS = {
+  ZERO: "0s",
+  FIVE_SECONDS: "5s",
+  THIRTY_SECONDS: "30s",
+  ONE_MINUTE: "1m 0s",
+  ONE_MINUTE_FIVE_SECONDS: "1m 5s",
+  TWO_MINUTES_FIVE_SECONDS: "2m 5s",
+  ONE_HOUR_ONE_MIN_ONE_SEC: "1h 1m 1s",
+  ONE_HOUR_TWO_MIN_FIVE_SEC: "1h 2m 5s",
+  TWO_HOURS: "2h 0m 0s",
+} as const;
+
+/**
+ * Expected formatted timestamp outputs.
+ */
+export const TEST_FORMATTED_TIMESTAMPS = {
+  /** Formatted output for ISO_SAMPLE */
+  ISO_SAMPLE: "2025-11-08 10:00:00",
+
+  /** Formatted output for ISO_WITH_MILLIS */
+  WITH_MILLIS: "2025-11-08 10:30:45",
+
+  /** Formatted output for YEAR_START */
+  YEAR_START: "2025-01-01 00:00:00",
+
+  /** Formatted output for YEAR_END */
+  YEAR_END: "2025-12-31 23:59:59",
+} as const;
+
+/**
+ * Numeric values for number validation tests.
+ */
+export const TEST_NUMBERS = {
+  /** Zero */
+  ZERO: 0,
+
+  /** Positive integer */
+  POSITIVE_INT: 1,
+
+  /** Large positive integer */
+  LARGE_POSITIVE_INT: 100,
+
+  /** Negative integer */
+  NEGATIVE_INT: -1,
+
+  /** Positive decimal */
+  POSITIVE_DECIMAL: 0.1,
+
+  /** Larger positive decimal */
+  POSITIVE_DECIMAL_LARGE: 1.5,
+
+  /** Negative decimal */
+  NEGATIVE_DECIMAL: -0.5,
+
+  /** Max safe integer */
+  MAX_SAFE_INT: Number.MAX_SAFE_INTEGER,
+
+  /** Min value (smallest positive) */
+  MIN_VALUE: Number.MIN_VALUE,
 } as const;

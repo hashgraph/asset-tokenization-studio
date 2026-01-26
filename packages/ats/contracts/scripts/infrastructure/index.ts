@@ -167,7 +167,12 @@ export {
   verifyProxyAdminControls,
 } from "./operations/proxyAdminDeployment";
 
-export { deployFacets, type DeployFacetsOptions, type DeployFacetsResult } from "./operations/facetDeployment";
+export {
+  deployFacets,
+  getFacetDeploymentSummary,
+  type DeployFacetsOptions,
+  type DeployFacetsResult,
+} from "./operations/facetDeployment";
 
 export {
   deployResolverProxy,
@@ -197,7 +202,18 @@ export {
 // Utilities
 // ============================================================================
 
-export { isValidAddress, validateAddress, isValidBytes32, validateBytes32 } from "./utils/validation";
+export {
+  isValidAddress,
+  validateAddress,
+  isValidBytes32,
+  validateBytes32,
+  isValidContractId,
+  validateContractId,
+  validateFacetName,
+  validateNetwork,
+  validatePositiveNumber,
+  validateNonNegativeInteger,
+} from "./utils/validation";
 
 export {
   saveDeploymentOutput,
