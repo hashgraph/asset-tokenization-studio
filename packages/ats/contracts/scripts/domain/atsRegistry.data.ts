@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-21T15:11:01.440Z
- * Facets: 193
+ * Generated: 2026-01-22T07:37:26.380Z
+ * Facets: 194
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -295,6 +295,8 @@ import {
   HoldTokenHolderSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KpiLinkedRateFacet__factory,
   KpiLinkedRateFacetTimeTravel__factory,
+  KpisKpiLinkedRateFacet__factory,
+  KpisKpiLinkedRateFacetTimeTravel__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KycFacet__factory,
@@ -8559,15 +8561,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5257b566",
       },
       {
-        name: "getKpiOracle",
-        signature: "function getKpiOracle() view returns (address kpiOracle_)",
-        selector: "0x507ff519",
-      },
-      {
         name: "initialize_KpiLinkedRate",
         signature:
-          "function initialize_KpiLinkedRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData, address kpiOracle)",
-        selector: "0x9a613933",
+          "function initialize_KpiLinkedRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData)",
+        selector: "0x0b7c89d7",
       },
       {
         name: "setImpactData",
@@ -8581,7 +8578,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function setInterestRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _newInterestRate)",
         selector: "0x9a833a5b",
       },
-      { name: "setKpiOracle", signature: "function setKpiOracle(address _kpiOracle)", selector: "0xa6a7e233" },
     ],
     events: [
       {
@@ -8594,21 +8590,65 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "InterestRateUpdated(address,InterestRate)",
         topic0: "0xed3c060bc037e2b9f05c9d552119ccb2cf7499562ac630370d20178beb1583e7",
       },
-      {
-        name: "KpiOracleUpdated",
-        signature: "KpiOracleUpdated(address,address)",
-        topic0: "0xb1508b1e352d7d662c2797f56b267cd7f96db139d0ba747ffa2d007bf8a8e823",
-      },
     ],
     errors: [
       { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-      { name: "KpiOracleCalledFailed", signature: "KpiOracleCalledFailed()", selector: "0x75d7804c" },
       { name: "WrongImpactDataValues", signature: "WrongImpactDataValues(ImpactData)", selector: "0xb90540b6" },
       { name: "WrongInterestRateValues", signature: "WrongInterestRateValues(InterestRate)", selector: "0xf2973d16" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new KpiLinkedRateFacetTimeTravel__factory(signer) : new KpiLinkedRateFacet__factory(signer),
+  },
+
+  KpisKpiLinkedRateFacet: {
+    name: "KpisKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x9a05806c3d9c062dfa7983f282dccc0397cb5d4ebf19b80ad4b5586c1d8c6cc6",
+    },
+    inheritance: ["KpisFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addKpiData",
+        signature: "function addKpiData(uint256 _date, uint256 _value, address _project)",
+        selector: "0x0de2be70",
+      },
+      {
+        name: "getLatestKpiData",
+        signature:
+          "function getLatestKpiData(uint256 _from, uint256 _to, address _project) view returns (uint256 value_, bool exists_)",
+        selector: "0xfc7f5cb3",
+      },
+      {
+        name: "getMinDate",
+        signature: "function getMinDate() view returns (uint256 minDate_)",
+        selector: "0x48de6fa7",
+      },
+      {
+        name: "isCheckPointDate",
+        signature: "function isCheckPointDate(uint256 _date, address _project) view returns (bool exists_)",
+        selector: "0x8078ccd5",
+      },
+    ],
+    events: [
+      {
+        name: "KpiDataAdded",
+        signature: "KpiDataAdded(address,uint256,uint256)",
+        topic0: "0xb14d0e5a6665e6c690dc5c7ffc777323768a449038bc6bfed9986ecd52547303",
+      },
+    ],
+    errors: [
+      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "InvalidDate", signature: "InvalidDate(uint256,uint256,uint256)", selector: "0x1addb674" },
+      { name: "InvalidDateRange", signature: "InvalidDateRange(uint256,uint256)", selector: "0x8914d40b" },
+      { name: "KpiDataAlreadyExists", signature: "KpiDataAlreadyExists(uint256)", selector: "0x74efd82c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new KpisKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new KpisKpiLinkedRateFacet__factory(signer),
   },
 
   KpisSustainabilityPerformanceTargetRateFacet: {
@@ -11665,7 +11705,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 193 as const;
+export const TOTAL_FACETS = 194 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -11921,8 +11961,8 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "deployBondKpiLinkedRate",
         signature:
-          "function deployBondKpiLinkedRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData, address kpiOracle) _bondKpiLinkedRateData) returns (address bondAddress_)",
-        selector: "0x16a2b067",
+          "function deployBondKpiLinkedRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData) _bondKpiLinkedRateData) returns (address bondAddress_)",
+        selector: "0x06e6effc",
       },
       {
         name: "deployBondSustainabilityPerformanceTargetRate",
@@ -11979,14 +12019,17 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   BondStorageWrapperKpiLinkedInterestRate: {
     name: "BondStorageWrapperKpiLinkedInterestRate",
-    inheritance: ["InternalsKpiLinkedInterestRate", "BondStorageWrapperFixingDateInterestRate"],
+    inheritance: ["InternalsKpiLinkedInterestRate", "ProceedRecipientsStorageWrapperKpiInterestRate"],
     methods: [],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
   },
 
   BondStorageWrapperSustainabilityPerformanceTargetInterestRate: {
     name: "BondStorageWrapperSustainabilityPerformanceTargetInterestRate",
-    inheritance: ["ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate"],
+    inheritance: [
+      "InternalsSustainabilityPerformanceTargetInterestRate",
+      "ProceedRecipientsStorageWrapperKpiInterestRate",
+    ],
     methods: [],
     errors: [
       {
@@ -12568,7 +12611,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
-    inheritance: ["InternalsSustainabilityPerformanceTargetInterestRate", "BondStorageWrapperFixingDateInterestRate"],
+    inheritance: ["InternalsKpiInterestRate", "BondStorageWrapperFixingDateInterestRate"],
     methods: [],
   },
 
@@ -12596,8 +12639,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
-  ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate: {
-    name: "ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate",
+  ProceedRecipientsStorageWrapperKpiInterestRate: {
+    name: "ProceedRecipientsStorageWrapperKpiInterestRate",
     inheritance: ["KpisStorageWrapper"],
     methods: [],
   },
