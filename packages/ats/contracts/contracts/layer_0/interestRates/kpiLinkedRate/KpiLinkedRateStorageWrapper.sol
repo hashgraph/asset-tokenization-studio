@@ -20,7 +20,6 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         uint256 maxDeviationFloor;
         uint256 adjustmentPrecision;
         uint8 impactDataDecimals;
-        address kpiOracle;
         bool initialized;
     }
 
@@ -67,12 +66,6 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
         kpiLinkedRateDataStorage.adjustmentPrecision = _newImpactData.adjustmentPrecision;
     }
 
-    function _setKpiOracle(address _kpiOracle) internal override {
-        _callTriggerPendingScheduledCrossOrderedTasks();
-
-        _kpiLinkedRateStorage().kpiOracle = _kpiOracle;
-    }
-
     function _getInterestRate() internal view override returns (IKpiLinkedRate.InterestRate memory interestRate_) {
         interestRate_ = IKpiLinkedRate.InterestRate({
             maxRate: _kpiLinkedRateStorage().maxRate,
@@ -94,10 +87,6 @@ abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {
             impactDataDecimals: _kpiLinkedRateStorage().impactDataDecimals,
             adjustmentPrecision: _kpiLinkedRateStorage().adjustmentPrecision
         });
-    }
-
-    function _getKpiOracle() internal view override returns (address kpiOracle_) {
-        kpiOracle_ = _kpiLinkedRateStorage().kpiOracle;
     }
 
     function _kpiLinkedRateStorage()

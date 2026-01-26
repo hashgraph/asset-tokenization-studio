@@ -11,10 +11,12 @@ import { InternalsKpiLinkedInterestRate } from "../Internals.sol";
 import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";
 import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
+import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";
+import { KpisStorageWrapper } from "../../KpisStorageWrapper.sol";
 
 abstract contract BondStorageWrapperKpiLinkedInterestRate is
     InternalsKpiLinkedInterestRate,
-    BondStorageWrapperFixingDateInterestRate
+    ProceedRecipientsStorageWrapperKpiInterestRate
 {
     using LowLevelCall for address;
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -29,7 +31,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
         return super._setCoupon(_newCoupon);
     }
 
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, BondStorageWrapper) {
+    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, KpisStorageWrapper) {
         super._addToCouponsOrderedList(_couponID);
         _setKpiLinkedInterestRate(_couponID);
     }
@@ -64,21 +66,26 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
             return (kpiLinkedRateStorage.startRate, kpiLinkedRateStorage.rateDecimals);
         }
 
-        if (kpiLinkedRateStorage.kpiOracle == address(0)) {
-            return (kpiLinkedRateStorage.baseRate, kpiLinkedRateStorage.rateDecimals);
-        }
+        address[] memory projects = _getProceedRecipients(0, _getProceedRecipientsCount());
+        uint256 impactData = 0;
+        bool reportFound = false;
 
-        (uint256 impactData, bool reportFound) = abi.decode(
-            kpiLinkedRateStorage.kpiOracle.functionStaticCall(
-                abi.encodeWithSelector(
-                    IKpi.getKpiData.selector,
-                    _coupon.fixingDate - kpiLinkedRateStorage.reportPeriod,
-                    _coupon.fixingDate
-                ),
-                IKpiLinkedRate.KpiOracleCalledFailed.selector
-            ),
-            (uint256, bool)
-        );
+        for (uint256 index = 0; index < projects.length; ) {
+            (uint256 value, bool exists) = _getLatestKpiData(
+                _coupon.fixingDate - kpiLinkedRateStorage.reportPeriod,
+                _coupon.fixingDate,
+                projects[index]
+            );
+
+            if (exists) {
+                impactData += value;
+                if (!reportFound) reportFound = true;
+            }
+
+            unchecked {
+                ++index;
+            }
+        }
 
         uint256 rate;
 
@@ -131,9 +138,8 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
 
         IBondRead.Coupon memory previousCoupon = _getCoupon(previousCouponId).coupon;
 
-        if (previousCoupon.rateStatus != IBondRead.RateCalculationStatus.SET) {
-            return _calculateKpiLinkedInterestRate(previousCouponId, previousCoupon);
-        }
+        assert(previousCoupon.rateStatus == IBondRead.RateCalculationStatus.SET);
+
         return (previousCoupon.rate, previousCoupon.rateDecimals);
     }
 }

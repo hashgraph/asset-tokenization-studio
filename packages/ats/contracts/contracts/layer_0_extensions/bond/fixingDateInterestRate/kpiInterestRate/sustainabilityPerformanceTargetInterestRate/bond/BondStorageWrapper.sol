@@ -6,14 +6,16 @@ import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
 // solhint-disable-next-line max-line-length
 import { ISustainabilityPerformanceTargetRate } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate
-} from "../proceedRecipients/ProceedRecipientsStorageWrapper.sol";
+import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
+import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";
+import { InternalsSustainabilityPerformanceTargetInterestRate } from "../Internals.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";
 import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
+import { KpisStorageWrapper } from "../../KpisStorageWrapper.sol";
 
 abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is
-    ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate
+    InternalsSustainabilityPerformanceTargetInterestRate,
+    ProceedRecipientsStorageWrapperKpiInterestRate
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -27,7 +29,7 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
         return super._setCoupon(_newCoupon);
     }
 
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override {
+    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, KpisStorageWrapper) {
         super._addToCouponsOrderedList(_couponID);
         _setSustainabilityPerformanceTargetInterestRate(_couponID);
     }
@@ -73,7 +75,7 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
         uint256 totalRateToAdd = 0;
         uint256 totalRateToSubtract = 0;
 
-        for (uint256 index = 0; index < projects.length; ) {
+        for (uint256 index = 0; index < projects.length; index++) {
             ISustainabilityPerformanceTargetRate.ImpactData memory impactData = _getSPTImpactDataFor(projects[index]);
 
             (uint256 value, bool exists) = _getLatestKpiData(
@@ -113,10 +115,6 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
                         continue;
                     }
                 }
-            }
-
-            unchecked {
-                ++index;
             }
         }
 
