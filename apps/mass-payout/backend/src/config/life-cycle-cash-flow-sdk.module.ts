@@ -67,7 +67,7 @@ function networkInitProvider(): Provider {
             custodialWalletSettings: {
               authorizationToken: config.get<string>(ConfigKeys.DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN)!,
               credentialId: config.get<string>(ConfigKeys.DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID)!,
-              serviceAccountPrivateKey: config.get<string>(ConfigKeys.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH)!,
+              serviceAccountPrivateKey: config.get<string>(ConfigKeys.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_OR_PATH)!,
               urlApplicationOrigin: config.get<string>(ConfigKeys.DFNS_APP_ORIGIN)!,
               applicationId: config.get<string>(ConfigKeys.DFNS_APP_ID)!,
               baseUrl: config.get<string>(ConfigKeys.DFNS_BASE_URL)!,
