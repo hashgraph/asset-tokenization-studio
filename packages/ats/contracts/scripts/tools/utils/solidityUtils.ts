@@ -551,19 +551,11 @@ function cleanNatspecValue(value: string): string {
  * ```
  */
 export function extractFacetResolverKeyImport(source: string): string | undefined {
-  const lines = source.split("\n");
-
-  for (const line of lines) {
-    // Quick check to avoid processing irrelevant lines
-    if (!line.includes("import") || !line.includes("_RESOLVER_KEY")) {
-      continue;
-    }
-
-    // Parse using string operations to avoid ReDoS
-    const keyName = parseResolverKeyImport(line);
-    if (keyName) {
-      return keyName;
-    }
+  // First try: Look for resolver key in import statements
+  // Handle both single-line and multi-line imports
+  const keyName = parseResolverKeyFromImports(source);
+  if (keyName) {
+    return keyName;
   }
 
   // Second try: Check for inline constant definition (e.g., TimeTravelFacet)
@@ -576,35 +568,55 @@ export function extractFacetResolverKeyImport(source: string): string | undefine
 }
 
 /**
- * Parse a resolver key import from a line using string operations.
+ * Parse resolver key from import statements, handling multi-line imports.
  */
-function parseResolverKeyImport(line: string): string | null {
-  // Find "import {"
-  const importIdx = line.indexOf("import");
-  if (importIdx === -1) {
-    return null;
-  }
-
-  const braceStart = line.indexOf("{", importIdx);
-  if (braceStart === -1) {
-    return null;
-  }
-
-  const braceEnd = line.indexOf("}", braceStart);
-  if (braceEnd === -1) {
-    return null;
-  }
-
-  // Extract content between braces
-  const content = line.slice(braceStart + 1, braceEnd);
-
-  // Split by comma and find the resolver key
-  const parts = content.split(",");
-  for (const part of parts) {
-    const trimmed = part.trim();
-    if (trimmed.endsWith("_RESOLVER_KEY")) {
-      return trimmed;
+function parseResolverKeyFromImports(source: string): string | null {
+  // Find all import { ... } blocks and look for resolver keys
+  let i = 0;
+  while (i < source.length) {
+    // Find "import"
+    const importIdx = source.indexOf("import", i);
+    if (importIdx === -1) {
+      break;
     }
+
+    // Find opening brace
+    const braceStart = source.indexOf("{", importIdx);
+    if (braceStart === -1) {
+      i = importIdx + 6;
+      continue;
+    }
+
+    // Make sure the brace is part of this import (not too far away)
+    const nextSemi = source.indexOf(";", importIdx);
+    if (nextSemi !== -1 && braceStart > nextSemi) {
+      i = importIdx + 6;
+      continue;
+    }
+
+    // Find closing brace
+    const braceEnd = source.indexOf("}", braceStart);
+    if (braceEnd === -1) {
+      i = importIdx + 6;
+      continue;
+    }
+
+    // Extract content between braces
+    const content = source.slice(braceStart + 1, braceEnd);
+
+    // Check if this import contains a resolver key
+    if (content.includes("_RESOLVER_KEY")) {
+      // Split by comma and find the resolver key
+      const parts = content.split(",");
+      for (const part of parts) {
+        const trimmed = part.trim();
+        if (trimmed.endsWith("_RESOLVER_KEY")) {
+          return trimmed;
+        }
+      }
+    }
+
+    i = braceEnd + 1;
   }
 
   return null;
