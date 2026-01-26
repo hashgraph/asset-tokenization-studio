@@ -203,26 +203,26 @@
 
 */
 
-export const METAMASK_URL = 'https://metamask.io/download/';
+export const METAMASK_URL = "https://metamask.io/download/";
 
 export enum WalletStatus {
-  connected = 'CONNECTED',
-  connecting = 'CONNECTING',
-  disconnected = 'DISCONNECTED',
-  uninstalled = 'UNINSTALLED',
+  connected = "CONNECTED",
+  connecting = "CONNECTING",
+  disconnected = "DISCONNECTED",
+  uninstalled = "UNINSTALLED",
 }
 
 export enum User {
-  admin = 'admin',
-  holder = 'holder',
-  general = 'general',
+  admin = "admin",
+  holder = "holder",
+  general = "general",
 }
 
-export const LOCALE = 'en-US';
+export const LOCALE = "en-US";
 export const COUPONS_FACTOR = 1000;
 export const NOMINAL_VALUE_DECIMALS = 2;
 
-export const DATE_TIME_FORMAT = 'dd/MM/yyyy HH:mm:ss';
+export const DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
 // * Time periods (in seconds and milliseconds)
 export const TIME_PERIODS_S = {
@@ -247,5 +247,6 @@ export const TIME_PERIODS_MS = {
   YEAR: TIME_PERIODS_S.YEAR * 1000,
 };
 
-export const DEFAULT_PARTITION =
-  '0x0000000000000000000000000000000000000000000000000000000000000001';
+export const DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
+
+export const RATE_MAX_DECIMALS = 3;

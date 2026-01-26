@@ -10,15 +10,9 @@ import {
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);
-    error NotAutocalling();
 
-    modifier onlyValidTimestamp(uint256 _timestamp) {
+    modifier onlyValidTimestamp(uint256 _timestamp) override {
         _checkTimestamp(_timestamp);
-        _;
-    }
-
-    modifier onlyAutoCalling(bool _autoCalling) {
-        _checkAutoCalling(_autoCalling);
         _;
     }
 
@@ -27,7 +21,7 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
         function(uint256, uint256, ScheduledTask memory) internal callBack,
         uint256 _max,
         uint256 _timestamp
-    ) internal returns (uint256) {
+    ) internal override returns (uint256) {
         uint256 scheduledTasksLength = ScheduledTasksLib.getScheduledTaskCount(_scheduledTasks);
 
         if (scheduledTasksLength == 0) {
@@ -63,9 +57,5 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
 
     function _checkTimestamp(uint256 _timestamp) private view {
         if (_timestamp <= _blockTimestamp()) revert WrongTimestamp(_timestamp);
-    }
-
-    function _checkAutoCalling(bool _autoCalling) private pure {
-        if (!_autoCalling) revert NotAutocalling();
     }
 }

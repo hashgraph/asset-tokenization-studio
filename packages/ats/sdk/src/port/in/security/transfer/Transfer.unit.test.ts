@@ -210,7 +210,6 @@ import {
   BatchTransferRequest,
   ForcedTransferRequest,
   ForceTransferRequest,
-  ProtectedTransferAndLockByPartitionRequest,
   ProtectedTransferFromByPartitionRequest,
   TransferAndLockRequest,
   TransferRequest,
@@ -235,11 +234,9 @@ import { TransferCommand } from '@command/security/operations/transfer/TransferC
 import { TransferAndLockCommand } from '@command/security/operations/transfer/TransferAndLockCommand';
 import { ControllerTransferCommand } from '@command/security/operations/transfer/ControllerTransferCommand';
 import {
-  ProtectedTransferAndLockByPartitionRequestFixture,
   ProtectedTransferFromByPartitionRequestFixture,
 } from '@test/fixtures/protectedPartitions/ProtectedPartitionsFixture';
 import { ProtectedTransferFromByPartitionCommand } from '@command/security/operations/transfer/ProtectedTransferFromByPartitionCommand';
-import { ProtectedTransferAndLockByPartitionCommand } from '@command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand';
 import {
   BatchForcedTransferResponse,
   BatchForcedTransferCommand,
@@ -264,7 +261,6 @@ describe('Transfer', () => {
   let forceTransferRequest: ForceTransferRequest;
   let forcedTransferRequest: ForcedTransferRequest;
   let protectedTransferFromByPartitionRequest: ProtectedTransferFromByPartitionRequest;
-  let protectedTransferAndLockByPartitionRequest: ProtectedTransferAndLockByPartitionRequest;
   let batchTransferRequest: BatchTransferRequest;
   let batchForcedTransferRequest: BatchForcedTransferRequest;
 
@@ -806,161 +802,6 @@ describe('Transfer', () => {
       await expect(
         Security.protectedTransferFromByPartition(
           protectedTransferFromByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe('protectedTransferAndLockByPartition', () => {
-    protectedTransferAndLockByPartitionRequest =
-      new ProtectedTransferAndLockByPartitionRequest(
-        ProtectedTransferAndLockByPartitionRequestFixture.create(),
-      );
-
-    const expectedResponse = {
-      payload: 1,
-      transactionId: transactionId,
-    };
-    it('should protected transfer and lock by partition successfully', async () => {
-      commandBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await Security.protectedTransferAndLockByPartition(
-        protectedTransferAndLockByPartitionRequest,
-      );
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ProtectedTransferAndLockByPartitionRequest',
-        protectedTransferAndLockByPartitionRequest,
-      );
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new ProtectedTransferAndLockByPartitionCommand(
-          protectedTransferAndLockByPartitionRequest.securityId,
-          protectedTransferAndLockByPartitionRequest.partitionId,
-          protectedTransferAndLockByPartitionRequest.amount,
-          protectedTransferAndLockByPartitionRequest.sourceId,
-          protectedTransferAndLockByPartitionRequest.targetId,
-          protectedTransferAndLockByPartitionRequest.expirationDate,
-          protectedTransferAndLockByPartitionRequest.deadline,
-          protectedTransferAndLockByPartitionRequest.nounce,
-          protectedTransferAndLockByPartitionRequest.signature,
-        ),
-      );
-      expect(result).toEqual(expectedResponse);
-    });
-
-    it('should throw an error if command execution fails', async () => {
-      const error = new Error('Command execution failed');
-      commandBusMock.execute.mockRejectedValue(error);
-
-      await expect(
-        Security.protectedTransferAndLockByPartition(
-          protectedTransferAndLockByPartitionRequest,
-        ),
-      ).rejects.toThrow('Command execution failed');
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        'ProtectedTransferAndLockByPartitionRequest',
-        protectedTransferAndLockByPartitionRequest,
-      );
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new ProtectedTransferAndLockByPartitionCommand(
-          protectedTransferAndLockByPartitionRequest.securityId,
-          protectedTransferAndLockByPartitionRequest.partitionId,
-          protectedTransferAndLockByPartitionRequest.amount,
-          protectedTransferAndLockByPartitionRequest.sourceId,
-          protectedTransferAndLockByPartitionRequest.targetId,
-          protectedTransferAndLockByPartitionRequest.expirationDate,
-          protectedTransferAndLockByPartitionRequest.deadline,
-          protectedTransferAndLockByPartitionRequest.nounce,
-          protectedTransferAndLockByPartitionRequest.signature,
-        ),
-      );
-    });
-
-    it('should throw error if securityId is invalid', async () => {
-      protectedTransferAndLockByPartitionRequest =
-        new ProtectedTransferAndLockByPartitionRequest({
-          ...ProtectedTransferAndLockByPartitionRequestFixture.create({
-            securityId: 'invalid',
-          }),
-        });
-
-      await expect(
-        Security.protectedTransferAndLockByPartition(
-          protectedTransferAndLockByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
-    });
-    it('should throw error if partitionId is invalid', async () => {
-      protectedTransferAndLockByPartitionRequest =
-        new ProtectedTransferAndLockByPartitionRequest({
-          ...ProtectedTransferAndLockByPartitionRequestFixture.create({
-            partitionId: 'invalid',
-          }),
-        });
-
-      await expect(
-        Security.protectedTransferAndLockByPartition(
-          protectedTransferAndLockByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
-    });
-    it('should throw error if sourceId is invalid', async () => {
-      protectedTransferAndLockByPartitionRequest =
-        new ProtectedTransferAndLockByPartitionRequest({
-          ...ProtectedTransferAndLockByPartitionRequestFixture.create({
-            sourceId: 'invalid',
-          }),
-        });
-
-      await expect(
-        Security.protectedTransferAndLockByPartition(
-          protectedTransferAndLockByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
-    });
-    it('should throw error if targetId is invalid', async () => {
-      protectedTransferAndLockByPartitionRequest =
-        new ProtectedTransferAndLockByPartitionRequest({
-          ...ProtectedTransferAndLockByPartitionRequestFixture.create({
-            targetId: 'invalid',
-          }),
-        });
-
-      await expect(
-        Security.protectedTransferAndLockByPartition(
-          protectedTransferAndLockByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
-    });
-    it('should throw error if amount is invalid', async () => {
-      protectedTransferAndLockByPartitionRequest =
-        new ProtectedTransferAndLockByPartitionRequest({
-          ...ProtectedTransferAndLockByPartitionRequestFixture.create({
-            amount: 'invalid',
-          }),
-        });
-
-      await expect(
-        Security.protectedTransferAndLockByPartition(
-          protectedTransferAndLockByPartitionRequest,
-        ),
-      ).rejects.toThrow(ValidationError);
-    });
-
-    it('should throw error if deadline is invalid', async () => {
-      protectedTransferAndLockByPartitionRequest =
-        new ProtectedTransferAndLockByPartitionRequest({
-          ...ProtectedTransferAndLockByPartitionRequestFixture.create({
-            deadline: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
-          }),
-        });
-
-      await expect(
-        Security.protectedTransferAndLockByPartition(
-          protectedTransferAndLockByPartitionRequest,
         ),
       ).rejects.toThrow(ValidationError);
     });

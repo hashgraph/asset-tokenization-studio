@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type AdjustBalances,
+  type AdjustBalancesFacet,
   type Pause,
   type IERC1410,
   type AccessControl,
@@ -33,7 +33,7 @@ describe("Adjust Balances Tests", () => {
   let signer_C: SignerWithAddress;
 
   let erc1410Facet: IERC1410;
-  let adjustBalancesFacet: AdjustBalances;
+  let adjustBalancesFacet: AdjustBalancesFacet;
   let accessControlFacet: AccessControl;
   let pauseFacet: Pause;
   let equityFacet: Equity;
@@ -73,7 +73,7 @@ describe("Adjust Balances Tests", () => {
 
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
 
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address);
 
     pauseFacet = await ethers.getContractAt("Pause", diamond.address);
 

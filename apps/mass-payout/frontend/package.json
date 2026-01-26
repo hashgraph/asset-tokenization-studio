@@ -1,5 +1,5 @@
 {
-  "name": "@mass-payout/frontend",
+  "name": "@hashgraph/mass-payout-frontend",
   "version": "1.0.0",
   "description": "UI for scheduler payment distribution",
   "private": true,

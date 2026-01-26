@@ -4,33 +4,61 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _DEFAULT_PARTITION } from "../constants/values.sol";
 import { SnapshotsStorageWrapper2 } from "../snapshots/SnapshotsStorageWrapper2.sol";
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
+import { ERC20StorageWrapper1 } from "../ERC1400/ERC20/ERC20StorageWrapper1.sol";
 
 abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
-    modifier onlyEmptyWallet(address _tokenHolder) {
+    modifier onlyEmptyWallet(address _tokenHolder) override {
         if (!_canRecover(_tokenHolder)) revert IERC3643Management.CannotRecoverWallet();
         _;
     }
 
-    function _setName(string calldata _name) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
+    function _setName(string calldata _name) internal override {
+        ERC20StorageWrapper1.ERC20Storage storage erc20Storage_ = _erc20Storage();
         erc20Storage_.name = _name;
+        emit IERC3643Management.UpdatedTokenInformation(
+            erc20Storage_.name,
+            erc20Storage_.symbol,
+            erc20Storage_.decimals,
+            _version(),
+            _erc3643Storage().onchainID
+        );
     }
 
-    function _setSymbol(string calldata _symbol) internal returns (ERC20Storage storage erc20Storage_) {
-        erc20Storage_ = _erc20Storage();
+    function _setSymbol(string calldata _symbol) internal override {
+        ERC20StorageWrapper1.ERC20Storage storage erc20Storage_ = _erc20Storage();
         erc20Storage_.symbol = _symbol;
+        emit IERC3643Management.UpdatedTokenInformation(
+            erc20Storage_.name,
+            erc20Storage_.symbol,
+            erc20Storage_.decimals,
+            _version(),
+            _erc3643Storage().onchainID
+        );
     }
 
-    function _freezeTokens(address _account, uint256 _amount) internal {
+    function _setOnchainID(address _onchainID) internal override {
+        ERC20StorageWrapper1.ERC20Storage storage erc20Storage = _erc20Storage();
+        _erc3643Storage().onchainID = _onchainID;
+
+        emit IERC3643Management.UpdatedTokenInformation(
+            erc20Storage.name,
+            erc20Storage.symbol,
+            erc20Storage.decimals,
+            _version(),
+            _onchainID
+        );
+    }
+
+    function _freezeTokens(address _account, uint256 _amount) internal override {
         _freezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
 
-    function _unfreezeTokens(address _account, uint256 _amount) internal {
+    function _unfreezeTokens(address _account, uint256 _amount) internal override {
         _checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount);
         _unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
 
-    function _freezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal {
+    function _freezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal override {
         _triggerAndSyncAll(_partition, _account, address(0));
 
         _updateTotalFreeze(_partition, _account);
@@ -43,7 +71,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         _reduceBalanceByPartition(_account, _amount, _partition);
     }
 
-    function _unfreezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal {
+    function _unfreezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal override {
         _triggerAndSyncAll(_partition, _account, address(0));
 
         _updateTotalFreeze(_partition, _account);
@@ -55,7 +83,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         _transferFrozenBalance(_partition, _account, _amount);
     }
 
-    function _updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
+    function _updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal override returns (uint256 abaf_) {
         abaf_ = _getAbaf();
         uint256 labaf = _getTotalFrozenLabaf(_tokenHolder);
         uint256 labafByPartition = _getTotalFrozenLabafByPartition(_partition, _tokenHolder);
@@ -73,12 +101,12 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         }
     }
 
-    function _beforeFreeze(bytes32 _partition, address _tokenHolder) internal {
+    function _beforeFreeze(bytes32 _partition, address _tokenHolder) internal override {
         _updateAccountSnapshot(_tokenHolder, _partition);
         _updateAccountFrozenBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function _updateTotalFreezeAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal {
+    function _updateTotalFreezeAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
         if (_factor == 1) return;
 
         _erc3643Storage().frozenTokens[_tokenHolder] *= _factor;
@@ -90,14 +118,14 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         address _tokenHolder,
         uint256 _factor,
         uint256 _abaf
-    ) internal {
+    ) internal override {
         if (_factor == 1) return;
 
         _erc3643Storage().frozenTokensByPartition[_tokenHolder][_partition] *= _factor;
         _setTotalFreezeLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
-    function _transferFrozenBalance(bytes32 _partition, address _to, uint256 _amount) internal {
+    function _transferFrozenBalance(bytes32 _partition, address _to, uint256 _amount) internal override {
         if (_validPartitionForReceiver(_partition, _to)) {
             _increaseBalanceByPartition(_to, _amount, _partition);
             return;
@@ -105,7 +133,11 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         _addPartitionTo(_amount, _to, _partition);
     }
 
-    function _recoveryAddress(address _lostWallet, address _newWallet) internal returns (bool) {
+    function _recoveryAddress(
+        address _lostWallet,
+        address _newWallet,
+        address _investorOnchainID
+    ) internal override returns (bool) {
         uint256 frozenBalance = _getFrozenAmountForAdjusted(_lostWallet);
         if (frozenBalance > 0) {
             _unfreezeTokens(_lostWallet, frozenBalance);
@@ -122,12 +154,12 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         }
         _erc3643Storage().addressRecovered[_lostWallet] = true;
         _erc3643Storage().addressRecovered[_newWallet] = false;
+
+        emit IERC3643Management.RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         return true;
     }
 
-    function _getFrozenAmountForAdjusted(
-        address _tokenHolder
-    ) internal view virtual override returns (uint256 amount_) {
+    function _getFrozenAmountForAdjusted(address _tokenHolder) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalFrozenLabaf(_tokenHolder));
 
         return _getFrozenAmountFor(_tokenHolder) * factor;
@@ -136,7 +168,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     function _getFrozenAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
-    ) internal view returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactorForFrozenAmountByTokenHolderAdjustedAt(_tokenHolder, _timestamp);
 
         return _getFrozenAmountFor(_tokenHolder) * factor;
@@ -167,7 +199,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     function _getFrozenAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view virtual override returns (uint256 amount_) {
+    ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactor(
             _getAbafAdjusted(),
             _getTotalFrozenLabafByPartition(_partition, _tokenHolder)
@@ -175,7 +207,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         return _getFrozenAmountForByPartition(_partition, _tokenHolder) * factor;
     }
 
-    function _canRecover(address _tokenHolder) internal view returns (bool isEmpty_) {
+    function _canRecover(address _tokenHolder) internal view override returns (bool isEmpty_) {
         isEmpty_ =
             _getLockedAmountFor(_tokenHolder) + _getHeldAmountFor(_tokenHolder) + _getClearedAmountFor(_tokenHolder) ==
             0;

@@ -317,6 +317,10 @@ const config: HardhatUserConfig = {
   },
   dodoc: {
     runOnCompile: false,
+    outputDir: "./docs/api",
+    freshOutput: true,
+    include: ["contracts"],
+    exclude: ["contracts/test", "contracts/mocks", "node_modules"],
   },
 };
 

@@ -6,9 +6,9 @@ import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-} from "../constants/values.sol";
+} from "../../layer_0/constants/values.sol";
 import { IEquity } from "../interfaces/equity/IEquity.sol";
-import { Common } from "../../layer_1/common/Common.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 abstract contract Equity is IEquity, Common {
@@ -23,10 +23,10 @@ abstract contract Equity is IEquity, Common {
         onlyRole(_CORPORATE_ACTION_ROLE)
         validateDates(_newDividend.recordDate, _newDividend.executionDate)
         onlyValidTimestamp(_newDividend.recordDate)
-        returns (bool success_, uint256 dividendID_)
+        returns (uint256 dividendID_)
     {
         bytes32 corporateActionID;
-        (success_, corporateActionID, dividendID_) = _setDividends(_newDividend);
+        (corporateActionID, dividendID_) = _setDividends(_newDividend);
         emit DividendSet(
             corporateActionID,
             dividendID_,
@@ -46,10 +46,10 @@ abstract contract Equity is IEquity, Common {
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
         onlyValidTimestamp(_newVoting.recordDate)
-        returns (bool success_, uint256 voteID_)
+        returns (uint256 voteID_)
     {
         bytes32 corporateActionID;
-        (success_, corporateActionID, voteID_) = _setVoting(_newVoting);
+        (corporateActionID, voteID_) = _setVoting(_newVoting);
         emit VotingSet(corporateActionID, voteID_, _msgSender(), _newVoting.recordDate, _newVoting.data);
     }
 
@@ -62,10 +62,10 @@ abstract contract Equity is IEquity, Common {
         onlyRole(_CORPORATE_ACTION_ROLE)
         onlyValidTimestamp(_newBalanceAdjustment.executionDate)
         validateFactor(_newBalanceAdjustment.factor)
-        returns (bool success_, uint256 balanceAdjustmentID_)
+        returns (uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;
-        (success_, corporateActionID, balanceAdjustmentID_) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
+        (corporateActionID, balanceAdjustmentID_) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
         emit ScheduledBalanceAdjustmentSet(
             corporateActionID,
             balanceAdjustmentID_,
@@ -184,7 +184,7 @@ abstract contract Equity is IEquity, Common {
         onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
         returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
     {
-        return _getScheduledBalanceAdjusment(_balanceAdjustmentID);
+        return _getScheduledBalanceAdjustment(_balanceAdjustmentID);
     }
 
     function getScheduledBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {

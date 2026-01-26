@@ -210,7 +210,6 @@ import { ControllerRedeemCommandHandler } from '@command/security/operations/red
 import { ControllerTransferCommandHandler } from '@command/security/operations/transfer/ControllerTransferCommandHandler';
 import { ForcedTransferCommandHandler } from '@command/security/operations/transfer/ForcedTransferCommandHandler';
 import { ProtectedTransferFromByPartitionCommandHandler } from '@command/security/operations/transfer/ProtectedTransferFromByPartitionCommandHandler';
-import { ProtectedTransferAndLockByPartitionCommandHandler } from '@command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommandHandler';
 import { BatchForcedTransferCommandHandler } from '@command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommandHandler';
 import { BatchTransferCommandHandler } from '@command/security/operations/batch/batchTransfer/BatchTransferCommandHandler';
 import { CanTransferByPartitionQueryHandler } from '@query/security/canTransferByPartition/CanTransferByPartitionQueryHandler';
@@ -240,10 +239,6 @@ export const COMMAND_HANDLERS_TRANSFER = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: ProtectedTransferFromByPartitionCommandHandler,
-  },
-  {
-    token: TOKENS.COMMAND_HANDLER,
-    useClass: ProtectedTransferAndLockByPartitionCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,

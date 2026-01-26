@@ -210,7 +210,7 @@
 /* eslint-disable camelcase */
 import { Injectable, Logger } from "@nestjs/common"
 import { ethers } from "ethers"
-import { LifeCycleCashFlow__factory } from "@mass-payout/contracts"
+import { LifeCycleCashFlow__factory } from "@hashgraph/mass-payout-contracts"
 import EvmAddress from "@domain/contract/EvmAddress"
 import NetworkService from "@app/services/network/NetworkService"
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter"

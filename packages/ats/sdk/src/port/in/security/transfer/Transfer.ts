@@ -209,7 +209,6 @@ import {
   BatchTransferRequest,
   ForcedTransferRequest,
   ForceTransferRequest,
-  ProtectedTransferAndLockByPartitionRequest,
   ProtectedTransferFromByPartitionRequest,
   TransferAndLockRequest,
   TransferRequest,
@@ -219,7 +218,6 @@ import { TransferCommand } from '@command/security/operations/transfer/TransferC
 import { TransferAndLockCommand } from '@command/security/operations/transfer/TransferAndLockCommand';
 import { ControllerTransferCommand } from '@command/security/operations/transfer/ControllerTransferCommand';
 import { ForcedTransferCommand } from '@command/security/operations/transfer/ForcedTransferCommand';
-import { ProtectedTransferAndLockByPartitionCommand } from '@command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand';
 import { BatchTransferCommand } from '@command/security/operations/batch/batchTransfer/BatchTransferCommand';
 import { BatchForcedTransferCommand } from '@command/security/operations/batch/batchForcedTransfer/BatchForcedTransferCommand';
 import { ProtectedTransferFromByPartitionCommand } from '@command/security/operations/transfer/ProtectedTransferFromByPartitionCommand';
@@ -244,9 +242,6 @@ export interface ISecurityInPortTransfer {
   batchForcedTransfer(
     request: BatchForcedTransferRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
-  protectedTransferAndLockByPartition(
-    request: ProtectedTransferAndLockByPartitionRequest,
-  ): Promise<{ payload: number; transactionId: string }>;
   protectedTransferFromByPartition(
     request: ProtectedTransferFromByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
@@ -301,41 +296,6 @@ export class SecurityInPortTransfer
 
     return await this.commandBus.execute(
       new ForcedTransferCommand(sourceId, targetId, amount, securityId),
-    );
-  }
-
-  @LogError
-  async protectedTransferAndLockByPartition(
-    request: ProtectedTransferAndLockByPartitionRequest,
-  ): Promise<{ payload: number; transactionId: string }> {
-    const {
-      securityId,
-      partitionId,
-      amount,
-      targetId,
-      sourceId,
-      expirationDate,
-      deadline,
-      nounce,
-      signature,
-    } = request;
-    ValidatedRequest.handleValidation(
-      'ProtectedTransferAndLockByPartitionRequest',
-      request,
-    );
-
-    return await this.commandBus.execute(
-      new ProtectedTransferAndLockByPartitionCommand(
-        securityId,
-        partitionId,
-        amount,
-        sourceId,
-        targetId,
-        expirationDate,
-        deadline,
-        nounce,
-        signature,
-      ),
     );
   }
 

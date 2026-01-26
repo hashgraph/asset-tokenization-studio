@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
-import { type ResolverProxy, type ERC1643, type Pause, AccessControl } from "@contract-types";
+import { type ResolverProxy, type ERC1643Facet, type PauseFacet, AccessControl } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../../common";
 import { deployEquityTokenFixture } from "@test";
@@ -21,9 +21,9 @@ describe("ERC1643 Tests", () => {
   let signer_B: SignerWithAddress;
   let signer_C: SignerWithAddress;
 
-  let erc1643Facet: ERC1643;
+  let erc1643Facet: ERC1643Facet;
   let accessControlFacet: AccessControl;
-  let pauseFacet: Pause;
+  let pauseFacet: PauseFacet;
 
   async function deploySecurityTokenFixture() {
     const base = await deployEquityTokenFixture();
@@ -40,9 +40,9 @@ describe("ERC1643 Tests", () => {
 
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
 
-    erc1643Facet = await ethers.getContractAt("ERC1643", diamond.address);
+    erc1643Facet = await ethers.getContractAt("ERC1643Facet", diamond.address);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
   }
 
   beforeEach(async () => {
@@ -174,5 +174,37 @@ describe("ERC1643 Tests", () => {
     // check documents
     documents = await erc1643Facet.getAllDocuments();
     expect(documents.length).to.equal(0);
+  });
+
+  it("GIVEN an existing document WHEN setDocument is called again with same name THEN document is updated without adding to docNames array", async () => {
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._DOCUMENTER_ROLE, signer_C.address);
+
+    // Add initial document
+    await erc1643Facet.connect(signer_C).setDocument(documentName_1, documentURI_1, documentHASH_1);
+
+    // Verify document was added
+    let documents = await erc1643Facet.getAllDocuments();
+    expect(documents.length).to.equal(1);
+    expect(documents[0]).to.equal(documentName_1);
+
+    // Get initial document details
+    let document = await erc1643Facet.getDocument(documentName_1);
+    expect(document[0]).to.equal(documentURI_1);
+    expect(document[1]).to.equal(documentHASH_1);
+
+    // Update the same document with new URI and HASH
+    await expect(erc1643Facet.connect(signer_C).setDocument(documentName_1, documentURI_2, documentHASH_2))
+      .to.emit(erc1643Facet, "DocumentUpdated")
+      .withArgs(documentName_1, documentURI_2, documentHASH_2);
+
+    // Verify document list length is still 1 (not duplicated)
+    documents = await erc1643Facet.getAllDocuments();
+    expect(documents.length).to.equal(1);
+    expect(documents[0]).to.equal(documentName_1);
+
+    // Verify document was updated with new values
+    document = await erc1643Facet.getDocument(documentName_1);
+    expect(document[0]).to.equal(documentURI_2);
+    expect(document[1]).to.equal(documentHASH_2);
   });
 });

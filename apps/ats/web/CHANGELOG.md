@@ -1,5 +1,32 @@
 # @hashgraph/asset-tokenization-dapp
 
+## 4.0.1
+
+### Patch Changes
+
+- @hashgraph/asset-tokenization-sdk@4.0.1
+
+## 4.0.0
+
+### Major Changes
+
+- 6950d41: Code refactor plus Coupon fixing, start and end date added. Four type of bonds exist : standard, fixed rate, kpi linked rate and sustainability performance target rate
+
+### Minor Changes
+
+- 902fea1: Added Docusaurus and project documentation, renamed the MP package organization, and added a Claude documentation command.
+
+### Patch Changes
+
+- Updated dependencies [3ba32c9]
+- Updated dependencies [902fea1]
+- Updated dependencies [650874b]
+- Updated dependencies [6950d41]
+- Updated dependencies [8f7487a]
+- Updated dependencies [c10a8ee]
+- Updated dependencies [cbcc1db]
+  - @hashgraph/asset-tokenization-sdk@4.0.0
+
 ## 3.1.0
 
 ### Patch Changes

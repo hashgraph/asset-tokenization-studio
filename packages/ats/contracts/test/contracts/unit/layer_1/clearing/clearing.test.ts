@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -9,17 +9,22 @@ import {
   type ClearingActionsFacet,
   ClearingActionsFacet__factory,
   type IHold,
-  ControlList,
+  ControlListFacet,
   Pause,
-  ERC20,
+  ERC20Facet,
   type IERC1410,
+  type IERC3643,
   TimeTravelFacet,
+  NoncesFacet,
   Kyc,
   SsiManagement,
   AccessControl,
   AdjustBalances,
   Equity,
   Snapshots,
+  ERC3643Management,
+  ProtectedPartitions,
+  DiamondCutFacet,
 } from "@contract-types";
 import { ADDRESS_ZERO, ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -100,6 +105,51 @@ describe("Clearing Tests", () => {
   let signer_D: SignerWithAddress;
   let signer_E: SignerWithAddress;
 
+  function set_initRbacs() {
+    return [
+      {
+        role: ATS_ROLES._ISSUER_ROLE,
+        members: [signer_B.address],
+      },
+      {
+        role: ATS_ROLES._PAUSER_ROLE,
+        members: [signer_D.address],
+      },
+      {
+        role: ATS_ROLES._KYC_ROLE,
+        members: [signer_B.address],
+      },
+      {
+        role: ATS_ROLES._SSI_MANAGER_ROLE,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES._CLEARING_ROLE,
+        members: [signer_A.address],
+      },
+      {
+        role: ATS_ROLES._CORPORATE_ACTION_ROLE,
+        members: [signer_B.address],
+      },
+      {
+        role: ATS_ROLES._CONTROL_LIST_ROLE,
+        members: [signer_E.address],
+      },
+      {
+        role: ATS_ROLES._CONTROLLER_ROLE,
+        members: [signer_C.address],
+      },
+      {
+        role: ATS_ROLES._PROTECTED_PARTITIONS_ROLE,
+        members: [signer_B.address],
+      },
+      {
+        role: ATS_ROLES._AGENT_ROLE,
+        members: [signer_A.address],
+      },
+    ];
+  }
+
   let clearingFacet: Contract;
   let clearingActionsFacet: ClearingActionsFacet;
   let holdFacet: IHold;
@@ -108,12 +158,17 @@ describe("Clearing Tests", () => {
   let equityFacet: Equity;
   let pauseFacet: Pause;
   let erc1410Facet: IERC1410;
-  let controlListFacet: ControlList;
-  let erc20Facet: ERC20;
+  let controlListFacet: ControlListFacet;
+  let erc20Facet: ERC20Facet;
   let timeTravelFacet: TimeTravelFacet;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
   let snapshotFacet: Snapshots;
+  let erc3643ManagementFacet: ERC3643Management;
+  let erc3643Facet: IERC3643;
+  let protectedPartitionsFacet: ProtectedPartitions;
+  let noncesFacet: NoncesFacet;
+  let diamondCutFacet: DiamondCutFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -155,12 +210,17 @@ describe("Clearing Tests", () => {
     adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_D);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-    controlListFacet = await ethers.getContractAt("ControlList", diamond.address, signer_E);
-    erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_A);
+    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_E);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
     snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
+    erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address, signer_A);
+    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address, signer_A);
+    protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address, signer_A);
+    noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.address, signer_A);
+    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", diamond.address, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -562,6 +622,40 @@ describe("Clearing Tests", () => {
       });
     });
 
+    describe("corporate actions integration", () => {
+      it("GIVEN pending clearing WHEN record date is reached THEN dividends use total balance including cleared amounts", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+
+        const currentTime = await timeTravelFacet.blockTimestamp();
+        const recordDate = currentTime.add(100);
+        const executionDate = recordDate.add(100);
+
+        clearingOperation.expirationTimestamp = executionDate.add(ONE_YEAR_IN_SECONDS).toNumber();
+
+        await clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, 10, signer_B.address);
+
+        const dividendInput = {
+          recordDate,
+          executionDate,
+          amount: 100,
+          amountDecimals: 0,
+        };
+
+        const dividendId = await equityFacet.connect(signer_A).callStatic.setDividends(dividendInput);
+        await equityFacet.connect(signer_A).setDividends(dividendInput);
+
+        await timeTravelFacet.changeSystemTimestamp(recordDate.add(1));
+
+        const dividendFor = await equityFacet.getDividendsFor(dividendId, signer_A.address);
+
+        const currentBalance = await erc1410Facet.balanceOf(signer_A.address);
+        const clearedAmount = await clearingFacet.getClearedAmountFor(signer_A.address);
+
+        expect(dividendFor.recordDateReached).to.equal(true);
+        expect(dividendFor.tokenBalance).to.equal(currentBalance.add(clearedAmount));
+      });
+    });
+
     describe("Not in clearing mode", () => {
       it("GIVEN a token not in clearing mode WHEN create clearing THEN transaction fails with ClearingIsDisabled", async () => {
         await clearingActionsFacet.deactivateClearing();
@@ -712,6 +806,204 @@ describe("Clearing Tests", () => {
         await expect(
           clearingActionsFacet.reclaimClearingOperationByPartition(clearingIdentifier),
         ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      });
+    });
+
+    describe("Clearing with zero and minimal amounts", () => {
+      it("GIVEN a Token WHEN creating clearing with amount 1 THEN transaction succeeds", async () => {
+        await expect(clearingFacet.clearingTransferByPartition(clearingOperation, 1, signer_B.address)).to.emit(
+          clearingFacet,
+          "ClearedTransferByPartition",
+        );
+
+        const clearing = await clearingFacet.getClearingTransferForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+        expect(clearing.amount).to.equal(1);
+      });
+
+      it("GIVEN a Token WHEN creating clearing redeem with amount 1 THEN transaction succeeds", async () => {
+        await expect(clearingFacet.clearingRedeemByPartition(clearingOperation, 1)).to.emit(
+          clearingFacet,
+          "ClearedRedeemByPartition",
+        );
+
+        clearingIdentifier.clearingId = 1;
+        clearingIdentifier.clearingOperationType = ClearingOperationType.Redeem;
+        const clearing = await clearingFacet.getClearingRedeemForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+        expect(clearing.amount).to.equal(1);
+      });
+
+      it("GIVEN a Token WHEN creating clearing hold with amount 1 THEN transaction succeeds", async () => {
+        const minimalHold = {
+          ...hold,
+          amount: 1,
+        };
+        await expect(clearingFacet.clearingCreateHoldByPartition(clearingOperation, minimalHold)).to.emit(
+          clearingFacet,
+          "ClearedHoldByPartition",
+        );
+
+        const clearing = await clearingFacet.getClearingCreateHoldForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          1,
+        );
+        expect(clearing.amount).to.equal(1);
+      });
+    });
+
+    describe("Clearing read operations edge cases", () => {
+      it("GIVEN no clearings WHEN getting cleared amounts THEN returns zero", async () => {
+        const clearedAmount = await clearingFacet.getClearedAmountFor(signer_D.address);
+        const clearedAmountByPartition = await clearingFacet.getClearedAmountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_D.address,
+        );
+
+        expect(clearedAmount).to.equal(0);
+        expect(clearedAmountByPartition).to.equal(0);
+      });
+
+      it("GIVEN no clearings WHEN getting clearing counts THEN returns zero", async () => {
+        const transferCount = await clearingFacet.getClearingCountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_D.address,
+          ClearingOperationType.Transfer,
+        );
+        const redeemCount = await clearingFacet.getClearingCountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_D.address,
+          ClearingOperationType.Redeem,
+        );
+        const holdCreationCount = await clearingFacet.getClearingCountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_D.address,
+          ClearingOperationType.HoldCreation,
+        );
+
+        expect(transferCount).to.equal(0);
+        expect(redeemCount).to.equal(0);
+        expect(holdCreationCount).to.equal(0);
+      });
+
+      it("GIVEN no clearings WHEN getting clearing IDs THEN returns empty array", async () => {
+        const clearingIds = await clearingFacet.getClearingsIdForByPartition(
+          _DEFAULT_PARTITION,
+          signer_D.address,
+          ClearingOperationType.Transfer,
+          0,
+          100,
+        );
+
+        expect(clearingIds.length).to.equal(0);
+      });
+    });
+
+    describe("operator clearing operations", () => {
+      it("GIVEN an authorized operator WHEN creating clearing transfers with different data THEN all succeed", async () => {
+        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+
+        const data1 = "0x1111";
+        const data2 = "0x2222";
+        const data3 = "0x3333";
+
+        const clearingOp1 = { ...clearingOperation, data: data1 };
+        const clearingOp2 = { ...clearingOperation, data: data2 };
+        const clearingOp3 = { ...clearingOperation, data: data3 };
+
+        await clearingFacet
+          .connect(signer_B)
+          .operatorClearingTransferByPartition(
+            { ...clearingOperationFrom, clearingOperation: clearingOp1 },
+            _AMOUNT / 10,
+            signer_C.address,
+          );
+        await clearingFacet
+          .connect(signer_B)
+          .operatorClearingTransferByPartition(
+            { ...clearingOperationFrom, clearingOperation: clearingOp2 },
+            _AMOUNT / 10,
+            signer_C.address,
+          );
+        await clearingFacet
+          .connect(signer_B)
+          .operatorClearingTransferByPartition(
+            { ...clearingOperationFrom, clearingOperation: clearingOp3 },
+            _AMOUNT / 10,
+            signer_C.address,
+          );
+
+        const clearing1 = await clearingFacet.getClearingTransferForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          1,
+        );
+        const clearing2 = await clearingFacet.getClearingTransferForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          2,
+        );
+        const clearing3 = await clearingFacet.getClearingTransferForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          3,
+        );
+
+        expect(clearing1.data).to.equal(data1);
+        expect(clearing2.data).to.equal(data2);
+        expect(clearing3.data).to.equal(data3);
+      });
+
+      it("GIVEN an authorized operator WHEN creating clearing redeems with different operatorData THEN all succeed", async () => {
+        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+
+        const opData1 = "0xaaaa";
+        const opData2 = "0xbbbb";
+
+        await clearingFacet
+          .connect(signer_B)
+          .operatorClearingRedeemByPartition({ ...clearingOperationFrom, operatorData: opData1 }, _AMOUNT / 10);
+        await clearingFacet
+          .connect(signer_B)
+          .operatorClearingRedeemByPartition({ ...clearingOperationFrom, operatorData: opData2 }, _AMOUNT / 10);
+
+        const clearing1 = await clearingFacet.getClearingRedeemForByPartition(_DEFAULT_PARTITION, signer_A.address, 1);
+        const clearing2 = await clearingFacet.getClearingRedeemForByPartition(_DEFAULT_PARTITION, signer_A.address, 2);
+
+        expect(clearing1.operatorData).to.equal(opData1);
+        expect(clearing2.operatorData).to.equal(opData2);
+      });
+
+      it("GIVEN an authorized operator WHEN creating clearing holds THEN holds are created correctly", async () => {
+        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+
+        const hold1 = {
+          ...hold,
+          amount: _AMOUNT / 10,
+          to: signer_C.address,
+        };
+
+        const hold2 = {
+          ...hold,
+          amount: _AMOUNT / 10,
+          to: signer_D.address,
+        };
+
+        await clearingFacet.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold1);
+        await clearingFacet.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold2);
+
+        const clearing1 = await clearingFacet.getClearingCreateHoldForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          1,
+        );
+        const clearing2 = await clearingFacet.getClearingCreateHoldForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          2,
+        );
+
+        expect(clearing1.holdTo).to.equal(signer_C.address);
+        expect(clearing2.holdTo).to.equal(signer_D.address);
       });
     });
 
@@ -1504,6 +1796,45 @@ describe("Clearing Tests", () => {
           clearingActionsFacet.reclaimClearingOperationByPartition(clearingIdentifier),
         ).to.be.revertedWithCustomError(clearingActionsFacet, "ExpirationDateNotReached");
       });
+
+      it("GIVEN a clearing transfer WHEN approveClearingOperationByPartition with wrong partition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
+        await clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_C.address);
+
+        const wrongClearingIdentifier = {
+          ...clearingIdentifier,
+          partition: _WRONG_PARTITION,
+        };
+
+        await expect(
+          clearingActionsFacet.approveClearingOperationByPartition(wrongClearingIdentifier),
+        ).to.be.revertedWithCustomError(clearingActionsFacet, "PartitionNotAllowedInSinglePartitionMode");
+      });
+
+      it("GIVEN a clearing transfer WHEN cancelClearingOperationByPartition with wrong clearingId THEN transaction fails with WrongClearingId", async () => {
+        await clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_C.address);
+
+        const wrongClearingIdentifier = {
+          ...clearingIdentifier,
+          clearingId: 999,
+        };
+
+        await expect(
+          clearingActionsFacet.cancelClearingOperationByPartition(wrongClearingIdentifier),
+        ).to.be.revertedWithCustomError(clearingActionsFacet, "WrongClearingId");
+      });
+
+      it("GIVEN a clearing transfer WHEN reclaimClearingOperationByPartition with unidentified account THEN transaction fails", async () => {
+        await clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_C.address);
+
+        // Revoke identity for signer_A
+        await kycFacet.connect(signer_B).revokeKyc(signer_A.address);
+
+        // Wait until expiration date
+        await timeTravelFacet.changeSystemTimestamp(clearingOperation.expirationTimestamp + 1);
+
+        await expect(clearingActionsFacet.connect(signer_A).reclaimClearingOperationByPartition(clearingIdentifier)).to
+          .be.reverted;
+      });
     });
 
     describe("Create clearing success", () => {
@@ -1826,6 +2157,241 @@ describe("Clearing Tests", () => {
           0,
           0,
           3,
+        );
+      });
+    });
+
+    describe("Edge cases and Additional Scenarios", () => {
+      it("GIVEN multiple clearings WHEN getClearingsIdForByPartition with pagination THEN returns correct results", async () => {
+        // Create multiple clearings
+        for (let i = 0; i < 5; i++) {
+          await clearingFacet.clearingTransferByPartition(clearingOperation, _AMOUNT / 10, signer_B.address);
+        }
+
+        // Test pagination
+        const clearingIds_page1 = await clearingFacet.getClearingsIdForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.Transfer,
+          0,
+          3,
+        );
+        const clearingIds_page2 = await clearingFacet.getClearingsIdForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.Transfer,
+          1,
+          3,
+        );
+
+        expect(clearingIds_page1.length).to.equal(3);
+        expect(clearingIds_page2.length).to.equal(2);
+        expect(clearingIds_page1[0]).to.equal(1);
+        expect(clearingIds_page1[1]).to.equal(2);
+        expect(clearingIds_page1[2]).to.equal(3);
+        expect(clearingIds_page2[0]).to.equal(4);
+        expect(clearingIds_page2[1]).to.equal(5);
+      });
+
+      it("GIVEN a clearing transfer WHEN checking cleared amounts across different accounts THEN values are correct", async () => {
+        const amount_A = _AMOUNT;
+        const amount_B = _AMOUNT * 2;
+
+        await clearingFacet
+          .connect(signer_A)
+          .clearingTransferByPartition(clearingOperation, amount_A, signer_C.address);
+        await clearingFacet
+          .connect(signer_B)
+          .clearingTransferByPartition(clearingOperation, amount_B, signer_C.address);
+
+        const clearedAmount_A = await clearingFacet.getClearedAmountFor(signer_A.address);
+        const clearedAmount_B = await clearingFacet.getClearedAmountFor(signer_B.address);
+        const clearedAmountByPartition_A = await clearingFacet.getClearedAmountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+        );
+        const clearedAmountByPartition_B = await clearingFacet.getClearedAmountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_B.address,
+        );
+
+        expect(clearedAmount_A).to.equal(amount_A);
+        expect(clearedAmount_B).to.equal(amount_B);
+        expect(clearedAmountByPartition_A).to.equal(amount_A);
+        expect(clearedAmountByPartition_B).to.equal(amount_B);
+      });
+
+      it("GIVEN a Token WHEN creating clearing with same parameters multiple times THEN all clearings are created independently", async () => {
+        const countBefore = await clearingFacet.getClearingCountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.Transfer,
+        );
+
+        await clearingFacet.clearingTransferByPartition(clearingOperation, _AMOUNT / 2, signer_B.address);
+        await clearingFacet.clearingTransferByPartition(clearingOperation, _AMOUNT / 2, signer_B.address);
+        await clearingFacet.clearingTransferByPartition(clearingOperation, _AMOUNT / 2, signer_B.address);
+
+        const countAfter = await clearingFacet.getClearingCountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.Transfer,
+        );
+
+        expect(countAfter).to.equal(countBefore.add(3));
+
+        // Verify each clearing is independent
+        const clearing1 = await clearingFacet.getClearingTransferForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          countBefore.add(1).toNumber(),
+        );
+        const clearing2 = await clearingFacet.getClearingTransferForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          countBefore.add(2).toNumber(),
+        );
+        const clearing3 = await clearingFacet.getClearingTransferForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          countBefore.add(3).toNumber(),
+        );
+
+        expect(clearing1.amount).to.equal(_AMOUNT / 2);
+        expect(clearing2.amount).to.equal(_AMOUNT / 2);
+        expect(clearing3.amount).to.equal(_AMOUNT / 2);
+      });
+
+      it("GIVEN mixed clearing operations WHEN checking counts per type THEN counts are accurate", async () => {
+        await clearingFacet.clearingTransferByPartition(clearingOperation, _AMOUNT / 5, signer_B.address);
+        await clearingFacet.clearingTransferByPartition(clearingOperation, _AMOUNT / 5, signer_B.address);
+        await clearingFacet.clearingRedeemByPartition(clearingOperation, _AMOUNT / 5);
+        await clearingFacet.clearingRedeemByPartition(clearingOperation, _AMOUNT / 5);
+        await clearingFacet.clearingRedeemByPartition(clearingOperation, _AMOUNT / 5);
+        await clearingFacet.clearingCreateHoldByPartition(clearingOperation, {
+          ...hold,
+          amount: _AMOUNT / 5,
+        });
+
+        const transferCount = await clearingFacet.getClearingCountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.Transfer,
+        );
+        const redeemCount = await clearingFacet.getClearingCountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.Redeem,
+        );
+        const holdCreationCount = await clearingFacet.getClearingCountForByPartition(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.HoldCreation,
+        );
+
+        expect(transferCount).to.equal(2);
+        expect(redeemCount).to.equal(3);
+        expect(holdCreationCount).to.equal(1);
+      });
+
+      it("GIVEN a clearing WHEN checking third party type THEN correct type is returned", async () => {
+        // NULL type (direct)
+        await clearingFacet.clearingTransferByPartition(clearingOperation, _AMOUNT / 4, signer_B.address);
+
+        // AUTHORIZED type (from)
+        await erc20Facet.connect(signer_A).increaseAllowance(signer_C.address, _AMOUNT / 4);
+        await clearingFacet
+          .connect(signer_C)
+          .clearingTransferFromByPartition(clearingOperationFrom, _AMOUNT / 4, signer_B.address);
+
+        // OPERATOR type
+        await erc1410Facet.connect(signer_A).authorizeOperator(signer_C.address);
+        await clearingFacet
+          .connect(signer_C)
+          .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT / 4, signer_B.address);
+
+        const thirdParty1 = await clearingFacet.getClearingThirdParty(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.Transfer,
+          1,
+        );
+        const thirdParty2 = await clearingFacet.getClearingThirdParty(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.Transfer,
+          2,
+        );
+        const thirdParty3 = await clearingFacet.getClearingThirdParty(
+          _DEFAULT_PARTITION,
+          signer_A.address,
+          ClearingOperationType.Transfer,
+          3,
+        );
+
+        expect(thirdParty1).to.equal(ADDRESS_ZERO); // NULL type
+        expect(thirdParty2).to.equal(signer_C.address); // AUTHORIZED
+        expect(thirdParty3).to.equal(ADDRESS_ZERO); // OPERATOR (stored differently)
+      });
+
+      it("GIVEN a Token WHEN activating and deactivating clearing multiple times THEN status is tracked correctly", async () => {
+        expect(await clearingActionsFacet.isClearingActivated()).to.equal(true);
+
+        await clearingActionsFacet.deactivateClearing();
+        expect(await clearingActionsFacet.isClearingActivated()).to.equal(false);
+
+        await clearingActionsFacet.activateClearing();
+        expect(await clearingActionsFacet.isClearingActivated()).to.equal(true);
+
+        await clearingActionsFacet.deactivateClearing();
+        expect(await clearingActionsFacet.isClearingActivated()).to.equal(false);
+
+        await clearingActionsFacet.activateClearing();
+        expect(await clearingActionsFacet.isClearingActivated()).to.equal(true);
+      });
+
+      // it("GIVEN a clearing WHEN expiration timestamp is at current time THEN transaction succeeds", async () => {
+      //   const currentTime = (await ethers.provider.getBlock("latest")).timestamp;
+      //   const clearingOpCurrentTime = {
+      //     ...clearingOperation,
+      //     expirationTimestamp: currentTime + 1, // Add 1 second to ensure it's in the future
+      //   };
+
+      //   // Should succeed with future timestamp
+      //   await expect(clearingFacet.clearingTransferByPartition(clearingOpCurrentTime, _AMOUNT / 10, signer_B.address))
+      //     .to.not.be.reverted;
+      // });
+
+      it("GIVEN expired clearing operations WHEN reclaimClearingOperationByPartition for different types THEN all succeed", async () => {
+        // Create clearings of all types
+        await clearingFacet.clearingTransferByPartition(clearingOperation, _AMOUNT / 4, signer_B.address);
+        await clearingFacet.clearingRedeemByPartition(clearingOperation, _AMOUNT / 4);
+        await clearingFacet.clearingCreateHoldByPartition(clearingOperation, {
+          ...hold,
+          amount: _AMOUNT / 4,
+        });
+
+        // Wait for expiration
+        await timeTravelFacet.changeSystemTimestamp(clearingOperation.expirationTimestamp + 1);
+
+        // Reclaim all
+        clearingIdentifier.clearingId = 1;
+        clearingIdentifier.clearingOperationType = ClearingOperationType.Transfer;
+        await expect(clearingActionsFacet.reclaimClearingOperationByPartition(clearingIdentifier)).to.emit(
+          clearingActionsFacet,
+          "ClearingOperationReclaimed",
+        );
+
+        clearingIdentifier.clearingOperationType = ClearingOperationType.Redeem;
+        await expect(clearingActionsFacet.reclaimClearingOperationByPartition(clearingIdentifier)).to.emit(
+          clearingActionsFacet,
+          "ClearingOperationReclaimed",
+        );
+
+        clearingIdentifier.clearingOperationType = ClearingOperationType.HoldCreation;
+        await expect(clearingActionsFacet.reclaimClearingOperationByPartition(clearingIdentifier)).to.emit(
+          clearingActionsFacet,
+          "ClearingOperationReclaimed",
         );
       });
     });
@@ -2557,6 +3123,873 @@ describe("Clearing Tests", () => {
     });
   });
 
+  describe("Common Modifiers", () => {
+    beforeEach(async () => {
+      await loadFixture(deploySecurityFixtureSinglePartition);
+    });
+
+    describe("onlyClearingDisabled modifier", () => {
+      it("GIVEN clearing is activated WHEN attempting executeHold THEN transaction succeeds (executeHold does not have onlyClearingDisabled modifier)", async () => {
+        // First create a hold when clearing is not yet activated
+        await clearingActionsFacet.deactivateClearing();
+
+        // Issue tokens to signer_A so they can create a hold
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: 1000,
+          data: _DATA,
+        });
+
+        const holdAmount = 100;
+        const holdExpirationTimestamp = expirationTimestamp;
+        const holdEscrow = signer_C.address;
+        const holdTo = signer_B.address;
+        const holdData = _DATA;
+
+        const holdToCreate = {
+          amount: holdAmount,
+          expirationTimestamp: holdExpirationTimestamp,
+          escrow: holdEscrow,
+          to: holdTo,
+          data: holdData,
+        };
+
+        await holdFacet.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, holdToCreate);
+
+        // Now activate clearing
+        await clearingActionsFacet.activateClearing();
+
+        const holdId = 1;
+        const holdIdentifierForTest = {
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          holdId: holdId,
+        };
+
+        // Execute hold - should succeed because executeHoldByPartition doesn't have onlyClearingDisabled modifier
+        await expect(
+          holdFacet.connect(signer_C).executeHoldByPartition(holdIdentifierForTest, signer_B.address, holdAmount),
+        ).to.not.be.reverted;
+      });
+
+      it("GIVEN clearing is activated WHEN attempting releaseHold THEN transaction succeeds (releaseHold does not have onlyClearingDisabled modifier)", async () => {
+        // First create a hold when clearing is not yet activated
+        await clearingActionsFacet.deactivateClearing();
+
+        // Issue tokens to signer_A so they can create a hold
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: 1000,
+          data: _DATA,
+        });
+
+        const holdAmount = 100;
+        const holdExpirationTimestamp = expirationTimestamp;
+        const holdEscrow = signer_C.address;
+        const holdTo = signer_B.address;
+        const holdData = _DATA;
+
+        const holdToCreate = {
+          amount: holdAmount,
+          expirationTimestamp: holdExpirationTimestamp,
+          escrow: holdEscrow,
+          to: holdTo,
+          data: holdData,
+        };
+
+        await holdFacet.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, holdToCreate);
+
+        // Now activate clearing
+        await clearingActionsFacet.activateClearing();
+
+        const holdId = 1;
+        const holdIdentifierForTest = {
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          holdId: holdId,
+        };
+
+        // Release hold - should succeed because releaseHoldByPartition doesn't have onlyClearingDisabled modifier
+        await expect(holdFacet.connect(signer_C).releaseHoldByPartition(holdIdentifierForTest, holdAmount)).to.not.be
+          .reverted;
+      });
+    });
+
+    describe("validateAddress modifier", () => {
+      it("GIVEN zero address as destination WHEN calling clearingTransferByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
+        await expect(
+          clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, ADDRESS_ZERO),
+        ).to.be.revertedWithCustomError(clearingFacet, "ZeroAddressNotAllowed");
+      });
+    });
+
+    describe("onlyUninitialized modifier", () => {
+      it("GIVEN clearing already initialized WHEN calling initializeClearing THEN transaction fails with AlreadyInitialized", async () => {
+        await expect(clearingActionsFacet.initializeClearing(true)).to.be.revertedWithCustomError(
+          clearingActionsFacet,
+          "AlreadyInitialized",
+        );
+      });
+    });
+
+    describe("onlyDefaultPartitionWithSinglePartition modifier", () => {
+      it("GIVEN non-default partition WHEN calling cancelClearingOperationByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
+        const wrongPartitionIdentifier = {
+          ...clearingIdentifier,
+          partition: _WRONG_PARTITION,
+        };
+
+        await expect(
+          clearingActionsFacet.cancelClearingOperationByPartition(wrongPartitionIdentifier),
+        ).to.be.revertedWithCustomError(clearingActionsFacet, "PartitionNotAllowedInSinglePartitionMode");
+      });
+
+      it("GIVEN non-default partition WHEN calling reclaimClearingOperationByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
+        const wrongPartitionIdentifier = {
+          ...clearingIdentifier,
+          partition: _WRONG_PARTITION,
+        };
+
+        await expect(
+          clearingActionsFacet.reclaimClearingOperationByPartition(wrongPartitionIdentifier),
+        ).to.be.revertedWithCustomError(clearingActionsFacet, "PartitionNotAllowedInSinglePartitionMode");
+      });
+    });
+
+    describe("onlyUnrecoveredAddress modifier", () => {
+      describe("clearingCreateHoldByPartition", () => {
+        it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+          // Grant _AGENT_ROLE to call recoveryAddress
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          // First recover signer_A's address
+          await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+          // Try to create clearing hold with recovered address
+          await expect(
+            clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered hold.to address WHEN calling clearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+          // Grant _AGENT_ROLE to call recoveryAddress
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          // Recover the hold.to address (signer_C - the actual hold.to)
+          await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+          // Try to create clearing hold with recovered hold.to
+          await expect(
+            clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+      });
+
+      describe("clearingCreateHoldFromByPartition", () => {
+        it("GIVEN a recovered msgSender WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered hold.to WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          // Recover the hold.to address (signer_C)
+          await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered from address WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+      });
+
+      describe("operatorClearingCreateHoldByPartition", () => {
+        it("GIVEN a recovered msgSender WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered from address WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered hold.to WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+          // Give signer_B some tokens and authorize operator
+          await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+          await erc1410Facet.issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_B.address,
+            value: _AMOUNT,
+            data: _DATA,
+          });
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          // Recover the hold.to address (signer_C - the actual hold.to)
+          await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+      });
+
+      describe("clearingRedeemByPartition", () => {
+        it("GIVEN a recovered msgSender WHEN calling clearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+          await expect(
+            clearingFacet.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+      });
+
+      describe("clearingRedeemFromByPartition", () => {
+        it("GIVEN a recovered msgSender WHEN calling clearingRedeemFromByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).clearingRedeemFromByPartition(clearingOperationFromB, _AMOUNT),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered from address WHEN calling clearingRedeemFromByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).clearingRedeemFromByPartition(clearingOperationFromB, _AMOUNT),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+      });
+
+      describe("operatorClearingRedeemByPartition", () => {
+        it("GIVEN a recovered msgSender WHEN calling operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).operatorClearingRedeemByPartition(clearingOperationFromB, _AMOUNT),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered from address WHEN calling operatorClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).operatorClearingRedeemByPartition(clearingOperationFromB, _AMOUNT),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+      });
+
+      describe("clearingTransferByPartition", () => {
+        it("GIVEN a recovered msgSender WHEN calling clearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+          await expect(
+            clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered to address WHEN calling clearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+
+          await expect(
+            clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+      });
+
+      describe("clearingTransferFromByPartition", () => {
+        it("GIVEN a recovered msgSender WHEN calling clearingTransferFromByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet
+              .connect(signer_A)
+              .clearingTransferFromByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered to address WHEN calling clearingTransferFromByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet
+              .connect(signer_A)
+              .clearingTransferFromByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered from address WHEN calling clearingTransferFromByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet
+              .connect(signer_A)
+              .clearingTransferFromByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+      });
+
+      describe("operatorClearingTransferByPartition", () => {
+        it("GIVEN a recovered msgSender WHEN calling operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet
+              .connect(signer_A)
+              .operatorClearingTransferByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered to address WHEN calling operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet
+              .connect(signer_A)
+              .operatorClearingTransferByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+
+        it("GIVEN a recovered from address WHEN calling operatorClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+          await erc3643ManagementFacet.recoveryAddress(signer_B.address, signer_D.address, ADDRESS_ZERO);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet
+              .connect(signer_A)
+              .operatorClearingTransferByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+        });
+      });
+    });
+
+    describe("onlyUnProtectedPartitionsOrWildCardRole modifier", () => {
+      beforeEach(async () => {
+        // Grant _PROTECTED_PARTITIONS_ROLE to call protectPartitions
+        await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        // Protect partitions
+        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address);
+        await protectedPartitionsFacet.protectPartitions();
+      });
+
+      it("GIVEN protected partitions without wildcard role WHEN calling clearingCreateHoldByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        // Try to create clearing hold without having wildcard role
+        await expect(
+          clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold),
+        ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreProtectedAndNoRole");
+      });
+
+      it("GIVEN protected partitions with wildcard role WHEN calling clearingCreateHoldByPartition THEN transaction succeeds", async () => {
+        // Grant wildcard role to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._WILD_CARD_ROLE, signer_A.address);
+
+        // Should succeed now
+        await expect(clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold)).to.not.be
+          .reverted;
+      });
+
+      it("GIVEN protected partitions without wildcard role WHEN calling clearingCreateHoldFromByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        // Grant allowance for clearing from
+        await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+
+        const clearingOperationFromB = {
+          ...clearingOperationFrom,
+          from: signer_B.address,
+        };
+
+        // Try to create clearing hold from without having wildcard role
+        await expect(
+          clearingFacet.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold),
+        ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreProtectedAndNoRole");
+      });
+
+      it("GIVEN protected partitions without wildcard role WHEN calling operatorClearingCreateHoldByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
+        // Make signer_A an operator
+        await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+
+        const clearingOperationFromB = {
+          ...clearingOperationFrom,
+          from: signer_B.address,
+        };
+
+        // Try to create operator clearing hold without having wildcard role
+        await expect(
+          clearingFacet.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold),
+        ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreProtectedAndNoRole");
+      });
+
+      describe("additional clearing methods", () => {
+        it("GIVEN protected partitions with wildcard role WHEN calling clearingCreateHoldFromByPartition THEN transaction succeeds", async () => {
+          // Give signer_B some tokens
+          await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+          await erc1410Facet.issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_B.address,
+            value: _AMOUNT,
+            data: _DATA,
+          });
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._WILD_CARD_ROLE, signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          // Need to increase allowance for signer_A from signer_B
+          await erc20Facet.connect(signer_B).increaseAllowance(signer_A.address, _AMOUNT);
+
+          await clearingFacet.connect(signer_A).clearingCreateHoldFromByPartition(clearingOperationFromB, hold);
+        });
+
+        it("GIVEN protected partitions with wildcard role WHEN calling operatorClearingCreateHoldByPartition THEN transaction succeeds", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._WILD_CARD_ROLE, signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await clearingFacet.connect(signer_A).operatorClearingCreateHoldByPartition(clearingOperationFromB, hold);
+        });
+
+        it("GIVEN protected partitions without wildcard role WHEN calling clearingRedeemByPartition THEN transaction fails", async () => {
+          await expect(
+            clearingFacet.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT),
+          ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreProtectedAndNoRole");
+        });
+
+        it("GIVEN protected partitions with wildcard role WHEN calling clearingRedeemByPartition THEN transaction succeeds", async () => {
+          await accessControlFacet.grantRole(ATS_ROLES._WILD_CARD_ROLE, signer_A.address);
+
+          await clearingFacet.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
+        });
+
+        it("GIVEN protected partitions without wildcard role WHEN calling clearingRedeemFromByPartition THEN transaction fails", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).clearingRedeemFromByPartition(clearingOperationFromB, _AMOUNT),
+          ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreProtectedAndNoRole");
+        });
+
+        it("GIVEN protected partitions with wildcard role WHEN calling clearingRedeemFromByPartition THEN transaction succeeds", async () => {
+          // Give signer_B some tokens
+          await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+          await erc1410Facet.issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_B.address,
+            value: _AMOUNT,
+            data: _DATA,
+          });
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._WILD_CARD_ROLE, signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          // Need to increase allowance for signer_A from signer_B
+          await erc20Facet.connect(signer_B).increaseAllowance(signer_A.address, _AMOUNT);
+
+          await clearingFacet.connect(signer_A).clearingRedeemFromByPartition(clearingOperationFromB, _AMOUNT);
+        });
+
+        it("GIVEN protected partitions without wildcard role WHEN calling operatorClearingRedeemByPartition THEN transaction fails", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet.connect(signer_A).operatorClearingRedeemByPartition(clearingOperationFromB, _AMOUNT),
+          ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreProtectedAndNoRole");
+        });
+
+        it("GIVEN protected partitions with wildcard role WHEN calling operatorClearingRedeemByPartition THEN transaction succeeds", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._WILD_CARD_ROLE, signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await clearingFacet.connect(signer_A).operatorClearingRedeemByPartition(clearingOperationFromB, _AMOUNT);
+        });
+
+        it("GIVEN protected partitions without wildcard role WHEN calling clearingTransferByPartition THEN transaction fails", async () => {
+          await expect(
+            clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreProtectedAndNoRole");
+        });
+
+        it("GIVEN protected partitions with wildcard role WHEN calling clearingTransferByPartition THEN transaction succeeds", async () => {
+          await accessControlFacet.grantRole(ATS_ROLES._WILD_CARD_ROLE, signer_A.address);
+
+          await clearingFacet
+            .connect(signer_A)
+            .clearingTransferByPartition(clearingOperation, _AMOUNT, signer_B.address);
+        });
+
+        it("GIVEN protected partitions without wildcard role WHEN calling clearingTransferFromByPartition THEN transaction fails", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet
+              .connect(signer_A)
+              .clearingTransferFromByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreProtectedAndNoRole");
+        });
+
+        it("GIVEN protected partitions with wildcard role WHEN calling clearingTransferFromByPartition THEN transaction succeeds", async () => {
+          // Give signer_B some tokens
+          await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+          await erc1410Facet.issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: signer_B.address,
+            value: _AMOUNT,
+            data: _DATA,
+          });
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._WILD_CARD_ROLE, signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          // Need to increase allowance for signer_A from signer_B
+          await erc20Facet.connect(signer_B).increaseAllowance(signer_A.address, _AMOUNT);
+
+          await clearingFacet
+            .connect(signer_A)
+            .clearingTransferFromByPartition(clearingOperationFromB, _AMOUNT, signer_C.address);
+        });
+
+        it("GIVEN protected partitions without wildcard role WHEN calling operatorClearingTransferByPartition THEN transaction fails", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await expect(
+            clearingFacet
+              .connect(signer_A)
+              .operatorClearingTransferByPartition(clearingOperationFromB, _AMOUNT, signer_C.address),
+          ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreProtectedAndNoRole");
+        });
+
+        it("GIVEN protected partitions with wildcard role WHEN calling operatorClearingTransferByPartition THEN transaction succeeds", async () => {
+          await erc1410Facet.connect(signer_B).authorizeOperator(signer_A.address);
+          await accessControlFacet.grantRole(ATS_ROLES._WILD_CARD_ROLE, signer_A.address);
+
+          const clearingOperationFromB = {
+            ...clearingOperationFrom,
+            from: signer_B.address,
+          };
+
+          await clearingFacet
+            .connect(signer_A)
+            .operatorClearingTransferByPartition(clearingOperationFromB, _AMOUNT, signer_C.address);
+        });
+      });
+    });
+
+    describe("onlyProtectedPartitions modifier", () => {
+      it("GIVEN unprotected partitions WHEN calling protectedClearingTransferByPartition THEN transaction fails with PartitionsAreUnProtected", async () => {
+        const protectedClearingOperation = {
+          clearingOperation: clearingOperation,
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: 1,
+        };
+
+        const signature = "0x1234"; // Dummy signature
+
+        await expect(
+          clearingFacet.protectedClearingTransferByPartition(
+            protectedClearingOperation,
+            _AMOUNT,
+            signer_B.address,
+            signature,
+          ),
+        ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreUnProtected");
+      });
+
+      it("GIVEN unprotected partitions WHEN calling protectedClearingRedeemByPartition THEN transaction fails with PartitionsAreUnProtected", async () => {
+        const protectedClearingOperation = {
+          clearingOperation: clearingOperation,
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: 1,
+        };
+
+        const signature = "0x1234"; // Dummy signature
+
+        await expect(
+          clearingFacet.protectedClearingRedeemByPartition(protectedClearingOperation, _AMOUNT, signature),
+        ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreUnProtected");
+      });
+
+      it("GIVEN unprotected partitions WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with PartitionsAreUnProtected", async () => {
+        const protectedClearingOperation = {
+          clearingOperation: clearingOperation,
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: 1,
+        };
+
+        const signature = "0x1234"; // Dummy signature
+
+        await expect(
+          clearingFacet.protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signature),
+        ).to.be.revertedWithCustomError(clearingFacet, "PartitionsAreUnProtected");
+      });
+    });
+
+    describe("onlyUnpaused modifier for protected clearing functions", () => {
+      beforeEach(async () => {
+        await pauseFacet.pause();
+      });
+
+      it("GIVEN a paused Token WHEN calling protectedClearingTransferByPartition THEN transaction fails with TokenIsPaused", async () => {
+        const protectedClearingOperation = {
+          clearingOperation: clearingOperation,
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: 1,
+        };
+
+        const signature = "0x1234"; // Dummy signature
+
+        await expect(
+          clearingFacet.protectedClearingTransferByPartition(
+            protectedClearingOperation,
+            _AMOUNT,
+            signer_B.address,
+            signature,
+          ),
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      });
+
+      it("GIVEN a paused Token WHEN calling protectedClearingRedeemByPartition THEN transaction fails with TokenIsPaused", async () => {
+        const protectedClearingOperation = {
+          clearingOperation: clearingOperation,
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: 1,
+        };
+
+        const signature = "0x1234"; // Dummy signature
+
+        await expect(
+          clearingFacet.protectedClearingRedeemByPartition(protectedClearingOperation, _AMOUNT, signature),
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      });
+
+      it("GIVEN a paused Token WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
+        const protectedClearingOperation = {
+          clearingOperation: clearingOperation,
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: 1,
+        };
+
+        const signature = "0x1234"; // Dummy signature
+
+        await expect(
+          clearingFacet.protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signature),
+        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+      });
+    });
+
+    describe("onlyUnrecoveredAddress modifier for protectedClearingCreateHoldByPartition", () => {
+      it("GIVEN a recovered from address WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+        await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+        await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
+
+        const protectedClearingOperation = {
+          clearingOperation: clearingOperation,
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: 1,
+        };
+
+        const signature = "0x1234"; // Dummy signature
+
+        await expect(
+          clearingFacet.protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signature),
+        ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+      });
+
+      it("GIVEN a recovered hold.to address WHEN calling protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+        await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
+        // Recover the hold.to address (signer_C)
+        await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+        const protectedClearingOperation = {
+          clearingOperation: clearingOperation,
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: 1,
+        };
+
+        const signature = "0x1234"; // Dummy signature
+
+        await expect(
+          clearingFacet.protectedClearingCreateHoldByPartition(protectedClearingOperation, hold, signature),
+        ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+      });
+    });
+  });
+
   describe("Multi Partition", async () => {
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureMultiPartition);
@@ -2744,6 +4177,1375 @@ describe("Clearing Tests", () => {
       await expect(
         clearingActionsFacet.reclaimClearingOperationByPartition(clearingIdentifier_ClearingOperationType),
       ).to.be.revertedWithCustomError(clearingActionsFacet, "WrongClearingId");
+    });
+
+    describe("Protected Clearing Operations", () => {
+      let protectedClearingTransfer: any;
+      let protectedClearingRedeem: any;
+      let protectedClearingHoldCreation: any;
+      let domain: any;
+
+      const clearingTransferType = {
+        ClearingOperation: [
+          { name: "partition", type: "bytes32" },
+          { name: "expirationTimestamp", type: "uint256" },
+          { name: "data", type: "bytes" },
+        ],
+        ProtectedClearingOperation: [
+          { name: "clearingOperation", type: "ClearingOperation" },
+          { name: "from", type: "address" },
+          { name: "deadline", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+        ],
+        protectedClearingTransferByPartition: [
+          { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+          { name: "_to", type: "address" },
+          { name: "_amount", type: "uint256" },
+        ],
+      };
+
+      const clearingRedeemType = {
+        ClearingOperation: [
+          { name: "partition", type: "bytes32" },
+          { name: "expirationTimestamp", type: "uint256" },
+          { name: "data", type: "bytes" },
+        ],
+        ProtectedClearingOperation: [
+          { name: "clearingOperation", type: "ClearingOperation" },
+          { name: "from", type: "address" },
+          { name: "deadline", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+        ],
+        protectedClearingRedeemByPartition: [
+          { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+          { name: "_value", type: "uint256" },
+        ],
+      };
+
+      const clearingHoldType = {
+        ClearingOperation: [
+          { name: "partition", type: "bytes32" },
+          { name: "expirationTimestamp", type: "uint256" },
+          { name: "data", type: "bytes" },
+        ],
+        ProtectedClearingOperation: [
+          { name: "clearingOperation", type: "ClearingOperation" },
+          { name: "from", type: "address" },
+          { name: "deadline", type: "uint256" },
+          { name: "nonce", type: "uint256" },
+        ],
+        Hold: [
+          { name: "amount", type: "uint256" },
+          { name: "expirationTimestamp", type: "uint256" },
+          { name: "escrow", type: "address" },
+          { name: "to", type: "address" },
+          { name: "data", type: "bytes" },
+        ],
+        protectedClearingCreateHoldByPartition: [
+          { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+          { name: "_hold", type: "Hold" },
+        ],
+      };
+
+      async function protectedClearingFixture() {
+        const base = await deployEquityTokenFixture({
+          equityDataParams: {
+            securityData: {
+              arePartitionsProtected: true,
+              clearingActive: true,
+            },
+          },
+        });
+        diamond = base.diamond;
+        signer_A = base.deployer;
+        signer_B = base.user1;
+        signer_C = base.user2;
+        signer_D = base.user3;
+        signer_E = base.user4;
+
+        await executeRbac(base.accessControlFacet, set_initRbacs());
+        await setFacets({ diamond });
+      }
+
+      beforeEach(async () => {
+        await loadFixture(protectedClearingFixture);
+
+        const chainId = await network.provider.send("eth_chainId");
+        domain = {
+          name: "ProtectedPartitions",
+          version: "1.0.0",
+          chainId: chainId,
+          verifyingContract: diamond.address,
+        };
+
+        protectedClearingTransfer = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: expirationTimestamp,
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: MAX_UINT256,
+          nonce: 1,
+        };
+
+        protectedClearingRedeem = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: expirationTimestamp,
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: MAX_UINT256,
+          nonce: 1,
+        };
+
+        protectedClearingHoldCreation = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: expirationTimestamp,
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: MAX_UINT256,
+          nonce: 1,
+        };
+      });
+
+      it("GIVEN a valid signature WHEN calling protectedClearingTransferByPartition THEN transaction succeeds", async () => {
+        // Setup: Issue tokens to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Enable protected partitions - grant role first
+        await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await protectedPartitionsFacet.protectPartitions();
+
+        // Grant role for protected partition
+        const packedData = ethers.utils.defaultAbiCoder.encode(
+          ["bytes32", "bytes32"],
+          [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+        );
+        const packedDataWithoutPrefix = packedData.slice(2);
+        const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
+
+        // Get the nonce for signer_A
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+        const protectedClearingOperation = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: expirationTimestamp,
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: nonce,
+        };
+
+        // Prepare EIP-712 domain
+        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
+        const chainId = await network.provider.send("eth_chainId");
+
+        const domain = {
+          name: name,
+          version: version,
+          chainId: parseInt(chainId, 16),
+          verifyingContract: diamond.address,
+        };
+
+        const types = {
+          ClearingOperation: [
+            { name: "partition", type: "bytes32" },
+            { name: "expirationTimestamp", type: "uint256" },
+            { name: "data", type: "bytes" },
+          ],
+          ProtectedClearingOperation: [
+            { name: "clearingOperation", type: "ClearingOperation" },
+            { name: "from", type: "address" },
+            { name: "deadline", type: "uint256" },
+            { name: "nonce", type: "uint256" },
+          ],
+          protectedClearingTransferByPartition: [
+            {
+              name: "_protectedClearingOperation",
+              type: "ProtectedClearingOperation",
+            },
+            { name: "_amount", type: "uint256" },
+            { name: "_to", type: "address" },
+          ],
+        };
+
+        const message = {
+          _protectedClearingOperation: protectedClearingOperation,
+          _amount: _AMOUNT,
+          _to: signer_C.address,
+        };
+
+        // Sign the message
+        const signature = await signer_A._signTypedData(domain, types, message);
+
+        // Execute the protected clearing transfer
+        await clearingFacet
+          .connect(signer_A)
+          .protectedClearingTransferByPartition(protectedClearingOperation, _AMOUNT, signer_C.address, signature);
+
+        // Check cleared amount
+        const clearedAmount = await clearingFacet.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address);
+        expect(clearedAmount).to.equal(_AMOUNT);
+      });
+
+      it("GIVEN a valid signature WHEN calling protectedClearingRedeemByPartition THEN transaction succeeds", async () => {
+        // Setup: Issue tokens to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Enable protected partitions - grant role first
+        await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await protectedPartitionsFacet.protectPartitions();
+
+        // Grant role for protected partition
+        const packedData = ethers.utils.defaultAbiCoder.encode(
+          ["bytes32", "bytes32"],
+          [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+        );
+        const packedDataWithoutPrefix = packedData.slice(2);
+        const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
+
+        // Get the nonce for signer_A
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+        const protectedClearingOperation = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: expirationTimestamp,
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: nonce,
+        };
+
+        // Prepare EIP-712 domain
+        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
+        const chainId = await network.provider.send("eth_chainId");
+
+        const domain = {
+          name: name,
+          version: version,
+          chainId: parseInt(chainId, 16),
+          verifyingContract: diamond.address,
+        };
+
+        const types = {
+          ClearingOperation: [
+            { name: "partition", type: "bytes32" },
+            { name: "expirationTimestamp", type: "uint256" },
+            { name: "data", type: "bytes" },
+          ],
+          ProtectedClearingOperation: [
+            { name: "clearingOperation", type: "ClearingOperation" },
+            { name: "from", type: "address" },
+            { name: "deadline", type: "uint256" },
+            { name: "nonce", type: "uint256" },
+          ],
+          protectedClearingRedeemByPartition: [
+            {
+              name: "_protectedClearingOperation",
+              type: "ProtectedClearingOperation",
+            },
+            { name: "_amount", type: "uint256" },
+          ],
+        };
+
+        const message = {
+          _protectedClearingOperation: protectedClearingOperation,
+          _amount: _AMOUNT,
+        };
+
+        // Sign the message
+        const signature = await signer_A._signTypedData(domain, types, message);
+
+        // Execute the protected clearing redeem
+        await clearingFacet
+          .connect(signer_A)
+          .protectedClearingRedeemByPartition(protectedClearingOperation, _AMOUNT, signature);
+
+        // Check cleared amount
+        const clearedAmount = await clearingFacet.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address);
+        expect(clearedAmount).to.equal(_AMOUNT);
+      });
+
+      it("GIVEN a valid signature WHEN calling protectedClearingCreateHoldByPartition THEN transaction succeeds", async () => {
+        // Setup: Issue tokens to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Enable protected partitions - grant role first
+        await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await protectedPartitionsFacet.protectPartitions();
+
+        // Grant role for protected partition
+        const packedData = ethers.utils.defaultAbiCoder.encode(
+          ["bytes32", "bytes32"],
+          [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+        );
+        const packedDataWithoutPrefix = packedData.slice(2);
+        const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
+
+        // Get the nonce for signer_A
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+        const protectedClearingOperation = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: expirationTimestamp,
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: expirationTimestamp,
+          nonce: nonce,
+        };
+
+        const holdForClearing = {
+          amount: BigNumber.from(_AMOUNT),
+          expirationTimestamp: BigNumber.from(expirationTimestamp),
+          escrow: signer_B.address,
+          to: signer_C.address,
+          data: _DATA,
+        };
+
+        // Prepare EIP-712 domain
+        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
+        const chainId = await network.provider.send("eth_chainId");
+
+        const domain = {
+          name: name,
+          version: version,
+          chainId: parseInt(chainId, 16),
+          verifyingContract: diamond.address,
+        };
+
+        const types = {
+          ClearingOperation: [
+            { name: "partition", type: "bytes32" },
+            { name: "expirationTimestamp", type: "uint256" },
+            { name: "data", type: "bytes" },
+          ],
+          ProtectedClearingOperation: [
+            { name: "clearingOperation", type: "ClearingOperation" },
+            { name: "from", type: "address" },
+            { name: "deadline", type: "uint256" },
+            { name: "nonce", type: "uint256" },
+          ],
+          Hold: [
+            { name: "amount", type: "uint256" },
+            { name: "expirationTimestamp", type: "uint256" },
+            { name: "escrow", type: "address" },
+            { name: "to", type: "address" },
+            { name: "data", type: "bytes" },
+          ],
+          protectedClearingCreateHoldByPartition: [
+            {
+              name: "_protectedClearingOperation",
+              type: "ProtectedClearingOperation",
+            },
+            { name: "_hold", type: "Hold" },
+          ],
+        };
+
+        const message = {
+          _protectedClearingOperation: protectedClearingOperation,
+          _hold: holdForClearing,
+        };
+
+        // Sign the message
+        const signature = await signer_A._signTypedData(domain, types, message);
+
+        // Execute the protected clearing create hold
+        await clearingFacet
+          .connect(signer_A)
+          .protectedClearingCreateHoldByPartition(protectedClearingOperation, holdForClearing, signature);
+
+        // Check cleared amount
+        const clearedAmount = await clearingFacet.getClearedAmountForByPartition(_DEFAULT_PARTITION, signer_A.address);
+        expect(clearedAmount).to.equal(_AMOUNT);
+      });
+
+      describe("Modifier Tests", () => {
+        describe("protectedClearingTransferByPartition", () => {
+          it("SHOULD revert WHEN from address is zero (validateAddress modifier)", async () => {
+            const protectedClearingOperationInvalid = {
+              clearingOperation: {
+                partition: _DEFAULT_PARTITION,
+                expirationTimestamp: expirationTimestamp,
+                data: _DATA,
+              },
+              from: ethers.constants.AddressZero, // Invalid
+              deadline: expirationTimestamp,
+              nonce: 1,
+            };
+
+            const chainId = await network.provider.send("eth_chainId");
+            const domain = {
+              name: "ProtectedPartitions",
+              version: "1.0.0",
+              chainId: parseInt(chainId, 16),
+              verifyingContract: diamond.address,
+            };
+
+            const types = {
+              ClearingOperation: [
+                { name: "partition", type: "bytes32" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "data", type: "bytes" },
+              ],
+              ProtectedClearingOperation: [
+                { name: "clearingOperation", type: "ClearingOperation" },
+                { name: "from", type: "address" },
+                { name: "deadline", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+              ],
+              protectedClearingTransferByPartition: [
+                { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+                { name: "_amount", type: "uint256" },
+                { name: "_to", type: "address" },
+              ],
+            };
+
+            const message = {
+              _protectedClearingOperation: protectedClearingOperationInvalid,
+              _amount: _AMOUNT,
+              _to: signer_C.address,
+            };
+
+            const sig = await signer_A._signTypedData(domain, types, message);
+
+            await expect(
+              clearingFacet
+                .connect(signer_A)
+                .protectedClearingTransferByPartition(
+                  protectedClearingOperationInvalid,
+                  _AMOUNT,
+                  signer_C.address,
+                  sig,
+                ),
+            ).to.be.reverted;
+          });
+
+          it("SHOULD revert WHEN to address is zero (validateAddress modifier)", async () => {
+            await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+            await erc1410Facet.issueByPartition({
+              partition: _DEFAULT_PARTITION,
+              tokenHolder: signer_A.address,
+              value: _AMOUNT,
+              data: _DATA,
+            });
+
+            await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await protectedPartitionsFacet.protectPartitions();
+
+            const packedData = ethers.utils.defaultAbiCoder.encode(
+              ["bytes32", "bytes32"],
+              [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+            );
+            const packedDataWithoutPrefix = packedData.slice(2);
+            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
+
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+            const protectedClearingOp = {
+              clearingOperation: {
+                partition: _DEFAULT_PARTITION,
+                expirationTimestamp: expirationTimestamp,
+                data: _DATA,
+              },
+              from: signer_A.address,
+              deadline: expirationTimestamp,
+              nonce: nonce,
+            };
+
+            const chainId = await network.provider.send("eth_chainId");
+            const domain = {
+              name: "ProtectedPartitions",
+              version: "1.0.0",
+              chainId: parseInt(chainId, 16),
+              verifyingContract: diamond.address,
+            };
+
+            const types = {
+              ClearingOperation: [
+                { name: "partition", type: "bytes32" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "data", type: "bytes" },
+              ],
+              ProtectedClearingOperation: [
+                { name: "clearingOperation", type: "ClearingOperation" },
+                { name: "from", type: "address" },
+                { name: "deadline", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+              ],
+              protectedClearingTransferByPartition: [
+                { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+                { name: "_amount", type: "uint256" },
+                { name: "_to", type: "address" },
+              ],
+            };
+
+            const message = {
+              _protectedClearingOperation: protectedClearingOp,
+              _amount: _AMOUNT,
+              _to: ethers.constants.AddressZero, // Invalid
+            };
+
+            const sig = await signer_A._signTypedData(domain, types, message);
+
+            await expect(
+              clearingFacet
+                .connect(signer_A)
+                .protectedClearingTransferByPartition(protectedClearingOp, _AMOUNT, ethers.constants.AddressZero, sig),
+            ).to.be.reverted;
+          });
+
+          it("SHOULD revert WHEN expiration timestamp is invalid (onlyWithValidExpirationTimestamp modifier)", async () => {
+            await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+            await erc1410Facet.issueByPartition({
+              partition: _DEFAULT_PARTITION,
+              tokenHolder: signer_A.address,
+              value: _AMOUNT,
+              data: _DATA,
+            });
+
+            await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await protectedPartitionsFacet.protectPartitions();
+
+            const packedData = ethers.utils.defaultAbiCoder.encode(
+              ["bytes32", "bytes32"],
+              [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+            );
+            const packedDataWithoutPrefix = packedData.slice(2);
+            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
+
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+            const protectedClearingOp = {
+              clearingOperation: {
+                partition: _DEFAULT_PARTITION,
+                expirationTimestamp: 1, // Expired timestamp
+                data: _DATA,
+              },
+              from: signer_A.address,
+              deadline: expirationTimestamp,
+              nonce: nonce,
+            };
+
+            const chainId = await network.provider.send("eth_chainId");
+            const domain = {
+              name: "ProtectedPartitions",
+              version: "1.0.0",
+              chainId: parseInt(chainId, 16),
+              verifyingContract: diamond.address,
+            };
+
+            const types = {
+              ClearingOperation: [
+                { name: "partition", type: "bytes32" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "data", type: "bytes" },
+              ],
+              ProtectedClearingOperation: [
+                { name: "clearingOperation", type: "ClearingOperation" },
+                { name: "from", type: "address" },
+                { name: "deadline", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+              ],
+              protectedClearingTransferByPartition: [
+                { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+                { name: "_amount", type: "uint256" },
+                { name: "_to", type: "address" },
+              ],
+            };
+
+            const message = {
+              _protectedClearingOperation: protectedClearingOp,
+              _amount: _AMOUNT,
+              _to: signer_C.address,
+            };
+
+            const sig = await signer_A._signTypedData(domain, types, message);
+
+            await expect(
+              clearingFacet
+                .connect(signer_A)
+                .protectedClearingTransferByPartition(protectedClearingOp, _AMOUNT, signer_C.address, sig),
+            ).to.be.reverted;
+          });
+
+          it("SHOULD revert WHEN missing required role (onlyRole modifier)", async () => {
+            await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+            await erc1410Facet.issueByPartition({
+              partition: _DEFAULT_PARTITION,
+              tokenHolder: signer_A.address,
+              value: _AMOUNT,
+              data: _DATA,
+            });
+
+            await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await protectedPartitionsFacet.protectPartitions();
+
+            // Don't grant protectedPartitionRole
+
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+            const protectedClearingOp = {
+              clearingOperation: {
+                partition: _DEFAULT_PARTITION,
+                expirationTimestamp: expirationTimestamp,
+                data: _DATA,
+              },
+              from: signer_A.address,
+              deadline: expirationTimestamp,
+              nonce: nonce,
+            };
+
+            const chainId = await network.provider.send("eth_chainId");
+            const domain = {
+              name: "ProtectedPartitions",
+              version: "1.0.0",
+              chainId: parseInt(chainId, 16),
+              verifyingContract: diamond.address,
+            };
+
+            const types = {
+              ClearingOperation: [
+                { name: "partition", type: "bytes32" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "data", type: "bytes" },
+              ],
+              ProtectedClearingOperation: [
+                { name: "clearingOperation", type: "ClearingOperation" },
+                { name: "from", type: "address" },
+                { name: "deadline", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+              ],
+              protectedClearingTransferByPartition: [
+                { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+                { name: "_amount", type: "uint256" },
+                { name: "_to", type: "address" },
+              ],
+            };
+
+            const message = {
+              _protectedClearingOperation: protectedClearingOp,
+              _amount: _AMOUNT,
+              _to: signer_C.address,
+            };
+
+            const sig = await signer_A._signTypedData(domain, types, message);
+
+            await expect(
+              clearingFacet
+                .connect(signer_A)
+                .protectedClearingTransferByPartition(protectedClearingOp, _AMOUNT, signer_C.address, sig),
+            ).to.be.reverted;
+          });
+
+          it("SHOULD revert WHEN clearing not activated (onlyClearingActivated modifier)", async () => {
+            await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+            await erc1410Facet.issueByPartition({
+              partition: _DEFAULT_PARTITION,
+              tokenHolder: signer_A.address,
+              value: _AMOUNT,
+              data: _DATA,
+            });
+
+            await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await protectedPartitionsFacet.protectPartitions();
+
+            const packedData = ethers.utils.defaultAbiCoder.encode(
+              ["bytes32", "bytes32"],
+              [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+            );
+            const packedDataWithoutPrefix = packedData.slice(2);
+            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
+
+            // Activate then deactivate clearing
+            await clearingActionsFacet.activateClearing();
+            await clearingActionsFacet.deactivateClearing();
+
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+            const protectedClearingOp = {
+              clearingOperation: {
+                partition: _DEFAULT_PARTITION,
+                expirationTimestamp: expirationTimestamp,
+                data: _DATA,
+              },
+              from: signer_A.address,
+              deadline: expirationTimestamp,
+              nonce: nonce,
+            };
+
+            const chainId = await network.provider.send("eth_chainId");
+            const domain = {
+              name: "ProtectedPartitions",
+              version: "1.0.0",
+              chainId: parseInt(chainId, 16),
+              verifyingContract: diamond.address,
+            };
+
+            const types = {
+              ClearingOperation: [
+                { name: "partition", type: "bytes32" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "data", type: "bytes" },
+              ],
+              ProtectedClearingOperation: [
+                { name: "clearingOperation", type: "ClearingOperation" },
+                { name: "from", type: "address" },
+                { name: "deadline", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+              ],
+              protectedClearingTransferByPartition: [
+                { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+                { name: "_amount", type: "uint256" },
+                { name: "_to", type: "address" },
+              ],
+            };
+
+            const message = {
+              _protectedClearingOperation: protectedClearingOp,
+              _amount: _AMOUNT,
+              _to: signer_C.address,
+            };
+
+            const sig = await signer_A._signTypedData(domain, types, message);
+
+            await expect(
+              clearingFacet
+                .connect(signer_A)
+                .protectedClearingTransferByPartition(protectedClearingOp, _AMOUNT, signer_C.address, sig),
+            ).to.be.reverted;
+          });
+        });
+
+        describe("protectedClearingRedeemByPartition", () => {
+          it("SHOULD revert WHEN from address is zero (validateAddress modifier)", async () => {
+            const protectedClearingOperationInvalid = {
+              clearingOperation: {
+                partition: _DEFAULT_PARTITION,
+                expirationTimestamp: expirationTimestamp,
+                data: _DATA,
+              },
+              from: ethers.constants.AddressZero, // Invalid
+              deadline: expirationTimestamp,
+              nonce: 1,
+            };
+
+            const chainId = await network.provider.send("eth_chainId");
+            const domain = {
+              name: "ProtectedPartitions",
+              version: "1.0.0",
+              chainId: parseInt(chainId, 16),
+              verifyingContract: diamond.address,
+            };
+
+            const types = {
+              ClearingOperation: [
+                { name: "partition", type: "bytes32" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "data", type: "bytes" },
+              ],
+              ProtectedClearingOperation: [
+                { name: "clearingOperation", type: "ClearingOperation" },
+                { name: "from", type: "address" },
+                { name: "deadline", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+              ],
+              protectedClearingRedeemByPartition: [
+                { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+                { name: "_amount", type: "uint256" },
+              ],
+            };
+
+            const message = {
+              _protectedClearingOperation: protectedClearingOperationInvalid,
+              _amount: _AMOUNT,
+            };
+
+            const sig = await signer_A._signTypedData(domain, types, message);
+
+            await expect(
+              clearingFacet
+                .connect(signer_A)
+                .protectedClearingRedeemByPartition(protectedClearingOperationInvalid, _AMOUNT, sig),
+            ).to.be.reverted;
+          });
+
+          it("SHOULD revert WHEN clearing not activated (onlyClearingActivated modifier)", async () => {
+            await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+            await erc1410Facet.issueByPartition({
+              partition: _DEFAULT_PARTITION,
+              tokenHolder: signer_A.address,
+              value: _AMOUNT,
+              data: _DATA,
+            });
+
+            await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await protectedPartitionsFacet.protectPartitions();
+
+            const packedData = ethers.utils.defaultAbiCoder.encode(
+              ["bytes32", "bytes32"],
+              [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+            );
+            const packedDataWithoutPrefix = packedData.slice(2);
+            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
+
+            // Activate then deactivate clearing to test the modifier
+            await clearingActionsFacet.activateClearing();
+            await clearingActionsFacet.deactivateClearing();
+
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+            const protectedClearingOp = {
+              clearingOperation: {
+                partition: _DEFAULT_PARTITION,
+                expirationTimestamp: expirationTimestamp,
+                data: _DATA,
+              },
+              from: signer_A.address,
+              deadline: expirationTimestamp,
+              nonce: nonce,
+            };
+
+            const chainId = await network.provider.send("eth_chainId");
+            const domain = {
+              name: "ProtectedPartitions",
+              version: "1.0.0",
+              chainId: parseInt(chainId, 16),
+              verifyingContract: diamond.address,
+            };
+
+            const types = {
+              ClearingOperation: [
+                { name: "partition", type: "bytes32" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "data", type: "bytes" },
+              ],
+              ProtectedClearingOperation: [
+                { name: "clearingOperation", type: "ClearingOperation" },
+                { name: "from", type: "address" },
+                { name: "deadline", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+              ],
+              protectedClearingRedeemByPartition: [
+                { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+                { name: "_amount", type: "uint256" },
+              ],
+            };
+
+            const message = {
+              _protectedClearingOperation: protectedClearingOp,
+              _amount: _AMOUNT,
+            };
+
+            const sig = await signer_A._signTypedData(domain, types, message);
+
+            await expect(
+              clearingFacet.connect(signer_A).protectedClearingRedeemByPartition(protectedClearingOp, _AMOUNT, sig),
+            ).to.be.reverted;
+          });
+        });
+
+        describe("protectedClearingCreateHoldByPartition", () => {
+          it("SHOULD revert WHEN from address is zero (validateAddress modifier)", async () => {
+            const protectedClearingOperationInvalid = {
+              clearingOperation: {
+                partition: _DEFAULT_PARTITION,
+                expirationTimestamp: expirationTimestamp,
+                data: _DATA,
+              },
+              from: ethers.constants.AddressZero, // Invalid
+              deadline: expirationTimestamp,
+              nonce: 1,
+            };
+
+            const holdForClearing = {
+              amount: _AMOUNT,
+              expirationTimestamp: expirationTimestamp,
+              escrow: ethers.constants.AddressZero,
+              to: signer_C.address,
+              data: _DATA,
+            };
+
+            const chainId = await network.provider.send("eth_chainId");
+            const domain = {
+              name: "ProtectedPartitions",
+              version: "1.0.0",
+              chainId: parseInt(chainId, 16),
+              verifyingContract: diamond.address,
+            };
+
+            const types = {
+              ClearingOperation: [
+                { name: "partition", type: "bytes32" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "data", type: "bytes" },
+              ],
+              ProtectedClearingOperation: [
+                { name: "clearingOperation", type: "ClearingOperation" },
+                { name: "from", type: "address" },
+                { name: "deadline", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+              ],
+              Hold: [
+                { name: "amount", type: "uint256" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "escrow", type: "address" },
+                { name: "to", type: "address" },
+                { name: "data", type: "bytes" },
+              ],
+              protectedClearingCreateHoldByPartition: [
+                { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+                { name: "_hold", type: "Hold" },
+              ],
+            };
+
+            const message = {
+              _protectedClearingOperation: protectedClearingOperationInvalid,
+              _hold: holdForClearing,
+            };
+
+            const sig = await signer_A._signTypedData(domain, types, message);
+
+            await expect(
+              clearingFacet
+                .connect(signer_A)
+                .protectedClearingCreateHoldByPartition(protectedClearingOperationInvalid, holdForClearing, sig),
+            ).to.be.reverted;
+          });
+
+          it("SHOULD revert WHEN clearing not activated (onlyClearingActivated modifier)", async () => {
+            await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+            await erc1410Facet.issueByPartition({
+              partition: _DEFAULT_PARTITION,
+              tokenHolder: signer_A.address,
+              value: _AMOUNT,
+              data: _DATA,
+            });
+
+            await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+            await protectedPartitionsFacet.protectPartitions();
+
+            const packedData = ethers.utils.defaultAbiCoder.encode(
+              ["bytes32", "bytes32"],
+              [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+            );
+            const packedDataWithoutPrefix = packedData.slice(2);
+            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
+
+            // Activate then deactivate clearing to test the modifier
+            await clearingActionsFacet.activateClearing();
+            await clearingActionsFacet.deactivateClearing();
+
+            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+            const protectedClearingOp = {
+              clearingOperation: {
+                partition: _DEFAULT_PARTITION,
+                expirationTimestamp: expirationTimestamp,
+                data: _DATA,
+              },
+              from: signer_A.address,
+              deadline: expirationTimestamp,
+              nonce: nonce,
+            };
+
+            const holdForClearing = {
+              amount: _AMOUNT,
+              expirationTimestamp: expirationTimestamp,
+              escrow: ethers.constants.AddressZero,
+              to: signer_C.address,
+              data: _DATA,
+            };
+
+            const chainId = await network.provider.send("eth_chainId");
+            const domain = {
+              name: "ProtectedPartitions",
+              version: "1.0.0",
+              chainId: parseInt(chainId, 16),
+              verifyingContract: diamond.address,
+            };
+
+            const types = {
+              ClearingOperation: [
+                { name: "partition", type: "bytes32" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "data", type: "bytes" },
+              ],
+              ProtectedClearingOperation: [
+                { name: "clearingOperation", type: "ClearingOperation" },
+                { name: "from", type: "address" },
+                { name: "deadline", type: "uint256" },
+                { name: "nonce", type: "uint256" },
+              ],
+              Hold: [
+                { name: "amount", type: "uint256" },
+                { name: "expirationTimestamp", type: "uint256" },
+                { name: "escrow", type: "address" },
+                { name: "to", type: "address" },
+                { name: "data", type: "bytes" },
+              ],
+              protectedClearingCreateHoldByPartition: [
+                { name: "_protectedClearingOperation", type: "ProtectedClearingOperation" },
+                { name: "_hold", type: "Hold" },
+              ],
+            };
+
+            const message = {
+              _protectedClearingOperation: protectedClearingOp,
+              _hold: holdForClearing,
+            };
+
+            const sig = await signer_A._signTypedData(domain, types, message);
+
+            await expect(
+              clearingFacet
+                .connect(signer_A)
+                .protectedClearingCreateHoldByPartition(protectedClearingOp, holdForClearing, sig),
+            ).to.be.reverted;
+          });
+        });
+      });
+
+      // Recovery tests following hold.test.ts pattern
+      it("GIVEN a from user recovering WHEN protectedClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
+        // Setup: Issue tokens to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Recover signer_A's address to signer_B
+        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        const message = {
+          _protectedClearingOperation: protectedClearingTransfer,
+          _to: signer_C.address,
+          _amount: _AMOUNT,
+        };
+
+        const signature = await signer_A._signTypedData(domain, clearingTransferType, message);
+
+        await expect(
+          clearingFacet
+            .connect(signer_B)
+            .protectedClearingTransferByPartition(protectedClearingTransfer, _AMOUNT, signer_C.address, signature),
+        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+      });
+
+      it("GIVEN a to user recovering WHEN protectedClearingTransferByPartition THEN transaction fails with WalletRecovered", async () => {
+        // Setup: Issue tokens to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Recover signer_C's address to signer_D
+        await erc3643Facet.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+        const message = {
+          _protectedClearingOperation: protectedClearingTransfer,
+          _to: signer_C.address,
+          _amount: _AMOUNT,
+        };
+
+        const signature = await signer_A._signTypedData(domain, clearingTransferType, message);
+
+        await expect(
+          clearingFacet
+            .connect(signer_B)
+            .protectedClearingTransferByPartition(protectedClearingTransfer, _AMOUNT, signer_C.address, signature),
+        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+      });
+
+      it("GIVEN missing partition role WHEN protectedClearingRedeemByPartition THEN transaction fails with AccountHasNoRole", async () => {
+        // Setup: Issue tokens to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Do NOT grant partition-specific role to signer_B - this will test the onlyRole modifier
+
+        // Try to call - should fail with AccountHasNoRole due to missing partition-specific role
+        await expect(
+          clearingFacet
+            .connect(signer_B)
+            .protectedClearingRedeemByPartition(protectedClearingRedeem, _AMOUNT, "0x1234"),
+        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+      });
+
+      it("GIVEN a from user recovering WHEN protectedClearingRedeemByPartition THEN transaction fails with WalletRecovered", async () => {
+        // Setup: Issue tokens to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Grant partition-specific role to signer_B
+        const packedData = ethers.utils.defaultAbiCoder.encode(
+          ["bytes32", "bytes32"],
+          [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+        );
+        const packedDataWithoutPrefix = packedData.slice(2);
+        const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        await accessControlFacet.grantRole(protectedPartitionRole, signer_B.address);
+
+        // Recover signer_A's address to signer_B
+        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        // Try to call - should hit onlyUnrecoveredAddress before signature validation
+        await expect(
+          clearingFacet
+            .connect(signer_B)
+            .protectedClearingRedeemByPartition(protectedClearingRedeem, _AMOUNT, "0x1234"),
+        ).to.be.revertedWithCustomError(clearingFacet, "WalletRecovered");
+      });
+
+      it("GIVEN a from user recovering WHEN protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+        // Setup: Issue tokens to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Recover signer_A's address to signer_B
+        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+
+        const holdForClearing = {
+          amount: _AMOUNT,
+          expirationTimestamp: expirationTimestamp,
+          escrow: signer_D.address,
+          to: signer_C.address,
+          data: _DATA,
+        };
+
+        const message = {
+          _protectedClearingOperation: protectedClearingHoldCreation,
+          _hold: holdForClearing,
+        };
+
+        const signature = await signer_A._signTypedData(domain, clearingHoldType, message);
+
+        await expect(
+          clearingFacet
+            .connect(signer_B)
+            .protectedClearingCreateHoldByPartition(protectedClearingHoldCreation, holdForClearing, signature),
+        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+      });
+
+      it("GIVEN a to user recovering WHEN protectedClearingCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
+        // Setup: Issue tokens to signer_A
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Recover signer_C's address (the "to" address in hold) to signer_D
+        await erc3643Facet.recoveryAddress(signer_C.address, signer_D.address, ADDRESS_ZERO);
+
+        const holdForClearing = {
+          amount: _AMOUNT,
+          expirationTimestamp: expirationTimestamp,
+          escrow: signer_D.address,
+          to: signer_C.address,
+          data: _DATA,
+        };
+
+        const message = {
+          _protectedClearingOperation: protectedClearingHoldCreation,
+          _hold: holdForClearing,
+        };
+
+        const signature = await signer_A._signTypedData(domain, clearingHoldType, message);
+
+        await expect(
+          clearingFacet
+            .connect(signer_B)
+            .protectedClearingCreateHoldByPartition(protectedClearingHoldCreation, holdForClearing, signature),
+        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+      });
+
+      // Additional tests for missing branch coverage
+      it("SHOULD revert WHEN expiration timestamp is invalid for protectedClearingRedeemByPartition", async () => {
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+        const protectedClearingOpExpired = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: 1, // Expired timestamp
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: MAX_UINT256,
+          nonce: nonce,
+        };
+
+        const message = {
+          _protectedClearingOperation: protectedClearingOpExpired,
+          _value: _AMOUNT,
+        };
+
+        const signature = await signer_A._signTypedData(domain, clearingRedeemType, message);
+
+        await expect(
+          clearingFacet
+            .connect(signer_B)
+            .protectedClearingRedeemByPartition(protectedClearingOpExpired, _AMOUNT, signature),
+        ).to.be.reverted;
+      });
+
+      it("SHOULD revert WHEN expiration timestamp is invalid for protectedClearingCreateHoldByPartition", async () => {
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+        const protectedClearingOpExpired = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: 1, // Expired timestamp
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: MAX_UINT256,
+          nonce: nonce,
+        };
+
+        const holdForClearing = {
+          amount: _AMOUNT,
+          expirationTimestamp: expirationTimestamp,
+          escrow: signer_D.address,
+          to: signer_C.address,
+          data: _DATA,
+        };
+
+        const message = {
+          _protectedClearingOperation: protectedClearingOpExpired,
+          _hold: holdForClearing,
+        };
+
+        const signature = await signer_A._signTypedData(domain, clearingHoldType, message);
+
+        await expect(
+          clearingFacet
+            .connect(signer_B)
+            .protectedClearingCreateHoldByPartition(protectedClearingOpExpired, holdForClearing, signature),
+        ).to.be.reverted;
+      });
+
+      it("SHOULD revert WHEN missing required role for protectedClearingCreateHoldByPartition", async () => {
+        await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await erc1410Facet.issueByPartition({
+          partition: _DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: _AMOUNT,
+          data: _DATA,
+        });
+
+        // Don't grant the protected partition role for signer_A
+        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+
+        const protectedClearingOp = {
+          clearingOperation: {
+            partition: _DEFAULT_PARTITION,
+            expirationTimestamp: expirationTimestamp,
+            data: _DATA,
+          },
+          from: signer_A.address,
+          deadline: MAX_UINT256,
+          nonce: nonce,
+        };
+
+        const holdForClearing = {
+          amount: _AMOUNT,
+          expirationTimestamp: expirationTimestamp,
+          escrow: signer_D.address,
+          to: signer_C.address,
+          data: _DATA,
+        };
+
+        const message = {
+          _protectedClearingOperation: protectedClearingOp,
+          _hold: holdForClearing,
+        };
+
+        const signature = await signer_A._signTypedData(domain, clearingHoldType, message);
+
+        await expect(
+          clearingFacet
+            .connect(signer_B)
+            .protectedClearingCreateHoldByPartition(protectedClearingOp, holdForClearing, signature),
+        ).to.be.reverted;
+      });
     });
   });
 });

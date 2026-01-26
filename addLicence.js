@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-const { promises: fs } = require('fs');
-const path = require('path');
+const { promises: fs } = require("fs");
+const path = require("path");
 
 async function findFiles(dir, extension) {
   let files = [];
@@ -9,7 +9,7 @@ async function findFiles(dir, extension) {
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        if (entry.name === 'node_modules') continue;
+        if (entry.name === "node_modules") continue;
         files = files.concat(await findFiles(fullPath, extension));
       } else if (entry.isFile() && path.extname(fullPath) === `.${extension}`) {
         files.push(fullPath);
@@ -24,21 +24,17 @@ async function findFiles(dir, extension) {
 function normalizeLicenseContent(content) {
   return content
     .trim()
-    .replace(/\r\n/g, '\n') // Normalize line endings
-    .split('\n')
-    .map((line) => line.trim().replace(/^\*/, '').trim())
-    .join('\n')
-    .replace(/\s+/g, ' ')
-    .replace(/\n+/g, '\n');
+    .replace(/\r\n/g, "\n") // Normalize line endings
+    .split("\n")
+    .map((line) => line.trim().replace(/^\*/, "").trim())
+    .join("\n")
+    .replace(/\s+/g, " ")
+    .replace(/\n+/g, "\n");
 }
 
-async function prependContentToFiles(
-  rootDirectory,
-  contentFile,
-  fileExtension,
-) {
+async function prependContentToFiles(rootDirectory, contentFile, fileExtension) {
   try {
-    const content = await fs.readFile(contentFile, 'utf8');
+    const content = await fs.readFile(contentFile, "utf8");
     const comment = `/*\n${content}\n*/\n\n`;
 
     // Create normalized version for comparison
@@ -46,13 +42,13 @@ async function prependContentToFiles(
 
     const files = await findFiles(rootDirectory, fileExtension);
     if (files.length === 0) {
-      console.log('No matching files found.');
+      console.log("No matching files found.");
       return;
     }
 
     for (const file of files) {
       try {
-        const existingContent = await fs.readFile(file, 'utf8');
+        const existingContent = await fs.readFile(file, "utf8");
 
         // Check for existing license using more sophisticated detection
         const existingHeaderMatch = existingContent.match(/^\/\*[\s\S]*?\*\//);
@@ -61,7 +57,7 @@ async function prependContentToFiles(
         if (existingHeaderMatch) {
           const existingHeader = existingHeaderMatch[0];
           const existingNormalized = normalizeLicenseContent(
-            existingHeader.replace(/^\/\*+/, '').replace(/\*+\/$/, ''),
+            existingHeader.replace(/^\/\*+/, "").replace(/\*+\/$/, ""),
           );
 
           // Compare normalized content
@@ -72,17 +68,15 @@ async function prependContentToFiles(
           await fs.writeFile(file, comment + existingContent);
           console.log(`Prepended content to ${file}`);
         } else {
-          console.log(
-            `Valid license header already exists in ${file}, skipping.`,
-          );
+          console.log(`Valid license header already exists in ${file}, skipping.`);
         }
       } catch (error) {
         console.error(`Error processing file ${file}:`, error);
       }
     }
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
   }
 }
 
-prependContentToFiles('./', './LICENSE', 'ts');
+prependContentToFiles("./", "./LICENSE", "ts");

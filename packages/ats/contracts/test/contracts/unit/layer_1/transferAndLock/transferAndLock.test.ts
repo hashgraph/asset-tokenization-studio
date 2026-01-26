@@ -3,12 +3,12 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type Lock,
-  Pause,
+  type LockFacet,
+  type PauseFacet,
   type IERC1410,
-  TransferAndLock,
-  SsiManagement,
-  Kyc,
+  type TransferAndLockFacet,
+  type SsiManagementFacet,
+  type KycFacet,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -27,12 +27,12 @@ describe("Transfer and lock Tests", () => {
   let signer_C: SignerWithAddress;
   let signer_D: SignerWithAddress;
 
-  let lockFacet: Lock;
-  let transferAndLockFacet: TransferAndLock;
-  let pauseFacet: Pause;
+  let lockFacet: LockFacet;
+  let transferAndLockFacet: TransferAndLockFacet;
+  let pauseFacet: PauseFacet;
   let erc1410Facet: IERC1410;
-  let kycFacet: Kyc;
-  let ssiManagementFacet: SsiManagement;
+  let kycFacet: KycFacet;
+  let ssiManagementFacet: SsiManagementFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -64,12 +64,12 @@ describe("Transfer and lock Tests", () => {
   }
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    lockFacet = await ethers.getContractAt("Lock", diamond.address, signer_C);
-    transferAndLockFacet = await ethers.getContractAt("TransferAndLock", diamond.address, signer_C);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_D);
+    lockFacet = await ethers.getContractAt("LockFacet", diamond.address, signer_C);
+    transferAndLockFacet = await ethers.getContractAt("TransferAndLockFacet", diamond.address, signer_C);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_D);
     erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
     await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -248,7 +248,7 @@ describe("Transfer and lock Tests", () => {
     });
 
     describe("multi-partition transactions arent enabled", () => {
-      it("GIVEN a token with multi-partition enabled GIVEN transferAndLockByPartition THEN fails with NotAllowedInMultiPartitionMode", async () => {
+      it("GIVEN a token with multi-partition disabled GIVEN transferAndLockByPartition with non-default partition THEN fails with PartitionNotAllowedInSinglePartitionMode", async () => {
         await expect(
           transferAndLockFacet.transferAndLockByPartition(
             _NON_DEFAULT_PARTITION,

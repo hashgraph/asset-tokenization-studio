@@ -207,9 +207,9 @@ jobs:
             fi
           echo "::endgroup::"
 
-          echo "::group::Publish ATS SDK Package ${{ needs.prepare-sdk.outputs.artifact-name }} with args: ${PUBLISH_ARGS}"
-            if ! npm publish ./${{ needs.prepare-sdk.outputs.artifact-name }} ${PUBLISH_ARGS}; then
-                echo "❌ Failed to publish ATS SDK package: ${{ needs.prepare-sdk.outputs.artifact-name }}"
+          echo "::group::Publish ATS Contracts Package ${{ needs.prepare-contracts.outputs.artifact-name }} with args: ${PUBLISH_ARGS}"
+            if ! npm publish ./${{ needs.prepare-contracts.outputs.artifact-name }} ${PUBLISH_ARGS}; then
+                echo "❌ Failed to publish ATS Contracts package: ${{ needs.prepare-contracts.outputs.artifact-name }}"
                 exit 1
             fi
           echo "::endgroup::"

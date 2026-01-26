@@ -2,14 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Read } from "../../interfaces/ERC1400/IERC1410Read.sol";
-import { Common } from "../../common/Common.sol";
+import { Internals } from "../../../layer_0/Internals.sol";
 
 /**
  * @title ERC1410Read
  * @dev Facet containing all read-only operations for ERC1410 functionality
  * @notice This facet handles balance queries, partition queries, operator queries, and validation queries
  */
-abstract contract ERC1410Read is IERC1410Read, Common {
+abstract contract ERC1410Read is IERC1410Read, Internals {
     function balanceOf(address _tokenHolder) external view returns (uint256) {
         return _balanceOfAdjusted(_tokenHolder);
     }

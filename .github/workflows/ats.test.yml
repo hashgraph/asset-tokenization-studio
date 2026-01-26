@@ -68,7 +68,7 @@ jobs:
         run: npm run ats:build
 
       - name: Run ATS tests
-        run: npm run ats:test
+        run: npm run ats:test:ci
 
       - name: Upload coverage report
         if: ${{ !cancelled() && always() }}

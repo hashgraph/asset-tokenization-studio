@@ -215,11 +215,11 @@ import { PublickKeyNotFound } from "@port/out/hs/hts/custodial/error/PublickKeyN
 import { SigningError } from "@port/out/error/SigningError"
 import Account from "@domain/account/Account"
 import TransactionResponse from "@domain/transaction/TransactionResponse"
-import { Client, Transaction, TransactionReceipt } from "@hashgraph/sdk"
+import { Client, Transaction, TransactionReceipt } from "@hiero-ledger/sdk"
 import { CustodialWalletService } from "@hashgraph/hedera-custodians-integration"
 import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings"
 
-jest.mock("@hashgraph/sdk", () => ({
+jest.mock("@hiero-ledger/sdk", () => ({
   Client: {
     forTestnet: jest.fn(() => ({ setOperatorWith: jest.fn() })),
     forMainnet: jest.fn(() => ({ setOperatorWith: jest.fn() })),
@@ -273,6 +273,7 @@ describe("CustodialTransactionAdapter", () => {
     it("should register and emit walletPaired", async () => {
       mockMirrorNodeAdapter.getAccountInfo.mockResolvedValueOnce({
         publicKey: { key: "fakePublicKey" },
+        evmAddress: "0xFakeEvmAddress",
       })
 
       const settings = { hederaAccountId: "0.0.123" } as DfnsSettings

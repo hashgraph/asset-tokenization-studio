@@ -12,7 +12,20 @@ abstract contract ExternalKycListManagementStorageWrapper is ExternalListManagem
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    function _isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) internal view returns (bool) {
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_ExternalKycLists(address[] calldata _kycLists) internal override {
+        uint256 length = _kycLists.length;
+        for (uint256 index; index < length; ) {
+            _checkValidAddress(_kycLists[index]);
+            _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
+            unchecked {
+                ++index;
+            }
+        }
+        _setExternalListInitialized(_KYC_MANAGEMENT_STORAGE_POSITION);
+    }
+
+    function _isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) internal view override returns (bool) {
         ExternalListDataStorage storage externalKycListStorage = _externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION);
         uint256 length = _getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
         for (uint256 index; index < length; ) {
@@ -23,5 +36,9 @@ abstract contract ExternalKycListManagementStorageWrapper is ExternalListManagem
             }
         }
         return true;
+    }
+
+    function _isKycExternalInitialized() internal view override returns (bool) {
+        return _externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 }

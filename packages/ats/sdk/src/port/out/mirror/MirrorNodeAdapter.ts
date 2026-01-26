@@ -206,7 +206,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { AxiosInstance } from 'axios';
 import { singleton } from 'tsyringe';
-import { PublicKey as HPublicKey } from '@hashgraph/sdk';
+import { PublicKey as HPublicKey } from '@hiero-ledger/sdk';
 import { InvalidResponse } from '@core/error/InvalidResponse';
 import { REGEX_TRANSACTION } from '../error/TransactionResponseError';
 import TransactionResultViewModel from '@port/in/response/TransactionResultViewModel';
