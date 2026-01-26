@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.22;
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
 interface IAccessControl {
     /**
      * @dev Emitted when a role is granted to an account
