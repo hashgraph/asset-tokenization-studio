@@ -14,13 +14,18 @@ import { promises as fs } from "fs";
 import { join } from "path";
 import {
   loadDeployment,
+  loadDeploymentByWorkflow,
   findLatestDeployment,
   listDeploymentFiles,
+  listDeploymentsByWorkflow,
   saveDeploymentOutput,
   generateTimestamp,
+  generateDeploymentFilename,
+  getDeploymentsDir,
+  getNetworkDeploymentDir,
   type DeploymentOutputType,
 } from "@scripts/infrastructure";
-import { TEST_ADDRESSES, TEST_CONFIG_IDS, TEST_WORKFLOWS } from "@test";
+import { TEST_ADDRESSES, TEST_CONFIG_IDS, TEST_WORKFLOWS, TEST_TIMESTAMPS } from "@test";
 
 describe("Deployment File Utilities", () => {
   const TEST_DEPLOYMENTS_DIR = join(__dirname, "../../../../deployments");
@@ -421,6 +426,363 @@ describe("Deployment File Utilities", () => {
         await fs.rm(join(TEST_DEPLOYMENTS_DIR, "very"), { recursive: true, force: true });
       } catch {
         // Ignore cleanup errors
+      }
+    });
+  });
+
+  describe("generateTimestamp", () => {
+    it("should return filename-safe ISO format", () => {
+      const timestamp = generateTimestamp();
+
+      // Format should be: YYYY-MM-DDTHH-MM-SS
+      expect(timestamp).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}$/);
+    });
+
+    it("should not contain colons or periods", () => {
+      const timestamp = generateTimestamp();
+
+      expect(timestamp).to.not.include(":");
+      expect(timestamp).to.not.include(".");
+    });
+
+    it("should generate unique timestamps for subsequent calls with delay", async () => {
+      const timestamp1 = generateTimestamp();
+      // Wait 1.1 seconds to ensure different second
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+      const timestamp2 = generateTimestamp();
+
+      expect(timestamp1).to.not.equal(timestamp2);
+    });
+
+    it("should be parseable back to a valid date", () => {
+      const timestamp = generateTimestamp();
+
+      // Convert back to ISO format with colons
+      const isoFormat = timestamp.replace(/T(\d{2})-(\d{2})-(\d{2})$/, "T$1:$2:$3Z");
+      const date = new Date(isoFormat);
+
+      expect(isNaN(date.getTime())).to.be.false;
+    });
+  });
+
+  describe("generateDeploymentFilename", () => {
+    it("should generate filename with workflow and timestamp", () => {
+      const filename = generateDeploymentFilename(TEST_WORKFLOWS.NEW_BLR, TEST_TIMESTAMPS.FILENAME_SAMPLE);
+
+      expect(filename).to.equal(`newBlr-${TEST_TIMESTAMPS.FILENAME_SAMPLE}.json`);
+    });
+
+    it("should use current timestamp when not provided", () => {
+      const filename = generateDeploymentFilename(TEST_WORKFLOWS.NEW_BLR);
+
+      expect(filename).to.match(/^newBlr-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.json$/);
+    });
+
+    it("should handle existingBlr workflow", () => {
+      const filename = generateDeploymentFilename(TEST_WORKFLOWS.EXISTING_BLR, TEST_TIMESTAMPS.FILENAME_SAMPLE);
+
+      expect(filename).to.equal(`existingBlr-${TEST_TIMESTAMPS.FILENAME_SAMPLE}.json`);
+    });
+
+    it("should handle upgradeConfigurations workflow", () => {
+      const filename = generateDeploymentFilename(TEST_WORKFLOWS.UPGRADE_CONFIGS, TEST_TIMESTAMPS.FILENAME_SAMPLE);
+
+      expect(filename).to.equal(`upgradeConfigurations-${TEST_TIMESTAMPS.FILENAME_SAMPLE}.json`);
+    });
+
+    it("should handle upgradeTupProxies workflow", () => {
+      const filename = generateDeploymentFilename(TEST_WORKFLOWS.UPGRADE_TUP, TEST_TIMESTAMPS.FILENAME_SAMPLE);
+
+      expect(filename).to.equal(`upgradeTupProxies-${TEST_TIMESTAMPS.FILENAME_SAMPLE}.json`);
+    });
+
+    it("should use workflow name directly for unregistered workflows", () => {
+      // Cast to WorkflowType to test custom workflow behavior
+      const customWorkflow = "customWorkflow" as unknown as typeof TEST_WORKFLOWS.NEW_BLR;
+      const filename = generateDeploymentFilename(customWorkflow, TEST_TIMESTAMPS.FILENAME_SAMPLE);
+
+      expect(filename).to.equal(`customWorkflow-${TEST_TIMESTAMPS.FILENAME_SAMPLE}.json`);
+    });
+  });
+
+  describe("getDeploymentsDir", () => {
+    it("should return an absolute path", () => {
+      const dir = getDeploymentsDir();
+
+      expect(dir).to.be.a("string");
+      expect(dir.startsWith("/")).to.be.true; // Unix absolute path
+    });
+
+    it("should end with deployments directory", () => {
+      const dir = getDeploymentsDir();
+
+      expect(dir.endsWith("deployments")).to.be.true;
+    });
+
+    it("should return consistent value on multiple calls", () => {
+      const dir1 = getDeploymentsDir();
+      const dir2 = getDeploymentsDir();
+
+      expect(dir1).to.equal(dir2);
+    });
+  });
+
+  describe("getNetworkDeploymentDir", () => {
+    it("should append network to deployments dir", () => {
+      const networkDir = getNetworkDeploymentDir(TEST_NETWORK);
+
+      expect(networkDir).to.include(TEST_NETWORK);
+      expect(networkDir.endsWith(TEST_NETWORK)).to.be.true;
+    });
+
+    it("should use custom deployments dir when provided", () => {
+      const customBase = "/custom/deployments";
+      const networkDir = getNetworkDeploymentDir(TEST_NETWORK, customBase);
+
+      expect(networkDir).to.equal(`${customBase}/${TEST_NETWORK}`);
+    });
+
+    it("should handle network names with special characters", () => {
+      const specialNetwork = "hedera-testnet-v2";
+      const networkDir = getNetworkDeploymentDir(specialNetwork);
+
+      expect(networkDir).to.include(specialNetwork);
+    });
+  });
+
+  describe("loadDeploymentByWorkflow", () => {
+    let timestamp: string;
+
+    before(async () => {
+      timestamp = generateTimestamp();
+      await createTestDeployment(timestamp);
+    });
+
+    after(async () => {
+      await cleanupTestDeployment(timestamp);
+    });
+
+    it("should load deployment with explicit timestamp", async () => {
+      const deployment = await loadDeploymentByWorkflow({
+        network: TEST_NETWORK,
+        workflow: TEST_WORKFLOW,
+        timestamp,
+      });
+
+      expect(deployment).to.not.be.null;
+      expect(deployment!.timestamp).to.equal(timestamp);
+    });
+
+    it("should load latest deployment when useLast is true", async () => {
+      const deployment = await loadDeploymentByWorkflow({
+        network: TEST_NETWORK,
+        workflow: TEST_WORKFLOW,
+        useLast: true,
+      });
+
+      expect(deployment).to.not.be.null;
+      expect(deployment!.network).to.equal(TEST_NETWORK);
+    });
+
+    it("should return null when no timestamp and useLast is false", async () => {
+      const deployment = await loadDeploymentByWorkflow({
+        network: TEST_NETWORK,
+        workflow: TEST_WORKFLOW,
+      });
+
+      expect(deployment).to.be.null;
+    });
+
+    it("should return null for nonexistent network", async () => {
+      const deployment = await loadDeploymentByWorkflow({
+        network: "nonexistent-network",
+        workflow: TEST_WORKFLOW,
+        useLast: true,
+      });
+
+      expect(deployment).to.be.null;
+    });
+
+    it("should return null for invalid timestamp", async () => {
+      const deployment = await loadDeploymentByWorkflow({
+        network: TEST_NETWORK,
+        workflow: TEST_WORKFLOW,
+        timestamp: "2020-01-01T00-00-00", // Does not exist
+      });
+
+      expect(deployment).to.be.null;
+    });
+  });
+
+  describe("listDeploymentsByWorkflow", () => {
+    const timestamps = ["2025-11-08T16-00-00", "2025-11-08T17-00-00", "2025-11-08T18-00-00"];
+
+    before(async () => {
+      await Promise.all(timestamps.map((ts) => createTestDeployment(ts)));
+    });
+
+    after(async () => {
+      await Promise.all(timestamps.map((ts) => cleanupTestDeployment(ts)));
+    });
+
+    it("should list files for specific workflow", async () => {
+      const files = await listDeploymentsByWorkflow(TEST_NETWORK, TEST_WORKFLOW);
+
+      expect(files).to.be.an("array");
+      expect(files.length).to.be.greaterThanOrEqual(3);
+      files.forEach((file) => {
+        expect(file).to.include(TEST_WORKFLOW);
+      });
+    });
+
+    it("should filter out non-JSON files", async () => {
+      // Create a non-JSON file temporarily
+      const networkDir = join(TEST_DEPLOYMENTS_DIR, TEST_NETWORK);
+      const nonJsonFile = join(networkDir, "readme.txt");
+      await fs.writeFile(nonJsonFile, "test content");
+
+      try {
+        const files = await listDeploymentsByWorkflow(TEST_NETWORK, TEST_WORKFLOW);
+        expect(files.every((f) => f.endsWith(".json"))).to.be.true;
+      } finally {
+        await fs.unlink(nonJsonFile).catch(() => {});
+      }
+    });
+
+    it("should filter out hidden files", async () => {
+      const networkDir = join(TEST_DEPLOYMENTS_DIR, TEST_NETWORK);
+      const hiddenFile = join(networkDir, ".hidden.json");
+      await fs.writeFile(hiddenFile, "{}");
+
+      try {
+        const files = await listDeploymentsByWorkflow(TEST_NETWORK, TEST_WORKFLOW);
+        expect(files.every((f) => !f.startsWith("."))).to.be.true;
+      } finally {
+        await fs.unlink(hiddenFile).catch(() => {});
+      }
+    });
+
+    it("should return all workflows when workflow not specified", async () => {
+      // Create a deployment with different workflow name
+      const networkDir = join(TEST_DEPLOYMENTS_DIR, TEST_NETWORK);
+      const otherWorkflowFile = join(networkDir, `${TEST_WORKFLOWS.EXISTING_BLR}-2025-11-08T19-00-00.json`);
+      await fs.writeFile(otherWorkflowFile, JSON.stringify(createSampleDeployment("2025-11-08T19-00-00")));
+
+      try {
+        const files = await listDeploymentsByWorkflow(TEST_NETWORK);
+
+        // Should include both workflow types
+        const hasNewBlr = files.some((f) => f.includes(TEST_WORKFLOWS.NEW_BLR));
+        const hasExistingBlr = files.some((f) => f.includes(TEST_WORKFLOWS.EXISTING_BLR));
+
+        expect(hasNewBlr).to.be.true;
+        expect(hasExistingBlr).to.be.true;
+      } finally {
+        await fs.unlink(otherWorkflowFile).catch(() => {});
+      }
+    });
+
+    it("should return empty array for nonexistent directory", async () => {
+      const files = await listDeploymentsByWorkflow("totally-fake-network", TEST_WORKFLOW);
+
+      expect(files).to.be.an("array");
+      expect(files.length).to.equal(0);
+    });
+  });
+
+  describe("findLatestDeployment edge cases", () => {
+    it("should return null when JSON file is corrupted", async () => {
+      const networkDir = join(TEST_DEPLOYMENTS_DIR, "corrupted-network");
+      const filename = `${TEST_WORKFLOW}-2025-11-08T20-00-00.json`;
+      const filepath = join(networkDir, filename);
+
+      await fs.mkdir(networkDir, { recursive: true });
+      await fs.writeFile(filepath, "{ invalid json }");
+
+      try {
+        const latest = await findLatestDeployment("corrupted-network", TEST_WORKFLOW);
+        expect(latest).to.be.null; // Should handle corrupted file gracefully
+      } finally {
+        await fs.unlink(filepath).catch(() => {});
+        await fs.rmdir(networkDir).catch(() => {});
+      }
+    });
+
+    it("should handle empty directory", async () => {
+      const emptyNetwork = "empty-network";
+      const networkDir = join(TEST_DEPLOYMENTS_DIR, emptyNetwork);
+      await fs.mkdir(networkDir, { recursive: true });
+
+      try {
+        const latest = await findLatestDeployment(emptyNetwork, TEST_WORKFLOW);
+        expect(latest).to.be.null;
+      } finally {
+        await fs.rmdir(networkDir).catch(() => {});
+      }
+    });
+  });
+
+  describe("saveDeploymentOutput edge cases", () => {
+    afterEach(async () => {
+      await cleanupAllTestDeployments();
+    });
+
+    it("should create parent directories automatically", async () => {
+      const _deepPath = join(TEST_DEPLOYMENTS_DIR, "deep/nested/new-network");
+      const mockData = createSampleDeployment(TEST_TIMESTAMPS.FILENAME_SAMPLE);
+
+      const result = await saveDeploymentOutput({
+        network: "deep/nested/new-network",
+        workflow: TEST_WORKFLOW,
+        data: mockData,
+      });
+
+      expect(result.success).to.be.true;
+
+      // Cleanup
+      try {
+        if (result.success) {
+          await fs.unlink(result.filepath);
+        }
+        await fs.rm(join(TEST_DEPLOYMENTS_DIR, "deep"), { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors
+      }
+    });
+
+    it("should handle data with circular reference gracefully", async () => {
+      // Create data with circular reference (will fail JSON.stringify)
+      const circularData: Record<string, unknown> = { name: "test" };
+      circularData.self = circularData;
+
+      const result = await saveDeploymentOutput({
+        network: TEST_NETWORK,
+        workflow: TEST_WORKFLOW,
+        data: circularData as unknown as DeploymentOutputType,
+      });
+
+      expect(result.success).to.be.false;
+      if (!result.success) {
+        expect(result.error).to.include("circular");
+      }
+    });
+
+    it("should return failure result for permission errors", async () => {
+      // Try to write to a read-only location (system directory)
+      // This test may not work on all systems, so we simulate with invalid path chars
+      const invalidPath = join("/\0invalid", "deployment.json");
+      const mockData = createSampleDeployment(TEST_TIMESTAMPS.FILENAME_SAMPLE);
+
+      const result = await saveDeploymentOutput({
+        network: TEST_NETWORK,
+        workflow: TEST_WORKFLOW,
+        data: mockData,
+        customPath: invalidPath,
+      });
+
+      expect(result.success).to.be.false;
+      if (!result.success) {
+        expect(result.error).to.be.a("string");
       }
     });
   });
