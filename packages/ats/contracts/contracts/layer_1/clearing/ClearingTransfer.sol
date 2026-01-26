@@ -136,6 +136,6 @@ abstract contract ClearingTransfer is IClearingTransfer, Internals {
         address _tokenHolder,
         uint256 _clearingId
     ) external view override returns (ClearingTransferData memory clearingTransferData_) {
-        return _getClearingTransferForByPartitionAdjusted(_partition, _tokenHolder, _clearingId);
+        return _getClearingTransferForByPartitionAdjustedAt(_partition, _tokenHolder, _clearingId, _blockTimestamp());
     }
 }

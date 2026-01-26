@@ -51,7 +51,8 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
         override(Internals, BondStorageWrapper)
         returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
     {
-        return _getCouponAdjusted(_couponID, _calculateSustainabilityPerformanceTargetInterestRate);
+        return
+            _getCouponAdjustedAt(_couponID, _calculateSustainabilityPerformanceTargetInterestRate, _blockTimestamp());
     }
 
     function _calculateSustainabilityPerformanceTargetInterestRate(
