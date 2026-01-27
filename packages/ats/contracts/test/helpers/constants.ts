@@ -78,11 +78,38 @@ export const TEST_NETWORKS = {
   /** Hedera mainnet network identifier */
   MAINNET: "hedera-mainnet",
 
+  /** Hedera previewnet network identifier */
+  PREVIEWNET: "hedera-previewnet",
+
+  /** Hedera local network identifier */
+  HEDERA_LOCAL: "hedera-local",
+
   /** Hardhat local network identifier */
   HARDHAT: "hardhat",
 
+  /** Local network identifier */
+  LOCAL: "local",
+
   /** Localhost network identifier */
-  LOCAL: "localhost",
+  LOCALHOST: "localhost",
+
+  /** Testnet short alias (without hedera- prefix) */
+  TESTNET_SHORT: "testnet",
+
+  /** Mainnet short alias (without hedera- prefix) */
+  MAINNET_SHORT: "mainnet",
+
+  /** Previewnet short alias (without hedera- prefix) */
+  PREVIEWNET_SHORT: "previewnet",
+
+  /** Ethereum mainnet (for non-Hedera network tests) */
+  ETHEREUM_MAINNET: "ethereum-mainnet",
+
+  /** Polygon network (for non-Hedera network tests) */
+  POLYGON: "polygon",
+
+  /** Arbitrum network (for non-Hedera network tests) */
+  ARBITRUM: "arbitrum",
 } as const;
 
 // ============================================================================
@@ -160,34 +187,35 @@ export const TEST_TIMESTAMPS = {
 
 /**
  * Sample transaction hashes for tests.
+ * All values are valid tx hash format (0x + 64 hex characters).
  */
 export const TEST_TX_HASHES = {
   /** First sample tx hash */
-  SAMPLE_0: "0xabc123",
+  SAMPLE_0: "0xabc1230000000000000000000000000000000000000000000000000000000000",
 
   /** Second sample tx hash */
-  SAMPLE_1: "0xdef456",
+  SAMPLE_1: "0xdef4560000000000000000000000000000000000000000000000000000000000",
 
   /** Third sample tx hash */
-  SAMPLE_2: "0xghi789",
+  SAMPLE_2: "0x1234567890000000000000000000000000000000000000000000000000000000",
 
   /** Fourth sample tx hash */
-  SAMPLE_3: "0xjkl012",
+  SAMPLE_3: "0xabcdef0120000000000000000000000000000000000000000000000000000000",
 
   /** Fifth sample tx hash */
-  SAMPLE_4: "0xmno345",
+  SAMPLE_4: "0x3456789000000000000000000000000000000000000000000000000000000000",
 
   /** Sixth sample tx hash */
-  SAMPLE_5: "0xpqr678",
+  SAMPLE_5: "0x6789012300000000000000000000000000000000000000000000000000000000",
 
   /** Seventh sample tx hash */
-  SAMPLE_6: "0xabc789",
+  SAMPLE_6: "0xabc7890000000000000000000000000000000000000000000000000000000000",
 
   /** Eighth sample tx hash */
-  SAMPLE_7: "0xdef123",
+  SAMPLE_7: "0xdef1230000000000000000000000000000000000000000000000000000000000",
 
   /** Ninth sample tx hash */
-  SAMPLE_8: "0xstu901",
+  SAMPLE_8: "0x9012345600000000000000000000000000000000000000000000000000000000",
 } as const;
 
 // ============================================================================
@@ -544,4 +572,106 @@ export const TEST_NUMBERS = {
 
   /** Min value (smallest positive) */
   MIN_VALUE: Number.MIN_VALUE,
+} as const;
+
+// ============================================================================
+// Mock/Stub Values for Unit Tests
+// ============================================================================
+
+/**
+ * Mock resolver key values for registry combination tests.
+ * All values are valid bytes32 format (0x + 64 hex characters).
+ */
+export const TEST_RESOLVER_KEYS = {
+  /** First mock resolver key */
+  KEY_1: "0x0000000000000000000000000000000000000000000000000000000000000111",
+
+  /** Second mock resolver key */
+  KEY_2: "0x0000000000000000000000000000000000000000000000000000000000000222",
+
+  /** Third mock resolver key */
+  KEY_3: "0x0000000000000000000000000000000000000000000000000000000000000333",
+
+  /** Fourth mock resolver key */
+  KEY_4: "0x0000000000000000000000000000000000000000000000000000000000000444",
+
+  /** Sample resolver key */
+  SAMPLE: "0x0000000000000000000000000000000000000000000000000000000000000123",
+
+  /** ABC resolver key */
+  ABC: "0x0000000000000000000000000000000000000000000000000000000000000abc",
+} as const;
+
+/**
+ * Generic facet names for mock registry tests.
+ */
+export const TEST_FACET_NAMES = {
+  /** First test facet */
+  FACET_A: "FacetA",
+
+  /** Second test facet */
+  FACET_B: "FacetB",
+
+  /** Third test facet */
+  FACET_C: "FacetC",
+
+  /** Fourth test facet */
+  FACET_D: "FacetD",
+
+  /** Generic test facet */
+  TEST: "TestFacet",
+
+  /** Duplicate facet for conflict tests */
+  DUPLICATE: "DuplicateFacet",
+
+  /** Non-existent facet for negative tests */
+  NON_EXISTENT: "NonExistent",
+} as const;
+
+/**
+ * Logger prefix values for logging tests.
+ */
+export const TEST_LOGGER_PREFIXES = {
+  /** Module prefix */
+  MODULE: "TestModule",
+
+  /** Deployment prefix */
+  DEPLOYMENT: "Deployment",
+
+  /** Generic prefix */
+  SOME: "SomePrefix",
+
+  /** Test prefix */
+  TEST: "Test",
+} as const;
+
+/**
+ * Contract names for deployment tests.
+ */
+export const TEST_CONTRACT_NAMES = {
+  /** Factory contract */
+  FACTORY: "Factory",
+
+  /** ProxyAdmin contract */
+  PROXY_ADMIN: "ProxyAdmin",
+
+  /** BusinessLogicResolver contract */
+  BLR: "BusinessLogicResolver",
+
+  /** Non-existent contract for negative tests */
+  NON_EXISTENT: "NonExistentContract",
+} as const;
+
+/**
+ * Non-existent/invalid values for negative tests.
+ */
+export const TEST_NON_EXISTENT = {
+  /** Non-existent network */
+  NETWORK: "non-existent-network",
+
+  /** Non-existent network with unique ID */
+  NETWORK_UNIQUE: "non-existent-network-12345",
+
+  /** Non-existent contract */
+  CONTRACT: "NonExistentContract",
 } as const;
