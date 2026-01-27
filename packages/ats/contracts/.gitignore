@@ -34,7 +34,7 @@ gas-report.txt
 extracted-methods.txt
 
 #Hardhat files
-cache
+/cache
 artifacts
 
 .deps/
