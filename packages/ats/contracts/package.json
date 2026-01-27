@@ -112,7 +112,7 @@
     "test:scripts:parallel": "bash -c 'NODE_OPTIONS=\"--import tsx\" npx hardhat test --parallel $(find test/scripts -name \"*.test.ts\")'",
     "test:scripts:unit": "bash -c 'npx hardhat test $(find test/scripts/unit -name \"*.test.ts\")'",
     "test:scripts:unit:parallel": "bash -c 'NODE_OPTIONS=\"--import tsx\" npx hardhat test --parallel $(find test/scripts/unit -name \"*.test.ts\")'",
-    "test:scripts:unit:coverage": "bash -c 'npx c8 --include=scripts/** --exclude=typechain-types/** --reporter=text --reporter=html npx hardhat test $(find test/scripts/unit -name \"*.test.ts\")'",
+    "test:scripts:unit:coverage": "bash -c 'npx c8 npx hardhat test $(find test/scripts/unit -name \"*.test.ts\")'",
     "test:scripts:integration": "bash -c 'npx hardhat test $(find test/scripts/integration -name \"*.test.ts\")'",
     "test:scripts:integration:parallel": "bash -c 'NODE_OPTIONS=\"--import tsx\" npx hardhat test --parallel $(find test/scripts/integration -name \"*.test.ts\")'",
     "test:demo": "npx hardhat test test/contracts/demo/Demo.test.ts",
