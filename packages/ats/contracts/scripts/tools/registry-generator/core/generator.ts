@@ -3,11 +3,14 @@
 /**
  * Generate TypeScript registry code from contract metadata.
  *
- * @module tools/generators/registryGenerator
+ * Transforms extracted contract metadata into complete TypeScript registry files
+ * with all contracts, methods, events, errors, and roles. Self-contained with no
+ * external infrastructure dependencies.
+ *
+ * @module registry-generator/core/generator
  */
 
-import { ContractMetadata } from "../scanner/metadataExtractor";
-import { MethodDefinition, EventDefinition, ErrorDefinition } from "../../infrastructure/types";
+import type { ContractMetadata, MethodDefinition, EventDefinition, ErrorDefinition } from "../types";
 
 /**
  * Format methods array for registry output.
@@ -51,10 +54,6 @@ function formatErrors(errors: ErrorDefinition[]): string {
  *
  * @param value - Role value from Solidity (may be shorthand like '0x00')
  * @returns Normalized bytes32 string (66 characters)
- *
- * @example
- * normalizeRoleValue('0x00') // '0x0000000000000000000000000000000000000000000000000000000000000000'
- * normalizeRoleValue('0x1234') // '0x0000000000000000000000000000000000000000000000000000000000001234'
  */
 function normalizeRoleValue(value: string): string {
   // Remove '0x' prefix if present
@@ -213,7 +212,7 @@ export const TOTAL_FACETS = ${facets.length} as const`;
 /**
  * Generate single facet registry entry.
  *
- * ENHANCED (2025-01-21): Includes resolver key object and role count.
+ * Includes resolver key object, role count, inheritance, methods, events, and errors.
  * Provides metadata useful for deployment verification and documentation.
  *
  * @param facet - Facet metadata
@@ -278,8 +277,6 @@ export const TOTAL_INFRASTRUCTURE_CONTRACTS = ${infrastructure.length} as const`
 
 /**
  * Generate single contract registry entry.
- *
- * ENHANCED (2025-10-21): Includes methods list.
  *
  * @param contract - Contract metadata
  * @returns TypeScript object literal
@@ -490,7 +487,7 @@ export const TOTAL_ROLES = ${sortedRoles.length} as const`;
  *
  * @param facets - Array of facet metadata
  * @param infrastructure - Array of infrastructure metadata
- * @returns Summary object
+ * @returns Summary object with statistics
  */
 export function generateSummary(
   facets: ContractMetadata[],

@@ -190,13 +190,8 @@ export {
   type ResolverProxyConfigInfo,
 } from "./operations/updateResolverProxyConfig";
 
-export {
-  generateRegistryPipeline,
-  DEFAULT_REGISTRY_CONFIG,
-  type RegistryGenerationConfig,
-  type RegistryGenerationStats,
-  type RegistryGenerationResult,
-} from "./operations/generateRegistryPipeline";
+// NOTE: generateRegistryPipeline moved to standalone module at @scripts/tools/registry-generator
+// Import from @scripts or @scripts/tools instead for the faster standalone generator
 
 // ============================================================================
 // Utilities

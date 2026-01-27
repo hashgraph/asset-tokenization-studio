@@ -53,7 +53,7 @@ export * from "./infrastructure/operations/proxyAdminDeployment";
 export * from "./infrastructure/operations/facetDeployment";
 export * from "./infrastructure/operations/deployResolverProxy";
 export * from "./infrastructure/operations/updateResolverProxyConfig";
-export * from "./infrastructure/operations/generateRegistryPipeline";
+// NOTE: generateRegistryPipeline moved to standalone module (./tools/registry-generator/)
 
 // Infrastructure utilities
 export * from "./infrastructure/utils/validation";
@@ -136,8 +136,18 @@ export * from "./workflows/upgradeTupProxies";
 // Registry Generation Tools (for extending ATS)
 // ========================================
 
-// Registry generation
-export * from "./tools/generators/registryGenerator";
+// Standalone Registry Generator (Fast, Recommended for downstream projects)
+export {
+  generateRegistryPipeline,
+  DEFAULT_CONFIG,
+  CacheManager,
+  LogLevel,
+  configureLogger,
+} from "./tools/registry-generator/exports";
+
+export type { RegistryConfig, RegistryResult, CacheEntry, RegistryCache } from "./tools/registry-generator/exports";
+
+// NOTE: Legacy registryGenerator.ts removed - use the standalone generator above
 
 // Contract scanning
 export * from "./tools/scanner/contractFinder";

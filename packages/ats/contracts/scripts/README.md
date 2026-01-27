@@ -966,7 +966,14 @@ scripts/
 │ └── upgradeTup.ts # TUP proxy upgrade CLI
 │
 ├── tools/ # Code generation tools
-│ ├── generateRegistry.ts # Registry generation CLI
+│ ├── registry-generator/ # Standalone registry generator (fast, no TypeChain deps)
+│ │ ├── index.ts # CLI entry point
+│ │ ├── pipeline.ts # Main generation pipeline
+│ │ ├── exports.ts # Public API exports
+│ │ ├── types.ts # Type definitions
+│ │ ├── cache/ # File caching for incremental builds
+│ │ ├── core/ # Scanner, extractor, generator
+│ │ └── utils/ # File utils, Solidity parser, logging
 │ ├── scanner/
 │ │ └── metadataExtractor.ts # Extract metadata from Solidity
 │ └── generators/

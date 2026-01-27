@@ -57,5 +57,8 @@ deployments/test-*.json
 deployments/**/.checkpoints/
 *.checkpoint.json
 
+# Registry generator cache
+.registry-cache.json
+
 # Test artifacts - all test-generated files go here
 .temp/

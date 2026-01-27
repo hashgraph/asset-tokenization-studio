@@ -1,185 +1,31 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Configurable registry generation pipeline for smart contracts.
+ * Registry generation pipeline - main orchestration.
  *
  * This module provides a reusable, framework-agnostic pipeline for generating
- * TypeScript contract registries from Solidity source files. Downstream projects
- * can use this to auto-generate their own registries with minimal configuration.
+ * TypeScript contract registries from Solidity source files.
  *
- * @module infrastructure/operations/generateRegistryPipeline
+ * CRITICAL: This module has NO dependencies on @scripts/infrastructure to avoid
+ * TypeChain barrel import overhead (which causes 6+ second delays).
  *
- * @example
- * ```typescript
- * // Generate registry with defaults
- * const result = await generateRegistryPipeline({
- *     contractsPath: './contracts'
- * })
- *
- * // Generate with custom configuration
- * const result = await generateRegistryPipeline({
- *     contractsPath: './contracts',
- *     outputPath: './src/generated/registry.ts',
- *     resolverKeyPaths: ['**\/config/keys.sol'],
- *     rolesPaths: ['**\/config/roles.sol'],
- *     logLevel: 'DEBUG'
- * })
- * ```
+ * @module registry-generator/pipeline
  */
 
 import * as path from "path";
-import {
-  ContractFile,
-  ContractMetadata,
-  findAllContracts,
-  categorizeContracts,
-  pairTimeTravelVariants,
-  extractMetadata,
-  detectCategory,
-  detectLayer,
-  generateRegistry,
-  generateSummary,
-  extractRoles,
-  extractResolverKeys,
-  writeFile as writeToFileFn,
-  readFile,
-  findSolidityFiles,
-} from "@scripts/tools";
-import { LogLevel, configureLogger, section, info, success, warn, table } from "@scripts/infrastructure";
-
-/**
- * Configuration for registry generation pipeline.
- */
-export interface RegistryGenerationConfig {
-  /** Path to contracts directory (required) */
-  contractsPath: string;
-
-  /** Path to artifacts directory (required) */
-  artifactPath: string;
-
-  /** Glob patterns to include (default: ['**\/*.sol']) */
-  includePaths?: string[];
-
-  /** Glob patterns to exclude (default: test/mock patterns) */
-  excludePaths?: string[];
-
-  /** Paths to search for resolver keys (default: ['**\/constants/resolverKeys.sol']) */
-  resolverKeyPaths?: string[];
-
-  /** Paths to search for roles (default: ['**\/constants/roles.sol']) */
-  rolesPaths?: string[];
-
-  /** Include storage wrappers in registry (default: true) */
-  includeStorageWrappers?: boolean;
-
-  /** Include TimeTravel variant pairing (default: true) */
-  includeTimeTravel?: boolean;
-
-  /** Extract natspec descriptions from contracts (default: true) */
-  extractNatspec?: boolean;
-
-  /** Output file path (default: './generated/registry.data.ts') */
-  outputPath?: string;
-
-  /** Module name for imports in generated code (default: '@scripts/infrastructure') */
-  moduleName?: string;
-
-  /** TypeChain factory import path (default: '@contract-types') */
-  typechainModuleName?: string;
-
-  /** Logging level (default: 'INFO') */
-  logLevel?: "DEBUG" | "INFO" | "WARN" | "ERROR" | "SILENT";
-
-  /** Custom category detector function */
-  categoryDetector?: (contract: ContractFile, layer: number) => string;
-
-  /** Custom layer detector function */
-  layerDetector?: (contract: ContractFile) => number;
-
-  /** Only generate facets, skip infrastructure contracts (default: false) */
-  facetsOnly?: boolean;
-
-  /**
-   * Include mock contracts in registry generation.
-   * When enabled, scans mockContractPaths for contracts and includes them
-   * in a separate MOCK_CONTRACTS registry.
-   * @default false
-   */
-  includeMocksInRegistry?: boolean;
-
-  /**
-   * Glob patterns to find mock contracts.
-   * Only used if includeMocksInRegistry=true.
-   * Mock contracts should follow standard patterns (use constants files for resolver keys).
-   * @default ['**\/mocks/**\/*.sol', '**\/test/**\/*Mock*.sol']
-   */
-  mockContractPaths?: string[];
-}
-
-/**
- * Statistics from registry generation.
- */
-export interface RegistryGenerationStats {
-  /** Total number of facets in registry */
-  totalFacets: number;
-
-  /** Total number of infrastructure contracts in registry */
-  totalInfrastructure: number;
-
-  /** Total number of storage wrappers in registry */
-  totalStorageWrappers: number;
-
-  /** Total number of mock contracts in registry */
-  totalMocks: number;
-
-  /** Total number of unique roles found */
-  totalRoles: number;
-
-  /** Total number of unique resolver keys found */
-  totalResolverKeys: number;
-
-  /** Number of facets with TimeTravel variants */
-  withTimeTravel: number;
-
-  /** Number of contracts with role definitions */
-  withRoles: number;
-
-  /** Facets grouped by category */
-  byCategory: Record<string, number>;
-
-  /** Facets grouped by layer */
-  byLayer: Record<number, number>;
-
-  /** Number of lines in generated code */
-  generatedLines: number;
-
-  /** Time taken to generate (milliseconds) */
-  durationMs: number;
-}
-
-/**
- * Result from registry generation pipeline.
- */
-export interface RegistryGenerationResult {
-  /** Generated TypeScript code */
-  code: string;
-
-  /** Generation statistics */
-  stats: RegistryGenerationStats;
-
-  /** Output file path (if written to disk) */
-  outputPath?: string;
-
-  /** Warnings encountered during generation */
-  warnings: string[];
-}
+import type { RegistryConfig, RegistryResult, ContractFile, ContractMetadata } from "./types";
+import { findSolidityFiles, readFile, writeFile } from "./utils/fileUtils";
+import { extractResolverKeys, extractRoles } from "./utils/solidityParser";
+import { LogLevel, configureLogger, section, info, success, warn, debug, table } from "./utils/logging";
+import { findAllContracts, categorizeContracts, pairTimeTravelVariants } from "./core/scanner";
+import { extractMetadata } from "./core/extractor";
+import { generateRegistry, generateSummary } from "./core/generator";
+import { CacheManager } from "./cache/manager";
 
 /**
  * Default configuration for registry generation.
  */
-export const DEFAULT_REGISTRY_CONFIG: Required<
-  Omit<RegistryGenerationConfig, "categoryDetector" | "layerDetector" | "mockContractPaths">
-> & { mockContractPaths: string[] } = {
+export const DEFAULT_CONFIG: Required<Omit<RegistryConfig, "mockContractPaths">> & { mockContractPaths: string[] } = {
   contractsPath: "./contracts",
   artifactPath: "./artifacts/contracts",
   includePaths: ["**/*.sol"],
@@ -196,66 +42,27 @@ export const DEFAULT_REGISTRY_CONFIG: Required<
   facetsOnly: false,
   includeMocksInRegistry: false,
   mockContractPaths: ["**/mocks/**/*.sol", "**/test/**/*Mock*.sol", "**/test/**/*mock*.sol"],
+  useCache: false,
+  cacheDir: process.cwd(),
 };
 
 /**
  * Generate a complete contract registry from Solidity source files.
  *
- * This is the main entry point for downstream projects to auto-generate
- * their own contract registries. It handles the full pipeline:
- *
- * 1. Scan contracts directory for Solidity files
- * 2. Categorize contracts (facets, infrastructure, test, etc.)
- * 3. Extract resolver keys and roles from constants files
- * 4. Extract metadata from each contract (methods, events, errors, natspec)
- * 5. Generate TypeScript registry code
- * 6. Optionally write to file
- *
- * The function is highly configurable and can adapt to different project
- * structures and naming conventions.
- *
- * @param config - Configuration options (uses defaults for omitted values)
- * @param writeFile - Whether to write generated code to file (default: true)
- * @returns Registry generation result with code, statistics, and warnings
- *
- * @example
- * ```typescript
- * // Simple usage with defaults
- * const result = await generateRegistryPipeline({
- *     contractsPath: './contracts'
- * })
- * console.log(`Generated ${result.stats.totalFacets} facets`)
- *
- * // Custom configuration for different project structure
- * const result = await generateRegistryPipeline({
- *     contractsPath: './src/contracts',
- *     outputPath: './scripts/registry.ts',
- *     resolverKeyPaths: ['**\/config/keys.sol'],
- *     rolesPaths: ['**\/config/roles.sol'],
- *     includeStorageWrappers: false,
- *     moduleName: '@my-company/contracts'
- * })
- *
- * // Dry run (don't write file)
- * const result = await generateRegistryPipeline(
- *     { contractsPath: './contracts' },
- *     false
- * )
- * console.log(result.code)  // View generated TypeScript
- * ```
+ * @param config - Configuration options
+ * @param writeToFile - Whether to write generated code to file
+ * @returns Registry generation result
  */
 export async function generateRegistryPipeline(
-  config: RegistryGenerationConfig,
+  config: RegistryConfig,
   writeToFile: boolean = true,
-): Promise<RegistryGenerationResult> {
+): Promise<RegistryResult> {
   const startTime = Date.now();
 
   // Merge with defaults
-  const fullConfig: Required<RegistryGenerationConfig> = {
-    ...DEFAULT_REGISTRY_CONFIG,
+  const fullConfig: Required<RegistryConfig> = {
+    ...DEFAULT_CONFIG,
     ...config,
-    categoryDetector: config.categoryDetector || detectCategory,
-    layerDetector: config.layerDetector || detectLayer,
   };
 
   // Configure logger
@@ -270,15 +77,23 @@ export async function generateRegistryPipeline(
 
   const warnings: string[] = [];
 
+  // Initialize cache if enabled
+  let cache: CacheManager | null = null;
+  if (fullConfig.useCache) {
+    cache = new CacheManager(fullConfig.cacheDir);
+    const stats = cache.getStats();
+    debug(`Cache initialized with ${stats.totalEntries} entries`);
+  }
+
   section("Registry Generation Pipeline");
   info(`Scanning: ${fullConfig.contractsPath}`);
 
-  // Resolve absolute path
+  // Resolve absolute paths
   const contractsDir = path.isAbsolute(fullConfig.contractsPath)
     ? fullConfig.contractsPath
     : path.resolve(process.cwd(), fullConfig.contractsPath);
 
-  info(`Scanning: ${fullConfig.artifactPath}`);
+  info(`Artifacts: ${fullConfig.artifactPath}`);
   const artifactDir = path.isAbsolute(fullConfig.artifactPath)
     ? fullConfig.artifactPath
     : path.resolve(process.cwd(), fullConfig.artifactPath);
@@ -302,7 +117,7 @@ export async function generateRegistryPipeline(
   ];
   table(["Type", "Count"], categorizationTable);
 
-  // Step 3: Pair TimeTravel variants (if enabled)
+  // Step 3: Pair TimeTravel variants
   let timeTravelPairs = new Map<string, ContractFile | null>();
   let withTimeTravel = 0;
 
@@ -320,10 +135,8 @@ export async function generateRegistryPipeline(
   const allResolverKeys = new Map<string, string>();
   const allSolidityFiles = findSolidityFiles(contractsDir);
 
-  // Find resolver key files using configured patterns
   const resolverKeyFiles = allSolidityFiles.filter((filePath) =>
     fullConfig.resolverKeyPaths.some((pattern) => {
-      // Convert glob pattern to regex
       const regexPattern = pattern.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*");
       return new RegExp(regexPattern).test(filePath);
     }),
@@ -345,7 +158,6 @@ export async function generateRegistryPipeline(
   // Step 5: Extract metadata
   info("Step 5: Extracting contract metadata...");
 
-  // Create contracts map for inheritance resolution
   const contractsMap = new Map<string, ContractFile>();
   for (const contract of allContracts) {
     for (const contractName of contract.contractNames) {
@@ -353,30 +165,61 @@ export async function generateRegistryPipeline(
     }
   }
 
-  // Extract facet metadata
+  // Helper function to extract metadata with caching
+  let cacheHits = 0;
+  let cacheMisses = 0;
+
+  const extractWithCache = (contract: ContractFile, hasTimeTravel: boolean): ContractMetadata => {
+    // Check cache first if enabled
+    if (cache && !cache.shouldReprocess(contract.filePath)) {
+      const cached = cache.getCached(contract.filePath);
+      if (cached) {
+        cacheHits++;
+        // Update hasTimeTravel since it may have changed based on config
+        return { ...cached, hasTimeTravel };
+      }
+    }
+
+    // Extract fresh metadata
+    cacheMisses++;
+    const metadata = extractMetadata(contract, hasTimeTravel, allResolverKeys, contractsMap);
+
+    // Cache the result
+    if (cache) {
+      cache.set(contract.filePath, metadata);
+    }
+
+    return metadata;
+  };
+
   const facetMetadata = categorized.facets.map((contract) => {
     const hasTimeTravel = fullConfig.includeTimeTravel ? timeTravelPairs.get(contract.primaryContract) !== null : false;
-    return extractMetadata(contract, hasTimeTravel, allResolverKeys, contractsMap);
+    return extractWithCache(contract, hasTimeTravel);
   });
 
-  // Extract infrastructure metadata (unless facetsOnly)
   const infrastructureMetadata = fullConfig.facetsOnly
     ? []
-    : categorized.infrastructure.map((contract) => extractMetadata(contract, false, allResolverKeys, contractsMap));
+    : categorized.infrastructure.map((contract) => extractWithCache(contract, false));
 
   info(`  Extracted metadata for ${facetMetadata.length} facets`);
   if (!fullConfig.facetsOnly) {
     info(`  Extracted metadata for ${infrastructureMetadata.length} infrastructure contracts`);
   }
 
-  // Validate resolver keys
+  // Log cache statistics
+  if (cache) {
+    info(
+      `  Cache: ${cacheHits} hits, ${cacheMisses} misses (${Math.round((cacheHits / (cacheHits + cacheMisses || 1)) * 100)}% hit rate)`,
+    );
+  }
+
   const facetsWithResolverKeys = facetMetadata.filter((f) => f.resolverKey);
   const facetsWithoutResolverKeys = facetMetadata.filter((f) => !f.resolverKey);
   info(
     `  Resolver keys: ${facetsWithResolverKeys.length} facets with keys, ${facetsWithoutResolverKeys.length} without`,
   );
 
-  // Step 5.5: Extract Storage Wrapper metadata (if enabled)
+  // Step 5.5: Extract Storage Wrapper metadata
   let storageWrapperMetadata: ContractMetadata[] = [];
 
   if (fullConfig.includeStorageWrappers) {
@@ -385,41 +228,26 @@ export async function generateRegistryPipeline(
       .filter((contract) => contract.filePath.endsWith("StorageWrapper.sol"))
       .filter((c): c is NonNullable<typeof c> => c !== null);
 
-    storageWrapperMetadata = storageWrapperContracts.map((contract) =>
-      extractMetadata(contract, false, allResolverKeys, contractsMap),
-    );
+    storageWrapperMetadata = storageWrapperContracts.map((contract) => extractWithCache(contract, false));
 
     info(`  Extracted metadata for ${storageWrapperMetadata.length} storage wrappers`);
-  } else {
-    info("Step 5.5: Skipping Storage Wrapper extraction (disabled)");
   }
 
-  // Step 5.6: Extract mock contracts metadata (if enabled)
+  // Step 5.6: Extract mock contracts metadata
   let mockMetadata: ContractMetadata[] = [];
 
   if (fullConfig.includeMocksInRegistry) {
     info("Step 5.6: Extracting mock contracts metadata...");
-
-    // Use already-categorized test contracts
-    // These were properly categorized in Step 2 (categorizeContracts)
-    // which now checks for test/mock BEFORE checking for facets
     const mockContracts = categorized.test;
-
     info(`  Found ${mockContracts.length} mock/test contract files`);
-
-    // Extract metadata for mock contracts
-    mockMetadata = mockContracts.map((contract) => extractMetadata(contract, false, allResolverKeys, contractsMap));
-
+    mockMetadata = mockContracts.map((contract) => extractWithCache(contract, false));
     info(`  Extracted metadata for ${mockMetadata.length} mock contracts`);
 
-    // Warn about mocks without resolver keys (may be intentional)
     const missingKeys = mockMetadata.filter((m) => !m.resolverKey);
     if (missingKeys.length > 0) {
       warn(`${missingKeys.length} mock contracts without resolver keys: ${missingKeys.map((m) => m.name).join(", ")}`);
       warnings.push(`Mock contracts without resolver keys: ${missingKeys.map((m) => m.name).join(", ")}`);
     }
-  } else {
-    info("Step 5.6: Skipping mock contract extraction (disabled)");
   }
 
   // Step 6: Scan standalone constant files for roles
@@ -427,7 +255,6 @@ export async function generateRegistryPipeline(
 
   const allRoles = new Map<string, string>();
 
-  // Collect roles from facets and infrastructure
   for (const metadata of [...facetMetadata, ...infrastructureMetadata]) {
     for (const role of metadata.roles) {
       if (!allRoles.has(role.name)) {
@@ -436,7 +263,6 @@ export async function generateRegistryPipeline(
     }
   }
 
-  // Find and scan standalone roles files using configured patterns
   const rolesFiles = allSolidityFiles.filter((filePath) =>
     fullConfig.rolesPaths.some((pattern) => {
       const regexPattern = pattern.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*");
@@ -503,7 +329,7 @@ export async function generateRegistryPipeline(
     table(["Layer", "Count"], layerTable);
   }
 
-  // Step 9: Format the generated code with Prettier
+  // Step 9: Format with Prettier
   let formattedCode = registryCode;
   try {
     const prettier = await import("prettier");
@@ -520,7 +346,7 @@ export async function generateRegistryPipeline(
     warn(`Could not apply Prettier formatting: ${error}`);
   }
 
-  // Step 10: Write output (if requested)
+  // Step 10: Write output
   let outputPath: string | undefined;
 
   if (writeToFile) {
@@ -528,30 +354,23 @@ export async function generateRegistryPipeline(
       ? fullConfig.outputPath
       : path.resolve(process.cwd(), fullConfig.outputPath);
 
-    // Smart file writing: only write if content changed (excluding timestamp)
     let shouldWrite = true;
     try {
       const existingContent = readFile(resolvedOutputPath);
-
-      // Normalize content by removing timestamp line for comparison
       const normalizeContent = (content: string) => {
         return content.replace(/\n \* Generated: .*\n/, "\n * Generated: TIMESTAMP\n");
       };
 
-      const normalizedExisting = normalizeContent(existingContent);
-      const normalizedNew = normalizeContent(formattedCode);
-
-      if (normalizedExisting === normalizedNew) {
+      if (normalizeContent(existingContent) === normalizeContent(formattedCode)) {
         shouldWrite = false;
         info("Registry content unchanged - preserving existing file and timestamp");
       }
-    } catch (error) {
-      // File doesn't exist or can't be read - write new file
+    } catch {
       shouldWrite = true;
     }
 
     if (shouldWrite) {
-      writeToFileFn(resolvedOutputPath, formattedCode);
+      writeFile(resolvedOutputPath, formattedCode);
       success("Registry generated successfully!");
       info(`Written to: ${resolvedOutputPath}`);
     }
@@ -574,6 +393,16 @@ export async function generateRegistryPipeline(
     const warningMsg = `${withoutTimeTravel.length} facets don't have TimeTravel variants: ${withoutTimeTravel.map((f) => f.name).join(", ")}`;
     warnings.push(warningMsg);
     warn(warningMsg);
+  }
+
+  // Save cache if enabled
+  if (cache) {
+    const pruned = cache.prune();
+    if (pruned > 0) {
+      debug(`Pruned ${pruned} stale cache entries`);
+    }
+    cache.save();
+    debug("Cache saved");
   }
 
   const durationMs = Date.now() - startTime;
