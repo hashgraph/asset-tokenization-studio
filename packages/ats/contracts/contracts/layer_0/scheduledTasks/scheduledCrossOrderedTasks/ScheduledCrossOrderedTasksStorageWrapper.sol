@@ -16,8 +16,12 @@ import {
 } from "contracts/layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
 
 abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAdjustmentsStorageWrapper {
-    function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes memory _newData) internal override {
-        ScheduledTasksLib.addScheduledTask(_scheduledCrossOrderedTaskStorage(), _newScheduledTimestamp, _newData);
+    function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes32 _taskType) internal override {
+        ScheduledTasksLib.addScheduledTask(
+            _scheduledCrossOrderedTaskStorage(),
+            _newScheduledTimestamp,
+            abi.encode(_taskType)
+        );
     }
 
     function _triggerScheduledCrossOrderedTasks(uint256 _max) internal override returns (uint256) {
@@ -40,8 +44,6 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
         ScheduledTask memory _scheduledTask
     ) internal override {
         bytes memory data = _scheduledTask.data;
-
-        if (data.length == 0) return;
 
         bytes32 taskType = abi.decode(data, (bytes32));
 

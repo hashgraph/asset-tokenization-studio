@@ -11,8 +11,12 @@ import {
 import { COUPON_LISTING_RESULT_ID } from "../../constants/values.sol";
 
 abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStorageWrapper {
-    function _addScheduledCouponListing(uint256 _newScheduledTimestamp, bytes memory _newData) internal override {
-        ScheduledTasksLib.addScheduledTask(_scheduledCouponListingStorage(), _newScheduledTimestamp, _newData);
+    function _addScheduledCouponListing(uint256 _newScheduledTimestamp, bytes32 _actionId) internal override {
+        ScheduledTasksLib.addScheduledTask(
+            _scheduledCouponListingStorage(),
+            _newScheduledTimestamp,
+            abi.encode(_actionId)
+        );
     }
 
     function _triggerScheduledCouponListing(uint256 _max) internal override returns (uint256) {
@@ -31,8 +35,6 @@ abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStor
         ScheduledTask memory _scheduledTask
     ) internal override {
         bytes memory data = _scheduledTask.data;
-
-        if (data.length == 0) return;
 
         bytes32 actionId = abi.decode(data, (bytes32));
 

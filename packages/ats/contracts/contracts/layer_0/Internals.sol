@@ -45,10 +45,10 @@ abstract contract Internals is Modifiers {
     function _addNewTokenHolder(address tokenHolder) internal virtual;
     function _addPartitionTo(uint256 _value, address _account, bytes32 _partition) internal virtual;
     function _addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal virtual;
-    function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes memory _newData) internal virtual;
-    function _addScheduledCouponListing(uint256 _newScheduledTimestamp, bytes memory _newData) internal virtual;
-    function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes memory _newData) internal virtual;
-    function _addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes memory _newData) internal virtual;
+    function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes32 _actionId) internal virtual;
+    function _addScheduledCouponListing(uint256 _newScheduledTimestamp, bytes32 _actionId) internal virtual;
+    function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes32 _taskType) internal virtual;
+    function _addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes32 _actionId) internal virtual;
     function _addToControlList(address _account) internal virtual returns (bool success_);
     function _addToCouponsOrderedList(uint256 _couponID) internal virtual;
     function _adjustBalances(uint256 _factor, uint8 _decimals) internal virtual;
@@ -856,11 +856,6 @@ abstract contract Internals is Modifiers {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockId
-    ) internal view virtual returns (ILock.LockData memory);
-    function _getLockByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex
     ) internal view virtual returns (ILock.LockData memory);
     function _getLockCountForByPartition(
         bytes32 _partition,

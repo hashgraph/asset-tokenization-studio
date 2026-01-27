@@ -13,8 +13,12 @@ import {
 } from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponListingStorageWrapper {
-    function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes memory _newData) internal override {
-        ScheduledTasksLib.addScheduledTask(_scheduledBalanceAdjustmentStorage(), _newScheduledTimestamp, _newData);
+    function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes32 _actionId) internal override {
+        ScheduledTasksLib.addScheduledTask(
+            _scheduledBalanceAdjustmentStorage(),
+            _newScheduledTimestamp,
+            abi.encode(_actionId)
+        );
     }
 
     function _triggerScheduledBalanceAdjustments(uint256 _max) internal override returns (uint256) {
@@ -34,7 +38,6 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
     ) internal override {
         bytes memory data = _scheduledTask.data;
 
-        if (data.length == 0) return;
         (, , bytes memory balanceAdjustmentData) = _getCorporateAction(abi.decode(data, (bytes32)));
         if (balanceAdjustmentData.length == 0) return;
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
