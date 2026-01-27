@@ -277,7 +277,7 @@ describe("Total Balance Tests", () => {
       await loadFixture(deployEquity.bind(null, false));
     });
 
-    it.only("GIVEN single partition equity with locked, held, cleared, and frozen tokens WHEN getTotalBalanceFor and getTotalBalanceForByPartition THEN returns correct total balance", async () => {
+    it("GIVEN single partition equity with locked, held, cleared, and frozen tokens WHEN getTotalBalanceFor and getTotalBalanceForByPartition THEN returns correct total balance", async () => {
       const tokenHolder = signer_A.address;
       const totalMintAmount = 1000;
 
