@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { task } from "hardhat/config";
 import { execSync } from "child_process";
 
@@ -21,7 +23,7 @@ import { execSync } from "child_process";
  * When called during compilation, uses WARN log level to show only
  * the final result. When called manually, shows full detailed output.
  *
- * @see scripts/tools/generateRegistry.ts for the underlying implementation
+ * @see scripts/tools/registry-generator/index.ts for the standalone implementation
  */
 task("generate-registry", "Generate contract registry from Solidity source files")
   .addFlag("silent", "Minimal output (only show final result)")
