@@ -6,14 +6,14 @@ import { IClearingRead } from "../interfaces/clearing/IClearingRead.sol";
 
 abstract contract ClearingRead is IClearingRead, Internals {
     function getClearedAmountFor(address _tokenHolder) external view returns (uint256 amount_) {
-        return _getClearedAmountForAdjusted(_tokenHolder);
+        return _getClearedAmountForAdjustedAt(_tokenHolder, _blockTimestamp());
     }
 
     function getClearedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 amount_) {
-        return _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+        return _getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
     }
 
     function getClearingCountForByPartition(

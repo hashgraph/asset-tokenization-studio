@@ -11,7 +11,7 @@ import { Internals } from "../../../layer_0/Internals.sol";
  */
 abstract contract ERC1410Read is IERC1410Read, Internals {
     function balanceOf(address _tokenHolder) external view returns (uint256) {
-        return _balanceOfAdjusted(_tokenHolder);
+        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
     }
 
     function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256) {
@@ -19,15 +19,15 @@ abstract contract ERC1410Read is IERC1410Read, Internals {
     }
 
     function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256) {
-        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
+        return _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
     }
 
     function totalSupply() external view returns (uint256) {
-        return _totalSupplyAdjusted();
+        return _totalSupplyAdjustedAt(_blockTimestamp());
     }
 
     function totalSupplyByPartition(bytes32 _partition) external view returns (uint256) {
-        return _totalSupplyByPartitionAdjusted(_partition);
+        return _totalSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 
     function partitionsOf(address _tokenHolder) external view returns (bytes32[] memory) {

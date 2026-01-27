@@ -46,6 +46,7 @@ const BOND_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "TotalBalanceFacet",
 
   // ERC Standards
   "ERC1410IssuerFacet",

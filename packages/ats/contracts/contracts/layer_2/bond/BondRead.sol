@@ -80,6 +80,6 @@ abstract contract BondRead is IBondRead, Internals {
     }
 
     function getCouponsOrderedListTotal() external view returns (uint256 total_) {
-        return _getCouponsOrderedListTotalAdjusted();
+        return _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp());
     }
 }

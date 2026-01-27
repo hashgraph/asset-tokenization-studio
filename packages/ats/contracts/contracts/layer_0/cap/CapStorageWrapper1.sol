@@ -46,19 +46,11 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         return _capStorage().maxSupplyByPartition[partition];
     }
 
-    function _getMaxSupplyAdjusted() internal view override returns (uint256 maxSupply_) {
-        return _getMaxSupplyAdjustedAt(_blockTimestamp());
-    }
-
     function _getMaxSupplyAdjustedAt(uint256 timestamp) internal view override returns (uint256) {
         CapDataStorage storage capStorage = _capStorage();
         if (capStorage.maxSupply == MAX_UINT256) return MAX_UINT256;
         (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(timestamp);
         return capStorage.maxSupply * pendingAbaf;
-    }
-
-    function _getMaxSupplyByPartitionAdjusted(bytes32 _partition) internal view override returns (uint256 maxSupply_) {
-        return _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 
     function _getMaxSupplyByPartitionAdjustedAt(

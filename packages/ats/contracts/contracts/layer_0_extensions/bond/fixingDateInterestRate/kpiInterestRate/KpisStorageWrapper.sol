@@ -4,15 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _KPIS_STORAGE_POSITION } from "contracts/layer_0/constants/storagePositions.sol";
 import { IKpis } from "contracts/layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
 import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
-import { InternalsSustainabilityPerformanceTargetInterestRate } from "../Internals.sol";
-import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
+import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { InternalsKpiInterestRate } from "./Internals.sol";
+import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";
 import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
 
-abstract contract KpisStorageWrapper is
-    InternalsSustainabilityPerformanceTargetInterestRate,
-    BondStorageWrapperFixingDateInterestRate
-{
+abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWrapperFixingDateInterestRate {
     using CheckpointsLib for CheckpointsLib.Checkpoint[];
 
     struct KpisDataStorage {
@@ -22,8 +20,9 @@ abstract contract KpisStorageWrapper is
     }
 
     modifier isValidDate(uint256 _date, address _project) override {
-        if (_date <= _getMinDateAdjusted() || _date > _blockTimestamp()) {
-            revert IKpis.InvalidDate(_date, _getMinDateAdjusted(), _blockTimestamp());
+        uint256 minDate = _getMinDateAdjusted();
+        if (_date <= minDate || _date > _blockTimestamp()) {
+            revert IKpis.InvalidDate(_date, minDate, _blockTimestamp());
         }
         if (_isCheckpointDate(_date, _project)) {
             revert IKpis.KpiDataAlreadyExists(_date);
@@ -91,7 +90,9 @@ abstract contract KpisStorageWrapper is
 
         uint256 lastFixingDate = _getCoupon(_couponID).coupon.fixingDate;
 
-        if (lastFixingDate > _kpisDataStorage().minDate) _kpisDataStorage().minDate = lastFixingDate;
+        assert(lastFixingDate >= _kpisDataStorage().minDate);
+
+        _setMinDate(lastFixingDate);
     }
 
     function _getLatestKpiData(
@@ -107,13 +108,15 @@ abstract contract KpisStorageWrapper is
     function _getMinDateAdjusted() internal view override returns (uint256 minDate_) {
         minDate_ = _kpisDataStorage().minDate;
 
-        uint256 total = _getCouponsOrderedListTotalAdjusted();
+        uint256 total = _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp());
 
         if (total == 0) return minDate_;
 
         uint256 lastFixingDate = _getCoupon(_getCouponFromOrderedListAt(total - 1)).coupon.fixingDate;
 
-        if (lastFixingDate > minDate_) minDate_ = lastFixingDate;
+        assert(lastFixingDate >= minDate_);
+
+        minDate_ = lastFixingDate;
     }
 
     function _isCheckpointDate(uint256 _date, address _project) internal view override returns (bool) {

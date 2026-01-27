@@ -223,10 +223,6 @@ abstract contract AdjustBalancesStorageWrapper1 is
         return _adjustBalancesStorage().abaf;
     }
 
-    function _getAbafAdjusted() internal view override returns (uint256) {
-        return _getAbafAdjustedAt(_blockTimestamp());
-    }
-
     function _getAbafAdjustedAt(uint256 _timestamp) internal view override returns (uint256) {
         uint256 abaf = _getAbaf();
         if (abaf == 0) abaf = 1;

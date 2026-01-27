@@ -83,7 +83,7 @@ abstract contract Lock is ILock, Internals {
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+        return _getLockedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
     }
 
     function getLockCountForByPartition(
@@ -107,11 +107,11 @@ abstract contract Lock is ILock, Internals {
         address _tokenHolder,
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        return _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
+        return _getLockForByPartitionAdjustedAt(_partition, _tokenHolder, _lockId, _blockTimestamp());
     }
 
     function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return _getLockedAmountForByPartitionAdjusted(_DEFAULT_PARTITION, _tokenHolder);
+        return _getLockedAmountForByPartitionAdjustedAt(_DEFAULT_PARTITION, _tokenHolder, _blockTimestamp());
     }
 
     function getLockCountFor(address _tokenHolder) external view override returns (uint256 lockCount_) {
@@ -130,6 +130,6 @@ abstract contract Lock is ILock, Internals {
         address _tokenHolder,
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        return _getLockForByPartitionAdjusted(_DEFAULT_PARTITION, _tokenHolder, _lockId);
+        return _getLockForByPartitionAdjustedAt(_DEFAULT_PARTITION, _tokenHolder, _lockId, _blockTimestamp());
     }
 }

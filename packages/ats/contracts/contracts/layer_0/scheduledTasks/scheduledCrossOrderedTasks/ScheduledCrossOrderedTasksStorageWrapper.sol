@@ -31,9 +31,6 @@ abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAd
     }
 
     function _callTriggerPendingScheduledCrossOrderedTasks() internal override returns (uint256) {
-        if (_getScheduledCrossOrderedTaskCount() == 0) {
-            return 0;
-        }
         return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
     }
 

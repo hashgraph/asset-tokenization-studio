@@ -328,12 +328,6 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         holdStorage.holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
     }
 
-    function _getHeldAmountForAdjusted(address _tokenHolder) internal view override returns (uint256 amount_) {
-        uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalHeldLabaf(_tokenHolder));
-
-        return _getHeldAmountFor(_tokenHolder) * factor;
-    }
-
     function _getHeldAmountForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -343,13 +337,14 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         return _getHeldAmountFor(_tokenHolder) * factor;
     }
 
-    function _getTotalBalanceForByPartitionAdjusted(
+    function _getTotalBalanceForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual override returns (uint256) {
         return
-            super._getTotalBalanceForByPartitionAdjusted(_partition, _tokenHolder) +
-            _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+            super._getTotalBalanceForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
+            _getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
     }
 
     function _getTotalBalanceForAdjustedAt(
@@ -361,20 +356,21 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             _getHeldAmountForAdjustedAt(_tokenHolder, _timestamp);
     }
 
-    function _getTotalBalance(address _tokenHolder) internal view virtual override returns (uint256) {
-        return super._getTotalBalance(_tokenHolder) + _getHeldAmountForAdjusted(_tokenHolder);
-    }
-
-    function _getHeldAmountForByPartitionAdjusted(
+    function _getHeldAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view override returns (uint256 amount_) {
-        uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalHeldLabafByPartition(_partition, _tokenHolder));
+        uint256 factor = _calculateFactor(
+            _getAbafAdjustedAt(_timestamp),
+            _getTotalHeldLabafByPartition(_partition, _tokenHolder)
+        );
         return _getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
     }
 
-    function _getHoldForByPartitionAdjusted(
-        HoldIdentifier calldata _holdIdentifier
+    function _getHoldForByPartitionAdjustedAt(
+        HoldIdentifier calldata _holdIdentifier,
+        uint256 _timestamp
     )
         internal
         view
@@ -390,7 +386,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         )
     {
         uint256 factor = _calculateFactor(
-            _getAbafAdjusted(),
+            _getAbafAdjustedAt(_timestamp),
             _getHoldLabafByPartition(_holdIdentifier.partition, _holdIdentifier.holdId, _holdIdentifier.tokenHolder)
         );
 

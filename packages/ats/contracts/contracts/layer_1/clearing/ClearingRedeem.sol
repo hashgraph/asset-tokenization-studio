@@ -114,6 +114,6 @@ abstract contract ClearingRedeem is IClearingRedeem, Internals {
         address _tokenHolder,
         uint256 _clearingId
     ) external view override returns (ClearingRedeemData memory clearingRedeemData_) {
-        return _getClearingRedeemForByPartitionAdjusted(_partition, _tokenHolder, _clearingId);
+        return _getClearingRedeemForByPartitionAdjustedAt(_partition, _tokenHolder, _clearingId, _blockTimestamp());
     }
 }

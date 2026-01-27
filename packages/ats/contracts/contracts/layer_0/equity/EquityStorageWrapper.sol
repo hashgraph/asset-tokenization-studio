@@ -320,7 +320,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
             balance_ = (_snapshotId != 0)
                 ? _getTotalBalanceOfAtSnapshot(_snapshotId, _account)
-                : (_getTotalBalanceForAdjustedAt(_account, _date));
+                : _getTotalBalanceForAdjustedAt(_account, _date);
 
             decimals_ = (_snapshotId != 0) ? _decimalsAtSnapshot(_snapshotId) : _decimalsAdjustedAt(_date);
         }

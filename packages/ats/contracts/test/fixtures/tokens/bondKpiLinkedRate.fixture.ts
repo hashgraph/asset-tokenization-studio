@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
 import { CURRENCIES, DeepPartial, BOND_KPI_LINKED_RATE_CONFIG_ID, ADDRESS_ZERO } from "../../../scripts";
 import {
@@ -43,7 +45,6 @@ export const DEFAULT_BOND_KPI_LINKED_RATE_PARAMS = {
   maxDeviationFloor: 500,
   impactDataDecimals: 2,
   adjustmentPrecision: 2,
-  kpiOracle: ADDRESS_ZERO,
 } as const;
 
 /**
@@ -60,13 +61,11 @@ export async function deployBondKpiLinkedRateTokenFixture({
   regulationTypeParams,
   interestRateParams,
   impactDataParams,
-  kpiOracle,
 }: {
   bondDataParams?: DeepPartial<DeployBondFromFactoryParams>;
   regulationTypeParams?: DeepPartial<FactoryRegulationDataParams>;
   interestRateParams?: DeepPartial<InterestRateParams>;
   impactDataParams?: DeepPartial<ImpactDataParams>;
-  kpiOracle?: string;
 } = {}) {
   const infrastructure = await deployAtsInfrastructureFixture();
   const { factory, blr, deployer } = infrastructure;
@@ -115,7 +114,6 @@ export async function deployBondKpiLinkedRateTokenFixture({
     getRegulationData(regulationTypeParams),
     interestRate,
     impactData,
-    kpiOracle ?? "0x0000000000000000000000000000000000000000",
   );
 
   // Connect commonly used facets to diamond

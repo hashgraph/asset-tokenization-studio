@@ -41,11 +41,11 @@ abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 
 
     function _checkNewMaxSupplyByPartition(bytes32 _partition, uint256 _newMaxSupply) internal view override {
         if (_newMaxSupply == 0) return;
-        uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(_partition);
+        uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
         if (totalSupplyForPartition > _newMaxSupply) {
             revert NewMaxSupplyForPartitionTooLow(_partition, _newMaxSupply, totalSupplyForPartition);
         }
-        uint256 maxSupplyOverall = _getMaxSupplyAdjusted();
+        uint256 maxSupplyOverall = _getMaxSupplyAdjustedAt(_blockTimestamp());
         if (_newMaxSupply > maxSupplyOverall) {
             revert NewMaxSupplyByPartitionTooHigh(_partition, _newMaxSupply, maxSupplyOverall);
         }
@@ -69,7 +69,7 @@ abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 
         if (_newMaxSupply == 0) {
             revert NewMaxSupplyCannotBeZero();
         }
-        uint256 totalSupply = _totalSupplyAdjusted();
+        uint256 totalSupply = _totalSupplyAdjustedAt(_blockTimestamp());
         if (totalSupply > _newMaxSupply) {
             revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
         }
