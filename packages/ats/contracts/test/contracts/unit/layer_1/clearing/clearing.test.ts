@@ -24,7 +24,7 @@ import {
   Snapshots,
   ERC3643Management,
   ProtectedPartitions,
-  DiamondCutFacet,
+  DiamondFacet,
 } from "@contract-types";
 import { ADDRESS_ZERO, ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
@@ -168,7 +168,7 @@ describe("Clearing Tests", () => {
   let erc3643Facet: IERC3643;
   let protectedPartitionsFacet: ProtectedPartitions;
   let noncesFacet: NoncesFacet;
-  let diamondCutFacet: DiamondCutFacet;
+  let diamondCutFacet: DiamondFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -220,7 +220,7 @@ describe("Clearing Tests", () => {
     erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address, signer_A);
     protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address, signer_A);
     noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.address, signer_A);
-    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", diamond.address, signer_A);
+    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.address, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);

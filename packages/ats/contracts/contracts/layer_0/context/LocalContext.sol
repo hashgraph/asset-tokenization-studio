@@ -5,17 +5,9 @@ import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 import { ArrayLib } from "../common/libraries/ArrayLib.sol";
 
 abstract contract LocalContext is Context {
-    error ExpirationNotReached();
-
     modifier onlyConsistentActivations(address[] calldata _controlLists, bool[] calldata _actives) {
         ArrayLib.checkUniqueValues(_controlLists, _actives);
         _;
-    }
-
-    function _checkExpirationReached(uint256 _expirationTimestamp) internal view {
-        if (!_isExpired(_expirationTimestamp)) {
-            revert ExpirationNotReached();
-        }
     }
 
     function _isExpired(uint256 _expirationTimestamp) internal view returns (bool) {
