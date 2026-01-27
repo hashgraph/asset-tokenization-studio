@@ -9,10 +9,19 @@
  */
 
 import { expect } from "chai";
-import { isHederaNetwork, getMirrorNodeUrl } from "@scripts/infrastructure";
+import { isHederaNetwork, getMirrorNodeUrl, configureLogger, LogLevel } from "@scripts/infrastructure";
 import { TEST_NETWORKS, TEST_NON_EXISTENT } from "@test";
 
 describe("Hedera Utilities", () => {
+  // Suppress warnings during tests (expected fallback behavior)
+  before(() => {
+    configureLogger({ level: LogLevel.ERROR });
+  });
+
+  after(() => {
+    configureLogger({ level: LogLevel.INFO });
+  });
+
   // ============================================================================
   // isHederaNetwork Tests
   // ============================================================================
