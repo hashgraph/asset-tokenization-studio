@@ -1,167 +1,105 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Cache manager for registry generation results.
+ * Cache management for standalone registry generator.
  *
- * Provides file-based caching of contract metadata to speed up registry generation
- * when most contracts haven't changed.
- *
- * @module registry-generator/cache/manager
+ * @module tools/registry-generator/cache/manager
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import * as crypto from "crypto";
-import type { ContractMetadata } from "../types";
+import { ContractMetadata, CacheEntry, RegistryCache } from "../types";
+import { hashFile, readFile, writeFile, fileExists } from "../utils/fileUtils";
 
-interface CacheEntry {
-  filePath: string;
-  timestamp: number;
-  hash: string;
-  metadata: ContractMetadata;
-}
-
-interface CacheData {
-  version: string;
-  entries: Record<string, CacheEntry>;
-  createdAt: number;
-  updatedAt: number;
-}
-
+/**
+ * Cache manager for registry generation.
+ */
 export class CacheManager {
-  private cacheDir: string;
-  private cacheFile: string;
-  private data: CacheData;
-  private fileHashes: Map<string, string> = new Map();
-
-  constructor(cacheDir: string) {
-    this.cacheDir = path.join(cacheDir, ".registry-cache");
-    this.cacheFile = path.join(this.cacheDir, "metadata.json");
-    this.data = this.loadCache();
-  }
+  private cachePath: string;
+  private cache: RegistryCache;
 
   /**
-   * Load cache from disk or return empty cache.
+   * Create cache manager.
+   *
+   * @param cachePath - Path to cache file
    */
-  private loadCache(): CacheData {
-    try {
-      if (fs.existsSync(this.cacheFile)) {
-        const content = fs.readFileSync(this.cacheFile, "utf-8");
-        return JSON.parse(content);
-      }
-    } catch {
-      // Cache is corrupted or unreadable, start fresh
-    }
-
-    return {
-      version: "1.0",
-      entries: {},
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-  }
-
-  /**
-   * Get file hash for change detection.
-   */
-  private getFileHash(filePath: string): string {
-    try {
-      const content = fs.readFileSync(filePath, "utf-8");
-      return crypto.createHash("sha256").update(content).digest("hex");
-    } catch {
-      return "";
-    }
+  constructor(cachePath: string) {
+    this.cachePath = cachePath;
+    this.cache = this.loadCache();
   }
 
   /**
    * Check if file should be reprocessed.
+   *
+   * @param filePath - File path to check
+   * @returns true if file has changed and needs reprocessing
    */
   shouldReprocess(filePath: string): boolean {
-    const normalized = path.normalize(filePath);
-    const cached = this.data.entries[normalized];
-
-    if (!cached) {
-      return true; // Not in cache, always reprocess
+    const entry = this.cache.entries[filePath];
+    if (!entry) {
+      return true; // New file
     }
 
-    // Check if file has changed
-    const currentHash = this.getFileHash(filePath);
-    this.fileHashes.set(normalized, currentHash);
-
-    return currentHash !== cached.hash;
+    const currentHash = hashFile(filePath);
+    return currentHash !== entry.fileHash;
   }
 
   /**
-   * Get cached metadata if available.
+   * Get cached metadata for file.
+   *
+   * @param filePath - File path
+   * @returns Cached metadata or undefined
    */
-  getCached(filePath: string): ContractMetadata | null {
-    const normalized = path.normalize(filePath);
-    const cached = this.data.entries[normalized];
-    return cached?.metadata || null;
+  getCached(filePath: string): ContractMetadata | undefined {
+    return this.cache.entries[filePath]?.metadata;
   }
 
   /**
    * Store metadata in cache.
+   *
+   * @param filePath - File path
+   * @param metadata - Metadata to cache
    */
   set(filePath: string, metadata: ContractMetadata): void {
-    const normalized = path.normalize(filePath);
-    const hash =
-      this.fileHashes.get(normalized) || this.getFileHash(filePath);
-
-    this.data.entries[normalized] = {
-      filePath: normalized,
-      timestamp: Date.now(),
-      hash,
+    const fileHash = hashFile(filePath);
+    this.cache.entries[filePath] = {
+      filePath,
+      fileHash,
       metadata,
+      timestamp: Date.now(),
     };
-
-    this.data.updatedAt = Date.now();
-  }
-
-  /**
-   * Get cache statistics.
-   */
-  getStats(): { entries: number; size: number } {
-    const entries = Object.keys(this.data.entries).length;
-    const size = JSON.stringify(this.data).length;
-    return { entries, size };
-  }
-
-  /**
-   * Prune stale cache entries (older than 7 days).
-   */
-  prune(): number {
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days
-    let pruned = 0;
-
-    for (const key of Object.keys(this.data.entries)) {
-      if (this.data.entries[key].timestamp < cutoff) {
-        delete this.data.entries[key];
-        pruned++;
-      }
-    }
-
-    if (pruned > 0) {
-      this.data.updatedAt = Date.now();
-    }
-
-    return pruned;
   }
 
   /**
    * Save cache to disk.
    */
   save(): void {
-    try {
-      // Ensure cache directory exists
-      if (!fs.existsSync(this.cacheDir)) {
-        fs.mkdirSync(this.cacheDir, { recursive: true });
-      }
+    this.cache.created = Date.now();
+    writeFile(this.cachePath, JSON.stringify(this.cache, null, 2));
+  }
 
-      fs.writeFileSync(this.cacheFile, JSON.stringify(this.data, null, 2), "utf-8");
-    } catch (error) {
-      // Silently fail - cache is not critical to functionality
-      console.warn(`[WARN] Failed to save cache: ${error instanceof Error ? error.message : String(error)}`);
+  /**
+   * Load cache from disk.
+   *
+   * @returns Loaded cache or empty cache if file doesn't exist
+   */
+  private loadCache(): RegistryCache {
+    if (!fileExists(this.cachePath)) {
+      return {
+        version: "1.0",
+        created: Date.now(),
+        entries: {},
+      };
+    }
+
+    try {
+      const content = readFile(this.cachePath);
+      return JSON.parse(content);
+    } catch {
+      // Corrupt cache, start fresh
+      return {
+        version: "1.0",
+        created: Date.now(),
+        entries: {},
+      };
     }
   }
 
@@ -169,7 +107,48 @@ export class CacheManager {
    * Clear all cache entries.
    */
   clear(): void {
-    this.data.entries = {};
-    this.data.updatedAt = Date.now();
+    this.cache = {
+      version: "1.0",
+      created: Date.now(),
+      entries: {},
+    };
+  }
+
+  /**
+   * Get cache statistics.
+   *
+   * @returns Cache stats
+   */
+  getStats(): { totalEntries: number; oldestEntry: number; newestEntry: number } {
+    const entries = Object.values(this.cache.entries);
+    if (entries.length === 0) {
+      return { totalEntries: 0, oldestEntry: 0, newestEntry: 0 };
+    }
+
+    const timestamps = entries.map((e) => e.timestamp);
+    return {
+      totalEntries: entries.length,
+      oldestEntry: Math.min(...timestamps),
+      newestEntry: Math.max(...timestamps),
+    };
+  }
+
+  /**
+   * Prune stale cache entries (files that no longer exist).
+   *
+   * @returns Number of entries pruned
+   */
+  prune(): number {
+    let pruned = 0;
+    const entries = Object.keys(this.cache.entries);
+
+    for (const filePath of entries) {
+      if (!fileExists(filePath)) {
+        delete this.cache.entries[filePath];
+        pruned++;
+      }
+    }
+
+    return pruned;
   }
 }
