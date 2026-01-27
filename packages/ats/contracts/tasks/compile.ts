@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { TASK_COMPILE } from "hardhat/builtin-tasks/task-names";
 import { task } from "hardhat/config";
 import fs from "fs";
@@ -114,7 +116,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
           })
           .join(", ");
 
-        return `import {${rewritten}} from './${fileNoExt}.sol';`;
+        return `import {${rewritten}} from "./${fileNoExt}.sol";`;
       },
     );
   }
