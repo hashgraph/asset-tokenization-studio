@@ -533,7 +533,6 @@ abstract contract Internals is Modifiers {
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
     ) internal view virtual;
     function _checkRole(bytes32 _role, address _account) internal view virtual;
-    function _checkRoleForPartition(bytes32 partition, address account) internal view virtual;
     function _checkTransferSignature(
         bytes32 _partition,
         address _from,
@@ -904,9 +903,7 @@ abstract contract Internals is Modifiers {
         uint256 _pageLength
     ) internal view virtual returns (uint256[] memory locksId_);
     function _getMaturityDate() internal view virtual returns (uint256 maturityDate_);
-    function _getMaxSupply() internal view virtual returns (uint256);
     function _getMaxSupplyAdjustedAt(uint256 timestamp) internal view virtual returns (uint256);
-    function _getMaxSupplyByPartition(bytes32 partition) internal view virtual returns (uint256);
     function _getMaxSupplyByPartitionAdjustedAt(
         bytes32 partition,
         uint256 timestamp
@@ -996,11 +993,6 @@ abstract contract Internals is Modifiers {
         uint256 _timestamp
     ) internal view virtual returns (uint256);
     function _getTotalBalanceOfAtSnapshot(
-        uint256 _snapshotId,
-        address _tokenHolder
-    ) internal view virtual returns (uint256);
-    function _getTotalBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
         uint256 _snapshotId,
         address _tokenHolder
     ) internal view virtual returns (uint256);
