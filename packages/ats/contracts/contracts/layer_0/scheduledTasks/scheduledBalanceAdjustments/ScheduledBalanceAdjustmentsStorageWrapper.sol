@@ -39,7 +39,6 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
         bytes memory data = _scheduledTask.data;
 
         (, , bytes memory balanceAdjustmentData) = _getCorporateAction(abi.decode(data, (bytes32)));
-        if (balanceAdjustmentData.length == 0) return;
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
             balanceAdjustmentData,
             (IEquity.ScheduledBalanceAdjustment)
