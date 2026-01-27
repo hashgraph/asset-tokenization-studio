@@ -34,15 +34,16 @@ abstract contract BondStorageWrapperFixingDateInterestRate is
         _addScheduledCouponListing(_newCoupon.fixingDate, abi.encode(_actionId));
     }
 
-    function _getCouponAdjusted(
+    function _getCouponAdjustedAt(
         uint256 _couponID,
-        function(uint256, IBondRead.Coupon memory) internal view returns (uint256, uint8) _calculateRate
+        function(uint256, IBondRead.Coupon memory) internal view returns (uint256, uint8) _calculateRate,
+        uint256 _timestamp
     ) internal view virtual returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
         registeredCoupon_ = super._getCoupon(_couponID);
 
         if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return registeredCoupon_;
 
-        if (registeredCoupon_.coupon.fixingDate > _blockTimestamp()) return registeredCoupon_;
+        if (registeredCoupon_.coupon.fixingDate > _timestamp) return registeredCoupon_;
 
         (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = _calculateRate(
             _couponID,

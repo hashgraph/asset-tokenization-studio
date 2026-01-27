@@ -37,10 +37,10 @@ abstract contract Cap is ICap, Internals {
     }
 
     function getMaxSupply() external view override returns (uint256 maxSupply_) {
-        return _getMaxSupplyAdjusted();
+        return _getMaxSupplyAdjustedAt(_blockTimestamp());
     }
 
     function getMaxSupplyByPartition(bytes32 _partition) external view override returns (uint256 maxSupply_) {
-        return _getMaxSupplyByPartitionAdjusted(_partition);
+        return _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 }
