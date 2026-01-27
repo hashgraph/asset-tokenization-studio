@@ -332,5 +332,38 @@ describe("Cap Tests", () => {
         capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition),
       ).to.eventually.be.rejectedWith("NewMaxSupplyForPartitionTooLow");
     });
+
+    it("GIVEN a token with max supply equal to MAX_UINT THEN balance adjustment occurs but max supply remains unchanged", async () => {
+      let adjustmentFactor = 2;
+
+      // Before
+      await capFacet.setMaxSupply(MAX_UINT256.div(adjustmentFactor));
+      await capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, MAX_UINT256.div(adjustmentFactor));
+
+      // First adjustment
+      const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`);
+      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [adjustmentFactor + 1], [0]);
+      await setupScheduledBalanceAdjustments(adjustments);
+
+      await timeTravelFacet.changeSystemTimestamp(adjustments[0].executionDate + 1);
+
+      const maxSupplyAfter = await capFacet.getMaxSupply();
+      const maxSupplyByPartitionAfter = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1);
+
+      // Second adjustment
+      const currentTime_2 = parseInt(adjustments[0].executionDate + 2);
+      const adjustments_2 = createAdjustmentData(currentTime_2, [TIME / 1000], [5], [1]);
+      await setupScheduledBalanceAdjustments(adjustments_2);
+
+      await timeTravelFacet.changeSystemTimestamp(adjustments_2[0].executionDate + 1);
+
+      const maxSupplyAfter_2 = await capFacet.getMaxSupply();
+      const maxSupplyByPartitionAfter_2 = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1);
+
+      expect(maxSupplyAfter).to.equal(MAX_UINT256);
+      expect(maxSupplyByPartitionAfter).to.equal(MAX_UINT256);
+      expect(maxSupplyAfter_2).to.equal(MAX_UINT256);
+      expect(maxSupplyByPartitionAfter_2).to.equal(MAX_UINT256);
+    });
   });
 });

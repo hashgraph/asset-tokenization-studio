@@ -28,13 +28,13 @@ abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 
 
     // Internal
     function _setMaxSupply(uint256 _maxSupply) internal override {
-        uint256 previousMaxSupply = _getMaxSupply();
+        uint256 previousMaxSupply = _getMaxSupplyAdjustedAt(_blockTimestamp());
         _capStorage().maxSupply = _maxSupply;
         emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
     }
 
     function _setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) internal override {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(_partition);
+        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
         _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
         emit MaxSupplyByPartitionSet(_msgSender(), _partition, _maxSupply, previousMaxSupplyByPartition);
     }
@@ -52,14 +52,14 @@ abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 
     }
 
     function _checkWithinMaxSupply(uint256 _amount) internal view override {
-        uint256 maxSupply = _getMaxSupply();
+        uint256 maxSupply = _getMaxSupplyAdjustedAt(_blockTimestamp());
         if (!_isCorrectMaxSupply(_totalSupply() + _amount, maxSupply)) {
             revert ICapStorageWrapper.MaxSupplyReached(maxSupply);
         }
     }
 
     function _checkWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount) private view {
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(_partition);
+        uint256 maxSupplyForPartition = _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
         if (!_isCorrectMaxSupply(_totalSupplyByPartition(_partition) + _amount, maxSupplyForPartition)) {
             revert ICapStorageWrapper.MaxSupplyReachedForPartition(_partition, maxSupplyForPartition);
         }

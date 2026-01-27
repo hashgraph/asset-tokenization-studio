@@ -28,28 +28,28 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
 
     function _adjustMaxSupply(uint256 factor) internal override {
         CapDataStorage storage capStorage = _capStorage();
-        if (capStorage.maxSupply == MAX_UINT256) return;
-        capStorage.maxSupply *= factor;
+        uint256 limit = MAX_UINT256 / factor;
+        if (capStorage.maxSupply > limit) capStorage.maxSupply = MAX_UINT256;
+        else capStorage.maxSupply *= factor;
     }
 
     function _adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal override {
         CapDataStorage storage capStorage = _capStorage();
-        if (capStorage.maxSupplyByPartition[partition] == MAX_UINT256) return;
-        capStorage.maxSupplyByPartition[partition] *= factor;
-    }
-
-    function _getMaxSupply() internal view override returns (uint256) {
-        return _capStorage().maxSupply;
-    }
-
-    function _getMaxSupplyByPartition(bytes32 partition) internal view override returns (uint256) {
-        return _capStorage().maxSupplyByPartition[partition];
+        uint256 limit = MAX_UINT256 / factor;
+        if (capStorage.maxSupplyByPartition[partition] > limit)
+            capStorage.maxSupplyByPartition[partition] = MAX_UINT256;
+        else capStorage.maxSupplyByPartition[partition] *= factor;
     }
 
     function _getMaxSupplyAdjustedAt(uint256 timestamp) internal view override returns (uint256) {
         CapDataStorage storage capStorage = _capStorage();
-        if (capStorage.maxSupply == MAX_UINT256) return MAX_UINT256;
+
         (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(timestamp);
+
+        uint256 limit = MAX_UINT256 / pendingAbaf;
+
+        if (capStorage.maxSupply > limit) return MAX_UINT256;
+
         return capStorage.maxSupply * pendingAbaf;
     }
 
@@ -57,8 +57,15 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         bytes32 partition,
         uint256 timestamp
     ) internal view override returns (uint256) {
+        CapDataStorage storage capStorage = _capStorage();
+
         uint256 factor = _calculateFactor(_getAbafAdjustedAt(timestamp), _getLabafByPartition(partition));
-        return _getMaxSupplyByPartition(partition) * factor;
+
+        uint256 limit = MAX_UINT256 / factor;
+
+        if (capStorage.maxSupplyByPartition[partition] > limit) return MAX_UINT256;
+
+        return capStorage.maxSupplyByPartition[partition] * factor;
     }
 
     function _isCapInitialized() internal view override returns (bool) {

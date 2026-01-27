@@ -9,7 +9,7 @@ import {
   ERC20,
   AccessControl,
   ControlList,
-  DiamondCutFacet,
+  DiamondFacet,
 } from "@contract-types";
 import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, getDltTimestamp } from "@test";
@@ -26,7 +26,7 @@ describe("ERC20Permit Tests", () => {
   let pauseFacet: Pause;
   let accessControlFacet: AccessControl;
   let controlList: ControlList;
-  let diamondCutFacet: DiamondCutFacet;
+  let diamondCutFacet: DiamondFacet;
 
   beforeEach(async () => {
     const base = await deployEquityTokenFixture();
@@ -49,7 +49,7 @@ describe("ERC20Permit Tests", () => {
     noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.address);
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
     erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_A);
-    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", diamond.address);
+    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.address);
   });
 
   describe("Single Partition", () => {
