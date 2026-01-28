@@ -111,6 +111,7 @@ import { MissingRegulationType } from '@domain/context/factory/error/MissingRegu
 import { BaseContract, Contract, ContractTransaction } from 'ethers';
 import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
 import { ProtectionData } from '@domain/context/factory/ProtectionData';
+import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
 
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
@@ -451,6 +452,26 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         `Unexpected error in HederaTransactionAdapter create operation : ${error}`,
       );
     }
+  }
+
+  async createBondFixedRate(
+        security: Security,
+        bondFixedRateDetails: BondFixedRateDetails,
+        factory: EvmAddress,
+        resolver: EvmAddress,
+        configId: string,
+        configVersion: number,
+        compliance: EvmAddress,
+        identityRegistryAddress: EvmAddress,
+        externalPauses?: EvmAddress[],
+        externalControlLists?: EvmAddress[],
+        externalKycLists?: EvmAddress[],
+        diamondOwnerAccount?: EvmAddress,
+        proceedRecipients?: EvmAddress[],
+        proceedRecipientsData?: string[],
+        factoryId?: ContractId | string,
+      ): Promise<TransactionResponse> {
+        return Promise.resolve({});
   }
 
   async transfer(

@@ -980,6 +980,23 @@ export default abstract class TransactionAdapter
     proceedRecipientsData?: string[],
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  abstract createBondFixedRate(
+    security: Security,
+    bondFixedRateDetails: BondFixedRateDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   abstract grantRole(
     security: EvmAddress,
     targetId: EvmAddress,

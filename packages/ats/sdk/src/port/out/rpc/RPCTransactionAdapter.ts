@@ -108,6 +108,7 @@ import NetworkService from '@service/network/NetworkService';
 import MetamaskService from '@service/wallet/metamask/MetamaskService';
 import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
 import { ProtectionData } from '@domain/context/factory/ProtectionData';
+import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
@@ -252,6 +253,26 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       identityRegistryAddress,
     );
   }
+
+  async createBondFixedRate(
+      security: Security,
+      bondFixedRateDetails: BondFixedRateDetails,
+      factory: EvmAddress,
+      resolver: EvmAddress,
+      configId: string,
+      configVersion: number,
+      compliance: EvmAddress,
+      identityRegistryAddress: EvmAddress,
+      externalPauses?: EvmAddress[],
+      externalControlLists?: EvmAddress[],
+      externalKycLists?: EvmAddress[],
+      diamondOwnerAccount?: EvmAddress,
+      proceedRecipients?: EvmAddress[],
+      proceedRecipientsData?: string[],
+      factoryId?: ContractId | string,
+    ): Promise<TransactionResponse> {
+      return Promise.resolve({});
+    }
 
   async transfer(
     security: EvmAddress,
