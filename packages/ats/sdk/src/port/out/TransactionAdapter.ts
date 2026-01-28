@@ -10,6 +10,7 @@ import LogService from '@service/log/LogService';
 import { Security } from '@domain/context/security/Security';
 import EvmAddress from '@domain/context/contract/EvmAddress';
 import { BondDetails } from '@domain/context/bond/BondDetails';
+import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
 import { EquityDetails } from '@domain/context/equity/EquityDetails';
 import HWCSettings from '@core/settings/walletConnect/HWCSettings';
 import { ContractId } from '@hiero-ledger/sdk';
@@ -65,9 +66,28 @@ interface ITransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  
   createBond(
     security: Security,
     bondDetails: BondDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+createBondFixedRate(
+    security: Security,
+    bondFixedRateDetails: BondFixedRateDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
