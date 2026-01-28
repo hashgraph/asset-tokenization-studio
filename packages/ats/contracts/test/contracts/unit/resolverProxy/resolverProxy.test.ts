@@ -1,11 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import {
-  type BusinessLogicResolver,
-  type AccessControlFacet,
-  type PauseFacet,
-  DiamondFacet,
-} from "@contract-types";
+import { type BusinessLogicResolver, type AccessControlFacet, type PauseFacet, DiamondFacet } from "@contract-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { ATS_ROLES } from "@scripts";
 import { assertObject } from "../../../common";

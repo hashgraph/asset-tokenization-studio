@@ -107,8 +107,6 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     }
 
     function _updateTotalFreezeAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
-        if (_factor == 1) return;
-
         _erc3643Storage().frozenTokens[_tokenHolder] *= _factor;
         _setTotalFreezeLabaf(_tokenHolder, _abaf);
     }
@@ -119,8 +117,6 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         uint256 _factor,
         uint256 _abaf
     ) internal override {
-        if (_factor == 1) return;
-
         _erc3643Storage().frozenTokensByPartition[_tokenHolder][_partition] *= _factor;
         _setTotalFreezeLabafByPartition(_partition, _tokenHolder, _abaf);
     }

@@ -72,8 +72,8 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
             revert IBondStorageWrapper.CouponCreationFailed();
         }
 
-        _addScheduledCrossOrderedTask(_newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(_newCoupon.recordDate, abi.encode(_actionId));
+        _addScheduledCrossOrderedTask(_newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
+        _addScheduledSnapshot(_newCoupon.recordDate, _actionId);
     }
 
     /**

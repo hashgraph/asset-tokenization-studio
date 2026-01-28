@@ -139,24 +139,6 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         return _lockStorage().locksByAccountPartitionAndId[_tokenHolder][_partition][_lockId];
     }
 
-    function _getLockByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex
-    ) internal view override returns (ILock.LockData memory) {
-        LockDataStorage storage lockStorage = _lockStorage();
-
-        if (_lockIndex == 0) return ILock.LockData(0, 0, 0);
-
-        _lockIndex--;
-
-        assert(_lockIndex < lockStorage.lockIdsByAccountAndPartition[_tokenHolder][_partition].length());
-
-        uint256 lockId = lockStorage.lockIdsByAccountAndPartition[_tokenHolder][_partition].at(_lockIndex);
-
-        return lockStorage.locksByAccountPartitionAndId[_tokenHolder][_partition][lockId];
-    }
-
     function _isLockedExpirationTimestamp(
         bytes32 _partition,
         address _tokenHolder,
