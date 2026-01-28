@@ -489,6 +489,46 @@ function parseSimpleImport(line: string): string | null {
 }
 
 /**
+ * Check if a contract is defined as an interface in the source code.
+ *
+ * Interfaces cannot be deployed (no bytecode) and their TypeChain factories
+ * have no constructor arguments, causing compilation errors when used like:
+ * `new IFactory__factory(signer)` instead of the correct form.
+ *
+ * @param source - Solidity source code
+ * @param contractName - Contract name to check
+ * @returns true if the contract is defined as an interface
+ */
+export function isInterfaceDefinition(source: string, contractName: string): boolean {
+  // Look for "interface ContractName" pattern in source
+  // Must handle whitespace variations and ensure we match the exact name
+  const lines = source.split("\n");
+
+  for (const line of lines) {
+    const normalized = normalizeWhitespace(line.trim());
+
+    // Check if line starts with "interface " followed by the contract name
+    if (normalized.startsWith("interface ")) {
+      const rest = normalized.slice(10); // "interface ".length = 10
+      // Extract the name (word characters until space, { or end)
+      let name = "";
+      for (const char of rest) {
+        if (/\w/.test(char)) {
+          name += char;
+        } else {
+          break;
+        }
+      }
+      if (name === contractName) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
  * Check if contract is a facet based on naming convention.
  *
  * @param contractName - Contract name to check

@@ -10,9 +10,85 @@
  */
 
 import * as path from "path";
+import * as fs from "fs";
 import { findSolidityFiles, readFile, getRelativePath } from "../utils/fileUtils";
 import { extractContractNames, isFacetName, isTimeTravelVariant, getBaseName } from "../utils/solidityParser";
 import type { ContractFile, CategorizedContracts } from "../types";
+
+/**
+ * Check if a contract is deployable (has bytecode).
+ *
+ * Interfaces and abstract contracts have empty bytecode ("0x" or "0x0")
+ * and cannot be deployed. This function is used to filter out non-deployable
+ * contracts when generating factory imports (e.g., for mock contracts).
+ *
+ * Note: This is NOT used in findAllContracts() because we want to keep
+ * abstract contracts like StorageWrappers for documentation purposes.
+ *
+ * @param contract - Contract file to check
+ * @returns true if contract has deployable bytecode
+ */
+export function isDeployableContract(contract: ContractFile): boolean {
+  const bytecode = contract.artifactData?.bytecode;
+  return Boolean(bytecode && bytecode !== "0x" && bytecode !== "0x0");
+}
+
+/**
+ * Check if a TypeChain factory exists for a contract.
+ *
+ * TypeChain may not generate factories for all contracts, especially:
+ * - Helper contracts defined in multi-contract files
+ * - Contracts that don't meet TypeChain's generation criteria
+ *
+ * This function checks if the factory file exists on disk.
+ *
+ * @param contractName - Name of the contract
+ * @param typechainPath - Path to TypeChain generated types directory
+ * @returns true if the factory file exists
+ */
+export function hasTypechainFactory(contractName: string, typechainPath: string): boolean {
+  // TypeChain generates factories in a flat factories/ directory
+  // Check both .ts and .js extensions since it might be compiled
+  const factoryPatterns = [
+    path.join(typechainPath, "factories", `${contractName}__factory.ts`),
+    path.join(typechainPath, "factories", `${contractName}__factory.js`),
+  ];
+
+  for (const pattern of factoryPatterns) {
+    if (fs.existsSync(pattern)) {
+      return true;
+    }
+  }
+
+  // Also check in nested directories (contracts/mocks/ContractName__factory.ts)
+  // TypeChain sometimes puts factories in subdirectories matching source structure
+  try {
+    const factoriesDir = path.join(typechainPath, "factories");
+    if (fs.existsSync(factoriesDir)) {
+      const findFactory = (dir: string): boolean => {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            if (findFactory(fullPath)) return true;
+          } else if (
+            entry.name === `${contractName}__factory.ts` ||
+            entry.name === `${contractName}__factory.js` ||
+            entry.name === `${contractName}__factory.d.ts`
+          ) {
+            return true;
+          }
+        }
+        return false;
+      };
+      return findFactory(factoriesDir);
+    }
+  } catch {
+    // If we can't read the directory, assume factory doesn't exist
+  }
+
+  return false;
+}
 
 /**
  * Find all contract files in contracts directory.
@@ -70,7 +146,19 @@ export function findAllContracts(contractsDir: string, artifactDir: string): Con
  * Categorize contracts by type.
  *
  * Organizes contracts into facets, TimeTravel variants, infrastructure, tests, etc.
- * Ensures test contracts are detected before facet detection to avoid misclassification.
+ *
+ * Note: This function categorizes ALL contracts including abstract ones (like StorageWrappers).
+ * Bytecode filtering for deployability is applied separately when needed (e.g., for mock
+ * contracts that require TypeChain factory imports). Use isDeployableContract() for filtering.
+ *
+ * Order is important:
+ * 1. Test/Mock contracts first (by path/name pattern)
+ * 2. TimeTravel variants
+ * 3. Facets
+ * 4. Infrastructure
+ * 5. Interface names (I-prefix, as secondary check)
+ * 6. Libraries
+ * 7. Everything else
  *
  * @param contracts - Array of contract files
  * @returns Categorized contracts grouped by type

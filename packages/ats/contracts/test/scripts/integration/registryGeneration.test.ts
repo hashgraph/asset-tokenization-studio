@@ -451,6 +451,64 @@ contract MyContract {}
         expect(facetRegistry).to.not.include("MockedWhitelist");
       }
     }).timeout(30000);
+
+    it("should filter out interfaces (empty bytecode) from mock registry", async () => {
+      // This test verifies that interfaces are NOT included in mock registry
+      // because they have empty bytecode and cannot be deployed
+      const result = await generateRegistryPipeline(
+        {
+          contractsPath,
+          artifactPath,
+          includeMocksInRegistry: true,
+          logLevel: "SILENT",
+        },
+        false,
+      );
+
+      // Interfaces like IFactory, IEquity, etc. should NOT be in MOCK_CONTRACTS
+      // These have bytecode "0x" (empty) and cannot be deployed
+      if (result.stats.totalMocks > 0) {
+        expect(result.code).to.not.match(
+          /MOCK_CONTRACTS.*TRexIFactory/s,
+          "Interface TRexIFactory should NOT be in MOCK_CONTRACTS",
+        );
+        expect(result.code).to.not.match(
+          /MOCK_CONTRACTS.*IFactory/s,
+          "Interface IFactory should NOT be in MOCK_CONTRACTS",
+        );
+      }
+
+      // Interfaces should also NOT be in FACET_REGISTRY
+      expect(result.code).to.not.match(
+        /FACET_REGISTRY.*TRexIFactory/s,
+        "Interface TRexIFactory should NOT be in FACET_REGISTRY",
+      );
+    }).timeout(30000);
+
+    it("should only include deployable contracts (with bytecode) in registries", async () => {
+      // This test verifies that the registry only includes contracts that can be deployed
+      const result = await generateRegistryPipeline(
+        {
+          contractsPath,
+          artifactPath,
+          includeMocksInRegistry: true,
+          logLevel: "SILENT",
+        },
+        false,
+      );
+
+      // All facets should be deployable (have bytecode)
+      expect(result.stats.totalFacets).to.be.greaterThan(0);
+
+      // The generated code should include factory references for deployment
+      expect(result.code).to.include("__factory");
+
+      // No interfaces should slip through - they don't have factories with constructor args
+      // Check that no "I" prefix interfaces are in the factory imports (except legitimate ones)
+      // Interfaces like IFactory, IEquity have bytecode "0x" and should be filtered
+      expect(result.code).to.not.include("TRexIFactory__factory");
+      expect(result.code).to.not.include("TRexIEquity__factory");
+    }).timeout(30000);
   });
 
   describe("Real-world Usage Scenarios", () => {

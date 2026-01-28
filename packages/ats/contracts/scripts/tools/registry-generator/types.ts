@@ -149,6 +149,8 @@ export interface RegistryConfig {
   moduleName?: string;
   /** TypeChain factory import path */
   typechainModuleName?: string;
+  /** Path to TypeChain generated types directory (for factory existence checks) */
+  typechainPath?: string;
   /** Logging level */
   logLevel?: "DEBUG" | "INFO" | "WARN" | "ERROR" | "SILENT";
   /** Only generate facets, skip infrastructure contracts */

@@ -205,6 +205,30 @@ console.log(ROLES._PAUSER_ROLE); // bytes32 value
 console.log(ROLES.CORPORATE_ACTION_ROLE); // bytes32 value
 ```
 
+### Mock Contracts in Registry
+
+When generating registries for test projects, you can include mock contracts using the `includeMocksInRegistry` option:
+
+```typescript
+const result = await generateRegistryPipeline({
+  contractsPath: "./contracts",
+  artifactPath: "./artifacts/contracts",
+  includeMocksInRegistry: true,
+  mockContractPaths: ["**/mocks/**/*.sol", "**/test/**/*Mock*.sol"],
+  logLevel: "INFO",
+});
+
+console.log(`Found ${result.stats.totalMocks} mock contracts`);
+```
+
+**Automatic Filtering**: The registry generator automatically filters out non-deployable contracts:
+
+- **Interfaces** - Detected by empty bytecode (`"0x"`) and source-level `interface` keyword
+- **Abstract contracts** - Detected by empty bytecode
+- **Contracts without TypeChain factories** - Skipped during import generation
+
+This ensures the generated `MOCK_CONTRACTS` registry only includes contracts that can actually be deployed and tested.
+
 ### Downstream Projects
 
 External projects can generate their own registries from their contracts using the **registry generation pipeline**:

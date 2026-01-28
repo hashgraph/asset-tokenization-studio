@@ -17,7 +17,13 @@ import type { RegistryConfig, RegistryResult, ContractFile, ContractMetadata } f
 import { findSolidityFiles, readFile, writeFile } from "./utils/fileUtils";
 import { extractResolverKeys, extractRoles } from "./utils/solidityParser";
 import { LogLevel, configureLogger, section, info, success, warn, debug, table } from "./utils/logging";
-import { findAllContracts, categorizeContracts, pairTimeTravelVariants } from "./core/scanner";
+import {
+  findAllContracts,
+  categorizeContracts,
+  pairTimeTravelVariants,
+  isDeployableContract,
+  hasTypechainFactory,
+} from "./core/scanner";
 import { extractMetadata } from "./core/extractor";
 import { generateRegistry, generateSummary } from "./core/generator";
 import { CacheManager } from "./cache/manager";
@@ -38,6 +44,7 @@ export const DEFAULT_CONFIG: Required<Omit<RegistryConfig, "mockContractPaths">>
   outputPath: "./generated/registry.data.ts",
   moduleName: "@scripts/infrastructure",
   typechainModuleName: "@contract-types",
+  typechainPath: "./build/typechain-types",
   logLevel: "INFO",
   facetsOnly: false,
   includeMocksInRegistry: false,
@@ -238,8 +245,26 @@ export async function generateRegistryPipeline(
 
   if (fullConfig.includeMocksInRegistry) {
     info("Step 5.6: Extracting mock contracts metadata...");
-    const mockContracts = categorized.test;
-    info(`  Found ${mockContracts.length} mock/test contract files`);
+
+    // Resolve typechain path for factory existence checks
+    const typechainDir = path.isAbsolute(fullConfig.typechainPath)
+      ? fullConfig.typechainPath
+      : path.resolve(process.cwd(), fullConfig.typechainPath);
+
+    // Filter to only deployable contracts that have TypeChain factories
+    // Excludes:
+    // 1. Interfaces/abstract contracts (no bytecode)
+    // 2. Helper contracts without generated factories (TypeChain doesn't generate for all)
+    const deployableContracts = categorized.test.filter(isDeployableContract);
+    const filteredByBytecode = categorized.test.length - deployableContracts.length;
+
+    const mockContracts = deployableContracts.filter((c) => hasTypechainFactory(c.primaryContract, typechainDir));
+    const filteredByFactory = deployableContracts.length - mockContracts.length;
+
+    info(`  Found ${categorized.test.length} test/mock contracts`);
+    info(`  Filtered ${filteredByBytecode} without bytecode, ${filteredByFactory} without TypeChain factory`);
+    info(`  Including ${mockContracts.length} deployable contracts with factories`);
+
     mockMetadata = mockContracts.map((contract) => extractWithCache(contract, false));
     info(`  Extracted metadata for ${mockMetadata.length} mock contracts`);
 
