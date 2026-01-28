@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    BondUSAReadSustainabilityPerformanceTargetRateFacet
-} from "contracts/layer_3/bondUSA/sustainabilityPerformanceTargetRate/BondUSAReadSustainabilityPerformanceTargetRateFacet.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { BondUSAReadSustainabilityPerformanceTargetRateFacet } from "../../../../layer_3/bondUSA/sustainabilityPerformanceTargetRate/BondUSAReadSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    ExternalControlListManagementSustainabilityPerformanceTargetRateFacet
-} from "contracts/layer_1/externalControlLists/sustainabilityPerformanceTargetRate/ExternalControlListManagementSustainabilityPerformanceTargetRateFacet.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { ExternalControlListManagementSustainabilityPerformanceTargetRateFacet } from "../../../../layer_1/externalControlLists/sustainabilityPerformanceTargetRate/ExternalControlListManagementSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "contracts/layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
 contract ExternalControlListManagementSustainabilityPerformanceTargetRateFacetTimeTravel is
     ExternalControlListManagementSustainabilityPerformanceTargetRateFacet,

@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { KpisStorageWrapper } from "./KpisStorageWrapper.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
+import { Internals } from "../../../../layer_0/Internals.sol";
 import {
     ProceedRecipientsStorageWrapper
-} from "contracts/layer_0/proceedRecipients/ProceedRecipientsStorageWrapper.sol";
+} from "../../../../layer_0/proceedRecipients/ProceedRecipientsStorageWrapper.sol";
 
 abstract contract ProceedRecipientsStorageWrapperKpiInterestRate is KpisStorageWrapper {
     function _addProceedRecipient(

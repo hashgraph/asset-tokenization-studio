@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { AdjustBalancesStorageWrapper1 } from "../adjustBalances/AdjustBalancesStorageWrapper1.sol";
 import { _CAP_STORAGE_POSITION } from "../constants/storagePositions.sol";
 import { MAX_UINT256 } from "../constants/values.sol";
-import { ICap } from "contracts/layer_1/interfaces/cap/ICap.sol";
+import { ICap } from "../../layer_1/interfaces/cap/ICap.sol";
 
 abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
     struct CapDataStorage {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Internals } from "contracts/layer_0/Internals.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 import { IClearingRedeem } from "../interfaces/clearing/IClearingRedeem.sol";
 import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
 

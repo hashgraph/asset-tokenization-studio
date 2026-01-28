@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Internals } from "contracts/layer_0/Internals.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 import { _SSI_MANAGER_ROLE } from "../constants/roles.sol";
 import { ISsiManagement } from "../interfaces/ssi/ISsiManagement.sol";
 

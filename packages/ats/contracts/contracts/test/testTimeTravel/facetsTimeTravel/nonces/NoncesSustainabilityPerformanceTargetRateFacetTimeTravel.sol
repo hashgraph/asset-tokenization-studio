@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    NoncesSustainabilityPerformanceTargetRateFacet
-} from "contracts/layer_1/nonces/sustainabilityPerformanceTargetRate/NoncesSustainabilityPerformanceTargetRateFacet.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { NoncesSustainabilityPerformanceTargetRateFacet } from "../../../../layer_1/nonces/sustainabilityPerformanceTargetRate/NoncesSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "contracts/layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
 contract NoncesSustainabilityPerformanceTargetRateFacetTimeTravel is
     NoncesSustainabilityPerformanceTargetRateFacet,

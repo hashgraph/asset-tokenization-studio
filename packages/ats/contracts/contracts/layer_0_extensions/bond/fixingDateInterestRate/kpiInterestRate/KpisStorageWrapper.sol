@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _KPIS_STORAGE_POSITION } from "contracts/layer_0/constants/storagePositions.sol";
-import { IKpis } from "contracts/layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
-import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
-import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { _KPIS_STORAGE_POSITION } from "../../../../layer_0/constants/storagePositions.sol";
+import { IKpis } from "../../../../layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
+import { CheckpointsLib } from "../../../../layer_0/common/libraries/CheckpointsLib.sol";
 import { InternalsKpiInterestRate } from "./Internals.sol";
 import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
-import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
+import { Internals } from "../../../../layer_0/Internals.sol";
+import { BondStorageWrapper } from "../../../../layer_0/bond/BondStorageWrapper.sol";
 
 abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWrapperFixingDateInterestRate {
     using CheckpointsLib for CheckpointsLib.Checkpoint[];

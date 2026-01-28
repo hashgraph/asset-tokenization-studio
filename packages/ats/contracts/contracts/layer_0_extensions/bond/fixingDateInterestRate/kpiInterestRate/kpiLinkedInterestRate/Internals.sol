@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../../../layer_2/interfaces/bond/IBondRead.sol";
 import { ModifiersKpiLinkedInterestRate } from "./Modifiers.sol";
 
 abstract contract InternalsKpiLinkedInterestRate is ModifiersKpiLinkedInterestRate {

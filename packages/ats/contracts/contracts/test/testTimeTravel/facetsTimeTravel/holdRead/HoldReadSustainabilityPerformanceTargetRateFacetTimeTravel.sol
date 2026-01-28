@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    HoldReadSustainabilityPerformanceTargetRateFacet
-} from "contracts/layer_1/hold/sustainabilityPerformanceTargetRate/HoldReadSustainabilityPerformanceTargetRateFacet.sol";
+// prettier-ignore
+// solhint-disable-next-line max-line-length
+import { HoldReadSustainabilityPerformanceTargetRateFacet } from "../../../../layer_1/hold/sustainabilityPerformanceTargetRate/HoldReadSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "contracts/layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
 contract HoldReadSustainabilityPerformanceTargetRateFacetTimeTravel is
     HoldReadSustainabilityPerformanceTargetRateFacet,
