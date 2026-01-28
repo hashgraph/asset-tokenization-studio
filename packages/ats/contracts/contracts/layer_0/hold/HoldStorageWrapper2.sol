@@ -260,8 +260,6 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _updateTotalHeldAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
-        if (_factor == 1) return;
-
         _holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
         _setTotalHeldLabaf(_tokenHolder, _abaf);
     }
@@ -272,8 +270,6 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         uint256 _factor,
         uint256 _abaf
     ) internal override {
-        if (_factor == 1) return;
-
         _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
         _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
@@ -322,7 +318,6 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         address _tokenHolder,
         uint256 _factor
     ) internal override {
-        if (_factor == 1) return;
         HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage.holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;

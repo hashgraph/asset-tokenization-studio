@@ -113,12 +113,10 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         address _tokenHolder,
         uint256 _factor
     ) internal override {
-        if (_factor == 1) return;
         _lockStorage().locksByAccountPartitionAndId[_tokenHolder][_partition][_lockId].amount *= _factor;
     }
 
     function _updateTotalLockedAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
-        if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
 
         lockStorage.totalLockedAmountByAccount[_tokenHolder] *= _factor;
@@ -131,7 +129,6 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         uint256 _factor,
         uint256 _abaf
     ) internal override {
-        if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
 
         lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
