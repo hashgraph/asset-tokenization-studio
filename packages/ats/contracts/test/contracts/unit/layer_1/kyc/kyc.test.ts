@@ -303,6 +303,18 @@ describe("Kyc Tests", () => {
       expect(KYCStatusFor_B_After_Expiration).to.equal(0);
     });
 
+    it("Check Kyc status before valid from", async () => {
+      const validFrom = _VALID_TO - 1;
+
+      await kycFacet.grantKyc(signer_B.address, _VC_ID, validFrom, _VALID_TO, signer_C.address);
+
+      await timeTravelFacet.changeSystemTimestamp(validFrom - 1);
+
+      const KYCStatusFor_B = await kycFacet.getKycStatusFor(signer_B.address);
+
+      expect(KYCStatusFor_B).to.equal(0);
+    });
+
     it("Check Kyc status after issuer removed", async () => {
       await kycFacet.grantKyc(signer_B.address, _VC_ID, _VALID_FROM, _VALID_TO, signer_C.address);
 
