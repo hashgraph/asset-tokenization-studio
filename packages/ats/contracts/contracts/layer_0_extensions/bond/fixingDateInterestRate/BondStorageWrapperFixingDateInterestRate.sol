@@ -30,8 +30,8 @@ abstract contract BondStorageWrapperFixingDateInterestRate is
     function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual override {
         super._initCoupon(_actionId, _newCoupon);
 
-        _addScheduledCrossOrderedTask(_newCoupon.fixingDate, abi.encode(COUPON_LISTING_TASK_TYPE));
-        _addScheduledCouponListing(_newCoupon.fixingDate, abi.encode(_actionId));
+        _addScheduledCrossOrderedTask(_newCoupon.fixingDate, COUPON_LISTING_TASK_TYPE);
+        _addScheduledCouponListing(_newCoupon.fixingDate, _actionId);
     }
 
     function _getCouponAdjustedAt(
