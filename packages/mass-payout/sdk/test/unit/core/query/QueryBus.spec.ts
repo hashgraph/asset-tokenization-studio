@@ -8,7 +8,6 @@ import { IQueryHandler } from "@core/query/QueryHandler";
 import { QUERY_METADATA, QUERY_HANDLER_METADATA } from "@core/Constants";
 
 describe("QueryBus", () => {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface DummyResponse extends QueryResponse {}
 
   class DummyQuery extends Query<DummyResponse> {}

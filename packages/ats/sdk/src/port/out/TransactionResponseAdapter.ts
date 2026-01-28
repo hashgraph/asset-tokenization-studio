@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers } from 'ethers';
-import LogService from '@service/log/LogService';
-import TransactionResponse from '@domain/context/transaction/TransactionResponse';
-import { TransactionResponseError } from './error/TransactionResponseError';
+import { ethers } from "ethers";
+import LogService from "@service/log/LogService";
+import TransactionResponse from "@domain/context/transaction/TransactionResponse";
+import { TransactionResponseError } from "./error/TransactionResponseError";
 
 export class TransactionResponseAdapter {
   manageResponse(): TransactionResponse {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
   public static decodeFunctionResult(
     functionName: string,
@@ -25,7 +25,7 @@ export class TransactionResponseAdapter {
         });
       }
 
-      const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'));
+      const resultHex = "0x".concat(Buffer.from(resultAsBytes).toString("hex"));
       const result = iface.decodeFunctionResult(functionName, resultHex);
 
       const jsonParsedArray = JSON.parse(JSON.stringify(result));
@@ -33,7 +33,7 @@ export class TransactionResponseAdapter {
     } catch (error) {
       LogService.logError(error);
       throw new TransactionResponseError({
-        message: 'Could not decode function result',
+        message: "Could not decode function result",
         network: network,
       });
     }

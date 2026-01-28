@@ -2,12 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
-import { IKpiLinkedRate } from "contracts/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { LowLevelCall } from "contracts/layer_0/common/libraries/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
 import { InternalsKpiLinkedInterestRate } from "../Internals.sol";
-import { BondStorageWrapperFixingDateInterestRate } from "../../../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";
 import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";

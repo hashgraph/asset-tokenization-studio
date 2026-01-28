@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IDiamondCut } from "../../../interfaces/resolver/resolverProxy/IDiamondCut.sol";
 import { ResolverProxyUnstructured } from "../unstructured/ResolverProxyUnstructured.sol";
 import { IBusinessLogicResolver } from "../../../interfaces/resolver/IBusinessLogicResolver.sol";
-import { _DIAMOND_CUT_RESOLVER_KEY } from "../../../layer_1/constants/resolverKeys.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../../../layer_1/constants/roles.sol";
 
 abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {

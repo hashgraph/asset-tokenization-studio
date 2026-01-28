@@ -1143,7 +1143,6 @@ describe(Distribution.name, () => {
         const asset = AssetUtils.newInstance()
         const snapshotIdValue = faker.string.alpha({ length: 10 })
         const snapshotId = SnapshotId.create(snapshotIdValue)
-        const executeAt = faker.date.future()
         const amount = faker.number.int({ min: 1, max: 1000 }).toString()
         const amountType = faker.helpers.objectValue(AmountType)
 
@@ -1166,7 +1165,6 @@ describe(Distribution.name, () => {
       const invalidAssets = [null, undefined] as unknown[]
       const snapshotIdValue = faker.string.alpha({ length: 10 })
       const snapshotId = SnapshotId.create(snapshotIdValue)
-      const executeAt = faker.date.future()
       const amount = faker.number.int({ min: 1, max: 1000 }).toString()
       const amountType = faker.helpers.objectValue(AmountType)
 

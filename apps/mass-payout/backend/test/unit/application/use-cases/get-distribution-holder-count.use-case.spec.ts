@@ -56,9 +56,9 @@ describe(GetDistributionHoldersUseCase.name, () => {
     it("should throw DistributionNotFoundError when distribution does not exist", async () => {
       distributionRepositoryMock.getDistribution.mockResolvedValue(null)
 
-      const result = await await expect(
-        getDistributionHolderCountUseCase.execute("testDistributionId"),
-      ).rejects.toThrow(DistributionNotFoundError)
+      await await expect(getDistributionHolderCountUseCase.execute("testDistributionId")).rejects.toThrow(
+        DistributionNotFoundError,
+      )
     })
   })
 })

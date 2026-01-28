@@ -6,7 +6,7 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable camelcase */
 /* eslint-disable unused-imports/no-unused-vars */
-import { Logger } from "@nestjs/common"
+import { Logger } from "@nestjs/common";
 import {
   PAUSE_GAS,
   UNPAUSE_GAS,
@@ -21,7 +21,7 @@ import {
   EXECUTE_AMOUNT_SNAPSHOT_BY_ADDRESSES_GAS,
   EXECUTE_PERCENTAGE_SNAPSHOT_GAS,
   EXECUTE_PERCENTAGE_SNAPSHOT_BY_ADDRESSES_GAS,
-} from "@core/Constants"
+} from "@core/Constants";
 
 import {
   Hbar,
@@ -32,47 +32,47 @@ import {
   FileAppendTransaction,
   FileCreateTransaction,
   ContractCreateTransaction,
-  ContractExecuteTransaction
-} from "@hiero-ledger/sdk"
-import { Interface } from "ethers/lib/utils.js"
-import TransactionAdapter from "../TransactionAdapter"
-import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter"
-import NetworkService from "@app/services/network/NetworkService"
-import TransactionResponse from "@domain/transaction/TransactionResponse"
-import { MirrorNodes } from "@domain/network/MirrorNode"
-import { JsonRpcRelays } from "@domain/network/JsonRpcRelay"
-import { TransactionType } from "../TransactionResponseEnums"
-import Account from "@domain/account/Account"
-import EvmAddress from "@domain/contract/EvmAddress"
-import BigDecimal from "@domain/shared/BigDecimal"
-import RbacPort from "./types/RbacPort"
-import { ethers, BaseContract, ContractTransaction } from "ethers"
-import { LifeCycleCashFlow__factory, ProxyAdmin__factory, TransparentUpgradeableProxy__factory } from "@hashgraph/mass-payout-contracts"
+  ContractExecuteTransaction,
+} from "@hiero-ledger/sdk";
+import { Interface } from "ethers/lib/utils.js";
+import TransactionAdapter from "../TransactionAdapter";
+import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
+import NetworkService from "@app/services/network/NetworkService";
+import TransactionResponse from "@domain/transaction/TransactionResponse";
+import { MirrorNodes } from "@domain/network/MirrorNode";
+import { JsonRpcRelays } from "@domain/network/JsonRpcRelay";
+import { TransactionType } from "../TransactionResponseEnums";
+import Account from "@domain/account/Account";
+import EvmAddress from "@domain/contract/EvmAddress";
+import BigDecimal from "@domain/shared/BigDecimal";
+import RbacPort from "./types/RbacPort";
+import { ethers, BaseContract, ContractTransaction } from "ethers";
+import {
+  LifeCycleCashFlow__factory,
+  ProxyAdmin__factory,
+  TransparentUpgradeableProxy__factory,
+} from "@hashgraph/mass-payout-contracts";
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
-  protected readonly logger = new Logger(HederaTransactionAdapter.name)
+  protected readonly logger = new Logger(HederaTransactionAdapter.name);
 
-  mirrorNodes: MirrorNodes
-  jsonRpcRelays: JsonRpcRelays
+  mirrorNodes: MirrorNodes;
+  jsonRpcRelays: JsonRpcRelays;
 
   // common
-  protected signer: Signer
+  protected signer: Signer;
 
   constructor(
     protected readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    protected readonly networkService: NetworkService
+    protected readonly networkService: NetworkService,
   ) {
-    super()
+    super();
   }
 
   private async executeWithArgs<
     C extends BaseContract,
     F extends {
-      [K in keyof C]: C[K] extends (
-        ...args: any[]
-      ) => Promise<ContractTransaction>
-        ? K
-        : never;
+      [K in keyof C]: C[K] extends (...args: any[]) => Promise<ContractTransaction> ? K : never;
     }[keyof C] &
       string,
   >(
@@ -80,224 +80,174 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     functionName: F,
     contractId: ContractId | string,
     gas: number,
-    args: Parameters<
-      C[F] extends (...args: infer P) => any ? (...args: P) => any : never
-    >
+    args: Parameters<C[F] extends (...args: infer P) => any ? (...args: P) => any : never>,
   ): Promise<TransactionResponse<any, Error>> {
-    const encodedHex = contractInstance.interface.encodeFunctionData(
-      functionName,
-      args as any
-    )
-    const encoded = new Uint8Array(Buffer.from(encodedHex.slice(2), "hex"))
+    const encodedHex = contractInstance.interface.encodeFunctionData(functionName, args as any);
+    const encoded = new Uint8Array(Buffer.from(encodedHex.slice(2), "hex"));
 
     return this.buildAndSendTransaction(
       contractId,
       gas,
-      tx => {
-        tx.setFunctionParameters(encoded)
+      (tx) => {
+        tx.setFunctionParameters(encoded);
       },
-      functionName
-    )
+      functionName,
+    );
   }
 
   private async buildAndSendTransaction(
     contractId: ContractId | string,
     gas: number,
     setup: (tx: ContractExecuteTransaction) => void,
-    functionName: string
+    functionName: string,
   ): Promise<TransactionResponse<any, Error>> {
-    const tx = new ContractExecuteTransaction()
-      .setContractId(contractId)
-      .setGas(gas)
+    const tx = new ContractExecuteTransaction().setContractId(contractId).setGas(gas);
 
-    setup(tx)
+    setup(tx);
 
     return this.signAndSendTransaction(
       tx,
       TransactionType.RECORD,
       functionName,
-      LifeCycleCashFlow__factory.abi as unknown as object[]
-    )
+      LifeCycleCashFlow__factory.abi as unknown as object[],
+    );
   }
 
   // * Operations NOT Smart Contract related
   public setMirrorNodes(mirrorNodes?: MirrorNodes): void {
-    if (mirrorNodes) this.mirrorNodes = mirrorNodes
+    if (mirrorNodes) this.mirrorNodes = mirrorNodes;
   }
 
   public setJsonRpcRelays(jsonRpcRelays?: JsonRpcRelays): void {
-    if (jsonRpcRelays) this.jsonRpcRelays = jsonRpcRelays
+    if (jsonRpcRelays) this.jsonRpcRelays = jsonRpcRelays;
   }
 
-  importAsset(
-    asset: EvmAddress,
-    paymentToken: EvmAddress
-  ): Promise<EvmAddress> {
-    throw new Error("Method not implemented.")
+  importAsset(asset: EvmAddress, paymentToken: EvmAddress): Promise<EvmAddress> {
+    throw new Error("Method not implemented.");
   }
 
   async deploy(asset: EvmAddress, paymentToken: EvmAddress, rbac: RbacPort[]): Promise<string> {
-    const lifeCycleCashFlowBytecodeHex =
-      LifeCycleCashFlow__factory.bytecode.startsWith("0x")
-        ? LifeCycleCashFlow__factory.bytecode.slice(2)
-        : LifeCycleCashFlow__factory.bytecode
+    const lifeCycleCashFlowBytecodeHex = LifeCycleCashFlow__factory.bytecode.startsWith("0x")
+      ? LifeCycleCashFlow__factory.bytecode.slice(2)
+      : LifeCycleCashFlow__factory.bytecode;
 
-    const lifeCycleCashFlowContractId = await this.deployLifeCycleCashFlow(
-      lifeCycleCashFlowBytecodeHex
-    )
+    const lifeCycleCashFlowContractId = await this.deployLifeCycleCashFlow(lifeCycleCashFlowBytecodeHex);
 
     const lifeCycleCashFlowContractAddress = (
-      await this.mirrorNodeAdapter.getContractInfo(
-        lifeCycleCashFlowContractId.toString()
-      )
-    ).evmAddress
-    this.logger.log(
-      "Deployed LifeCycleCashFlow ID:",
-      lifeCycleCashFlowContractId,
-      lifeCycleCashFlowContractAddress
-    )
+      await this.mirrorNodeAdapter.getContractInfo(lifeCycleCashFlowContractId.toString())
+    ).evmAddress;
+    this.logger.log("Deployed LifeCycleCashFlow ID:", lifeCycleCashFlowContractId, lifeCycleCashFlowContractAddress);
 
     const proxyAdminBytecodeHex = ProxyAdmin__factory.bytecode.startsWith("0x")
       ? ProxyAdmin__factory.bytecode.slice(2)
-      : ProxyAdmin__factory.bytecode
+      : ProxyAdmin__factory.bytecode;
 
-    const initialOwnerEvmAddress = this.getAccount().evmAddress
-    const abiCoder = new ethers.utils.AbiCoder()
-    const constructorParamsProxyAdminHex = abiCoder.encode(
-      ["address"], [initialOwnerEvmAddress]
-    )
+    const initialOwnerEvmAddress = this.getAccount().evmAddress;
+    const abiCoder = new ethers.utils.AbiCoder();
+    const constructorParamsProxyAdminHex = abiCoder.encode(["address"], [initialOwnerEvmAddress]);
 
-    const fullBytecodeProxyAdminHex =
-      "0x" + proxyAdminBytecodeHex + constructorParamsProxyAdminHex.slice(2)
-    const fullBytecodeProxyAdmin = Uint8Array.from(
-      Buffer.from(fullBytecodeProxyAdminHex.slice(2), "hex")
-    )
+    const fullBytecodeProxyAdminHex = "0x" + proxyAdminBytecodeHex + constructorParamsProxyAdminHex.slice(2);
+    const fullBytecodeProxyAdmin = Uint8Array.from(Buffer.from(fullBytecodeProxyAdminHex.slice(2), "hex"));
 
     const proxyAdminTransaction = new ContractCreateTransaction()
       .setBytecode(fullBytecodeProxyAdmin)
-      .setGas(PROXY_ADMIN_DEPLOYMENT_GAS)
+      .setGas(PROXY_ADMIN_DEPLOYMENT_GAS);
 
-    const resProxyAdmin =
-      await this.signAndSendTransactionForDeployment(proxyAdminTransaction)
-    const proxyAdminAddress = "0x".concat(resProxyAdmin.contractId.toSolidityAddress())
+    const resProxyAdmin = await this.signAndSendTransactionForDeployment(proxyAdminTransaction);
+    const proxyAdminAddress = "0x".concat(resProxyAdmin.contractId.toSolidityAddress());
 
-    this.logger.log("ProxyAdmin:", resProxyAdmin.contractId, proxyAdminAddress)
+    this.logger.log("ProxyAdmin:", resProxyAdmin.contractId, proxyAdminAddress);
 
-    const proxyBytecodeHex =
-      TransparentUpgradeableProxy__factory.bytecode.startsWith("0x")
-        ? TransparentUpgradeableProxy__factory.bytecode.slice(2)
-        : TransparentUpgradeableProxy__factory.bytecode
+    const proxyBytecodeHex = TransparentUpgradeableProxy__factory.bytecode.startsWith("0x")
+      ? TransparentUpgradeableProxy__factory.bytecode.slice(2)
+      : TransparentUpgradeableProxy__factory.bytecode;
 
-    const proxyBytecode = Uint8Array.from(Buffer.from(proxyBytecodeHex, "hex"))
+    const proxyBytecode = Uint8Array.from(Buffer.from(proxyBytecodeHex, "hex"));
 
-    const iface = new ethers.utils.Interface(LifeCycleCashFlow__factory.abi)
-    const callDataHex = iface.encodeFunctionData("initialize", [
-      asset.value,
-      paymentToken.value.slice(2),
-      rbac
-    ])
-    const callDataBytes = Uint8Array.from(
-      Buffer.from(callDataHex.slice(2), "hex")
-    )
+    const iface = new ethers.utils.Interface(LifeCycleCashFlow__factory.abi);
+    const callDataHex = iface.encodeFunctionData("initialize", [asset.value, paymentToken.value.slice(2), rbac]);
+    const callDataBytes = Uint8Array.from(Buffer.from(callDataHex.slice(2), "hex"));
 
     const constructorParamsProxyHex = abiCoder.encode(
       ["address", "address", "bytes"],
-      [lifeCycleCashFlowContractAddress, proxyAdminAddress, callDataHex]
-    )
-    const fullBytecodeProxyHex =
-      "0x" + proxyBytecodeHex + constructorParamsProxyHex.slice(2)
-    const fullBytecodeProxy = Uint8Array.from(
-      Buffer.from(fullBytecodeProxyHex.slice(2), "hex")
-    )
+      [lifeCycleCashFlowContractAddress, proxyAdminAddress, callDataHex],
+    );
+    const fullBytecodeProxyHex = "0x" + proxyBytecodeHex + constructorParamsProxyHex.slice(2);
+    const fullBytecodeProxy = Uint8Array.from(Buffer.from(fullBytecodeProxyHex.slice(2), "hex"));
 
     const proxyTransaction = new ContractCreateTransaction()
       .setBytecode(fullBytecodeProxy)
-      .setGas(PROXY_DEPLOYMENT_GAS)
+      .setGas(PROXY_DEPLOYMENT_GAS);
 
-    const resProxy =
-      await this.signAndSendTransactionForDeployment(proxyTransaction)
-    const proxyAddress = "0x".concat(resProxy.contractId.toSolidityAddress())
+    const resProxy = await this.signAndSendTransactionForDeployment(proxyTransaction);
+    const proxyAddress = "0x".concat(resProxy.contractId.toSolidityAddress());
 
-    this.logger.log("Proxy:", resProxy.contractId, proxyAddress)
+    this.logger.log("Proxy:", resProxy.contractId, proxyAddress);
 
-    return proxyAddress
+    return proxyAddress;
   }
 
   private async deployLifeCycleCashFlow(bytecode: string): Promise<string> {
-    const fileCreateTransaction = new FileCreateTransaction()
-      .setKeys([])
-      .setMaxTransactionFee(new Hbar(5))
+    const fileCreateTransaction = new FileCreateTransaction().setKeys([]).setMaxTransactionFee(new Hbar(5));
 
     const fileCreateReceipt: TransactionReceipt | undefined =
-      await this.signAndSendTransactionForDeployment(fileCreateTransaction)
-    const fileId = fileCreateReceipt.fileId
+      await this.signAndSendTransactionForDeployment(fileCreateTransaction);
+    const fileId = fileCreateReceipt.fileId;
 
     const appendTransaction = new FileAppendTransaction()
       .setFileId(fileId)
       .setContents(bytecode) // your 15650 bytes
-      .setMaxTransactionFee(new Hbar(5))
+      .setMaxTransactionFee(new Hbar(5));
 
-    await this.signAndSendTransactionForDeployment(appendTransaction)
+    await this.signAndSendTransactionForDeployment(appendTransaction);
 
     const contractCreateTransaction = new ContractCreateTransaction()
       .setBytecodeFileId(fileId)
       .setGas(LIFE_CYCLE_CASH_FLOW_DEPLOYMENT_GAS)
-      .setMaxTransactionFee(new Hbar(30))
+      .setMaxTransactionFee(new Hbar(30));
 
     const contractCreateReceipt: TransactionReceipt | undefined =
-      await this.signAndSendTransactionForDeployment(contractCreateTransaction)
+      await this.signAndSendTransactionForDeployment(contractCreateTransaction);
 
-    return contractCreateReceipt.contractId.toString()
+    return contractCreateReceipt.contractId.toString();
   }
 
   async pause(
     lifeCycleCashFlow: EvmAddress,
-    lifeCycleCashFlowId: ContractId | string
+    lifeCycleCashFlowId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = "pause"
-    this.logger.log(
-      `Pausing LifeCycleCashFlow on address ${lifeCycleCashFlow.toString()}`
-    )
+    const FUNCTION_NAME = "pause";
+    this.logger.log(`Pausing LifeCycleCashFlow on address ${lifeCycleCashFlow.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
-      LifeCycleCashFlow__factory.abi
-    ).encodeFunctionData(FUNCTION_NAME)
+    const functionDataEncodedHex = new Interface(LifeCycleCashFlow__factory.abi).encodeFunctionData(FUNCTION_NAME);
 
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), "hex")
-    )
+    const functionDataEncoded = new Uint8Array(Buffer.from(functionDataEncodedHex.slice(2), "hex"));
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(lifeCycleCashFlowId)
       .setGas(PAUSE_GAS)
-      .setFunctionParameters(functionDataEncoded)
+      .setFunctionParameters(functionDataEncoded);
 
-    return await this.signAndSendTransaction(transaction)
+    return await this.signAndSendTransaction(transaction);
   }
 
   async unpause(
     lifeCycleCashFlow: EvmAddress,
-    lifeCycleCashFlowId: ContractId | string
+    lifeCycleCashFlowId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = "unpause"
-    this.logger.log(
-      `Pausing LifeCycleCashFlow on address ${lifeCycleCashFlow.toString()}`
-    )
+    const FUNCTION_NAME = "unpause";
+    this.logger.log(`Pausing LifeCycleCashFlow on address ${lifeCycleCashFlow.toString()}`);
 
-    const functionDataEncodedHex = new Interface(
-      LifeCycleCashFlow__factory.abi
-    ).encodeFunctionData(FUNCTION_NAME)
+    const functionDataEncodedHex = new Interface(LifeCycleCashFlow__factory.abi).encodeFunctionData(FUNCTION_NAME);
 
-    const functionDataEncoded = new Uint8Array(
-      Buffer.from(functionDataEncodedHex.slice(2), "hex")
-    )
+    const functionDataEncoded = new Uint8Array(Buffer.from(functionDataEncodedHex.slice(2), "hex"));
 
     const transaction = new ContractExecuteTransaction()
       .setContractId(lifeCycleCashFlowId)
       .setGas(UNPAUSE_GAS)
-      .setFunctionParameters(functionDataEncoded)
+      .setFunctionParameters(functionDataEncoded);
 
-    return await this.signAndSendTransaction(transaction)
+    return await this.signAndSendTransaction(transaction);
   }
 
   executeDistribution(
@@ -306,19 +256,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     asset: EvmAddress,
     distributionID: string,
     pageIndex: number,
-    pageLength: number
+    pageLength: number,
   ): Promise<TransactionResponse<any, Error>> {
-    this.logger.log(
-      `Executing distribution on address ${lifeCycleCashFlow.toString()}`
-    )
+    this.logger.log(`Executing distribution on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
       new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
       "executeDistribution",
       lifeCycleCashFlowId,
       EXECUTE_DISTRIBUTION_GAS,
-      [asset.toString(), distributionID, pageIndex, pageLength]
-    )
+      [asset.toString(), distributionID, pageIndex, pageLength],
+    );
   }
 
   executeDistributionByAddresses(
@@ -326,23 +274,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     lifeCycleCashFlowId: ContractId | string,
     asset: EvmAddress,
     distributionID: string,
-    holders: EvmAddress[]
+    holders: EvmAddress[],
   ): Promise<TransactionResponse<any, Error>> {
-    this.logger.log(
-      `Executing distribution by addresses on address ${lifeCycleCashFlow.toString()}`
-    )
+    this.logger.log(`Executing distribution by addresses on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
       new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
       "executeDistributionByAddresses",
       lifeCycleCashFlowId,
       EXECUTE_DISTRIBUTION_BY_ADDRESSES_GAS,
-      [
-        asset.toString(),
-        distributionID,
-        holders.map(holder => holder.toString()),
-      ]
-    )
+      [asset.toString(), distributionID, holders.map((holder) => holder.toString())],
+    );
   }
 
   executeBondCashOut(
@@ -350,38 +292,34 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     lifeCycleCashFlowId: ContractId | string,
     bond: EvmAddress,
     pageIndex: number,
-    pageLength: number
+    pageLength: number,
   ): Promise<TransactionResponse<any, Error>> {
-    this.logger.log(
-      `Executing bond cash out on address ${lifeCycleCashFlow.toString()}`
-    )
+    this.logger.log(`Executing bond cash out on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
       new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
       "executeBondCashOut",
       lifeCycleCashFlowId,
       EXECUTE_BOND_CASHOUT_GAS,
-      [bond.toString(), pageIndex, pageLength]
-    )
+      [bond.toString(), pageIndex, pageLength],
+    );
   }
 
   executeBondCashOutByAddresses(
     lifeCycleCashFlow: EvmAddress,
     lifeCycleCashFlowId: ContractId | string,
     bond: EvmAddress,
-    holders: EvmAddress[]
+    holders: EvmAddress[],
   ): Promise<TransactionResponse<any, Error>> {
-    this.logger.log(
-      `Executing bond cash out by addresses on address ${lifeCycleCashFlow.toString()}`
-    )
+    this.logger.log(`Executing bond cash out by addresses on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
       new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
       "executeBondCashOutByAddresses",
       lifeCycleCashFlowId,
       EXECUTE_BOND_CASHOUT_BY_ADDRESSES_GAS,
-      [bond.toString(), holders.map(holder => holder.toString())]
-    )
+      [bond.toString(), holders.map((holder) => holder.toString())],
+    );
   }
 
   executeAmountSnapshot(
@@ -391,25 +329,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     snapshotID: string,
     pageIndex: number,
     pageLength: number,
-    amount: BigDecimal
+    amount: BigDecimal,
   ): Promise<TransactionResponse<any, Error>> {
-    this.logger.log(
-      `Executing amount snapshot on address ${lifeCycleCashFlow.toString()}`
-    )
+    this.logger.log(`Executing amount snapshot on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
       new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
       "executeAmountSnapshot",
       lifeCycleCashFlowId,
       EXECUTE_AMOUNT_SNAPSHOT_GAS,
-      [
-        asset.toString(),
-        snapshotID,
-        pageIndex,
-        pageLength,
-        amount.toHexString(),
-      ]
-    )
+      [asset.toString(), snapshotID, pageIndex, pageLength, amount.toHexString()],
+    );
   }
 
   executePercentageSnapshot(
@@ -419,25 +349,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     snapshotID: string,
     pageIndex: number,
     pageLength: number,
-    percentage: BigDecimal
+    percentage: BigDecimal,
   ): Promise<TransactionResponse<any, Error>> {
-    this.logger.log(
-      `Executing percentage snapshot on address ${lifeCycleCashFlow.toString()}`
-    )
+    this.logger.log(`Executing percentage snapshot on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
       new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
       "executePercentageSnapshot",
       lifeCycleCashFlowId,
       EXECUTE_PERCENTAGE_SNAPSHOT_GAS,
-      [
-        asset.toString(),
-        snapshotID,
-        pageIndex,
-        pageLength,
-        percentage.toHexString(),
-      ]
-    )
+      [asset.toString(), snapshotID, pageIndex, pageLength, percentage.toHexString()],
+    );
   }
 
   executeAmountSnapshotByAddresses(
@@ -446,24 +368,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     asset: EvmAddress,
     snapshotID: string,
     holders: EvmAddress[],
-    amount: BigDecimal
+    amount: BigDecimal,
   ): Promise<TransactionResponse<any, Error>> {
-    this.logger.log(
-      `Executing amount snapshot by addresses on address ${lifeCycleCashFlow.toString()}`
-    )
+    this.logger.log(`Executing amount snapshot by addresses on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
       new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
       "executeAmountSnapshotByAddresses",
       lifeCycleCashFlowId,
       EXECUTE_AMOUNT_SNAPSHOT_BY_ADDRESSES_GAS,
-      [
-        asset.toString(),
-        snapshotID,
-        holders.map(holder => holder.toString()),
-        amount.toHexString(),
-      ]
-    )
+      [asset.toString(), snapshotID, holders.map((holder) => holder.toString()), amount.toHexString()],
+    );
   }
 
   executePercentageSnapshotByAddresses(
@@ -472,53 +387,44 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     asset: EvmAddress,
     snapshotID: string,
     holders: EvmAddress[],
-    percentage: BigDecimal
+    percentage: BigDecimal,
   ): Promise<TransactionResponse<any, Error>> {
-    this.logger.log(
-      `Executing percentage snapshot by addresses on address ${lifeCycleCashFlow.toString()}`
-    )
+    this.logger.log(`Executing percentage snapshot by addresses on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
       new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
       "executePercentageSnapshotByAddresses",
       lifeCycleCashFlowId,
       EXECUTE_PERCENTAGE_SNAPSHOT_BY_ADDRESSES_GAS,
-      [
-        asset.toString(),
-        snapshotID,
-        holders.map(holder => holder.toString()),
-        percentage.toHexString(),
-      ]
-    )
+      [asset.toString(), snapshotID, holders.map((holder) => holder.toString()), percentage.toHexString()],
+    );
   }
 
   transferPaymentToken(
     lifeCycleCashFlow: EvmAddress,
     lifeCycleCashFlowId: ContractId | string,
     to: EvmAddress,
-    amount: BigDecimal
+    amount: BigDecimal,
   ) {
-    throw new Error("Method not implemented.")
+    throw new Error("Method not implemented.");
   }
 
   updatePaymentToken(
     lifeCycleCashFlow: EvmAddress,
     lifeCycleCashFlowId: ContractId | string,
-    paymentToken: EvmAddress
+    paymentToken: EvmAddress,
   ) {
-    throw new Error("Method not implemented.")
+    throw new Error("Method not implemented.");
   }
 
   abstract signAndSendTransaction(
     transaction: Transaction,
     transactionType?: TransactionType,
     functionName?: string,
-    abi?: object[]
-  ): Promise<TransactionResponse>
+    abi?: object[],
+  ): Promise<TransactionResponse>;
 
-  abstract signAndSendTransactionForDeployment(
-    transaction: Transaction
-  ): Promise<TransactionReceipt>
+  abstract signAndSendTransactionForDeployment(transaction: Transaction): Promise<TransactionReceipt>;
 
-  abstract getAccount(): Account
+  abstract getAccount(): Account;
 }
