@@ -91,7 +91,7 @@ The backend uses **DFNS** for transaction signing.
 # Service account credentials
 DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN=your_token_here
 DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID=cr-xxxxx-xxxxx-xxxxxxxxxxxxxxxxx
-DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH="-----BEGIN EC PRIVATE KEY-----\n...\n-----END EC PRIVATE KEY-----"
+DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_OR_PATH="-----BEGIN EC PRIVATE KEY-----\n...\n-----END EC PRIVATE KEY-----"
 
 # Application settings
 DFNS_APP_ID=ap-xxxxx-xxxxx-xxxxxxxxxxxxxxxxx
