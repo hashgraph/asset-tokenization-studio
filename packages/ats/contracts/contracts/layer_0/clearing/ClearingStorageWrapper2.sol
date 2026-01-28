@@ -406,7 +406,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         uint256 _abaf
     ) internal override {
-        uint256 clearingLabaf = _getClearingLabafByPartition(_clearingOperationIdentifier);
+        uint256 clearingLabaf = _getClearingLabafById(_clearingOperationIdentifier);
 
         if (_abaf == clearingLabaf) {
             return;
@@ -555,7 +555,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
 
         clearingTransferData_.amount *= _calculateFactor(
             _getAbafAdjustedAt(_timestamp),
-            _getClearingLabafByPartition(
+            _getClearingLabafById(
                 _buildClearingOperationIdentifier(
                     _tokenHolder,
                     _partition,
@@ -576,7 +576,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
 
         clearingRedeemData_.amount *= _calculateFactor(
             _getAbafAdjustedAt(_timestamp),
-            _getClearingLabafByPartition(
+            _getClearingLabafById(
                 _buildClearingOperationIdentifier(
                     _tokenHolder,
                     _partition,
@@ -597,7 +597,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
 
         clearingHoldCreationData_.amount *= _calculateFactor(
             _getAbafAdjustedAt(_timestamp),
-            _getClearingLabafByPartition(
+            _getClearingLabafById(
                 _buildClearingOperationIdentifier(
                     _tokenHolder,
                     _partition,

@@ -47,7 +47,6 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
 
         uint256 abaf = _getAbaf();
-        abaf = (abaf == 0) ? 1 : abaf;
 
         uint256 pos = erc20VotesStorage.abafCheckpoints.length;
 
