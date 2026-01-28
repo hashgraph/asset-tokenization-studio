@@ -58,6 +58,7 @@ import { SigningError } from '../error/SigningError';
 import NetworkService from '@service/network/NetworkService';
 import LogService from '@service/log/LogService';
 import {
+  FactoryBondFixedRateToken,
   FactoryBondToken,
   FactoryEquityToken,
   FactoryRegulationData,
@@ -112,6 +113,7 @@ import { BaseContract, Contract, ContractTransaction } from 'ethers';
 import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
 import { ProtectionData } from '@domain/context/factory/ProtectionData';
 import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
+import { BondFixedRateDetailsData } from '@domain/context/factory/BondFixedRateDetailsData';
 
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
@@ -455,23 +457,121 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async createBondFixedRate(
-        security: Security,
+        securityInfo: Security,
         bondFixedRateDetails: BondFixedRateDetails,
         factory: EvmAddress,
         resolver: EvmAddress,
         configId: string,
         configVersion: number,
         compliance: EvmAddress,
-        identityRegistryAddress: EvmAddress,
+        identityRegistry: EvmAddress,
         externalPauses?: EvmAddress[],
         externalControlLists?: EvmAddress[],
         externalKycLists?: EvmAddress[],
         diamondOwnerAccount?: EvmAddress,
-        proceedRecipients?: EvmAddress[],
-        proceedRecipientsData?: string[],
+        proceedRecipients: EvmAddress[] = [],
+        proceedRecipientsData: string[] = [],
         factoryId?: ContractId | string,
       ): Promise<TransactionResponse> {
-        return Promise.resolve({});
+        try {
+        if (!securityInfo.regulationType) {
+          throw new MissingRegulationType();
+        }
+        if (!securityInfo.regulationsubType) {
+          throw new MissingRegulationSubType();
+        }
+
+        const rbacAdmin: Rbac = {
+          role: SecurityRole._DEFAULT_ADMIN_ROLE,
+          members: [diamondOwnerAccount!.toString()],
+        };
+        const rbacs: Rbac[] = [rbacAdmin];
+
+        const erc20MetadataInfo: ERC20MetadataInfo = {
+          name: securityInfo.name,
+          symbol: securityInfo.symbol,
+          isin: securityInfo.isin,
+          decimals: securityInfo.decimals,
+        };
+
+        const resolverProxyConfiguration: ResolverProxyConfiguration = {
+          key: configId,
+          version: configVersion,
+        };
+
+        const security: SecurityData = {
+          arePartitionsProtected: securityInfo.arePartitionsProtected,
+          isMultiPartition: securityInfo.isMultiPartition,
+          resolver: resolver.toString(),
+          resolverProxyConfiguration: resolverProxyConfiguration,
+          rbacs: rbacs,
+          isControllable: securityInfo.isControllable,
+          isWhiteList: securityInfo.isWhiteList,
+          maxSupply: securityInfo.maxSupply
+            ? securityInfo.maxSupply.toString()
+            : '0',
+          erc20VotesActivated: securityInfo.erc20VotesActivated,
+          erc20MetadataInfo: erc20MetadataInfo,
+          clearingActive: securityInfo.clearingActive,
+          internalKycActivated: securityInfo.internalKycActivated,
+          externalPauses:
+            externalPauses?.map((address) => address.toString()) ?? [],
+          externalControlLists:
+            externalControlLists?.map((address) => address.toString()) ?? [],
+          externalKycLists:
+            externalKycLists?.map((address) => address.toString()) ?? [],
+          compliance: compliance.toString(),
+          identityRegistry: identityRegistry.toString(),
+        };
+
+        const bondFixedRateDetailsData = new BondFixedRateDetailsData(
+          bondFixedRateDetails.currency,
+          bondFixedRateDetails.nominalValue.toString(),
+          bondFixedRateDetails.nominalValueDecimals,
+          bondFixedRateDetails.startingDate.toString(),
+          bondFixedRateDetails.maturityDate.toString(),
+          bondFixedRateDetails.rate,
+          bondFixedRateDetails.rateDecimals,
+        );
+
+        const securityTokenToCreate = new FactoryBondFixedRateToken(
+          security,
+          bondFixedRateDetailsData,
+          proceedRecipients.map((addr) => addr.toString()),
+          proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
+        );
+
+        const additionalSecurityData: AdditionalSecurityData = {
+          countriesControlListType: securityInfo.isCountryControlListWhiteList,
+          listOfCountries: securityInfo.countries ?? '',
+          info: securityInfo.info ?? '',
+        };
+
+        const factoryRegulationData = new FactoryRegulationData(
+          CastRegulationType.toNumber(securityInfo.regulationType),
+          CastRegulationSubType.toNumber(securityInfo.regulationsubType),
+          additionalSecurityData,
+        );
+
+        LogService.logTrace(
+          `Deploying bond fixed rate: ${{
+            security: securityTokenToCreate,
+          }}`,
+        );
+
+        return this.executeWithArgs(
+          new Factory__factory().attach(factory.toString()),
+          'deployBondFixedRate',
+          factoryId!,
+          GAS.CREATE_BOND_ST,
+          [securityTokenToCreate],
+        );
+      } catch (error) {
+        LogService.logError(error);
+        throw new SigningError(
+          `Unexpected error in HederaTransactionAdapter create operation : ${error}`,
+        );
+      }
   }
 
   async transfer(

@@ -32,6 +32,7 @@ import {
 import { Security } from '@domain/context/security/Security';
 import { SecurityRole } from '@domain/context/security/SecurityRole';
 import {
+  FactoryBondFixedRateToken,
   FactoryBondToken,
   FactoryEquityToken,
 } from '@domain/context/factory/FactorySecurityToken';
@@ -255,7 +256,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   }
 
   async createBondFixedRate(
-      security: Security,
+      securityInfo: Security,
       bondFixedRateDetails: BondFixedRateDetails,
       factory: EvmAddress,
       resolver: EvmAddress,
@@ -267,11 +268,36 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       externalControlLists?: EvmAddress[],
       externalKycLists?: EvmAddress[],
       diamondOwnerAccount?: EvmAddress,
-      proceedRecipients?: EvmAddress[],
-      proceedRecipientsData?: string[],
+      proceedRecipients: EvmAddress[] = [],
+      proceedRecipientsData: string[] = [],
       factoryId?: ContractId | string,
     ): Promise<TransactionResponse> {
-      return Promise.resolve({});
+      return this.createSecurity(
+        securityInfo,
+        {
+          bondDetails: SecurityDataBuilder.buildBondFixedRateDetails(bondFixedRateDetails),
+        },
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+        diamondOwnerAccount!,
+        (security, details) =>
+          new FactoryBondFixedRateToken(
+            security,
+            details.bondDetails,
+            proceedRecipients.map((addr) => addr.toString()),
+            proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
+          ),
+        'deployBondFixedRate',
+        GAS.CREATE_BOND_ST,
+        'BondFixedRateDeployed',
+        compliance,
+        identityRegistryAddress,
+      );
     }
 
   async transfer(

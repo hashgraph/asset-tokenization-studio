@@ -4,6 +4,7 @@ import { BondDetailsData } from "./BondDetailsData";
 import { SecurityData } from "./SecurityData";
 import { EquityDetailsData } from "./EquityDetailsData";
 import { AdditionalSecurityData } from "./AdditionalSecurityData";
+import { BondFixedRateDetailsData } from "./BondFixedRateDetailsData";
 
 export class FactoryEquityToken {
   public security: SecurityData;
@@ -29,6 +30,25 @@ export class FactoryBondToken {
   ) {
     this.security = security;
     this.bondDetails = bondDetails;
+    this.proceedRecipients = proceedRecipients;
+    this.proceedRecipientsData = proceedRecipientsData;
+  }
+}
+
+export class FactoryBondFixedRateToken {
+  public security: SecurityData;
+  public bondFixedRateDetails: BondFixedRateDetailsData;
+  public proceedRecipients: string[];
+  public proceedRecipientsData: string[];
+
+  constructor(
+    security: SecurityData,
+    bondFixedRateDetails: BondFixedRateDetailsData,
+    proceedRecipients: string[],
+    proceedRecipientsData: string[],
+  ) {
+    this.security = security;
+    this.bondFixedRateDetails = bondFixedRateDetails;
     this.proceedRecipients = proceedRecipients;
     this.proceedRecipientsData = proceedRecipientsData;
   }

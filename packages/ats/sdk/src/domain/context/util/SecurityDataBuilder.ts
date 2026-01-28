@@ -12,6 +12,8 @@ import { SecurityData } from "../factory/SecurityData";
 import { SecurityRole } from "../security/SecurityRole";
 import { Security } from "../security/Security";
 import EvmAddress from "../contract/EvmAddress";
+import { BondFixedRateDetails } from "../bond/BondFixedRateDetails";
+import { BondFixedRateDetailsData } from "../factory/BondFixedRateDetailsData";
 
 export class SecurityDataBuilder {
   static buildSecurityData(
@@ -92,6 +94,18 @@ export class SecurityDataBuilder {
       bondInfo.nominalValueDecimals,
       bondInfo.startingDate.toString(),
       bondInfo.maturityDate.toString(),
+    );
+  }
+
+  static buildBondFixedRateDetails(bondInfo: BondFixedRateDetails): BondFixedRateDetailsData {
+    return new BondFixedRateDetailsData(
+      bondInfo.currency,
+      bondInfo.nominalValue.toString(),
+      bondInfo.nominalValueDecimals,
+      bondInfo.startingDate.toString(),
+      bondInfo.maturityDate.toString(),
+      bondInfo.rate,
+      bondInfo.rateDecimals,
     );
   }
 }
