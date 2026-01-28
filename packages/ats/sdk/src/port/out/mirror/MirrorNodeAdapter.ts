@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import axios, { AxiosRequestConfig } from 'axios';
-import { AxiosInstance } from 'axios';
-import { singleton } from 'tsyringe';
-import { PublicKey as HPublicKey } from '@hiero-ledger/sdk';
-import { InvalidResponse } from '@core/error/InvalidResponse';
-import { REGEX_TRANSACTION } from '../error/TransactionResponseError';
-import TransactionResultViewModel from '@port/in/response/TransactionResultViewModel';
-import ContractViewModel from '@port/in/response/ContractViewModel';
-import { BYTES_32_LENGTH } from '@core/Constants';
-import LogService from '@service/log/LogService';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import PublicKey from '@domain/context/account/PublicKey';
-import { HederaId } from '@domain/context/shared/HederaId';
-import { KeyType } from '@domain/context/account/KeyProps';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { MirrorNode } from '@domain/context/network/MirrorNode';
-import Account from '@domain/context/account/Account';
-import { Time } from '@core/Time';
-import { TransactionNotFound } from './error/TransactionNotFound';
-import { TransactionResultNotFound } from './error/TransactionResultNotFound';
-import { BalanceNotFound } from './error/BalanceNotFound';
-import { ErrorRetrievingEvmAddress } from './error/ErrorRetrievingEvmAddress';
+import axios, { AxiosRequestConfig } from "axios";
+import { AxiosInstance } from "axios";
+import { singleton } from "tsyringe";
+import { PublicKey as HPublicKey } from "@hiero-ledger/sdk";
+import { InvalidResponse } from "@core/error/InvalidResponse";
+import { REGEX_TRANSACTION } from "../error/TransactionResponseError";
+import TransactionResultViewModel from "@port/in/response/TransactionResultViewModel";
+import ContractViewModel from "@port/in/response/ContractViewModel";
+import { BYTES_32_LENGTH } from "@core/Constants";
+import LogService from "@service/log/LogService";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import PublicKey from "@domain/context/account/PublicKey";
+import { HederaId } from "@domain/context/shared/HederaId";
+import { KeyType } from "@domain/context/account/KeyProps";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
+import Account from "@domain/context/account/Account";
+import { Time } from "@core/Time";
+import { TransactionNotFound } from "./error/TransactionNotFound";
+import { TransactionResultNotFound } from "./error/TransactionResultNotFound";
+import { BalanceNotFound } from "./error/BalanceNotFound";
+import { ErrorRetrievingEvmAddress } from "./error/ErrorRetrievingEvmAddress";
 
 @singleton()
 export class MirrorNodeAdapter {
@@ -37,33 +37,22 @@ export class MirrorNodeAdapter {
       },
     });
 
-    this.mirrorNodeConfig.baseUrl = mnConfig.baseUrl.endsWith('/')
-      ? mnConfig.baseUrl
-      : `${mnConfig.baseUrl}/`;
+    this.mirrorNodeConfig.baseUrl = mnConfig.baseUrl.endsWith("/") ? mnConfig.baseUrl : `${mnConfig.baseUrl}/`;
 
     if (this.mirrorNodeConfig.headerName && this.mirrorNodeConfig.apiKey)
-      this.instance.defaults.headers.common[this.mirrorNodeConfig.headerName] =
-        this.mirrorNodeConfig.apiKey;
+      this.instance.defaults.headers.common[this.mirrorNodeConfig.headerName] = this.mirrorNodeConfig.apiKey;
   }
 
-  public async getHederaIdfromContractAddress(
-    contractAddress: string,
-  ): Promise<string> {
-    if (!contractAddress) return '';
-    if (contractAddress.length >= 40)
-      return (await this.getContractInfo(contractAddress)).id;
+  public async getHederaIdfromContractAddress(contractAddress: string): Promise<string> {
+    if (!contractAddress) return "";
+    if (contractAddress.length >= 40) return (await this.getContractInfo(contractAddress)).id;
     return contractAddress;
   }
 
   public async getAccountInfo(accountId: HederaId | string): Promise<Account> {
     try {
-      LogService.logTrace(
-        'Getting account info -> ',
-        this.mirrorNodeConfig.baseUrl + 'accounts/' + accountId,
-      );
-      const res = await this.instance.get<IAccount>(
-        this.mirrorNodeConfig.baseUrl + 'accounts/' + accountId.toString(),
-      );
+      LogService.logTrace("Getting account info -> ", this.mirrorNodeConfig.baseUrl + "accounts/" + accountId);
+      const res = await this.instance.get<IAccount>(this.mirrorNodeConfig.baseUrl + "accounts/" + accountId.toString());
 
       const account: Account = {
         id: HederaId.from(res.data.account),
@@ -73,12 +62,8 @@ export class MirrorNodeAdapter {
 
       if (res.data.key)
         account.publicKey = new PublicKey({
-          key: res.data.key
-            ? this.trimLeadingZeros(res.data.key.key)
-            : undefined,
-          type: res.data.key
-            ? this.getPublicKeyType(res.data.key._type)
-            : undefined,
+          key: res.data.key ? this.trimLeadingZeros(res.data.key.key) : undefined,
+          type: res.data.key ? this.getPublicKeyType(res.data.key._type) : undefined,
         });
 
       return account;
@@ -96,16 +81,14 @@ export class MirrorNodeAdapter {
     requestInterval = 2,
   ): Promise<string[] | null> {
     if (transactionId.match(REGEX_TRANSACTION)) {
-      transactionId = transactionId
-        .replace('@', '-')
-        .replace(/.([^.]*)$/, '-$1');
+      transactionId = transactionId.replace("@", "-").replace(/.([^.]*)$/, "-$1");
     }
     const url = `${this.mirrorNodeConfig.baseUrl}contracts/results/${transactionId}`;
     let call_OK = false;
     const results: string[] = [];
 
     do {
-      await Time.delay(requestInterval, 'seconds');
+      await Time.delay(requestInterval, "seconds");
       timeout = timeout - requestInterval;
       this.instance
         .get(url)
@@ -130,11 +113,7 @@ export class MirrorNodeAdapter {
                 numberOfResultItems = (data.length - 2) / BYTES_32_LENGTH;
               }
 
-              if (
-                data &&
-                data.startsWith('0x') &&
-                data.length >= 2 + numberOfResultItems * BYTES_32_LENGTH
-              ) {
+              if (data && data.startsWith("0x") && data.length >= 2 + numberOfResultItems * BYTES_32_LENGTH) {
                 for (let i = 0; i < numberOfResultItems; i++) {
                   const start = 2 + i * BYTES_32_LENGTH;
                   const end = start + BYTES_32_LENGTH;
@@ -152,9 +131,7 @@ export class MirrorNodeAdapter {
           }
         })
         .catch((error) => {
-          LogService.logError(
-            `Error getting contracts result for transaction ${transactionId}: ${error}`,
-          );
+          LogService.logError(`Error getting contracts result for transaction ${transactionId}: ${error}`);
         });
     } while (timeout > 0 && !call_OK);
 
@@ -162,12 +139,12 @@ export class MirrorNodeAdapter {
   }
 
   private trimLeadingZeros(publicKey: string): string {
-    return publicKey.replace(/^0+/, '');
+    return publicKey.replace(/^0+/, "");
   }
 
   private getPublicKeyType(publicKey: string): KeyType {
     switch (publicKey) {
-      case 'ECDSA_SECP256K1':
+      case "ECDSA_SECP256K1":
         return KeyType.ECDSA;
 
       default:
@@ -178,7 +155,7 @@ export class MirrorNodeAdapter {
   public async getContractInfo(contractId: string): Promise<ContractViewModel> {
     try {
       const url = `${this.mirrorNodeConfig.baseUrl}contracts/${contractId}`;
-      LogService.logTrace('Getting contract info -> ', url);
+      LogService.logTrace("Getting contract info -> ", url);
 
       const retry = 10;
       let i = 0;
@@ -203,12 +180,9 @@ export class MirrorNodeAdapter {
     }
   }
 
-  public async getTransactionResult(
-    transactionId: string,
-  ): Promise<TransactionResultViewModel> {
+  public async getTransactionResult(transactionId: string): Promise<TransactionResultViewModel> {
     try {
-      const url =
-        this.mirrorNodeConfig.baseUrl + 'contracts/results/' + transactionId;
+      const url = this.mirrorNodeConfig.baseUrl + "contracts/results/" + transactionId;
       LogService.logTrace(url);
       const res = await this.instance.get<ITransactionResult>(url);
       if (!res.data.call_result) throw new TransactionResultNotFound();
@@ -220,23 +194,16 @@ export class MirrorNodeAdapter {
       return result;
     } catch (error) {
       LogService.logError(error);
-      return Promise.reject<TransactionResultViewModel>(
-        new InvalidResponse(error),
-      );
+      return Promise.reject<TransactionResultViewModel>(new InvalidResponse(error));
     }
   }
 
-  public async getTransactionFinalError(
-    transactionId: string,
-  ): Promise<TransactionResultViewModel> {
+  public async getTransactionFinalError(transactionId: string): Promise<TransactionResultViewModel> {
     try {
       if (transactionId.match(REGEX_TRANSACTION))
-        transactionId = transactionId
-          .replace('@', '-')
-          .replace(/.([^.]*)$/, '-$1');
+        transactionId = transactionId.replace("@", "-").replace(/.([^.]*)$/, "-$1");
 
-      const url =
-        this.mirrorNodeConfig.baseUrl + 'transactions/' + transactionId;
+      const url = this.mirrorNodeConfig.baseUrl + "transactions/" + transactionId;
       LogService.logTrace(url);
 
       await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -244,8 +211,7 @@ export class MirrorNodeAdapter {
 
       let lastChildTransaction: ITransaction;
       if (res.data.transactions) {
-        lastChildTransaction =
-          res.data.transactions[res.data.transactions.length - 1];
+        lastChildTransaction = res.data.transactions[res.data.transactions.length - 1];
         LogService.logError(JSON.stringify(lastChildTransaction));
       } else {
         throw new TransactionNotFound();
@@ -258,9 +224,7 @@ export class MirrorNodeAdapter {
       return result;
     } catch (error) {
       LogService.logError(error);
-      return Promise.reject<TransactionResultViewModel>(
-        new InvalidResponse(error),
-      );
+      return Promise.reject<TransactionResultViewModel>(new InvalidResponse(error));
     }
   }
 
@@ -276,7 +240,7 @@ export class MirrorNodeAdapter {
           accountId,
         );
       } else {
-        return Promise.reject<EvmAddress>('');
+        return Promise.reject<EvmAddress>("");
       }
     } catch (e) {
       throw new ErrorRetrievingEvmAddress(accountId, e);
@@ -290,31 +254,21 @@ export class MirrorNodeAdapter {
   ): Promise<EvmAddress> {
     switch (privateKeyType) {
       case KeyType.ECDSA:
-        return new EvmAddress(
-          HPublicKey.fromString(publicKey).toEthereumAddress(),
-        );
+        return new EvmAddress(HPublicKey.fromString(publicKey).toEthereumAddress());
 
       default:
-        return new EvmAddress(
-          '0x' + (await this.getContractInfo(accountId)).evmAddress,
-        );
+        return new EvmAddress("0x" + (await this.getContractInfo(accountId)).evmAddress);
     }
   }
 
-  public async getHBARBalance(
-    accountId: HederaId | string,
-  ): Promise<BigDecimal> {
+  public async getHBARBalance(accountId: HederaId | string): Promise<BigDecimal> {
     try {
-      const url = `${
-        this.mirrorNodeConfig.baseUrl
-      }balances?account.id=${accountId.toString()}`;
+      const url = `${this.mirrorNodeConfig.baseUrl}balances?account.id=${accountId.toString()}`;
       LogService.logTrace(url);
       const res = await this.instance.get<IBalances>(url);
       if (!res.data.balances) throw new BalanceNotFound();
 
-      return BigDecimal.fromString(
-        res.data.balances[res.data.balances.length - 1].balance.toString(),
-      );
+      return BigDecimal.fromString(res.data.balances[res.data.balances.length - 1].balance.toString());
     } catch (error) {
       LogService.logError(error);
       return Promise.reject<BigDecimal>(new InvalidResponse(error));

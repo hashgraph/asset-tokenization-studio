@@ -15,7 +15,6 @@ import {
 import { TokenId } from "@hiero-ledger/sdk";
 import { DeployCommandError } from "./error/DeployCommandError";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
-import RbacPort from "@port/out/hs/types/RbacPort";
 
 @CommandHandler(DeployCommand)
 export class DeployCommandHandler implements ICommandHandler<DeployCommand> {

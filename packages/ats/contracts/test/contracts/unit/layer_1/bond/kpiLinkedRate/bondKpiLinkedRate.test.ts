@@ -14,7 +14,7 @@ import {
   KpisKpiLinkedRateFacetTimeTravel,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
 } from "@contract-types";
-import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S, ADDRESS_ZERO } from "@scripts";
+import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondKpiLinkedRateTokenFixture, DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, getDltTimestamp } from "@test";
 import { executeRbac } from "@test";
