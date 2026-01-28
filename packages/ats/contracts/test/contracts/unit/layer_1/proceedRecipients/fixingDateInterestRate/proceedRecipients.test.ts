@@ -21,7 +21,6 @@ const referenceDate = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
 
 describe("Proceed Recipients fixing Date Interest RateTests", () => {
   let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
 
   let diamond: ResolverProxy;
   let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
@@ -46,7 +45,6 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
 
     diamond = base.diamond;
     signer_A = base.deployer;
-    signer_B = base.user2;
 
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsKpiLinkedRateFacetTimeTravel",

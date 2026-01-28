@@ -207,6 +207,28 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
   });
 
   describe("Sustainability Performance Target Rate Calculations", () => {
+    it("GIVEN a list of projects that are not proceeds recipients WHEN initializing the bond THEN fails", async () => {
+      const nonExistingProject = "0x0000000000000000000000000000000000000001";
+      await expect(
+        deployBondSustainabilityPerformanceTargetRateTokenFixture({
+          bondDataParams: undefined,
+          regulationTypeParams: undefined,
+          interestRateParams: undefined,
+          impactDataParams: [
+            {
+              baseLine: 800,
+              baseLineMode: 1,
+              deltaRate: 15,
+              impactDataMode: 1,
+            },
+          ],
+          projects: [nonExistingProject],
+        }),
+      )
+        .to.be.revertedWithCustomError(sptRateFacet, "NotExistingProject")
+        .withArgs(nonExistingProject);
+    });
+
     it("GIVEN a coupon with fixing date before start period WHEN rate is calculated THEN rate is start rate", async () => {
       couponData.fixingDate = (newInterestRate.startPeriod - 1000).toString();
       couponData.recordDate = (parseInt(couponData.fixingDate) + 1).toString();

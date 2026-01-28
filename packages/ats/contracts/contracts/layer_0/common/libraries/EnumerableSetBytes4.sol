@@ -71,7 +71,7 @@ library EnumerableSetBytes4 {
      * this function has an unbounded cost, and using it as part of a state-changing function may render the function
      * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
      */
-    function values(Bytes4Set storage set) internal view returns (bytes4[] memory) {
+    /*function values(Bytes4Set storage set) internal view returns (bytes4[] memory) {
         bytes4[] memory store = _values(set._inner);
         bytes4[] memory result;
 
@@ -81,7 +81,7 @@ library EnumerableSetBytes4 {
         }
 
         return result;
-    }
+    }*/
 
     /**
      * @dev Add a value to a set. O(1).
@@ -108,6 +108,7 @@ library EnumerableSetBytes4 {
      * present.
      */
     function _remove(Set storage set, bytes4 value) private returns (bool) {
+        if (!_contains(set, value)) return false;
         // We read and store the value's index to prevent multiple reads from the same storage slot
         uint256 valueIndex = set._indexes[value];
 
@@ -177,7 +178,7 @@ library EnumerableSetBytes4 {
      * this function has an unbounded cost, and using it as part of a state-changing function may render the function
      * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
      */
-    function _values(Set storage set) private view returns (bytes4[] memory) {
+    /*function _values(Set storage set) private view returns (bytes4[] memory) {
         return set._values;
-    }
+    }*/
 }

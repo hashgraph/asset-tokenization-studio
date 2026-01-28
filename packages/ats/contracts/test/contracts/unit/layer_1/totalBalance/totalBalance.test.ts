@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
@@ -9,12 +11,11 @@ import {
   type FreezeFacet,
   type ClearingActionsFacet,
   ClearingActionsFacet__factory,
-  type AccessControlFacet,
   type KycFacet,
   type SsiManagementFacet,
   type TotalBalanceFacet,
 } from "@contract-types";
-import { ATS_ROLES, DEFAULT_PARTITION, ADDRESS_ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { ATS_ROLES, ADDRESS_ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
 import { BigNumber, Contract } from "ethers";
 
@@ -23,29 +24,10 @@ const _SECOND_PARTITION = "0x000000000000000000000000000000000000000000000000000
 const _AMOUNT = 1000;
 const EMPTY_VC_ID = EMPTY_STRING;
 
-enum ClearingOperationType {
-  Transfer,
-  Redeem,
-  HoldCreation,
-}
-
 interface ClearingOperation {
   partition: string;
   expirationTimestamp: number;
   data: string;
-}
-
-interface ClearingOperationFrom {
-  clearingOperation: ClearingOperation;
-  from: string;
-  operatorData: string;
-}
-
-interface ClearingIdentifier {
-  partition: string;
-  tokenHolder: string;
-  clearingId: number;
-  clearingOperationType: ClearingOperationType;
 }
 
 interface Hold {
@@ -69,7 +51,6 @@ describe("Total Balance Tests", () => {
   let clearingFacet: Contract;
   let clearingActionsFacet: ClearingActionsFacet;
   let freezeFacet: FreezeFacet;
-  let accessControlFacet: AccessControlFacet;
   let kycFacet: KycFacet;
   let ssiManagementFacet: SsiManagementFacet;
   let totalBalanceFacet: TotalBalanceFacet;
@@ -107,7 +88,6 @@ describe("Total Balance Tests", () => {
     lockFacet = await ethers.getContractAt("LockFacet", diamond.address, signer_C);
     holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
     freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address, signer_D);
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
     kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
     totalBalanceFacet = await ethers.getContractAt("TotalBalanceFacet", diamond.address, signer_A);
@@ -180,7 +160,6 @@ describe("Total Balance Tests", () => {
 
     it("GIVEN multi-partition equity with locked, held, and cleared tokens WHEN getTotalBalanceFor and getTotalBalanceForByPartition THEN returns correct total balance", async () => {
       const tokenHolder = signer_A.address;
-      const totalAmount = 1000;
 
       // Amounts for DEFAULT partition
       const defaultMintAmount = 600;
