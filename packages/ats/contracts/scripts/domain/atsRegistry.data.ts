@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-23T09:09:54.578Z
+ * Generated: 2026-01-27T11:02:06.703Z
  * Facets: 193
  * Infrastructure: 2
  *
@@ -694,6 +694,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   AccessControlSustainabilityPerformanceTargetRateFacet: {
     name: "AccessControlSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ACCESS_CONTROL_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x9d13e61abd630355ccae4279993868d7cf3b04d4368a0fedcefe6fec3fabaa0c",
+    },
     methods: [
       {
         name: "applyRoles",
@@ -818,6 +822,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   AdjustBalancesSustainabilityPerformanceTargetRateFacet: {
     name: "AdjustBalancesSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_BALANCE_ADJUSTMENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xc9e1f8d7c6b5a4e3f2d1c9b8a7e6f5d4c3b2a1e9f8d7c6b5a4e3f2d1c9b8a7e6",
+    },
     methods: [
       {
         name: "adjustBalances",
@@ -1274,6 +1282,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   BondUSAReadSustainabilityPerformanceTargetRateFacet: {
     name: "BondUSAReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY",
+      value: "0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504",
+    },
     methods: [
       {
         name: "getBondDetails",
@@ -1363,6 +1375,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   BondUSASustainabilityPerformanceTargetRateFacet: {
     name: "BondUSASustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x8048a878c656dcf3886e69ad27a9272a4fb9499299ab5f0e1b6c99ac3b1130f8",
+    },
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -1813,6 +1829,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingActionsSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingActionsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_ACTIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xae9d6d2e1d9a660994e89e185ab5a3439d2def9baa6ba47fdf854ce0a29a5033",
+    },
     methods: [
       {
         name: "activateClearing",
@@ -2005,6 +2025,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingHoldCreationSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingHoldCreationSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_HOLDCREATION_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x0e59e36a2b1298d11c3612c3203c6d45cb185879383f5a22617c4f49495c070d",
+    },
     methods: [
       {
         name: "clearingCreateHoldByPartition",
@@ -2184,6 +2208,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingReadSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa188d3ee426a514ccfe03470d196ed29da48de0ae59898d9b5a30ec680515a11",
+    },
     methods: [
       {
         name: "getClearedAmountFor",
@@ -2365,6 +2393,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingRedeemSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingRedeemSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_REDEEM_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xc4731d62375990b9721357983c8f6acf3fdc78d7814919c187607f653b768d5d",
+    },
     methods: [
       {
         name: "clearingRedeemByPartition",
@@ -2547,6 +2579,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingTransferSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingTransferSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_TRANSFER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x7e29efe8ee5285a43acddbe766fd9219266a74cb24ed3331b4e350d8e263d0c7",
+    },
     methods: [
       {
         name: "clearingTransferByPartition",
@@ -2791,6 +2827,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ControlListSustainabilityPerformanceTargetRateFacet: {
     name: "ControlListSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CONTROL_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe3fbab5a4ccf7a873a9601bf5494c43f6e4b53218ff8310ec97811471397b3cf",
+    },
     methods: [
       {
         name: "addToControlList",
@@ -3047,6 +3087,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   CorporateActionsSustainabilityPerformanceTargetRateFacet: {
     name: "CorporateActionsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CORPORATE_ACTIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa4a23267cb0a22c52bd05b12e644136bc38b7ac51218a0cb3aed166697caa79e",
+    },
     methods: [
       {
         name: "actionContentHashExists",
@@ -3533,6 +3577,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1410IssuerSustainabilityPerformanceTargetRateFacet: {
     name: "ERC1410IssuerSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_ISSUER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x4d5a3964d29183253487011c31ec3e09977b5eded43c8a3a222a2e53f4282f61",
+    },
     methods: [
       {
         name: "issueByPartition",
@@ -3726,6 +3774,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1410ManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ERC1410ManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x6768fcc73686ddd306656061b0e415208ded041927d9935de3747583559d0c5e",
+    },
     methods: [
       {
         name: "controllerRedeemByPartition",
@@ -3991,6 +4043,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1410ReadSustainabilityPerformanceTargetRateFacet: {
     name: "ERC1410ReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x7c15e98edcc41b3177b8cfff7055cd57b47000fd843fce22e7ead13f07e346b6",
+    },
     methods: [
       {
         name: "balanceOf",
@@ -4193,6 +4249,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet: {
     name: "ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_TOKEN_HOLDER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x6e21f1ca6d12f08b0d36f08711a48500d02dcf7edd2e8b87e4de350b98df4822",
+    },
     methods: [
       { name: "authorizeOperator", signature: "function authorizeOperator(address _operator)", selector: "0x959b8c3f" },
       {
@@ -4422,6 +4482,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1594SustainabilityPerformanceTargetRateFacet: {
     name: "ERC1594SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1594_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x2c5f8a3d6e9b1f4c7a2e5d8b1f4c7a2e5d8b1f4c7a2e5d8b1f4c7a2e5d8b1f4c",
+    },
     methods: [
       {
         name: "canTransfer",
@@ -4615,6 +4679,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1643SustainabilityPerformanceTargetRateFacet: {
     name: "ERC1643SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1643_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x5f8d2a3e6c9f1d4e7a2f5c8d1e4f7c2e5d8f1e4c7d2f5e8d1f4c7e2d5f8d1f4c",
+    },
     methods: [
       {
         name: "getAllDocuments",
@@ -4745,6 +4813,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1644SustainabilityPerformanceTargetRateFacet: {
     name: "ERC1644SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1644_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x8b2f5e3d6f9c2e5d8f1e4c7d2e5f8d1f4c7e2d5f8d1f4c7e2d5f8d1f4c7e2d5f",
+    },
     methods: [
       {
         name: "controllerRedeem",
@@ -5819,6 +5891,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC3643ManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ERC3643ManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC3643_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x324a20f20a55098c207cd0bc42498561962995b82918d6a9697320c42c5b11fa",
+    },
     methods: [
       { name: "addAgent", signature: "function addAgent(address _agent)", selector: "0x84e79842" },
       {
@@ -5926,6 +6002,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC3643OperationsSustainabilityPerformanceTargetRateFacet: {
     name: "ERC3643OperationsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC3643_OPERATIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xbe85d38775742687362efc4fc0ffed08044614079fc51bbf7b0f29e11d3ffafa",
+    },
     methods: [
       { name: "burn", signature: "function burn(address _userAddress, uint256 _amount)", selector: "0x9dc29fac" },
       {
@@ -6246,6 +6326,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalControlListManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ExternalControlListManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_CONTROL_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x2c56accbf6faf923cd323935455dac00c2ddffe08f0becdf49d515e4b4d355af",
+    },
     methods: [
       {
         name: "addExternalControlList",
@@ -6515,6 +6599,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalKycListManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ExternalKycListManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_KYC_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x0fcfeebcf118ca3c39fbed0e2a527a866cac42bbd3fcad5f9b4f755ef97f3aa9",
+    },
     methods: [
       {
         name: "addExternalKycList",
@@ -6802,6 +6890,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalPauseManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ExternalPauseManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_PAUSE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x07846b678053cbd4be5d9d3929fa9af5ab76bb508a0f7957f5239302aad45bc3",
+    },
     methods: [
       {
         name: "addExternalPause",
@@ -7108,6 +7200,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   FreezeSustainabilityPerformanceTargetRateFacet: {
     name: "FreezeSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_FREEZE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x25ca5cbe52a82389e142792fdab2ffc58f224f2628f9a92a3f717134cbe229e4",
+    },
     methods: [
       {
         name: "batchFreezePartialTokens",
@@ -7310,6 +7406,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   HoldManagementSustainabilityPerformanceTargetRateFacet: {
     name: "HoldManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_HOLD_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x4574524c203fbcc0f5b9f08bcd2b9a9d47c5a9cf3a30eeb540a93a33a8a2f834",
+    },
     methods: [
       {
         name: "controllerCreateHoldByPartition",
@@ -7495,6 +7595,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   HoldReadSustainabilityPerformanceTargetRateFacet: {
     name: "HoldReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_HOLD_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x8e7113391652a4d3d8feb1d90990cd06ee33dc67a640b4400f8bfb9fae4f91b2",
+    },
     methods: [
       {
         name: "getHeldAmountFor",
@@ -7763,6 +7867,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   HoldTokenHolderSustainabilityPerformanceTargetRateFacet: {
     name: "HoldTokenHolderSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_HOLD_TOKEN_HOLDER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x28ae4d4cdc1846ba348a31e222161d8343223560c1875fe3efcad8c5dd5f81e0",
+    },
     methods: [
       {
         name: "createHoldByPartition",
@@ -8542,6 +8650,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   LockSustainabilityPerformanceTargetRateFacet: {
     name: "LockSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe73c2eecf92b5b8eb7ecc89b379f70193694f2906188318c3407458267385b82",
+    },
     methods: [
       {
         name: "getLockCountFor",
@@ -8674,6 +8786,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   NoncesSustainabilityPerformanceTargetRateFacet: {
     name: "NoncesSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_NONCES_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x631217f1fdd4036273035308e6637d8cdef1927db4eef0af68e5aac13a70892e",
+    },
     methods: [
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
     ],
@@ -8744,6 +8860,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   PauseSustainabilityPerformanceTargetRateFacet: {
     name: "PauseSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_PAUSE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa16c7f2d6b5ab7f05dd30bd562ac9f3005fe21e3b2bde131733e37c0d42046ee",
+    },
     methods: [
       { name: "isPaused", signature: "function isPaused() view returns (bool)", selector: "0xb187bd26" },
       { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
@@ -9005,6 +9125,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ProceedRecipientsSustainabilityPerformanceTargetRateFacet: {
     name: "ProceedRecipientsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xf3e4f2e1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9",
+    },
     methods: [
       {
         name: "addProceedRecipient",
@@ -9185,6 +9309,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ProtectedPartitionsSustainabilityPerformanceTargetRateFacet: {
     name: "ProtectedPartitionsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_PROTECTED_PARTITIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x088ec2750f42a30fde9383e74f4148ce5df963263d426deffc1d29fff61a6538",
+    },
     methods: [
       {
         name: "arePartitionsProtected",
@@ -9302,6 +9430,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet: {
     name: "ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_BALANCE_ADJUSTMENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x1168df5bb8a348d137af6e29915c261dc82c495f72484a046ac4f750899625f4",
+    },
     methods: [
       {
         name: "getScheduledBalanceAdjustments",
@@ -9410,6 +9542,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ScheduledCouponListingSustainabilityPerformanceTargetRateFacet: {
     name: "ScheduledCouponListingSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_COUPON_LISTING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x85c0dee450a5a4657a9de39ca4ba19881b079d55d5bb64641d52f59bea709ba8",
+    },
     methods: [
       {
         name: "getScheduledCouponListing",
@@ -9543,6 +9679,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: {
     name: "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_CROSS_ORDERED_TASKS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x23d3302e505d889e80b20005bf316ccd7cbbd3c547a7305d600e8f0d9bc73267",
+    },
     methods: [
       {
         name: "getScheduledCrossOrderedTasks",
@@ -9661,6 +9801,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet: {
     name: "ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_SNAPSHOTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x99a85df534e32a3b9fce8e80f0cc30d6703e578eb5c641ab2d9e95530d046b4b",
+    },
     methods: [
       {
         name: "getScheduledSnapshots",
@@ -10028,6 +10172,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   SnapshotsSustainabilityPerformanceTargetRateFacet: {
     name: "SnapshotsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SNAPSHOTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xbcc6255960c1cbe69dae32f7db730d14a35fdb81d91cc7e637e5af4d229bcbbe",
+    },
     methods: [
       {
         name: "balanceOfAtSnapshot",
@@ -10604,6 +10752,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   TransferAndLockSustainabilityPerformanceTargetRateFacet: {
     name: "TransferAndLockSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x9d1e3f5a7b9c0d2e4f6a8b0c1d3e5f7a9b0c2d4e6f8a9b1c3d5e7f9a0b2c4d6e",
+    },
     methods: [
       {
         name: "transferAndLock",
