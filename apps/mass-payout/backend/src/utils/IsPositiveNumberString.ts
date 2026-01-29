@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { registerDecorator, ValidationArguments, ValidationOptions } from "class-validator"
 
 export function IsPositiveNumberString(validationOptions?: ValidationOptions) {
@@ -8,6 +10,7 @@ export function IsPositiveNumberString(validationOptions?: ValidationOptions) {
       propertyName: propertyName,
       options: validationOptions,
       validator: {
+        // eslint-disable-next-line unused-imports/no-unused-vars
         validate(value: any, args: ValidationArguments) {
           if (typeof value !== "string") return false
           const num = Number(value)

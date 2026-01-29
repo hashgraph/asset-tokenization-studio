@@ -1,37 +1,30 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  Client,
-  Transaction,
-  TransactionResponse as HTransactionResponse,
-} from '@hiero-ledger/sdk';
-import {
-  CustodialWalletService,
-  SignatureRequest,
-} from '@hashgraph/hedera-custodians-integration';
-import TransactionResponse from '@domain/context/transaction/TransactionResponse';
-import Account from '@domain/context/account/Account';
-import { InitializationData } from '@port/out/TransactionAdapter';
-import { lazyInject } from '@core/decorator/LazyInjectDecorator';
-import EventService from '@service/event/EventService';
-import { MirrorNodeAdapter } from '@port/out/mirror/MirrorNodeAdapter';
-import NetworkService from '@service/network/NetworkService';
-import { Environment } from '@domain/context/network/Environment';
-import LogService from '@service/log/LogService';
-import { SigningError } from '@port/out/error/SigningError';
-import { SupportedWallets } from '@domain/context/network/Wallet';
-import { WalletEvents, WalletPairedEvent } from '@service/event/WalletEvent';
-import Injectable from '@core/injectable/Injectable';
-import { TransactionType } from '@port/out/TransactionResponseEnums';
-import Hex from '@core/Hex';
-import { HederaTransactionAdapter } from '@port/out/hs/HederaTransactionAdapter';
-import { HTSTransactionResponseAdapter } from '../HTSTransactionResponseAdapter';
-import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
-import { HederaId } from '@domain/context/shared/HederaId';
-import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
-import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
-import { PublickKeyNotFound } from './error/PublickKeyNotFound';
-import { UnsupportedNetwork } from '@domain/context/network/error/UnsupportedNetwork';
+import { Client, Transaction, TransactionResponse as HTransactionResponse } from "@hiero-ledger/sdk";
+import { CustodialWalletService, SignatureRequest } from "@hashgraph/hedera-custodians-integration";
+import TransactionResponse from "@domain/context/transaction/TransactionResponse";
+import Account from "@domain/context/account/Account";
+import { InitializationData } from "@port/out/TransactionAdapter";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import EventService from "@service/event/EventService";
+import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import NetworkService from "@service/network/NetworkService";
+import { Environment } from "@domain/context/network/Environment";
+import LogService from "@service/log/LogService";
+import { SigningError } from "@port/out/error/SigningError";
+import { SupportedWallets } from "@domain/context/network/Wallet";
+import { WalletEvents, WalletPairedEvent } from "@service/event/WalletEvent";
+import Injectable from "@core/injectable/Injectable";
+import { TransactionType } from "@port/out/TransactionResponseEnums";
+import Hex from "@core/Hex";
+import { HederaTransactionAdapter } from "@port/out/hs/HederaTransactionAdapter";
+import { HTSTransactionResponseAdapter } from "../HTSTransactionResponseAdapter";
+import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
+import { HederaId } from "@domain/context/shared/HederaId";
+import FireblocksSettings from "@core/settings/custodialWalletSettings/FireblocksSettings";
+import AWSKMSSettings from "@core/settings/custodialWalletSettings/AWSKMSSettings";
+import { PublickKeyNotFound } from "./error/PublickKeyNotFound";
+import { UnsupportedNetwork } from "@domain/context/network/error/UnsupportedNetwork";
 
 export abstract class CustodialTransactionAdapter extends HederaTransactionAdapter {
   protected client: Client;
@@ -52,13 +45,13 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
   protected initClient(accountId: string, publicKey: string): void {
     const currentNetwork = this.networkService.environment;
     switch (currentNetwork) {
-      case 'testnet':
+      case "testnet":
         this.client = Client.forTestnet();
         break;
-      case 'mainnet':
+      case "mainnet":
         this.client = Client.forMainnet();
         break;
-      case 'previewnet':
+      case "previewnet":
         this.client = Client.forPreviewnet();
         break;
       default:
@@ -67,9 +60,7 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
     this.client.setOperatorWith(accountId, publicKey, this.signingService);
   }
 
-  protected signingService = async (
-    message: Uint8Array,
-  ): Promise<Uint8Array> => {
+  protected signingService = async (message: Uint8Array): Promise<Uint8Array> => {
     const signatureRequest = new SignatureRequest(message);
     return await this.custodialWalletService.signTransaction(signatureRequest);
   };
@@ -81,19 +72,11 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
     abi?: object[],
   ): Promise<TransactionResponse> => {
     try {
-      LogService.logTrace(
-        'Custodial wallet signing and sending transaction:',
-        nameFunction,
-      );
+      LogService.logTrace("Custodial wallet signing and sending transaction:", nameFunction);
 
-      const txResponse: HTransactionResponse = await transaction.execute(
-        this.client,
-      );
+      const txResponse: HTransactionResponse = await transaction.execute(this.client);
 
-      this.logTransaction(
-        txResponse.transactionId.toString(),
-        this.networkService.environment,
-      );
+      this.logTransaction(txResponse.transactionId.toString(), this.networkService.environment);
 
       return HTSTransactionResponseAdapter.manageResponse(
         this.networkService.environment,
@@ -109,37 +92,29 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
     }
   };
 
-  protected createWalletPairedEvent(
-    wallet: SupportedWallets,
-  ): WalletPairedEvent {
+  protected createWalletPairedEvent(wallet: SupportedWallets): WalletPairedEvent {
     return {
       wallet: wallet,
       data: {
         account: this.account,
-        pairing: '',
-        topic: '',
+        pairing: "",
+        topic: "",
       },
       network: {
         name: this.networkService.environment,
         recognized: true,
-        factoryId: this.networkService.configuration?.factoryAddress ?? '',
+        factoryId: this.networkService.configuration?.factoryAddress ?? "",
       },
     };
   }
 
-  protected abstract initCustodialWalletService(
-    settings: DfnsSettings | FireblocksSettings | AWSKMSSettings,
-  ): void;
+  protected abstract initCustodialWalletService(settings: DfnsSettings | FireblocksSettings | AWSKMSSettings): void;
 
   protected abstract getSupportedWallet(): SupportedWallets;
 
-  async register(
-    settings: DfnsSettings | FireblocksSettings,
-  ): Promise<InitializationData> {
+  async register(settings: DfnsSettings | FireblocksSettings): Promise<InitializationData> {
     Injectable.registerTransactionHandler(this);
-    const accountMirror = await this.mirrorNodeAdapter.getAccountInfo(
-      new HederaId(settings.hederaAccountId),
-    );
+    const accountMirror = await this.mirrorNodeAdapter.getAccountInfo(new HederaId(settings.hederaAccountId));
     if (!accountMirror.publicKey) {
       throw new PublickKeyNotFound();
     }
@@ -166,18 +141,15 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
   }
 
   async sign(message: string): Promise<string> {
-    if (!this.custodialWalletService)
-      throw new SigningError('Custodial Wallet is empty');
+    if (!this.custodialWalletService) throw new SigningError("Custodial Wallet is empty");
 
     try {
       const encoded_message: Uint8Array = Hex.toUint8Array(message);
       const encoded_signed_message = await this.signingService(encoded_message);
 
-      const hexArray = Array.from(encoded_signed_message, (byte) =>
-        ('0' + byte.toString(16)).slice(-2),
-      );
+      const hexArray = Array.from(encoded_signed_message, (byte) => ("0" + byte.toString(16)).slice(-2));
 
-      return hexArray.join('');
+      return hexArray.join("");
     } catch (error) {
       LogService.logError(error);
       throw new SigningError(error);

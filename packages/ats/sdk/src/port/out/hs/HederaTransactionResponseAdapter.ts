@@ -6,12 +6,12 @@ import {
   TransactionReceipt,
   TransactionRecord,
   TransactionResponse as HTransactionResponse,
-} from '@hiero-ledger/sdk';
-import TransactionResponse from '@domain/context/transaction/TransactionResponse';
-import { TransactionResponseError } from '../error/TransactionResponseError';
-import { TransactionType } from '../TransactionResponseEnums';
-import { TransactionResponseAdapter } from '../TransactionResponseAdapter';
-import LogService from '@service/log/LogService';
+} from "@hiero-ledger/sdk";
+import TransactionResponse from "@domain/context/transaction/TransactionResponse";
+import { TransactionResponseError } from "../error/TransactionResponseError";
+import { TransactionType } from "../TransactionResponseEnums";
+import { TransactionResponseAdapter } from "../TransactionResponseAdapter";
+import LogService from "@service/log/LogService";
 
 export class HederaTransactionResponseAdapter extends TransactionResponseAdapter {
   public static async manageResponse(
@@ -23,40 +23,29 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
     abi?: object[],
   ): Promise<TransactionResponse> {
     let results: Uint8Array = new Uint8Array();
-    LogService.logTrace(
-      'Managing Hedera Transaction response: ',
-      transactionResponse,
-      responseType,
-      nameFunction,
-    );
+    LogService.logTrace("Managing Hedera Transaction response: ", transactionResponse, responseType, nameFunction);
     if (responseType === TransactionType.RECEIPT) {
       // Does not block execution thread
       this.getReceipt(network, signer, transactionResponse).then((result) => {
         if (!result) {
-          LogService.logError('Receipt not found after timeout');
+          LogService.logError("Receipt not found after timeout");
         }
       });
       let transId;
       if (transactionResponse?.transactionId) {
         transId = transactionResponse?.transactionId;
       } else {
-        transId = JSON.parse(
-          JSON.stringify(transactionResponse),
-        ).response.transactionId.toString();
+        transId = JSON.parse(JSON.stringify(transactionResponse)).response.transactionId.toString();
       }
-      LogService.logTrace('Manage Response AFTER : ' + responseType.toString());
+      LogService.logTrace("Manage Response AFTER : " + responseType.toString());
 
       return this.createTransactionResponse(transId, responseType, results);
     }
 
     if (responseType === TransactionType.RECORD) {
-      LogService.logTrace('RECORD');
+      LogService.logTrace("RECORD");
 
-      const transactionRecord:
-        | TransactionRecord
-        | Uint32Array
-        | Uint8Array
-        | undefined = await this.getRecord(
+      const transactionRecord: TransactionRecord | Uint32Array | Uint8Array | undefined = await this.getRecord(
         network,
         signer,
         transactionResponse,
@@ -72,7 +61,7 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
         }
         if (!record)
           throw new TransactionResponseError({
-            message: 'Invalid response type',
+            message: "Invalid response type",
             network: network,
           });
         results = this.decodeFunctionResult(nameFunction, record, abi, network);
@@ -81,20 +70,16 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
       LogService.logTrace(
         `Creating RECORD response from TRX (${transactionId}) from record: `,
         record?.toString(),
-        ' with decoded result:',
+        " with decoded result:",
         results,
       );
-      LogService.logTrace('Manage Response AFTER : ' + responseType.toString());
+      LogService.logTrace("Manage Response AFTER : " + responseType.toString());
 
-      return this.createTransactionResponse(
-        transactionId,
-        responseType,
-        results,
-      );
+      return this.createTransactionResponse(transactionId, responseType, results);
     }
 
     throw new TransactionResponseError({
-      message: 'The response type is neither RECORD nor RECEIPT.',
+      message: "The response type is neither RECORD nor RECEIPT.",
       network: network,
     });
   }
@@ -107,15 +92,13 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
   ): Promise<TransactionReceipt | boolean> {
     try {
       const receiptPromise = transactionResponse.getReceiptWithSigner(signer);
-      const timeoutPromise = new Promise<TransactionReceipt | boolean>(
-        (resolve) => {
-          setTimeout(() => resolve(false), timeout * 1000);
-        },
-      );
+      const timeoutPromise = new Promise<TransactionReceipt | boolean>((resolve) => {
+        setTimeout(() => resolve(false), timeout * 1000);
+      });
       return Promise.race([receiptPromise, timeoutPromise]);
     } catch (error: any) {
       if (error.status) {
-        if (error.status.toString() === 'SUCCESS') {
+        if (error.status.toString() === "SUCCESS") {
           return true;
         }
       }
@@ -128,14 +111,14 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
     signer: Signer,
     transactionResponse: HTransactionResponse,
   ): Promise<Uint32Array | undefined | Uint8Array> {
-    LogService.logInfo('getRecordWithSigner');
+    LogService.logInfo("getRecordWithSigner");
 
     // const txId = transactionResponse.transactionId.toString();
     // const query = new TransactionRecordQuery().setTransactionId(txId);
     // const record = await query.executeWithSigner(signer);
 
     const record = await transactionResponse.getRecordWithSigner(signer);
-    LogService.logTrace('getRecordWithSigner : ' + JSON.stringify(record));
+    LogService.logTrace("getRecordWithSigner : " + JSON.stringify(record));
 
     if (!record) {
       const transactionError = {
@@ -167,9 +150,6 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
     responseType: TransactionType,
     response: Uint8Array,
   ): TransactionResponse {
-    return new TransactionResponse(
-      transactionId ? transactionId : '',
-      response,
-    );
+    return new TransactionResponse(transactionId ? transactionId : "", response);
   }
 }

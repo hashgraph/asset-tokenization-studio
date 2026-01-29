@@ -64,10 +64,12 @@ export class MockOnChainDistributionRepository implements OnChainDistributionRep
     return Promise.resolve(futureDistributions)
   }
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   getHoldersCountForCorporateActionId(distribution: Distribution): Promise<number> {
     return Promise.resolve(this.defaultHoldersCount)
   }
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
   getHoldersCountForSnapshotId(distribution: Distribution): Promise<number> {
     return Promise.resolve(this.defaultHoldersCount)
   }

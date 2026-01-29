@@ -2,22 +2,22 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import TransactionResponse from '@domain/context/transaction/TransactionResponse';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import Account from '@domain/context/account/Account';
-import { Environment } from '@domain/context/network/Environment';
-import LogService from '@service/log/LogService';
-import { Security } from '@domain/context/security/Security';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { BondDetails } from '@domain/context/bond/BondDetails';
-import { EquityDetails } from '@domain/context/equity/EquityDetails';
-import HWCSettings from '@core/settings/walletConnect/HWCSettings';
-import { ContractId } from '@hiero-ledger/sdk';
-import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
-import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
-import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
-import { ClearingOperationType } from '@domain/context/security/Clearing';
-import { RateStatus } from '@domain/context/bond/RateStatus';
+import TransactionResponse from "@domain/context/transaction/TransactionResponse";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import Account from "@domain/context/account/Account";
+import { Environment } from "@domain/context/network/Environment";
+import LogService from "@service/log/LogService";
+import { Security } from "@domain/context/security/Security";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { BondDetails } from "@domain/context/bond/BondDetails";
+import { EquityDetails } from "@domain/context/equity/EquityDetails";
+import HWCSettings from "@core/settings/walletConnect/HWCSettings";
+import { ContractId } from "@hiero-ledger/sdk";
+import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
+import FireblocksSettings from "@core/settings/custodialWalletSettings/FireblocksSettings";
+import AWSKMSSettings from "@core/settings/custodialWalletSettings/AWSKMSSettings";
+import { ClearingOperationType } from "@domain/context/security/Clearing";
+import { RateStatus } from "@domain/context/bond/RateStatus";
 
 export interface InitializationData {
   account?: Account;
@@ -38,12 +38,7 @@ export interface NetworkData {
 export interface WalletAdapter {
   init(): Promise<Environment>;
   register(
-    input?:
-      | Account
-      | HWCSettings
-      | DfnsSettings
-      | FireblocksSettings
-      | AWSKMSSettings,
+    input?: Account | HWCSettings | DfnsSettings | FireblocksSettings | AWSKMSSettings,
   ): Promise<InitializationData>;
   stop(): Promise<boolean>;
   getAccount(): Account;
@@ -128,11 +123,7 @@ interface ITransactionAdapter {
     expirationDate: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  redeem(
-    security: EvmAddress,
-    amount: BigDecimal,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  redeem(security: EvmAddress, amount: BigDecimal, securityId?: ContractId | string): Promise<TransactionResponse>;
   burn(
     source: EvmAddress,
     security: EvmAddress,
@@ -149,18 +140,9 @@ interface ITransactionAdapter {
     targetId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  pause(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-  unpause(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-  takeSnapshot(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  takeSnapshot(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   setDividends(
     security: EvmAddress,
     recordDate: BigDecimal,
@@ -192,11 +174,7 @@ interface ITransactionAdapter {
     hash: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  removeDocument(
-    security: EvmAddress,
-    name: string,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  removeDocument(security: EvmAddress, name: string, securityId?: ContractId | string): Promise<TransactionResponse>;
   authorizeOperator(
     security: EvmAddress,
     targetId: EvmAddress,
@@ -288,14 +266,8 @@ interface ITransactionAdapter {
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  protectPartitions(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-  unprotectPartitions(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  protectPartitions(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  unprotectPartitions(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   redeemAtMaturityByPartition(
     security: EvmAddress,
     partitionId: string,
@@ -330,11 +302,7 @@ interface RoleTransactionAdapter {
     role: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  renounceRole(
-    security: EvmAddress,
-    role: string,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  renounceRole(security: EvmAddress, role: string, securityId?: ContractId | string): Promise<TransactionResponse>;
 }
 
 interface IManagementTransactionAdapter {
@@ -427,16 +395,8 @@ interface ISsiManagementTransactionAdapter {
     revocationRegistry: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  addIssuer(
-    security: EvmAddress,
-    issuer: EvmAddress,
-    securityId: ContractId | string,
-  ): Promise<TransactionResponse>;
-  removeIssuer(
-    security: EvmAddress,
-    issuer: EvmAddress,
-    securityId: ContractId | string,
-  ): Promise<TransactionResponse>;
+  addIssuer(security: EvmAddress, issuer: EvmAddress, securityId: ContractId | string): Promise<TransactionResponse>;
+  removeIssuer(security: EvmAddress, issuer: EvmAddress, securityId: ContractId | string): Promise<TransactionResponse>;
 }
 
 interface IKycTransactionAdapter {
@@ -449,30 +409,14 @@ interface IKycTransactionAdapter {
     issuer: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  revokeKyc(
-    security: EvmAddress,
-    targetId: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-  activateInternalKyc(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-  deactivateInternalKyc(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  revokeKyc(security: EvmAddress, targetId: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  activateInternalKyc(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  deactivateInternalKyc(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
 }
 
 interface IClearingAdapter {
-  activateClearing(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-  deactivateClearing(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  activateClearing(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  deactivateClearing(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   clearingTransferByPartition(
     security: EvmAddress,
     partitionId: string,
@@ -637,11 +581,7 @@ interface IExternalPausesAdapter {
 }
 
 interface IExternalPausesMockAdapter {
-  setPausedMock(
-    contract: EvmAddress,
-    paused: boolean,
-    contractId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  setPausedMock(contract: EvmAddress, paused: boolean, contractId?: ContractId | string): Promise<TransactionResponse>;
   createExternalPauseMock(): Promise<string | TransactionResponse>;
 }
 
@@ -723,16 +663,8 @@ interface IExternalKycListsMockAdapter {
 }
 
 interface ITokenMetadataTransactionAdapter {
-  setName(
-    security: EvmAddress,
-    name: string,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-  setSymbol(
-    security: EvmAddress,
-    symbol: string,
-    securityId: ContractId | string,
-  ): Promise<TransactionResponse>;
+  setName(security: EvmAddress, name: string, securityId?: ContractId | string): Promise<TransactionResponse>;
+  setSymbol(security: EvmAddress, symbol: string, securityId: ContractId | string): Promise<TransactionResponse>;
   setOnchainID(
     security: EvmAddress,
     onchainID: EvmAddress,
@@ -831,11 +763,7 @@ interface IRecoveryAddress {
 }
 
 interface IAgent {
-  addAgent(
-    security: EvmAddress,
-    agentId: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  addAgent(security: EvmAddress, agentId: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   removeAgent(
     security: EvmAddress,
     agentId: EvmAddress,
@@ -986,12 +914,7 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>>;
   abstract init(): Promise<string>;
   abstract register(
-    input?:
-      | Account
-      | HWCSettings
-      | DfnsSettings
-      | FireblocksSettings
-      | AWSKMSSettings,
+    input?: Account | HWCSettings | DfnsSettings | FireblocksSettings | AWSKMSSettings,
     debug?: boolean,
   ): Promise<InitializationData>;
   abstract stop(): Promise<boolean>;
@@ -1061,14 +984,8 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
-  abstract pause(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>>;
-  abstract unpause(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse<any, Error>>;
+  abstract pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
+  abstract unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse<any, Error>>;
   abstract takeSnapshot(
     security: EvmAddress,
     securityId?: ContractId | string,
@@ -1132,9 +1049,7 @@ export default abstract class TransactionAdapter
   logTransaction(id: string, network: string): void {
     const HASHSCAN_URL = `https://hashscan.io/${network}/transactionsById/`;
     const HASHSCAN_TX_URL = `https://hashscan.io/${network}/tx/`;
-    const msg = `\nYou can see your transaction at ${
-      id.startsWith('0x') ? HASHSCAN_TX_URL : HASHSCAN_URL
-    }${id}\n`;
+    const msg = `\nYou can see your transaction at ${id.startsWith("0x") ? HASHSCAN_TX_URL : HASHSCAN_URL}${id}\n`;
     LogService.logInfo(msg);
     console.log(msg);
   }
@@ -1292,14 +1207,8 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  abstract activateClearing(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-  abstract deactivateClearing(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  abstract activateClearing(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  abstract deactivateClearing(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   abstract clearingTransferByPartition(
     security: EvmAddress,
     partitionId: string,
@@ -1518,14 +1427,8 @@ export default abstract class TransactionAdapter
     externalKycListAddress: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  abstract activateInternalKyc(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
-  abstract deactivateInternalKyc(
-    security: EvmAddress,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  abstract activateInternalKyc(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
+  abstract deactivateInternalKyc(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   abstract grantKycMock(
     security: EvmAddress,
     targetId: EvmAddress,
@@ -1537,11 +1440,7 @@ export default abstract class TransactionAdapter
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   abstract createExternalKycListMock(): Promise<string | TransactionResponse>;
-  abstract setName(
-    security: EvmAddress,
-    name: string,
-    securityId?: ContractId | string,
-  ): Promise<TransactionResponse>;
+  abstract setName(security: EvmAddress, name: string, securityId?: ContractId | string): Promise<TransactionResponse>;
   abstract setSymbol(
     security: EvmAddress,
     symbol: string,

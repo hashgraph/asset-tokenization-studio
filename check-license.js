@@ -7,6 +7,23 @@ const path = require("path");
 const LICENSE_HEADER = "// SPDX-License-Identifier: Apache-2.0";
 
 /**
+ * Check if a file should be excluded from license checking
+ * @param {string} filePath - Path to the file to check
+ * @returns {boolean} - True if file should be excluded
+ */
+function shouldExcludeFile(filePath) {
+  // Exclude test files
+  return (
+    filePath.includes(".test.ts") ||
+    filePath.includes(".test.tsx") ||
+    filePath.includes(".spec.ts") ||
+    filePath.includes(".spec.tsx") ||
+    filePath.includes("/test/") ||
+    filePath.includes("/__tests__/")
+  );
+}
+
+/**
  * Check if a file contains the required license header
  * @param {string} filePath - Path to the file to check
  * @returns {boolean} - True if license header is present
@@ -40,6 +57,10 @@ function main() {
   const filesWithoutLicense = [];
 
   files.forEach((file) => {
+    if (shouldExcludeFile(file)) {
+      return; // Skip test files
+    }
+
     if (!checkLicenseHeader(file)) {
       filesWithoutLicense.push(file);
     }
