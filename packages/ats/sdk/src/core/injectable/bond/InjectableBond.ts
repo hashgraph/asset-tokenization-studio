@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 import { TOKENS } from "../Tokens";
 import { GetCouponForQueryHandler } from "@query/bond/coupons/getCouponFor/GetCouponForQueryHandler";
@@ -9,6 +9,7 @@ import { GetCouponCountQueryHandler } from "@query/bond/coupons/getCouponCount/G
 import { UpdateMaturityDateCommandHandler } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommandHandler";
 import { SetCouponCommandHandler } from "@command/bond/coupon/set/SetCouponCommandHandler";
 import { CreateBondCommandHandler } from "@command/bond/create/CreateBondCommandHandler";
+import { CreateBondFixedRateCommandHandler } from "@command/bond/createfixedrate/CreateBondFixedRateCommandHandler";
 import { GetBondDetailsQueryHandler } from "@query/bond/get/getBondDetails/GetBondDetailsQueryHandler";
 import { RedeemAtMaturityByPartitionCommandHandler } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommandHandler";
 import { GetTotalCouponHoldersQueryHandler } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler";
@@ -19,6 +20,10 @@ export const COMMAND_HANDLERS_BOND = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: CreateBondCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateBondFixedRateCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,
