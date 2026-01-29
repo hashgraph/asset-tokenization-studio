@@ -63,9 +63,12 @@ import {
   GetProceedRecipientsRequest,
 } from "../request";
 import { CastRateStatus } from "@domain/context/bond/RateStatus";
+import CreateBondFixedRateRequest from "../request/bond/CreateBondFixedRateRequest";
+import { CreateBondFixedRateCommand } from "@command/bond/createfixedrate/CreateBondFixedRateCommand";
 
 interface IBondInPort {
   create(request: CreateBondRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
+  createFixedRate(request: CreateBondFixedRateRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
   getBondDetails(request: GetBondDetailsRequest): Promise<BondDetailsViewModel>;
   setCoupon(request: SetCouponRequest): Promise<{ payload: number; transactionId: string }>;
   getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
@@ -136,6 +139,77 @@ class BondInPort implements IBondInPort {
         req.nominalValueDecimals,
         req.startingDate,
         req.maturityDate,
+        securityFactory ? new ContractId(securityFactory) : undefined,
+        resolver ? new ContractId(resolver) : undefined,
+        req.configId,
+        req.configVersion,
+        diamondOwnerAccount,
+        externalPausesIds,
+        externalControlListsIds,
+        externalKycListsIds,
+        req.complianceId,
+        req.identityRegistryId,
+        req.proceedRecipientsIds,
+        req.proceedRecipientsData,
+      ),
+    );
+
+    const securityCreated = createResponse.securityId.toString() !== ContractId.NULL.toString();
+
+    const res = securityCreated
+      ? (await this.queryBus.execute(new GetSecurityQuery(createResponse.securityId.toString()))).security
+      : {};
+
+    return {
+      security: securityCreated
+        ? {
+            ...res,
+          }
+        : {},
+      transactionId: createResponse.transactionId,
+    };
+  }
+
+  @LogError
+  async createFixedRate(
+    req: CreateBondFixedRateRequest,
+  ): Promise<{ security: SecurityViewModel; transactionId: string }> {
+    ValidatedRequest.handleValidation("CreateBondFixedRateRequest", req);
+    const { diamondOwnerAccount, externalPausesIds, externalControlListsIds, externalKycListsIds } = req;
+
+    const securityFactory = this.networkService.configuration.factoryAddress;
+    const resolver = this.networkService.configuration.resolverAddress;
+
+    const newSecurity: SecurityProps = {
+      name: req.name,
+      symbol: req.symbol,
+      isin: req.isin,
+      decimals: req.decimals,
+      isWhiteList: req.isWhiteList,
+      erc20VotesActivated: req.erc20VotesActivated,
+      isControllable: req.isControllable,
+      arePartitionsProtected: req.arePartitionsProtected,
+      clearingActive: req.clearingActive,
+      internalKycActivated: req.internalKycActivated,
+      isMultiPartition: req.isMultiPartition,
+      maxSupply: BigDecimal.fromString(req.numberOfUnits),
+      regulationType: CastRegulationType.fromNumber(req.regulationType),
+      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
+      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
+      countries: req.countries,
+      info: req.info,
+    };
+
+    const createResponse = await this.commandBus.execute(
+      new CreateBondFixedRateCommand(
+        newSecurity,
+        req.currency,
+        req.nominalValue,
+        req.nominalValueDecimals,
+        req.startingDate,
+        req.maturityDate,
+        req.rate,
+        req.rateDecimals,
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
         req.configId,

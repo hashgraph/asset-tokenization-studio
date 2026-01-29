@@ -5,6 +5,7 @@ import RedeemRequest from "./security/operations/redeem/RedeemRequest";
 import ForceRedeemRequest from "./security/operations/redeem/ForceRedeemRequest";
 import CreateEquityRequest from "./equity/CreateEquityRequest";
 import CreateBondRequest from "./bond/CreateBondRequest";
+import CreateBondFixedRateRequest from "./bond/CreateBondFixedRateRequest";
 import RoleRequest from "./security/roles/RoleRequest";
 import ApplyRolesRequest from "./security/roles/ApplyRolesRequest";
 import ValidationResponse from "@core/validation/ValidationResponse";
@@ -202,6 +203,7 @@ import ActionContentHashExistsRequest from "./security/operations/corporateActio
 export {
   CreateEquityRequest,
   CreateBondRequest,
+  CreateBondFixedRateRequest,
   ValidationResponse,
   IssueRequest,
   RedeemRequest,
