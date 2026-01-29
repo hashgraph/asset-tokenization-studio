@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  CustodialWalletService,
-  DFNSConfig,
-} from '@hashgraph/hedera-custodians-integration';
-import { singleton } from 'tsyringe';
-import { WalletEvents } from '@service/event/WalletEvent';
-import { SupportedWallets } from '@domain/context/network/Wallet';
-import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
-import LogService from '@service/log/LogService';
-import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
+import { CustodialWalletService, DFNSConfig } from "@hashgraph/hedera-custodians-integration";
+import { singleton } from "tsyringe";
+import { WalletEvents } from "@service/event/WalletEvent";
+import { SupportedWallets } from "@domain/context/network/Wallet";
+import { CustodialTransactionAdapter } from "./CustodialTransactionAdapter";
+import LogService from "@service/log/LogService";
+import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
 
 @singleton()
 export class DFNSTransactionAdapter extends CustodialTransactionAdapter {
@@ -18,7 +15,7 @@ export class DFNSTransactionAdapter extends CustodialTransactionAdapter {
       wallet: SupportedWallets.DFNS,
       initData: {},
     });
-    LogService.logTrace('DFNS Initialized');
+    LogService.logTrace("DFNS Initialized");
     return Promise.resolve(this.networkService.environment);
   }
 
@@ -43,7 +40,7 @@ export class DFNSTransactionAdapter extends CustodialTransactionAdapter {
 
   stop(): Promise<boolean> {
     this.client?.close();
-    LogService.logTrace('DFNS stopped');
+    LogService.logTrace("DFNS stopped");
     this.eventService.emit(WalletEvents.walletDisconnect, {
       wallet: SupportedWallets.DFNS,
     });

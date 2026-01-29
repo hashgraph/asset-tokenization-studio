@@ -395,7 +395,6 @@ abstract contract Internals is Modifiers {
         bytes32 r,
         bytes32 s
     ) internal virtual;
-
     function _protectedClearingCreateHoldByPartition(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
         Hold calldata _hold,
@@ -559,7 +558,6 @@ abstract contract Internals is Modifiers {
     function _syncBalanceAdjustments(bytes32 _partition, address _from, address _to) internal virtual;
     function _takeAbafCheckpoint() internal virtual;
     function _takeSnapshot() internal virtual returns (uint256 snapshotID_);
-
     function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
     function _updateTotalTokenHolderSnapshot() internal virtual;
     // solhint-disable-next-line func-name-mixedcase

@@ -2,6 +2,6 @@
 
 export class PublickKeyNotFound extends Error {
   constructor() {
-    super("PublicKey not found in the mirror node")
+    super("PublicKey not found in the mirror node");
   }
 }
