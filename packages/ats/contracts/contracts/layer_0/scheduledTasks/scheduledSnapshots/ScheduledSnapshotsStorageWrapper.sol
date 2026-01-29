@@ -21,14 +21,11 @@ abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
     }
 
     function _onScheduledSnapshotTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
+        uint256 /*_pos*/,
+        uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
     ) internal override {
-        uint256 newSnapShotID;
-        if (_pos == _scheduledTasksLength - 1) {
-            newSnapShotID = _snapshot();
-        } else newSnapShotID = _getCurrentSnapshotId();
+        uint256 newSnapShotID = _snapshot();
 
         bytes memory data = _scheduledTask.data;
 
