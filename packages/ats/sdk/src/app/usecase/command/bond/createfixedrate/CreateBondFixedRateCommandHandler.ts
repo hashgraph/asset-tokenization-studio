@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  CreateBondCommand as CreateBondFixedRateCommand,
-  CreateBondCommandResponse as CreateBondFixedRateCommandResponse,
-} from "./CreateBondCommand";
+import { CreateBondFixedRateCommand, CreateBondFixedRateCommandResponse } from "./CreateBondFixedRateCommand";
 import { InvalidRequest } from "@command/error/InvalidRequest";
 import { ICommandHandler } from "@core/command/CommandHandler";
 import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
