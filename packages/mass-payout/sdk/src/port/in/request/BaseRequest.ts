@@ -17,7 +17,6 @@ interface RequestKey {
 }
 
 // Extend as empty interface for future changes
-/* eslint-disable-next-line @typescript-eslint/no-empty-object-type */
 export interface RequestPublicKey extends RequestKey {}
 
 export interface AccountBaseRequest {
@@ -28,7 +27,6 @@ export interface ContractBaseRequest extends BaseRequest, AccountBaseRequest {
   proxyContractId: string;
 }
 
-/* eslint-disable  @typescript-eslint/no-empty-object-type */
 export interface RequestPrivateKey extends RequestKey {
   type: string;
 }

@@ -2,6 +2,6 @@
 
 export class EvmAddressNotFound extends Error {
   constructor() {
-    super("EvmAddress not found in the mirror node")
+    super("EvmAddress not found in the mirror node");
   }
 }

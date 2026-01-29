@@ -4,7 +4,6 @@ import { DeployCommandHandler } from "@app/usecase/command/lifeCycleCashFlow/ope
 import TransactionService from "@app/services/transaction/TransactionService";
 import ContractService from "@app/services/contract/ContractService";
 import EvmAddress from "@domain/contract/EvmAddress";
-import Account from "@domain/account/Account";
 import {
   RbacCommand,
   DeployCommand,
@@ -99,7 +98,7 @@ describe("DeployCommandHandler", () => {
     expect(response.payload).toBe(mockDeployedAddress);
   });
 
-  it("should deploy contract with rbac, being the only member in Hedera Id format, and return DeployCommandResponse", async () => {
+  it("should deploy contract with rbac, being the only member in Hedera Id format", async () => {
     const rbacMock: RbacCommand[] = [
       {
         role: roleId,

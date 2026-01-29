@@ -74,7 +74,8 @@ export default [
       ],
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": "warn",
-      "@stylistic/ts/semi": ["error", "never"],
+      semi: "off",
+      "@stylistic/ts/semi": "off",
       "max-len": [
         "error",
         {
@@ -92,6 +93,9 @@ export default [
       ],
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unsafe-function-type": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/ban-types": "off",
       "import/no-restricted-paths": [
         "error",
         {

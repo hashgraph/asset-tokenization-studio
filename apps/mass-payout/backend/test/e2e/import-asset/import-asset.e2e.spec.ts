@@ -137,6 +137,7 @@ describe("Import Asset", () => {
   it(
     "returns 500 when the database fails (e.g. missing table)",
     async () => {
+      // eslint-disable-next-line @stylistic/ts/quotes
       await internalAssetRepository.query('DROP TABLE IF EXISTS "Asset" CASCADE;')
       const payload = {
         hederaTokenAddress: fakeHederaAddress(),
