@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Unit tests for CheckpointManager class.
+ * Integration tests for CheckpointManager class.
  *
  * Tests the checkpoint system that enables resumable deployment workflows
  * by persisting deployment state to disk with support for Map serialization.
  *
- * @module test/scripts/unit/checkpoint/CheckpointManager.test
+ * Note: These tests involve filesystem I/O and are categorized as integration tests.
+ *
+ * @module test/scripts/integration/checkpoint/CheckpointManager.test
  */
 
 import { expect } from "chai";
@@ -21,6 +23,7 @@ import {
   TEST_TX_HASHES,
   TEST_DIRS,
   TEST_TIME,
+  TEST_STANDARD_CONTRACTS,
 } from "@test";
 
 describe("CheckpointManager", () => {
@@ -188,7 +191,7 @@ describe("CheckpointManager", () => {
 
       checkpoint.steps.facets = new Map([
         [
-          "AccessControlFacet",
+          TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET,
           {
             address: TEST_ADDRESSES.VALID_3,
             txHash: TEST_TX_HASHES.SAMPLE_1,
@@ -196,7 +199,7 @@ describe("CheckpointManager", () => {
           },
         ],
         [
-          "PausableFacet",
+          TEST_STANDARD_CONTRACTS.PAUSABLE_FACET,
           {
             address: TEST_ADDRESSES.VALID_4,
             txHash: TEST_TX_HASHES.SAMPLE_2,
@@ -274,8 +277,8 @@ describe("CheckpointManager", () => {
       };
 
       original.steps.facets = new Map([
-        ["AccessControlFacet", facet1],
-        ["PausableFacet", facet2],
+        [TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET, facet1],
+        [TEST_STANDARD_CONTRACTS.PAUSABLE_FACET, facet2],
       ]);
 
       await manager.saveCheckpoint(original);
@@ -285,8 +288,8 @@ describe("CheckpointManager", () => {
       expect(loaded).to.not.be.null;
       expect(loaded!.steps.facets).to.be.instanceOf(Map);
       expect(loaded!.steps.facets!.size).to.equal(2);
-      expect(loaded!.steps.facets!.get("AccessControlFacet")).to.deep.equal(facet1);
-      expect(loaded!.steps.facets!.get("PausableFacet")).to.deep.equal(facet2);
+      expect(loaded!.steps.facets!.get(TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET)).to.deep.equal(facet1);
+      expect(loaded!.steps.facets!.get(TEST_STANDARD_CONTRACTS.PAUSABLE_FACET)).to.deep.equal(facet2);
     });
 
     it("should handle checkpoint with failure information", async () => {

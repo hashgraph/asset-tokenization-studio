@@ -37,15 +37,20 @@ describe("atsRegistry.data - Factory Functions", () => {
    */
   const facetNames = Object.keys(FACET_REGISTRY);
 
+  // Cache signer to avoid repeated Hardhat network bootstrap (saves ~4+ seconds)
+  let signer: Awaited<ReturnType<typeof ethers.getSigners>>[0];
+
+  before(async () => {
+    [signer] = await ethers.getSigners();
+  });
+
   describe("TimeTravel factory branches (comprehensive)", () => {
     facetNames.forEach((facetName) => {
       const facet = FACET_REGISTRY[facetName as keyof typeof FACET_REGISTRY];
 
       // Only test facets that have a factory function
       if (typeof facet.factory === "function") {
-        it(`should create TimeTravel factory for ${facetName}`, async () => {
-          const [signer] = await ethers.getSigners();
-
+        it(`should create TimeTravel factory for ${facetName}`, () => {
           expect(facet).to.not.be.undefined;
           expect(facet.factory).to.be.a("function");
 
@@ -65,9 +70,7 @@ describe("atsRegistry.data - Factory Functions", () => {
 
       // Only test facets that have a factory function
       if (typeof facet.factory === "function") {
-        it(`should create normal factory for ${facetName}`, async () => {
-          const [signer] = await ethers.getSigners();
-
+        it(`should create normal factory for ${facetName}`, () => {
           expect(facet).to.not.be.undefined;
           expect(facet.factory).to.be.a("function");
 
@@ -81,9 +84,7 @@ describe("atsRegistry.data - Factory Functions", () => {
   });
 
   describe("Factory default parameter behavior", () => {
-    it("should default to normal factory when useTimeTravel is omitted", async () => {
-      const [signer] = await ethers.getSigners();
-
+    it("should default to normal factory when useTimeTravel is omitted", () => {
       // Find any facet with a factory function
       const facetWithFactory = facetNames.find((name) => {
         const facet = FACET_REGISTRY[name as keyof typeof FACET_REGISTRY];

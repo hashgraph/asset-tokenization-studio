@@ -29,7 +29,12 @@ import {
 } from "@scripts/infrastructure";
 import { atsRegistry } from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
-import { BLR_VERSIONS, deployResolverProxyFixture, deployResolverProxyWithAltConfigFixture } from "@test";
+import {
+  BLR_VERSIONS,
+  deployResolverProxyFixture,
+  deployResolverProxyWithAltConfigFixture,
+  TEST_ADDRESSES,
+} from "@test";
 
 describe("updateResolverProxy* - Integration Tests", () => {
   before(() => {
@@ -265,7 +270,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
     it("should fail for invalid proxy address", async () => {
       const { deployer } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyVersion(deployer, "0x1234567890123456789012345678901234567890", 2, {
+      const result = await updateResolverProxyVersion(deployer, TEST_ADDRESSES.NO_CODE, 2, {
         confirmations: 0,
       });
 
@@ -277,7 +282,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       const { deployer } = await loadFixture(deployResolverProxyFixture);
 
       // This should not throw, but return a structured error
-      const result = await updateResolverProxyVersion(deployer, "0x1234567890123456789012345678901234567890", 2, {
+      const result = await updateResolverProxyVersion(deployer, TEST_ADDRESSES.NO_CODE, 2, {
         confirmations: 0,
       });
 

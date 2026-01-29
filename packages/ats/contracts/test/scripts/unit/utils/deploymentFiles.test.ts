@@ -10,13 +10,13 @@
  */
 
 import { expect } from "chai";
+import sinon from "sinon";
 import { promises as fs } from "fs";
 import { join } from "path";
 import {
   loadDeployment,
   loadDeploymentByWorkflow,
   findLatestDeployment,
-  listDeploymentFiles,
   listDeploymentsByWorkflow,
   saveDeploymentOutput,
   generateTimestamp,
@@ -77,7 +77,43 @@ describe("Deployment File Utilities", () => {
         facets: [
           {
             facetName: "AccessControlFacet",
-            key: TEST_CONFIG_IDS.EQUITY,
+            key: TEST_CONFIG_IDS.BOND,
+            address: TEST_ADDRESSES.VALID_2,
+          },
+        ],
+      },
+      bondFixedRate: {
+        configId: TEST_CONFIG_IDS.BOND_FIXED_RATE,
+        version: 1,
+        facetCount: 43,
+        facets: [
+          {
+            facetName: "AccessControlFacet",
+            key: TEST_CONFIG_IDS.BOND_FIXED_RATE,
+            address: TEST_ADDRESSES.VALID_2,
+          },
+        ],
+      },
+      bondKpiLinkedRate: {
+        configId: TEST_CONFIG_IDS.BOND_KPI_LINKED,
+        version: 1,
+        facetCount: 43,
+        facets: [
+          {
+            facetName: "AccessControlFacet",
+            key: TEST_CONFIG_IDS.BOND_KPI_LINKED,
+            address: TEST_ADDRESSES.VALID_2,
+          },
+        ],
+      },
+      bondSustainabilityPerformanceTargetRate: {
+        configId: TEST_CONFIG_IDS.BOND_SPT,
+        version: 1,
+        facetCount: 43,
+        facets: [
+          {
+            facetName: "AccessControlFacet",
+            key: TEST_CONFIG_IDS.BOND_SPT,
             address: TEST_ADDRESSES.VALID_2,
           },
         ],
@@ -86,7 +122,7 @@ describe("Deployment File Utilities", () => {
     summary: {
       totalContracts: 48,
       totalFacets: 1,
-      totalConfigurations: 2,
+      totalConfigurations: 5,
       deploymentTime: 5000,
       gasUsed: "0",
       success: true,
@@ -94,6 +130,9 @@ describe("Deployment File Utilities", () => {
     helpers: {
       getEquityFacets: () => [],
       getBondFacets: () => [],
+      getBondFixedRateFacets: () => [],
+      getBondKpiLinkedRateFacets: () => [],
+      getBondSustainabilityPerformanceTargetRateFacets: () => [],
     },
   });
 
@@ -258,7 +297,7 @@ describe("Deployment File Utilities", () => {
     });
   });
 
-  describe("listDeploymentFiles", () => {
+  describe("listDeploymentsByWorkflow (without workflow filter)", () => {
     const timestamps = ["2025-11-08T10-00-00", "2025-11-08T11-00-00", "2025-11-08T12-00-00"];
 
     before(async () => {
@@ -272,18 +311,18 @@ describe("Deployment File Utilities", () => {
     });
 
     it("should list all files for a network", async () => {
-      const files = await listDeploymentFiles(TEST_NETWORK);
+      const files = await listDeploymentsByWorkflow(TEST_NETWORK);
 
       expect(files).to.be.an("array");
       expect(files.length).to.equal(3);
-      files.forEach((file) => {
+      files.forEach((file: string) => {
         expect(file).to.include(TEST_WORKFLOW);
         expect(file).to.include(".json");
       });
     });
 
     it("should sort files by timestamp (newest first)", async () => {
-      const files = await listDeploymentFiles(TEST_NETWORK);
+      const files = await listDeploymentsByWorkflow(TEST_NETWORK);
 
       expect(files[0]).to.include("12-00-00"); // Latest
       expect(files[1]).to.include("11-00-00"); // Middle
@@ -291,7 +330,7 @@ describe("Deployment File Utilities", () => {
     });
 
     it("should return empty array for network with no deployments", async () => {
-      const files = await listDeploymentFiles("nonexistent-network");
+      const files = await listDeploymentsByWorkflow("nonexistent-network");
       expect(files).to.be.an("array");
       expect(files.length).to.equal(0);
     });
@@ -313,13 +352,13 @@ describe("Deployment File Utilities", () => {
 
       try {
         // List files for test network
-        const testFiles = await listDeploymentFiles(TEST_NETWORK);
-        expect(testFiles.every((f) => f.startsWith(TEST_WORKFLOW))).to.be.true;
+        const testFiles = await listDeploymentsByWorkflow(TEST_NETWORK);
+        expect(testFiles.every((f: string) => f.startsWith(TEST_WORKFLOW))).to.be.true;
         expect(testFiles.length).to.equal(4); // 3 original + 1 new
 
         // List files for other network
-        const otherFiles = await listDeploymentFiles(otherNetwork);
-        expect(otherFiles.every((f) => f.startsWith(TEST_WORKFLOW))).to.be.true;
+        const otherFiles = await listDeploymentsByWorkflow(otherNetwork);
+        expect(otherFiles.every((f: string) => f.startsWith(TEST_WORKFLOW))).to.be.true;
         expect(otherFiles.length).to.equal(1);
       } finally {
         // Cleanup
@@ -331,7 +370,7 @@ describe("Deployment File Utilities", () => {
     it("should handle deployments directory not existing", async () => {
       // Test with network that would create path to non-existent dir
       // This tests the ENOENT error handling
-      const files = await listDeploymentFiles("network-with-no-dir");
+      const files = await listDeploymentsByWorkflow("network-with-no-dir");
       expect(files).to.be.an("array");
       expect(files.length).to.equal(0);
     });
@@ -445,13 +484,31 @@ describe("Deployment File Utilities", () => {
       expect(timestamp).to.not.include(".");
     });
 
-    it("should generate unique timestamps for subsequent calls with delay", async () => {
-      const timestamp1 = generateTimestamp();
-      // Wait 1.1 seconds to ensure different second
-      await new Promise((resolve) => setTimeout(resolve, 1100));
-      const timestamp2 = generateTimestamp();
+    it("should generate unique timestamps for subsequent calls with time advancement", () => {
+      // Use sinon fake timers to advance time instantly (no real delay)
+      // Uses TEST_TIMESTAMPS.ISO_SAMPLE as base time
+      const clock = sinon.useFakeTimers(new Date(TEST_TIMESTAMPS.ISO_SAMPLE));
 
-      expect(timestamp1).to.not.equal(timestamp2);
+      try {
+        const timestamp1 = generateTimestamp();
+
+        // Verify first timestamp matches expected format from constants
+        expect(timestamp1).to.equal(TEST_TIMESTAMPS.FILENAME_SAMPLE);
+
+        // Advance time by 2 seconds (instant, no real delay)
+        clock.tick(2000);
+
+        const timestamp2 = generateTimestamp();
+
+        // Verify timestamps are different after time advancement
+        expect(timestamp1).to.not.equal(timestamp2);
+
+        // Verify second timestamp has correct format and is later
+        expect(timestamp2).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}$/);
+        expect(timestamp2 > timestamp1).to.be.true; // Lexicographic comparison works for ISO format
+      } finally {
+        clock.restore();
+      }
     });
 
     it("should be parseable back to a valid date", () => {
@@ -614,7 +671,7 @@ describe("Deployment File Utilities", () => {
     });
   });
 
-  describe("listDeploymentsByWorkflow", () => {
+  describe("listDeploymentsByWorkflow (with workflow filter)", () => {
     const timestamps = ["2025-11-08T16-00-00", "2025-11-08T17-00-00", "2025-11-08T18-00-00"];
 
     before(async () => {
@@ -630,7 +687,7 @@ describe("Deployment File Utilities", () => {
 
       expect(files).to.be.an("array");
       expect(files.length).to.be.greaterThanOrEqual(3);
-      files.forEach((file) => {
+      files.forEach((file: string) => {
         expect(file).to.include(TEST_WORKFLOW);
       });
     });
@@ -643,7 +700,7 @@ describe("Deployment File Utilities", () => {
 
       try {
         const files = await listDeploymentsByWorkflow(TEST_NETWORK, TEST_WORKFLOW);
-        expect(files.every((f) => f.endsWith(".json"))).to.be.true;
+        expect(files.every((f: string) => f.endsWith(".json"))).to.be.true;
       } finally {
         await fs.unlink(nonJsonFile).catch(() => {});
       }
@@ -656,7 +713,7 @@ describe("Deployment File Utilities", () => {
 
       try {
         const files = await listDeploymentsByWorkflow(TEST_NETWORK, TEST_WORKFLOW);
-        expect(files.every((f) => !f.startsWith("."))).to.be.true;
+        expect(files.every((f: string) => !f.startsWith("."))).to.be.true;
       } finally {
         await fs.unlink(hiddenFile).catch(() => {});
       }
@@ -672,8 +729,8 @@ describe("Deployment File Utilities", () => {
         const files = await listDeploymentsByWorkflow(TEST_NETWORK);
 
         // Should include both workflow types
-        const hasNewBlr = files.some((f) => f.includes(TEST_WORKFLOWS.NEW_BLR));
-        const hasExistingBlr = files.some((f) => f.includes(TEST_WORKFLOWS.EXISTING_BLR));
+        const hasNewBlr = files.some((f: string) => f.includes(TEST_WORKFLOWS.NEW_BLR));
+        const hasExistingBlr = files.some((f: string) => f.includes(TEST_WORKFLOWS.EXISTING_BLR));
 
         expect(hasNewBlr).to.be.true;
         expect(hasExistingBlr).to.be.true;
@@ -728,7 +785,6 @@ describe("Deployment File Utilities", () => {
     });
 
     it("should create parent directories automatically", async () => {
-      const _deepPath = join(TEST_DEPLOYMENTS_DIR, "deep/nested/new-network");
       const mockData = createSampleDeployment(TEST_TIMESTAMPS.FILENAME_SAMPLE);
 
       const result = await saveDeploymentOutput({
@@ -800,7 +856,7 @@ describe("Deployment File Utilities", () => {
 
     it("should work together: list, find latest, load", async () => {
       // List all files
-      const files = await listDeploymentFiles(TEST_NETWORK);
+      const files = await listDeploymentsByWorkflow(TEST_NETWORK);
       expect(files.length).to.be.greaterThan(0);
 
       // Find latest

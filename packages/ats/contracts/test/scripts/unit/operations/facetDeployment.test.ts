@@ -11,7 +11,7 @@
 
 import { expect } from "chai";
 import { getFacetDeploymentSummary, type DeployFacetsResult, type DeploymentResult } from "@scripts/infrastructure";
-import { TEST_ADDRESSES, TEST_TX_HASHES } from "@test";
+import { TEST_ADDRESSES, TEST_TX_HASHES, TEST_STANDARD_CONTRACTS, TEST_FACET_NAMES } from "@test";
 
 describe("Facet Deployment Utilities", () => {
   // ============================================================================
@@ -72,7 +72,11 @@ describe("Facet Deployment Utilities", () => {
 
   describe("getFacetDeploymentSummary", () => {
     it("should return correct summary for successful deployments", () => {
-      const facetNames = ["AccessControlFacet", "PauseFacet", "KycFacet"];
+      const facetNames = [
+        TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET,
+        TEST_STANDARD_CONTRACTS.PAUSE_FACET,
+        TEST_STANDARD_CONTRACTS.KYC_FACET,
+      ];
       const result = createFacetsResult(facetNames);
 
       const summary = getFacetDeploymentSummary(result);
@@ -84,8 +88,8 @@ describe("Facet Deployment Utilities", () => {
     });
 
     it("should return correct summary with failed deployments", () => {
-      const deployed = ["AccessControlFacet", "PauseFacet"];
-      const failed = ["KycFacet", "CapTableFacet"];
+      const deployed = [TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET, TEST_STANDARD_CONTRACTS.PAUSE_FACET];
+      const failed = [TEST_STANDARD_CONTRACTS.KYC_FACET, TEST_STANDARD_CONTRACTS.CAP_TABLE_FACET];
       const result = createFacetsResult(deployed, failed);
 
       const summary = getFacetDeploymentSummary(result);
@@ -97,9 +101,9 @@ describe("Facet Deployment Utilities", () => {
     });
 
     it("should return correct summary with skipped deployments", () => {
-      const deployed = ["AccessControlFacet"];
+      const deployed = [TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET];
       const failed: string[] = [];
-      const skipped = ["PauseFacet", "KycFacet"];
+      const skipped = [TEST_STANDARD_CONTRACTS.PAUSE_FACET, TEST_STANDARD_CONTRACTS.KYC_FACET];
       const result = createFacetsResult(deployed, failed, skipped);
 
       const summary = getFacetDeploymentSummary(result);
@@ -111,9 +115,9 @@ describe("Facet Deployment Utilities", () => {
     });
 
     it("should return correct summary with mixed results", () => {
-      const deployed = ["AccessControlFacet", "PauseFacet"];
-      const failed = ["KycFacet"];
-      const skipped = ["CapTableFacet"];
+      const deployed = [TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET, TEST_STANDARD_CONTRACTS.PAUSE_FACET];
+      const failed = [TEST_STANDARD_CONTRACTS.KYC_FACET];
+      const skipped = [TEST_STANDARD_CONTRACTS.CAP_TABLE_FACET];
       const result = createFacetsResult(deployed, failed, skipped);
 
       const summary = getFacetDeploymentSummary(result);
@@ -135,7 +139,7 @@ describe("Facet Deployment Utilities", () => {
     });
 
     it("should build addresses map from deployed facets", () => {
-      const facetNames = ["FacetA", "FacetB", "FacetC"];
+      const facetNames = [TEST_FACET_NAMES.FACET_A, TEST_FACET_NAMES.FACET_B, TEST_FACET_NAMES.FACET_C];
       const result = createFacetsResult(facetNames);
 
       const summary = getFacetDeploymentSummary(result);
@@ -147,7 +151,7 @@ describe("Facet Deployment Utilities", () => {
     });
 
     it("should filter out facets without addresses in addresses map", () => {
-      const result = createFacetsResult(["TestFacet"]);
+      const result = createFacetsResult([TEST_FACET_NAMES.TEST]);
 
       // Manually add a deployed facet without address (edge case)
       result.deployed.set("NoAddressFacet", {
@@ -159,10 +163,10 @@ describe("Facet Deployment Utilities", () => {
 
       const summary = getFacetDeploymentSummary(result);
 
-      expect(summary.deployed).to.include("TestFacet");
+      expect(summary.deployed).to.include(TEST_FACET_NAMES.TEST);
       expect(summary.deployed).to.include("NoAddressFacet");
       // Addresses map should only include facets with addresses
-      expect(summary.addresses["TestFacet"]).to.exist;
+      expect(summary.addresses[TEST_FACET_NAMES.TEST]).to.exist;
       expect(summary.addresses["NoAddressFacet"]).to.be.undefined;
     });
 
