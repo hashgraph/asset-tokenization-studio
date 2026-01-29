@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
@@ -7,10 +9,11 @@ import {
   ResolverProxy,
   Pause,
   ExternalControlListManagementFacet,
+  IERC1410,
 } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
-import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
+import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, GAS_LIMIT } from "@scripts";
 
 describe("ExternalControlList Management Tests", () => {
   let signer_A: SignerWithAddress;
@@ -24,6 +27,7 @@ describe("ExternalControlList Management Tests", () => {
   let externalWhitelistMock1: MockedWhitelist;
   let externalBlacklistMock1: MockedBlacklist;
   let externalWhitelistMock2: MockedWhitelist;
+  let erc1410Facet: IERC1410;
 
   async function deployExternalControlListTokenSecurity() {
     const [deployer] = await ethers.getSigners();
@@ -38,6 +42,8 @@ describe("ExternalControlList Management Tests", () => {
         securityData: {
           isMultiPartition: true,
           externalControlLists: [initMock1.address, initMock2.address],
+          internalKycActivated: false,
+          externalKycLists: [],
         },
       },
     });
@@ -51,9 +57,11 @@ describe("ExternalControlList Management Tests", () => {
       signer_A,
     );
     pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
 
     await base.accessControlFacet.grantRole(ATS_ROLES._CONTROL_LIST_MANAGER_ROLE, signer_A.address);
     await base.accessControlFacet.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
+    await base.accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
 
     externalWhitelistMock1 = await (await ethers.getContractFactory("MockedWhitelist", signer_A)).deploy();
     await externalWhitelistMock1.deployed();
@@ -403,6 +411,32 @@ describe("ExternalControlList Management Tests", () => {
         .withArgs(signer_A.address, controlLists, actives);
       expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.false;
       expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.address)).to.be.true;
+    });
+  });
+
+  describe("Testing external authorization", () => {
+    it("GIVEN an externally unauthorized account WHEN trying to operate THEN transaction fails with AccountIsBlocked", async () => {
+      const issueBody = {
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: 1,
+        data: "0x",
+      };
+      await expect(erc1410Facet.issueByPartition(issueBody)).to.be.rejectedWith("AccountIsBlocked");
+      await initMock1.addToWhitelist(issueBody.tokenHolder);
+      await expect(erc1410Facet.issueByPartition(issueBody)).to.be.rejectedWith("AccountIsBlocked");
+    });
+
+    it("GIVEN an externally authorized account WHEN trying to operate THEN transaction succeeds", async () => {
+      const issueBody = {
+        partition: DEFAULT_PARTITION,
+        tokenHolder: signer_A.address,
+        value: 1,
+        data: "0x",
+      };
+      await initMock1.addToWhitelist(issueBody.tokenHolder);
+      await externalWhitelistMock1.addToWhitelist(issueBody.tokenHolder);
+      await erc1410Facet.issueByPartition(issueBody);
     });
   });
 });

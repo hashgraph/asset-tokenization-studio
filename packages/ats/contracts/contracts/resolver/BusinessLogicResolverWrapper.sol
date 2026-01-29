@@ -95,9 +95,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
         uint256 length = _selectors.length;
         for (uint256 index; index < length; ) {
             bytes4 selector = _selectors[index];
-            if (!EnumerableSetBytes4.contains(selectorBlacklist, selector)) {
-                EnumerableSetBytes4.add(selectorBlacklist, selector);
-            }
+            EnumerableSetBytes4.add(selectorBlacklist, selector);
             unchecked {
                 ++index;
             }
@@ -111,9 +109,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
         uint256 length = _selectors.length;
         for (uint256 index; index < length; ) {
             bytes4 selector = _selectors[index];
-            if (EnumerableSetBytes4.contains(selectorBlacklist, selector)) {
-                EnumerableSetBytes4.remove(selectorBlacklist, selector);
-            }
+            EnumerableSetBytes4.remove(selectorBlacklist, selector);
             unchecked {
                 ++index;
             }

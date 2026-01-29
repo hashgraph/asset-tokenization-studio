@@ -34,27 +34,21 @@ abstract contract AdjustBalancesStorageWrapper2 is IAdjustBalancesStorageWrapper
         _updateLabafByPartition(_partition);
     }
 
-    function _getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) internal view override returns (uint256) {
-        return _getHoldLabafById(_partition, _tokenHolder, _holdId);
-    }
-
-    function _getClearingLabafByPartition(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
-    ) internal view override returns (uint256) {
-        return _getClearingLabafById(_clearingOperationIdentifier);
-    }
-
     function _getLabafByUserAndPartition(
         bytes32 _partition,
         address _account
     ) internal view override returns (uint256) {
         uint256 partitionsIndex = _erc1410BasicStorage().partitionToIndex[_account][_partition];
 
-        if (partitionsIndex == 0) return 0;
-        return _adjustBalancesStorage().labafUserPartition[_account][partitionsIndex - 1];
+        if (partitionsIndex == 0) return 1;
+        return _zeroToOne(_adjustBalancesStorage().labafUserPartition[_account][partitionsIndex - 1]);
+    }
+
+    function _getLabafByUserAndPartitionIndex(
+        uint256 _partitionIndex,
+        address _account
+    ) internal view override returns (uint256) {
+        if (_partitionIndex == 0) return 1;
+        return _zeroToOne(_adjustBalancesStorage().labafUserPartition[_account][_partitionIndex - 1]);
     }
 }
