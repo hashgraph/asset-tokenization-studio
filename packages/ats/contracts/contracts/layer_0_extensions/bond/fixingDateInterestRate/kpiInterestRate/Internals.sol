@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
 import { ModifiersKpiInterestRate } from "./Modifiers.sol";
-import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
 
 abstract contract InternalsKpiInterestRate is ModifiersKpiInterestRate {
     // ===== KPIs Methods =====

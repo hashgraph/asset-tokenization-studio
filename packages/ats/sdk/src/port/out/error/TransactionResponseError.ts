@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import BaseError, { ErrorCode } from '@core/error/BaseError';
+import BaseError, { ErrorCode } from "@core/error/BaseError";
 
 export const REGEX_TRANSACTION =
   /^(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))\.(0|(?:[1-9]\d*))(?:-([a-z]{5}))?@([1-9]\d*)\.([1-9]\d*)$/;
-const HASHSCAN_BASE = 'https://hashscan.io/';
-const TRANSACTION_PATH = '/transactionsById/';
-const RPC_RELAY_PATH = '/tx/';
+const HASHSCAN_BASE = "https://hashscan.io/";
+const TRANSACTION_PATH = "/transactionsById/";
+const RPC_RELAY_PATH = "/tx/";
 
 type TransactionResponseErrorPayload = {
   message: string;

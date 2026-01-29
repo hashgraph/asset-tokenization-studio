@@ -6,7 +6,6 @@ import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
 // solhint-disable-next-line max-line-length
 import { ISustainabilityPerformanceTargetRate } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
 import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";
 import { InternalsSustainabilityPerformanceTargetInterestRate } from "../Internals.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";

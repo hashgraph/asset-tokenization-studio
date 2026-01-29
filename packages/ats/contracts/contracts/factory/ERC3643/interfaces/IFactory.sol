@@ -11,7 +11,7 @@ import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
 import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import {TRexISustainabilityPerformanceTargetRate as ISustainabilityPerformanceTargetRate} from './ISustainabilityPerformanceTargetRate.sol';
+import {TRexISustainabilityPerformanceTargetRate as ISustainabilityPerformanceTargetRate} from "./ISustainabilityPerformanceTargetRate.sol";
 
 interface TRexIFactory {
     enum SecurityType {

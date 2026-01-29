@@ -4,10 +4,7 @@ import { AssetType } from "@domain/model/asset-type.enum"
 import { CorporateActionDetails, Distribution, DistributionType } from "@domain/model/distribution"
 import { AssetRepository } from "@domain/ports/asset-repository.port"
 import { DistributionRepository } from "@domain/ports/distribution-repository.port"
-import {
-  OnChainDistributionRepositoryPort,
-  OnChainDistributionData,
-} from "@domain/ports/on-chain-distribution-repository.port"
+import { OnChainDistributionRepositoryPort } from "@domain/ports/on-chain-distribution-repository.port"
 import { LifeCycleCashFlowPort } from "@domain/ports/life-cycle-cash-flow.port"
 import { SyncFromOnChainDomainService } from "@domain/services/sync-from-onchain.domain-service"
 import { faker } from "@faker-js/faker"
@@ -312,11 +309,3 @@ describe(SyncFromOnChainDomainService.name, () => {
     })
   })
 })
-
-function fakeRemote(): OnChainDistributionData {
-  return {
-    corporateActionID: faker.string.uuid(),
-    assetId: faker.string.uuid(),
-    executionDate: faker.date.future(),
-  }
-}
