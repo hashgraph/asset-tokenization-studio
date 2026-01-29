@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
@@ -425,7 +427,7 @@ describe("ExternalControlList Management Tests", () => {
       await expect(erc1410Facet.issueByPartition(issueBody)).to.be.rejectedWith("AccountIsBlocked");
     });
 
-    it("GIVEN an externally unauthorized account WHEN trying to operate THEN transaction fails with AccountIsBlocked", async () => {
+    it("GIVEN an externally authorized account WHEN trying to operate THEN transaction succeeds", async () => {
       const issueBody = {
         partition: DEFAULT_PARTITION,
         tokenHolder: signer_A.address,
