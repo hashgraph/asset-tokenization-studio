@@ -19,26 +19,30 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { upgradeProxy, getProxyImplementation, configureLogger, LogLevel } from "@scripts/infrastructure";
-import { TUP_VERSIONS, deployTupProxyFixture, deployTupProxyWithV2Fixture } from "@test";
+import {
+  upgradeProxy,
+  getProxyImplementation,
+  proxyNeedsUpgrade,
+  prepareUpgrade,
+  configureLogger,
+  LogLevel,
+} from "@scripts/infrastructure";
+import { TUP_VERSIONS, deployTupProxyFixture, deployTupProxyWithV2Fixture, TEST_ADDRESSES, TEST_VALUES } from "@test";
 import { MockImplementation__factory, MockImplementationV2__factory, ProxyAdmin__factory } from "@contract-types";
 
 /**
  * Test constants for upgradeProxy integration tests.
+ * Combines TEST_VALUES from @test with test-specific constants.
  */
 const TEST_CONSTANTS = {
-  /** Test value for V2 initialization (basic test) */
-  TEST_INIT_VALUE_BASIC: 42,
+  /** Test value for V2 initialization (basic test) - use centralized constant */
+  TEST_INIT_VALUE_BASIC: TEST_VALUES.INIT_VALUE,
   /** Test value for V2 initialization (upgrade with init) */
   TEST_INIT_VALUE_WITH_UPGRADE: 123,
   /** Test value for V2 initialization (state verification) */
   TEST_INIT_VALUE_STATE_VERIFY: 999,
   /** EIP-1967 admin storage slot constant */
   EIP1967_ADMIN_SLOT: "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103",
-  /** Non-existent proxy address (for error testing) */
-  NON_EXISTENT_PROXY_ADDRESS: "0x1234567890123456789012345678901234567890",
-  /** Invalid implementation address (for error testing) */
-  INVALID_IMPLEMENTATION_ADDRESS: "0x1234567890123456789012345678901234567890",
   /** Gas limit for basic upgrade() call */
   MAX_GAS_UPGRADE: 200_000,
   /** Gas limit for upgradeAndCall() call (includes initialization) */
@@ -277,7 +281,7 @@ describe("upgradeProxy - Integration Tests", () => {
       const { proxyAdmin } = await loadFixture(deployTupProxyFixture);
 
       const result = await upgradeProxy(proxyAdmin, {
-        proxyAddress: TEST_CONSTANTS.NON_EXISTENT_PROXY_ADDRESS,
+        proxyAddress: TEST_ADDRESSES.NO_CODE,
         newImplementationAddress: ethers.constants.AddressZero,
       });
 
@@ -290,7 +294,7 @@ describe("upgradeProxy - Integration Tests", () => {
 
       // Should return result, not throw
       const result = await upgradeProxy(proxyAdmin, {
-        proxyAddress: TEST_CONSTANTS.INVALID_IMPLEMENTATION_ADDRESS,
+        proxyAddress: TEST_ADDRESSES.NO_CODE,
         newImplementationAddress: ethers.constants.AddressZero,
       });
 
@@ -400,6 +404,44 @@ describe("upgradeProxy - Integration Tests", () => {
       expect(result.gasUsed).to.exist;
       expect(result.gasUsed).to.be.greaterThan(0);
       expect(result.gasUsed).to.be.lessThan(TEST_CONSTANTS.MAX_GAS_UPGRADE_AND_CALL); // upgradeAndCall uses more gas
+    });
+  });
+
+  describe("Helper Functions", () => {
+    it("proxyNeedsUpgrade should return true when upgrade needed", async () => {
+      const { proxyAddress, implementationV1Address, implementationV2Address } =
+        await loadFixture(deployTupProxyWithV2Fixture);
+
+      const needsUpgrade = await proxyNeedsUpgrade(ethers.provider, proxyAddress, implementationV2Address);
+
+      expect(needsUpgrade).to.be.true;
+
+      // Verify current implementation is V1
+      const currentImpl = await getProxyImplementation(ethers.provider, proxyAddress);
+      expect(currentImpl.toLowerCase()).to.equal(implementationV1Address.toLowerCase());
+    });
+
+    it("proxyNeedsUpgrade should return false when already at target", async () => {
+      const { proxyAddress, implementationV1Address } = await loadFixture(deployTupProxyFixture);
+
+      const needsUpgrade = await proxyNeedsUpgrade(ethers.provider, proxyAddress, implementationV1Address);
+
+      expect(needsUpgrade).to.be.false;
+    });
+
+    it("prepareUpgrade should deploy implementation without upgrading", async () => {
+      const { deployer, proxyAddress } = await loadFixture(deployTupProxyFixture);
+
+      // Prepare upgrade (deploy V2 without upgrading) using TypeChain factory
+      const newImplAddress = await prepareUpgrade(new MockImplementationV2__factory(deployer), []);
+
+      // Verify V2 was deployed
+      expect(newImplAddress).to.be.a("string");
+      expect(newImplAddress).to.not.equal(ethers.constants.AddressZero);
+
+      // Verify proxy is still at V1
+      const currentImpl = await getProxyImplementation(ethers.provider, proxyAddress);
+      expect(currentImpl.toLowerCase()).to.not.equal(newImplAddress.toLowerCase());
     });
   });
 });

@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Unit tests for network configuration utilities.
+ * Integration tests for network configuration utilities.
  *
  * Tests network configuration retrieval and validation.
  * Note: These tests work with whatever networks are configured in Configuration.ts.
+ * They depend on actual Configuration.ts values and environment variables,
+ * so they are categorized as integration tests.
  *
- * @module test/scripts/unit/infrastructure/config.test
+ * @module test/scripts/integration/infrastructure/config.test
  */
 
 import { expect } from "chai";
