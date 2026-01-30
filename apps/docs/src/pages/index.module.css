@@ -1,4 +1,5 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
  * CSS files with the .module.css suffix will be treated as CSS modules
  * and scoped locally.
  */
@@ -20,4 +21,148 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Products Section */
+.productsSection {
+  padding: 3rem 0;
+}
+
+.productCard {
+  background: var(--ifm-card-background-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.productCard h2 {
+  margin-bottom: 0.5rem;
+}
+
+.tagline {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.featureList {
+  flex-grow: 1;
+  margin-bottom: 1.5rem;
+  padding-left: 1.25rem;
+}
+
+.featureList li {
+  margin-bottom: 0.5rem;
+}
+
+.cardButtons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Capabilities Table Section */
+.tableSection {
+  padding: 3rem 0;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.capabilitiesTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--ifm-card-background-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.capabilitiesTable th,
+.capabilitiesTable td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.capabilitiesTable th {
+  background: var(--ifm-color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+.capabilitiesTable tr:last-child td {
+  border-bottom: none;
+}
+
+.capabilitiesTable tr:hover td {
+  background: var(--ifm-color-emphasis-100);
+}
+
+/* Workflow Section */
+.workflowSection {
+  padding: 3rem 0;
+}
+
+.workflowSteps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.workflowStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--ifm-card-background-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  min-width: 140px;
+}
+
+.stepNumber {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ifm-color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.stepProduct {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+  margin-top: 0.25rem;
+}
+
+.workflowArrow {
+  font-size: 1.5rem;
+  color: var(--ifm-color-emphasis-500);
+}
+
+@media screen and (max-width: 768px) {
+  .workflowSteps {
+    flex-direction: column;
+  }
+
+  .workflowArrow {
+    transform: rotate(90deg);
+  }
+
+  .productCard {
+    margin-bottom: 1.5rem;
+  }
 }
