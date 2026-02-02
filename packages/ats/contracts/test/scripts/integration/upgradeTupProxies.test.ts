@@ -17,7 +17,7 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { upgradeTupProxies } from "@scripts";
-import { silenceScriptLogging, createCheckpointCleanupHooks } from "@test";
+import { silenceScriptLogging, createCheckpointCleanupHooks, TEST_OPTIONS } from "@test";
 import {
   deployTupUpgradeTestFixture,
   deployBlrV2Implementation,
@@ -39,7 +39,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         deployNewFactoryImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -64,7 +64,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -85,7 +85,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         factoryProxyAddress,
         deployNewFactoryImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -105,7 +105,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -122,7 +122,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -141,7 +141,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         deployNewFactoryImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -166,7 +166,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -182,7 +182,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -194,7 +194,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         blrImplementationAddress: firstUpgrade.blrUpgrade?.newImplementation,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -218,7 +218,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrImplementationAddress: blrV2.address,
         factoryImplementationAddress: factoryV2.address,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -239,7 +239,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         blrImplementationAddress: blrV2.address,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -264,7 +264,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         factoryImplementationAddress: factoryV2.address,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -286,7 +286,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           blrProxyAddress,
           deployNewBlrImpl: true,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown");
@@ -302,7 +302,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         await upgradeTupProxies(deployer, "hardhat", {
           proxyAdminAddress,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown");
@@ -320,7 +320,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           proxyAdminAddress,
           blrProxyAddress,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown");
@@ -338,7 +338,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           proxyAdminAddress,
           factoryProxyAddress,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown");
@@ -357,7 +357,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           blrProxyAddress: "0x1111111111111111111111111111111111111111",
           deployNewBlrImpl: true,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         } as any);
         expect.fail("Should have thrown");
@@ -378,7 +378,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
       const after = new Date().toISOString();
@@ -396,7 +396,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -414,7 +414,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         deployNewFactoryImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -440,7 +440,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewFactoryImpl: true,
         enableRetry: false,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -468,7 +468,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         checkpointDir,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.summary.success).to.be.true;
@@ -483,7 +483,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         ignoreCheckpoint: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.summary.success).to.be.true;
@@ -503,7 +503,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deleteOnSuccess: true,
         checkpointDir,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.summary.success).to.be.true;
@@ -520,7 +520,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         verifyDeployment: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -538,7 +538,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         verifyDeployment: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -559,7 +559,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           blrProxyAddress: invalidProxyAddress,
           deployNewBlrImpl: true,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown an error");
