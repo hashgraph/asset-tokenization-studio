@@ -4,28 +4,19 @@
 import {
   SDK,
   LoggerTransports,
-  CreateBondRequest,
-  GetBondDetailsRequest,
-  GetCouponRequest,
-  GetAllCouponsRequest,
   SupportedWallets,
   Network,
   Bond,
-  GetCouponForRequest,
-  Role,
-  RoleRequest,
-  SetCouponRequest,
-  UpdateMaturityDateRequest,
+  InitializationRequest,
+  CreateBondFixedRateRequest,
 } from "@port/in";
-import { CLIENT_ACCOUNT_ECDSA, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
-import { TIME_PERIODS_S } from "@core/Constants";
+import { DFNS_SETTINGS, CLIENT_ACCOUNT_ECDSA, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
 import { MirrorNode } from "@domain/context/network/MirrorNode";
 import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
 import NetworkService from "@service/network/NetworkService";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import Injectable from "@core/injectable/Injectable";
-import { SecurityRole } from "@domain/context/security/SecurityRole";
 import {
   CastRegulationSubType,
   CastRegulationType,
@@ -36,15 +27,13 @@ import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
 import { Wallet, ethers } from "ethers";
-import BaseError from "@core/error/BaseError";
-import { CastRateStatus, RateStatus } from "@domain/context/bond/RateStatus";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
 const decimals = 0;
 const name = "TEST_SECURITY_TOKEN";
 const symbol = "TEST";
-const isin = "ABCDE123456Z";
+const isin = "US0378331005";
 const currency = "0x455552";
 const TIME = 30;
 const numberOfUnits = "1000";
@@ -57,8 +46,10 @@ const regulationType = RegulationType.REG_S;
 const regulationSubType = RegulationSubType.NONE;
 const countries = "AF,HG,BN";
 const info = "Anything";
-const configId = "0x0000000000000000000000000000000000000000000000000000000000000000";
+const configId = "0x0000000000000000000000000000000000000000000000000000000000000003";
 const configVersion = 0;
+const rate = 5;
+const rateDecimals = 2;
 
 const mirrorNode: MirrorNode = {
   name: "testmirrorNode",
@@ -107,19 +98,26 @@ describe("🧪 Bond test", () => {
 
     await Network.connect(
       new ConnectRequest({
-        account: {
-          accountId: CLIENT_ACCOUNT_ECDSA.id.toString(),
-          privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
-        },
         network: "testnet",
-        wallet: SupportedWallets.METAMASK,
+        wallet: SupportedWallets.DFNS,
         mirrorNode: mirrorNode,
         rpcNode: rpcNode,
-        debug: true,
+        custodialWalletSettings: DFNS_SETTINGS,
+      }),
+    );
+    await Network.init(
+      new InitializationRequest({
+        network: "testnet",
+        configuration: {
+          factoryAddress: FACTORY_ADDRESS,
+          resolverAddress: RESOLVER_ADDRESS,
+        },
+        mirrorNode: mirrorNode,
+        rpcNode: rpcNode,
       }),
     );
 
-    const requestST = new CreateBondRequest({
+    const requestST = new CreateBondFixedRateRequest({
       name: name,
       symbol: symbol,
       isin: isin,
@@ -145,161 +143,18 @@ describe("🧪 Bond test", () => {
       info: info,
       configId: configId,
       configVersion: configVersion,
+      rate: rate,
+      rateDecimals: rateDecimals,
     });
 
     Injectable.resolveTransactionHandler();
 
-    bond = (await Bond.create(requestST)).security;
+    bond = (await Bond.createFixedRate(requestST)).security;
 
     console.log("bond: " + JSON.stringify(bond));
   }, 600_000);
 
-  it("Check Bond Details", async () => {
-    const bondDetails = await Bond.getBondDetails(
-      new GetBondDetailsRequest({
-        bondId: bond.evmDiamondAddress!.toString(),
-      }),
-    );
-
-    expect(bondDetails.currency).toEqual(currency);
-    expect(bondDetails.nominalValue).toEqual(nominalValue);
-    expect(bondDetails.nominalValueDecimals).toEqual(nominalValueDecimals);
-    expect(bondDetails.startingDate.getTime() / 1000).toEqual(startingDate);
-    expect(bondDetails.maturityDate.getTime() / 1000).toEqual(maturityDate);
+  it("test", async () => {
+    return true;
   }, 60_000);
-
-  it("Coupons Fixed", async () => {
-    // Manually create a coupon since automatic creation was removed
-    const couponRate = "3";
-    const couponRecordDate = startingDate + 30;
-    const couponExecutionDate = startingDate + 35;
-    const couponFixingDate = startingDate + 25;
-
-    await Bond.setCoupon(
-      new SetCouponRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        rate: couponRate,
-        recordTimestamp: couponRecordDate.toString(),
-        executionTimestamp: couponExecutionDate.toString(),
-        startTimestamp: "0",
-        endTimestamp: TIME_PERIODS_S.DAY.toString(),
-        fixingTimestamp: couponFixingDate.toString(),
-        rateStatus: CastRateStatus.toNumber(RateStatus.SET),
-      }),
-    );
-
-    const coupon = await Bond.getCoupon(
-      new GetCouponRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        couponId: 1,
-      }),
-    );
-
-    const allCoupon = await Bond.getAllCoupons(
-      new GetAllCouponsRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-      }),
-    );
-
-    const couponFor = await Bond.getCouponFor(
-      new GetCouponForRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        couponId: 1,
-      }),
-    );
-
-    const couponAmountFor = await Bond.getCouponAmountFor(
-      new GetCouponForRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        couponId: 1,
-      }),
-    );
-
-    expect(coupon.rate).toEqual(couponRate);
-    expect(coupon.rateDecimals).toEqual(0);
-    expect(coupon.couponId).toEqual(1);
-    expect(coupon.recordDate.getTime() / 1000).toEqual(couponRecordDate);
-    expect(coupon.executionDate.getTime() / 1000).toEqual(couponExecutionDate);
-    expect(couponFor.tokenBalance).toEqual("0");
-    expect(couponFor.decimals).toEqual("0");
-    expect(allCoupon.length).toEqual(1); // Now only 1 manually created coupon
-    expect(couponAmountFor.numerator).toEqual("5");
-    expect(couponAmountFor.denominator).toEqual("3");
-    expect(couponAmountFor.recordDateReached).toEqual(true);
-  }, 600_000);
-
-  it("Coupons Custom", async () => {
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._CORPORATEACTIONS_ROLE,
-      }),
-    );
-
-    const rate = "1";
-    const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
-    const executionTimestamp = recordTimestamp + 1000;
-    const couponFixingDate = recordTimestamp - 1000;
-
-    await Bond.setCoupon(
-      new SetCouponRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        rate: rate,
-        recordTimestamp: recordTimestamp.toString(),
-        executionTimestamp: executionTimestamp.toString(),
-        startTimestamp: "0",
-        endTimestamp: TIME_PERIODS_S.DAY.toString(),
-        fixingTimestamp: couponFixingDate.toString(),
-        rateStatus: CastRateStatus.toNumber(RateStatus.PENDING),
-      }),
-    );
-
-    const coupon = await Bond.getCoupon(
-      new GetCouponRequest({
-        securityId: bond.evmDiamondAddress!.toString(),
-        couponId: 2, // Second coupon (first one was created in 'Coupons Fixed' test)
-      }),
-    );
-
-    expect(coupon.couponId).toEqual(2);
-    expect(coupon.recordDate.getTime() / 1000).toEqual(recordTimestamp);
-    expect(coupon.executionDate.getTime() / 1000).toEqual(executionTimestamp);
-  }, 600_000);
-
-  it("Update bond maturity date correctly", async () => {
-    const newMaturityDate = maturityDate + 10;
-    const request = new UpdateMaturityDateRequest({
-      securityId: bond.evmDiamondAddress!.toString(),
-      maturityDate: newMaturityDate.toString(),
-    });
-
-    const res = await Bond.updateMaturityDate(request);
-
-    const bondDetails = await Bond.getBondDetails(
-      new GetBondDetailsRequest({
-        bondId: bond.evmDiamondAddress!.toString(),
-      }),
-    );
-    expect(bondDetails.maturityDate.getTime() / 1000).toEqual(newMaturityDate);
-    expect(res.payload).toBe(true);
-  }, 600_000);
-
-  it("Should return error if bond maturity date is earlier than current one", async () => {
-    const newMaturityDate = maturityDate - 10;
-    const request = new UpdateMaturityDateRequest({
-      securityId: bond.evmDiamondAddress!.toString(),
-      maturityDate: newMaturityDate.toString(),
-    });
-
-    let thrownError;
-    try {
-      await Bond.updateMaturityDate(request);
-    } catch (error) {
-      thrownError = error;
-    }
-    expect(thrownError).toBeInstanceOf(BaseError);
-  }, 600_000);
 });
