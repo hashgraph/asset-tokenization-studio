@@ -640,3 +640,79 @@ export function createStatusTestCheckpoint(
     ...(failure ? { failure } : {}),
   };
 }
+
+/**
+ * Create checkpoint cleanup hooks for Mocha tests.
+ *
+ * Returns an object with methods for tracking and cleaning up checkpoint directories
+ * created during tests. Use `trackDir` to register directories for cleanup,
+ * `afterEachCleanup` in an `afterEach` hook, and `afterCleanup` in an `after` hook.
+ *
+ * @returns Object with trackDir, afterEachCleanup, and afterCleanup methods
+ *
+ * @example
+ * ```typescript
+ * import { createCheckpointCleanupHooks } from "@test";
+ *
+ * describe("My Checkpoint Tests", () => {
+ *   const { trackDir, afterEachCleanup, afterCleanup } = createCheckpointCleanupHooks();
+ *
+ *   afterEach(afterEachCleanup);
+ *   after(afterCleanup);
+ *
+ *   it("should create checkpoint", async () => {
+ *     const checkpointDir = `deployments/test/hardhat/.checkpoints/test-${Date.now()}`;
+ *     trackDir(checkpointDir);
+ *
+ *     // Test code that creates checkpoints in checkpointDir
+ *   });
+ * });
+ * ```
+ */
+export function createCheckpointCleanupHooks(): {
+  trackDir: (dir: string) => void;
+  afterEachCleanup: () => Promise<void>;
+  afterCleanup: () => Promise<void>;
+} {
+  const checkpointDirs: string[] = [];
+
+  return {
+    /**
+     * Track a checkpoint directory for cleanup.
+     * Call this with each directory created during tests.
+     */
+    trackDir: (dir: string) => {
+      checkpointDirs.push(dir);
+    },
+
+    /**
+     * Clean up tracked directories after each test.
+     * Use in an `afterEach` hook.
+     */
+    afterEachCleanup: async () => {
+      const fsModule = await import("fs").then((m) => m.promises);
+      for (const dir of checkpointDirs) {
+        try {
+          await fsModule.rm(dir, { recursive: true, force: true });
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+      checkpointDirs.length = 0; // Clear array
+    },
+
+    /**
+     * Clean up the shared test checkpoint directory after all tests.
+     * Use in an `after` hook.
+     */
+    afterCleanup: async () => {
+      const fsModule = await import("fs").then((m) => m.promises);
+      const testCheckpointDir = "deployments/test/hardhat/.checkpoints";
+      try {
+        await fsModule.rm(testCheckpointDir, { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors
+      }
+    },
+  };
+}

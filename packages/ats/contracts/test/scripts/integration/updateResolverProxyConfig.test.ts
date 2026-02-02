@@ -17,6 +17,8 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+
+// Infrastructure layer
 import {
   updateResolverProxyVersion,
   updateResolverProxyConfig,
@@ -24,22 +26,25 @@ import {
   getResolverProxyConfigInfo,
   deployProxy,
   registerFacets,
-  configureLogger,
-  LogLevel,
 } from "@scripts/infrastructure";
+
+// Domain layer
 import { atsRegistry } from "@scripts/domain";
-import { BusinessLogicResolver__factory } from "@contract-types";
+
+// Test helpers
 import {
   BLR_VERSIONS,
   deployResolverProxyFixture,
   deployResolverProxyWithAltConfigFixture,
   TEST_ADDRESSES,
+  silenceScriptLogging,
 } from "@test";
 
+// Contract types
+import { BusinessLogicResolver__factory } from "@contract-types";
+
 describe("updateResolverProxy* - Integration Tests", () => {
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   describe("updateResolverProxyVersion", () => {
     it("should update version successfully", async () => {
