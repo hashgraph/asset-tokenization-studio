@@ -1150,3 +1150,49 @@ export const TEST_INIT_VALUES = {
   /** Value for state verification tests */
   STATE_VERIFY: 999,
 } as const;
+
+// ============================================================================
+// Test Timing Constants
+// ============================================================================
+
+/**
+ * Timing delay constants for async test operations.
+ *
+ * Used with `sleep()` or `setTimeout()` in tests that require short waits
+ * for filesystem I/O, timestamp differentiation, or async operation completion.
+ */
+export const TEST_DELAYS = {
+  /** Short delay for async operations (5ms) - e.g., ensuring unique timestamps */
+  SHORT: 5,
+
+  /** Medium delay for filesystem operations (10ms) - e.g., file write completion */
+  MEDIUM: 10,
+} as const;
+
+// ============================================================================
+// Test Options
+// ============================================================================
+
+/**
+ * Common test configuration options.
+ *
+ * Provides named constants for frequently-used test configuration values
+ * with documentation explaining their purpose and when to use them.
+ */
+export const TEST_OPTIONS = {
+  /**
+   * Confirmations for instant-mining networks (0 = no wait).
+   *
+   * Transactions on Hardhat, Anvil, and other local test networks are mined
+   * immediately, so no confirmation wait is needed. Using 0 prevents tests
+   * from hanging while waiting for confirmations.
+   *
+   * @example
+   * await upgradeProxy(proxyAdmin, {
+   *   proxyAddress,
+   *   newImplementationAddress,
+   *   confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+   * });
+   */
+  CONFIRMATIONS_INSTANT: 0,
+} as const;
