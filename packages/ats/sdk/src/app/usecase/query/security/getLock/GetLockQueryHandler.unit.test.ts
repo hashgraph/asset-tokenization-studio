@@ -14,7 +14,7 @@ import AccountService from "@service/account/AccountService";
 import SecurityService from "@service/security/SecurityService";
 import { GetLockQueryFixture } from "@test/fixtures/lock/LockFixture";
 import { GetLockQueryError } from "./error/GetLockQueryError";
-import { BigNumber } from "ethers";
+
 import { Lock } from "@domain/context/security/Lock";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 
@@ -32,7 +32,7 @@ describe("GetLockQueryHandler", () => {
 
   const security = new Security(SecurityPropsFixture.create());
   const errorMsg = ErrorMsgFixture.create().msg;
-  const lock: [BigNumber, BigNumber] = [BigNumber.from(1), BigNumber.from(1)];
+  const lock: [bigint, bigint] = [BigInt(1), BigInt(1)];
 
   beforeEach(() => {
     handler = new GetLockQueryHandler(

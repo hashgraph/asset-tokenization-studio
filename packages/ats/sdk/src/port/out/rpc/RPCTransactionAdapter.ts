@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
 import TransactionAdapter, { InitializationData } from "../TransactionAdapter";
-import { BaseContract, ContractTransaction, Signer } from "ethers";
+import { BaseContract, ContractTransactionResponse, Signer, Provider } from "ethers";
 import { singleton } from "tsyringe";
 import Account from "@domain/context/account/Account";
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
@@ -81,7 +81,6 @@ import { BondDetails } from "@domain/context/bond/BondDetails";
 import { EquityDetails } from "@domain/context/equity/EquityDetails";
 import { SecurityData } from "@domain/context/factory/SecurityData";
 import { TransferAndLock } from "@domain/context/security/TransferAndLock";
-import type { Provider } from "@ethersproject/providers";
 import { Hold, HoldIdentifier, ProtectedHold } from "@domain/context/security/Hold";
 import { BasicTransferInfo, IssueData, OperatorTransferData } from "@domain/context/factory/ERC1410Metadata";
 import {
@@ -266,7 +265,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       TransferAndLockFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "transferAndLockByPartition",
-      [_PARTITION_ID_1, targetId.toString(), amount.toBigNumber(), "0x", expirationDate.toBigNumber()],
+      [_PARTITION_ID_1, targetId.toString(), amount.toBigInt(), "0x", expirationDate.toBigInt()],
       GAS.TRANSFER_AND_LOCK,
     );
   }
@@ -277,7 +276,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ERC1410TokenHolderFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "redeemByPartition",
-      [_PARTITION_ID_1, amount.toBigNumber(), "0x"],
+      [_PARTITION_ID_1, amount.toBigInt(), "0x"],
       GAS.REDEEM,
     );
   }
@@ -288,7 +287,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ERC3643OperationsFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "burn",
-      [source.toString(), amount.toBigNumber()],
+      [source.toString(), amount.toBigInt()],
       GAS.BURN,
     );
   }
@@ -389,7 +388,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ERC3643OperationsFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "mint",
-      [target.toString(), amount.toBigNumber()],
+      [target.toString(), amount.toBigInt()],
       GAS.MINT,
     );
   }
@@ -429,7 +428,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ERC1410ManagementFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "controllerTransferByPartition",
-      [_PARTITION_ID_1, sourceId.toString(), targetId.toString(), amount.toBigNumber(), "0x", "0x"],
+      [_PARTITION_ID_1, sourceId.toString(), targetId.toString(), amount.toBigInt(), "0x", "0x"],
       GAS.CONTROLLER_TRANSFER,
     );
   }
@@ -447,7 +446,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ERC3643OperationsFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "forcedTransfer",
-      [source.toString(), target.toString(), amount.toBigNumber()],
+      [source.toString(), target.toString(), amount.toBigInt()],
       GAS.FORCED_TRANSFER,
     );
   }
@@ -458,7 +457,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ERC1410ManagementFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "controllerRedeemByPartition",
-      [_PARTITION_ID_1, sourceId.toString(), amount.toBigNumber(), "0x", "0x"],
+      [_PARTITION_ID_1, sourceId.toString(), amount.toBigInt(), "0x", "0x"],
       GAS.CONTROLLER_REDEEM,
     );
   }
@@ -476,9 +475,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       amount : ${amount}  `,
     );
     const dividendStruct: IEquity.DividendStruct = {
-      recordDate: recordDate.toBigNumber(),
-      executionDate: executionDate.toBigNumber(),
-      amount: amount.toBigNumber(),
+      recordDate: recordDate.toBigInt(),
+      executionDate: executionDate.toBigInt(),
+      amount: amount.toBigInt(),
       amountDecimals: amount.decimals,
     };
 
@@ -497,7 +496,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       recordDate :${recordDate} , `,
     );
     const votingStruct: IEquity.VotingStruct = {
-      recordDate: recordDate.toBigNumber(),
+      recordDate: recordDate.toBigInt(),
       data: data,
     };
 
@@ -532,13 +531,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       fixingDate: ${fixingDate}`,
     );
     const couponStruct: IBondRead.CouponStruct = {
-      recordDate: recordDate.toBigNumber(),
-      executionDate: executionDate.toBigNumber(),
-      rate: rate.toBigNumber(),
+      recordDate: recordDate.toBigInt(),
+      executionDate: executionDate.toBigInt(),
+      rate: rate.toBigInt(),
       rateDecimals: rate.decimals,
-      startDate: startDate.toBigNumber(),
-      endDate: endDate.toBigNumber(),
-      fixingDate: fixingDate.toBigNumber(),
+      startDate: startDate.toBigInt(),
+      endDate: endDate.toBigInt(),
+      fixingDate: fixingDate.toBigInt(),
       rateStatus: CastRateStatus.toNumber(rateStatus),
     };
 
@@ -674,7 +673,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       CapFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setMaxSupply",
-      [maxSupply.toBigNumber()],
+      [maxSupply.toBigInt()],
       GAS.SET_MAX_SUPPLY,
     );
   }
@@ -696,7 +695,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ScheduledCrossOrderedTasksFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "triggerScheduledCrossOrderedTasks",
-      [max.toBigNumber()],
+      [max.toBigInt()],
       GAS.TRIGGER_PENDING_SCHEDULED_SNAPSHOTS,
     );
   }
@@ -712,7 +711,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       LockFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "lockByPartition",
-      [_PARTITION_ID_1, amount.toBigNumber(), sourceId.toString(), expirationDate.toBigNumber()],
+      [_PARTITION_ID_1, amount.toBigInt(), sourceId.toString(), expirationDate.toBigInt()],
       GAS.LOCK,
     );
   }
@@ -723,7 +722,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       LockFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "releaseByPartition",
-      [_PARTITION_ID_1, lockId.toBigNumber(), sourceId.toString()],
+      [_PARTITION_ID_1, lockId.toBigInt(), sourceId.toString()],
       GAS.RELEASE,
     );
   }
@@ -790,9 +789,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             decimals : ${decimals}  `,
     );
     const scheduledBalanceAdjustmentStruct: IEquity.ScheduledBalanceAdjustmentStruct = {
-      executionDate: executionDate.toBigNumber(),
-      factor: factor.toBigNumber(),
-      decimals: decimals.toBigNumber(),
+      executionDate: executionDate.toBigInt(),
+      factor: factor.toBigInt(),
+      decimals: decimals.toBigInt(),
     };
 
     return this.executeTransaction(
@@ -838,15 +837,15 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Protected Redeeming ${amount} securities from account ${sourceId.toString()}`);
 
     const protectionData: ProtectionData = {
-      deadline: deadline.toBigNumber(),
-      nounce: nounce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nounce: nounce.toBigInt(),
       signature: signature,
     };
 
     return this.executeTransaction(
       ERC1410ManagementFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "protectedRedeemFromByPartition",
-      [partitionId, sourceId.toString(), amount.toBigNumber(), protectionData],
+      [partitionId, sourceId.toString(), amount.toBigInt(), protectionData],
       GAS.PROTECTED_REDEEM,
     );
   }
@@ -866,15 +865,15 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const protectionData: ProtectionData = {
-      deadline: deadline.toBigNumber(),
-      nounce: nounce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nounce: nounce.toBigInt(),
       signature: signature,
     };
 
     return this.executeTransaction(
       ERC1410ManagementFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "protectedTransferFromByPartition",
-      [partitionId, sourceId.toString(), targetId.toString(), amount.toBigNumber(), protectionData],
+      [partitionId, sourceId.toString(), targetId.toString(), amount.toBigInt(), protectionData],
       GAS.PROTECTED_TRANSFER,
     );
   }
@@ -892,8 +891,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: expirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: expirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -921,8 +920,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: expirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: expirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -950,8 +949,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: expirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: expirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -982,8 +981,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: expirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: expirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -991,8 +990,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     const protectedHold: ProtectedHold = {
       hold,
-      deadline: deadline.toBigNumber(),
-      nonce: nonce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nonce: nonce.toBigInt(),
     };
 
     return this.executeTransaction(
@@ -1021,7 +1020,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       HoldTokenHolderFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "releaseHoldByPartition",
-      [holdIdentifier, amount.toBigNumber()],
+      [holdIdentifier, amount.toBigInt()],
       GAS.RELEASE_HOLD,
     );
   }
@@ -1069,7 +1068,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       HoldTokenHolderFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "executeHoldByPartition",
-      [holdIdentifier, targetId.toString(), amount.toBigNumber()],
+      [holdIdentifier, targetId.toString(), amount.toBigInt()],
       GAS.EXECUTE_HOLD_BY_PARTITION,
     );
   }
@@ -1125,7 +1124,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       KycFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "grantKyc",
-      [targetId.toString(), vcId, validFrom.toBigNumber(), validTo.toBigNumber(), issuer.toString()],
+      [targetId.toString(), vcId, validFrom.toBigInt(), validTo.toBigInt(), issuer.toString()],
       GAS.GRANT_KYC,
     );
   }
@@ -1174,14 +1173,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     const clearingOperation: ClearingOperation = {
       partition: partitionId,
-      expirationTimestamp: expirationDate.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigInt(),
       data: "0x",
     };
 
     return this.executeTransaction(
       ClearingTransferFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "clearingTransferByPartition",
-      [clearingOperation, amount.toBigNumber(), targetId.toString()],
+      [clearingOperation, amount.toBigInt(), targetId.toString()],
       GAS.CLEARING_TRANSFER_BY_PARTITION,
     );
   }
@@ -1199,7 +1198,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1209,7 +1208,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ClearingTransferFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "clearingTransferFromByPartition",
-      [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
+      [clearingOperationFrom, amount.toBigInt(), targetId.toString()],
       GAS.CLEARING_TRANSFER_FROM_BY_PARTITION,
     );
   }
@@ -1230,18 +1229,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const protectedClearingOperation: ProtectedClearingOperation = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
-      deadline: deadline.toBigNumber(),
-      nonce: nonce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nonce: nonce.toBigInt(),
     };
 
     return this.executeTransaction(
       ClearingTransferFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "protectedClearingTransferByPartition",
-      [protectedClearingOperation, amount.toBigNumber(), targetId.toString(), signature],
+      [protectedClearingOperation, amount.toBigInt(), targetId.toString(), signature],
       GAS.PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
     );
   }
@@ -1328,14 +1327,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     const clearingOperation: ClearingOperation = {
       partition: partitionId,
-      expirationTimestamp: expirationDate.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigInt(),
       data: "0x",
     };
 
     return this.executeTransaction(
       ClearingRedeemFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "clearingRedeemByPartition",
-      [clearingOperation, amount.toBigNumber()],
+      [clearingOperation, amount.toBigInt()],
       GAS.CLEARING_REDEEM_BY_PARTITION,
     );
   }
@@ -1352,7 +1351,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1362,7 +1361,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ClearingRedeemFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "clearingRedeemFromByPartition",
-      [clearingOperationFrom, amount.toBigNumber()],
+      [clearingOperationFrom, amount.toBigInt()],
       GAS.CLEARING_REDEEM_FROM_BY_PARTITION,
     );
   }
@@ -1382,18 +1381,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const protectedClearingOperation: ProtectedClearingOperation = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
-      deadline: deadline.toBigNumber(),
-      nonce: nonce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nonce: nonce.toBigInt(),
     };
 
     return this.executeTransaction(
       ClearingRedeemFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "protectedClearingRedeemByPartition",
-      [protectedClearingOperation, amount.toBigNumber(), signature],
+      [protectedClearingOperation, amount.toBigInt(), signature],
       GAS.PROTECTED_CLEARING_REDEEM_BY_PARTITION,
     );
   }
@@ -1411,13 +1410,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     const clearingOperation: ClearingOperation = {
       partition: partitionId,
-      expirationTimestamp: clearingExpirationDate.toBigNumber(),
+      expirationTimestamp: clearingExpirationDate.toBigInt(),
       data: "0x",
     };
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: holdExpirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1446,7 +1445,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        expirationTimestamp: clearingExpirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1454,8 +1453,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: holdExpirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1487,17 +1486,17 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const protectedClearingOperation: ProtectedClearingOperation = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        expirationTimestamp: clearingExpirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
-      deadline: deadline.toBigNumber(),
-      nonce: nonce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nonce: nonce.toBigInt(),
     };
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: holdExpirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1526,7 +1525,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        expirationTimestamp: clearingExpirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1534,8 +1533,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: holdExpirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1561,7 +1560,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1571,7 +1570,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ClearingRedeemFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "operatorClearingRedeemByPartition",
-      [clearingOperationFrom, amount.toBigNumber()],
+      [clearingOperationFrom, amount.toBigInt()],
       GAS.OPERATOR_CLEARING_REDEEM_BY_PARTITION,
     );
   }
@@ -1589,7 +1588,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1599,7 +1598,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ClearingTransferFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "clearingTransferFromByPartition",
-      [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
+      [clearingOperationFrom, amount.toBigInt(), targetId.toString()],
       GAS.OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
     );
   }
@@ -1945,7 +1944,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       FreezeFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "freezePartialTokens",
-      [targetId.toString(), amount.toBigNumber()],
+      [targetId.toString(), amount.toBigInt()],
       GAS.FREEZE_PARTIAL_TOKENS,
     );
   }
@@ -1960,7 +1959,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       FreezeFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "unfreezePartialTokens",
-      [targetId.toString(), amount.toBigNumber()],
+      [targetId.toString(), amount.toBigInt()],
       GAS.UNFREEZE_PARTIAL_TOKENS,
     );
   }
@@ -2014,7 +2013,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ERC3643BatchFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "batchTransfer",
-      [toList.map((account) => account.toString()), amountList.map((item) => item.toBigNumber())],
+      [toList.map((account) => account.toString()), amountList.map((item) => item.toBigInt())],
       GAS.BATCH_TRANSFER,
     );
   }
@@ -2035,7 +2034,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [
         fromList.map((item) => item.toString()),
         toList.map((item) => item.toString()),
-        amountList.map((item) => item.toBigNumber()),
+        amountList.map((item) => item.toBigInt()),
       ],
       GAS.BATCH_FORCED_TRANSFER,
     );
@@ -2049,7 +2048,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ERC3643BatchFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "batchMint",
-      [toList.map((item) => item.toString()), amountList.map((item) => item.toBigNumber())],
+      [toList.map((item) => item.toString()), amountList.map((item) => item.toBigInt())],
       GAS.BATCH_MINT,
     );
   }
@@ -2066,7 +2065,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       ERC3643BatchFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "batchBurn",
-      [targetList.map((item) => item.toString()), amountList.map((item) => item.toBigNumber())],
+      [targetList.map((item) => item.toString()), amountList.map((item) => item.toBigInt())],
       GAS.BATCH_BURN,
     );
   }
@@ -2100,7 +2099,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       FreezeFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "batchFreezePartialTokens",
-      [targetList.map((item) => item.toString()), amountList.map((item) => item.toBigNumber())],
+      [targetList.map((item) => item.toString()), amountList.map((item) => item.toBigInt())],
       GAS.BATCH_FREEZE_PARTIAL_TOKENS,
     );
   }
@@ -2117,7 +2116,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       FreezeFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "batchUnfreezePartialTokens",
-      [targetList.map((item) => item.toString()), amountList.map((item) => item.toBigNumber())],
+      [targetList.map((item) => item.toString()), amountList.map((item) => item.toBigInt())],
       GAS.BATCH_UNFREEZE_PARTIAL_TOKENS,
     );
   }
@@ -2144,7 +2143,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
       "redeemAtMaturityByPartition",
-      [sourceId.toString(), partitionId, amount.toBigNumber()],
+      [sourceId.toString(), partitionId, amount.toBigInt()],
       GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
     );
   }
@@ -2163,7 +2162,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   private async executeTransaction<
     C extends BaseContract,
     F extends {
-      [K in keyof C]: C[K] extends (...args: any[]) => Promise<ContractTransaction> ? K : never;
+      [K in keyof C]: C[K] extends (...args: any[]) => Promise<ContractTransactionResponse> ? K : never;
     }[keyof C] &
       string,
   >(
@@ -2175,7 +2174,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse> {
     LogService.logTrace(`Executing ${method} with args:`, args);
 
-    const fn = factory[method] as (...args: any[]) => Promise<ContractTransaction>;
+    const fn = factory[method] as (...args: any[]) => Promise<ContractTransactionResponse>;
     const tx = await fn(...args, { gasLimit });
     return RPCTransactionResponseAdapter.manageResponse(tx, this.networkService.environment, eventName);
   }

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BigNumber } from "ethers";
 import BigDecimal from "../shared/BigDecimal";
 import {
   InvalidClearingOperationType,
@@ -9,7 +8,7 @@ import {
 
 export class ClearingOperation {
   partition: string;
-  expirationTimestamp: BigNumber;
+  expirationTimestamp: bigint;
   data: string;
 }
 
@@ -22,8 +21,8 @@ export class ClearingOperationFrom {
 export class ProtectedClearingOperation {
   clearingOperation: ClearingOperation;
   from: string;
-  deadline: BigNumber;
-  nonce: BigNumber;
+  deadline: bigint;
+  nonce: bigint;
 }
 
 export class ClearingOperationIdentifier {

@@ -16,9 +16,9 @@ export class TransactionResponseAdapter {
     network: string,
   ): Uint8Array {
     try {
-      const iface = new ethers.utils.Interface(abi);
+      const iface = new ethers.Interface(abi);
 
-      if (!iface.functions[functionName]) {
+      if (!iface.getFunction(functionName)) {
         throw new TransactionResponseError({
           message: `Contract function ${functionName} not found in ABI, are you using the right version?`,
           network: network,

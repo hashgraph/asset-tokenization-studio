@@ -32,7 +32,7 @@ import GetCouponRequest from "@port/in/request/bond/GetCouponRequest";
 import GetAllCouponsRequest from "@port/in/request/bond/GetAllCouponsRequest";
 import UpdateMaturityDateRequest from "@port/in/request/bond/UpdateMaturityDateRequest";
 import BigDecimal from "@domain/context/shared/BigDecimal";
-import { BigNumber } from "ethers";
+
 import { Coupon } from "@domain/context/bond/Coupon";
 import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
 import RedeemAtMaturityByPartitionRequest from "@port/in/request/bond/RedeemAtMaturityByPartitionRequest";
@@ -189,7 +189,7 @@ export const GetTotalCouponHoldersQueryFixture = createFixture<GetTotalCouponHol
 export const CouponFixture = createFixture<Coupon>((props) => {
   props.recordTimeStamp.faker((faker) => faker.date.past().getTime().toString());
   props.executionTimeStamp.faker((faker) => faker.date.past().getTime().toString());
-  props.rate.faker((faker) => new BigDecimal(BigNumber.from(faker.number.int({ min: 1, max: 5 }))));
+  props.rate.faker((faker) => BigInt(faker.number.int({ min: 1, max: 5 })));
   props.rateDecimals.faker((faker) => faker.number.int({ min: 1, max: 10 }));
   props.startTimeStamp.faker((faker) => faker.date.past().getTime().toString());
   props.endTimeStamp.faker((faker) => faker.date.past().getTime().toString());

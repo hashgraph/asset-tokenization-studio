@@ -6,7 +6,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { ethers } from "ethers";
-import { BigNumber } from "@ethersproject/bignumber";
 import { singleton } from "tsyringe";
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import NetworkService from "@service/network/NetworkService";
@@ -103,7 +102,7 @@ type FactoryContract<T extends StaticConnect> = T["connect"] extends (...args: a
 
 @singleton()
 export class RPCQueryAdapter {
-  provider: ethers.providers.JsonRpcProvider;
+  provider: ethers.JsonRpcProvider;
 
   constructor(
     @lazyInject(NetworkService)
@@ -114,7 +113,7 @@ export class RPCQueryAdapter {
 
   async init(urlRpcProvider?: string, apiKey?: string): Promise<string> {
     const url = urlRpcProvider ? (apiKey ? urlRpcProvider + apiKey : urlRpcProvider) : LOCAL_JSON_RPC_RELAY_URL;
-    this.provider = new ethers.providers.JsonRpcProvider(url);
+    this.provider = new ethers.JsonRpcProvider(url);
     LogService.logTrace("RPC Query Adapter Initialized on: ", url);
 
     return this.networkService.environment;
@@ -124,13 +123,13 @@ export class RPCQueryAdapter {
     return fac.connect(address, this.provider);
   }
 
-  async balanceOf(address: EvmAddress, target: EvmAddress): Promise<BigNumber> {
+  async balanceOf(address: EvmAddress, target: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting balance of ${address.toString()} security for the account ${target.toString()}`);
 
     return await this.connect(ERC1410ReadFacet__factory, address.toString()).balanceOf(target.toString());
   }
 
-  async balanceOfByPartition(address: EvmAddress, target: EvmAddress, partitionId: string): Promise<BigNumber> {
+  async balanceOfByPartition(address: EvmAddress, target: EvmAddress, partitionId: string): Promise<bigint> {
     LogService.logTrace(
       `Getting balance of ${address.toString()} security for partition ${partitionId} for the account ${target.toString()}`,
     );
@@ -141,7 +140,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async balanceOfAtSnapshot(address: EvmAddress, target: EvmAddress, snapshotId: number): Promise<BigNumber> {
+  async balanceOfAtSnapshot(address: EvmAddress, target: EvmAddress, snapshotId: number): Promise<bigint> {
     LogService.logTrace(
       `Getting balance of ${address.toString()} security at snapshot ${snapshotId.toString()} for the account ${target.toString()}`,
     );
@@ -157,7 +156,7 @@ export class RPCQueryAdapter {
     target: EvmAddress,
     partitionId: string,
     snapshotId: number,
-  ): Promise<BigNumber> {
+  ): Promise<bigint> {
     LogService.logTrace(
       `Getting balance of ${address.toString()} security for partition ${partitionId} at snapshot ${snapshotId.toString()} for the account ${target.toString()}`,
     );
@@ -169,7 +168,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getNonceFor(address: EvmAddress, target: EvmAddress): Promise<BigNumber> {
+  async getNonceFor(address: EvmAddress, target: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting Nounce`);
 
     return await this.connect(NoncesFacet__factory, address.toString()).nonces(target.toString());
@@ -190,13 +189,13 @@ export class RPCQueryAdapter {
     );
   }
 
-  async totalSupply(address: EvmAddress): Promise<BigNumber> {
+  async totalSupply(address: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting total supply of ${address.toString()} security`);
 
     return await this.connect(ERC1410ReadFacet__factory, address.toString()).totalSupply();
   }
 
-  async totalSupplyAtSnapshot(address: EvmAddress, snapshotId: number): Promise<BigNumber> {
+  async totalSupplyAtSnapshot(address: EvmAddress, snapshotId: number): Promise<bigint> {
     LogService.logTrace(`Getting total supply of ${address.toString()} security at snapshot ${snapshotId.toString()}`);
 
     return await this.connect(SnapshotsFacet__factory, address.toString()).totalSupplyAtSnapshot(snapshotId);
@@ -526,7 +525,7 @@ export class RPCQueryAdapter {
       sourceId.toString(),
       targetId.toString(),
       partitionId,
-      amount.toBigNumber(),
+      amount.toBigInt(),
       data,
       operatorData,
       {
@@ -546,7 +545,7 @@ export class RPCQueryAdapter {
 
     return await this.connect(ERC1594Facet__factory, address.toString()).canTransfer(
       targetId.toString(),
-      amount.toBigNumber(),
+      amount.toBigInt(),
       data,
       {
         from: operatorId,
@@ -568,7 +567,7 @@ export class RPCQueryAdapter {
     return await this.connect(ERC1410ReadFacet__factory, address.toString()).canRedeemByPartition(
       sourceId.toString(),
       partitionId,
-      amount.toBigNumber(),
+      amount.toBigInt(),
       data,
       operatorData,
       {
@@ -577,7 +576,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getDocument(address: EvmAddress, name: string): Promise<[string, string, BigNumber]> {
+  async getDocument(address: EvmAddress, name: string): Promise<[string, string, bigint]> {
     LogService.logTrace(`Getting document: ${name}`);
 
     return await this.connect(ERC1643Facet__factory, address.toString()).getDocument(name);
@@ -624,7 +623,7 @@ export class RPCQueryAdapter {
     );
 
     return snapshots.map(
-      (s: { scheduledTimestamp: BigNumber; data: string }) => new ScheduledSnapshot(s.scheduledTimestamp, s.data),
+      (s: { scheduledTimestamp: bigint; data: string }) => new ScheduledSnapshot(s.scheduledTimestamp, s.data),
     );
   }
 
@@ -639,19 +638,19 @@ export class RPCQueryAdapter {
     return scheduledSnapshotsCount.toNumber();
   }
 
-  async getMaxSupply(address: EvmAddress): Promise<BigNumber> {
+  async getMaxSupply(address: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting max supply for ${address.toString()} security`);
 
     return await this.connect(CapFacet__factory, address.toString()).getMaxSupply();
   }
 
-  async getMaxSupplyByPartition(address: EvmAddress, partitionId: string): Promise<BigNumber> {
+  async getMaxSupplyByPartition(address: EvmAddress, partitionId: string): Promise<bigint> {
     LogService.logTrace(`Getting max supply by partition for ${address.toString()} security`);
 
     return await this.connect(CapFacet__factory, address.toString()).getMaxSupplyByPartition(partitionId);
   }
 
-  async getTotalSupplyByPartition(address: EvmAddress, partitionId: string): Promise<BigNumber> {
+  async getTotalSupplyByPartition(address: EvmAddress, partitionId: string): Promise<bigint> {
     LogService.logTrace(`Getting max supply by partition for ${address.toString()} security`);
 
     return await this.connect(ERC1410ReadFacet__factory, address.toString()).totalSupplyByPartition(partitionId);
@@ -677,7 +676,7 @@ export class RPCQueryAdapter {
     return regulation;
   }
 
-  async getLockedBalanceOf(address: EvmAddress, target: EvmAddress): Promise<BigNumber> {
+  async getLockedBalanceOf(address: EvmAddress, target: EvmAddress): Promise<bigint> {
     LogService.logTrace(
       `Getting locked balance of ${address.toString()} security for the account ${target.toString()}`,
     );
@@ -699,7 +698,7 @@ export class RPCQueryAdapter {
     return count.toNumber();
   }
 
-  async getLocksId(address: EvmAddress, target: EvmAddress, start: number, end: number): Promise<BigNumber[]> {
+  async getLocksId(address: EvmAddress, target: EvmAddress, start: number, end: number): Promise<bigint[]> {
     LogService.logTrace(
       `Getting locks id of ${address.toString()} security for the account ${target.toString()} from ${start.toString()} to ${end.toString()}`,
     );
@@ -712,7 +711,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getLock(address: EvmAddress, target: EvmAddress, lockId: number): Promise<[BigNumber, BigNumber]> {
+  async getLock(address: EvmAddress, target: EvmAddress, lockId: number): Promise<[bigint, bigint]> {
     LogService.logTrace(
       `Getting lock ${lockId.toString()} of ${address.toString()} security for the account ${target.toString()}`,
     );
@@ -805,7 +804,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getHoldsIdForByPartition(partitionId, target.toString(), start, end);
 
-    return holdsIdForByPartition.map((id) => id.toNumber());
+    return holdsIdForByPartition.map((id: bigint) => Number(id));
   }
 
   async getHoldForByPartition(
@@ -823,8 +822,8 @@ export class RPCQueryAdapter {
     });
 
     return new HoldDetails(
-      hold.expirationTimestamp_.toNumber(),
-      new BigDecimal(hold.amount_.toString()),
+      Number(hold.expirationTimestamp_),
+      hold.amount_,
       hold.escrow_,
       targetId.toString(),
       hold.destination_,
@@ -896,7 +895,7 @@ export class RPCQueryAdapter {
     );
 
     return accounts.map(
-      (account, index) =>
+      (account: string, index: number) =>
         new KycAccountData(
           account,
           kycAccountsData[index].validFrom.toString(),
@@ -981,7 +980,7 @@ export class RPCQueryAdapter {
       end,
     );
 
-    return clearingsIdForByPartition.map((id) => id.toNumber());
+    return clearingsIdForByPartition.map((id: bigint) => Number(id));
   }
 
   async getClearingCreateHoldForByPartition(
