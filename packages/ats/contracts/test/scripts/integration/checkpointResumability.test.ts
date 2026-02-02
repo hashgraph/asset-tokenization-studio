@@ -17,7 +17,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { configureLogger, LogLevel, CheckpointManager } from "@scripts/infrastructure";
+import { CheckpointManager } from "@scripts/infrastructure";
+import { silenceScriptLogging } from "@test";
 import {
   createCheckpointWithState,
   simulateFailureAtStep,
@@ -32,7 +33,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
   let signers: SignerWithAddress[];
 
   before(async () => {
-    configureLogger({ level: LogLevel.SILENT });
+    silenceScriptLogging();
     signers = await ethers.getSigners();
   });
 

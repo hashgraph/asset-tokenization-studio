@@ -16,8 +16,8 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { configureLogger, LogLevel } from "@scripts/infrastructure";
 import { upgradeTupProxies } from "@scripts";
+import { silenceScriptLogging, createCheckpointCleanupHooks } from "@test";
 import {
   deployTupUpgradeTestFixture,
   deployBlrV2Implementation,
@@ -25,9 +25,7 @@ import {
 } from "../../fixtures/upgradeTupProxies.fixture";
 
 describe("upgradeTupProxies - Integration Tests", () => {
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   describe("Basic Upgrade Flow - Deploy New Implementations", () => {
     it("should upgrade both BLR and Factory with new implementations", async () => {
@@ -452,38 +450,17 @@ describe("upgradeTupProxies - Integration Tests", () => {
   });
 
   describe("Checkpoint Resumability", () => {
-    const checkpointDirs: string[] = [];
+    const { trackDir, afterEachCleanup, afterCleanup } = createCheckpointCleanupHooks();
 
-    afterEach(async () => {
-      // Clean up any checkpoint directories created during tests
-      const fs = await import("fs").then((m) => m.promises);
-      for (const dir of checkpointDirs) {
-        try {
-          await fs.rm(dir, { recursive: true, force: true });
-        } catch (error) {
-          // Ignore cleanup errors
-        }
-      }
-      checkpointDirs.length = 0; // Clear array
-    });
-
-    after(async () => {
-      // Clean entire test checkpoint directory after all tests complete
-      const fs = await import("fs").then((m) => m.promises);
-      const testCheckpointDir = "deployments/test/hardhat/.checkpoints";
-      try {
-        await fs.rm(testCheckpointDir, { recursive: true, force: true });
-      } catch (error) {
-        // Ignore cleanup errors
-      }
-    });
+    afterEach(afterEachCleanup);
+    after(afterCleanup);
 
     it("should support checkpoint creation during workflow", async () => {
       const { deployer, proxyAdminAddress, blrProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
 
       const timestamp = Date.now();
       const checkpointDir = `deployments/test/hardhat/.checkpoints/test-upgrade-${timestamp}`;
-      checkpointDirs.push(checkpointDir);
+      trackDir(checkpointDir);
 
       const result = await upgradeTupProxies(deployer, "hardhat", {
         proxyAdminAddress,
@@ -517,7 +494,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
 
       const timestamp = Date.now();
       const checkpointDir = `deployments/test/hardhat/.checkpoints/test-delete-${timestamp}`;
-      checkpointDirs.push(checkpointDir);
+      trackDir(checkpointDir);
 
       const result = await upgradeTupProxies(deployer, "hardhat", {
         proxyAdminAddress,

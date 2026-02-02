@@ -15,16 +15,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import type { Signer } from "ethers";
-import {
-  ProxyAdmin__factory,
-  AccessControlFacet__factory,
-  AccessControlFacetTimeTravel__factory,
-  BusinessLogicResolver__factory,
-  KycFacet__factory,
-  Factory__factory,
-  PauseFacet__factory,
-  ProxyAdmin,
-} from "@contract-types";
 
 // Infrastructure layer
 import {
@@ -41,8 +31,6 @@ import {
   isTimeTravelVariant,
   validateAddress,
   validateBytes32,
-  configureLogger,
-  LogLevel,
 } from "@scripts/infrastructure";
 
 // Domain layer
@@ -56,15 +44,25 @@ import {
 } from "@scripts/domain";
 
 // Test helpers
-import { TEST_SIZES, BLR_VERSIONS } from "@test";
+import { TEST_SIZES, BLR_VERSIONS, silenceScriptLogging } from "@test";
+
+// Contract types
+import {
+  ProxyAdmin__factory,
+  AccessControlFacet__factory,
+  AccessControlFacetTimeTravel__factory,
+  BusinessLogicResolver__factory,
+  KycFacet__factory,
+  Factory__factory,
+  PauseFacet__factory,
+  ProxyAdmin,
+} from "@contract-types";
 
 describe("Phase 1 Deployment System - Integration Tests", () => {
   let deployer: Signer;
   let user: Signer;
 
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   beforeEach(async () => {
     [deployer, user] = await ethers.getSigners();

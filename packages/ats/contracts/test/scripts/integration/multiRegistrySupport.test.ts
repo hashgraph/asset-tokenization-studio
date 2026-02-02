@@ -17,18 +17,21 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import type { Signer } from "ethers";
-import { BusinessLogicResolver__factory } from "@contract-types";
 
 // Infrastructure layer
 import {
   deployProxy,
   combineRegistries,
   getRegistryConflicts,
-  configureLogger,
-  LogLevel,
   type RegistryProvider,
   type FacetDefinition,
 } from "@scripts/infrastructure";
+
+// Test helpers
+import { silenceScriptLogging } from "@test";
+
+// Contract types
+import { BusinessLogicResolver__factory } from "@contract-types";
 
 describe("Multi-Registry Support - Integration Tests", () => {
   let deployer: Signer;
@@ -146,7 +149,7 @@ describe("Multi-Registry Support - Integration Tests", () => {
   };
 
   beforeEach(async () => {
-    configureLogger({ level: LogLevel.SILENT });
+    silenceScriptLogging();
     [deployer] = await ethers.getSigners();
 
     // Deploy BLR for tests

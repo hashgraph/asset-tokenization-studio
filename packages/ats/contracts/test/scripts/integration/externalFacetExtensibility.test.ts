@@ -16,14 +16,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import type { Signer } from "ethers";
-import {
-  BusinessLogicResolver__factory,
-  AccessControlFacet__factory,
-  KycFacet__factory,
-  PauseFacet__factory,
-  FreezeFacet__factory,
-  ProxyAdmin__factory,
-} from "@contract-types";
 
 // Infrastructure layer - generic blockchain operations
 import {
@@ -34,24 +26,30 @@ import {
   createBatchConfiguration,
   deployFacets,
   LATEST_VERSION,
-  configureLogger,
-  LogLevel,
 } from "@scripts/infrastructure";
 
 // Domain layer - ATS-specific business logic
 import { EQUITY_CONFIG_ID, atsRegistry } from "@scripts/domain";
 
 // Test helpers
-import { TEST_SIZES } from "@test";
+import { TEST_SIZES, silenceScriptLogging } from "@test";
+
+// Contract types
+import {
+  BusinessLogicResolver__factory,
+  AccessControlFacet__factory,
+  KycFacet__factory,
+  PauseFacet__factory,
+  FreezeFacet__factory,
+  ProxyAdmin__factory,
+} from "@contract-types";
 
 describe("External Facet Extensibility - Integration Tests", () => {
   let deployer: Signer;
   let blrAddress: string;
   let blrContract: any;
 
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   beforeEach(async () => {
     [deployer] = await ethers.getSigners();

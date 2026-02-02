@@ -10,3 +10,4 @@
 
 export * from "./constants";
 export * from "./checkpointTestHelpers";
+export * from "./testSetup";
