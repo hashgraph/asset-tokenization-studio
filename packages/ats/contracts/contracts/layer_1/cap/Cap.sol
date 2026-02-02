@@ -2,16 +2,26 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap } from "contracts/layer_1/interfaces/cap/ICap.sol";
-import { _CAP_ROLE } from "../constants/roles.sol";
+import { _CAP_ROLE, _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { Internals } from "../../layer_0/Internals.sol";
 
 abstract contract Cap is ICap, Internals {
+    /**
+     * @notice Initialize or reinitialize Cap with version-based logic
+     * @dev Replaces the old binary initialized flag with version tracking.
+     *      - Fresh deploy (not initialized): Anyone can call (for Factory deployment)
+     *      - Upgrade (already initialized): DEFAULT_ADMIN_ROLE required
+     *      - Version check in storage wrapper handles idempotency and reverts if already at latest
+     * @param params The initialization parameters
+     */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(
-        uint256 maxSupply,
-        PartitionCap[] calldata partitionCap
-    ) external override onlyUninitialized(_isCapInitialized()) onlyValidNewMaxSupply(maxSupply) {
-        _initialize_Cap(maxSupply, partitionCap);
+    function initialize_Cap(CapInitParams calldata params) external override onlyValidNewMaxSupply(params.maxSupply) {
+        // For upgrades (already initialized), require admin role
+        // Fresh deploy doesn't have roles assigned yet, so allow anyone
+        if (_isCapInitialized()) {
+            _checkRole(_DEFAULT_ADMIN_ROLE, _msgSender());
+        }
+        _initialize_Cap(params);
     }
 
     function setMaxSupply(

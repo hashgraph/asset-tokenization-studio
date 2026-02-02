@@ -261,8 +261,10 @@ contract Factory is IFactory, Common {
         // configure issue flag
         IERC1594(securityAddress_).initialize_ERC1594();
 
-        // configure issue flag
-        ICap(securityAddress_).initialize_Cap(_securityData.maxSupply, new ICap.PartitionCap[](0));
+        // configure cap
+        ICap(securityAddress_).initialize_Cap(
+            ICap.CapInitParams({ maxSupply: _securityData.maxSupply, partitionCap: new ICap.PartitionCap[](0) })
+        );
 
         IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(_securityData.arePartitionsProtected);
 

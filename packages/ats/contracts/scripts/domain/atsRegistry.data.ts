@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-28T12:33:30.537Z
+ * Generated: 2026-02-02T13:24:25.739Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -1417,8 +1417,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initialize_Cap",
         signature:
-          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
-        selector: "0x56210c4e",
+          "function initialize_Cap(tuple(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap) params)",
+        selector: "0xd5910fe9",
       },
       {
         name: "setMaxSupply",
@@ -1456,8 +1456,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initialize_Cap",
         signature:
-          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
-        selector: "0x56210c4e",
+          "function initialize_Cap(tuple(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap) params)",
+        selector: "0xd5910fe9",
       },
       {
         name: "setMaxSupply",
@@ -1496,8 +1496,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initialize_Cap",
         signature:
-          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
-        selector: "0x56210c4e",
+          "function initialize_Cap(tuple(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap) params)",
+        selector: "0xd5910fe9",
       },
       {
         name: "setMaxSupply",
@@ -1535,8 +1535,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initialize_Cap",
         signature:
-          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
-        selector: "0x56210c4e",
+          "function initialize_Cap(tuple(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap) params)",
+        selector: "0xd5910fe9",
       },
       {
         name: "setMaxSupply",
@@ -10970,6 +10970,19 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  FacetVersionsStorageWrapper: {
+    name: "FacetVersionsStorageWrapper",
+    description: "Centralized version storage for Diamond pattern facet reinitialization",
+    methods: [],
+    errors: [
+      {
+        name: "AlreadyAtLatestVersion",
+        signature: "AlreadyAtLatestVersion(bytes32,uint64,uint64)",
+        selector: "0xf2b8d611",
+      },
+    ],
+  },
+
   FixedRateStorageWrapper: {
     name: "FixedRateStorageWrapper",
     inheritance: ["SustainabilityPerformanceTargetRateStorageWrapper"],
@@ -11553,7 +11566,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 57 as const;
+export const TOTAL_STORAGE_WRAPPERS = 58 as const;
 
 /**
  * All role identifiers extracted from contracts.

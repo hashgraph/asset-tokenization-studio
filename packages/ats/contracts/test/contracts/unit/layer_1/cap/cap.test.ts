@@ -111,8 +111,10 @@ describe("Cap Tests", () => {
     ).to.be.rejectedWith("NewMaxSupplyCannotBeZero");
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(capFacet.initialize_Cap(5, [])).to.be.rejectedWith("AlreadyInitialized");
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyAtLatestVersion", async () => {
+    await expect(capFacet.initialize_Cap({ maxSupply: 5, partitionCap: [] })).to.be.rejectedWith(
+      "AlreadyAtLatestVersion",
+    );
   });
 
   describe("Paused", () => {
