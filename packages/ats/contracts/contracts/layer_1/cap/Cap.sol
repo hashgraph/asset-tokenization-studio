@@ -24,6 +24,16 @@ abstract contract Cap is ICap, Internals {
         _initialize_Cap(params);
     }
 
+    /**
+     * @notice Rollback Cap facet to a previous version
+     * @dev Requires DEFAULT_ADMIN_ROLE. Undoes storage changes made during version upgrades.
+     * @param targetVersion The version to rollback to (must be < current version, >= 1)
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function deinitialize_Cap(uint64 targetVersion) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _deinitialize_Cap(targetVersion);
+    }
+
     function setMaxSupply(
         uint256 _maxSupply
     ) external override onlyUnpaused onlyRole(_CAP_ROLE) onlyValidNewMaxSupply(_maxSupply) returns (bool success_) {

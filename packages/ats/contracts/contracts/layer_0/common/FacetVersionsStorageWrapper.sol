@@ -24,8 +24,17 @@ abstract contract FacetVersionsStorageWrapper {
         mapping(bytes32 => uint64) versions;
     }
 
+    /// @notice Emitted when a facet version is rolled back
+    event FacetVersionRolledBack(bytes32 indexed facetKey, uint64 fromVersion, uint64 toVersion);
+
     /// @notice Reverts when attempting to reinitialize a facet already at the target version
     error AlreadyAtLatestVersion(bytes32 facetKey, uint64 currentVersion, uint64 targetVersion);
+
+    /// @notice Reverts when rollback target version is invalid (>= current version)
+    error InvalidRollbackTarget(bytes32 facetKey, uint64 targetVersion, uint64 currentVersion);
+
+    /// @notice Reverts when trying to rollback below the minimum supported version
+    error CannotRollbackBelowMinVersion(bytes32 facetKey, uint64 minVersion);
 
     /**
      * @notice Set the version for a facet

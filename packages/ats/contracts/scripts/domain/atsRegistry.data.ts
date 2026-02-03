@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-02T13:24:25.739Z
+ * Generated: 2026-02-03T08:24:01.650Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -1405,6 +1405,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["CapFacetBase", "Common"],
     methods: [
       {
+        name: "deinitialize_Cap",
+        signature: "function deinitialize_Cap(uint64 targetVersion)",
+        selector: "0xd8939a23",
+      },
+      {
         name: "getMaxSupply",
         signature: "function getMaxSupply() view returns (uint256 maxSupply_)",
         selector: "0x4c0f38c2",
@@ -1443,6 +1448,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["CapFacetBase", "CommonFixedInterestRate"],
     methods: [
+      {
+        name: "deinitialize_Cap",
+        signature: "function deinitialize_Cap(uint64 targetVersion)",
+        selector: "0xd8939a23",
+      },
       {
         name: "getMaxSupply",
         signature: "function getMaxSupply() view returns (uint256 maxSupply_)",
@@ -1484,6 +1494,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     inheritance: ["CapFacetBase", "CommonKpiLinkedInterestRate"],
     methods: [
       {
+        name: "deinitialize_Cap",
+        signature: "function deinitialize_Cap(uint64 targetVersion)",
+        selector: "0xd8939a23",
+      },
+      {
         name: "getMaxSupply",
         signature: "function getMaxSupply() view returns (uint256 maxSupply_)",
         selector: "0x4c0f38c2",
@@ -1522,6 +1537,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       value: "0xa321c5301bbccd760c5aaf08286a67948cb7d49be22c17f12aa163b324a276d0",
     },
     methods: [
+      {
+        name: "deinitialize_Cap",
+        signature: "function deinitialize_Cap(uint64 targetVersion)",
+        selector: "0xd8939a23",
+      },
       {
         name: "getMaxSupply",
         signature: "function getMaxSupply() view returns (uint256 maxSupply_)",
@@ -10974,11 +10994,28 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "FacetVersionsStorageWrapper",
     description: "Centralized version storage for Diamond pattern facet reinitialization",
     methods: [],
+    events: [
+      {
+        name: "FacetVersionRolledBack",
+        signature: "FacetVersionRolledBack(bytes32,uint64,uint64)",
+        topic0: "0x394cf3ebfed15f10c272ca0467671a70cf5b45549b9918020ff5725817b17f97",
+      },
+    ],
     errors: [
       {
         name: "AlreadyAtLatestVersion",
         signature: "AlreadyAtLatestVersion(bytes32,uint64,uint64)",
         selector: "0xf2b8d611",
+      },
+      {
+        name: "CannotRollbackBelowMinVersion",
+        signature: "CannotRollbackBelowMinVersion(bytes32,uint64)",
+        selector: "0x11242cfe",
+      },
+      {
+        name: "InvalidRollbackTarget",
+        signature: "InvalidRollbackTarget(bytes32,uint64,uint64)",
+        selector: "0xba648dfd",
       },
     ],
   },

@@ -26,6 +26,15 @@ interface ICap {
     function initialize_Cap(CapInitParams calldata params) external;
 
     /**
+     * @notice Rollback Cap facet to a previous version
+     * @dev Undoes storage changes made during version upgrades by resetting to default values.
+     *      Cannot rollback below minimum version (1).
+     * @param targetVersion The version to rollback to (must be < current version, >= 1)
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function deinitialize_Cap(uint64 targetVersion) external;
+
+    /**
      * @dev Set a max supply for the token
      *
      * @return success_ true or false
