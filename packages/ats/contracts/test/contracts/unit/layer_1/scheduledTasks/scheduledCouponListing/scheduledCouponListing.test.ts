@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   ScheduledCouponListingFacet,
@@ -13,7 +13,7 @@ import { ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 
 describe("ScheduledCouponListing Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
 
   let scheduledCouponListingFacet: ScheduledCouponListingFacet;
   let bondFacet: BondUSAKpiLinkedRateFacet;

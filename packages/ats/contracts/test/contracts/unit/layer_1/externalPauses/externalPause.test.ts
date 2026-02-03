@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
@@ -10,8 +10,8 @@ import { ResolverProxy, ExternalPauseManagementFacet, MockedExternalPause } from
 
 describe("ExternalPause Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
 
   let externalPauseManagement: ExternalPauseManagementFacet;
   let externalPauseMock1: MockedExternalPause;
@@ -21,10 +21,10 @@ describe("ExternalPause Tests", () => {
   async function deployExternalPauseSecurityFixture() {
     const [tempSigner] = await ethers.getSigners();
     const initMock1 = await (await ethers.getContractFactory("MockedExternalPause", tempSigner)).deploy();
-    await initMock1.deployed();
+    await initMock1.waitForDeployment()();
 
     const initMock2 = await (await ethers.getContractFactory("MockedExternalPause", tempSigner)).deploy();
-    await initMock2.deployed();
+    await initMock2.waitForDeployment()();
 
     const base = await deployEquityTokenFixture({
       useLoadFixture: false,
@@ -44,13 +44,13 @@ describe("ExternalPause Tests", () => {
     await base.accessControlFacet.grantRole(ATS_ROLES._PAUSE_MANAGER_ROLE, signer_A.address);
 
     externalPauseMock1 = await (await ethers.getContractFactory("MockedExternalPause", signer_A)).deploy();
-    await externalPauseMock1.deployed();
+    await externalPauseMock1.waitForDeployment()();
 
     externalPauseMock2 = await (await ethers.getContractFactory("MockedExternalPause", signer_A)).deploy();
-    await externalPauseMock2.deployed();
+    await externalPauseMock2.waitForDeployment()();
 
     externalPauseMock3 = await (await ethers.getContractFactory("MockedExternalPause", signer_A)).deploy();
-    await externalPauseMock3.deployed();
+    await externalPauseMock3.waitForDeployment()();
 
     await externalPauseMock1.setPaused(false, {
       gasLimit: GAS_LIMIT.default,

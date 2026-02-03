@@ -266,7 +266,7 @@ describe("upgradeProxy - Integration Tests", () => {
 
       // Verify ProxyAdmin is the admin of the proxy (EIP-1967)
       const adminAddressSlot = await ethers.provider.getStorageAt(proxyAddress, TEST_CONSTANTS.EIP1967_ADMIN_SLOT);
-      const adminAddress = ethers.utils.getAddress("0x" + adminAddressSlot.slice(-40));
+      const adminAddress = ethers.getAddress("0x" + adminAddressSlot.slice(-40));
 
       expect(adminAddress.toLowerCase()).to.equal(proxyAdminAddress.toLowerCase());
     });
@@ -278,7 +278,7 @@ describe("upgradeProxy - Integration Tests", () => {
 
       const result = await upgradeProxy(proxyAdmin, {
         proxyAddress: TEST_CONSTANTS.NON_EXISTENT_PROXY_ADDRESS,
-        newImplementationAddress: ethers.constants.AddressZero,
+        newImplementationAddress: ethers.ZeroAddress,
       });
 
       expect(result.success).to.be.false;
@@ -291,7 +291,7 @@ describe("upgradeProxy - Integration Tests", () => {
       // Should return result, not throw
       const result = await upgradeProxy(proxyAdmin, {
         proxyAddress: TEST_CONSTANTS.INVALID_IMPLEMENTATION_ADDRESS,
-        newImplementationAddress: ethers.constants.AddressZero,
+        newImplementationAddress: ethers.ZeroAddress,
       });
 
       expect(result).to.be.an("object");

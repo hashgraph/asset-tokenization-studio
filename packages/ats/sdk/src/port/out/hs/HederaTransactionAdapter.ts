@@ -97,7 +97,7 @@ import {
 } from "@domain/context/security/Clearing";
 import { MissingRegulationSubType } from "@domain/context/factory/error/MissingRegulationSubType";
 import { MissingRegulationType } from "@domain/context/factory/error/MissingRegulationType";
-import { BaseContract, Contract, ContractTransaction } from "ethers";
+import { BaseContract, Contract, ContractTransactionResponse } from "ethers";
 import { CastRateStatus, RateStatus } from "@domain/context/bond/RateStatus";
 import { ProtectionData } from "@domain/context/factory/ProtectionData";
 
@@ -119,18 +119,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     super();
   }
 
-  private async executeWithArgs<
-    C extends BaseContract,
-    F extends {
-      [K in keyof C]: C[K] extends (...args: any[]) => Promise<ContractTransaction> ? K : never;
-    }[keyof C] &
-      string,
-  >(
+  private async executeWithArgs<C extends BaseContract>(
     contractInstance: C,
-    functionName: F,
+    functionName: string,
     contractId: ContractId | string,
     gas: number,
-    args: Parameters<C[F] extends (...args: infer P) => any ? (...args: P) => any : never>,
+    args: any[],
   ): Promise<TransactionResponse<any, Error>> {
     const encodedHex = contractInstance.interface.encodeFunctionData(functionName, args as any);
     const encoded = new Uint8Array(Buffer.from(encodedHex.slice(2), "hex"));

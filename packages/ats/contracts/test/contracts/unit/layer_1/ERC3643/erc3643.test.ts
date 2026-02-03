@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 import {
   type ResolverProxy,
@@ -58,12 +58,12 @@ const onchainId = ethers.Wallet.createRandom().address;
 
 describe("ERC3643 Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
-  let signer_E: SignerWithAddress;
-  let signer_F: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
+  let signer_E: HardhatEthersSigner;
+  let signer_F: HardhatEthersSigner;
 
   let erc3643Facet: IERC3643;
   let erc1410Facet: IERC1410;
@@ -104,12 +104,12 @@ describe("ERC3643 Tests", () => {
     let erc20Facet: ERC20;
     async function deploySecurityFixtureSinglePartition() {
       complianceMock = await (await ethers.getContractFactory("ComplianceMock", signer_A)).deploy(true, false);
-      await complianceMock.deployed();
+      await complianceMock.waitForDeployment()();
 
       identityRegistryMock = await (
         await ethers.getContractFactory("IdentityRegistryMock", signer_A)
       ).deploy(true, false);
-      await identityRegistryMock.deployed();
+      await identityRegistryMock.waitForDeployment()();
 
       const base = await deployEquityTokenFixture({
         equityDataParams: {
@@ -878,7 +878,7 @@ describe("ERC3643 Tests", () => {
         const newComplianceMock = await (
           await ethers.getContractFactory("ComplianceMock", signer_A)
         ).deploy(true, false);
-        await newComplianceMock.deployed();
+        await newComplianceMock.waitForDeployment()();
 
         expect(await erc3643Facet.setCompliance(newComplianceMock.address))
           .to.emit(erc3643Facet, "ComplianceAdded")
@@ -1039,7 +1039,7 @@ describe("ERC3643 Tests", () => {
       });
 
       it("GIVEN a failed mint call THEN transaction reverts with custom error", async () => {
-        const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("created"));
+        const hash = ethers.keccak256(ethers.toUtf8Bytes("created"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
         let caught;
         try {
@@ -1056,8 +1056,11 @@ describe("ERC3643 Tests", () => {
         const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
         expect(returnedSelector).to.equal(outerSelector);
         const targetErrorSelector = complianceMock.interface.getSighash("MockErrorMint(address,uint256)");
-        const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [signer_E.address, AMOUNT]);
-        const args = ethers.utils.solidityPack(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
+        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
+          ["address", "uint256"],
+          [signer_E.address, AMOUNT],
+        );
+        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
         const returnedArgs = (caught.data as string).slice(10); // Skip custom error selector
         expect(returnedArgs).to.equal(args.slice(2));
       });
@@ -1069,7 +1072,7 @@ describe("ERC3643 Tests", () => {
           value: AMOUNT,
           data: "0x",
         });
-        const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("transferred"));
+        const hash = ethers.keccak256(ethers.toUtf8Bytes("transferred"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
         const basicTransferInfo = {
           to: signer_D.address,
@@ -1087,11 +1090,11 @@ describe("ERC3643 Tests", () => {
         const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
         expect(returnedSelector).to.equal(outerSelector);
         const targetErrorSelector = complianceMock.interface.getSighash("MockErrorTransfer(address,address,uint256)");
-        const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
           ["address", "address", "uint256"],
           [signer_E.address, signer_D.address, AMOUNT],
         );
-        const args = ethers.utils.solidityPack(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
+        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
         const returnedArgs = (caught.data as string).slice(10); // Skip custom error selector
         expect(returnedArgs).to.equal(args.slice(2));
       });
@@ -1103,7 +1106,7 @@ describe("ERC3643 Tests", () => {
           value: AMOUNT,
           data: "0x",
         });
-        const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("destroyed"));
+        const hash = ethers.keccak256(ethers.toUtf8Bytes("destroyed"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
         let caught;
         try {
@@ -1115,14 +1118,17 @@ describe("ERC3643 Tests", () => {
         const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
         expect(returnedSelector).to.equal(outerSelector);
         const targetErrorSelector = complianceMock.interface.getSighash("MockErrorBurn(address,uint256)");
-        const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [signer_E.address, AMOUNT]);
-        const args = ethers.utils.solidityPack(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
+        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
+          ["address", "uint256"],
+          [signer_E.address, AMOUNT],
+        );
+        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
         const returnedArgs = (caught.data as string).slice(10); // Skip custom error selector
         expect(returnedArgs).to.equal(args.slice(2));
       });
 
       it("GIVEN a failed canTransfer call THEN transaction reverts with custom error", async () => {
-        const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("canTransfer"));
+        const hash = ethers.keccak256(ethers.toUtf8Bytes("canTransfer"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
         let caught;
         try {
@@ -1136,11 +1142,11 @@ describe("ERC3643 Tests", () => {
         const targetErrorSelector = complianceMock.interface.getSighash(
           "MockErrorCanTransfer(address,address,uint256)",
         );
-        const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
           ["address", "address", "uint256"],
           [signer_E.address, signer_D.address, ZERO], // During approvals amount is not checked
         );
-        const args = ethers.utils.solidityPack(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
+        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
         const returnedArgs = (caught.data as string).slice(10);
         expect(returnedArgs).to.equal(args.slice(2));
       });
@@ -2290,13 +2296,13 @@ describe("ERC3643 Tests", () => {
         await expect(
           erc20Facet.connect(signer_C).transferFrom(signer_A.address, basicTransferInfo.to, amount),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
-        const packedData = ethers.utils.defaultAbiCoder.encode(
+        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
           [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
 
-        const ProtectedPartitionRole_1 = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
         await accessControlFacet.grantRole(ProtectedPartitionRole_1, signer_A.address);
         await protectedPartitionsFacet.protectPartitions();
         await expect(

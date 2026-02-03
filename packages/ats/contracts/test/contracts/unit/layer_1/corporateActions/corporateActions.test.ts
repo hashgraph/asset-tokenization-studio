@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type CorporateActions, type Pause, type AccessControl } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { grantRoleAndPauseToken } from "../../../../common";
@@ -14,9 +14,9 @@ const corporateActionId_1 = "0x0000000000000000000000000000000000000000000000000
 
 describe("Corporate Actions Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let corporateActionsFacet: CorporateActions;
   let accessControlFacet: AccessControl;
@@ -71,9 +71,9 @@ describe("Corporate Actions Tests", () => {
   it("GIVEN an account with corporateActions role WHEN addCorporateAction (two identical CA) THEN transaction first succeeds but second fails with DuplicatedCorporateAction", async () => {
     await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-    const encoded = ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes"], [actionType, actionData]);
+    const encoded = ethers.AbiCoder.defaultAbiCoder().encode(["bytes32", "bytes"], [actionType, actionData]);
 
-    const contentHash = ethers.utils.keccak256(encoded);
+    const contentHash = ethers.keccak256(encoded);
 
     const actionContentHashExistsBefore = await corporateActionsFacet.actionContentHashExists(contentHash);
 

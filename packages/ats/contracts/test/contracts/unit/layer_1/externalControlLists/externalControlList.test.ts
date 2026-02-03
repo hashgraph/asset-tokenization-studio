@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   MockedWhitelist,
   MockedBlacklist,
@@ -16,8 +16,8 @@ import { deployEquityTokenFixture } from "@test";
 import { ADDRESS_ZERO, ATS_ROLES, DEFAULT_PARTITION, GAS_LIMIT } from "@scripts";
 
 describe("ExternalControlList Management Tests", () => {
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
 
   let diamond: ResolverProxy;
   let externalControlListManagement: ExternalControlListManagementFacet;
@@ -32,9 +32,9 @@ describe("ExternalControlList Management Tests", () => {
   async function deployExternalControlListTokenSecurity() {
     const [deployer] = await ethers.getSigners();
     initMock1 = await (await ethers.getContractFactory("MockedWhitelist", deployer)).deploy();
-    await initMock1.deployed();
+    await initMock1.waitForDeployment()();
     initMock2 = await (await ethers.getContractFactory("MockedBlacklist", deployer)).deploy();
-    await initMock2.deployed();
+    await initMock2.waitForDeployment()();
 
     const base = await deployEquityTokenFixture({
       useLoadFixture: false,
@@ -64,13 +64,13 @@ describe("ExternalControlList Management Tests", () => {
     await base.accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
 
     externalWhitelistMock1 = await (await ethers.getContractFactory("MockedWhitelist", signer_A)).deploy();
-    await externalWhitelistMock1.deployed();
+    await externalWhitelistMock1.waitForDeployment()();
 
     externalBlacklistMock1 = await (await ethers.getContractFactory("MockedBlacklist", signer_A)).deploy();
-    await externalBlacklistMock1.deployed();
+    await externalBlacklistMock1.waitForDeployment()();
 
     externalWhitelistMock2 = await (await ethers.getContractFactory("MockedWhitelist", signer_A)).deploy();
-    await externalWhitelistMock2.deployed();
+    await externalWhitelistMock2.waitForDeployment()();
 
     await externalControlListManagement.addExternalControlList(externalWhitelistMock1.address, {
       gasLimit: GAS_LIMIT.default,

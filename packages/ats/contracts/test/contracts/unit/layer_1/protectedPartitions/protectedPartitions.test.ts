@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type PauseFacet,
@@ -24,13 +24,13 @@ import { executeRbac } from "@test";
 
 const amount = 1;
 
-const packedData = ethers.utils.defaultAbiCoder.encode(
+const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
   ["bytes32", "bytes32"],
   [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
 );
 const packedDataWithoutPrefix = packedData.slice(2);
 
-const ProtectedPartitionRole_1 = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
 
 const domain = {
   name: "",
@@ -196,9 +196,9 @@ let operatorTransferData: OperatorTransferData;
 describe("ProtectedPartitions Tests", () => {
   let diamond_UnprotectedPartitions: ResolverProxy;
   let diamond_ProtectedPartitions: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let protectedPartitionsFacet: ProtectedPartitionsFacet;
   let pauseFacet: PauseFacet;
@@ -715,8 +715,8 @@ describe("ProtectedPartitions Tests", () => {
         };
 
         /*const domainSeparator =
-                    ethers.utils._TypedDataEncoder.hashDomain(domain)
-                const messageHash = ethers.utils._TypedDataEncoder.hash(
+                    ethers.TypedDataEncoder.hashDomain(domain)
+                const messageHash = ethers.TypedDataEncoder.hash(
                     domain,
                     transferType,
                     message
@@ -842,8 +842,8 @@ describe("ProtectedPartitions Tests", () => {
         };
 
         /*const domainSeparator =
-                    ethers.utils._TypedDataEncoder.hashDomain(domain)
-                const messageHash = ethers.utils._TypedDataEncoder.hash(
+                    ethers.TypedDataEncoder.hashDomain(domain)
+                const messageHash = ethers.TypedDataEncoder.hash(
                     domain,
                     transferType,
                     message

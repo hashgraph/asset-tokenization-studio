@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { BigNumber } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type PauseFacet,
@@ -85,21 +85,21 @@ interface BalanceAdjustedValues {
   decimals: number;
   metadata?: any;
 }
-const packedData = ethers.utils.defaultAbiCoder.encode(
+const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
   ["bytes32", "bytes32"],
   [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
 );
 const packedDataWithoutPrefix = packedData.slice(2);
 
-const ProtectedPartitionRole_1 = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
 
 describe("ERC1410 Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
-  let signer_E: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
+  let signer_E: HardhatEthersSigner;
 
   let erc1410Facet: IERC1410;
   let accessControlFacet: AccessControl;
@@ -2457,8 +2457,8 @@ describe("ERC1410 Tests", () => {
           };
 
           /*const domainSeparator =
-                    ethers.utils._TypedDataEncoder.hashDomain(domain)
-                const messageHash = ethers.utils._TypedDataEncoder.hash(
+                    ethers.TypedDataEncoder.hashDomain(domain)
+                const messageHash = ethers.TypedDataEncoder.hash(
                     domain,
                     transferType,
                     message
@@ -2716,7 +2716,7 @@ describe("ERC1410 Tests", () => {
 
         expect(
           await erc1594Facet.connect(signer_A).canTransfer(signer_B.address, adjustFactor * amount, "0x"),
-        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.constants.HashZero]);
+        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferByPartition succeeds", async () => {
@@ -2734,7 +2734,7 @@ describe("ERC1410 Tests", () => {
             "0x",
             "0x",
           ),
-        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.constants.HashZero]);
+        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferFrom succeeds", async () => {
@@ -2749,7 +2749,7 @@ describe("ERC1410 Tests", () => {
           await erc1594Facet
             .connect(signer_A)
             .canTransferFrom(signer_A.address, signer_B.address, adjustFactor * amount, "0x"),
-        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.constants.HashZero]);
+        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 transfer succeeds", async () => {

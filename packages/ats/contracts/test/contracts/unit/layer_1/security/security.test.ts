@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type Security, IERC1410 } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { executeRbac } from "@test";
@@ -12,9 +12,9 @@ const _PARTITION_ID_2 = "0x00000000000000000000000000000000000000000000000000000
 
 describe("Security Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let securityFacet: Security;
   let erc1410Facet: IERC1410;

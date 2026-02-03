@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ProceedRecipientsFacet, ResolverProxy, AccessControl, PauseFacet } from "@contract-types";
 import { GAS_LIMIT, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
 import { deployBondTokenFixture } from "@test";
@@ -12,8 +12,8 @@ const PROCEED_RECIPIENT_2 = "0x2345678901234567890123456789012345678901";
 const PROCEED_RECIPIENT_2_DATA = "0x88888888";
 
 describe("Proceed Recipients Tests", () => {
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
 
   let diamond: ResolverProxy;
   let proceedRecipientsFacet: ProceedRecipientsFacet;

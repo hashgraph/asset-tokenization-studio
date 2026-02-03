@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type BondUSAReadFacet } from "@contract-types";
 import { RegulationType, RegulationSubType, TIME_PERIODS_S } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
@@ -17,7 +17,7 @@ const frequency = TIME_PERIODS_S.DAY;
 let maturityDate = startingDate + numberOfCoupons * frequency;
 
 describe("Security USA Tests", () => {
-  let signer_B: SignerWithAddress;
+  let signer_B: HardhatEthersSigner;
 
   let bondUSAFacet: BondUSAReadFacet;
 

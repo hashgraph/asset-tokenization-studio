@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ADDRESS_ZERO, ATS_ROLES, GAS_LIMIT } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 
@@ -11,8 +11,8 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("ExternalKycList Management Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
 
   let externalKycListManagement: ExternalKycListManagementFacet;
   let pauseFacet: Pause;
@@ -25,9 +25,9 @@ describe("ExternalKycList Management Tests", () => {
   async function deployExternalKycSecurityFixture() {
     const [deployer] = await ethers.getSigners();
     initMock1 = await (await ethers.getContractFactory("MockedExternalKycList", deployer)).deploy();
-    await initMock1.deployed();
+    await initMock1.waitForDeployment()();
     initMock2 = await (await ethers.getContractFactory("MockedExternalKycList", deployer)).deploy();
-    await initMock2.deployed();
+    await initMock2.waitForDeployment()();
 
     const base = await deployEquityTokenFixture({
       useLoadFixture: false,
@@ -48,13 +48,13 @@ describe("ExternalKycList Management Tests", () => {
     await base.accessControlFacet.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
 
     externalKycListMock1 = await (await ethers.getContractFactory("MockedExternalKycList", signer_A)).deploy();
-    await externalKycListMock1.deployed();
+    await externalKycListMock1.waitForDeployment()();
 
     externalKycListMock2 = await (await ethers.getContractFactory("MockedExternalKycList", signer_A)).deploy();
-    await externalKycListMock2.deployed();
+    await externalKycListMock2.waitForDeployment()();
 
     externalKycListMock3 = await (await ethers.getContractFactory("MockedExternalKycList", signer_A)).deploy();
-    await externalKycListMock3.deployed();
+    await externalKycListMock3.waitForDeployment()();
     // Now we have 2 from initialization + 2 added here = 4 total
     await externalKycListManagement.addExternalKycList(externalKycListMock1.address, { gasLimit: GAS_LIMIT.default });
     await externalKycListManagement.addExternalKycList(externalKycListMock2.address, { gasLimit: GAS_LIMIT.default });

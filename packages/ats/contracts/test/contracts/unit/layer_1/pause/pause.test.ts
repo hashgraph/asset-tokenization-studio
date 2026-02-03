@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { GAS_LIMIT, ATS_ROLES } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
 import { deployEquityTokenFixture } from "@test";
@@ -12,7 +12,7 @@ describe("Pause Tests", () => {
   let diamond: ResolverProxy;
   let pauseFacet: PauseFacet;
   let accessControlFacet: AccessControl;
-  let deployer: SignerWithAddress;
+  let deployer: HardhatEthersSigner;
   let unknownSigner: Signer;
   let externalPauseMock: MockedExternalPause;
 

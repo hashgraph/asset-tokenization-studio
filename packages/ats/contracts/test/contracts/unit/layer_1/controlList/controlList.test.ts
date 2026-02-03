@@ -4,16 +4,16 @@ import { AccessControlFacet, ControlListFacet, PauseFacet, ResolverProxy } from 
 import { ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { grantRoleAndPauseToken } from "@test";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import { executeRbac } from "@test";
 
 describe("Control List Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let controlListFacet: ControlListFacet;
   let pauseFacet: PauseFacet;

@@ -39,6 +39,10 @@ export class CastRegulationType {
     return RegulationType.REG_D;
   }
 
+  static fromBigint(id: bigint): RegulationType {
+    return this.fromNumber(Number(id));
+  }
+
   static toNumber(value: RegulationType): number {
     if (value == RegulationType.NONE) return 0;
     if (value == RegulationType.REG_S) return 1;
@@ -48,9 +52,13 @@ export class CastRegulationType {
 
 export class CastRegulationSubType {
   static fromNumber(id: number): RegulationSubType {
-    if (id == 0) return RegulationSubType.NONE;
-    if (id == 1) return RegulationSubType.B_506;
+    if (id === 0) return RegulationSubType.NONE;
+    if (id === 1) return RegulationSubType.B_506;
     return RegulationSubType.C_506;
+  }
+
+  static fromBigint(id: bigint): RegulationSubType {
+    return this.fromNumber(Number(id));
   }
 
   static toNumber(value: RegulationSubType): number {
@@ -75,8 +83,8 @@ export class CheckRegulations {
 }
 
 export class CastAccreditedInvestors {
-  static fromNumber(id: number): AccreditedInvestors {
-    if (id == 0) return AccreditedInvestors.NONE;
+  static fromBigint(id: bigint): AccreditedInvestors {
+    if (id === 0n) return AccreditedInvestors.NONE;
     return AccreditedInvestors.ACCREDITATION_REQUIRED;
   }
 
@@ -87,8 +95,8 @@ export class CastAccreditedInvestors {
 }
 
 export class CastManualInvestorVerification {
-  static fromNumber(id: number): ManualInvestorVerification {
-    if (id == 0) return ManualInvestorVerification.NOTHING_TO_VERIFY;
+  static fromBigint(id: bigint): ManualInvestorVerification {
+    if (id === 0n) return ManualInvestorVerification.NOTHING_TO_VERIFY;
     return ManualInvestorVerification.VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
   }
 
@@ -99,8 +107,8 @@ export class CastManualInvestorVerification {
 }
 
 export class CastInternationalInvestorscation {
-  static fromNumber(id: number): InternationalInvestors {
-    if (id == 0) return InternationalInvestors.NOT_ALLOWED;
+  static fromBigint(id: bigint): InternationalInvestors {
+    if (id === 0n) return InternationalInvestors.NOT_ALLOWED;
     return InternationalInvestors.ALLOWED;
   }
 
@@ -111,8 +119,8 @@ export class CastInternationalInvestorscation {
 }
 
 export class CastResaleHoldPeriodorscation {
-  static fromNumber(id: number): ResaleHoldPeriod {
-    if (id == 0) return ResaleHoldPeriod.NOT_APPLICABLE;
+  static fromBigint(id: bigint): ResaleHoldPeriod {
+    if (id === 0n) return ResaleHoldPeriod.NOT_APPLICABLE;
     return ResaleHoldPeriod.APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
   }
 

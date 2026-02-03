@@ -115,7 +115,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       expect(() => validateAddress(deployerAddress, "deployer")).to.not.throw();
       expect(() => validateAddress(userAddress, "user")).to.not.throw();
-      expect(() => validateAddress(ethers.constants.AddressZero, "zero address")).to.not.throw();
+      expect(() => validateAddress(ethers.ZeroAddress, "zero address")).to.not.throw();
     });
 
     it("should reject invalid addresses", () => {
@@ -373,7 +373,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(factoryResult.proxyAdminAddress).to.equal(blrResult.proxyAdminAddress);
 
       // Verify Factory deployment was successful (Factory doesn't have a getter for BLR address)
-      expect(factoryResult.factoryAddress).to.not.equal(ethers.constants.AddressZero);
+      expect(factoryResult.factoryAddress).to.not.equal(ethers.ZeroAddress);
     });
 
     it("should deploy multiple facets in batch", async () => {

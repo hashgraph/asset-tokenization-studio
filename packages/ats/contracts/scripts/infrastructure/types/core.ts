@@ -30,7 +30,7 @@
  * @module core/types
  */
 
-import { Contract, ContractFactory, Signer, Wallet, Overrides, providers } from "ethers";
+import { Contract, ContractFactory, Signer, Wallet, Overrides, JsonRpcProvider } from "ethers";
 import type { WorkflowType } from "./checkpoint";
 
 /**
@@ -605,7 +605,7 @@ export function createSigner(options: SignerOptions): Signer {
   // Normalize private key (add 0x prefix if missing)
   const normalizedKey = privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`;
 
-  const provider = new providers.JsonRpcProvider(rpcUrl, chainId);
+  const provider = new JsonRpcProvider(rpcUrl, chainId);
   return new Wallet(normalizedKey, provider);
 }
 

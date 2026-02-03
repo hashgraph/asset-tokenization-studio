@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type Pause,
@@ -16,9 +16,9 @@ import { deployEquityTokenFixture, executeRbac, getDltTimestamp } from "@test";
 
 describe("ERC20Permit Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let erc20PermitFacet: ERC20PermitFacet;
   let noncesFacet: NoncesFacet;
@@ -64,7 +64,7 @@ describe("ERC20Permit Tests", () => {
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
           verifyingContract: diamond.address,
         };
-        const domainHash = ethers.utils._TypedDataEncoder.hashDomain(domain);
+        const domainHash = ethers.TypedDataEncoder.hashDomain(domain);
         expect(domainSeparator).to.equal(domainHash);
       });
     });
@@ -209,7 +209,7 @@ describe("ERC20Permit Tests", () => {
         };
 
         const signature = await signer_A._signTypedData(domain, types, value);
-        const sig = ethers.utils.splitSignature(signature);
+        const sig = ethers.Signature.from(signature);
 
         await expect(
           erc20PermitFacet.permit(signer_B.address, signer_A.address, 1, expiry, sig.v, sig.r, sig.s),
@@ -248,7 +248,7 @@ describe("ERC20Permit Tests", () => {
         };
 
         const signature = await signer_A._signTypedData(domain, types, value);
-        const sig = ethers.utils.splitSignature(signature);
+        const sig = ethers.Signature.from(signature);
 
         await expect(erc20PermitFacet.permit(signer_A.address, signer_B.address, 1, expiry, sig.v, sig.r, sig.s))
           .to.emit(erc20Facet, "Approval")

@@ -39,16 +39,16 @@ export enum ClearingOperationType {
 }
 
 export class CastClearingOperationType {
-  static fromNumber(id: number): ClearingOperationType {
+  static fromBigint(id: bigint): ClearingOperationType {
     switch (id) {
-      case 0:
+      case 0n:
         return ClearingOperationType.Transfer;
-      case 1:
+      case 1n:
         return ClearingOperationType.Redeem;
-      case 2:
+      case 2n:
         return ClearingOperationType.HoldCreation;
       default:
-        throw new InvalidClearingOperationTypeNumber(id);
+        throw new InvalidClearingOperationTypeNumber(Number(id));
     }
   }
 

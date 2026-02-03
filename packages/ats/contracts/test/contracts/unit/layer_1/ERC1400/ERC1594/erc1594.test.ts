@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type PauseFacet,
@@ -26,11 +26,11 @@ const EMPTY_VC_ID = EMPTY_STRING;
 
 describe("ERC1594 Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
-  let signer_E: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
+  let signer_E: HardhatEthersSigner;
 
   let erc1594Facet: ERC1594Facet;
   let accessControlFacet: AccessControl;
@@ -549,16 +549,14 @@ describe("ERC1594 Tests", () => {
     it("GIVEN a zero address in to WHEN canTransfer and canTransferFrom THEN responds _TO_signer_N.addressULL_ERROR_ID", async () => {
       await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await erc1594Issuer.issue(signer_A.address, AMOUNT, DATA);
-      expect(await erc1594Facet.canTransfer(ethers.constants.AddressZero, AMOUNT, DATA)).to.be.deep.equal([
+      expect(await erc1594Facet.canTransfer(ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
         false,
         EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
         getSelector(erc1594Facet, "ZeroAddressNotAllowed"),
       ]);
       await erc1594Issuer.issue(signer_D.address, AMOUNT, DATA);
       await erc20Facet.connect(signer_D).increaseAllowance(signer_A.address, AMOUNT);
-      expect(
-        await erc1594Facet.canTransferFrom(signer_D.address, ethers.constants.AddressZero, AMOUNT, DATA),
-      ).to.be.deep.equal([
+      expect(await erc1594Facet.canTransferFrom(signer_D.address, ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
         false,
         EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
         getSelector(erc1594Facet, "ZeroAddressNotAllowed"),
@@ -608,7 +606,7 @@ describe("ERC1594 Tests", () => {
       expect(await erc1594Transferor.canTransfer(signer_D.address, AMOUNT / 2, DATA)).to.be.deep.equal([
         true,
         EIP1066_CODES.SUCCESS,
-        ethers.constants.HashZero,
+        ethers.ZeroHash,
       ]);
       expect(await erc1594Transferor.transferWithData(signer_D.address, AMOUNT / 2, DATA))
         .to.emit(erc1594Transferor, "Transferred")
@@ -636,7 +634,7 @@ describe("ERC1594 Tests", () => {
 
         expect(
           await erc1594Approved.canTransferFrom(signer_E.address, signer_D.address, AMOUNT / 2, DATA),
-        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.constants.HashZero]);
+        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
         expect(await erc1594Approved.transferFromWithData(signer_E.address, signer_D.address, AMOUNT / 2, DATA))
           .to.emit(erc1594Transferor, "Transferred")
           .withArgs(signer_E.address, signer_D.address, AMOUNT / 2);
@@ -714,7 +712,7 @@ describe("ERC1594 Tests", () => {
         await erc20Facet.connect(signer_E).approve(signer_C.address, AMOUNT / 2);
 
         // Recover signer_C's address
-        await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ethers.constants.AddressZero);
+        await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ethers.ZeroAddress);
 
         // Verify recovery was successful
         expect(await erc3643ReadFacet.isAddressRecovered(signer_C.address)).to.be.true;
@@ -727,7 +725,7 @@ describe("ERC1594 Tests", () => {
 
       it("GIVEN a recovered tokenHolder WHEN redeemFrom THEN transaction fails with WalletRecovered", async () => {
         // Recover signer_E's address
-        await erc3643ManagementFacet.recoveryAddress(signer_E.address, signer_D.address, ethers.constants.AddressZero);
+        await erc3643ManagementFacet.recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);
 
         // Verify recovery was successful
         expect(await erc3643ReadFacet.isAddressRecovered(signer_E.address)).to.be.true;
@@ -835,7 +833,7 @@ describe("ERC1594 Tests", () => {
       it("GIVEN protected partitions and wildcard role WHEN redeem THEN transaction succeeds", async () => {
         expect(await erc1594Transferor.redeem(AMOUNT / 2, DATA))
           .to.emit(erc1594Transferor, "Redeemed")
-          .withArgs(ethers.constants.AddressZero, signer_E.address, AMOUNT / 2);
+          .withArgs(ethers.ZeroAddress, signer_E.address, AMOUNT / 2);
 
         expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
         expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT / 2);

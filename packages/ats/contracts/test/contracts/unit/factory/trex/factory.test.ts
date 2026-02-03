@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BusinessLogicResolver, TREXFactoryAts, ITREXFactory, AccessControl, ERC20, Factory } from "@contract-types";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import { BusinessLogicResolver, TREXFactoryAts, ITREXFactory, AccessControl, ERC20, IFactory } from "@contract-types";
 
 import { deployFullSuiteFixture } from "./fixtures/deploy-full-suite.fixture";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -13,7 +13,7 @@ import { getEquityDetails } from "@test";
 import { getBondDetails } from "@test";
 
 describe("TREX Factory Tests", () => {
-  let deployer: SignerWithAddress;
+  let deployer: HardhatEthersSigner;
 
   let init_rbacs: Rbac[] = [];
 
@@ -30,7 +30,7 @@ describe("TREX Factory Tests", () => {
 
   let accessControlFacet: AccessControl;
   let erc20Facet: ERC20;
-  let factory: Factory;
+  let factory: IFactory;
 
   async function setFacets(diamond: string) {
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond);
@@ -55,27 +55,31 @@ describe("TREX Factory Tests", () => {
     trexDeployment = await deployFullSuiteFixture();
 
     const trexBondDeploymentLib = await (await ethers.getContractFactory("TREXBondDeploymentLib")).deploy();
-    await trexBondDeploymentLib.deployed();
+    await trexBondDeploymentLib.waitForDeployment();
     const trexEquityDeploymentLib = await (await ethers.getContractFactory("TREXEquityDeploymentLib")).deploy();
-    await trexEquityDeploymentLib.deployed();
+    await trexEquityDeploymentLib.waitForDeployment();
 
     factoryAts = await (
       await ethers.getContractFactory("TREXFactoryAts", {
         signer: deployer,
         libraries: {
-          TREXBondDeploymentLib: trexBondDeploymentLib.address,
-          TREXEquityDeploymentLib: trexEquityDeploymentLib.address,
+          TREXBondDeploymentLib: await trexBondDeploymentLib.getAddress(),
+          TREXEquityDeploymentLib: await trexEquityDeploymentLib.getAddress(),
         },
       })
     ).deploy(
-      trexDeployment.authorities.trexImplementationAuthority.address,
-      trexDeployment.factories.identityFactory.address,
-      factory.address,
+      trexDeployment.authorities.trexImplementationAuthority.target,
+      await trexDeployment.factories.identityFactory.getAddress(),
+      factory.target,
       {},
     );
-    await factoryAts.deployed();
+    await factoryAts.waitForDeployment();
 
-    await trexDeployment.factories.identityFactory.connect(deployer).addTokenFactory(factoryAts.address);
+    await (
+      trexDeployment.factories.identityFactory.connect(deployer) as unknown as {
+        addTokenFactory: (address: string) => Promise<void>;
+      }
+    ).addTokenFactory(await factoryAts.getAddress());
 
     tokenDetails.name = name;
     tokenDetails.symbol = symbol;
@@ -294,7 +298,15 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       const [trexAddr] = trexSuiteDeployedEvent?.args || [];
@@ -364,7 +376,15 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
     });
 
@@ -385,12 +405,12 @@ describe("TREX Factory Tests", () => {
       // Deploy a real compliance module contract
       const MockComplianceModule = await ethers.getContractFactory("MockComplianceModule");
       const complianceModule = await MockComplianceModule.deploy();
-      await complianceModule.deployed();
+      await complianceModule.waitForDeployment();
 
       // Encode the setConfig function call with value 100
       const setConfigData = complianceModule.interface.encodeFunctionData("setConfig", [100]);
 
-      tokenDetails.complianceModules = [complianceModule.address];
+      tokenDetails.complianceModules = [complianceModule.target];
       tokenDetails.complianceSettings = [setConfigData];
 
       const deploymentResult = await factoryAts
@@ -405,7 +425,15 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
@@ -446,7 +474,15 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
     });
 
@@ -454,18 +490,18 @@ describe("TREX Factory Tests", () => {
       // Deploy compliance proxy WITHOUT initializing - let factory use it as-is
       const ModularComplianceProxy = await ethers.getContractFactory("ModularComplianceProxy");
       const compliance = await ModularComplianceProxy.deploy(
-        trexDeployment.authorities.trexImplementationAuthority.address,
+        trexDeployment.authorities.trexImplementationAuthority.target,
       );
-      await compliance.deployed();
+      await compliance.waitForDeployment();
 
       // Transfer ownership to factory so it can manage the uninitialized compliance
-      const complianceContract = await ethers.getContractAt("ModularCompliance", compliance.address);
-      await complianceContract.transferOwnership(factoryAts.address);
+      const complianceContract = await ethers.getContractAt("ModularCompliance", compliance.target);
+      await complianceContract.transferOwnership(factoryAts.target);
 
       const equityData = {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
-          compliance: compliance.address,
+          compliance: compliance.target as string,
         }),
         equityDetails: getEquityDetails(),
       };
@@ -487,7 +523,15 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
     });
 
@@ -495,15 +539,15 @@ describe("TREX Factory Tests", () => {
       // Deploy IRS proxy WITHOUT initializing - let factory use it as-is
       const IdentityRegistryStorageProxy = await ethers.getContractFactory("IdentityRegistryStorageProxy");
       const irs = await IdentityRegistryStorageProxy.deploy(
-        trexDeployment.authorities.trexImplementationAuthority.address,
+        trexDeployment.authorities.trexImplementationAuthority.target,
       );
-      await irs.deployed();
+      await irs.waitForDeployment();
 
       // Transfer ownership to factory so it can bind the identity registry
-      const irsContract = await ethers.getContractAt("IdentityRegistryStorage", irs.address);
-      await irsContract.transferOwnership(factoryAts.address);
+      const irsContract = await ethers.getContractAt("IdentityRegistryStorage", irs.target);
+      await irsContract.transferOwnership(factoryAts.target);
 
-      tokenDetails.irs = irs.address;
+      tokenDetails.irs = irs.target as string;
 
       const equityData = {
         security: getSecurityData(businessLogicResolver, {
@@ -529,11 +573,19 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
-      tokenDetails.irs = ethers.constants.AddressZero;
+      tokenDetails.irs = ethers.ZeroAddress;
     });
 
     it("GIVEN existing identity registry WHEN deploying equity THEN uses existing IR", async () => {
@@ -569,12 +621,12 @@ describe("TREX Factory Tests", () => {
       const firstIR = await firstTokenContract.identityRegistry();
 
       // Verify firstIR is valid
-      expect(firstIR).to.not.equal(ethers.constants.AddressZero);
+      expect(firstIR).to.not.equal(ethers.ZeroAddress);
       expect(firstIR).to.not.be.undefined;
 
       // Transfer ownership of the IR and its components to factory so they can be reused
       const firstIRContract = await ethers.getContractAt("OwnableUpgradeable", firstIR);
-      await firstIRContract.connect(deployer).transferOwnership(factoryAts.address);
+      await firstIRContract.connect(deployer).transferOwnership(factoryAts.target);
 
       // Get TIR and CTR from the IR and transfer their ownership too
       const ir = await ethers.getContractAt(
@@ -587,9 +639,9 @@ describe("TREX Factory Tests", () => {
       const tirContract = await ethers.getContractAt("OwnableUpgradeable", tirAddress);
       const ctrContract = await ethers.getContractAt("OwnableUpgradeable", ctrAddress);
       const irsContract = await ethers.getContractAt("OwnableUpgradeable", irsAddress);
-      await tirContract.connect(deployer).transferOwnership(factoryAts.address);
-      await ctrContract.connect(deployer).transferOwnership(factoryAts.address);
-      await irsContract.connect(deployer).transferOwnership(factoryAts.address);
+      await tirContract.connect(deployer).transferOwnership(factoryAts.target);
+      await ctrContract.connect(deployer).transferOwnership(factoryAts.target);
+      await irsContract.connect(deployer).transferOwnership(factoryAts.target);
 
       // Create tokenDetails for second deployment with empty irAgents
       // since the IR already has its agents configured
@@ -622,7 +674,15 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
 
       // Verify the event was emitted
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
@@ -631,9 +691,9 @@ describe("TREX Factory Tests", () => {
     it("GIVEN existing ONCHAINID in tokenDetails WHEN deploying equity THEN uses existing token ID", async () => {
       // Create an identity first
       const identity = await ethers.deployContract("Identity", [deployer.address, true]);
-      await identity.deployed();
+      await identity.waitForDeployment();
 
-      tokenDetails.ONCHAINID = identity.address;
+      tokenDetails.ONCHAINID = identity.target as string;
 
       const equityData = {
         security: getSecurityData(businessLogicResolver, {
@@ -659,24 +719,32 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
-      tokenDetails.ONCHAINID = ethers.constants.AddressZero;
+      tokenDetails.ONCHAINID = ethers.ZeroAddress;
     });
 
     it("GIVEN more modules than settings WHEN deploying equity THEN handles modules without settings", async () => {
       const MockComplianceModule = await ethers.getContractFactory("MockComplianceModule");
       const module1 = await MockComplianceModule.deploy();
-      await module1.deployed();
+      await module1.waitForDeployment();
       const module2 = await MockComplianceModule.deploy();
-      await module2.deployed();
+      await module2.waitForDeployment();
 
       // Only one setting for two modules
       const setConfigData = module1.interface.encodeFunctionData("setConfig", [100]);
 
-      tokenDetails.complianceModules = [module1.address, module2.address];
+      tokenDetails.complianceModules = [module1.target, module2.target];
       tokenDetails.complianceSettings = [setConfigData]; // Only one setting
 
       const equityData = {
@@ -703,7 +771,15 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
@@ -739,7 +815,15 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
@@ -763,11 +847,11 @@ describe("TREX Factory Tests", () => {
       // Deploy claim issuer for testing line 91
       const ClaimIssuer = await ethers.getContractFactory("ClaimIssuer");
       const claimIssuer = await ClaimIssuer.deploy(deployer.address);
-      await claimIssuer.deployed();
+      await claimIssuer.waitForDeployment();
 
       // Add claim topics and issuer
       claimDetails.claimTopics = [1];
-      claimDetails.issuers = [claimIssuer.address];
+      claimDetails.issuers = [claimIssuer.target as string];
       claimDetails.issuerClaims = [[1]];
 
       const deploymentResult = await factoryAts
@@ -781,7 +865,15 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
@@ -1006,7 +1098,7 @@ describe("TREX Factory Tests", () => {
 
       // Deploy first bond with a module
       const mockModule = await (await ethers.getContractFactory("MockComplianceModule")).deploy();
-      tokenDetails.complianceModules = [mockModule.address];
+      tokenDetails.complianceModules = [mockModule.target];
       tokenDetails.complianceSettings = [];
 
       await factoryAts
@@ -1019,7 +1111,7 @@ describe("TREX Factory Tests", () => {
 
       // Transfer compliance ownership to factory so it can be reused
       const complianceContract = await ethers.getContractAt("OwnableUpgradeable", compliance);
-      await complianceContract.connect(deployer).transferOwnership(factoryAts.address);
+      await complianceContract.connect(deployer).transferOwnership(factoryAts.target);
 
       // Now deploy second bond reusing the same compliance and same module
       const secondBondData = {
@@ -1078,7 +1170,15 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       const [trexAddr] = trexSuiteDeployedEvent?.args || [];
@@ -1146,7 +1246,15 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
     });
 
@@ -1169,12 +1277,12 @@ describe("TREX Factory Tests", () => {
       // Deploy a real compliance module contract
       const MockComplianceModule = await ethers.getContractFactory("MockComplianceModule");
       const complianceModule = await MockComplianceModule.deploy();
-      await complianceModule.deployed();
+      await complianceModule.waitForDeployment();
 
       // Encode the setConfig function call with value 100
       const setConfigData = complianceModule.interface.encodeFunctionData("setConfig", [100]);
 
-      tokenDetails.complianceModules = [complianceModule.address];
+      tokenDetails.complianceModules = [complianceModule.target];
       tokenDetails.complianceSettings = [setConfigData];
 
       const deploymentResult = await factoryAts
@@ -1183,7 +1291,15 @@ describe("TREX Factory Tests", () => {
 
       const deploymentReceipt = await deploymentResult.wait();
 
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
@@ -1220,7 +1336,15 @@ describe("TREX Factory Tests", () => {
         .deployTREXSuiteAtsBond("salt-bond-diff-owner", tokenDetails, claimDetails, bondData, factoryRegulationData);
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
     });
 
@@ -1228,18 +1352,18 @@ describe("TREX Factory Tests", () => {
       // Deploy compliance proxy WITHOUT initializing - let factory use it as-is
       const ModularComplianceProxy = await ethers.getContractFactory("ModularComplianceProxy");
       const compliance = await ModularComplianceProxy.deploy(
-        trexDeployment.authorities.trexImplementationAuthority.address,
+        trexDeployment.authorities.trexImplementationAuthority.target,
       );
-      await compliance.deployed();
+      await compliance.waitForDeployment();
 
       // Transfer ownership to factory so it can manage the uninitialized compliance
-      const complianceContract = await ethers.getContractAt("ModularCompliance", compliance.address);
-      await complianceContract.transferOwnership(factoryAts.address);
+      const complianceContract = await ethers.getContractAt("ModularCompliance", compliance.target);
+      await complianceContract.transferOwnership(factoryAts.target);
 
       const bondData = {
         security: getSecurityData(businessLogicResolver, {
           rbacs: init_rbacs,
-          compliance: compliance.address,
+          compliance: compliance.target as string,
         }),
         bondDetails: await getBondDetails(),
         proceedRecipients: [],
@@ -1263,7 +1387,15 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
     });
 
@@ -1271,15 +1403,15 @@ describe("TREX Factory Tests", () => {
       // Deploy IRS proxy WITHOUT initializing - let factory use it as-is
       const IdentityRegistryStorageProxy = await ethers.getContractFactory("IdentityRegistryStorageProxy");
       const irs = await IdentityRegistryStorageProxy.deploy(
-        trexDeployment.authorities.trexImplementationAuthority.address,
+        trexDeployment.authorities.trexImplementationAuthority.target,
       );
-      await irs.deployed();
+      await irs.waitForDeployment();
 
       // Transfer ownership to factory so it can bind the identity registry
-      const irsContract = await ethers.getContractAt("IdentityRegistryStorage", irs.address);
-      await irsContract.transferOwnership(factoryAts.address);
+      const irsContract = await ethers.getContractAt("IdentityRegistryStorage", irs.target);
+      await irsContract.transferOwnership(factoryAts.target);
 
-      tokenDetails.irs = irs.address;
+      tokenDetails.irs = irs.target as string;
 
       const bondData = {
         security: getSecurityData(businessLogicResolver, {
@@ -1301,11 +1433,19 @@ describe("TREX Factory Tests", () => {
         .deployTREXSuiteAtsBond("salt-bond-existing-irs", tokenDetails, claimDetails, bondData, factoryRegulationData);
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
-      tokenDetails.irs = ethers.constants.AddressZero;
+      tokenDetails.irs = ethers.ZeroAddress;
     });
 
     it("GIVEN existing identity registry WHEN deploying bond THEN uses existing IR", async () => {
@@ -1343,12 +1483,12 @@ describe("TREX Factory Tests", () => {
       const firstIR = await firstTokenContract.identityRegistry();
 
       // Verify firstIR is valid
-      expect(firstIR).to.not.equal(ethers.constants.AddressZero);
+      expect(firstIR).to.not.equal(ethers.ZeroAddress);
       expect(firstIR).to.not.be.undefined;
 
       // Transfer ownership of the IR and its components to factory so they can be reused
       const firstIRContract = await ethers.getContractAt("OwnableUpgradeable", firstIR);
-      await firstIRContract.connect(deployer).transferOwnership(factoryAts.address);
+      await firstIRContract.connect(deployer).transferOwnership(factoryAts.target);
 
       // Get TIR and CTR from the IR and transfer their ownership too
       const ir = await ethers.getContractAt(
@@ -1361,9 +1501,9 @@ describe("TREX Factory Tests", () => {
       const tirContract = await ethers.getContractAt("OwnableUpgradeable", tirAddress);
       const ctrContract = await ethers.getContractAt("OwnableUpgradeable", ctrAddress);
       const irsContract = await ethers.getContractAt("OwnableUpgradeable", irsAddress);
-      await tirContract.connect(deployer).transferOwnership(factoryAts.address);
-      await ctrContract.connect(deployer).transferOwnership(factoryAts.address);
-      await irsContract.connect(deployer).transferOwnership(factoryAts.address);
+      await tirContract.connect(deployer).transferOwnership(factoryAts.target);
+      await ctrContract.connect(deployer).transferOwnership(factoryAts.target);
+      await irsContract.connect(deployer).transferOwnership(factoryAts.target);
 
       // Create tokenDetails for second deployment with empty irAgents
       // since the IR already has its agents configured
@@ -1398,7 +1538,15 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
 
       // Verify the event was emitted
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
@@ -1406,9 +1554,9 @@ describe("TREX Factory Tests", () => {
 
     it("GIVEN existing ONCHAINID in tokenDetails WHEN deploying bond THEN uses existing token ID", async () => {
       const identity = await ethers.deployContract("Identity", [deployer.address, true]);
-      await identity.deployed();
+      await identity.waitForDeployment();
 
-      tokenDetails.ONCHAINID = identity.address;
+      tokenDetails.ONCHAINID = identity.target as string;
 
       const bondData = {
         security: getSecurityData(businessLogicResolver, {
@@ -1436,24 +1584,32 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
-      tokenDetails.ONCHAINID = ethers.constants.AddressZero;
+      tokenDetails.ONCHAINID = ethers.ZeroAddress;
     });
 
     it("GIVEN more modules than settings WHEN deploying bond THEN handles modules without settings", async () => {
       const MockComplianceModule = await ethers.getContractFactory("MockComplianceModule");
       const module1 = await MockComplianceModule.deploy();
-      await module1.deployed();
+      await module1.waitForDeployment();
       const module2 = await MockComplianceModule.deploy();
-      await module2.deployed();
+      await module2.waitForDeployment();
 
       // Only one setting for two modules
       const setConfigData = module1.interface.encodeFunctionData("setConfig", [100]);
 
-      tokenDetails.complianceModules = [module1.address, module2.address];
+      tokenDetails.complianceModules = [module1.target, module2.target];
       tokenDetails.complianceSettings = [setConfigData]; // Only one setting
 
       const bondData = {
@@ -1482,7 +1638,15 @@ describe("TREX Factory Tests", () => {
         );
 
       const deploymentReceipt = await deploymentResult.wait();
-      const trexSuiteDeployedEvent = deploymentReceipt.events?.find((event) => event.event === "TREXSuiteDeployed");
+      const trexSuiteDeployedEvent = deploymentReceipt!.logs
+        .map((log) => {
+          try {
+            return factoryAts.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "TREXSuiteDeployed");
       expect(trexSuiteDeployedEvent).to.not.be.undefined;
 
       // Reset for next tests
@@ -1492,7 +1656,7 @@ describe("TREX Factory Tests", () => {
   });
 
   describe("Administrative functions tests", () => {
-    let otherAccount: SignerWithAddress;
+    let otherAccount: HardhatEthersSigner;
 
     beforeEach(async () => {
       [, otherAccount] = await ethers.getSigners();
@@ -1501,31 +1665,32 @@ describe("TREX Factory Tests", () => {
     describe("recoverContractOwnership", () => {
       it("GIVEN non-owner caller WHEN calling recoverContractOwnership THEN transaction reverts", async () => {
         await expect(
-          factoryAts.connect(otherAccount).recoverContractOwnership(factory.address, otherAccount.address),
+          factoryAts.connect(otherAccount).recoverContractOwnership(factory.target, otherAccount.address),
         ).to.be.revertedWith("Ownable: caller is not the owner");
       });
 
       it("GIVEN owner caller WHEN calling recoverContractOwnership THEN ownership is transferred", async () => {
         // Deploy a mock ownable contract
+        const bondLib = await (await ethers.getContractFactory("TREXBondDeploymentLib")).deploy();
+        const equityLib = await (await ethers.getContractFactory("TREXEquityDeploymentLib")).deploy();
         const MockOwnable = await ethers.getContractFactory("TREXFactoryAts", {
           libraries: {
-            TREXBondDeploymentLib: (await (await ethers.getContractFactory("TREXBondDeploymentLib")).deploy()).address,
-            TREXEquityDeploymentLib: (await (await ethers.getContractFactory("TREXEquityDeploymentLib")).deploy())
-              .address,
+            TREXBondDeploymentLib: await bondLib.getAddress(),
+            TREXEquityDeploymentLib: await equityLib.getAddress(),
           },
         });
         const mockContract = await MockOwnable.connect(deployer).deploy(
-          trexDeployment.authorities.trexImplementationAuthority.address,
-          trexDeployment.factories.identityFactory.address,
-          factory.address,
+          trexDeployment.authorities.trexImplementationAuthority.target,
+          await trexDeployment.factories.identityFactory.getAddress(),
+          factory.target,
         );
-        await mockContract.deployed();
+        await mockContract.waitForDeployment();
 
         // Transfer ownership to factory first
-        await mockContract.transferOwnership(factoryAts.address);
+        await mockContract.transferOwnership(factoryAts.target);
 
         // Recover ownership using factoryAts
-        await factoryAts.connect(deployer).recoverContractOwnership(mockContract.address, otherAccount.address);
+        await factoryAts.connect(deployer).recoverContractOwnership(mockContract.target, otherAccount.address);
 
         expect(await mockContract.owner()).to.equal(otherAccount.address);
       });
@@ -1536,7 +1701,7 @@ describe("TREX Factory Tests", () => {
         await expect(
           factoryAts
             .connect(otherAccount)
-            .setImplementationAuthority(trexDeployment.authorities.trexImplementationAuthority.address),
+            .setImplementationAuthority(trexDeployment.authorities.trexImplementationAuthority.target),
         ).to.be.revertedWith("Ownable: caller is not the owner");
       });
 
@@ -1550,15 +1715,15 @@ describe("TREX Factory Tests", () => {
         // Deploy a mock incomplete implementation authority
         const IncompleteAuthority = await ethers.getContractFactory("MockIncompleteImplementationAuthority");
         const incompleteAuthority = await IncompleteAuthority.deploy();
-        await incompleteAuthority.deployed();
+        await incompleteAuthority.waitForDeployment();
 
         await expect(
-          factoryAts.connect(deployer).setImplementationAuthority(incompleteAuthority.address),
+          factoryAts.connect(deployer).setImplementationAuthority(incompleteAuthority.target),
         ).to.be.revertedWith("invalid Implementation Authority");
       });
 
       it("GIVEN valid implementation authority WHEN calling setImplementationAuthority THEN authority is set and event is emitted", async () => {
-        const newAuthority = trexDeployment.authorities.trexImplementationAuthority.address;
+        const newAuthority = trexDeployment.authorities.trexImplementationAuthority.target;
 
         const tx = await factoryAts.connect(deployer).setImplementationAuthority(newAuthority);
 
@@ -1570,7 +1735,7 @@ describe("TREX Factory Tests", () => {
     describe("setIdFactory", () => {
       it("GIVEN non-owner caller WHEN calling setIdFactory THEN transaction reverts", async () => {
         await expect(
-          factoryAts.connect(otherAccount).setIdFactory(trexDeployment.factories.identityFactory.address),
+          factoryAts.connect(otherAccount).setIdFactory(await trexDeployment.factories.identityFactory.getAddress()),
         ).to.be.revertedWith("Ownable: caller is not the owner");
       });
 
@@ -1581,7 +1746,7 @@ describe("TREX Factory Tests", () => {
       });
 
       it("GIVEN valid id factory address WHEN calling setIdFactory THEN factory is set and event is emitted", async () => {
-        const newIdFactory = trexDeployment.factories.identityFactory.address;
+        const newIdFactory = await trexDeployment.factories.identityFactory.getAddress();
 
         const tx = await factoryAts.connect(deployer).setIdFactory(newIdFactory);
 
@@ -1592,7 +1757,7 @@ describe("TREX Factory Tests", () => {
 
     describe("setAtsFactory", () => {
       it("GIVEN non-owner caller WHEN calling setAtsFactory THEN transaction reverts", async () => {
-        await expect(factoryAts.connect(otherAccount).setAtsFactory(factory.address)).to.be.revertedWith(
+        await expect(factoryAts.connect(otherAccount).setAtsFactory(factory.target)).to.be.revertedWith(
           "Ownable: caller is not the owner",
         );
       });
@@ -1604,7 +1769,7 @@ describe("TREX Factory Tests", () => {
       });
 
       it("GIVEN valid ats factory address WHEN calling setAtsFactory THEN factory is set", async () => {
-        const newAtsFactory = factory.address;
+        const newAtsFactory = factory.target;
 
         await factoryAts.connect(deployer).setAtsFactory(newAtsFactory);
 

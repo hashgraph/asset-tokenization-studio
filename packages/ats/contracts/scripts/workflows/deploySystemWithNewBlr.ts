@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Complete ATS system deployment workflow.
  *
@@ -241,16 +243,16 @@ export async function deploySystemWithNewBlr(
       info("\n✓ Step 1/7: ProxyAdmin already deployed (resuming)");
       // Reconstruct ProxyAdmin from checkpoint - need to reconnect to contract
       proxyAdmin = ProxyAdmin__factory.connect(checkpoint.steps.proxyAdmin.address, signer);
-      info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
+      info(`✅ ProxyAdmin: ${proxyAdmin.target as string}`);
     } else {
       info("\n📋 Step 1/7: Deploying ProxyAdmin...");
       proxyAdmin = await deployProxyAdmin(signer);
 
-      info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
+      info(`✅ ProxyAdmin: ${proxyAdmin.target as string}`);
 
       // Save checkpoint (ProxyAdmin doesn't have contractId property)
       checkpoint.steps.proxyAdmin = {
-        address: proxyAdmin.address,
+        address: proxyAdmin.target as string,
         txHash: "", // ProxyAdmin doesn't return tx hash currently
         deployedAt: new Date().toISOString(),
       };
@@ -696,7 +698,7 @@ export async function deploySystemWithNewBlr(
     if (checkpoint.steps.factory && checkpoint.currentStep >= 7) {
       info("\n✓ Step 8/8: Factory already deployed (resuming)");
       // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
-      const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || proxyAdmin.address;
+      const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || (proxyAdmin.target as string);
       factoryResult = {
         success: true,
         proxyResult: {
@@ -753,8 +755,8 @@ export async function deploySystemWithNewBlr(
 
       infrastructure: {
         proxyAdmin: {
-          address: proxyAdmin.address,
-          contractId: await getContractId(proxyAdmin.address),
+          address: proxyAdmin.target as string,
+          contractId: await getContractId(proxyAdmin.target as string),
         },
         blr: {
           implementation: blrResult.implementationAddress,

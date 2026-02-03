@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ResolverProxy, TimeTravelFacet } from "@contract-types";
 import { deployEquityTokenFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -8,7 +8,7 @@ import { dateToUnixTimestamp } from "@scripts";
 
 describe("Time Travel Tests", () => {
   let diamond: ResolverProxy, timeTravelFacet: TimeTravelFacet;
-  let signer_A: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
 
   const setupEnvironment = async () => {
     const base = await deployEquityTokenFixture();

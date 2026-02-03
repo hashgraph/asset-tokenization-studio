@@ -37,7 +37,7 @@ import {
  * const signer = (await ethers.getSigners())[0]
  * const proxyAdmin = await deployProxyAdmin(signer)
  *
- * console.log(`ProxyAdmin: ${proxyAdmin.address}`)
+ * console.log(`ProxyAdmin: ${await proxyAdmin.getAddress()}`)
  * ```
  */
 export async function deployProxyAdmin(signer: Signer, overrides?: Overrides): Promise<ProxyAdmin> {
@@ -46,11 +46,11 @@ export async function deployProxyAdmin(signer: Signer, overrides?: Overrides): P
   try {
     info("Deploying ProxyAdmin...");
 
-    const proxyAdmin = await new ProxyAdmin__factory(signer).deploy(overrides || {});
-    await proxyAdmin.deployed();
+    const proxyAdmin = await new ProxyAdmin__factory(signer).deploy((overrides || {}) as any);
+    await proxyAdmin.waitForDeployment();
 
     success("ProxyAdmin deployment complete");
-    info(`  ProxyAdmin: ${proxyAdmin.address}`);
+    info(`  ProxyAdmin: ${await proxyAdmin.getAddress()}`);
 
     return proxyAdmin;
   } catch (err) {
@@ -169,7 +169,7 @@ export async function verifyProxyAdminControls(
 
     const actualAdmin = await getProxyAdmin(signer.provider!, proxyAddress);
 
-    return actualAdmin.toLowerCase() === proxyAdmin.address.toLowerCase();
+    return actualAdmin.toLowerCase() === (await proxyAdmin.getAddress()).toLowerCase();
   } catch (err) {
     const errorMessage = extractRevertReason(err);
     logError(`Verification failed: ${errorMessage}`);

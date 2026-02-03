@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   ProceedRecipientsKpiLinkedRateFacetTimeTravel,
   ResolverProxy,
@@ -20,7 +20,7 @@ const PROCEED_RECIPIENT_1_DATA = "0xabcdef";
 const referenceDate = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
 
 describe("Proceed Recipients fixing Date Interest RateTests", () => {
-  let signer_A: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
 
   let diamond: ResolverProxy;
   let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;

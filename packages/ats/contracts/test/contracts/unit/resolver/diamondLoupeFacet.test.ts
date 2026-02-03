@@ -1,12 +1,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { DiamondFacet } from "@contract-types";
 import { deployEquityTokenFixture } from "test/fixtures";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("DiamondLoupeFacet", () => {
-  let signer_A: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
 
   let diamondLoupe: DiamondFacet;
 

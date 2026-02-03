@@ -101,7 +101,7 @@ describe("upgradeProxy - Unit Tests", () => {
 
       const result = await upgradeProxy(proxyAdmin, {
         proxyAddress: "0xinvalid",
-        newImplementationAddress: ethers.constants.AddressZero,
+        newImplementationAddress: ethers.ZeroAddress,
       });
 
       expect(result.success).to.be.false;
@@ -113,7 +113,7 @@ describe("upgradeProxy - Unit Tests", () => {
 
       const result = await upgradeProxy(proxyAdmin, {
         proxyAddress: TEST_CONSTANTS.NON_EXISTENT_PROXY_ADDRESS,
-        newImplementationAddress: ethers.constants.AddressZero,
+        newImplementationAddress: ethers.ZeroAddress,
       });
 
       expect(result.success).to.be.false;
@@ -129,7 +129,7 @@ describe("upgradeProxy - Unit Tests", () => {
 
       const result = await upgradeProxy(fakeProxyAdmin, {
         proxyAddress,
-        newImplementationAddress: ethers.constants.AddressZero,
+        newImplementationAddress: ethers.ZeroAddress,
       });
 
       expect(result.success).to.be.false;
@@ -180,7 +180,7 @@ describe("upgradeProxy - Unit Tests", () => {
 
       const result = await upgradeProxy(proxyAdmin, {
         proxyAddress: invalidAddress,
-        newImplementationAddress: ethers.constants.AddressZero,
+        newImplementationAddress: ethers.ZeroAddress,
       });
 
       expect(result.success).to.be.false;
@@ -238,7 +238,7 @@ describe("upgradeProxy - Unit Tests", () => {
 
       // Verify V2 was deployed
       expect(newImplAddress).to.be.a("string");
-      expect(newImplAddress).to.not.equal(ethers.constants.AddressZero);
+      expect(newImplAddress).to.not.equal(ethers.ZeroAddress);
 
       // Verify proxy is still at V1
       const currentImpl = await getProxyImplementation(ethers.provider, proxyAddress);

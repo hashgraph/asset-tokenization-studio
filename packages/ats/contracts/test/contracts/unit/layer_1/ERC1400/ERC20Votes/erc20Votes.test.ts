@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type IERC1410,
@@ -20,10 +20,10 @@ const amount = 1000;
 
 describe("ERC20Votes Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let erc20VotesFacet: ERC20VotesFacet;
   let pauseFacet: Pause;
@@ -170,7 +170,7 @@ describe("ERC20Votes Tests", () => {
     it("GIVEN tokens issued WHEN delegate THEN delegate is set correctly", async () => {
       await expect(erc20VotesFacet.delegate(signer_B.address))
         .to.emit(erc20VotesFacet, "DelegateChanged")
-        .withArgs(signer_A.address, ethers.constants.AddressZero, signer_B.address);
+        .withArgs(signer_A.address, ethers.ZeroAddress, signer_B.address);
 
       const delegate = await erc20VotesFacet.delegates(signer_A.address);
       expect(delegate).to.equal(signer_B.address);
@@ -186,12 +186,12 @@ describe("ERC20Votes Tests", () => {
 
     it("GIVEN delegation WHEN delegate to zero address THEN delegation is removed", async () => {
       await erc20VotesFacet.delegate(signer_B.address);
-      await expect(erc20VotesFacet.delegate(ethers.constants.AddressZero))
+      await expect(erc20VotesFacet.delegate(ethers.ZeroAddress))
         .to.emit(erc20VotesFacet, "DelegateChanged")
-        .withArgs(signer_A.address, signer_B.address, ethers.constants.AddressZero);
+        .withArgs(signer_A.address, signer_B.address, ethers.ZeroAddress);
 
       const delegate = await erc20VotesFacet.delegates(signer_A.address);
-      expect(delegate).to.equal(ethers.constants.AddressZero);
+      expect(delegate).to.equal(ethers.ZeroAddress);
     });
   });
 

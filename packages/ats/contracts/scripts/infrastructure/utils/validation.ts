@@ -42,7 +42,7 @@ import { ethers } from "ethers";
  */
 export function isValidAddress(address: string): boolean {
   try {
-    return ethers.utils.isAddress(address);
+    return ethers.isAddress(address);
   } catch {
     return false;
   }
@@ -72,7 +72,7 @@ export function isValidBytes32(value: string): boolean {
 
   // Must be valid hex
   try {
-    ethers.utils.hexlify(value);
+    ethers.hexlify(value);
     return true;
   } catch {
     return false;

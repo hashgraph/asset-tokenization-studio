@@ -1659,9 +1659,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const contract = await factory.deploy({
       gasLimit: GAS.CREATE_EXTERNAL_PAUSE_MOCK,
     });
-    await contract.deployed();
+    await contract.waitForDeployment();
 
-    return contract.address;
+    return contract.target.toString();
   }
 
   async updateExternalControlLists(
@@ -1767,9 +1767,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const contract = await factory.deploy({
       gasLimit: GAS.CREATE_EXTERNAL_BLACK_LIST_MOCK,
     });
-    await contract.deployed();
+    await contract.waitForDeployment();
 
-    return contract.address;
+    return contract.target.toString();
   }
 
   async createExternalWhiteListMock(): Promise<string> {
@@ -1780,9 +1780,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const contract = await factory.deploy({
       gasLimit: GAS.CREATE_EXTERNAL_WHITE_LIST_MOCK,
     });
-    await contract.deployed();
+    await contract.waitForDeployment();
 
-    return contract.address;
+    return contract.target.toString();
   }
 
   async updateExternalKycLists(
@@ -1852,9 +1852,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const contract = await factory.deploy({
       gasLimit: GAS.CREATE_EXTERNAL_KYC_LIST_MOCK,
     });
-    await contract.deployed();
+    await contract.waitForDeployment();
 
-    return contract.address;
+    return contract.target.toString();
   }
 
   async activateInternalKyc(security: EvmAddress): Promise<TransactionResponse> {

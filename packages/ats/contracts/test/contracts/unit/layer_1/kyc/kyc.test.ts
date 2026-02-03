@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -22,10 +22,10 @@ const _VC_ID = "VC_24";
 
 describe("Kyc Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let kycFacet: KycFacet;
   let pauseFacet: PauseFacet;
@@ -74,10 +74,10 @@ describe("Kyc Tests", () => {
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
 
     revocationList = await (await ethers.getContractFactory("MockedT3RevocationRegistry", signer_C)).deploy();
-    await revocationList.deployed();
+    await revocationList.waitForDeployment()();
 
     externalKycListMock = await (await ethers.getContractFactory("MockedExternalKycList", signer_C)).deploy();
-    await externalKycListMock.deployed();
+    await externalKycListMock.waitForDeployment()();
 
     await ssiManagementFacet.addIssuer(signer_C.address);
     await ssiManagementFacet.setRevocationRegistryAddress(revocationList.address);

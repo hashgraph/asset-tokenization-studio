@@ -14,7 +14,7 @@
 import { configureLogger, LogLevel, deployContract } from "@scripts/infrastructure";
 import { deployAtsInfrastructureFixture } from "./infrastructure.fixture";
 import { BusinessLogicResolver__factory, Factory__factory } from "@contract-types";
-import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import type { ProxyAdmin, BusinessLogicResolver, IFactory } from "@contract-types";
 
 /**
@@ -22,8 +22,8 @@ import type { ProxyAdmin, BusinessLogicResolver, IFactory } from "@contract-type
  */
 export interface TupUpgradeTestFixture {
   // Signers
-  deployer: SignerWithAddress;
-  otherSigner: SignerWithAddress;
+  deployer: HardhatEthersSigner;
+  otherSigner: HardhatEthersSigner;
 
   // Infrastructure - ProxyAdmin
   proxyAdmin: ProxyAdmin;
@@ -47,7 +47,7 @@ export interface TupUpgradeTestFixture {
  * Used for testing "upgrade with provided implementations" pattern.
  */
 export interface TupInfrastructureOnlyFixture {
-  deployer: SignerWithAddress;
+  deployer: HardhatEthersSigner;
   proxyAdminAddress: string;
   proxyAdmin: ProxyAdmin;
 }
@@ -81,11 +81,11 @@ export async function deployTupUpgradeTestFixture(): Promise<TupUpgradeTestFixtu
   const { deployer, unknownSigner, proxyAdmin, blr, factory } = infrastructure;
 
   // Get the ProxyAdmin address
-  const proxyAdminAddress = proxyAdmin.address;
+  const proxyAdminAddress = await proxyAdmin.getAddress();
 
   // Get proxy addresses
-  const blrProxyAddress = blr.address;
-  const factoryProxyAddress = factory.address;
+  const blrProxyAddress = await blr.getAddress();
+  const factoryProxyAddress = await factory.getAddress();
 
   // Get implementation addresses from proxy storage
   const blrImplAddress = await proxyAdmin.getProxyImplementation(blrProxyAddress);
@@ -127,7 +127,7 @@ export async function deployTupInfrastructureOnlyFixture(): Promise<TupInfrastru
 
   return {
     deployer,
-    proxyAdminAddress: proxyAdmin.address,
+    proxyAdminAddress: await proxyAdmin.getAddress(),
     proxyAdmin,
   };
 }
@@ -138,7 +138,7 @@ export async function deployTupInfrastructureOnlyFixture(): Promise<TupInfrastru
  * @param signer - Signer to deploy with
  * @returns Deployed V2 implementation address and details
  */
-export async function deployBlrV2Implementation(signer: SignerWithAddress): Promise<V2ImplementationResult> {
+export async function deployBlrV2Implementation(signer: HardhatEthersSigner): Promise<V2ImplementationResult> {
   configureLogger({ level: LogLevel.SILENT });
 
   const factory = new BusinessLogicResolver__factory(signer);
@@ -163,7 +163,7 @@ export async function deployBlrV2Implementation(signer: SignerWithAddress): Prom
  * @param signer - Signer to deploy with
  * @returns Deployed V2 implementation address and details
  */
-export async function deployFactoryV2Implementation(signer: SignerWithAddress): Promise<V2ImplementationResult> {
+export async function deployFactoryV2Implementation(signer: HardhatEthersSigner): Promise<V2ImplementationResult> {
   configureLogger({ level: LogLevel.SILENT });
 
   const factory = new Factory__factory(signer);
@@ -188,7 +188,7 @@ export async function deployFactoryV2Implementation(signer: SignerWithAddress): 
  * @param signer - Signer to deploy with
  * @returns Mock contract address
  */
-export async function createMockImplementation(signer: SignerWithAddress): Promise<string> {
+export async function createMockImplementation(signer: HardhatEthersSigner): Promise<string> {
   configureLogger({ level: LogLevel.SILENT });
 
   // Deploy a minimal contract that can serve as an implementation
