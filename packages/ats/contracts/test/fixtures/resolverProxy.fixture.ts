@@ -19,12 +19,12 @@ import { deployBlrFixture } from "./integration.fixture";
 import { deployContract, registerFacets } from "@scripts/infrastructure";
 import { atsRegistry } from "@scripts/domain";
 import {
-  DiamondCutFacet__factory,
+  DiamondFacet__factory,
   AccessControlFacet__factory,
   BusinessLogicResolver__factory,
   ResolverProxy__factory,
 } from "@contract-types";
-import type { BusinessLogicResolver, DiamondCutFacet, AccessControlFacet } from "@contract-types";
+import type { BusinessLogicResolver, DiamondFacet, AccessControlFacet } from "@contract-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import type { Contract } from "ethers";
 
@@ -62,7 +62,7 @@ export interface ResolverProxyFixtureResult {
   /** ResolverProxy address */
   proxyAddress: string;
   /** DiamondCutFacet interface connected to proxy */
-  diamondCutFacet: DiamondCutFacet;
+  diamondCutFacet: DiamondFacet;
   /** AccessControlFacet interface connected to proxy */
   accessControlFacet: AccessControlFacet;
   /** Deployed facet addresses by name */
@@ -96,7 +96,7 @@ export async function deployResolverProxyFixture(): Promise<ResolverProxyFixture
   const unknownSigner = signers.at(-1)!;
 
   // Deploy minimal required facets for ResolverProxy
-  const facetNames = ["DiamondCutFacet", "DiamondFacet", "AccessControlFacet"];
+  const facetNames = ["DiamondFacet", "AccessControlFacet"];
   const facetAddresses: Record<string, string> = {};
 
   for (const name of facetNames) {
@@ -147,7 +147,7 @@ export async function deployResolverProxyFixture(): Promise<ResolverProxyFixture
   await resolverProxy.deployed();
 
   // Connect facet interfaces to proxy for convenient access
-  const diamondCutFacet = DiamondCutFacet__factory.connect(resolverProxy.address, deployer);
+  const diamondCutFacet = DiamondFacet__factory.connect(resolverProxy.address, deployer);
   const accessControlFacet = AccessControlFacet__factory.connect(resolverProxy.address, deployer);
 
   return {

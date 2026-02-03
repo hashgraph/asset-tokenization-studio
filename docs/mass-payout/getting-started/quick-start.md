@@ -147,7 +147,7 @@ The backend uses DFNS for secure transaction signing. Configure your DFNS wallet
 # Service Account Authentication
 DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN=your_dfns_service_account_token_here
 DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID=cr-xxxxx-xxxxx-xxxxxxxxxxxxxxxxx
-DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH="-----BEGIN EC PRIVATE KEY-----
+DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_OR_PATH="-----BEGIN EC PRIVATE KEY-----
 your_private_key_here
 -----END EC PRIVATE KEY-----"
 

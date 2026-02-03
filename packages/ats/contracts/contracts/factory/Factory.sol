@@ -166,8 +166,7 @@ contract Factory is IFactory, Common {
 
         IKpiLinkedRate(bondAddress_).initialize_KpiLinkedRate(
             _bondKpiLinkedRateData.interestRate,
-            _bondKpiLinkedRateData.impactData,
-            _bondKpiLinkedRateData.kpiOracle
+            _bondKpiLinkedRateData.impactData
         );
 
         emit BondKpiLinkedRateDeployed(_msgSender(), bondAddress_, _bondKpiLinkedRateData);

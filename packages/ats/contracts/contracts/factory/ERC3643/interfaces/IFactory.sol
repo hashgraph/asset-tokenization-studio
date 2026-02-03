@@ -61,7 +61,6 @@ interface TRexIFactory {
         FactoryRegulationData factoryRegulationData;
         IKpiLinkedRate.InterestRate interestRate;
         IKpiLinkedRate.ImpactData impactData;
-        address kpiOracle;
     }
 
     struct BondSustainabilityPerformanceTargetRateData {

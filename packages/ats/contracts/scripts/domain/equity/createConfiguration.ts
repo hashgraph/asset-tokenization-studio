@@ -46,6 +46,7 @@ const EQUITY_FACETS = [
   "KycFacet",
   "PauseFacet",
   "SnapshotsFacet",
+  "TotalBalanceFacet",
 
   // ERC Standards (13)
   "ERC1410IssuerFacet",

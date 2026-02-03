@@ -53,7 +53,7 @@ await network.connect({
   custodialWalletSettings: {
     serviceAccountAuthToken: process.env.DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN,
     serviceAccountCredentialId: process.env.DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID,
-    serviceAccountPrivateKey: process.env.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH,
+    serviceAccountPrivateKey: process.env.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_OR_PATH,
     appId: process.env.DFNS_APP_ID,
     appOrigin: process.env.DFNS_APP_ORIGIN,
     baseUrl: process.env.DFNS_BASE_URL,
@@ -69,7 +69,7 @@ Environment variables:
 ```bash
 DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN=eyJ0eXAiOiJKV1QiLCJhbGc...
 DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID=cr-xxxxx-xxxxx-xxxxx
-DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH="-----BEGIN EC PRIVATE KEY-----\n...\n-----END EC PRIVATE KEY-----"
+DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_OR_PATH="-----BEGIN EC PRIVATE KEY-----\n...\n-----END EC PRIVATE KEY-----"
 DFNS_APP_ID=ap-xxxxx-xxxxx-xxxxx
 DFNS_APP_ORIGIN=http://localhost:3000
 DFNS_BASE_URL=https://api.dfns.ninja

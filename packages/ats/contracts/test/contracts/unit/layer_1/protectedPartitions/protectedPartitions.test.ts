@@ -14,7 +14,7 @@ import {
   type SsiManagementFacet,
   type IHold,
   ComplianceMock,
-  DiamondCutFacet,
+  DiamondFacet,
 } from "@contract-types";
 import { DEFAULT_PARTITION, ZERO, EMPTY_STRING, ADDRESS_ZERO, ATS_ROLES } from "@scripts";
 import { Contract } from "ethers";
@@ -218,7 +218,7 @@ describe("ProtectedPartitions Tests", () => {
   let protectedClearingOperation: ProtectedClearingOperationData;
   let complianceMock: ComplianceMock;
   let complianceMockAddress: string;
-  let diamondCutFacet: DiamondCutFacet;
+  let diamondCutFacet: DiamondFacet;
 
   async function grant_WILD_CARD_ROLE_and_issue_tokens(
     wildCard_Account: string,
@@ -270,7 +270,7 @@ describe("ProtectedPartitions Tests", () => {
     accessControlFacet = await ethers.getContractAt("AccessControl", address);
     kycFacet = await ethers.getContractAt("KycFacet", address);
     ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", address);
-    diamondCutFacet = await ethers.getContractAt("DiamondCutFacet", address);
+    diamondCutFacet = await ethers.getContractAt("DiamondFacet", address);
 
     const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", address, signer_A);
 

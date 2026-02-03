@@ -155,6 +155,7 @@ export const SecurityDetailsExtended = ({
     }
 
     return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, id, nominalValue, tProperties, bondDetailsResponse, compliance, identityRegistry]);
 
   return (

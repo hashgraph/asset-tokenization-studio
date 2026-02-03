@@ -1,69 +1,54 @@
-import { useMemo } from 'react';
-import type { tabsAnatomy as ChakraTabsAnatomy } from '@chakra-ui/anatomy';
-import type { ComponentWithAs } from '@chakra-ui/system';
-import { forwardRef } from '@chakra-ui/system';
-import { useMultiStyleConfig as useChakraMultiStyleConfig } from '@chakra-ui/react';
+import { useMemo } from "react";
+import type { tabsAnatomy as ChakraTabsAnatomy } from "@chakra-ui/anatomy";
+import type { ComponentWithAs } from "@chakra-ui/system";
+import { forwardRef } from "@chakra-ui/system";
+import { useMultiStyleConfig as useChakraMultiStyleConfig } from "@chakra-ui/react";
 import type {
   TabListProps as ChakraTabListProps,
   TabPanelsProps as ChakraTabPanelsProps,
   TabProps as ChakraTabProps,
   TabsProps as ChakraTabsProps,
-} from '@chakra-ui/tabs';
+} from "@chakra-ui/tabs";
 import {
   Tab as ChakraTab,
   TabList as ChakraTabList,
   TabPanel as ChakraTabPanel,
   TabPanels as ChakraTabPanels,
   Tabs as ChakraTabs,
-} from '@chakra-ui/tabs';
-import type { ReactNode } from 'react';
-import { BaseMultiStyleConfiguration } from '../BaseMultiStyleConfiguration';
+} from "@chakra-ui/tabs";
+import type { ReactNode } from "react";
+import { BaseMultiStyleConfiguration } from "../BaseMultiStyleConfiguration";
 
 export const panelTabsPartsList: typeof ChakraTabsAnatomy.keys = [
-  'root',
-  'tab',
-  'tablist',
-  'tabpanel',
-  'tabpanels',
-  'indicator',
+  "root",
+  "tab",
+  "tablist",
+  "tabpanel",
+  "tabpanels",
+  "indicator",
 ];
 
 type Parts = typeof panelTabsPartsList;
 
-export interface PanelTabsThemeConfiguration
-  extends BaseMultiStyleConfiguration<Parts> {}
+export interface PanelTabsThemeConfiguration extends BaseMultiStyleConfiguration<Parts> {}
 
-export interface PanelTabProps
-  extends Omit<ChakraTabProps, 'children' | 'content'> {
+export interface PanelTabProps extends Omit<ChakraTabProps, "children" | "content"> {
   header: string | ReactNode;
   content: string | ReactNode;
 }
-export interface PanelTabsProps extends Omit<ChakraTabsProps, 'children'> {
+export interface PanelTabsProps extends Omit<ChakraTabsProps, "children"> {
   tabs: PanelTabProps[];
   listProps?: ChakraTabListProps;
   panelsProps?: ChakraTabPanelsProps;
   variant?: string;
 }
-export const PanelTabs: ComponentWithAs<'div', PanelTabsProps> = forwardRef<
-  PanelTabsProps,
-  'div'
->(
-  (
-    {
-      tabs,
-      listProps,
-      panelsProps,
-      variant,
-      isFitted: isFittedArg,
-      ...props
-    }: PanelTabsProps,
-    ref,
-  ) => {
+export const PanelTabs: ComponentWithAs<"div", PanelTabsProps> = forwardRef<PanelTabsProps, "div">(
+  ({ tabs, listProps, panelsProps, variant, isFitted: isFittedArg, ...props }: PanelTabsProps, ref) => {
     const isFitted = useMemo(() => {
       if (isFittedArg) return true;
     }, [isFittedArg]);
 
-    const styles = useChakraMultiStyleConfig('PanelTabs', {
+    const styles = useChakraMultiStyleConfig("PanelTabs", {
       variant,
       isFitted,
     });

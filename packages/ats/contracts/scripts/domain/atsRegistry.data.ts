@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-23T09:09:54.578Z
- * Facets: 193
+ * Generated: 2026-01-28T12:33:30.537Z
+ * Facets: 196
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -115,12 +115,8 @@ import {
   CorporateActionsKpiLinkedRateFacetTimeTravel__factory,
   CorporateActionsSustainabilityPerformanceTargetRateFacet__factory,
   CorporateActionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
-  DiamondCutFacet__factory,
-  DiamondCutFacetTimeTravel__factory,
   DiamondFacet__factory,
   DiamondFacetTimeTravel__factory,
-  DiamondLoupeFacet__factory,
-  DiamondLoupeFacetTimeTravel__factory,
   ERC1410IssuerFacet__factory,
   ERC1410IssuerFacetTimeTravel__factory,
   ERC1410IssuerFixedRateFacet__factory,
@@ -295,6 +291,8 @@ import {
   HoldTokenHolderSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KpiLinkedRateFacet__factory,
   KpiLinkedRateFacetTimeTravel__factory,
+  KpisKpiLinkedRateFacet__factory,
+  KpisKpiLinkedRateFacetTimeTravel__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
   KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KycFacet__factory,
@@ -396,6 +394,14 @@ import {
   SustainabilityPerformanceTargetRateFacet__factory,
   SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   TimeTravelFacet__factory,
+  TotalBalanceFacet__factory,
+  TotalBalanceFacetTimeTravel__factory,
+  TotalBalanceFixedRateFacet__factory,
+  TotalBalanceFixedRateFacetTimeTravel__factory,
+  TotalBalanceKpiLinkedRateFacet__factory,
+  TotalBalanceKpiLinkedRateFacetTimeTravel__factory,
+  TotalBalanceSustainabilityPerformanceTargetRateFacet__factory,
+  TotalBalanceSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   TransferAndLockFacet__factory,
   TransferAndLockFacetTimeTravel__factory,
   TransferAndLockFixedRateFacet__factory,
@@ -495,7 +501,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "AccountNotAssignedToRole(bytes32,address)",
         selector: "0x3ad9a7ae",
       },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "RolesNotApplied", signature: "RolesNotApplied(bytes32[],bool[],address)", selector: "0xaa4b6234" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -587,7 +592,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "AccountNotAssignedToRole(bytes32,address)",
         selector: "0x3ad9a7ae",
       },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
       { name: "RolesNotApplied", signature: "RolesNotApplied(bytes32[],bool[],address)", selector: "0xaa4b6234" },
     ],
@@ -682,7 +686,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "AccountNotAssignedToRole(bytes32,address)",
         selector: "0x3ad9a7ae",
       },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       { name: "RolesNotApplied", signature: "RolesNotApplied(bytes32[],bool[],address)", selector: "0xaa4b6234" },
     ],
@@ -694,6 +697,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   AccessControlSustainabilityPerformanceTargetRateFacet: {
     name: "AccessControlSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ACCESS_CONTROL_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x9d13e61abd630355ccae4279993868d7cf3b04d4368a0fedcefe6fec3fabaa0c",
+    },
     methods: [
       {
         name: "applyRoles",
@@ -763,7 +770,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe2d77e44",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new AdjustBalancesFacetTimeTravel__factory(signer) : new AdjustBalancesFacet__factory(signer),
   },
@@ -782,10 +788,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe2d77e44",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new AdjustBalancesFixedRateFacetTimeTravel__factory(signer)
@@ -806,10 +809,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe2d77e44",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new AdjustBalancesKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -818,6 +818,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   AdjustBalancesSustainabilityPerformanceTargetRateFacet: {
     name: "AdjustBalancesSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_BALANCE_ADJUSTMENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xc9e1f8d7c6b5a4e3f2d1c9b8a7e6f5d4c3b2a1e9f8d7c6b5a4e3f2d1c9b8a7e6",
+    },
     methods: [
       {
         name: "adjustBalances",
@@ -874,7 +878,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new BondUSAFacetTimeTravel__factory(signer) : new BondUSAFacet__factory(signer),
   },
@@ -922,10 +925,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new BondUSAFixedRateFacetTimeTravel__factory(signer) : new BondUSAFixedRateFacet__factory(signer),
   },
@@ -973,10 +973,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new BondUSAKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -1071,7 +1068,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new BondUSAReadFacetTimeTravel__factory(signer) : new BondUSAReadFacet__factory(signer),
   },
@@ -1164,10 +1160,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new BondUSAReadFixedRateFacetTimeTravel__factory(signer)
@@ -1262,10 +1255,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -1274,6 +1264,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   BondUSAReadSustainabilityPerformanceTargetRateFacet: {
     name: "BondUSAReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY",
+      value: "0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504",
+    },
     methods: [
       {
         name: "getBondDetails",
@@ -1363,6 +1357,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   BondUSASustainabilityPerformanceTargetRateFacet: {
     name: "BondUSASustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x8048a878c656dcf3886e69ad27a9272a4fb9499299ab5f0e1b6c99ac3b1130f8",
+    },
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -1433,7 +1431,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b69647",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new CapFacetTimeTravel__factory(signer) : new CapFacet__factory(signer),
   },
@@ -1473,10 +1470,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b69647",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new CapFixedRateFacetTimeTravel__factory(signer) : new CapFixedRateFacet__factory(signer),
   },
@@ -1516,10 +1510,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b69647",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new CapKpiLinkedRateFacetTimeTravel__factory(signer) : new CapKpiLinkedRateFacet__factory(signer),
   },
@@ -1638,7 +1629,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingActionsFacetTimeTravel__factory(signer) : new ClearingActionsFacet__factory(signer),
   },
@@ -1717,10 +1707,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingActionsFixedRateFacetTimeTravel__factory(signer)
@@ -1801,10 +1788,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingActionsKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -1813,6 +1797,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingActionsSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingActionsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_ACTIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xae9d6d2e1d9a660994e89e185ab5a3439d2def9baa6ba47fdf854ce0a29a5033",
+    },
     methods: [
       {
         name: "activateClearing",
@@ -1898,7 +1886,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9b646ab9",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingHoldCreationFacetTimeTravel__factory(signer)
@@ -1944,10 +1931,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9b646ab9",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingHoldCreationFixedRateFacetTimeTravel__factory(signer)
@@ -1993,10 +1977,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9b646ab9",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingHoldCreationKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -2005,6 +1986,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingHoldCreationSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingHoldCreationSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_HOLDCREATION_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x0e59e36a2b1298d11c3612c3203c6d45cb185879383f5a22617c4f49495c070d",
+    },
     methods: [
       {
         name: "clearingCreateHoldByPartition",
@@ -2081,7 +2066,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcf38dab5",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingReadFacetTimeTravel__factory(signer) : new ClearingReadFacet__factory(signer),
   },
@@ -2124,10 +2108,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcf38dab5",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingReadFixedRateFacetTimeTravel__factory(signer)
@@ -2172,10 +2153,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcf38dab5",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingReadKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -2184,6 +2162,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingReadSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa188d3ee426a514ccfe03470d196ed29da48de0ae59898d9b5a30ec680515a11",
+    },
     methods: [
       {
         name: "getClearedAmountFor",
@@ -2260,7 +2242,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x498f1f65",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingRedeemFacetTimeTravel__factory(signer) : new ClearingRedeemFacet__factory(signer),
   },
@@ -2304,10 +2285,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x498f1f65",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingRedeemFixedRateFacetTimeTravel__factory(signer)
@@ -2353,10 +2331,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x498f1f65",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingRedeemKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -2365,6 +2340,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingRedeemSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingRedeemSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_REDEEM_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xc4731d62375990b9721357983c8f6acf3fdc78d7814919c187607f653b768d5d",
+    },
     methods: [
       {
         name: "clearingRedeemByPartition",
@@ -2442,7 +2421,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1f4eef27",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingTransferFacetTimeTravel__factory(signer) : new ClearingTransferFacet__factory(signer),
   },
@@ -2486,10 +2464,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1f4eef27",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingTransferFixedRateFacetTimeTravel__factory(signer)
@@ -2535,10 +2510,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1f4eef27",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingTransferKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -2547,6 +2519,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ClearingTransferSustainabilityPerformanceTargetRateFacet: {
     name: "ClearingTransferSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CLEARING_TRANSFER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x7e29efe8ee5285a43acddbe766fd9219266a74cb24ed3331b4e350d8e263d0c7",
+    },
     methods: [
       {
         name: "clearingTransferByPartition",
@@ -2643,7 +2619,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
@@ -2709,7 +2684,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
@@ -2778,7 +2752,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
@@ -2791,6 +2764,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ControlListSustainabilityPerformanceTargetRateFacet: {
     name: "ControlListSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CONTROL_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe3fbab5a4ccf7a873a9601bf5494c43f6e4b53218ff8310ec97811471397b3cf",
+    },
     methods: [
       {
         name: "addToControlList",
@@ -2897,7 +2874,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "DuplicatedCorporateAction(bytes32,bytes)",
         selector: "0x3266e9e3",
       },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new CorporateActionsFacetTimeTravel__factory(signer) : new CorporateActionsFacet__factory(signer),
@@ -2965,7 +2941,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "DuplicatedCorporateAction(bytes32,bytes)",
         selector: "0x3266e9e3",
       },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -3036,7 +3011,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "DuplicatedCorporateAction(bytes32,bytes)",
         selector: "0x3266e9e3",
       },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -3047,6 +3021,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   CorporateActionsSustainabilityPerformanceTargetRateFacet: {
     name: "CorporateActionsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_CORPORATE_ACTIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa4a23267cb0a22c52bd05b12e644136bc38b7ac51218a0cb3aed166697caa79e",
+    },
     methods: [
       {
         name: "actionContentHashExists",
@@ -3095,47 +3073,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new CorporateActionsSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
-  DiamondCutFacet: {
-    name: "DiamondCutFacet",
-    resolverKey: {
-      name: "_DIAMOND_CUT_RESOLVER_KEY",
-      value: "0xb66fc45b2670ed2c4ce03061121e6c8e53bce06e161f95afad8e57671b64fca8",
-    },
-    inheritance: ["IDiamondCut", "ResolverProxyUnstructured"],
-    methods: [
-      {
-        name: "getConfigInfo",
-        signature:
-          "function getConfigInfo() view returns (address resolver_, bytes32 configurationId_, uint256 version_)",
-        selector: "0x78a1bf05",
-      },
-      {
-        name: "updateConfig",
-        signature: "function updateConfig(bytes32 _newConfigurationId, uint256 _newVersion)",
-        selector: "0x0b3bad61",
-      },
-      {
-        name: "updateConfigVersion",
-        signature: "function updateConfigVersion(uint256 _newVersion)",
-        selector: "0x002eeb22",
-      },
-      {
-        name: "updateResolver",
-        signature: "function updateResolver(address _newResolver, bytes32 _newConfigurationId, uint256 _newVersion)",
-        selector: "0xe5d3a872",
-      },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new DiamondCutFacetTimeTravel__factory(signer) : new DiamondCutFacet__factory(signer),
-  },
-
   DiamondFacet: {
     name: "DiamondFacet",
     resolverKey: {
       name: "_DIAMOND_RESOLVER_KEY",
       value: "0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78",
     },
-    inheritance: ["IDiamond", "DiamondCutFacet", "DiamondLoupeFacet"],
+    inheritance: ["IDiamond", "DiamondCut", "DiamondLoupe"],
     methods: [
       {
         name: "getConfigInfo",
@@ -3237,95 +3181,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new DiamondFacetTimeTravel__factory(signer) : new DiamondFacet__factory(signer),
-  },
-
-  DiamondLoupeFacet: {
-    name: "DiamondLoupeFacet",
-    resolverKey: {
-      name: "_DIAMOND_LOUPE_RESOLVER_KEY",
-      value: "0x086a1dd0b9bfa39267d1de30445a8edeb3a1f50c8a0a82c91f9dee3608e83567",
-    },
-    inheritance: ["IDiamondLoupe", "IERC165", "ResolverProxyUnstructured"],
-    methods: [
-      {
-        name: "getFacet",
-        signature:
-          "function getFacet(bytes32 _facetId) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds) facet_)",
-        selector: "0xe317d12f",
-      },
-      {
-        name: "getFacetAddress",
-        signature: "function getFacetAddress(bytes4 _selector) view returns (address facetAddress_)",
-        selector: "0x7a070c2d",
-      },
-      {
-        name: "getFacetAddresses",
-        signature: "function getFacetAddresses() view returns (address[] facetAddresses_)",
-        selector: "0x3bed2f49",
-      },
-      {
-        name: "getFacetAddressesByPage",
-        signature:
-          "function getFacetAddressesByPage(uint256 _pageIndex, uint256 _pageLength) view returns (address[] facetAddresses_)",
-        selector: "0x9fea53e7",
-      },
-      {
-        name: "getFacetIdBySelector",
-        signature: "function getFacetIdBySelector(bytes4 _selector) view returns (bytes32 facetId_)",
-        selector: "0xb3fd6894",
-      },
-      {
-        name: "getFacetIds",
-        signature: "function getFacetIds() view returns (bytes32[] facetIds_)",
-        selector: "0xcd25d535",
-      },
-      {
-        name: "getFacetIdsByPage",
-        signature:
-          "function getFacetIdsByPage(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] facetIds_)",
-        selector: "0x20202e6d",
-      },
-      {
-        name: "getFacetSelectors",
-        signature: "function getFacetSelectors(bytes32 _facetId) view returns (bytes4[] facetSelectors_)",
-        selector: "0x8214de3e",
-      },
-      {
-        name: "getFacetSelectorsByPage",
-        signature:
-          "function getFacetSelectorsByPage(bytes32 _facetId, uint256 _pageIndex, uint256 _pageLength) view returns (bytes4[] facetSelectors_)",
-        selector: "0x39a9e956",
-      },
-      {
-        name: "getFacetSelectorsLength",
-        signature: "function getFacetSelectorsLength(bytes32 _facetId) view returns (uint256 facetSelectorsLength_)",
-        selector: "0xca1f70ec",
-      },
-      {
-        name: "getFacets",
-        signature:
-          "function getFacets() view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
-        selector: "0x662ea47d",
-      },
-      {
-        name: "getFacetsByPage",
-        signature:
-          "function getFacetsByPage(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
-        selector: "0xbf02c5b9",
-      },
-      {
-        name: "getFacetsLength",
-        signature: "function getFacetsLength() view returns (uint256 facetsLength_)",
-        selector: "0x430720f9",
-      },
-      {
-        name: "supportsInterface",
-        signature: "function supportsInterface(bytes4 _interfaceId) view returns (bool)",
-        selector: "0x01ffc9a7",
-      },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new DiamondLoupeFacetTimeTravel__factory(signer) : new DiamondLoupeFacet__factory(signer),
   },
 
   EquityUSAFacet: {
@@ -3456,7 +3311,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5adaa49e",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new EquityUSAFacetTimeTravel__factory(signer) : new EquityUSAFacet__factory(signer),
   },
@@ -3476,7 +3330,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x18180262",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1410IssuerFacetTimeTravel__factory(signer) : new ERC1410IssuerFacet__factory(signer),
   },
@@ -3496,10 +3349,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x18180262",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410IssuerFixedRateFacetTimeTravel__factory(signer)
@@ -3521,10 +3371,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x18180262",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410IssuerKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -3533,6 +3380,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1410IssuerSustainabilityPerformanceTargetRateFacet: {
     name: "ERC1410IssuerSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_ISSUER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x4d5a3964d29183253487011c31ec3e09977b5eded43c8a3a222a2e53f4282f61",
+    },
     methods: [
       {
         name: "issueByPartition",
@@ -3597,7 +3448,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b5ef4a",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410ManagementFacetTimeTravel__factory(signer)
@@ -3654,10 +3504,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b5ef4a",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410ManagementFixedRateFacetTimeTravel__factory(signer)
@@ -3714,10 +3561,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b5ef4a",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410ManagementKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -3726,6 +3570,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1410ManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ERC1410ManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x6768fcc73686ddd306656061b0e415208ded041927d9935de3747583559d0c5e",
+    },
     methods: [
       {
         name: "controllerRedeemByPartition",
@@ -3838,7 +3686,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa26734dc",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1410ReadFacetTimeTravel__factory(signer) : new ERC1410ReadFacet__factory(signer),
   },
@@ -3906,10 +3753,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa26734dc",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410ReadFixedRateFacetTimeTravel__factory(signer)
@@ -3979,10 +3823,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa26734dc",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410ReadKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -3991,6 +3832,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1410ReadSustainabilityPerformanceTargetRateFacet: {
     name: "ERC1410ReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x7c15e98edcc41b3177b8cfff7055cd57b47000fd843fce22e7ead13f07e346b6",
+    },
     methods: [
       {
         name: "balanceOf",
@@ -4090,7 +3935,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x6afb79db",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410TokenHolderFacetTimeTravel__factory(signer)
@@ -4134,10 +3978,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x6afb79db",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410TokenHolderFixedRateFacetTimeTravel__factory(signer)
@@ -4181,10 +4022,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x6afb79db",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410TokenHolderKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -4193,6 +4031,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet: {
     name: "ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1410_TOKEN_HOLDER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x6e21f1ca6d12f08b0d36f08711a48500d02dcf7edd2e8b87e4de350b98df4822",
+    },
     methods: [
       { name: "authorizeOperator", signature: "function authorizeOperator(address _operator)", selector: "0x959b8c3f" },
       {
@@ -4285,7 +4127,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1594FacetTimeTravel__factory(signer) : new ERC1594Facet__factory(signer),
   },
@@ -4346,10 +4187,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1594FixedRateFacetTimeTravel__factory(signer) : new ERC1594FixedRateFacet__factory(signer),
   },
@@ -4410,10 +4248,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1594KpiLinkedRateFacetTimeTravel__factory(signer)
@@ -4422,6 +4257,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1594SustainabilityPerformanceTargetRateFacet: {
     name: "ERC1594SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1594_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x2c5f8a3d6e9b1f4c7a2e5d8b1f4c7a2e5d8b1f4c7a2e5d8b1f4c7a2e5d8b1f4c",
+    },
     methods: [
       {
         name: "canTransfer",
@@ -4507,7 +4346,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "EmptyHASH", signature: "EmptyHASH()", selector: "0x402e72be" },
       { name: "EmptyName", signature: "EmptyName()", selector: "0x2ef13105" },
       { name: "EmptyURI", signature: "EmptyURI()", selector: "0xd07b00d6" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1643FacetTimeTravel__factory(signer) : new ERC1643Facet__factory(signer),
@@ -4555,7 +4393,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "EmptyHASH", signature: "EmptyHASH()", selector: "0x402e72be" },
       { name: "EmptyName", signature: "EmptyName()", selector: "0x2ef13105" },
       { name: "EmptyURI", signature: "EmptyURI()", selector: "0xd07b00d6" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -4604,7 +4441,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "EmptyHASH", signature: "EmptyHASH()", selector: "0x402e72be" },
       { name: "EmptyName", signature: "EmptyName()", selector: "0x2ef13105" },
       { name: "EmptyURI", signature: "EmptyURI()", selector: "0xd07b00d6" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -4615,6 +4451,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1643SustainabilityPerformanceTargetRateFacet: {
     name: "ERC1643SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1643_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x5f8d2a3e6c9f1d4e7a2f5c8d1e4f7c2e5d8f1e4c7d2f5e8d1f4c7e2d5f8d1f4c",
+    },
     methods: [
       {
         name: "getAllDocuments",
@@ -4666,7 +4506,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1644FacetTimeTravel__factory(signer) : new ERC1644Facet__factory(signer),
   },
@@ -4698,10 +4537,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1644FixedRateFacetTimeTravel__factory(signer) : new ERC1644FixedRateFacet__factory(signer),
   },
@@ -4733,10 +4569,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1644KpiLinkedRateFacetTimeTravel__factory(signer)
@@ -4745,6 +4578,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC1644SustainabilityPerformanceTargetRateFacet: {
     name: "ERC1644SustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC1644_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x8b2f5e3d6f9c2e5d8f1e4c7d2e5f8d1f4c7e2d5f8d1f4c7e2d5f8d1f4c7e2d5f",
+    },
     methods: [
       {
         name: "controllerRedeem",
@@ -4837,7 +4674,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x46bcf81f2ddc9f000abc20dea52d3061e6deb0c928ad04616fd2bee32e475440",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC20FacetTimeTravel__factory(signer) : new ERC20Facet__factory(signer),
   },
@@ -4908,10 +4744,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x46bcf81f2ddc9f000abc20dea52d3061e6deb0c928ad04616fd2bee32e475440",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC20FixedRateFacetTimeTravel__factory(signer) : new ERC20FixedRateFacet__factory(signer),
   },
@@ -4982,10 +4815,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x46bcf81f2ddc9f000abc20dea52d3061e6deb0c928ad04616fd2bee32e475440",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC20KpiLinkedRateFacetTimeTravel__factory(signer)
@@ -5015,7 +4845,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "ERC2612ExpiredSignature", signature: "ERC2612ExpiredSignature(uint256)", selector: "0x62791302" },
       { name: "ERC2612InvalidSigner", signature: "ERC2612InvalidSigner(address,address)", selector: "0x4b800e46" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC20PermitFacetTimeTravel__factory(signer) : new ERC20PermitFacet__factory(signer),
@@ -5044,7 +4873,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "ERC2612ExpiredSignature", signature: "ERC2612ExpiredSignature(uint256)", selector: "0x62791302" },
       { name: "ERC2612InvalidSigner", signature: "ERC2612InvalidSigner(address,address)", selector: "0x4b800e46" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -5076,7 +4904,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "ERC2612ExpiredSignature", signature: "ERC2612ExpiredSignature(uint256)", selector: "0x62791302" },
       { name: "ERC2612InvalidSigner", signature: "ERC2612InvalidSigner(address,address)", selector: "0x4b800e46" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -5229,7 +5056,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "AbafChangeForBlockForbidden(uint256)",
         selector: "0x5a2afdff",
       },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC20VotesFacetTimeTravel__factory(signer) : new ERC20VotesFacet__factory(signer),
@@ -5290,7 +5116,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "AbafChangeForBlockForbidden(uint256)",
         selector: "0x5a2afdff",
       },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -5354,7 +5179,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "AbafChangeForBlockForbidden(uint256)",
         selector: "0x5a2afdff",
       },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -5446,7 +5270,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x88d695b2",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC3643BatchFacetTimeTravel__factory(signer) : new ERC3643BatchFacet__factory(signer),
   },
@@ -5480,10 +5303,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x88d695b2",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC3643BatchFixedRateFacetTimeTravel__factory(signer)
@@ -5519,10 +5339,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x88d695b2",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC3643BatchKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -5631,7 +5448,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
       { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
       { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
       {
         name: "InputAmountsArrayLengthMismatch",
@@ -5715,7 +5531,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
       { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
       { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
       {
         name: "InputAmountsArrayLengthMismatch",
@@ -5800,7 +5615,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
       { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
       { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
       {
         name: "InputAmountsArrayLengthMismatch",
@@ -5819,6 +5633,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC3643ManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ERC3643ManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC3643_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x324a20f20a55098c207cd0bc42498561962995b82918d6a9697320c42c5b11fa",
+    },
     methods: [
       { name: "addAgent", signature: "function addAgent(address _agent)", selector: "0x84e79842" },
       {
@@ -5865,7 +5683,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC3643OperationsFacetTimeTravel__factory(signer)
@@ -5888,10 +5705,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC3643OperationsFixedRateFacetTimeTravel__factory(signer)
@@ -5914,10 +5728,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC3643OperationsKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -5926,6 +5737,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ERC3643OperationsSustainabilityPerformanceTargetRateFacet: {
     name: "ERC3643OperationsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_ERC3643_OPERATIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xbe85d38775742687362efc4fc0ffed08044614079fc51bbf7b0f29e11d3ffafa",
+    },
     methods: [
       { name: "burn", signature: "function burn(address _userAddress, uint256 _amount)", selector: "0x9dc29fac" },
       {
@@ -5964,7 +5779,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "onchainID", signature: "function onchainID() view returns (address)", selector: "0xaba63705" },
       { name: "version", signature: "function version() view returns (string)", selector: "0x54fd4d50" },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC3643ReadFacetTimeTravel__factory(signer) : new ERC3643ReadFacet__factory(signer),
   },
@@ -5992,10 +5806,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "onchainID", signature: "function onchainID() view returns (address)", selector: "0xaba63705" },
       { name: "version", signature: "function version() view returns (string)", selector: "0x54fd4d50" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC3643ReadFixedRateFacetTimeTravel__factory(signer)
@@ -6025,10 +5836,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "onchainID", signature: "function onchainID() view returns (address)", selector: "0xaba63705" },
       { name: "version", signature: "function version() view returns (string)", selector: "0x54fd4d50" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC3643ReadKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -6127,7 +5935,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ExternalControlListsNotUpdated",
         signature: "ExternalControlListsNotUpdated(address[],bool[])",
@@ -6246,6 +6053,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalControlListManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ExternalControlListManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_CONTROL_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x2c56accbf6faf923cd323935455dac00c2ddffe08f0becdf49d515e4b4d355af",
+    },
     methods: [
       {
         name: "addExternalControlList",
@@ -6359,7 +6170,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ExternalKycListsNotUpdated",
         signature: "ExternalKycListsNotUpdated(address[],bool[])",
@@ -6442,7 +6252,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ExternalKycListsNotUpdated",
         signature: "ExternalKycListsNotUpdated(address[],bool[])",
@@ -6515,6 +6324,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalKycListManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ExternalKycListManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_KYC_LIST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x0fcfeebcf118ca3c39fbed0e2a527a866cac42bbd3fcad5f9b4f755ef97f3aa9",
+    },
     methods: [
       {
         name: "addExternalKycList",
@@ -6627,7 +6440,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ExternalPausesNotUpdated",
         signature: "ExternalPausesNotUpdated(address[],bool[])",
@@ -6705,7 +6517,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ExternalPausesNotUpdated",
         signature: "ExternalPausesNotUpdated(address[],bool[])",
@@ -6784,7 +6595,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ExternalPausesNotUpdated",
         signature: "ExternalPausesNotUpdated(address[],bool[])",
@@ -6802,6 +6612,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ExternalPauseManagementSustainabilityPerformanceTargetRateFacet: {
     name: "ExternalPauseManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_EXTERNAL_PAUSE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x07846b678053cbd4be5d9d3929fa9af5ab76bb508a0f7957f5239302aad45bc3",
+    },
     methods: [
       {
         name: "addExternalPause",
@@ -6877,10 +6691,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xa7fd66e9450da5029fb2dfd59586274386eb4c169bfc873e265aa29d3df59424",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new FixedRateFacetTimeTravel__factory(signer) : new FixedRateFacet__factory(signer),
   },
@@ -6951,7 +6762,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new FreezeFacetTimeTravel__factory(signer) : new FreezeFacet__factory(signer),
   },
@@ -7022,10 +6832,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new FreezeFixedRateFacetTimeTravel__factory(signer) : new FreezeFixedRateFacet__factory(signer),
   },
@@ -7096,10 +6903,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new FreezeKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -7108,6 +6912,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   FreezeSustainabilityPerformanceTargetRateFacet: {
     name: "FreezeSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_FREEZE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x25ca5cbe52a82389e142792fdab2ffc58f224f2628f9a92a3f717134cbe229e4",
+    },
     methods: [
       {
         name: "batchFreezePartialTokens",
@@ -7195,7 +7003,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new HoldManagementFacetTimeTravel__factory(signer) : new HoldManagementFacet__factory(signer),
   },
@@ -7244,10 +7051,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new HoldManagementFixedRateFacetTimeTravel__factory(signer)
@@ -7298,10 +7102,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new HoldManagementKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -7310,6 +7111,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   HoldManagementSustainabilityPerformanceTargetRateFacet: {
     name: "HoldManagementSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_HOLD_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x4574524c203fbcc0f5b9f08bcd2b9a9d47c5a9cf3a30eeb540a93a33a8a2f834",
+    },
     methods: [
       {
         name: "controllerCreateHoldByPartition",
@@ -7380,7 +7185,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xeb89899d",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new HoldReadFacetTimeTravel__factory(signer) : new HoldReadFacet__factory(signer),
   },
@@ -7429,10 +7233,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xeb89899d",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new HoldReadFixedRateFacetTimeTravel__factory(signer)
@@ -7483,10 +7284,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xeb89899d",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new HoldReadKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -7495,6 +7293,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   HoldReadSustainabilityPerformanceTargetRateFacet: {
     name: "HoldReadSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_HOLD_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x8e7113391652a4d3d8feb1d90990cd06ee33dc67a640b4400f8bfb9fae4f91b2",
+    },
     methods: [
       {
         name: "getHeldAmountFor",
@@ -7604,7 +7406,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new HoldTokenHolderFacetTimeTravel__factory(signer) : new HoldTokenHolderFacet__factory(signer),
   },
@@ -7675,10 +7476,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new HoldTokenHolderFixedRateFacetTimeTravel__factory(signer)
@@ -7751,10 +7549,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new HoldTokenHolderKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -7763,6 +7558,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   HoldTokenHolderSustainabilityPerformanceTargetRateFacet: {
     name: "HoldTokenHolderSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_HOLD_TOKEN_HOLDER_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x28ae4d4cdc1846ba348a31e222161d8343223560c1875fe3efcad8c5dd5f81e0",
+    },
     methods: [
       {
         name: "createHoldByPartition",
@@ -7822,15 +7621,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5257b566",
       },
       {
-        name: "getKpiOracle",
-        signature: "function getKpiOracle() view returns (address kpiOracle_)",
-        selector: "0x507ff519",
-      },
-      {
         name: "initialize_KpiLinkedRate",
         signature:
-          "function initialize_KpiLinkedRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData, address kpiOracle)",
-        selector: "0x9a613933",
+          "function initialize_KpiLinkedRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData)",
+        selector: "0x0b7c89d7",
       },
       {
         name: "setImpactData",
@@ -7844,7 +7638,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function setInterestRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _newInterestRate)",
         selector: "0x9a833a5b",
       },
-      { name: "setKpiOracle", signature: "function setKpiOracle(address _kpiOracle)", selector: "0xa6a7e233" },
     ],
     events: [
       {
@@ -7857,20 +7650,63 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "InterestRateUpdated(address,InterestRate)",
         topic0: "0xed3c060bc037e2b9f05c9d552119ccb2cf7499562ac630370d20178beb1583e7",
       },
-      {
-        name: "KpiOracleUpdated",
-        signature: "KpiOracleUpdated(address,address)",
-        topic0: "0xb1508b1e352d7d662c2797f56b267cd7f96db139d0ba747ffa2d007bf8a8e823",
-      },
     ],
     errors: [
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-      { name: "KpiOracleCalledFailed", signature: "KpiOracleCalledFailed()", selector: "0x75d7804c" },
       { name: "WrongImpactDataValues", signature: "WrongImpactDataValues(ImpactData)", selector: "0xb90540b6" },
       { name: "WrongInterestRateValues", signature: "WrongInterestRateValues(InterestRate)", selector: "0xf2973d16" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new KpiLinkedRateFacetTimeTravel__factory(signer) : new KpiLinkedRateFacet__factory(signer),
+  },
+
+  KpisKpiLinkedRateFacet: {
+    name: "KpisKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x9a05806c3d9c062dfa7983f282dccc0397cb5d4ebf19b80ad4b5586c1d8c6cc6",
+    },
+    inheritance: ["KpisFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "addKpiData",
+        signature: "function addKpiData(uint256 _date, uint256 _value, address _project)",
+        selector: "0x0de2be70",
+      },
+      {
+        name: "getLatestKpiData",
+        signature:
+          "function getLatestKpiData(uint256 _from, uint256 _to, address _project) view returns (uint256 value_, bool exists_)",
+        selector: "0xfc7f5cb3",
+      },
+      {
+        name: "getMinDate",
+        signature: "function getMinDate() view returns (uint256 minDate_)",
+        selector: "0x48de6fa7",
+      },
+      {
+        name: "isCheckPointDate",
+        signature: "function isCheckPointDate(uint256 _date, address _project) view returns (bool exists_)",
+        selector: "0x8078ccd5",
+      },
+    ],
+    events: [
+      {
+        name: "KpiDataAdded",
+        signature: "KpiDataAdded(address,uint256,uint256)",
+        topic0: "0xb14d0e5a6665e6c690dc5c7ffc777323768a449038bc6bfed9986ecd52547303",
+      },
+    ],
+    errors: [
+      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      { name: "InvalidDate", signature: "InvalidDate(uint256,uint256,uint256)", selector: "0x1addb674" },
+      { name: "InvalidDateRange", signature: "InvalidDateRange(uint256,uint256)", selector: "0x8914d40b" },
+      { name: "KpiDataAlreadyExists", signature: "KpiDataAlreadyExists(uint256)", selector: "0x74efd82c" },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new KpisKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new KpisKpiLinkedRateFacet__factory(signer),
   },
 
   KpisSustainabilityPerformanceTargetRateFacet: {
@@ -7988,7 +7824,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InvalidDates", signature: "InvalidDates()", selector: "0xd937486c" },
       { name: "InvalidKycStatus", signature: "InvalidKycStatus()", selector: "0xfc855b1b" },
       { name: "InvalidZeroAddress", signature: "InvalidZeroAddress()", selector: "0xf6b2911f" },
@@ -8078,7 +7913,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
       { name: "InvalidDates", signature: "InvalidDates()", selector: "0xd937486c" },
       { name: "InvalidKycStatus", signature: "InvalidKycStatus()", selector: "0xfc855b1b" },
@@ -8169,7 +8003,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       { name: "InvalidDates", signature: "InvalidDates()", selector: "0xd937486c" },
       { name: "InvalidKycStatus", signature: "InvalidKycStatus()", selector: "0xfc855b1b" },
@@ -8337,7 +8170,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new LockFacetTimeTravel__factory(signer) : new LockFacet__factory(signer),
   },
@@ -8432,10 +8264,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new LockFixedRateFacetTimeTravel__factory(signer) : new LockFixedRateFacet__factory(signer),
   },
@@ -8530,10 +8359,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new LockKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -8542,6 +8368,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   LockSustainabilityPerformanceTargetRateFacet: {
     name: "LockSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xe73c2eecf92b5b8eb7ecc89b379f70193694f2906188318c3407458267385b82",
+    },
     methods: [
       {
         name: "getLockCountFor",
@@ -8629,7 +8459,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new NoncesFacetTimeTravel__factory(signer) : new NoncesFacet__factory(signer),
   },
@@ -8644,10 +8473,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new NoncesFixedRateFacetTimeTravel__factory(signer) : new NoncesFixedRateFacet__factory(signer),
   },
@@ -8662,10 +8488,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new NoncesKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -8674,6 +8497,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   NoncesSustainabilityPerformanceTargetRateFacet: {
     name: "NoncesSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_NONCES_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x631217f1fdd4036273035308e6637d8cdef1927db4eef0af68e5aac13a70892e",
+    },
     methods: [
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
     ],
@@ -8695,7 +8522,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
       { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new PauseFacetTimeTravel__factory(signer) : new PauseFacet__factory(signer),
   },
@@ -8712,10 +8538,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
       { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new PauseFixedRateFacetTimeTravel__factory(signer) : new PauseFixedRateFacet__factory(signer),
   },
@@ -8732,10 +8555,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
       { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new PauseKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -8744,6 +8564,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   PauseSustainabilityPerformanceTargetRateFacet: {
     name: "PauseSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_PAUSE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xa16c7f2d6b5ab7f05dd30bd562ac9f3005fe21e3b2bde131733e37c0d42046ee",
+    },
     methods: [
       { name: "isPaused", signature: "function isPaused() view returns (bool)", selector: "0xb187bd26" },
       { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
@@ -8823,7 +8647,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       {
         name: "ProceedRecipientAlreadyExists",
         signature: "ProceedRecipientAlreadyExists(address)",
@@ -8905,7 +8728,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
       {
         name: "ProceedRecipientAlreadyExists",
@@ -8988,7 +8810,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       {
         name: "ProceedRecipientAlreadyExists",
@@ -9005,6 +8826,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ProceedRecipientsSustainabilityPerformanceTargetRateFacet: {
     name: "ProceedRecipientsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xf3e4f2e1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9",
+    },
     methods: [
       {
         name: "addProceedRecipient",
@@ -9088,7 +8913,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1277b323",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ProtectedPartitionsFacetTimeTravel__factory(signer)
@@ -9129,10 +8953,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1277b323",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ProtectedPartitionsFixedRateFacetTimeTravel__factory(signer)
@@ -9173,10 +8994,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1277b323",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ProtectedPartitionsKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -9185,6 +9003,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ProtectedPartitionsSustainabilityPerformanceTargetRateFacet: {
     name: "ProtectedPartitionsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_PROTECTED_PARTITIONS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x088ec2750f42a30fde9383e74f4148ce5df963263d426deffc1d29fff61a6538",
+    },
     methods: [
       {
         name: "arePartitionsProtected",
@@ -9238,7 +9060,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x2de241e3",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledBalanceAdjustmentsFacetTimeTravel__factory(signer)
@@ -9265,10 +9086,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x2de241e3",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledBalanceAdjustmentsFixedRateFacetTimeTravel__factory(signer)
@@ -9302,6 +9120,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet: {
     name: "ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_BALANCE_ADJUSTMENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x1168df5bb8a348d137af6e29915c261dc82c495f72484a046ac4f750899625f4",
+    },
     methods: [
       {
         name: "getScheduledBalanceAdjustments",
@@ -9341,7 +9163,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x80a84271",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledCouponListingFacetTimeTravel__factory(signer)
@@ -9368,10 +9189,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x80a84271",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledCouponListingFixedRateFacetTimeTravel__factory(signer)
@@ -9398,10 +9216,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x80a84271",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledCouponListingKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -9410,6 +9225,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ScheduledCouponListingSustainabilityPerformanceTargetRateFacet: {
     name: "ScheduledCouponListingSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_COUPON_LISTING_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x85c0dee450a5a4657a9de39ca4ba19881b079d55d5bb64641d52f59bea709ba8",
+    },
     methods: [
       {
         name: "getScheduledCouponListing",
@@ -9459,7 +9278,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5be4a143",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledCrossOrderedTasksFacetTimeTravel__factory(signer)
@@ -9496,10 +9314,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5be4a143",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledCrossOrderedTasksFixedRateFacetTimeTravel__factory(signer)
@@ -9543,6 +9358,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: {
     name: "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_CROSS_ORDERED_TASKS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x23d3302e505d889e80b20005bf316ccd7cbbd3c547a7305d600e8f0d9bc73267",
+    },
     methods: [
       {
         name: "getScheduledCrossOrderedTasks",
@@ -9592,7 +9411,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa19e91fe",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledSnapshotsFacetTimeTravel__factory(signer)
@@ -9619,10 +9437,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa19e91fe",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledSnapshotsFixedRateFacetTimeTravel__factory(signer)
@@ -9649,10 +9464,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa19e91fe",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ScheduledSnapshotsKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -9661,6 +9473,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet: {
     name: "ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SCHEDULED_SNAPSHOTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x99a85df534e32a3b9fce8e80f0cc30d6703e578eb5c641ab2d9e95530d046b4b",
+    },
     methods: [
       {
         name: "getScheduledSnapshots",
@@ -9787,7 +9603,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9657ddb9",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new SnapshotsFacetTimeTravel__factory(signer) : new SnapshotsFacet__factory(signer),
   },
@@ -9899,10 +9714,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9657ddb9",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new SnapshotsFixedRateFacetTimeTravel__factory(signer)
@@ -10016,10 +9828,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9657ddb9",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new SnapshotsKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -10028,6 +9837,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   SnapshotsSustainabilityPerformanceTargetRateFacet: {
     name: "SnapshotsSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_SNAPSHOTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0xbcc6255960c1cbe69dae32f7db730d14a35fdb81d91cc7e637e5af4d229bcbbe",
+    },
     methods: [
       {
         name: "balanceOfAtSnapshot",
@@ -10194,7 +10007,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccountIsNotIssuer", signature: "AccountIsNotIssuer(address)", selector: "0xcd324f53" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "ListedIssuer", signature: "ListedIssuer(address)", selector: "0xcb2beece" },
       { name: "UnlistedIssuer", signature: "UnlistedIssuer(address)", selector: "0xd1243a92" },
     ],
@@ -10262,7 +10074,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccountIsNotIssuer", signature: "AccountIsNotIssuer(address)", selector: "0xcd324f53" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
       { name: "ListedIssuer", signature: "ListedIssuer(address)", selector: "0xcb2beece" },
       { name: "UnlistedIssuer", signature: "UnlistedIssuer(address)", selector: "0xd1243a92" },
@@ -10333,7 +10144,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccountIsNotIssuer", signature: "AccountIsNotIssuer(address)", selector: "0xcd324f53" },
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       { name: "ListedIssuer", signature: "ListedIssuer(address)", selector: "0xcb2beece" },
       { name: "UnlistedIssuer", signature: "UnlistedIssuer(address)", selector: "0xd1243a92" },
@@ -10485,12 +10295,114 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
       { name: "InvalidBlocknumber", signature: "InvalidBlocknumber(uint256)", selector: "0x769a518c" },
       { name: "InvalidTimestamp", signature: "InvalidTimestamp(uint256)", selector: "0x25c20828" },
       { name: "WrongChainId", signature: "WrongChainId()", selector: "0x5f87bc00" },
     ],
     factory: (signer) => new TimeTravelFacet__factory(signer),
+  },
+
+  TotalBalanceFacet: {
+    name: "TotalBalanceFacet",
+    resolverKey: {
+      name: "_TOTAL_BALANCE_RESOLVER_KEY",
+      value: "0xd1873ecc41f0658d1ac1c9bf3fe6a4da2071b04edc7f7d3b4520d029c3ce64d5",
+    },
+    inheritance: ["TotalBalanceFacetBase", "Common"],
+    methods: [
+      {
+        name: "getTotalBalanceFor",
+        signature: "function getTotalBalanceFor(address _account) view returns (uint256)",
+        selector: "0xa8f9868e",
+      },
+      {
+        name: "getTotalBalanceForByPartition",
+        signature:
+          "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
+        selector: "0xf29416ed",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new TotalBalanceFacetTimeTravel__factory(signer) : new TotalBalanceFacet__factory(signer),
+  },
+
+  TotalBalanceFixedRateFacet: {
+    name: "TotalBalanceFixedRateFacet",
+    resolverKey: {
+      name: "_TOTAL_BALANCE_FIXED_RATE_RESOLVER_KEY",
+      value: "0x0f902d5eda4d9e41f9c3ad2bb5367bb6a2e9df580335d82a5210bbda16cc76f2",
+    },
+    inheritance: ["TotalBalanceFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "getTotalBalanceFor",
+        signature: "function getTotalBalanceFor(address _account) view returns (uint256)",
+        selector: "0xa8f9868e",
+      },
+      {
+        name: "getTotalBalanceForByPartition",
+        signature:
+          "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
+        selector: "0xf29416ed",
+      },
+    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new TotalBalanceFixedRateFacetTimeTravel__factory(signer)
+        : new TotalBalanceFixedRateFacet__factory(signer),
+  },
+
+  TotalBalanceKpiLinkedRateFacet: {
+    name: "TotalBalanceKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_TOTAL_BALANCE_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0xc162f5370d292bd42da32ccacfbbb9560b4cc23623a5089545a314ae29bf2be0",
+    },
+    inheritance: ["TotalBalanceFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "getTotalBalanceFor",
+        signature: "function getTotalBalanceFor(address _account) view returns (uint256)",
+        selector: "0xa8f9868e",
+      },
+      {
+        name: "getTotalBalanceForByPartition",
+        signature:
+          "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
+        selector: "0xf29416ed",
+      },
+    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new TotalBalanceKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new TotalBalanceKpiLinkedRateFacet__factory(signer),
+  },
+
+  TotalBalanceSustainabilityPerformanceTargetRateFacet: {
+    name: "TotalBalanceSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_TOTAL_BALANCE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x70b68464eff2e356899f071ddcf4cc232d6aa181ec8f142f2251291b3cd73f3e",
+    },
+    methods: [
+      {
+        name: "getTotalBalanceFor",
+        signature: "function getTotalBalanceFor(address _account) view returns (uint256)",
+        selector: "0xa8f9868e",
+      },
+      {
+        name: "getTotalBalanceForByPartition",
+        signature:
+          "function getTotalBalanceForByPartition(bytes32 _partition, address _account) view returns (uint256)",
+        selector: "0xf29416ed",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new TotalBalanceSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new TotalBalanceSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   TransferAndLockFacet: {
@@ -10521,7 +10433,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    errors: [{ name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new TransferAndLockFacetTimeTravel__factory(signer) : new TransferAndLockFacet__factory(signer),
   },
@@ -10554,10 +10465,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new TransferAndLockFixedRateFacetTimeTravel__factory(signer)
@@ -10592,10 +10500,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    errors: [
-      { name: "ExpirationNotReached", signature: "ExpirationNotReached()", selector: "0x92899bcd" },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -10604,6 +10509,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 
   TransferAndLockSustainabilityPerformanceTargetRateFacet: {
     name: "TransferAndLockSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_TRANSFER_AND_LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x9d1e3f5a7b9c0d2e4f6a8b0c1d3e5f7a9b0c2d4e6f8a9b1c3d5e7f9a0b2c4d6e",
+    },
     methods: [
       {
         name: "transferAndLock",
@@ -10628,7 +10537,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 193 as const;
+export const TOTAL_FACETS = 196 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -10884,8 +10793,8 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "deployBondKpiLinkedRate",
         signature:
-          "function deployBondKpiLinkedRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData, address kpiOracle) _bondKpiLinkedRateData) returns (address bondAddress_)",
-        selector: "0x16a2b067",
+          "function deployBondKpiLinkedRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData) _bondKpiLinkedRateData) returns (address bondAddress_)",
+        selector: "0x06e6effc",
       },
       {
         name: "deployBondSustainabilityPerformanceTargetRate",
@@ -11534,6 +11443,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
+    inheritance: ["InternalsKpiInterestRate", "BondStorageWrapperFixingDateInterestRate"],
     methods: [],
   },
 
@@ -11561,8 +11471,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
-  ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate: {
-    name: "ProceedRecipientsStorageWrapperSustainabilityPerformanceTargetInterestRate",
+  ProceedRecipientsStorageWrapperKpiInterestRate: {
+    name: "ProceedRecipientsStorageWrapperKpiInterestRate",
     inheritance: ["KpisStorageWrapper"],
     methods: [],
   },

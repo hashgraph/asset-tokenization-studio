@@ -79,6 +79,8 @@
     "ats:contracts:test:scripts": "npm run test:scripts --workspace=packages/ats/contracts",
     "ats:contracts:test:scripts:unit": "npm run test:scripts:unit --workspace=packages/ats/contracts",
     "ats:contracts:test:scripts:integration": "npm run test:scripts:integration --workspace=packages/ats/contracts",
+    "ats:contracts:test:scripts:unit:parallel": "npm run test:scripts:unit:parallel --workspace=packages/ats/contracts",
+    "ats:contracts:test:scripts:integration:parallel": "npm run test:scripts:integration:parallel --workspace=packages/ats/contracts",
     "ats:contracts:test:scripts:parallel": "npm run test:scripts:parallel --workspace=packages/ats/contracts",
     "ats:contracts:test:coverage": "npm run test:coverage --workspace=packages/ats/contracts",
     "ats:contracts:test:ci": "npm run test:ci --workspace=packages/ats/contracts --if-present || npm run test --workspace=packages/ats/contracts",
@@ -119,6 +121,13 @@
     "ats:contracts:upgrade:hedera:previewnet": "npm run ats:contracts:upgrade:configs:hedera:previewnet",
     "ats:contracts:upgrade:testnet": "npm run ats:contracts:upgrade:configs:hedera:testnet",
     "ats:contracts:upgrade:mainnet": "npm run ats:contracts:upgrade:configs:hedera:mainnet",
+    "ats:contracts:upgrade:previewnet": "npm run ats:contracts:upgrade:configs:hedera:previewnet",
+    "ats:contracts:generate:registry": "npm run generate:registry --workspace=packages/ats/contracts",
+    "ats:contracts:generate:registry:cached": "npm run generate:registry:cached --workspace=packages/ats/contracts",
+    "ats:contracts:local:hardhat": "npm run local:hardhat --workspace=packages/ats/contracts",
+    "ats:contracts:size": "npm run size --workspace=packages/ats/contracts",
+    "ats:contracts:slither": "npm run slither --workspace=packages/ats/contracts",
+    "ats:contracts:doc": "npm run doc --workspace=packages/ats/contracts",
     "ats:contracts:publish": "npm run publish --workspace=packages/ats/contracts",
     "ats:sdk:build": "npm run build --workspace=packages/ats/sdk",
     "ats:sdk:test": "npm run test --workspace=packages/ats/sdk",
@@ -193,8 +202,9 @@
     "typescript": "^5.8.2"
   },
   "lint-staged": {
-    "*.sol": ["npm run lint:staged:sol --", "npm run format:staged --"],
-    "*.{js,mjs,cjs,ts,tsx,mts}": ["npm run lint:staged:js -- --fix", "npm run format:staged --"],
+    "*.sol": ["node check-license.js", "npm run lint:staged:sol --", "npm run format:staged --"],
+    "*.{ts,tsx}": ["node check-license.js", "npm run lint:staged:js -- --fix", "npm run format:staged --"],
+    "*.{js,mjs,cjs,mts}": ["npm run lint:staged:js -- --fix", "npm run format:staged --"],
     "*.{json,md,yml,yaml}": ["npm run format:staged --"]
   },
   "packageManager": "yarn@4.9.2+sha512.1fc009bc09d13cfd0e19efa44cbfc2b9cf6ca61482725eb35bbc5e257e093ebf4130db6dfe15d604ff4b79efd8e1e8e99b25fa7d0a6197c9f9826358d4d65c3c"

@@ -16,10 +16,10 @@ import { deployEquityFromFactory, deployBondFromFactory, BOND_CONFIG_ID } from "
 import { getSecurityData, getRegulationData } from "./tokens/common.fixture";
 import { getEquityDetails } from "./tokens/equity.fixture";
 import { getBondDetails } from "./tokens/bond.fixture";
-import { DiamondCutFacet__factory } from "@contract-types";
+import { DiamondFacet__factory } from "@contract-types";
 import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import type { Contract } from "ethers";
-import type { BusinessLogicResolver, IFactory, ProxyAdmin, DiamondCutFacet } from "@contract-types";
+import type { BusinessLogicResolver, IFactory, ProxyAdmin, DiamondFacet } from "@contract-types";
 
 /**
  * Result of deploying the upgrade test environment.
@@ -44,11 +44,11 @@ export interface UpgradeTestFixtureResult {
   // Deployed token proxies for testing updates
   equityTokenProxy: Contract;
   equityTokenAddress: string;
-  equityDiamondCut: DiamondCutFacet;
+  equityDiamondCut: DiamondFacet;
 
   bondTokenProxy: Contract;
   bondTokenAddress: string;
-  bondDiamondCut: DiamondCutFacet;
+  bondDiamondCut: DiamondFacet;
 
   // Facet addresses from initial deployment
   facetAddresses: Record<string, string>;
@@ -106,7 +106,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
   );
 
   const equityTokenAddress = equityTokenProxy.address;
-  const equityDiamondCut = DiamondCutFacet__factory.connect(equityTokenAddress, deployer);
+  const equityDiamondCut = DiamondFacet__factory.connect(equityTokenAddress, deployer);
 
   // Deploy sample Bond token via Factory
   const bondSecurityData = getSecurityData(blr, {
@@ -131,7 +131,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
   );
 
   const bondTokenAddress = bondTokenProxy.address;
-  const bondDiamondCut = DiamondCutFacet__factory.connect(bondTokenAddress, deployer);
+  const bondDiamondCut = DiamondFacet__factory.connect(bondTokenAddress, deployer);
 
   return {
     // Signers

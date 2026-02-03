@@ -260,8 +260,6 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _updateTotalHeldAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
-        if (_factor == 1) return;
-
         _holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
         _setTotalHeldLabaf(_tokenHolder, _abaf);
     }
@@ -272,8 +270,6 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         uint256 _factor,
         uint256 _abaf
     ) internal override {
-        if (_factor == 1) return;
-
         _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
         _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
@@ -306,7 +302,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _updateHold(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _abaf) internal override {
-        uint256 holdLabaf = _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
+        uint256 holdLabaf = _getHoldLabafById(_partition, _tokenHolder, _holdId);
 
         if (_abaf != holdLabaf) {
             uint256 holdFactor = _calculateFactor(_abaf, holdLabaf);
@@ -322,16 +318,9 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         address _tokenHolder,
         uint256 _factor
     ) internal override {
-        if (_factor == 1) return;
         HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage.holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
-    }
-
-    function _getHeldAmountForAdjusted(address _tokenHolder) internal view override returns (uint256 amount_) {
-        uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalHeldLabaf(_tokenHolder));
-
-        return _getHeldAmountFor(_tokenHolder) * factor;
     }
 
     function _getHeldAmountForAdjustedAt(
@@ -343,13 +332,14 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         return _getHeldAmountFor(_tokenHolder) * factor;
     }
 
-    function _getTotalBalanceForByPartitionAdjusted(
+    function _getTotalBalanceForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual override returns (uint256) {
         return
-            super._getTotalBalanceForByPartitionAdjusted(_partition, _tokenHolder) +
-            _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+            super._getTotalBalanceForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
+            _getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
     }
 
     function _getTotalBalanceForAdjustedAt(
@@ -361,20 +351,21 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             _getHeldAmountForAdjustedAt(_tokenHolder, _timestamp);
     }
 
-    function _getTotalBalance(address _tokenHolder) internal view virtual override returns (uint256) {
-        return super._getTotalBalance(_tokenHolder) + _getHeldAmountForAdjusted(_tokenHolder);
-    }
-
-    function _getHeldAmountForByPartitionAdjusted(
+    function _getHeldAmountForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view override returns (uint256 amount_) {
-        uint256 factor = _calculateFactor(_getAbafAdjusted(), _getTotalHeldLabafByPartition(_partition, _tokenHolder));
+        uint256 factor = _calculateFactor(
+            _getAbafAdjustedAt(_timestamp),
+            _getTotalHeldLabafByPartition(_partition, _tokenHolder)
+        );
         return _getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
     }
 
-    function _getHoldForByPartitionAdjusted(
-        HoldIdentifier calldata _holdIdentifier
+    function _getHoldForByPartitionAdjustedAt(
+        HoldIdentifier calldata _holdIdentifier,
+        uint256 _timestamp
     )
         internal
         view
@@ -390,8 +381,8 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         )
     {
         uint256 factor = _calculateFactor(
-            _getAbafAdjusted(),
-            _getHoldLabafByPartition(_holdIdentifier.partition, _holdIdentifier.holdId, _holdIdentifier.tokenHolder)
+            _getAbafAdjustedAt(_timestamp),
+            _getHoldLabafById(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId)
         );
 
         (

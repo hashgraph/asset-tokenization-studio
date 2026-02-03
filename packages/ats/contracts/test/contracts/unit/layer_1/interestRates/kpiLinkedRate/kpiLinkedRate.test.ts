@@ -1,8 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { type ResolverProxy, Pause, KpiLinkedRate } from "@contract-types";
-import { ADDRESS_ZERO, ATS_ROLES } from "@scripts";
+import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, deployBondKpiLinkedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -62,7 +64,6 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 3,
         },
-        ADDRESS_ZERO,
       ),
     ).to.be.rejectedWith("AlreadyInitialized");
   });
@@ -101,13 +102,6 @@ describe("Kpi Linked Rate Tests", () => {
         }),
       ).to.be.rejectedWith("TokenIsPaused");
     });
-
-    it("GIVEN a paused Token WHEN setKpiOracle THEN transaction fails with TokenIsPaused", async () => {
-      // transfer with data fails
-      await expect(
-        kpiLinkedRateFacet.connect(signer_A).setKpiOracle("0x0000000000000000000000000000000000000001"),
-      ).to.be.rejectedWith("TokenIsPaused");
-    });
   });
 
   describe("AccessControl", () => {
@@ -137,13 +131,6 @@ describe("Kpi Linked Rate Tests", () => {
           impactDataDecimals: 1,
           adjustmentPrecision: 3,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
-    });
-
-    it("GIVEN an account without interest rate manager role WHEN setKpiOracle THEN transaction fails with AccountHasNoRole", async () => {
-      // add to list fails
-      await expect(
-        kpiLinkedRateFacet.connect(signer_C).setKpiOracle("0x0000000000000000000000000000000000000001"),
       ).to.be.rejectedWith("AccountHasNoRole");
     });
   });
@@ -272,20 +259,6 @@ describe("Kpi Linked Rate Tests", () => {
       expect(impactData.maxDeviationFloor).to.equal(newImpactData.maxDeviationFloor);
       expect(impactData.impactDataDecimals).to.equal(newImpactData.impactDataDecimals);
       expect(impactData.adjustmentPrecision).to.equal(newImpactData.adjustmentPrecision);
-    });
-  });
-
-  describe("Kpi Oracle", () => {
-    it("GIVEN oracle WHEN setKpiOracle THEN transaction succeeds", async () => {
-      const newOracle = "0x0000000000000000000000000000000000000011";
-
-      await expect(kpiLinkedRateFacet.connect(signer_A).setKpiOracle(newOracle))
-        .to.emit(kpiLinkedRateFacet, "KpiOracleUpdated")
-        .withArgs(signer_A.address, newOracle);
-
-      const oracle = await kpiLinkedRateFacet.getKpiOracle();
-
-      expect(oracle).to.equal(newOracle);
     });
   });
 });

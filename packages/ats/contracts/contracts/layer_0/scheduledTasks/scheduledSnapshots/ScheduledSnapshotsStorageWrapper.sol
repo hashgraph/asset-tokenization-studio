@@ -11,8 +11,8 @@ import {
 } from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
-    function _addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes memory _newData) internal override {
-        ScheduledTasksLib.addScheduledTask(_scheduledSnapshotStorage(), _newScheduledTimestamp, _newData);
+    function _addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes32 _actionId) internal override {
+        ScheduledTasksLib.addScheduledTask(_scheduledSnapshotStorage(), _newScheduledTimestamp, abi.encode(_actionId));
     }
 
     function _triggerScheduledSnapshots(uint256 _max) internal override returns (uint256) {
@@ -21,21 +21,16 @@ abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
     }
 
     function _onScheduledSnapshotTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
+        uint256 /*_pos*/,
+        uint256 /*_scheduledTasksLength*/,
         ScheduledTask memory _scheduledTask
     ) internal override {
-        uint256 newSnapShotID;
-        if (_pos == _scheduledTasksLength - 1) {
-            newSnapShotID = _snapshot();
-        } else newSnapShotID = _getCurrentSnapshotId();
+        uint256 newSnapShotID = _snapshot();
 
         bytes memory data = _scheduledTask.data;
 
-        if (data.length > 0) {
-            bytes32 actionId = abi.decode(data, (bytes32));
-            _updateCorporateActionResult(actionId, SNAPSHOT_RESULT_ID, abi.encodePacked(newSnapShotID));
-        }
+        bytes32 actionId = abi.decode(data, (bytes32));
+        _updateCorporateActionResult(actionId, SNAPSHOT_RESULT_ID, abi.encodePacked(newSnapShotID));
     }
 
     function _getScheduledSnapshotCount() internal view override returns (uint256) {

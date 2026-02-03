@@ -133,6 +133,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Internals {
         address _tokenHolder,
         uint256 _clearingId
     ) external view override returns (ClearingHoldCreationData memory clearingHoldCreationData_) {
-        return _getClearingHoldCreationForByPartitionAdjusted(_partition, _tokenHolder, _clearingId);
+        return
+            _getClearingHoldCreationForByPartitionAdjustedAt(_partition, _tokenHolder, _clearingId, _blockTimestamp());
     }
 }

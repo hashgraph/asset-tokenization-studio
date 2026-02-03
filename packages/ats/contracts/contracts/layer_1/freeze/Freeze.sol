@@ -114,6 +114,6 @@ abstract contract Freeze is IFreeze, Internals {
     // ====== External functions (view/pure) ======
 
     function getFrozenTokens(address _userAddress) external view override returns (uint256) {
-        return _getFrozenAmountForAdjusted(_userAddress);
+        return _getFrozenAmountForAdjustedAt(_userAddress, _blockTimestamp());
     }
 }

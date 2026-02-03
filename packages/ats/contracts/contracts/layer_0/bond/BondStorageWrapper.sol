@@ -72,8 +72,8 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
             revert IBondStorageWrapper.CouponCreationFailed();
         }
 
-        _addScheduledCrossOrderedTask(_newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(_newCoupon.recordDate, abi.encode(_actionId));
+        _addScheduledCrossOrderedTask(_newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
+        _addScheduledSnapshot(_newCoupon.recordDate, _actionId);
     }
 
     /**
@@ -106,7 +106,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     }
 
     function _getCouponFromOrderedListAt(uint256 _pos) internal view override returns (uint256 couponID_) {
-        if (_pos >= _getCouponsOrderedListTotalAdjusted()) return 0;
+        if (_pos >= _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp())) return 0;
 
         uint256 actualOrderedListLengthTotal = _getCouponsOrderedListTotal();
 
@@ -125,15 +125,17 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     ) internal view override returns (uint256[] memory couponIDs_) {
         (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
 
-        couponIDs_ = new uint256[](LibCommon.getSize(start, end, _getCouponsOrderedListTotalAdjusted()));
+        couponIDs_ = new uint256[](
+            LibCommon.getSize(start, end, _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp()))
+        );
 
         for (uint256 i = 0; i < couponIDs_.length; i++) {
             couponIDs_[i] = _getCouponFromOrderedListAt(start + i);
         }
     }
 
-    function _getCouponsOrderedListTotalAdjusted() internal view override returns (uint256 total_) {
-        return _getCouponsOrderedListTotal() + _getPendingScheduledCouponListingTotalAt(_blockTimestamp());
+    function _getCouponsOrderedListTotalAdjustedAt(uint256 _timestamp) internal view override returns (uint256 total_) {
+        return _getCouponsOrderedListTotal() + _getPendingScheduledCouponListingTotalAt(_timestamp);
     }
 
     function _getCouponsOrderedListTotal() internal view override returns (uint256 total_) {
@@ -143,7 +145,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     function _getPreviousCouponInOrderedList(
         uint256 _couponID
     ) internal view override returns (uint256 previousCouponID_) {
-        uint256 orderedListLength = _getCouponsOrderedListTotalAdjusted();
+        uint256 orderedListLength = _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp());
 
         if (orderedListLength < 2) return (0);
 
@@ -202,9 +204,9 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
 
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
                 ? _getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
-                : _getTotalBalance(_account);
+                : _getTotalBalanceForAdjustedAt(_account, _blockTimestamp());
 
-            couponFor_.decimals = _decimalsAdjusted();
+            couponFor_.decimals = _decimalsAdjustedAt(_blockTimestamp());
         }
     }
 
@@ -233,8 +235,8 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     ) internal view override returns (IBondRead.PrincipalFor memory principalFor_) {
         IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
 
-        principalFor_.numerator = _balanceOfAdjusted(_account) * bondDetails.nominalValue;
-        principalFor_.denominator = 10 ** (_decimalsAdjusted() + bondDetails.nominalValueDecimals);
+        principalFor_.numerator = _balanceOfAdjustedAt(_account, _blockTimestamp()) * bondDetails.nominalValue;
+        principalFor_.denominator = 10 ** (_decimalsAdjustedAt(_blockTimestamp()) + bondDetails.nominalValueDecimals);
     }
 
     function _getCouponCount() internal view override returns (uint256 couponCount_) {

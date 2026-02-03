@@ -38,11 +38,6 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         _;
     }
 
-    modifier onlyValidParticipant(bytes32 _partition) override {
-        _checkValidPartition(_partition);
-        _;
-    }
-
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ProtectedPartitions(bool _protectPartitions) internal override returns (bool success_) {
         ProtectedPartitionsDataStorage storage protectedPartitionsStorage = _protectedPartitionsStorage();
@@ -249,10 +244,6 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
             );
     }
 
-    function _checkRoleForPartition(bytes32 partition, address account) internal view override {
-        _checkRole(_calculateRoleForPartition(partition), account);
-    }
-
     function _checkProtectedPartitions() internal view override {
         if (!_arePartitionsProtected()) revert PartitionsAreUnProtected();
     }
@@ -279,9 +270,5 @@ abstract contract ProtectedPartitionsStorageWrapper is IProtectedPartitionsStora
         assembly {
             protectedPartitions_.slot := position
         }
-    }
-
-    function _checkValidPartition(bytes32 _partition) private view {
-        if (_arePartitionsProtected()) _checkRoleForPartition(_partition, _msgSender());
     }
 }

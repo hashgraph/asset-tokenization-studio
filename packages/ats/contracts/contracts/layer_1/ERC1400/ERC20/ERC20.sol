@@ -74,7 +74,7 @@ abstract contract ERC20 is IERC20, Internals {
     }
 
     function allowance(address owner, address spender) external view override returns (uint256) {
-        return _allowanceAdjusted(owner, spender);
+        return _allowanceAdjustedAt(owner, spender, _blockTimestamp());
     }
 
     function name() external view returns (string memory) {
@@ -86,7 +86,7 @@ abstract contract ERC20 is IERC20, Internals {
     }
 
     function decimals() external view returns (uint8) {
-        return _decimalsAdjusted();
+        return _decimalsAdjustedAt(_blockTimestamp());
     }
 
     function decimalsAt(uint256 _timestamp) external view returns (uint8) {
@@ -94,6 +94,6 @@ abstract contract ERC20 is IERC20, Internals {
     }
 
     function getERC20Metadata() external view returns (ERC20Metadata memory) {
-        return _getERC20MetadataAdjusted();
+        return _getERC20MetadataAdjustedAt(_blockTimestamp());
     }
 }

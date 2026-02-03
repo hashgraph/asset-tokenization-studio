@@ -21,11 +21,9 @@ abstract contract Modifiers is LocalContext {
 
     // ===== ProtectedPartitions Modifiers =====
     modifier onlyProtectedPartitions() virtual;
-    modifier onlyValidParticipant(bytes32 _partition) virtual;
 
     // ===== AccessControl Modifiers =====
     modifier onlyRole(bytes32 _role) virtual;
-    modifier onlyRoleFor(bytes32 _role, address _account) virtual;
     modifier onlySameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) virtual;
     modifier onlyConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) virtual;
 

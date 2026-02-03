@@ -1,0 +1,218 @@
+###############################################################################
+# Pre-Push Hook - DCO and GPG Signature Verification
+#
+# This hook verifies that ALL commits being pushed have:
+# 1. DCO sign-off (Signed-off-by line)
+# 2. GPG signature present (verification not required - key may not be in local keyring)
+#
+# Part of Layer 3: Push-time enforcement (final gate before GitHub)
+###############################################################################
+
+# Colors for output
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+###############################################################################
+# Configuration
+###############################################################################
+
+REMOTE="$1"
+URL="$2"
+
+# Track errors
+ERRORS_FOUND=0
+MISSING_DCO_COMMITS=""
+MISSING_GPG_COMMITS=""
+
+###############################################################################
+# Functions
+###############################################################################
+
+check_commit_dco() {
+    local commit="$1"
+    local commit_msg=$(git log -1 --format=%B "$commit")
+
+    if ! echo "$commit_msg" | grep -q "^Signed-off-by: "; then
+        return 1
+    fi
+    return 0
+}
+
+check_commit_gpg() {
+    local commit="$1"
+    local sig_status=$(git log -1 --format='%G?' "$commit")
+
+    # %G? returns: G=good, U=unknown validity, E=can't check (missing key),
+    # X=expired, Y=expired key, R=revoked, B=bad, N=no signature
+    # We only reject N (no signature). All others mean a signature EXISTS.
+    if [ "$sig_status" = "N" ]; then
+        return 1  # No signature - fail
+    fi
+    return 0  # Signature exists (even if we can't verify it locally)
+}
+
+###############################################################################
+# Main Verification Loop
+###############################################################################
+
+echo ""
+echo "🔒 Verifying commits before push..."
+echo ""
+
+# Read refs from stdin
+while read local_ref local_sha remote_ref remote_sha; do
+    # Skip if deleting a branch
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+        continue
+    fi
+
+    # Determine commit range
+    if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+        # New branch - check all commits
+        range="$local_sha"
+
+        # Get all commits up to common ancestor with development/main
+        if git rev-parse --verify origin/development > /dev/null 2>&1; then
+            BASE="origin/development"
+        elif git rev-parse --verify origin/main > /dev/null 2>&1; then
+            BASE="origin/main"
+        else
+            # No remote base, check all commits
+            BASE=""
+        fi
+
+        if [ -n "$BASE" ]; then
+            range="$BASE..$local_sha"
+        fi
+    else
+        # Existing branch - check only NEW commits being pushed
+        range="$remote_sha..$local_sha"
+    fi
+
+    # Get list of commits to check
+    commits=$(git rev-list "$range" 2>/dev/null)
+
+    if [ -z "$commits" ]; then
+        echo "No commits to verify."
+        continue
+    fi
+
+    commit_count=$(echo "$commits" | wc -l | tr -d ' ')
+    echo "Checking $commit_count commit(s)..."
+    echo ""
+
+    # Check each commit
+    for commit in $commits; do
+        commit_short=$(git rev-parse --short "$commit")
+        commit_subject=$(git log -1 --format=%s "$commit")
+
+        # Check DCO
+        if ! check_commit_dco "$commit"; then
+            ERRORS_FOUND=$((ERRORS_FOUND + 1))
+            MISSING_DCO_COMMITS="$MISSING_DCO_COMMITS\n  - $commit_short: $commit_subject"
+        fi
+
+        # Check GPG
+        if ! check_commit_gpg "$commit"; then
+            ERRORS_FOUND=$((ERRORS_FOUND + 1))
+            MISSING_GPG_COMMITS="$MISSING_GPG_COMMITS\n  - $commit_short: $commit_subject"
+        fi
+    done
+done
+
+###############################################################################
+# Report Results
+###############################################################################
+
+if [ $ERRORS_FOUND -eq 0 ]; then
+    echo -e "${GREEN}✅ All commits verified successfully!${NC}"
+    echo ""
+    echo "  ✅ DCO sign-off: Present in all commits"
+    echo "  ✅ GPG signatures: Present in all commits"
+    echo ""
+    echo "Proceeding with push..."
+    exit 0
+fi
+
+###############################################################################
+# Error Report
+###############################################################################
+
+echo ""
+echo "═══════════════════════════════════════════════════════════════"
+echo -e "${RED}${BOLD}❌ PUSH BLOCKED: Commit verification failed${NC}"
+echo "═══════════════════════════════════════════════════════════════"
+echo ""
+
+if [ -n "$MISSING_DCO_COMMITS" ]; then
+    echo -e "${RED}Missing DCO sign-off (Signed-off-by line):${NC}"
+    echo -e "$MISSING_DCO_COMMITS"
+    echo ""
+fi
+
+if [ -n "$MISSING_GPG_COMMITS" ]; then
+    echo -e "${RED}Missing GPG signature:${NC}"
+    echo -e "$MISSING_GPG_COMMITS"
+    echo ""
+fi
+
+echo "═══════════════════════════════════════════════════════════════"
+echo -e "${YELLOW}How to fix:${NC}"
+echo "═══════════════════════════════════════════════════════════════"
+echo ""
+
+if [ -n "$MISSING_DCO_COMMITS" ] && [ -n "$MISSING_GPG_COMMITS" ]; then
+    echo "Fix missing DCO AND GPG signatures:"
+    echo ""
+    echo "  ${BOLD}Option 1: Amend recent commits (if not pushed yet)${NC}"
+    echo "  git rebase -i HEAD~N  # N = number of commits to fix"
+    echo "  Mark commits as 'edit', then for each:"
+    echo "    git commit --amend --no-edit --signoff -S"
+    echo "    git rebase --continue"
+    echo ""
+    echo "  ${BOLD}Option 2: Reset and re-commit${NC}"
+    echo "  git reset --soft HEAD~N  # N = number of commits"
+    echo "  git commit --signoff -S -m \"your message\""
+    echo ""
+elif [ -n "$MISSING_DCO_COMMITS" ]; then
+    echo "Fix missing DCO sign-off:"
+    echo ""
+    echo "  ${BOLD}Amend commits to add DCO:${NC}"
+    echo "  git rebase -i HEAD~N  # N = number of commits to fix"
+    echo "  Mark commits as 'edit', then for each:"
+    echo "    git commit --amend --no-edit --signoff -S"
+    echo "    git rebase --continue"
+    echo ""
+elif [ -n "$MISSING_GPG_COMMITS" ]; then
+    echo "Fix missing GPG signatures:"
+    echo ""
+    echo "  ${BOLD}1. Ensure GPG is configured:${NC}"
+    echo "  bash .github/scripts/setup-git.sh"
+    echo ""
+    echo "  ${BOLD}2. Re-sign commits:${NC}"
+    echo "  git rebase -i HEAD~N  # N = number of commits to fix"
+    echo "  Mark commits as 'edit', then for each:"
+    echo "    git commit --amend --no-edit --signoff -S"
+    echo "    git rebase --continue"
+    echo ""
+fi
+
+echo "═══════════════════════════════════════════════════════════════"
+echo -e "${BLUE}Prevention for future commits:${NC}"
+echo "═══════════════════════════════════════════════════════════════"
+echo ""
+echo "Enable automatic DCO + GPG for all commits:"
+echo "  bash .github/scripts/setup-git.sh"
+echo ""
+echo "Or manually configure:"
+echo "  git config format.signoff true    # Auto-add DCO"
+echo "  git config commit.gpgsign true   # Auto-sign with GPG"
+echo ""
+echo "═══════════════════════════════════════════════════════════════"
+echo ""
+
+exit 1
