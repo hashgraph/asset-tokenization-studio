@@ -104,3 +104,6 @@ bytes32 constant _KPIS_STORAGE_POSITION = 0x15e2583fed61d8b30b191451b67403569c6e
 
 // keccak256('security.token.standard.nonce.storage');
 bytes32 constant _NONCE_STORAGE_POSITION = 0xfce5baa472f37a2de2808d549c4eb6787a5a27db638637a7ffa45da5f9f8c9f7;
+
+// keccak256('security.token.standard.facetVersions.storage')
+bytes32 constant _FACET_VERSIONS_STORAGE_POSITION = 0xd458f31869700dbe109e51288e178c53443f45b02aae7ac09ac95de0d38cedc1;

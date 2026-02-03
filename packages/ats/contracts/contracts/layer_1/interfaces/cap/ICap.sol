@@ -7,8 +7,32 @@ interface ICap {
         uint256 maxSupply;
     }
 
+    /**
+     * @notice Parameters for versioned Cap initialization
+     * @param maxSupply Maximum total supply for the token
+     * @param partitionCap Array of partition-specific supply caps
+     */
+    struct CapInitParams {
+        uint256 maxSupply;
+        PartitionCap[] partitionCap;
+    }
+
+    /**
+     * @notice Initialize or reinitialize Cap with version-based logic
+     * @dev Supports both fresh deployment and upgrades via version-gated blocks
+     * @param params The initialization parameters
+     */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external;
+    function initialize_Cap(CapInitParams calldata params) external;
+
+    /**
+     * @notice Rollback Cap facet to a previous version
+     * @dev Undoes storage changes made during version upgrades by resetting to default values.
+     *      Cannot rollback below minimum version (1).
+     * @param targetVersion The version to rollback to (must be < current version, >= 1)
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function deinitialize_Cap(uint64 targetVersion) external;
 
     /**
      * @dev Set a max supply for the token

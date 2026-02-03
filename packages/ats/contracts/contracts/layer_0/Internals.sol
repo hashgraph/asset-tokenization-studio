@@ -186,7 +186,9 @@ abstract contract Internals is Modifiers {
         AdditionalSecurityData calldata _additionalSecurityData
     ) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_Cap(uint256 maxSupply, ICap.PartitionCap[] calldata partitionCap) internal virtual;
+    function _initialize_Cap(ICap.CapInitParams calldata params) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
+    function _deinitialize_Cap(uint64 targetVersion) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ControlList(bool _isWhiteList) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
