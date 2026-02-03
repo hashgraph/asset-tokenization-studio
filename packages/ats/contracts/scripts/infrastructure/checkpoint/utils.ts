@@ -9,8 +9,7 @@
  * @module infrastructure/checkpoint/utils
  */
 
-import type { DeploymentCheckpoint, WorkflowType } from "@scripts/infrastructure";
-import type { DeploymentOutput } from "../../workflows/deploySystemWithNewBlr";
+import type { DeploymentCheckpoint, DeploymentOutputType, WorkflowType } from "@scripts/infrastructure";
 
 /**
  * Convert checkpoint to DeploymentOutput format.
@@ -29,7 +28,7 @@ import type { DeploymentOutput } from "../../workflows/deploySystemWithNewBlr";
  * const output = checkpointToDeploymentOutput(checkpoint)
  * ```
  */
-export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): DeploymentOutput {
+export function checkpointToDeploymentOutput(checkpoint: DeploymentCheckpoint): DeploymentOutputType {
   const { steps, network, deployer, startTime } = checkpoint;
 
   // Validate required steps
