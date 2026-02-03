@@ -32,7 +32,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
         if (currentSnapshotId == 0) return;
 
         uint256 abafAtCurrentSnapshot = _abafAtSnapshot(currentSnapshotId);
-        uint256 abaf = _getAbafAdjusted();
+        uint256 abaf = _getAbafAdjustedAt(_blockTimestamp());
 
         if (abaf == abafAtCurrentSnapshot) {
             _updateAccountSnapshot(
@@ -45,10 +45,9 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             );
             return;
         }
-        if (abafAtCurrentSnapshot == 0) abafAtCurrentSnapshot = 1;
 
-        uint256 balance = _balanceOfAdjusted(account);
-        uint256 balanceForPartition = _balanceOfByPartitionAdjusted(partition, account);
+        uint256 balance = _balanceOfAdjustedAt(account, _blockTimestamp());
+        uint256 balanceForPartition = _balanceOfByPartitionAdjustedAt(partition, account, _blockTimestamp());
         uint256 factor = abaf / abafAtCurrentSnapshot;
 
         balance /= factor;
@@ -132,13 +131,13 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
     function _abafAtSnapshot(uint256 _snapshotID) internal view override returns (uint256 abaf_) {
         (bool snapshotted, uint256 value) = _valueAt(_snapshotID, _snapshotStorage().abafSnapshots);
 
-        return snapshotted ? value : _getAbaf();
+        return snapshotted ? value : _getAbafAdjustedAt(_blockTimestamp());
     }
 
     function _decimalsAtSnapshot(uint256 _snapshotID) internal view override returns (uint8 decimals_) {
         (bool snapshotted, uint256 value) = _valueAt(_snapshotID, _snapshotStorage().decimals);
 
-        return snapshotted ? uint8(value) : _decimalsAdjusted();
+        return snapshotted ? uint8(value) : _decimalsAdjustedAt(_blockTimestamp());
     }
 
     function _balanceOfAtSnapshot(
@@ -160,22 +159,6 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
                 _heldBalanceOfAtSnapshot(_snapshotId, _tokenHolder) +
                 _lockedBalanceOfAtSnapshot(_snapshotId, _tokenHolder) +
                 _frozenBalanceOfAtSnapshot(_snapshotId, _tokenHolder);
-        }
-    }
-
-    function _getTotalBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotId,
-        address _tokenHolder
-    ) internal view override returns (uint256) {
-        // Use unchecked block since we're dealing with token balances that shouldn't overflow
-        unchecked {
-            return
-                _balanceOfAtSnapshotByPartition(_partition, _snapshotId, _tokenHolder) +
-                _clearedBalanceOfAtSnapshotByPartition(_partition, _snapshotId, _tokenHolder) +
-                _heldBalanceOfAtSnapshotByPartition(_partition, _snapshotId, _tokenHolder) +
-                _lockedBalanceOfAtSnapshotByPartition(_partition, _snapshotId, _tokenHolder) +
-                _frozenBalanceOfAtSnapshotByPartition(_partition, _snapshotId, _tokenHolder);
         }
     }
 
@@ -211,7 +194,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 _snapshotId,
                 _snapshotStorage().accountBalanceSnapshots[_tokenHolder],
-                _balanceOfAdjusted(_tokenHolder)
+                _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp())
             );
     }
 
@@ -252,7 +235,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 snapshotId,
                 _snapshotStorage().accountPartitionBalanceSnapshots[account][_partition],
-                _balanceOfByPartitionAdjusted(_partition, account)
+                _balanceOfByPartitionAdjustedAt(_partition, account, _blockTimestamp())
             );
     }
 
@@ -264,7 +247,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().totalSupplyByPartitionSnapshots[_partition],
-                _totalSupplyByPartitionAdjusted(_partition)
+                _totalSupplyByPartitionAdjustedAt(_partition, _blockTimestamp())
             );
     }
 
@@ -289,7 +272,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountPartitionLockedBalanceSnapshots[_tokenHolder][_partition],
-                _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder)
+                _getLockedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp())
             );
     }
 
@@ -301,7 +284,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountHeldBalanceSnapshots[_tokenHolder],
-                _getHeldAmountForAdjusted(_tokenHolder)
+                _getHeldAmountForAdjustedAt(_tokenHolder, _blockTimestamp())
             );
     }
 
@@ -314,7 +297,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountPartitionHeldBalanceSnapshots[_tokenHolder][_partition],
-                _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder)
+                _getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp())
             );
     }
 
@@ -326,7 +309,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountFrozenBalanceSnapshots[_tokenHolder],
-                _getFrozenAmountForAdjusted(_tokenHolder)
+                _getFrozenAmountForAdjustedAt(_tokenHolder, _blockTimestamp())
             );
     }
 
@@ -339,7 +322,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountPartitionFrozenBalanceSnapshots[_tokenHolder][_partition],
-                _getFrozenAmountForByPartitionAdjusted(_partition, _tokenHolder)
+                _getFrozenAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp())
             );
     }
 
@@ -351,7 +334,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountClearedBalanceSnapshots[_tokenHolder],
-                _getClearedAmountForAdjusted(_tokenHolder)
+                _getClearedAmountForAdjustedAt(_tokenHolder, _blockTimestamp())
             );
     }
 
@@ -364,7 +347,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountPartitionClearedBalanceSnapshots[_tokenHolder][_partition],
-                _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder)
+                _getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp())
             );
     }
 
@@ -377,10 +360,9 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
         if (snapshotted) return value;
 
         uint256 abafAtSnapshot = _abafAtSnapshot(_snapshotId);
-        uint256 abaf = _getAbaf();
+        uint256 abaf = _getAbafAdjustedAt(_blockTimestamp());
 
         if (abafAtSnapshot == abaf) return _currentBalanceAdjusted;
-        if (abafAtSnapshot == 0) abafAtSnapshot = 1;
 
         uint256 factor = abaf / abafAtSnapshot;
 

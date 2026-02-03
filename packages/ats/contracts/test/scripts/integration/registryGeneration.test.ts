@@ -17,22 +17,26 @@ import { expect } from "chai";
 import * as path from "path";
 import * as fs from "fs";
 
-// Infrastructure layer - registry generation tools
-import {
-  generateRegistryPipeline,
-  DEFAULT_REGISTRY_CONFIG,
-  configureLogger,
-  LogLevel,
-  type RegistryGenerationConfig,
-} from "@scripts/infrastructure";
+// Standalone registry generator (faster, no TypeChain dependencies)
+import { generateRegistryPipeline, DEFAULT_CONFIG, configureLogger, LogLevel, type RegistryConfig } from "@scripts";
 
 // Exported building blocks
 import { detectLayer, detectCategory, generateDescription } from "@scripts";
 
 import { pairTimeTravelVariants } from "@scripts";
 
+// Mock artifact data for test contracts
+const mockArtifactData = {
+  contractName: "MockContract",
+  sourceName: "test.sol",
+  abi: [],
+  bytecode: "0x",
+  deployedBytecode: "0x",
+};
+
 describe("Registry Generation Pipeline - Integration Tests", () => {
   const contractsPath = path.join(__dirname, "../../../contracts");
+  const artifactPath = path.join(__dirname, "../../../artifacts/contracts");
 
   before(() => {
     configureLogger({ level: LogLevel.SILENT });
@@ -43,6 +47,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           logLevel: "SILENT", // Suppress output during tests
         },
         false, // Don't write file
@@ -72,8 +77,9 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
     }).timeout(30000);
 
     it("should respect configuration options", async () => {
-      const config: RegistryGenerationConfig = {
+      const config: RegistryConfig = {
         contractsPath,
+        artifactPath,
         includeStorageWrappers: false,
         includeTimeTravel: false,
         facetsOnly: true,
@@ -96,6 +102,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           resolverKeyPaths: ["**/constants/resolverKeys.sol"],
           logLevel: "SILENT",
         },
@@ -109,6 +116,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           rolesPaths: ["**/constants/roles.sol"],
           logLevel: "SILENT",
         },
@@ -122,6 +130,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           logLevel: "SILENT",
         },
         false,
@@ -144,6 +153,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           logLevel: "SILENT",
         },
         false,
@@ -169,6 +179,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
         const result = await generateRegistryPipeline(
           {
             contractsPath,
+            artifactPath,
             outputPath: tempOutputPath,
             logLevel: "SILENT",
           },
@@ -200,6 +211,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
         contractNames: ["AccessControl"],
         primaryContract: "AccessControl",
         source: "contract AccessControl {}",
+        artifactData: mockArtifactData,
       };
 
       const layer = detectLayer(mockContract);
@@ -215,6 +227,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
         contractNames: ["KycFacet"],
         primaryContract: "KycFacet",
         source: "contract KycFacet {}",
+        artifactData: mockArtifactData,
       };
 
       const category = detectCategory(mockContract, 1);
@@ -244,6 +257,7 @@ contract MyContract {}
           contractNames: ["AccessControlFacet"],
           primaryContract: "AccessControlFacet",
           source: "",
+          artifactData: mockArtifactData,
         },
       ];
 
@@ -256,6 +270,7 @@ contract MyContract {}
           contractNames: ["AccessControlFacetTimeTravel"],
           primaryContract: "AccessControlFacetTimeTravel",
           source: "",
+          artifactData: mockArtifactData,
         },
       ];
 
@@ -265,18 +280,18 @@ contract MyContract {}
     });
   });
 
-  describe("DEFAULT_REGISTRY_CONFIG", () => {
+  describe("DEFAULT_CONFIG", () => {
     it("should have sensible defaults", () => {
-      expect(DEFAULT_REGISTRY_CONFIG.contractsPath).to.equal("./contracts");
-      expect(DEFAULT_REGISTRY_CONFIG.includeStorageWrappers).to.be.true;
-      expect(DEFAULT_REGISTRY_CONFIG.includeTimeTravel).to.be.true;
-      expect(DEFAULT_REGISTRY_CONFIG.extractNatspec).to.be.true;
-      expect(DEFAULT_REGISTRY_CONFIG.logLevel).to.equal("INFO");
-      expect(DEFAULT_REGISTRY_CONFIG.facetsOnly).to.be.false;
+      expect(DEFAULT_CONFIG.contractsPath).to.equal("./contracts");
+      expect(DEFAULT_CONFIG.includeStorageWrappers).to.be.true;
+      expect(DEFAULT_CONFIG.includeTimeTravel).to.be.true;
+      expect(DEFAULT_CONFIG.extractNatspec).to.be.true;
+      expect(DEFAULT_CONFIG.logLevel).to.equal("INFO");
+      expect(DEFAULT_CONFIG.facetsOnly).to.be.false;
     });
 
     it("should have appropriate exclude patterns", () => {
-      const excludes = DEFAULT_REGISTRY_CONFIG.excludePaths;
+      const excludes = DEFAULT_CONFIG.excludePaths;
       expect(excludes).to.include("**/test/**");
       expect(excludes).to.include("**/tests/**");
       expect(excludes).to.include("**/mocks/**");
@@ -290,6 +305,7 @@ contract MyContract {}
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           logLevel: "SILENT",
         },
         false,
@@ -304,6 +320,7 @@ contract MyContract {}
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           includeMocksInRegistry: true,
           mockContractPaths: ["**/mocks/**/*.sol", "**/test/**/*Mock*.sol"],
           logLevel: "SILENT",
@@ -323,6 +340,7 @@ contract MyContract {}
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           includeMocksInRegistry: true,
           mockContractPaths: ["**/mocks/**/*.sol"],
           logLevel: "SILENT",
@@ -334,7 +352,7 @@ contract MyContract {}
       expect(result.stats.totalMocks).to.be.greaterThan(0);
 
       // May have warnings about missing keys
-      const mockWarnings = result.warnings.filter((w) => w.includes("mock"));
+      const mockWarnings = result.warnings.filter((w: string) => w.includes("mock"));
       expect(mockWarnings).to.be.an("array");
     }).timeout(30000);
 
@@ -342,6 +360,7 @@ contract MyContract {}
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           includeMocksInRegistry: true,
           mockContractPaths: ["**/mocks/MockedExternalKycList.sol"], // Specific file
           logLevel: "SILENT",
@@ -358,6 +377,7 @@ contract MyContract {}
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           includeMocksInRegistry: true,
           logLevel: "SILENT",
         },
@@ -380,6 +400,7 @@ contract MyContract {}
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           includeMocksInRegistry: true,
           logLevel: "SILENT",
         },
@@ -398,6 +419,7 @@ contract MyContract {}
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           includeMocksInRegistry: true,
           mockContractPaths: ["**/mocks/**/*.sol"],
           logLevel: "SILENT",
@@ -434,8 +456,9 @@ contract MyContract {}
   describe("Real-world Usage Scenarios", () => {
     it("should work for downstream project with different structure", async () => {
       // Simulate downstream project configuration
-      const customConfig: RegistryGenerationConfig = {
+      const customConfig: RegistryConfig = {
         contractsPath,
+        artifactPath,
         outputPath: "./custom/registry.data.ts",
         resolverKeyPaths: ["**/config/keys.sol", "**/constants/*.sol"],
         rolesPaths: ["**/config/roles.sol", "**/constants/*.sol"],
@@ -454,6 +477,7 @@ contract MyContract {}
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           resolverKeyPaths: ["**/nonexistent/*.sol"], // Won't find any
           logLevel: "SILENT",
         },
@@ -469,6 +493,7 @@ contract MyContract {}
       const result = await generateRegistryPipeline(
         {
           contractsPath,
+          artifactPath,
           rolesPaths: ["**/nonexistent/*.sol"], // Won't find standalone files
           logLevel: "SILENT",
         },

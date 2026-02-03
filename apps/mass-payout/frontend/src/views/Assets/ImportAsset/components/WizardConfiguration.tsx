@@ -4,13 +4,13 @@
  * Queda prohibida su distribución, copia o uso no autorizado.
  */
 
-import React from 'react';
-import { Box } from '@chakra-ui/react';
-import { Wizard } from 'io-bricks-ui';
-import { UseFormReturn } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { StepAssetDetails } from './StepAssetDetails';
-import { StepReview } from './StepReview';
+import React from "react";
+import { Box } from "@chakra-ui/react";
+import { Wizard } from "io-bricks-ui";
+import { UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { StepAssetDetails } from "./StepAssetDetails";
+import { StepReview } from "./StepReview";
 
 interface ImportAssetFormValues {
   assetId: string;
@@ -37,29 +37,21 @@ interface WizardConfigurationProps {
 }
 
 export const WizardConfiguration = ({ steps }: WizardConfigurationProps) => {
-  const { t } = useTranslation('importAsset');
+  const { t } = useTranslation("importAsset");
 
   const wizardSteps = [
     {
-      title: t('header.details'),
+      title: t("header.details"),
       content: <StepAssetDetails goToNext={steps.goToNext} />,
     },
     {
-      title: t('header.review'),
+      title: t("header.review"),
       content: <StepReview />,
     },
   ];
 
   return (
-    <Box
-      bg="neutral.50"
-      borderRadius="lg"
-      boxShadow="sm"
-      p={6}
-      flex="1"
-      display="flex"
-      flexDirection="column"
-    >
+    <Box bg="neutral.50" borderRadius="lg" boxShadow="sm" p={6} flex="1" display="flex" flexDirection="column">
       <Wizard
         // @ts-ignore
         steps={wizardSteps}

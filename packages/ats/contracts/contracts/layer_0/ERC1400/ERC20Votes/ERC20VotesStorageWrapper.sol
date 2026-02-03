@@ -47,7 +47,6 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         ERC20VotesStorage storage erc20VotesStorage = _erc20VotesStorage();
 
         uint256 abaf = _getAbaf();
-        abaf = (abaf == 0) ? 1 : abaf;
 
         uint256 pos = erc20VotesStorage.abafCheckpoints.length;
 
@@ -94,10 +93,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
         _takeAbafCheckpoint();
 
-        uint256 delegatorBalance = _balanceOfAdjustedAt(delegator, _blockTimestamp()) +
-            _getLockedAmountForAdjustedAt(delegator, _blockTimestamp()) +
-            _getHeldAmountForAdjusted(delegator) +
-            _getClearedAmountForAdjusted(delegator);
+        uint256 delegatorBalance = _getTotalBalanceForAdjustedAt(delegator, _blockTimestamp());
 
         _erc20VotesStorage().delegates[delegator] = delegatee;
 
@@ -179,20 +175,20 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     }
 
     function _getVotes(address account) internal view virtual override returns (uint256) {
-        return _getVotesAdjusted(_clock(), _erc20VotesStorage().checkpoints[account]);
+        return _getVotesAdjustedAt(_clock(), _erc20VotesStorage().checkpoints[account]);
     }
 
     function _getPastVotes(address account, uint256 timepoint) internal view virtual override returns (uint256) {
         require(timepoint < _clock(), "ERC20Votes: future lookup");
-        return _getVotesAdjusted(timepoint, _erc20VotesStorage().checkpoints[account]);
+        return _getVotesAdjustedAt(timepoint, _erc20VotesStorage().checkpoints[account]);
     }
 
     function _getPastTotalSupply(uint256 timepoint) internal view virtual override returns (uint256) {
         require(timepoint < _clock(), "ERC20Votes: future lookup");
-        return _getVotesAdjusted(timepoint, _erc20VotesStorage().totalSupplyCheckpoints);
+        return _getVotesAdjustedAt(timepoint, _erc20VotesStorage().totalSupplyCheckpoints);
     }
 
-    function _getVotesAdjusted(
+    function _getVotesAdjustedAt(
         uint256 timepoint,
         CheckpointsLib.Checkpoint[] storage ckpts
     ) internal view override returns (uint256) {

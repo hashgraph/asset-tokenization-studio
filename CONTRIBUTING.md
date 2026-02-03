@@ -111,11 +111,63 @@ git commit --signoff -S -m "fix(mp:backend): resolve payout calculation error"
 git commit --signoff -S -m "docs: update quick start guide"
 ```
 
-**Configure GPG signing:**
+### Automatic Setup (Recommended)
+
+Run the setup script to configure automatic DCO and GPG signing:
+
+```bash
+bash .github/scripts/setup-git.sh
+```
+
+This script will:
+
+1. Verify your Git identity
+2. Enable automatic DCO sign-off (`format.signoff = true`)
+3. Enable automatic GPG signing (`commit.gpgsign = true`)
+4. Guide you through GPG key creation if needed
+
+### Manual Configuration
+
+If you prefer manual setup:
 
 ```bash
 git config --global user.signingkey YOUR_GPG_KEY_ID
 git config --global commit.gpgsign true
+git config format.signoff true
+```
+
+### Enforcement Architecture
+
+This project uses a three-layer enforcement system:
+
+| Layer | Hook         | Purpose                                   |
+| ----- | ------------ | ----------------------------------------- |
+| 1     | `pre-commit` | Runs lint-staged for code quality         |
+| 2     | `commit-msg` | Verifies/auto-adds DCO, runs commitlint   |
+| 3     | `pre-push`   | Final gate: blocks push without DCO + GPG |
+
+The `commit-msg` hook will automatically add DCO sign-off if missing. However, the `pre-push` hook requires both DCO and GPG signatures, blocking any push that doesn't comply.
+
+### Troubleshooting
+
+**Push blocked due to missing signatures:**
+
+```bash
+# Fix recent commits with missing DCO/GPG
+git rebase -i HEAD~N  # N = number of commits to fix
+# Mark commits as 'edit', then for each:
+git commit --amend --no-edit --signoff -S
+git rebase --continue
+```
+
+**GPG signing not working:**
+
+```bash
+# Add to your shell profile (~/.zshrc or ~/.bashrc)
+export GPG_TTY=$(tty)
+
+# Verify GPG works
+echo "test" | gpg --clearsign
 ```
 
 ## Creating a Changeset (Required)

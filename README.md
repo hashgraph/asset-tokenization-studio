@@ -75,7 +75,7 @@ This project follows a **"Docs-as-Code"** philosophy, treating documentation wit
 You can also run the documentation site locally:
 
 ```bash
-npm run docs:dev
+npm run docs:start
 ```
 
 ## Architecture

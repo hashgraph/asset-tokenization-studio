@@ -1,12 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import {
-  type BusinessLogicResolver,
-  type AccessControlFacet,
-  type PauseFacet,
-  DiamondFacet,
-  DiamondLoupeFacet,
-} from "@contract-types";
+import { type BusinessLogicResolver, type AccessControlFacet, type PauseFacet, DiamondFacet } from "@contract-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
 import { ATS_ROLES } from "@scripts";
 import { assertObject } from "../../../common";
@@ -62,7 +56,7 @@ describe("ResolverProxy Tests", () => {
     return newResolver;
   }
 
-  async function checkFacets(businessLogicsRegistryDatas: any[], diamondLoupe: DiamondLoupeFacet) {
+  async function checkFacets(businessLogicsRegistryDatas: any[], diamondLoupe: DiamondFacet) {
     const expectedFacets = await Promise.all(
       businessLogicsRegistryDatas.map(async (data) => {
         const staticFunctionSelectors = await ethers.getContractAt(
@@ -117,7 +111,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, 1, []);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
 
     const result = await diamondCut.getConfigInfo();
 
@@ -125,7 +119,7 @@ describe("ResolverProxy Tests", () => {
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.version_).to.equal(1);
 
-    const diamondLoupe = await ethers.getContractAt("DiamondLoupeFacet", resolverProxy.address);
+    const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
 
     await checkFacets(businessLogicsRegistryDatas, diamondLoupe);
   });
@@ -145,7 +139,7 @@ describe("ResolverProxy Tests", () => {
     ).deploy(resolver.address, CONFIG_ID, 1, []);
 
     const accessControl = await ethers.getContractAt("AccessControl", resolverProxy.address);
-    const diamondLoupe = await ethers.getContractAt("DiamondLoupeFacet", resolverProxy.address);
+    const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
 
     const GRANT_ROLE_SIGNATURE = "0x2f2ff15d";
     await expect(accessControl.grantRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, signer_A.address))
@@ -222,7 +216,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, 1, []);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
 
     await expect(diamondCut.updateConfigVersion(0)).to.be.rejectedWith("AccountHasNoRole");
   });
@@ -252,7 +246,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, 1, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
 
     await expect(diamondCut.updateConfigVersion(100)).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
   });
@@ -284,7 +278,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
 
     let result = await diamondCut.getConfigInfo();
 
@@ -321,7 +315,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, 1, []);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
 
     await expect(diamondCut.updateConfig(CONFIG_ID_2, 1)).to.be.rejectedWith("AccountHasNoRole");
   });
@@ -351,7 +345,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, 1, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
 
     await expect(diamondCut.updateConfig(CONFIG_ID_2, 1)).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
   });
@@ -384,7 +378,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
 
     let result = await diamondCut.getConfigInfo();
 
@@ -423,7 +417,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, 1, []);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
 
     await expect(diamondCut.updateResolver(resolver_2.address, CONFIG_ID_2, 1)).to.be.rejectedWith("AccountHasNoRole");
   });
@@ -455,7 +449,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, 1, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
 
     await expect(diamondCut.updateResolver(resolver_2.address, CONFIG_ID_2, 1)).to.be.rejectedWith(
       "ResolverProxyConfigurationNoRegistered",
@@ -492,7 +486,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondCutFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
 
     let result = await diamondCut.getConfigInfo();
 

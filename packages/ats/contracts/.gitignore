@@ -34,7 +34,7 @@ gas-report.txt
 extracted-methods.txt
 
 #Hardhat files
-cache
+/cache
 artifacts
 
 .deps/
@@ -56,6 +56,9 @@ deployments/test-*.json
 # Checkpoint files (deployment state tracking) - never commit checkpoints
 deployments/**/.checkpoints/
 *.checkpoint.json
+
+# Registry generator cache
+.registry-cache.json
 
 # Test artifacts - all test-generated files go here
 .temp/

@@ -28,7 +28,7 @@ import {
   waitForTransaction,
   extractRevertReason,
 } from "@scripts/infrastructure";
-import { DiamondCutFacet__factory } from "@contract-types";
+import { DiamondFacet__factory } from "@contract-types";
 
 /**
  * Type of ResolverProxy update operation.
@@ -154,7 +154,7 @@ export async function getResolverProxyConfigInfo(
   try {
     validateAddress(proxyAddress, "ResolverProxy address");
 
-    const diamondCutFacet = DiamondCutFacet__factory.connect(proxyAddress, signerOrProvider);
+    const diamondCutFacet = DiamondFacet__factory.connect(proxyAddress, signerOrProvider);
     const [resolver, configId, version] = await diamondCutFacet.getConfigInfo();
 
     return {
@@ -373,7 +373,7 @@ async function _updateResolverProxyInternal(
       `Previous config: resolver=${previousConfig.resolver}, configId=${previousConfig.configurationId}, version=${previousConfig.version}`,
     );
 
-    const diamondCutFacet = DiamondCutFacet__factory.connect(proxyAddress, signer);
+    const diamondCutFacet = DiamondFacet__factory.connect(proxyAddress, signer);
 
     let updateTx;
     info("Sending update transaction...");

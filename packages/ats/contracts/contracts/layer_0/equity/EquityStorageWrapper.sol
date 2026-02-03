@@ -64,8 +64,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
         IEquity.Dividend memory newDividend = abi.decode(_data, (IEquity.Dividend));
 
-        _addScheduledCrossOrderedTask(newDividend.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
+        _addScheduledCrossOrderedTask(newDividend.recordDate, SNAPSHOT_TASK_TYPE);
+        _addScheduledSnapshot(newDividend.recordDate, _actionId);
     }
 
     function _setVoting(
@@ -85,8 +85,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
         IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
 
-        _addScheduledCrossOrderedTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
+        _addScheduledCrossOrderedTask(newVoting.recordDate, SNAPSHOT_TASK_TYPE);
+        _addScheduledSnapshot(newVoting.recordDate, _actionId);
     }
 
     function _setScheduledBalanceAdjustment(
@@ -112,8 +112,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
             (IEquity.ScheduledBalanceAdjustment)
         );
 
-        _addScheduledCrossOrderedTask(newBalanceAdjustment.executionDate, abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE));
-        _addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, abi.encode(_actionId));
+        _addScheduledCrossOrderedTask(newBalanceAdjustment.executionDate, BALANCE_ADJUSTMENT_TASK_TYPE);
+        _addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, _actionId);
     }
 
     function _getEquityDetails() internal view override returns (IEquity.EquityDetailsData memory equityDetails_) {
@@ -320,7 +320,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
             balance_ = (_snapshotId != 0)
                 ? _getTotalBalanceOfAtSnapshot(_snapshotId, _account)
-                : (_getTotalBalanceForAdjustedAt(_account, _date));
+                : _getTotalBalanceForAdjustedAt(_account, _date);
 
             decimals_ = (_snapshotId != 0) ? _decimalsAtSnapshot(_snapshotId) : _decimalsAdjustedAt(_date);
         }

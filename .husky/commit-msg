@@ -1,1 +1,89 @@
+###############################################################################
+# Commit Message Hook - DCO Sign-off Verification
+#
+# This hook verifies that commit messages include DCO sign-off.
+# If missing and format.signoff is not configured, it auto-adds it.
+#
+# Part of Layer 2: Commit-time enforcement
+###############################################################################
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Colors for output
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+###############################################################################
+# Check for DCO Sign-off
+###############################################################################
+
+# Check if commit message already has DCO sign-off
+if echo "$COMMIT_MSG" | grep -q "^Signed-off-by: "; then
+    # DCO sign-off is present, proceed to commitlint
+    npm run commitlint
+    exit $?
+fi
+
+###############################################################################
+# DCO Missing - Check if format.signoff is enabled
+###############################################################################
+
+FORMAT_SIGNOFF=$(git config --get format.signoff || echo "false")
+
+if [ "$FORMAT_SIGNOFF" = "true" ]; then
+    # format.signoff is enabled but DCO still missing (shouldn't happen)
+    # This means git commit was called without proper flags
+    echo ""
+    echo -e "${YELLOW}⚠️  Warning: DCO sign-off missing despite format.signoff=true${NC}"
+    echo ""
+    echo "This commit would fail pre-push hook verification."
+    echo ""
+    echo "Git should have added DCO automatically. This might indicate:"
+    echo "  - You used 'git commit --no-signoff' (overrides config)"
+    echo "  - An IDE/tool bypassed git config"
+    echo ""
+    echo "Fix: Cancel this commit and use:"
+    echo "  git commit --signoff"
+    echo ""
+    exit 1
+fi
+
+###############################################################################
+# Auto-add DCO Sign-off (Fallback)
+###############################################################################
+
+# Get author information
+AUTHOR_NAME=$(git config user.name)
+AUTHOR_EMAIL=$(git config user.email)
+
+if [ -z "$AUTHOR_NAME" ] || [ -z "$AUTHOR_EMAIL" ]; then
+    echo ""
+    echo -e "${RED}❌ ERROR: Git identity not configured${NC}"
+    echo ""
+    echo "You must configure your Git identity:"
+    echo "  git config user.name \"Your Name\""
+    echo "  git config user.email \"your.email@example.com\""
+    echo ""
+    exit 1
+fi
+
+# Add DCO sign-off line
+echo "" >> "$COMMIT_MSG_FILE"
+echo "Signed-off-by: $AUTHOR_NAME <$AUTHOR_EMAIL>" >> "$COMMIT_MSG_FILE"
+
+echo ""
+echo -e "${GREEN}✅ DCO sign-off automatically added${NC}"
+echo "   Signed-off-by: $AUTHOR_NAME <$AUTHOR_EMAIL>"
+echo ""
+echo -e "${BLUE}💡 Tip: Enable automatic DCO for all commits:${NC}"
+echo "   git config format.signoff true"
+echo "   Or run: bash .github/scripts/setup-git.sh"
+echo ""
+
+# Run commitlint on the modified message
 npm run commitlint
+exit $?

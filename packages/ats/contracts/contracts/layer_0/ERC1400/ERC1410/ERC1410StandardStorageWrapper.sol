@@ -27,7 +27,7 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
             // burn | redeem
             _updateAccountSnapshot(from, partition);
             _updateTotalSupplySnapshot(partition);
-            if (amount > 0 && _balanceOfAdjusted(from) == amount) removeFrom = true;
+            if (amount > 0 && _balanceOfAdjustedAt(from, _blockTimestamp()) == amount) removeFrom = true;
         }
         // transfer
         else {
@@ -35,7 +35,7 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
             _updateAccountSnapshot(to, partition);
             // _balanceOf instead of _balanceOfAdjusted because we are comparing it to 0
             if (amount > 0 && _balanceOf(to) == 0) addTo = true;
-            if (amount > 0 && _balanceOfAdjusted(from) == amount) removeFrom = true;
+            if (amount > 0 && _balanceOfAdjustedAt(from, _blockTimestamp()) == amount) removeFrom = true;
         }
 
         if (addTo && removeFrom) {
@@ -154,34 +154,22 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
         erc1410Storage.totalSupplyByPartition[_partition] += _value;
     }
 
-    function _totalSupplyAdjusted() internal view override returns (uint256) {
-        return _totalSupplyAdjustedAt(_blockTimestamp());
-    }
-
     function _totalSupplyAdjustedAt(uint256 _timestamp) internal view override returns (uint256) {
         (uint256 pendingABAF, ) = _getPendingScheduledBalanceAdjustmentsAt(_timestamp);
         return _totalSupply() * pendingABAF;
     }
 
-    function _totalSupplyByPartitionAdjusted(bytes32 _partition) internal view override returns (uint256) {
-        uint256 factor = _calculateFactor(_getAbafAdjusted(), _getLabafByPartition(_partition));
+    function _totalSupplyByPartitionAdjustedAt(
+        bytes32 _partition,
+        uint256 _timestamp
+    ) internal view override returns (uint256) {
+        uint256 factor = _calculateFactor(_getAbafAdjustedAt(_timestamp), _getLabafByPartition(_partition));
         return _totalSupplyByPartition(_partition) * factor;
-    }
-
-    function _balanceOfAdjusted(address _tokenHolder) internal view override returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
     }
 
     function _balanceOfAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view override returns (uint256) {
         uint256 factor = _calculateFactor(_getAbafAdjustedAt(_timestamp), _getLabafByUser(_tokenHolder));
         return _balanceOf(_tokenHolder) * factor;
-    }
-
-    function _balanceOfByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view override returns (uint256) {
-        return _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
     }
 
     function _balanceOfByPartitionAdjustedAt(
@@ -196,10 +184,6 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
         return _balanceOfByPartition(_partition, _tokenHolder) * factor;
     }
 
-    function _getTotalBalance(address _tokenHolder) internal view virtual override returns (uint256) {
-        return super._getTotalBalance(_tokenHolder) + _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
-    }
-
     function _getTotalBalanceForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -209,13 +193,14 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
             _balanceOfAdjustedAt(_tokenHolder, _timestamp);
     }
 
-    function _getTotalBalanceForByPartitionAdjusted(
+    function _getTotalBalanceForByPartitionAdjustedAt(
         bytes32 _partition,
-        address _tokenHolder
+        address _tokenHolder,
+        uint256 _timestamp
     ) internal view virtual override returns (uint256) {
         return
-            super._getTotalBalanceForByPartitionAdjusted(_partition, _tokenHolder) +
-            _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
+            super._getTotalBalanceForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
+            _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
     }
 
     function _validateParams(bytes32 _partition, uint256 _value) internal pure override {

@@ -1,21 +1,21 @@
-import { Flex, HStack } from '@chakra-ui/react';
-import { Button, InputController, Table, Text } from 'io-bricks-ui';
-import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { required } from '../../../../utils/rules';
-import { createColumnHelper } from '@tanstack/table-core';
-import { useGetDividendHolders } from '../../../../hooks/queries/useDividends';
-import { useParams } from 'react-router-dom';
-import { GetDividendHoldersRequest } from '@hashgraph/asset-tokenization-sdk';
+import { Flex, HStack } from "@chakra-ui/react";
+import { Button, InputController, Table, Text } from "io-bricks-ui";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { required } from "../../../../utils/rules";
+import { createColumnHelper } from "@tanstack/table-core";
+import { useGetDividendHolders } from "../../../../hooks/queries/useDividends";
+import { useParams } from "react-router-dom";
+import { GetDividendHoldersRequest } from "@hashgraph/asset-tokenization-sdk";
 
 type DividendsHoldersData = {
   holderAddress: string;
 };
 
 export const DividendsHolders = () => {
-  const { id: securityId = '' } = useParams();
-  const { t } = useTranslation('security', {
-    keyPrefix: 'details.dividends.holders',
+  const { id: securityId = "" } = useParams();
+  const { t } = useTranslation("security", {
+    keyPrefix: "details.dividends.holders",
   });
 
   const {
@@ -24,15 +24,12 @@ export const DividendsHolders = () => {
     formState: { isValid },
     handleSubmit,
   } = useForm({
-    mode: 'onSubmit',
+    mode: "onSubmit",
   });
 
-  const dividendId = watch('dividendId');
+  const dividendId = watch("dividendId");
 
-  const { data, refetch, isFetching } = useGetDividendHolders<
-    unknown,
-    DividendsHoldersData[]
-  >(
+  const { data, refetch, isFetching } = useGetDividendHolders<unknown, DividendsHoldersData[]>(
     new GetDividendHoldersRequest({
       securityId: securityId,
       dividendId: Number(dividendId),
@@ -56,8 +53,8 @@ export const DividendsHolders = () => {
   const columnHelper = createColumnHelper<DividendsHoldersData>();
 
   const columns = [
-    columnHelper.accessor('holderAddress', {
-      header: t('table.holderAddress'),
+    columnHelper.accessor("holderAddress", {
+      header: t("table.holderAddress"),
       enableSorting: false,
     }),
   ];
@@ -67,39 +64,34 @@ export const DividendsHolders = () => {
   };
 
   return (
-    <Flex flexDir={'column'} gap={4}>
-      <HStack
-        gap={4}
-        justifyContent={'flex-end'}
-        alignItems={'flex-end'}
-        w={'400px'}
-      >
+    <Flex flexDir={"column"} gap={4}>
+      <HStack gap={4} justifyContent={"flex-end"} alignItems={"flex-end"} w={"400px"}>
         <InputController
-          label={t('dividendIdInput.label')}
+          label={t("dividendIdInput.label")}
           control={control}
           id="dividendId"
           rules={{
             required,
           }}
-          placeholder={t('dividendIdInput.placeholder')}
+          placeholder={t("dividendIdInput.placeholder")}
           showErrors={false}
         />
         <Button
-          variant={'primary'}
+          variant={"primary"}
           onClick={handleSubmit(onSubmit)}
           isDisabled={!isValid || isFetching}
           isLoading={isFetching}
-          size={'md'}
-          width={'150px'}
+          size={"md"}
+          width={"150px"}
         >
-          {t('searchButton')}
+          {t("searchButton")}
         </Button>
       </HStack>
       <Table
         columns={columns}
         data={data ?? []}
-        name={'dividends-holders'}
-        emptyComponent={<Text>{t('emptyTable')}</Text>}
+        name={"dividends-holders"}
+        emptyComponent={<Text>{t("emptyTable")}</Text>}
         isLoading={isFetching}
       />
     </Flex>

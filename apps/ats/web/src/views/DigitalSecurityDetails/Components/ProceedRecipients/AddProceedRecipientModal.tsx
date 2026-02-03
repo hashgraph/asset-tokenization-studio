@@ -9,31 +9,28 @@ import {
   ModalOverlay,
   ModalProps,
   VStack,
-} from '@chakra-ui/react';
-import { Button, InputController } from 'io-bricks-ui';
-import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import { isValidHederaId, required } from '../../../../utils/rules';
-import { useAddProceedRecipient } from '../../../../hooks/mutations/useProceedRecipients';
-import { AddProceedRecipientRequest } from '@hashgraph/asset-tokenization-sdk';
-import { textToHex } from '../../../../utils/format';
+} from "@chakra-ui/react";
+import { Button, InputController } from "io-bricks-ui";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
+import { isValidHederaId, required } from "../../../../utils/rules";
+import { useAddProceedRecipient } from "../../../../hooks/mutations/useProceedRecipients";
+import { AddProceedRecipientRequest } from "@hashgraph/asset-tokenization-sdk";
+import { textToHex } from "../../../../utils/format";
 
 interface FormValues {
   address: string;
   data?: string;
 }
 
-interface AddProceedRecipientModalProps extends Omit<ModalProps, 'children'> {}
+interface AddProceedRecipientModalProps extends Omit<ModalProps, "children"> {}
 
-export const AddProceedRecipientModal = ({
-  isOpen,
-  onClose,
-}: AddProceedRecipientModalProps) => {
-  const { id: securityId = '' } = useParams();
+export const AddProceedRecipientModal = ({ isOpen, onClose }: AddProceedRecipientModalProps) => {
+  const { id: securityId = "" } = useParams();
 
-  const { t: tCreate } = useTranslation('security', {
-    keyPrefix: 'details.proceedRecipients.create',
+  const { t: tCreate } = useTranslation("security", {
+    keyPrefix: "details.proceedRecipients.create",
   });
 
   const {
@@ -42,19 +39,16 @@ export const AddProceedRecipientModal = ({
     handleSubmit,
     reset,
   } = useForm<FormValues>({
-    mode: 'onChange',
+    mode: "onChange",
   });
 
-  const {
-    mutate: addProceedRecipientMutation,
-    isPending: isPendingAddProceedRecipient,
-  } = useAddProceedRecipient();
+  const { mutate: addProceedRecipientMutation, isPending: isPendingAddProceedRecipient } = useAddProceedRecipient();
 
   const onSubmit = (values: FormValues) => {
     const request = new AddProceedRecipientRequest({
       securityId,
       proceedRecipientId: values.address,
-      data: values.data ? textToHex(values.data) : '',
+      data: values.data ? textToHex(values.data) : "",
     });
 
     addProceedRecipientMutation(request, {
@@ -77,27 +71,23 @@ export const AddProceedRecipientModal = ({
       }}
     >
       <ModalOverlay />
-      <ModalContent bgColor={'white'}>
-        <ModalHeader>{tCreate('title')}</ModalHeader>
+      <ModalContent bgColor={"white"}>
+        <ModalHeader>{tCreate("title")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack gap={4}>
             <InputController
               control={control}
               id="address"
-              label={tCreate('form.address.label')}
-              placeholder={tCreate('form.address.placeholder')}
+              label={tCreate("form.address.label")}
+              placeholder={tCreate("form.address.placeholder")}
               isRequired={true}
               rules={{
                 required,
                 validate: { isValidHederaId: isValidHederaId },
               }}
             />
-            <InputController
-              control={control}
-              id="data"
-              label={tCreate('form.data.label')}
-            />
+            <InputController control={control} id="data" label={tCreate("form.data.label")} />
           </VStack>
         </ModalBody>
         <ModalFooter>
@@ -108,9 +98,9 @@ export const AddProceedRecipientModal = ({
                 reset();
                 onClose();
               }}
-              variant={'secondary'}
+              variant={"secondary"}
             >
-              {tCreate('buttons.cancel')}
+              {tCreate("buttons.cancel")}
             </Button>
             <Button
               isDisabled={!isValid || isPendingAddProceedRecipient}
@@ -118,7 +108,7 @@ export const AddProceedRecipientModal = ({
               type="submit"
               onClick={handleSubmit(onSubmit)}
             >
-              {tCreate('buttons.add')}
+              {tCreate("buttons.add")}
             </Button>
           </HStack>
         </ModalFooter>
