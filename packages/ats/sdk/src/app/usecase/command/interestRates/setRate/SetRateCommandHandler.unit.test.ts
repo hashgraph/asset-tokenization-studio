@@ -11,6 +11,7 @@ import { ErrorCode } from "@core/error/BaseError";
 import { SetRateCommandHandler } from "./SetRateCommandHandler";
 import { SetRateCommand, SetRateCommandResponse } from "./SetRateCommand";
 import { SetRateCommandError } from "./error/SetRateCommandError";
+import AccountService from "@service/account/AccountService";
 
 describe("SetRateCommandHandler", () => {
   let handler: SetRateCommandHandler;
@@ -19,6 +20,7 @@ describe("SetRateCommandHandler", () => {
   const transactionServiceMock = createMock<TransactionService>();
   const validationServiceMock = createMock<ValidationService>();
   const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
   const handlerMock = createMock<any>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
@@ -26,7 +28,12 @@ describe("SetRateCommandHandler", () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new SetRateCommandHandler(transactionServiceMock, contractServiceMock, validationServiceMock);
+    handler = new SetRateCommandHandler(
+      transactionServiceMock,
+      contractServiceMock,
+      validationServiceMock,
+      accountServiceMock,
+    );
     command = new SetRateCommand("0x1234567890123456789012345678901234567890", "5.5", 8);
 
     transactionServiceMock.getHandler.mockReturnValue(handlerMock);
@@ -106,6 +113,7 @@ describe("SetRateCommandHandler", () => {
           transactionServiceMock,
           contractServiceMock,
           validationServiceMock,
+          accountServiceMock,
         );
 
         // Mock the execute method to throw an error
