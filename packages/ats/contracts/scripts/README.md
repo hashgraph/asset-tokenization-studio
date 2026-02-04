@@ -1247,6 +1247,79 @@ async function createBondConfiguration(
 
 ---
 
+## Testing
+
+### Test Structure
+
+Scripts tests follow a 2-type structure for clarity:
+
+```
+test/scripts/
+├── unit/                   # Pure unit tests (no I/O, no external dependencies)
+│   ├── utils/              # Validation, naming, logging utilities
+│   ├── infrastructure/     # Pure data operations (combineRegistries, networkConfig)
+│   └── domain/             # Registry data tests
+│
+└── integration/            # Tests with external dependencies
+    ├── operations/         # Contract deployments (Hardhat fixtures)
+    ├── checkpoint/         # Filesystem operations
+    ├── infrastructure/     # Configuration dependencies (env vars)
+    └── workflows/          # Full deployment workflows
+```
+
+**Unit tests**: Pure functions, in-memory only, typically <10ms execution
+
+- No filesystem, network, or database I/O
+- No Hardhat fixtures or contract deployments
+- Uses `@test` alias for centralized constants
+
+**Integration tests**: Tests with external dependencies
+
+- Uses `loadFixture` from Hardhat for contract setup
+- Filesystem operations (checkpoints, deployment files)
+- Configuration dependencies (env vars)
+
+### Test Constants
+
+All tests use centralized constants from `@test`:
+
+```typescript
+import { TEST_ADDRESSES, TEST_NETWORKS, TEST_WORKFLOWS, TEST_CONFIG_IDS, TEST_STANDARD_CONTRACTS } from "@test";
+
+const deployer = TEST_ADDRESSES.VALID_0;
+const network = TEST_NETWORKS.TESTNET;
+const facetName = TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET;
+```
+
+**Available constants:**
+
+- `TEST_ADDRESSES`: Valid/invalid addresses for testing
+- `TEST_NETWORKS`: Network identifiers
+- `TEST_WORKFLOWS`: Workflow type strings
+- `TEST_CONFIG_IDS`: Bytes32 configuration IDs
+- `TEST_TX_HASHES`: Sample transaction hashes
+- `TEST_TIMESTAMPS`: ISO format timestamps
+- `TEST_STANDARD_CONTRACTS`: Real contract/facet names
+- `TEST_TIME_TRAVEL_VARIANTS`: TimeTravel facet variant names
+
+### Running Tests
+
+```bash
+# Unit tests only (fast, no Hardhat required)
+npm run test:scripts:unit
+
+# Integration tests (requires Hardhat)
+npm run test:scripts:integration
+
+# All scripts tests
+npm run test:scripts
+
+# Parallel execution (faster for large test suites)
+npm run test:scripts:unit:parallel
+```
+
+---
+
 ## Troubleshooting
 
 ### Parallel Tests Running Slowly (8+ minutes instead of 2 minutes)

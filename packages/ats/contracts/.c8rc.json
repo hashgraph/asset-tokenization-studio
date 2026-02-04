@@ -1,0 +1,7 @@
+{
+  "reporter": ["text", "html"],
+  "all": false,
+  "include": ["scripts/**"],
+  "exclude": ["typechain-types/**", "scripts/**/index.ts", "node_modules/**", "**/*.d.ts"],
+  "report-dir": "./coverage"
+}

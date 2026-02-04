@@ -18,6 +18,16 @@ import type {
   WorkflowType,
 } from "@scripts/infrastructure";
 import { CheckpointManager, getStepName } from "@scripts/infrastructure";
+import {
+  TEST_ADDRESSES,
+  TEST_NETWORKS,
+  TEST_WORKFLOWS,
+  TEST_CHECKPOINT_STATUS,
+  TEST_TX_HASHES,
+  TEST_CONFIG_IDS,
+  TEST_CONTRACT_IDS,
+  TEST_TIMESTAMPS,
+} from "./constants";
 
 /**
  * Create a pre-populated checkpoint with specific deployment state.
@@ -428,4 +438,205 @@ export function addFacetToCheckpoint(
   }
   checkpoint.steps.facets.set(facetName, facetData);
   return checkpoint;
+}
+
+/**
+ * Create a fully-populated completed checkpoint for conversion tests.
+ *
+ * Returns a checkpoint with all deployment steps completed, suitable for
+ * testing checkpoint-to-output conversion and format verification.
+ *
+ * @param overrides - Optional partial data to merge/override defaults
+ * @returns Complete checkpoint with all fields populated
+ *
+ * @example
+ * ```typescript
+ * // Create default completed checkpoint
+ * const checkpoint = createCompletedTestCheckpoint();
+ *
+ * // Create with custom network
+ * const mainnetCheckpoint = createCompletedTestCheckpoint({
+ *   network: TEST_NETWORKS.MAINNET
+ * });
+ * ```
+ */
+export function createCompletedTestCheckpoint(overrides: Partial<DeploymentCheckpoint> = {}): DeploymentCheckpoint {
+  const now = new Date().toISOString();
+
+  return {
+    checkpointId: `${TEST_NETWORKS.TESTNET}-1731085200000`,
+    network: TEST_NETWORKS.TESTNET,
+    deployer: TEST_ADDRESSES.VALID_0,
+    status: TEST_CHECKPOINT_STATUS.COMPLETED,
+    currentStep: 6,
+    workflowType: TEST_WORKFLOWS.NEW_BLR,
+    startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
+    lastUpdate: TEST_TIMESTAMPS.ISO_SAMPLE_LATER,
+    steps: {
+      proxyAdmin: {
+        address: TEST_ADDRESSES.VALID_2,
+        contractId: TEST_CONTRACT_IDS.SAMPLE_0,
+        txHash: TEST_TX_HASHES.SAMPLE_0,
+        deployedAt: now,
+      },
+      blr: {
+        address: TEST_ADDRESSES.VALID_3,
+        implementation: TEST_ADDRESSES.VALID_3.replace(/3/g, "2") + "1",
+        implementationContractId: TEST_CONTRACT_IDS.SAMPLE_1,
+        proxy: TEST_ADDRESSES.VALID_3,
+        proxyContractId: TEST_CONTRACT_IDS.SAMPLE_2,
+        txHash: TEST_TX_HASHES.SAMPLE_1,
+        deployedAt: now,
+      },
+      facets: new Map([
+        [
+          "AccessControlFacet",
+          {
+            address: TEST_ADDRESSES.VALID_4,
+            contractId: TEST_CONTRACT_IDS.SAMPLE_3,
+            txHash: TEST_TX_HASHES.SAMPLE_2,
+            gasUsed: "500000",
+            deployedAt: now,
+          },
+        ],
+        [
+          "PausableFacet",
+          {
+            address: TEST_ADDRESSES.VALID_5,
+            contractId: TEST_CONTRACT_IDS.SAMPLE_4,
+            txHash: TEST_TX_HASHES.SAMPLE_3,
+            gasUsed: "450000",
+            deployedAt: now,
+          },
+        ],
+      ]),
+      facetsRegistered: true,
+      configurations: {
+        equity: {
+          configId: TEST_CONFIG_IDS.EQUITY,
+          version: 1,
+          facetCount: 43,
+          txHash: TEST_TX_HASHES.SAMPLE_4,
+        },
+        bond: {
+          configId: TEST_CONFIG_IDS.BOND,
+          version: 1,
+          facetCount: 43,
+          txHash: TEST_TX_HASHES.SAMPLE_5,
+        },
+        bondFixedRate: {
+          configId: TEST_CONFIG_IDS.BOND_FIXED_RATE,
+          version: 1,
+          facetCount: 47,
+          txHash: "0xabc789",
+        },
+        bondKpiLinkedRate: {
+          configId: TEST_CONFIG_IDS.BOND_KPI_LINKED,
+          version: 1,
+          facetCount: 47,
+          txHash: "0xdef123",
+        },
+        bondSustainabilityPerformanceTargetRate: {
+          configId: TEST_CONFIG_IDS.BOND_SPT,
+          version: 1,
+          facetCount: 47,
+          txHash: "0xghi456",
+        },
+      },
+      factory: {
+        address: TEST_ADDRESSES.VALID_6,
+        implementation: TEST_ADDRESSES.VALID_6.replace(/5/g, "4"),
+        implementationContractId: TEST_CONTRACT_IDS.SAMPLE_5,
+        proxy: TEST_ADDRESSES.VALID_6,
+        proxyContractId: TEST_CONTRACT_IDS.SAMPLE_6,
+        txHash: "0xstu901",
+        gasUsed: "800000",
+        deployedAt: now,
+      },
+    },
+    options: {},
+    ...overrides,
+    // Deep merge steps if provided
+    ...(overrides.steps
+      ? {
+          steps: {
+            ...overrides.steps,
+          },
+        }
+      : {}),
+  };
+}
+
+/**
+ * Create a minimal incomplete checkpoint for error condition tests.
+ *
+ * Returns a checkpoint with only basic fields, suitable for testing
+ * validation error conditions (missing ProxyAdmin, BLR, etc.).
+ *
+ * @param overrides - Optional partial data to merge/override defaults
+ * @returns Minimal checkpoint with basic fields only
+ *
+ * @example
+ * ```typescript
+ * // Create empty checkpoint (for missing ProxyAdmin test)
+ * const checkpoint = createMinimalTestCheckpoint();
+ *
+ * // Create with only ProxyAdmin (for missing BLR test)
+ * const checkpoint = createMinimalTestCheckpoint({
+ *   steps: {
+ *     proxyAdmin: {
+ *       address: TEST_ADDRESSES.VALID_2,
+ *       txHash: TEST_TX_HASHES.SAMPLE_0,
+ *       deployedAt: new Date().toISOString()
+ *     }
+ *   }
+ * });
+ * ```
+ */
+export function createMinimalTestCheckpoint(overrides: Partial<DeploymentCheckpoint> = {}): DeploymentCheckpoint {
+  return {
+    checkpointId: `${TEST_NETWORKS.TESTNET}-1731085200000`,
+    network: TEST_NETWORKS.TESTNET,
+    deployer: TEST_ADDRESSES.VALID_0,
+    status: TEST_CHECKPOINT_STATUS.COMPLETED,
+    currentStep: 6,
+    workflowType: TEST_WORKFLOWS.NEW_BLR,
+    startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
+    lastUpdate: TEST_TIMESTAMPS.ISO_SAMPLE_LATER,
+    steps: {},
+    options: {},
+    ...overrides,
+  };
+}
+
+/**
+ * Create test checkpoint for status formatting tests.
+ *
+ * Returns a checkpoint with minimal fields needed for formatCheckpointStatus tests.
+ *
+ * @param status - Checkpoint status
+ * @param step - Current step number
+ * @param workflowType - Workflow type
+ * @param failure - Optional failure information
+ * @returns Checkpoint suitable for status formatting tests
+ */
+export function createStatusTestCheckpoint(
+  status: "in-progress" | "completed" | "failed",
+  step: number,
+  workflowType: WorkflowType = "newBlr",
+  failure?: DeploymentCheckpoint["failure"],
+): DeploymentCheckpoint {
+  return {
+    checkpointId: `${TEST_NETWORKS.TESTNET}-1731085200000`,
+    network: TEST_NETWORKS.TESTNET,
+    deployer: TEST_ADDRESSES.VALID_0,
+    status,
+    currentStep: step,
+    workflowType,
+    startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
+    lastUpdate: "2025-11-08T10:05:00.000Z",
+    steps: {},
+    options: {},
+    ...(failure ? { failure } : {}),
+  };
 }
