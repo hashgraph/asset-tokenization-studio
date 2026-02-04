@@ -73,12 +73,11 @@
 }
 
 .tableWrapper {
+  width: 100%;
   overflow-x: auto;
 }
 
 .capabilitiesTable {
-  width: 100%;
-  border-collapse: collapse;
   background: var(--ifm-card-background-color);
   border-radius: 8px;
   overflow: hidden;

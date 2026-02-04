@@ -192,12 +192,32 @@
 
 /* Tables */
 table {
-  border-collapse: collapse;
+  width: 100% !important;
+  border-collapse: collapse !important;
   border: 1px solid var(--ifm-table-border-color);
+  table-layout: fixed !important;
+  display: table !important;
 }
 
 table thead {
+  display: table-header-group !important;
+  width: 100% !important;
   background-color: var(--ifm-color-gray-50);
+}
+
+table tbody {
+  display: table-row-group !important;
+  width: 100% !important;
+}
+
+table tr {
+  display: table-row !important;
+  width: 100% !important;
+}
+
+table th,
+table td {
+  display: table-cell !important;
 }
 
 [data-theme='dark'] table thead {
