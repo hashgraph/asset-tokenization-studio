@@ -269,7 +269,7 @@ describe("upgradeProxy - Integration Tests", () => {
       const { proxyAddress, proxyAdminAddress } = await loadFixture(deployTupProxyFixture);
 
       // Verify ProxyAdmin is the admin of the proxy (EIP-1967)
-      const adminAddressSlot = await ethers.provider.getStorageAt(proxyAddress, TEST_CONSTANTS.EIP1967_ADMIN_SLOT);
+      const adminAddressSlot = await ethers.provider.getStorage(proxyAddress, TEST_CONSTANTS.EIP1967_ADMIN_SLOT);
       const adminAddress = ethers.getAddress("0x" + adminAddressSlot.slice(-40));
 
       expect(adminAddress.toLowerCase()).to.equal(proxyAdminAddress.toLowerCase());
@@ -437,7 +437,7 @@ describe("upgradeProxy - Integration Tests", () => {
 
       // Verify V2 was deployed
       expect(newImplAddress).to.be.a("string");
-      expect(newImplAddress).to.not.equal(ethers.constants.AddressZero);
+      expect(newImplAddress).to.not.equal(ethers.ZeroAddress);
 
       // Verify proxy is still at V1
       const currentImpl = await getProxyImplementation(ethers.provider, proxyAddress);

@@ -179,7 +179,6 @@
     "typescript": "^5.8.2"
   },
   "overrides": {
-    "@typechain/ethers-v5": "^11.1.2",
     "ws": "^8.15.0"
   },
   "publishConfig": {
