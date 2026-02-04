@@ -582,4 +582,265 @@ describe("CheckpointManager", () => {
       expect(deleted).to.equal(0);
     });
   });
+
+  describe("findResumableCheckpoints", () => {
+    it("should find both in-progress and failed checkpoints", async () => {
+      // Create in-progress checkpoint
+      const inProgressCheckpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        options: {},
+      });
+      inProgressCheckpoint.status = TEST_CHECKPOINT_STATUS.IN_PROGRESS;
+      await manager.saveCheckpoint(inProgressCheckpoint);
+
+      // Wait to ensure different timestamp
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
+
+      // Create failed checkpoint
+      const failedCheckpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_1,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        options: {},
+      });
+      failedCheckpoint.status = TEST_CHECKPOINT_STATUS.FAILED;
+      failedCheckpoint.failure = {
+        step: 2,
+        stepName: "Facets",
+        error: "Test error",
+        timestamp: new Date().toISOString(),
+      };
+      await manager.saveCheckpoint(failedCheckpoint);
+
+      // Wait to ensure different timestamp
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
+
+      // Create completed checkpoint (should NOT be included)
+      const completedCheckpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_2,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        options: {},
+      });
+      completedCheckpoint.status = TEST_CHECKPOINT_STATUS.COMPLETED;
+      await manager.saveCheckpoint(completedCheckpoint);
+
+      const resumable = await manager.findResumableCheckpoints(TEST_NETWORKS.TESTNET);
+
+      expect(resumable).to.have.lengthOf(2);
+      // Should include both in-progress and failed
+      const statuses = resumable.map((cp) => cp.status);
+      expect(statuses).to.include(TEST_CHECKPOINT_STATUS.IN_PROGRESS);
+      expect(statuses).to.include(TEST_CHECKPOINT_STATUS.FAILED);
+      // Should NOT include completed
+      expect(statuses).to.not.include(TEST_CHECKPOINT_STATUS.COMPLETED);
+    });
+
+    it("should filter by workflow type", async () => {
+      // Create newBlr checkpoint
+      const newBlrCheckpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        options: {},
+      });
+      newBlrCheckpoint.status = TEST_CHECKPOINT_STATUS.IN_PROGRESS;
+      await manager.saveCheckpoint(newBlrCheckpoint);
+
+      // Wait to ensure different timestamp
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
+
+      // Create existingBlr checkpoint
+      const existingBlrCheckpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_1,
+        workflowType: TEST_WORKFLOWS.EXISTING_BLR,
+        options: {},
+      });
+      existingBlrCheckpoint.status = TEST_CHECKPOINT_STATUS.IN_PROGRESS;
+      await manager.saveCheckpoint(existingBlrCheckpoint);
+
+      // Find only newBlr checkpoints
+      const newBlrResumable = await manager.findResumableCheckpoints(TEST_NETWORKS.TESTNET, TEST_WORKFLOWS.NEW_BLR);
+      expect(newBlrResumable).to.have.lengthOf(1);
+      expect(newBlrResumable[0].workflowType).to.equal(TEST_WORKFLOWS.NEW_BLR);
+
+      // Find only existingBlr checkpoints
+      const existingBlrResumable = await manager.findResumableCheckpoints(
+        TEST_NETWORKS.TESTNET,
+        TEST_WORKFLOWS.EXISTING_BLR,
+      );
+      expect(existingBlrResumable).to.have.lengthOf(1);
+      expect(existingBlrResumable[0].workflowType).to.equal(TEST_WORKFLOWS.EXISTING_BLR);
+    });
+
+    it("should sort by timestamp (newest first)", async () => {
+      // Create older checkpoint
+      const olderCheckpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        options: {},
+      });
+      olderCheckpoint.status = TEST_CHECKPOINT_STATUS.IN_PROGRESS;
+      await manager.saveCheckpoint(olderCheckpoint);
+
+      // Wait to ensure different timestamp
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
+
+      // Create newer checkpoint
+      const newerCheckpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_1,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        options: {},
+      });
+      newerCheckpoint.status = TEST_CHECKPOINT_STATUS.FAILED;
+      await manager.saveCheckpoint(newerCheckpoint);
+
+      const resumable = await manager.findResumableCheckpoints(TEST_NETWORKS.TESTNET);
+
+      expect(resumable).to.have.lengthOf(2);
+      // Newest first
+      expect(resumable[0].checkpointId).to.equal(newerCheckpoint.checkpointId);
+      expect(resumable[1].checkpointId).to.equal(olderCheckpoint.checkpointId);
+    });
+
+    it("should return empty array when no resumable checkpoints", async () => {
+      const resumable = await manager.findResumableCheckpoints(TEST_NETWORKS.TESTNET);
+      expect(resumable).to.be.an("array");
+      expect(resumable).to.have.lengthOf(0);
+    });
+  });
+
+  describe("prepareForResume", () => {
+    it("should reset failed status to in-progress", async () => {
+      const checkpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        options: {},
+      });
+      checkpoint.status = TEST_CHECKPOINT_STATUS.FAILED;
+      checkpoint.failure = {
+        step: 2,
+        stepName: "Facets",
+        error: "Test error",
+        timestamp: new Date().toISOString(),
+      };
+      await manager.saveCheckpoint(checkpoint);
+
+      expect(checkpoint.status).to.equal(TEST_CHECKPOINT_STATUS.FAILED);
+      expect(checkpoint.failure).to.not.be.undefined;
+
+      await manager.prepareForResume(checkpoint);
+
+      expect(checkpoint.status).to.equal(TEST_CHECKPOINT_STATUS.IN_PROGRESS);
+      expect(checkpoint.failure).to.be.undefined;
+
+      // Verify it was saved
+      const loaded = await manager.loadCheckpoint(checkpoint.checkpointId);
+      expect(loaded).to.not.be.null;
+      expect(loaded!.status).to.equal(TEST_CHECKPOINT_STATUS.IN_PROGRESS);
+      expect(loaded!.failure).to.be.undefined;
+    });
+
+    it("should be a no-op for in-progress checkpoints", async () => {
+      const checkpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        options: {},
+      });
+      checkpoint.status = TEST_CHECKPOINT_STATUS.IN_PROGRESS;
+      await manager.saveCheckpoint(checkpoint);
+
+      const originalLastUpdate = checkpoint.lastUpdate;
+
+      // Small delay to detect if lastUpdate changes
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.SHORT));
+
+      await manager.prepareForResume(checkpoint);
+
+      expect(checkpoint.status).to.equal(TEST_CHECKPOINT_STATUS.IN_PROGRESS);
+      // Should not have been saved (lastUpdate unchanged)
+      expect(checkpoint.lastUpdate).to.equal(originalLastUpdate);
+    });
+  });
+
+  describe("schemaVersion", () => {
+    it("should include schemaVersion when creating checkpoint", () => {
+      const checkpoint = manager.createCheckpoint({
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        options: {},
+      });
+
+      expect(checkpoint.schemaVersion).to.be.a("number");
+      expect(checkpoint.schemaVersion).to.equal(2); // Current version
+    });
+
+    it("should load and migrate legacy checkpoints without schemaVersion", async () => {
+      // Create checkpoint manually without schemaVersion (legacy)
+      const checkpointId = `${TEST_NETWORKS.TESTNET}-${Date.now()}`;
+      const legacyCheckpoint = {
+        checkpointId,
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        status: TEST_CHECKPOINT_STATUS.IN_PROGRESS,
+        currentStep: 1,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        startTime: new Date().toISOString(),
+        lastUpdate: new Date().toISOString(),
+        steps: {},
+        options: {},
+        // Note: no schemaVersion field (legacy)
+      };
+
+      // Write directly to file
+      const filepath = join(testCheckpointsDir, `${checkpointId}.json`);
+      await fs.writeFile(filepath, JSON.stringify(legacyCheckpoint), "utf-8");
+
+      // Load through manager (should migrate)
+      const loaded = await manager.loadCheckpoint(checkpointId);
+
+      expect(loaded).to.not.be.null;
+      expect(loaded!.schemaVersion).to.equal(2); // Migrated to current version
+    });
+
+    it("should throw error for checkpoints with newer schema version", async () => {
+      // Create checkpoint with future schema version
+      const checkpointId = `${TEST_NETWORKS.TESTNET}-${Date.now()}`;
+      const futureCheckpoint = {
+        schemaVersion: 999, // Future version
+        checkpointId,
+        network: TEST_NETWORKS.TESTNET,
+        deployer: TEST_ADDRESSES.VALID_0,
+        status: TEST_CHECKPOINT_STATUS.IN_PROGRESS,
+        currentStep: 1,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
+        startTime: new Date().toISOString(),
+        lastUpdate: new Date().toISOString(),
+        steps: {},
+        options: {},
+      };
+
+      // Write directly to file
+      const filepath = join(testCheckpointsDir, `${checkpointId}.json`);
+      await fs.writeFile(filepath, JSON.stringify(futureCheckpoint), "utf-8");
+
+      // Should throw when loading
+      try {
+        await manager.loadCheckpoint(checkpointId);
+        expect.fail("Should have thrown error for future schema version");
+      } catch (err) {
+        expect(err).to.be.instanceOf(Error);
+        expect((err as Error).message).to.include("schema version 999");
+        expect((err as Error).message).to.include("upgrade");
+      }
+    });
+  });
 });

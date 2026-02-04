@@ -43,12 +43,13 @@ This README provides comprehensive reference documentation for the deployment sy
 6. [Import Standards](#import-standards)
 7. [Quick Start](#quick-start)
 8. [Usage Modes](#usage-modes)
-9. [Upgrading Configurations](#upgrading-configurations)
-10. [Upgrading TUP Proxy Implementations](#upgrading-tup-proxy-implementations)
-11. [Directory Structure](#directory-structure)
-12. [Examples](#examples)
-13. [API Reference](#api-reference)
-14. [Troubleshooting](#troubleshooting)
+9. **[Checkpoint System](./CHECKPOINT_GUIDE.md)** - Automatic deployment resume and recovery
+10. [Upgrading Configurations](#upgrading-configurations)
+11. [Upgrading TUP Proxy Implementations](#upgrading-tup-proxy-implementations)
+12. [Directory Structure](#directory-structure)
+13. [Examples](#examples)
+14. [API Reference](#api-reference)
+15. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -597,6 +598,90 @@ const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
   useTimeTravel: false,
 });
 ```
+
+---
+
+## Checkpoint System
+
+ATS deployment scripts use an automatic checkpoint system for reliable, resumable deployments. Checkpoints save progress after each step, enabling recovery from failures without restarting from scratch.
+
+### Key Features
+
+- ✅ **Automatic resume** after network failures or transaction errors
+- ✅ **Safe interruption** - Press Ctrl+C anytime, resume later
+- ✅ **Multiple resume attempts** - Keep retrying until success
+- ✅ **Progress preservation** - Never re-deploy completed steps
+- ✅ **Failure diagnostics** - Detailed error information for troubleshooting
+
+### Quick Example
+
+```bash
+# Deployment fails at step 3
+npm run deploy:newBlr
+# Step 1: Deploy ProxyAdmin... ✅
+# Step 2: Deploy BLR... ✅
+# Step 3: Deploy Facets... ❌ ERROR: Transaction failed
+
+# Just run again - resumes automatically!
+npm run deploy:newBlr
+# ✅ Resumes from step 3, skips completed steps 1-2
+# Step 3: Deploy Facets... ✅
+# Step 4: Register Facets... ✅
+# ...
+```
+
+### How It Works
+
+1. **Checkpoint created** when deployment starts
+2. **Updated after each step** with deployed addresses and transaction hashes
+3. **Marked as failed** if error occurs (preserves all completed work)
+4. **Auto-resume prompt** when you run the command again
+5. **Skips completed steps** and retries from failure point
+6. **Marked as completed** when deployment finishes successfully
+
+### Checkpoint Management
+
+```bash
+# List all checkpoints for a network
+npm run checkpoint:list -- hedera-testnet
+
+# Show detailed checkpoint information
+npm run checkpoint:show -- hedera-testnet-1738675200000
+
+# Delete specific checkpoint
+npm run checkpoint:delete -- hedera-testnet-1738675200000
+
+# Clean up old completed checkpoints (older than N days)
+npm run checkpoint:cleanup -- hedera-testnet 30
+
+# Reset failed checkpoint to in-progress (skip confirmation prompt)
+npm run checkpoint:reset -- hedera-testnet-1738675200000
+```
+
+### Checkpoint Storage
+
+Checkpoints are stored in `.checkpoints/` subdirectories:
+
+```
+deployments/
+├── hedera-testnet/.checkpoints/
+│   ├── hedera-testnet-1738675200000.json  ← Active checkpoint
+│   └── hedera-testnet-1738561800000.json  ← Old checkpoint
+├── hedera-mainnet/.checkpoints/
+└── local/.checkpoints/
+```
+
+### Learn More
+
+For comprehensive documentation including:
+
+- Real-world scenarios (failures, interruptions, multiple checkpoints)
+- Troubleshooting common issues
+- CI/CD integration patterns
+- Checkpoint file structure reference
+- Best practices and advanced topics
+
+**See the [Checkpoint Guide](./CHECKPOINT_GUIDE.md)** for complete details.
 
 ---
 
