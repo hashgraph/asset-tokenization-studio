@@ -199,6 +199,8 @@ import GetProceedRecipientsRequest from "./bond/GetProceedRecipientsRequest";
 import IsProceedRecipientRequest from "./bond/IsProceedRecipientRequest";
 import GetPrincipalForRequest from "./bond/GetPrincipalForRequest";
 import ActionContentHashExistsRequest from "./security/operations/corporateActions/ActionContentHashExistsRequest";
+import SetRateRequest from "@port/in/request/interestRates/SetRateRequest";
+import GetRateRequest from "@port/in/request/interestRates/GetRateRequest";
 
 export {
   CreateEquityRequest,
@@ -399,4 +401,6 @@ export {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
   ActionContentHashExistsRequest,
+  SetRateRequest,
+  GetRateRequest,
 };

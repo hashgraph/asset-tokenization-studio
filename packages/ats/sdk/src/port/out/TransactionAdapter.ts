@@ -811,6 +811,15 @@ interface IProceedRecipients {
   ): Promise<TransactionResponse>;
 }
 
+interface IFixedRate {
+  setRate(
+    security: EvmAddress,
+    rate: BigDecimal,
+    rateDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     WalletAdapter,
@@ -834,9 +843,9 @@ export default abstract class TransactionAdapter
     IFreezeAdapter,
     IBatchAdapter,
     IAgent,
-    IProceedRecipients
-{
-  abstract triggerPendingScheduledSnapshots(
+    IProceedRecipients,
+    IFixedRate
+{abstract triggerPendingScheduledSnapshots(
     security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
@@ -1659,6 +1668,13 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     proceedRecipient: EvmAddress,
     data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  
+  abstract setRate(
+    security: EvmAddress,
+    rate: BigDecimal,
+    rateDecimals: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }

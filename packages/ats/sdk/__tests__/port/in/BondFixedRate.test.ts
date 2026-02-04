@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 //import "../environmentMock";
 import {
@@ -8,13 +8,16 @@ import {
   Network,
   Bond,
   InitializationRequest,
+  FixedRate,
+  SetRateRequest,
+  Role,
+  ApplyRolesRequest,
   CreateBondFixedRateRequest,
 } from "@port/in";
-import { DFNS_SETTINGS, CLIENT_ACCOUNT_ECDSA, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
+import { DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
 import { MirrorNode } from "@domain/context/network/MirrorNode";
 import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
-import NetworkService from "@service/network/NetworkService";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import Injectable from "@core/injectable/Injectable";
 import {
@@ -23,10 +26,8 @@ import {
   RegulationSubType,
   RegulationType,
 } from "@domain/context/factory/RegulationType";
-import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
-import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
-import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
-import { Wallet, ethers } from "ethers";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import { Time } from "@core/Time";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -41,7 +42,9 @@ const nominalValue = "100";
 const nominalValueDecimals = 3;
 const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
 const startingDate = currentTimeInSeconds + TIME;
-const maturityDate = startingDate + 365; // 1 year maturity
+const numberOfCoupons = 15;
+const couponFrequency = 7;
+const maturityDate = startingDate + numberOfCoupons * couponFrequency;
 const regulationType = RegulationType.REG_S;
 const regulationSubType = RegulationSubType.NONE;
 const countries = "AF,HG,BN";
@@ -58,44 +61,13 @@ const mirrorNode: MirrorNode = {
 
 const rpcNode: JsonRpcRelay = {
   name: "testrpcNode",
-  baseUrl: "http://127.0.0.1:7546/api",
+  baseUrl: "http://localhost:7546",
 };
 
-describe("🧪 Bond test", () => {
-  let th: RPCTransactionAdapter;
-  let ns: NetworkService;
-  let mirrorNodeAdapter: MirrorNodeAdapter;
-  let rpcQueryAdapter: RPCQueryAdapter;
+describe("DFNS Transaction Adapter test", () => {
   let bond: SecurityViewModel;
 
   beforeAll(async () => {
-    mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
-    mirrorNodeAdapter.set(mirrorNode);
-
-    th = Injectable.resolve(RPCTransactionAdapter);
-    ns = Injectable.resolve(NetworkService);
-    rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
-
-    rpcQueryAdapter.init();
-    ns.environment = "testnet";
-    ns.configuration = {
-      factoryAddress: FACTORY_ADDRESS,
-      resolverAddress: RESOLVER_ADDRESS,
-    };
-    ns.mirrorNode = mirrorNode;
-    ns.rpcNode = rpcNode;
-
-    await th.init(true);
-    //await th.register(undefined, true);
-
-    const url = "http://127.0.0.1:7546";
-    const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
-
-    console.log("Client privateKey ECDSA:", CLIENT_ACCOUNT_ECDSA.privateKey);
-    console.log("Client account ECDSA:", CLIENT_ACCOUNT_ECDSA.id.toString());
-
-    th.setSignerOrProvider(new Wallet(CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? "", customHttpProvider));
-
     await Network.connect(
       new ConnectRequest({
         network: "testnet",
@@ -117,6 +89,9 @@ describe("🧪 Bond test", () => {
       }),
     );
 
+    Injectable.resolveTransactionHandler();
+
+    //Create a security for example a bond
     const requestST = new CreateBondFixedRateRequest({
       name: name,
       symbol: symbol,
@@ -129,7 +104,7 @@ describe("🧪 Bond test", () => {
       clearingActive: false,
       internalKycActivated: true,
       isMultiPartition: false,
-      diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
+      diamondOwnerAccount: DFNS_SETTINGS.hederaAccountId,
       currency: currency,
       numberOfUnits: numberOfUnits.toString(),
       nominalValue: nominalValue,
@@ -147,14 +122,41 @@ describe("🧪 Bond test", () => {
       rateDecimals: rateDecimals,
     });
 
-    Injectable.resolveTransactionHandler();
-
     bond = (await Bond.createFixedRate(requestST)).security;
+
+    console.log(bond.diamondAddress);
+    console.log(bond.evmDiamondAddress);
 
     console.log("bond: " + JSON.stringify(bond));
   }, 600_000);
 
-  it("test", async () => {
-    return true;
+  it("set fixed rate", async () => {
+    // Usar el contract ID que sabemos que fue creado exitosamente
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    await Role.applyRoles(
+      new ApplyRolesRequest({
+        securityId: contractAddress,
+        targetId: DFNS_SETTINGS.hederaAccountId,
+        roles: [SecurityRole._INTEREST_RATE_MANAGER_ROLE],
+        actives: [true],
+      }),
+    );
+    console.log("applyRoles [_INTEREST_RATE_MANAGER_ROLE]");
+    await Time.delay(4, "seconds");
+
+    const request = new SetRateRequest({
+      securityId: contractAddress,
+      rate: "5.5",
+      rateDecimals: 8,
+    });
+
+    const result = await FixedRate.setRate(request);
+    console.log("result: " + JSON.stringify(result));
   }, 60_000);
 });

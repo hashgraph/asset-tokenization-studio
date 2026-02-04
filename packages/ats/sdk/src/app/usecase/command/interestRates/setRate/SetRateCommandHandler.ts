@@ -8,6 +8,10 @@ import TransactionService from "@service/transaction/TransactionService";
 import ContractService from "@service/contract/ContractService";
 import { SetRateCommandError } from "./error/SetRateCommandError";
 import ValidationService from "@service/validation/ValidationService";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import AccountService from "@service/account/AccountService";
 
 @CommandHandler(SetRateCommand)
 export class SetRateCommandHandler implements ICommandHandler<SetRateCommand> {
@@ -18,24 +22,28 @@ export class SetRateCommandHandler implements ICommandHandler<SetRateCommand> {
     private readonly contractService: ContractService,
     @lazyInject(ValidationService)
     private readonly validationService: ValidationService,
+    @lazyInject(AccountService)
+    private readonly accountService: AccountService,
   ) {}
 
   async execute(command: SetRateCommand): Promise<SetRateCommandResponse> {
     try {
-      const {
-        securityId,
-        //rate,
-        //rateDecimals
-      } = command;
-      //const handler = this.transactionService.getHandler();
+      const { securityId, rate, rateDecimals } = command;
+      const handler = this.transactionService.getHandler();
+      const account = this.accountService.getCurrentAccount();
 
       await this.validationService.checkPause(securityId);
-      // TODO ruben.martinez
-      // await this.validationService.checkRole(SecurityRole.<expected_role>, account.id.toString(), securityId);
+      await this.validationService.checkRole(
+        SecurityRole._INTEREST_RATE_MANAGER_ROLE,
+        account.id.toString(),
+        securityId,
+      );
 
-      // TODO: Implementar la lógica para establecer la tasa de interés
+      const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
+      const rateBd = BigDecimal.fromString(rate, rateDecimals);
+      const res = await handler.setRate(securityEvmAddress, rateBd, rateDecimals, securityId);
 
-      return new SetRateCommandResponse(true, "pending");
+      return Promise.resolve(new SetRateCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new SetRateCommandError(error instanceof Error ? error : new Error(String(error)));
     }

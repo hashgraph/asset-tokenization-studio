@@ -50,6 +50,7 @@ import {
   TREXFactoryAts__factory,
   ProceedRecipientsFacet__factory,
   ERC1410IssuerFacet__factory,
+  FixedRate__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from "@core/Constants";
 import TransactionAdapter from "../TransactionAdapter";
@@ -3031,6 +3032,19 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       securityId!,
       GAS.UPDATE_PROCEED_RECIPIENT,
       [proceedRecipient.toString(), data],
+    );
+  }
+
+  setRate(security: EvmAddress, rate: BigDecimal, rateDecimals: number, securityId?: ContractId | string): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting Rate ${rate.toString()} with decimals ${rateDecimals} for security ${security.toString()}`,
+    );
+    return this.executeWithArgs(
+      new FixedRate__factory().attach(security.toString()),
+      "setRate",
+      securityId!,
+      GAS.SET_RATE,
+      [rate.toBigNumber(), rateDecimals],
     );
   }
 

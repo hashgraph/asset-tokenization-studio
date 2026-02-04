@@ -103,6 +103,7 @@ export default class TransactionService extends Service {
         "CreateBondFixedRateCommandHandler",
         "CreateTrexSuiteBondCommandHandler",
         "CreateTrexSuiteEquityCommandHandler",
+        "SetRateCommandHandler",
       ].some((handler) => className.includes(handler))
     ) {
       const data = results.map((result) => result.substring(BYTES_32_LENGTH - ADDRESS_LENGTH + 2));

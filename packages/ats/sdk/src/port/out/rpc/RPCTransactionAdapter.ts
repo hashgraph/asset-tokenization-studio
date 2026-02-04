@@ -78,6 +78,7 @@ import {
   TREXFactoryAts__factory,
   ProceedRecipientsFacet__factory,
   ERC1410IssuerFacet__factory,
+  FixedRate__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { Resolvers } from "@domain/context/factory/Resolvers";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -2537,6 +2538,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "updateProceedRecipientData",
       [proceedRecipient.toString(), data],
       GAS.UPDATE_PROCEED_RECIPIENT,
+    );
+  }
+
+  setRate(security: EvmAddress, rate: BigDecimal, rateDecimals: number, securityId?: ContractId | string): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting Rate ${rate.toString()} with decimals ${rateDecimals} for security ${security.toString()}`,
+    );
+    return this.executeTransaction(
+      FixedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setRate",
+      [rate.toBigNumber(), rateDecimals],
+      GAS.SET_RATE,
     );
   }
 }

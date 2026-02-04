@@ -15,6 +15,7 @@ import { RedeemAtMaturityByPartitionCommandHandler } from "@command/bond/redeemA
 import { GetTotalCouponHoldersQueryHandler } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler";
 import { GetCouponHoldersQueryHandler } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQueryHandler";
 import { FullRedeemAtMaturityCommandHandler } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommandHandler";
+import { SetRateCommandHandler } from "@command/interestRates/setRate/SetRateCommandHandler";
 
 export const COMMAND_HANDLERS_BOND = [
   {
@@ -40,6 +41,10 @@ export const COMMAND_HANDLERS_BOND = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: FullRedeemAtMaturityCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetRateCommandHandler,
   },
 ];
 

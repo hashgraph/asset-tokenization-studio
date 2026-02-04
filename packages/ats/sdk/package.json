@@ -32,6 +32,8 @@
     "clean:all": "npx --yes npm-run-all --parallel clean:cache clean:node clean:build clean:coverage",
     "test:local": "npx --yes jest --forceExit",
     "test:demo": "npx --yes jest demo.test.ts",
+    "test:unit:diff": "npx --yes jest $(git diff --name-only development | grep '\\.unit\\.test\\.ts$')",
+    "test:int:diff": "npx --yes jest $(git diff --name-only development | grep '__tests__/.*\\.test\\.ts$')",
     "test:clear:cache": "npx --yes jest --clearCache",
     "lint": "eslint '**/*.{js,mjs,cjs,ts,tsx,mts}' --cache",
     "lint:fix": "eslint '**/*.{js,mjs,cjs,ts,tsx,mts}' --fix --cache && npm run format",
