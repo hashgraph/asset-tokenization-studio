@@ -10,6 +10,18 @@
  */
 
 /**
+ * Current checkpoint schema version.
+ *
+ * Increment this when making breaking changes to checkpoint structure.
+ * CheckpointManager will validate and migrate older schemas.
+ *
+ * Version History:
+ * - v1: Initial schema (implicit, pre-versioning)
+ * - v2: Added schemaVersion field for forward compatibility
+ */
+export const CHECKPOINT_SCHEMA_VERSION = 2;
+
+/**
  * Deployed contract information for checkpoint tracking.
  */
 export interface DeployedContract {
@@ -91,6 +103,18 @@ export type WorkflowType = AtsWorkflowType | string;
  * automatic resume from the exact point of failure.
  */
 export interface DeploymentCheckpoint {
+  // ============================================================================
+  // Schema Version (for forward compatibility)
+  // ============================================================================
+
+  /**
+   * Schema version for forward compatibility.
+   *
+   * Used to detect and migrate older checkpoint formats.
+   * If undefined, treated as v1 (legacy pre-versioned checkpoint).
+   */
+  schemaVersion?: number;
+
   // ============================================================================
   // Identity
   // ============================================================================

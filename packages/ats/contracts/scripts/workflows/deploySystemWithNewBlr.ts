@@ -40,6 +40,8 @@ import {
   toConfigurationData,
   convertCheckpointFacets,
   isSuccess,
+  confirmFailedCheckpointResume,
+  selectCheckpointToResume,
 } from "@scripts/infrastructure";
 import {
   atsRegistry,
@@ -188,18 +190,38 @@ export async function deploySystemWithNewBlr(
       info(`✅ Loaded checkpoint from ${checkpoint.startTime}`);
       info(formatCheckpointStatus(checkpoint));
     } else if (autoResume) {
-      // Auto-detect incomplete deployments
-      const incompleteCheckpoints = await checkpointManager.findCheckpoints(network, "in-progress");
+      // Auto-detect incomplete deployments (both in-progress AND failed)
+      const resumableCheckpoints = await checkpointManager.findResumableCheckpoints(network, "newBlr");
 
-      if (incompleteCheckpoints.length > 0) {
-        const latestCheckpoint = incompleteCheckpoints[0];
-        info(`\n🔍 Found incomplete deployment: ${latestCheckpoint.checkpointId}`);
-        info(formatCheckpointStatus(latestCheckpoint));
+      if (resumableCheckpoints.length > 0) {
+        // If multiple checkpoints, let user select (in interactive mode)
+        let selectedCheckpoint: DeploymentCheckpoint | null;
 
-        // In TTY mode, this would prompt user. In CI, auto-resume.
-        // For now, we'll auto-resume (proper prompt implementation would use readline or similar)
-        info("🔄 Resuming from checkpoint...");
-        checkpoint = latestCheckpoint;
+        if (resumableCheckpoints.length > 1) {
+          selectedCheckpoint = await selectCheckpointToResume(resumableCheckpoints);
+        } else {
+          selectedCheckpoint = resumableCheckpoints[0];
+        }
+
+        if (selectedCheckpoint) {
+          info(`\n🔍 Found resumable deployment: ${selectedCheckpoint.checkpointId}`);
+          info(formatCheckpointStatus(selectedCheckpoint));
+
+          // If failed checkpoint, confirm with user before resuming
+          if (selectedCheckpoint.status === "failed") {
+            const shouldResume = await confirmFailedCheckpointResume(selectedCheckpoint);
+            if (!shouldResume) {
+              info("User declined to resume. Starting fresh deployment.");
+              selectedCheckpoint = null;
+            }
+          }
+
+          if (selectedCheckpoint) {
+            info("🔄 Resuming from checkpoint...");
+            await checkpointManager.prepareForResume(selectedCheckpoint);
+            checkpoint = selectedCheckpoint;
+          }
+        }
       }
     }
   }
@@ -959,10 +981,12 @@ export async function deploySystemWithNewBlr(
     logError("\n❌ Deployment failed:", errorMessage);
 
     // Mark checkpoint as failed
+    // Note: currentStep tracks the last COMPLETED step, so the failed step is currentStep + 1
+    const failedStep = checkpoint.currentStep + 1;
     checkpoint.status = "failed";
     checkpoint.failure = {
-      step: checkpoint.currentStep,
-      stepName: getStepName(checkpoint.currentStep, "newBlr"),
+      step: failedStep,
+      stepName: getStepName(failedStep, "newBlr"),
       error: errorMessage,
       timestamp: new Date().toISOString(),
       stackTrace,

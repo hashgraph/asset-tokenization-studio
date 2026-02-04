@@ -67,7 +67,7 @@ export type {
   ResumeOptions,
 } from "./checkpoint";
 
-export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./checkpoint";
+export { isSaveSuccess, isSaveFailure, isAtsWorkflow, CHECKPOINT_SCHEMA_VERSION } from "./checkpoint";
 
 // ============================================================================
 // BLR Configuration Types

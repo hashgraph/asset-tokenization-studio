@@ -4,12 +4,14 @@
  * Checkpoint utilities for deployment workflows.
  *
  * Helper functions for converting checkpoints, formatting status,
- * and mapping step numbers to names.
+ * mapping step numbers to names, and user confirmation prompts.
  *
  * @module infrastructure/checkpoint/utils
  */
 
+import * as readline from "readline";
 import type { DeploymentCheckpoint, DeploymentOutputType, WorkflowType } from "@scripts/infrastructure";
+import { warn, info } from "../utils/logging";
 
 /**
  * Convert checkpoint to DeploymentOutput format.
@@ -350,4 +352,132 @@ export function formatDuration(milliseconds: number): string {
 export function formatTimestamp(isoString: string): string {
   const date = new Date(isoString);
   return date.toISOString().replace("T", " ").split(".")[0];
+}
+
+// ============================================================================
+// User Confirmation Utilities for Checkpoint Resume
+// ============================================================================
+
+/**
+ * Prompt user to confirm resuming from a failed checkpoint.
+ *
+ * In non-TTY environments (CI), returns true by default (auto-resume with warning).
+ * In interactive mode, shows failure details and prompts for confirmation.
+ *
+ * @param checkpoint - Failed checkpoint to potentially resume from
+ * @returns Promise resolving to true if user confirms resume, false otherwise
+ *
+ * @example
+ * ```typescript
+ * if (checkpoint.status === 'failed') {
+ *   const shouldResume = await confirmFailedCheckpointResume(checkpoint);
+ *   if (!shouldResume) {
+ *     info("User declined to resume. Starting fresh deployment.");
+ *     checkpoint = null;
+ *   }
+ * }
+ * ```
+ */
+export async function confirmFailedCheckpointResume(checkpoint: DeploymentCheckpoint): Promise<boolean> {
+  // Non-interactive mode (CI) - auto-resume with warning
+  if (!process.stdin.isTTY) {
+    warn("Non-interactive mode: auto-resuming from failed checkpoint");
+    return true;
+  }
+
+  info("\n" + "═".repeat(60));
+  warn("⚠️  FOUND FAILED DEPLOYMENT");
+  info("═".repeat(60));
+  info(`Checkpoint: ${checkpoint.checkpointId}`);
+  info(`Started:    ${checkpoint.startTime}`);
+  if (checkpoint.failure) {
+    info(`Failed at:  Step ${checkpoint.failure.step} (${checkpoint.failure.stepName})`);
+    info(`Error:      ${checkpoint.failure.error}`);
+    info(`Time:       ${checkpoint.failure.timestamp}`);
+  }
+  info("═".repeat(60));
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) => {
+    rl.question("\nResume from this failed checkpoint? [Y/n]: ", (answer) => {
+      rl.close();
+      const normalized = answer.trim().toLowerCase();
+      // Accept empty (default yes), 'y', 'yes'
+      resolve(normalized === "" || normalized === "y" || normalized === "yes");
+    });
+  });
+}
+
+/**
+ * Prompt user to select which checkpoint to resume from when multiple exist.
+ *
+ * In non-TTY environments, returns the newest checkpoint (first in sorted list).
+ * In interactive mode, shows a selection menu with checkpoint details.
+ *
+ * @param checkpoints - Array of resumable checkpoints (sorted newest first)
+ * @returns Promise resolving to selected checkpoint, or null to start fresh
+ *
+ * @example
+ * ```typescript
+ * const resumable = await checkpointManager.findResumableCheckpoints(network);
+ * if (resumable.length > 1) {
+ *   const selected = await selectCheckpointToResume(resumable);
+ *   if (!selected) {
+ *     info("Starting fresh deployment.");
+ *   }
+ * }
+ * ```
+ */
+export async function selectCheckpointToResume(
+  checkpoints: DeploymentCheckpoint[],
+): Promise<DeploymentCheckpoint | null> {
+  if (checkpoints.length === 0) {
+    return null;
+  }
+
+  // Non-interactive: return newest
+  if (!process.stdin.isTTY) {
+    info("Non-interactive mode: selecting newest checkpoint");
+    return checkpoints[0];
+  }
+
+  info("\n" + "═".repeat(60));
+  info("📋 MULTIPLE CHECKPOINTS FOUND");
+  info("═".repeat(60));
+
+  checkpoints.forEach((cp, i) => {
+    const status = cp.status === "failed" ? "❌ FAILED" : "⏳ In Progress";
+    const stepName = getStepName(cp.currentStep, cp.workflowType);
+    info(`\n[${i + 1}] ${cp.checkpointId}`);
+    info(`    Status: ${status}`);
+    info(`    Step:   ${cp.currentStep + 1} - ${stepName}`);
+    info(`    Started: ${formatTimestamp(cp.startTime)}`);
+    if (cp.failure) {
+      info(`    Error:  ${cp.failure.error}`);
+    }
+  });
+
+  info(`\n[0] Start fresh deployment`);
+  info("═".repeat(60));
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) => {
+    rl.question("\nSelect checkpoint to resume (default: 1): ", (answer) => {
+      rl.close();
+      const num = parseInt(answer.trim() || "1");
+      if (num === 0 || isNaN(num) || num > checkpoints.length) {
+        resolve(null); // Start fresh
+      } else {
+        resolve(checkpoints[num - 1]);
+      }
+    });
+  });
 }

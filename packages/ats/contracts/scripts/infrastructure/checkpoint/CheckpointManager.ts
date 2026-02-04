@@ -14,7 +14,8 @@ import { join } from "path";
 // Import directly from source files to avoid circular dependency with NullCheckpointManager
 // (barrel export @scripts/infrastructure includes NullCheckpointManager which imports CheckpointManager)
 import type { DeploymentCheckpoint, CheckpointStatus, WorkflowType } from "../types/checkpoint";
-import { warn } from "../utils/logging";
+import { CHECKPOINT_SCHEMA_VERSION } from "../types/checkpoint";
+import { warn, info } from "../utils/logging";
 
 /**
  * Parameters for creating a new checkpoint.
@@ -90,6 +91,7 @@ export class CheckpointManager {
     const timestamp = Date.now();
 
     return {
+      schemaVersion: CHECKPOINT_SCHEMA_VERSION,
       checkpointId: `${network}-${timestamp}`,
       network,
       deployer,
@@ -164,7 +166,12 @@ export class CheckpointManager {
       const filepath = join(this.checkpointsDir, filename);
 
       const content = await fs.readFile(filepath, "utf-8");
-      return JSON.parse(content, this.mapReviver) as DeploymentCheckpoint;
+      const checkpoint = JSON.parse(content, this.mapReviver) as DeploymentCheckpoint;
+
+      // Validate and migrate schema if needed
+      this.validateAndMigrateSchema(checkpoint);
+
+      return checkpoint;
     } catch (error) {
       if (error instanceof Error && "code" in error && error.code === "ENOENT") {
         return null; // File not found
@@ -173,6 +180,57 @@ export class CheckpointManager {
         `Failed to load checkpoint ${checkpointId}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
+  }
+
+  /**
+   * Validate checkpoint schema version and apply migrations if needed.
+   *
+   * @param checkpoint - Checkpoint to validate and migrate
+   * @throws Error if checkpoint schema version is newer than supported
+   * @private
+   */
+  private validateAndMigrateSchema(checkpoint: DeploymentCheckpoint): void {
+    // Handle legacy checkpoints (pre-versioning)
+    if (!checkpoint.schemaVersion) {
+      checkpoint.schemaVersion = 1;
+      info(`Migrating legacy checkpoint ${checkpoint.checkpointId} to schema v1`);
+    }
+
+    // Check for unsupported future versions
+    if (checkpoint.schemaVersion > CHECKPOINT_SCHEMA_VERSION) {
+      throw new Error(
+        `Checkpoint ${checkpoint.checkpointId} has schema version ${checkpoint.schemaVersion}, ` +
+          `but this version of ATS only supports up to v${CHECKPOINT_SCHEMA_VERSION}. ` +
+          `Please upgrade your @hashgraph/asset-tokenization-contracts package.`,
+      );
+    }
+
+    // Apply migrations for older schemas
+    if (checkpoint.schemaVersion < CHECKPOINT_SCHEMA_VERSION) {
+      this.migrateCheckpoint(checkpoint);
+    }
+  }
+
+  /**
+   * Apply schema migrations to bring checkpoint up to current version.
+   *
+   * @param checkpoint - Checkpoint to migrate
+   * @private
+   */
+  private migrateCheckpoint(checkpoint: DeploymentCheckpoint): void {
+    // Version 1 -> 2 migration
+    // Currently no structural changes needed, just update version
+    if (checkpoint.schemaVersion === 1) {
+      info(`Migrating checkpoint ${checkpoint.checkpointId} from v1 to v2`);
+      checkpoint.schemaVersion = 2;
+      // Future: Add any v1 -> v2 data transformations here
+    }
+
+    // Add more migrations as needed when CHECKPOINT_SCHEMA_VERSION increases
+    // if (checkpoint.schemaVersion === 2) {
+    //   checkpoint.schemaVersion = 3;
+    //   // v2 -> v3 migrations
+    // }
   }
 
   /**
@@ -259,6 +317,82 @@ export class CheckpointManager {
       throw new Error(
         `Failed to delete checkpoint ${checkpointId}: ${error instanceof Error ? error.message : String(error)}`,
       );
+    }
+  }
+
+  /**
+   * Find checkpoints that can be resumed (in-progress or failed).
+   *
+   * Returns checkpoints sorted by timestamp (newest first).
+   * Used by workflows to auto-detect resumable deployments.
+   *
+   * @param network - Network name to filter by
+   * @param workflowType - Optional workflow type filter
+   * @returns Array of resumable checkpoints (in-progress and failed)
+   *
+   * @example
+   * ```typescript
+   * // Find all resumable checkpoints for testnet
+   * const resumable = await manager.findResumableCheckpoints('hedera-testnet')
+   *
+   * // Find resumable checkpoints for specific workflow
+   * const newBlrResumable = await manager.findResumableCheckpoints(
+   *   'hedera-testnet',
+   *   'newBlr'
+   * )
+   *
+   * if (resumable.length > 0) {
+   *   const checkpoint = resumable[0] // Newest
+   *   if (checkpoint.status === 'failed') {
+   *     // Prompt user to confirm resume from failed checkpoint
+   *   }
+   * }
+   * ```
+   */
+  async findResumableCheckpoints(network: string, workflowType?: WorkflowType): Promise<DeploymentCheckpoint[]> {
+    // Find both in-progress and failed checkpoints
+    const inProgress = await this.findCheckpoints(network, "in-progress");
+    const failed = await this.findCheckpoints(network, "failed");
+
+    let all = [...inProgress, ...failed];
+
+    // Filter by workflow type if specified
+    if (workflowType) {
+      all = all.filter((cp) => cp.workflowType === workflowType);
+    }
+
+    // Sort by timestamp (newest first)
+    // Timestamp is extracted from checkpointId: network-timestamp
+    return all.sort((a, b) => {
+      const tsA = parseInt(a.checkpointId.split("-").pop() || "0");
+      const tsB = parseInt(b.checkpointId.split("-").pop() || "0");
+      return tsB - tsA; // Descending order (newest first)
+    });
+  }
+
+  /**
+   * Prepare a checkpoint for resume.
+   *
+   * Resets status to in-progress and clears failure info.
+   * Call this before resuming from a failed checkpoint.
+   *
+   * @param checkpoint - Checkpoint to prepare for resume
+   *
+   * @example
+   * ```typescript
+   * if (checkpoint.status === 'failed') {
+   *   await manager.prepareForResume(checkpoint)
+   *   // checkpoint.status is now 'in-progress'
+   *   // checkpoint.failure is now undefined
+   * }
+   * ```
+   */
+  async prepareForResume(checkpoint: DeploymentCheckpoint): Promise<void> {
+    if (checkpoint.status === "failed") {
+      warn(`Clearing failure status from checkpoint: ${checkpoint.checkpointId}`);
+      checkpoint.status = "in-progress";
+      checkpoint.failure = undefined;
+      await this.saveCheckpoint(checkpoint);
     }
   }
 

@@ -39,6 +39,8 @@ import {
   getStepName,
   validateAddress,
   saveDeploymentOutput,
+  confirmFailedCheckpointResume,
+  selectCheckpointToResume,
 } from "@scripts/infrastructure";
 import { atsRegistry, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
@@ -297,15 +299,38 @@ async function validateAndInitialize(
       info(`✅ Loaded checkpoint from ${checkpoint.startTime}`);
       info(formatCheckpointStatus(checkpoint));
     } else if (autoResume) {
-      const incompleteCheckpoints = await checkpointManager.findCheckpoints(network, "in-progress");
-      const upgradeCheckpoints = incompleteCheckpoints.filter((cp) => cp.workflowType === "upgradeConfigurations");
+      // Auto-detect incomplete deployments (both in-progress AND failed)
+      const resumableCheckpoints = await checkpointManager.findResumableCheckpoints(network, "upgradeConfigurations");
 
-      if (upgradeCheckpoints.length > 0) {
-        const latestCheckpoint = upgradeCheckpoints[0];
-        info(`\n🔍 Found incomplete upgrade: ${latestCheckpoint.checkpointId}`);
-        info(formatCheckpointStatus(latestCheckpoint));
-        info("🔄 Resuming from checkpoint...");
-        checkpoint = latestCheckpoint;
+      if (resumableCheckpoints.length > 0) {
+        // If multiple checkpoints, let user select (in interactive mode)
+        let selectedCheckpoint: DeploymentCheckpoint | null;
+
+        if (resumableCheckpoints.length > 1) {
+          selectedCheckpoint = await selectCheckpointToResume(resumableCheckpoints);
+        } else {
+          selectedCheckpoint = resumableCheckpoints[0];
+        }
+
+        if (selectedCheckpoint) {
+          info(`\n🔍 Found resumable upgrade: ${selectedCheckpoint.checkpointId}`);
+          info(formatCheckpointStatus(selectedCheckpoint));
+
+          // If failed checkpoint, confirm with user before resuming
+          if (selectedCheckpoint.status === "failed") {
+            const shouldResume = await confirmFailedCheckpointResume(selectedCheckpoint);
+            if (!shouldResume) {
+              info("User declined to resume. Starting fresh upgrade.");
+              selectedCheckpoint = null;
+            }
+          }
+
+          if (selectedCheckpoint) {
+            info("🔄 Resuming from checkpoint...");
+            await checkpointManager.prepareForResume(selectedCheckpoint);
+            checkpoint = selectedCheckpoint;
+          }
+        }
       }
     }
   }
@@ -1142,11 +1167,13 @@ export async function upgradeConfigurations(
     logError("\n❌ Upgrade failed:", errorMessage);
 
     // Mark checkpoint as failed if context was initialized
+    // Note: currentStep tracks the last COMPLETED step, so the failed step is currentStep + 1
     if (ctx) {
+      const failedStep = ctx.checkpoint.currentStep + 1;
       ctx.checkpoint.status = "failed";
       ctx.checkpoint.failure = {
-        step: ctx.checkpoint.currentStep,
-        stepName: getStepName(ctx.checkpoint.currentStep, "upgradeConfigurations"),
+        step: failedStep,
+        stepName: getStepName(failedStep, "upgradeConfigurations"),
         error: errorMessage,
         timestamp: new Date().toISOString(),
         stackTrace,

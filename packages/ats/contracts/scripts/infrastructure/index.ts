@@ -62,6 +62,8 @@ export type {
   ResumeOptions,
 } from "./types";
 
+export { CHECKPOINT_SCHEMA_VERSION } from "./types";
+
 // Type guards
 export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./types";
 
@@ -269,6 +271,9 @@ export { getSelector } from "./utils/selector";
 
 export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
+export { withRetry, withRetryFn, DEFAULT_RETRYABLE_ERRORS } from "./utils/retry";
+export type { WithRetryOptions } from "./utils/retry";
+
 // ============================================================================
 // Checkpoint System
 // ============================================================================
@@ -284,6 +289,8 @@ export {
   formatCheckpointStatus,
   formatDuration,
   formatTimestamp,
+  confirmFailedCheckpointResume,
+  selectCheckpointToResume,
 } from "./checkpoint/utils";
 
 // Checkpoint converters for resumability
