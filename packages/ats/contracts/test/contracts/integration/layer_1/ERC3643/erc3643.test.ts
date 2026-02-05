@@ -1053,9 +1053,9 @@ describe("ERC3643 Tests", () => {
           caught = err;
         }
         const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
+        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
         expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getSighash("MockErrorMint(address,uint256)");
+        const targetErrorSelector = complianceMock.interface.getError("MockErrorMint")!.selector;
         const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
           ["address", "uint256"],
           [signer_E.address, AMOUNT],
@@ -1087,9 +1087,9 @@ describe("ERC3643 Tests", () => {
           caught = err;
         }
         const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
+        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
         expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getSighash("MockErrorTransfer(address,address,uint256)");
+        const targetErrorSelector = complianceMock.interface.getError("MockErrorTransfer")!.selector;
         const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
           ["address", "address", "uint256"],
           [signer_E.address, signer_D.address, AMOUNT],
@@ -1115,9 +1115,9 @@ describe("ERC3643 Tests", () => {
           caught = err;
         }
         const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
+        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
         expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getSighash("MockErrorBurn(address,uint256)");
+        const targetErrorSelector = complianceMock.interface.getError("MockErrorBurn")!.selector;
         const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
           ["address", "uint256"],
           [signer_E.address, AMOUNT],
@@ -1137,11 +1137,9 @@ describe("ERC3643 Tests", () => {
           caught = err;
         }
         const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
+        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
         expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getSighash(
-          "MockErrorCanTransfer(address,address,uint256)",
-        );
+        const targetErrorSelector = complianceMock.interface.getError("MockErrorCanTransfer")!.selector;
         const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
           ["address", "address", "uint256"],
           [signer_E.address, signer_D.address, ZERO], // During approvals amount is not checked
