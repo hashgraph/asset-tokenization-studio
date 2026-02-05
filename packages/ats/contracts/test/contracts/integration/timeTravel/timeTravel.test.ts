@@ -16,7 +16,7 @@ describe("Time Travel Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
 
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
   };
 
   beforeEach(async () => {
@@ -50,7 +50,7 @@ describe("Time Travel Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(newTimestamp);
     await expect(timeTravelFacet.resetSystemTimestamp()).to.emit(timeTravelFacet, "SystemTimestampReset");
     const latestBlock = await ethers.provider.getBlock("latest");
-    const latestTimestamp = latestBlock.timestamp;
+    const latestTimestamp = latestBlock!.timestamp;
     expect(await timeTravelFacet.blockTimestamp()).to.be.equal(latestTimestamp);
   });
 });

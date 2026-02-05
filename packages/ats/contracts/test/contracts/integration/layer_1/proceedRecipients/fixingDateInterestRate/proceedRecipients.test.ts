@@ -48,21 +48,21 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
 
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsKpiLinkedRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
     bondKpiLinkedRateFacet = await ethers.getContractAt(
       "BondUSAKpiLinkedRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     scheduledTasksFacet = await ethers.getContractAt(
       "ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
 
     await accessControlFacet.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
     await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);

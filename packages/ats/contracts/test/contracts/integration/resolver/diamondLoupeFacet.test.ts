@@ -14,7 +14,7 @@ describe("DiamondLoupeFacet", () => {
     const base = await loadFixture(deployEquityTokenFixture);
     signer_A = base.deployer;
 
-    diamondLoupe = await ethers.getContractAt("DiamondFacet", base.diamond.address, signer_A);
+    diamondLoupe = await ethers.getContractAt("DiamondFacet", base.diamond.target, signer_A);
   });
 
   describe("getFacets functionality", () => {
@@ -37,8 +37,8 @@ describe("DiamondLoupeFacet", () => {
       const facetsLength = await diamondLoupe.getFacetsLength();
       const facets = await diamondLoupe.getFacets();
 
-      expect(facetsLength.toNumber()).to.equal(facets.length);
-      expect(facetsLength.toNumber()).to.be.greaterThan(0);
+      expect(Number(facetsLength)).to.equal(facets.length);
+      expect(Number(facetsLength)).to.be.greaterThan(0);
     });
 
     it("GIVEN a resolver WHEN getting facets by page THEN returns paginated results", async () => {
@@ -48,14 +48,14 @@ describe("DiamondLoupeFacet", () => {
       const pageLength = 2;
       const firstPage = await diamondLoupe.getFacetsByPage(0, pageLength);
 
-      expect(firstPage.length).to.equal(Math.min(pageLength, facetsLength.toNumber()));
+      expect(firstPage.length).to.equal(Math.min(pageLength, Number(facetsLength)));
 
       for (let i = 0; i < firstPage.length; i++) {
         expect(firstPage[i].id).to.equal(allFacets[i].id);
         expect(firstPage[i].addr).to.equal(allFacets[i].addr);
       }
 
-      if (facetsLength.toNumber() > pageLength) {
+      if (Number(facetsLength) > pageLength) {
         const secondPage = await diamondLoupe.getFacetsByPage(pageLength - 1, pageLength);
         expect(secondPage.length).to.be.greaterThan(0);
 
@@ -86,8 +86,8 @@ describe("DiamondLoupeFacet", () => {
       const selectorsLength = await diamondLoupe.getFacetSelectorsLength(facetId);
       const selectors = await diamondLoupe.getFacetSelectors(facetId);
 
-      expect(selectorsLength.toNumber()).to.equal(selectors.length);
-      expect(selectorsLength.toNumber()).to.be.greaterThan(0);
+      expect(Number(selectorsLength)).to.equal(selectors.length);
+      expect(Number(selectorsLength)).to.be.greaterThan(0);
     });
 
     it("GIVEN a resolver WHEN getting facet selectors by page THEN returns paginated selectors", async () => {
@@ -241,9 +241,9 @@ describe("DiamondLoupeFacet", () => {
       const facetAddresses = await diamondLoupe.getFacetAddresses();
       const facetsLength = await diamondLoupe.getFacetsLength();
 
-      expect(facets.length).to.equal(facetsLength.toNumber());
-      expect(facetIds.length).to.equal(facetsLength.toNumber());
-      expect(facetAddresses.length).to.equal(facetsLength.toNumber());
+      expect(facets.length).to.equal(Number(facetsLength));
+      expect(facetIds.length).to.equal(Number(facetsLength));
+      expect(facetAddresses.length).to.equal(Number(facetsLength));
 
       for (let i = 0; i < facets.length; i++) {
         expect(facets[i].id).to.equal(facetIds[i]);
@@ -255,7 +255,7 @@ describe("DiamondLoupeFacet", () => {
         expect(individualFacet.selectors).to.have.members(facets[i].selectors);
 
         const selectorsLength = await diamondLoupe.getFacetSelectorsLength(facets[i].id);
-        expect(selectorsLength.toNumber()).to.equal(facets[i].selectors.length);
+        expect(Number(selectorsLength)).to.equal(facets[i].selectors.length);
 
         const selectors = await diamondLoupe.getFacetSelectors(facets[i].id);
         expect(selectors).to.have.members(facets[i].selectors);
@@ -311,7 +311,7 @@ describe("DiamondLoupeFacet", () => {
 
     it("GIVEN a resolver WHEN getting facets by page beyond available data THEN returns empty array", async () => {
       const facetsLength = await diamondLoupe.getFacetsLength();
-      const facets = await diamondLoupe.getFacetsByPage(facetsLength.toNumber() + 100, 10);
+      const facets = await diamondLoupe.getFacetsByPage(Number(facetsLength) + 100, 10);
       expect(facets.length).to.equal(0);
     });
 
@@ -335,7 +335,7 @@ describe("DiamondLoupeFacet", () => {
       const facetsLength = await diamondLoupe.getFacetsLength();
       const largePage = await diamondLoupe.getFacetsByPage(0, 10000);
 
-      expect(largePage.length).to.equal(facetsLength.toNumber());
+      expect(largePage.length).to.equal(Number(facetsLength));
     });
   });
 });

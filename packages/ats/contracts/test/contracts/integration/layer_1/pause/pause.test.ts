@@ -25,19 +25,19 @@ describe("Pause Tests", () => {
     externalPauseMock = await (
       await ethers.getContractFactory("MockedExternalPause", base.deployer)
     ).deploy({ gasLimit: GAS_LIMIT.high });
-    await externalPauseMock.deployed();
+    await externalPauseMock.waitForDeployment();
 
     // Get external pause management facet
     const externalPauseManagement = await ethers.getContractAt(
       "ExternalPauseManagement",
-      diamond.address,
+      diamond.target,
       base.deployer,
     );
 
     // Add external pause to the token
     await base.accessControlFacet.grantRole(ATS_ROLES._PAUSER_ROLE, base.deployer.address);
     await base.accessControlFacet.grantRole(ATS_ROLES._PAUSE_MANAGER_ROLE, base.deployer.address);
-    await externalPauseManagement.addExternalPause(externalPauseMock.address, {
+    await externalPauseManagement.addExternalPause(externalPauseMock.target, {
       gasLimit: GAS_LIMIT.high,
     });
 

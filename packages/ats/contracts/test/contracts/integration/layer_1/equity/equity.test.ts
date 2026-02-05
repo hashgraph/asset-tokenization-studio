@@ -30,7 +30,6 @@ import { getEquityDetails, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
 import { executeRbac } from "@test";
-import { BigNumber } from "ethers";
 
 let dividendsRecordDateInSeconds = 0;
 let dividendsExecutionDateInSeconds = 0;
@@ -103,18 +102,18 @@ describe("Equity Tests", () => {
       },
     ]);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    lockFacet = await ethers.getContractAt("Lock", diamond.address, signer_A);
-    holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSAFacetTimeTravel", diamond.address, signer_A);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
-    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address, signer_A);
-    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address, signer_A);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
+    lockFacet = await ethers.getContractAt("Lock", diamond.target, signer_A);
+    holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("EquityUSAFacetTimeTravel", diamond.target, signer_A);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
+    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
+    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -125,12 +124,12 @@ describe("Equity Tests", () => {
 
     // Use dynamic timestamps based on current block time
     const currentTimestamp = await timeTravelFacet.blockTimestamp();
-    const ONE_DAY = 86400; // 24 hours in seconds
+    const ONE_DAY = 86400n; // 24 hours in seconds
 
-    dividendsRecordDateInSeconds = currentTimestamp.add(ONE_DAY).toNumber();
-    dividendsExecutionDateInSeconds = currentTimestamp.add(ONE_DAY + 1000).toNumber();
-    votingRecordDateInSeconds = currentTimestamp.add(ONE_DAY).toNumber();
-    balanceAdjustmentExecutionDateInSeconds = currentTimestamp.add(ONE_DAY).toNumber();
+    dividendsRecordDateInSeconds = Number(currentTimestamp + ONE_DAY);
+    dividendsExecutionDateInSeconds = Number(currentTimestamp + ONE_DAY + 1000n);
+    votingRecordDateInSeconds = Number(currentTimestamp + ONE_DAY);
+    balanceAdjustmentExecutionDateInSeconds = Number(currentTimestamp + ONE_DAY);
 
     votingData = {
       recordDate: votingRecordDateInSeconds.toString(),
@@ -295,7 +294,7 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails", async () => {
       const currentTimestamp = await timeTravelFacet.blockTimestamp();
-      await timeTravelFacet.changeSystemTimestamp(currentTimestamp.add(100));
+      await timeTravelFacet.changeSystemTimestamp(currentTimestamp + 100n);
       // Granting Role to account C
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
@@ -313,7 +312,7 @@ describe("Equity Tests", () => {
       );
 
       const wrongDividendData_2 = {
-        recordDate: currentTimestamp.sub(100).toString(), // Past timestamp
+        recordDate: (currentTimestamp - 100n).toString(), // Past timestamp
         executionDate: dividendsExecutionDateInSeconds.toString(),
         amount: dividendsAmountPerEquity,
         amountDecimals: dividendsAmountDecimalsPerEquity,
@@ -417,10 +416,8 @@ describe("Equity Tests", () => {
       expect(dividendHolders.length).to.equal(dividendTotalHolder);
       expect(dividendHolders).to.have.members([signer_A.address]);
       expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance.mul(dividendFor.amount));
-      expect(dividendAmountFor.denominator).to.equal(
-        BigNumber.from(10 ** (dividendFor.decimals + dividendFor.amountDecimals)),
-      );
+      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
+      expect(dividendAmountFor.denominator).to.equal(BigInt(10 ** (dividendFor.decimals + dividendFor.amountDecimals)));
     });
 
     it("GIVEN an account with corporateActions role WHEN setDividends and hold THEN transaction succeeds", async () => {
@@ -475,10 +472,8 @@ describe("Equity Tests", () => {
       expect(dividendHolders.length).to.equal(dividendTotalHolder);
       expect(dividendHolders).to.have.members([signer_A.address]);
       expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance.mul(dividendFor.amount));
-      expect(dividendAmountFor.denominator).to.equal(
-        BigNumber.from(10 ** (dividendFor.decimals + dividendFor.amountDecimals)),
-      );
+      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
+      expect(dividendAmountFor.denominator).to.equal(BigInt(10 ** (dividendFor.decimals + dividendFor.amountDecimals)));
     });
 
     it("GIVEN scheduled dividends WHEN record date is reached AND scheduled balance adjustments is set after record date THEN dividends are paid without adjusted balance", async () => {
@@ -538,10 +533,8 @@ describe("Equity Tests", () => {
       expect(dividendFor.amount).to.equal(dividendsAmountPerEquity);
       expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
       expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
-      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance.mul(dividendFor.amount));
-      expect(dividendAmountFor.denominator).to.equal(
-        BigNumber.from(10 ** (dividendFor.decimals + dividendFor.amountDecimals)),
-      );
+      expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
+      expect(dividendAmountFor.denominator).to.equal(BigInt(10 ** (dividendFor.decimals + dividendFor.amountDecimals)));
     });
 
     it("GIVEN frozen tokens WHEN calculating dividends without snapshot THEN frozen tokens are included in dividend calculation", async () => {
@@ -583,9 +576,9 @@ describe("Equity Tests", () => {
       expect(dividendFor.recordDateReached).to.equal(true);
 
       // Verify dividend calculation: (tokenBalance * amount) / (10^(decimals + amountDecimals))
-      const expectedDividendNumerator = dividendFor.tokenBalance.mul(dividendFor.amount);
-      const expectedDividendDenominator = BigNumber.from(10 ** (dividendFor.decimals + dividendFor.amountDecimals));
-      expectedDividendNumerator.div(expectedDividendDenominator);
+      const expectedDividendNumerator = dividendFor.tokenBalance * dividendFor.amount;
+      const expectedDividendDenominator = BigInt(10 ** (dividendFor.decimals + dividendFor.amountDecimals));
+      // Division result: expectedDividendNumerator / expectedDividendDenominator
 
       // Also get the dividendAmountFor to verify
       const dividendAmountFor = await equityFacet.getDividendAmountFor(1, signer_A.address);
@@ -704,11 +697,11 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account with corporateActions role WHEN setVoting with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
       const currentTimestamp = await timeTravelFacet.blockTimestamp();
-      await timeTravelFacet.changeSystemTimestamp(currentTimestamp.add(100));
+      await timeTravelFacet.changeSystemTimestamp(currentTimestamp + 100n);
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
       const invalidVotingData = {
-        recordDate: currentTimestamp.sub(100).toString(), // Past timestamp
+        recordDate: (currentTimestamp - 100n).toString(), // Past timestamp
         data: voteData,
       };
 
@@ -877,11 +870,11 @@ describe("Equity Tests", () => {
 
     it("GIVEN an account with corporateActions role WHEN setScheduledBalanceAdjustment with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
       const currentTimestamp = await timeTravelFacet.blockTimestamp();
-      await timeTravelFacet.changeSystemTimestamp(currentTimestamp.add(100));
+      await timeTravelFacet.changeSystemTimestamp(currentTimestamp + 100n);
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
       const invalidBalanceAdjustmentData = {
-        executionDate: currentTimestamp.sub(100).toString(), // Past timestamp
+        executionDate: (currentTimestamp - 100n).toString(), // Past timestamp
         factor: balanceAdjustmentFactor,
         decimals: balanceAdjustmentDecimals,
       };

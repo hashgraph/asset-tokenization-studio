@@ -65,16 +65,16 @@ describe("Scheduled Tasks Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSA", diamond.address, signer_A);
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_A);
+    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target, signer_A);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
 
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_A.address);
   }
@@ -156,10 +156,10 @@ describe("Scheduled Tasks Tests", () => {
 
     expect(scheduledTasksCount).to.equal(4);
     expect(scheduledTasks.length).to.equal(scheduledTasksCount);
-    expect(scheduledTasks[0].scheduledTimestamp.toNumber()).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
-    expect(scheduledTasks[1].scheduledTimestamp.toNumber()).to.equal(dividendsRecordDateInSeconds_2);
-    expect(scheduledTasks[2].scheduledTimestamp.toNumber()).to.equal(balanceAdjustmentExecutionDateInSeconds_1);
-    expect(scheduledTasks[3].scheduledTimestamp.toNumber()).to.equal(dividendsRecordDateInSeconds_1);
+    expect(scheduledTasks[0].scheduledTimestamp).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
+    expect(scheduledTasks[1].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_2);
+    expect(scheduledTasks[2].scheduledTimestamp).to.equal(balanceAdjustmentExecutionDateInSeconds_1);
+    expect(scheduledTasks[3].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_1);
     expect(scheduledTasks[0].data).to.equal(ATS_TASK.BALANCE_ADJUSTMENT);
     expect(scheduledTasks[1].data).to.equal(ATS_TASK.SNAPSHOT);
     expect(scheduledTasks[2].data).to.equal(ATS_TASK.BALANCE_ADJUSTMENT);
@@ -185,8 +185,8 @@ describe("Scheduled Tasks Tests", () => {
 
     expect(scheduledTasksCount).to.equal(2);
     expect(scheduledTasks.length).to.equal(scheduledTasksCount);
-    expect(scheduledTasks[0].scheduledTimestamp.toNumber()).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
-    expect(scheduledTasks[1].scheduledTimestamp.toNumber()).to.equal(dividendsRecordDateInSeconds_2);
+    expect(scheduledTasks[0].scheduledTimestamp).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
+    expect(scheduledTasks[1].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_2);
     expect(scheduledTasks[0].data).to.equal(ATS_TASK.BALANCE_ADJUSTMENT);
     expect(scheduledTasks[1].data).to.equal(ATS_TASK.SNAPSHOT);
 

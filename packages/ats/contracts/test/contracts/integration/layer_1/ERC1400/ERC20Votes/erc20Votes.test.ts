@@ -88,12 +88,12 @@ describe("ERC20Votes Tests", () => {
       },
     ]);
 
-    erc20VotesFacet = await ethers.getContractAt("ERC20VotesFacet", diamond.address);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSA", diamond.address, signer_A);
+    erc20VotesFacet = await ethers.getContractAt("ERC20VotesFacet", diamond.target);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -125,7 +125,7 @@ describe("ERC20Votes Tests", () => {
         },
       });
 
-      const erc20VotesFacetInactive = await ethers.getContractAt("ERC20Votes", base.diamond.address);
+      const erc20VotesFacetInactive = await ethers.getContractAt("ERC20Votes", base.diamond.target);
       const isActivated = await erc20VotesFacetInactive.isActivated();
       expect(isActivated).to.equal(false);
     });

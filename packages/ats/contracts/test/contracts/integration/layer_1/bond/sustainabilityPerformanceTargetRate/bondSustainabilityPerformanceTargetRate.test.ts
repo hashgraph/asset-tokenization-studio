@@ -98,38 +98,38 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
 
     bondSPTRateFacet = await ethers.getContractAt(
       "BondUSASustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     bondReadFacet = await ethers.getContractAt(
       "BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     sptRateFacet = await ethers.getContractAt(
       "SustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     erc1594Facet = await ethers.getContractAt(
       "ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     kpisFacet = await ethers.getContractAt(
       "KpisSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     scheduledTasksFacet = await ethers.getContractAt(
       "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
 

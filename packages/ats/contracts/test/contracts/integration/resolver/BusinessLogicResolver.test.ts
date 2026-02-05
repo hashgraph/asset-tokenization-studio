@@ -44,10 +44,10 @@ describe("BusinessLogicResolver", () => {
     businessLogicResolver = await (await ethers.getContractFactory("BusinessLogicResolver", signer_A)).deploy();
 
     await businessLogicResolver.initialize_BusinessLogicResolver();
-    accessControl = await ethers.getContractAt("AccessControl", businessLogicResolver.address, signer_A);
+    accessControl = await ethers.getContractAt("AccessControl", businessLogicResolver.target, signer_A);
     await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
 
-    pause = await ethers.getContractAt("Pause", businessLogicResolver.address);
+    pause = await ethers.getContractAt("Pause", businessLogicResolver.target);
   }
 
   beforeEach(async () => {

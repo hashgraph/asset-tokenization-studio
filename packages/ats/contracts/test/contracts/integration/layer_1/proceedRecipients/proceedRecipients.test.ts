@@ -32,10 +32,10 @@ describe("Proceed Recipients Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user2;
 
-    proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipientsFacet", diamond.address, signer_A);
+    proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipientsFacet", diamond.target, signer_A);
 
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
 
     await accessControlFacet.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
 

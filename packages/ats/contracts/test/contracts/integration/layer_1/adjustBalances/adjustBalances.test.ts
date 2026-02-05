@@ -69,22 +69,22 @@ describe("Adjust Balances Tests", () => {
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
 
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.target);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target);
 
-    equityFacet = await ethers.getContractAt("Equity", diamond.address);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target);
 
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacetTimeTravel", diamond.address);
+    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacetTimeTravel", diamond.target);
 
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
 
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target);
   }
 
   beforeEach(async () => {

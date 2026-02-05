@@ -15,7 +15,7 @@ describe("Nonces Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
 
-    noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.address);
+    noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.target);
   });
 
   describe("Nonces", () => {

@@ -35,9 +35,9 @@ describe("Corporate Actions Tests", () => {
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    corporateActionsFacet = await ethers.getContractAt("CorporateActionsFacet", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
+    corporateActionsFacet = await ethers.getContractAt("CorporateActionsFacet", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {

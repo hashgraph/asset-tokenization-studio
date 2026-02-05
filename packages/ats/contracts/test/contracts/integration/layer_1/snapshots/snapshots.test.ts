@@ -73,22 +73,22 @@ describe("Snapshots Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
 
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
+    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.target);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target);
 
-    lockFacet = await ethers.getContractAt("Lock", diamond.address);
-    holdFacet = await ethers.getContractAt("IHold", diamond.address);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.address);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address);
-    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address);
+    lockFacet = await ethers.getContractAt("Lock", diamond.target);
+    holdFacet = await ethers.getContractAt("IHold", diamond.target);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
+    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
+    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target);
   }
 
   function set_initRbacs(): any[] {

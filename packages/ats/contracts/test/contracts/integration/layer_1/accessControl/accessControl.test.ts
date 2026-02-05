@@ -26,7 +26,7 @@ describe("Access Control Tests", () => {
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target);
     deployer = base.deployer;
     pauseFacet = base.pauseFacet;
     signer_B = base.user1;

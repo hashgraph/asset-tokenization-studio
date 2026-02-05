@@ -106,22 +106,22 @@ describe("Bond KpiLinked Rate Tests", () => {
 
     bondKpiLinkedRateFacet = await ethers.getContractAt(
       "BondUSAKpiLinkedRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.address, signer_A);
-    kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRateFacetTimeTravel", diamond.address, signer_A);
-    erc1594Facet = await ethers.getContractAt("ERC1594KpiLinkedRateFacetTimeTravel", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.target, signer_A);
+    kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
+    erc1594Facet = await ethers.getContractAt("ERC1594KpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsKpiLinkedRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    kpisFacet = await ethers.getContractAt("KpisKpiLinkedRateFacetTimeTravel", diamond.address, signer_A);
+    kpisFacet = await ethers.getContractAt("KpisKpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
     scheduledTasksFacet = await ethers.getContractAt(
       "ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
 

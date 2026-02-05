@@ -34,8 +34,8 @@ describe("Fixed Rate Tests", () => {
       },
     ]);
 
-    fixedRateFacet = await ethers.getContractAt("FixedRate", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
+    fixedRateFacet = await ethers.getContractAt("FixedRate", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
   }
 
   beforeEach(async () => {

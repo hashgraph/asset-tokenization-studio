@@ -64,12 +64,12 @@ describe("Transfer and lock Tests", () => {
   }
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    lockFacet = await ethers.getContractAt("LockFacet", diamond.address, signer_C);
-    transferAndLockFacet = await ethers.getContractAt("TransferAndLockFacet", diamond.address, signer_C);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_D);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
-    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
+    lockFacet = await ethers.getContractAt("LockFacet", diamond.target, signer_C);
+    transferAndLockFacet = await ethers.getContractAt("TransferAndLockFacet", diamond.target, signer_C);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_D);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
     await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);

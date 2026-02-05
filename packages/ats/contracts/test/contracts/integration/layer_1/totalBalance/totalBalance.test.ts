@@ -61,13 +61,9 @@ describe("Total Balance Tests", () => {
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
     // Get clearing facets and combine their interfaces
-    const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address, signer_A);
-    const clearingHoldCreationFacet = await ethers.getContractAt(
-      "ClearingHoldCreationFacet",
-      diamond.address,
-      signer_A,
-    );
-    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.address, signer_A);
+    const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
+    const clearingHoldCreationFacet = await ethers.getContractAt("ClearingHoldCreationFacet", diamond.target, signer_A);
+    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.target, signer_A);
 
     const fragmentMap = new Map<string, any>();
     [
@@ -82,15 +78,15 @@ describe("Total Balance Tests", () => {
     });
 
     const uniqueFragments = Array.from(fragmentMap.values());
-    clearingFacet = new Contract(diamond.address, uniqueFragments, signer_A);
+    clearingFacet = new Contract(diamond.target, uniqueFragments, signer_A);
 
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-    lockFacet = await ethers.getContractAt("LockFacet", diamond.address, signer_C);
-    holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address, signer_D);
-    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
-    totalBalanceFacet = await ethers.getContractAt("TotalBalanceFacet", diamond.address, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_B);
+    lockFacet = await ethers.getContractAt("LockFacet", diamond.target, signer_C);
+    holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
+    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target, signer_D);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
+    totalBalanceFacet = await ethers.getContractAt("TotalBalanceFacet", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);

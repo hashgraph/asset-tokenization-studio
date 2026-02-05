@@ -40,8 +40,8 @@ describe("Security Tests", () => {
       },
     ]);
 
-    securityFacet = await ethers.getContractAt("Security", diamond.address);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
+    securityFacet = await ethers.getContractAt("Security", diamond.target);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
   }
 
   beforeEach(async () => {

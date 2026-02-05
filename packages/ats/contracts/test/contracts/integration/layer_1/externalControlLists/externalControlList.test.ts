@@ -32,16 +32,16 @@ describe("ExternalControlList Management Tests", () => {
   async function deployExternalControlListTokenSecurity() {
     const [deployer] = await ethers.getSigners();
     initMock1 = await (await ethers.getContractFactory("MockedWhitelist", deployer)).deploy();
-    await initMock1.waitForDeployment()();
+    await initMock1.waitForDeployment();
     initMock2 = await (await ethers.getContractFactory("MockedBlacklist", deployer)).deploy();
-    await initMock2.waitForDeployment()();
+    await initMock2.waitForDeployment();
 
     const base = await deployEquityTokenFixture({
       useLoadFixture: false,
       equityDataParams: {
         securityData: {
           isMultiPartition: true,
-          externalControlLists: [initMock1.address, initMock2.address],
+          externalControlLists: [initMock1.target as string, initMock2.target as string],
           internalKycActivated: false,
           externalKycLists: [],
         },
@@ -53,29 +53,29 @@ describe("ExternalControlList Management Tests", () => {
 
     externalControlListManagement = await ethers.getContractAt(
       "ExternalControlListManagementFacet",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
 
     await base.accessControlFacet.grantRole(ATS_ROLES._CONTROL_LIST_MANAGER_ROLE, signer_A.address);
     await base.accessControlFacet.grantRole(ATS_ROLES._PAUSER_ROLE, signer_A.address);
     await base.accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
 
     externalWhitelistMock1 = await (await ethers.getContractFactory("MockedWhitelist", signer_A)).deploy();
-    await externalWhitelistMock1.waitForDeployment()();
+    await externalWhitelistMock1.waitForDeployment();
 
     externalBlacklistMock1 = await (await ethers.getContractFactory("MockedBlacklist", signer_A)).deploy();
-    await externalBlacklistMock1.waitForDeployment()();
+    await externalBlacklistMock1.waitForDeployment();
 
     externalWhitelistMock2 = await (await ethers.getContractFactory("MockedWhitelist", signer_A)).deploy();
-    await externalWhitelistMock2.waitForDeployment()();
+    await externalWhitelistMock2.waitForDeployment();
 
-    await externalControlListManagement.addExternalControlList(externalWhitelistMock1.address, {
+    await externalControlListManagement.addExternalControlList(externalWhitelistMock1.target as string, {
       gasLimit: GAS_LIMIT.default,
     });
-    await externalControlListManagement.addExternalControlList(externalBlacklistMock1.address, {
+    await externalControlListManagement.addExternalControlList(externalBlacklistMock1.target as string, {
       gasLimit: GAS_LIMIT.default,
     });
   }
@@ -86,7 +86,7 @@ describe("ExternalControlList Management Tests", () => {
 
   describe("Add Tests", () => {
     it("GIVEN an unlisted external control list WHEN added THEN it is listed and event is emitted", async () => {
-      const newControlList = externalWhitelistMock2.address;
+      const newControlList = externalWhitelistMock2.target as string;
       expect(await externalControlListManagement.isExternalControlList(newControlList)).to.be.false;
       const initialCount = await externalControlListManagement.getExternalControlListsCount();
       expect(initialCount).to.equal(4); // 2 from init + 2 from fixture
@@ -102,9 +102,10 @@ describe("ExternalControlList Management Tests", () => {
     });
 
     it("GIVEN a listed external control list WHEN adding it again THEN it reverts with ListedControlList", async () => {
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.true;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .true;
       await expect(
-        externalControlListManagement.addExternalControlList(externalWhitelistMock1.address, {
+        externalControlListManagement.addExternalControlList(externalWhitelistMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
       ).to.be.revertedWithCustomError(externalControlListManagement, "ListedControlList");
@@ -121,7 +122,7 @@ describe("ExternalControlList Management Tests", () => {
 
   describe("Remove Tests", () => {
     it("GIVEN a listed external control list WHEN removed THEN it is unlisted and event is emitted", async () => {
-      const controlListToRemove = externalWhitelistMock1.address;
+      const controlListToRemove = externalWhitelistMock1.target as string;
       expect(await externalControlListManagement.isExternalControlList(controlListToRemove)).to.be.true;
       const initialCount = await externalControlListManagement.getExternalControlListsCount();
       expect(initialCount).to.equal(4); // 2 from init + 2 from fixture
@@ -160,13 +161,16 @@ describe("ExternalControlList Management Tests", () => {
     });
 
     it("GIVEN multiple external control lists WHEN updated THEN their statuses are updated and event is emitted", async () => {
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.true;
-      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.address)).to.be.true;
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock2.address)).to.be.false;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .true;
+      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.target as string)).to.be
+        .true;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock2.target as string)).to.be
+        .false;
       const initialCount = await externalControlListManagement.getExternalControlListsCount();
       expect(initialCount).to.equal(4); // 2 from init + 2 from fixture
 
-      const controlListsToUpdate = [externalBlacklistMock1.address, externalWhitelistMock2.address];
+      const controlListsToUpdate = [externalBlacklistMock1.target as string, externalWhitelistMock2.target as string];
       const activesToUpdate = [false, true];
 
       await expect(
@@ -177,14 +181,17 @@ describe("ExternalControlList Management Tests", () => {
         .to.emit(externalControlListManagement, "ExternalControlListsUpdated")
         .withArgs(signer_A.address, controlListsToUpdate, activesToUpdate);
 
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.true;
-      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.address)).to.be.false;
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock2.address)).to.be.true;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .true;
+      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.target as string)).to.be
+        .false;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock2.target as string)).to.be
+        .true;
       expect(await externalControlListManagement.getExternalControlListsCount()).to.equal(4); // Still 4: removed 1, added 1
     });
 
     it("GIVEN duplicate addresses with conflicting actives (true then false) WHEN updated THEN it reverts with ContradictoryValuesInArray", async () => {
-      const duplicateControlList = externalWhitelistMock2.address;
+      const duplicateControlList = externalWhitelistMock2.target as string;
       expect(await externalControlListManagement.isExternalControlList(duplicateControlList)).to.be.false;
 
       const controlLists = [duplicateControlList, duplicateControlList];
@@ -198,7 +205,7 @@ describe("ExternalControlList Management Tests", () => {
     });
 
     it("GIVEN duplicate addresses with conflicting actives (false then true) WHEN updated THEN it reverts with ContradictoryValuesInArray", async () => {
-      const duplicateControlList = externalWhitelistMock1.address;
+      const duplicateControlList = externalWhitelistMock1.target as string;
       expect(await externalControlListManagement.isExternalControlList(duplicateControlList)).to.be.true;
 
       const controlLists = [duplicateControlList, duplicateControlList];
@@ -228,23 +235,26 @@ describe("ExternalControlList Management Tests", () => {
 
   describe("View/Getter Functions", () => {
     it("GIVEN listed and unlisted addresses WHEN isExternalControlList is called THEN it returns the correct status", async () => {
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.true;
-      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.address)).to.be.true;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .true;
+      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.target as string)).to.be
+        .true;
       const randomAddress = ethers.Wallet.createRandom().address;
       expect(await externalControlListManagement.isExternalControlList(randomAddress)).to.be.false;
-      await externalControlListManagement.addExternalControlList(externalWhitelistMock2.address);
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock2.address)).to.be.true;
+      await externalControlListManagement.addExternalControlList(externalWhitelistMock2.target as string);
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock2.target as string)).to.be
+        .true;
     });
 
     it("GIVEN external control lists WHEN getExternalControlListsCount is called THEN it returns the current count", async () => {
       const initialCount = await externalControlListManagement.getExternalControlListsCount();
       expect(initialCount).to.equal(4); // 2 from init + 2 from fixture
-      await externalControlListManagement.addExternalControlList(externalWhitelistMock2.address);
+      await externalControlListManagement.addExternalControlList(externalWhitelistMock2.target as string);
       expect(await externalControlListManagement.getExternalControlListsCount()).to.equal(5);
-      await externalControlListManagement.removeExternalControlList(externalWhitelistMock1.address);
+      await externalControlListManagement.removeExternalControlList(externalWhitelistMock1.target as string);
       expect(await externalControlListManagement.getExternalControlListsCount()).to.equal(4);
-      await externalControlListManagement.removeExternalControlList(externalBlacklistMock1.address);
-      await externalControlListManagement.removeExternalControlList(externalWhitelistMock2.address);
+      await externalControlListManagement.removeExternalControlList(externalBlacklistMock1.target as string);
+      await externalControlListManagement.removeExternalControlList(externalWhitelistMock2.target as string);
       expect(await externalControlListManagement.getExternalControlListsCount()).to.equal(2); // 2 from init remain
     });
 
@@ -253,19 +263,19 @@ describe("ExternalControlList Management Tests", () => {
       let membersPage = await externalControlListManagement.getExternalControlListsMembers(0, 1);
       expect(membersPage).to.have.lengthOf(1);
       expect([
-        initMock1.address,
-        initMock2.address,
-        externalWhitelistMock1.address,
-        externalBlacklistMock1.address,
+        initMock1.target as string,
+        initMock2.target as string,
+        externalWhitelistMock1.target as string,
+        externalBlacklistMock1.target as string,
       ]).to.include(membersPage[0]);
 
       membersPage = await externalControlListManagement.getExternalControlListsMembers(1, 1);
       expect(membersPage).to.have.lengthOf(1);
       expect([
-        initMock1.address,
-        initMock2.address,
-        externalWhitelistMock1.address,
-        externalBlacklistMock1.address,
+        initMock1.target as string,
+        initMock2.target as string,
+        externalWhitelistMock1.target as string,
+        externalBlacklistMock1.target as string,
       ]).to.include(membersPage[0]);
       expect(membersPage[0]).to.not.equal(
         (await externalControlListManagement.getExternalControlListsMembers(0, 1))[0],
@@ -273,19 +283,19 @@ describe("ExternalControlList Management Tests", () => {
 
       let allMembers = await externalControlListManagement.getExternalControlListsMembers(0, 4);
       expect(allMembers).to.have.lengthOf(4);
-      expect(allMembers).to.contain(initMock1.address);
-      expect(allMembers).to.contain(initMock2.address);
-      expect(allMembers).to.contain(externalWhitelistMock1.address);
-      expect(allMembers).to.contain(externalBlacklistMock1.address);
+      expect(allMembers).to.contain(initMock1.target as string);
+      expect(allMembers).to.contain(initMock2.target as string);
+      expect(allMembers).to.contain(externalWhitelistMock1.target as string);
+      expect(allMembers).to.contain(externalBlacklistMock1.target as string);
 
-      await externalControlListManagement.addExternalControlList(externalWhitelistMock2.address);
+      await externalControlListManagement.addExternalControlList(externalWhitelistMock2.target as string);
       allMembers = await externalControlListManagement.getExternalControlListsMembers(0, 5);
       expect(allMembers).to.have.lengthOf(5);
-      expect(allMembers).to.contain(initMock1.address);
-      expect(allMembers).to.contain(initMock2.address);
-      expect(allMembers).to.contain(externalWhitelistMock1.address);
-      expect(allMembers).to.contain(externalBlacklistMock1.address);
-      expect(allMembers).to.contain(externalWhitelistMock2.address);
+      expect(allMembers).to.contain(initMock1.target as string);
+      expect(allMembers).to.contain(initMock2.target as string);
+      expect(allMembers).to.contain(externalWhitelistMock1.target as string);
+      expect(allMembers).to.contain(externalBlacklistMock1.target as string);
+      expect(allMembers).to.contain(externalWhitelistMock2.target as string);
 
       membersPage = await externalControlListManagement.getExternalControlListsMembers(1, 3);
       expect(membersPage).to.have.lengthOf(2);
@@ -293,9 +303,9 @@ describe("ExternalControlList Management Tests", () => {
       membersPage = await externalControlListManagement.getExternalControlListsMembers(5, 1);
       expect(membersPage).to.have.lengthOf(0);
 
-      await externalControlListManagement.removeExternalControlList(externalWhitelistMock1.address);
-      await externalControlListManagement.removeExternalControlList(externalBlacklistMock1.address);
-      await externalControlListManagement.removeExternalControlList(externalWhitelistMock2.address);
+      await externalControlListManagement.removeExternalControlList(externalWhitelistMock1.target as string);
+      await externalControlListManagement.removeExternalControlList(externalBlacklistMock1.target as string);
+      await externalControlListManagement.removeExternalControlList(externalWhitelistMock2.target as string);
       allMembers = await externalControlListManagement.getExternalControlListsMembers(0, 5);
       expect(allMembers).to.have.lengthOf(2); // 2 from init remain
     });
@@ -304,7 +314,7 @@ describe("ExternalControlList Management Tests", () => {
   describe("Pause Tests", () => {
     it("GIVEN a paused token WHEN addExternalControlList THEN it reverts with TokenIsPaused", async () => {
       await pauseFacet.pause();
-      const newControlList = externalWhitelistMock2.address;
+      const newControlList = externalWhitelistMock2.target as string;
       await expect(
         externalControlListManagement.addExternalControlList(newControlList, {
           gasLimit: GAS_LIMIT.default,
@@ -315,7 +325,7 @@ describe("ExternalControlList Management Tests", () => {
     it("GIVEN a paused token WHEN removeExternalControlList THEN it reverts with TokenIsPaused", async () => {
       await pauseFacet.pause();
       await expect(
-        externalControlListManagement.removeExternalControlList(externalWhitelistMock1.address, {
+        externalControlListManagement.removeExternalControlList(externalWhitelistMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
       ).to.be.revertedWithCustomError(externalControlListManagement, "TokenIsPaused");
@@ -323,7 +333,7 @@ describe("ExternalControlList Management Tests", () => {
 
     it("GIVEN a paused token WHEN updateExternalControlLists THEN it reverts with TokenIsPaused", async () => {
       await pauseFacet.pause();
-      const controlLists = [externalWhitelistMock1.address];
+      const controlLists = [externalWhitelistMock1.target as string];
       const actives = [false];
       await expect(
         externalControlListManagement.updateExternalControlLists(controlLists, actives, {
@@ -335,7 +345,7 @@ describe("ExternalControlList Management Tests", () => {
 
   describe("Initialize Tests", () => {
     it("GIVEN an already initialized contract WHEN initialize_ExternalControlLists is called again THEN it reverts with ContractAlreadyInitialized", async () => {
-      const newControlLists = [externalWhitelistMock2.address];
+      const newControlLists = [externalWhitelistMock2.target as string];
       await expect(
         externalControlListManagement.initialize_ExternalControlLists(newControlLists),
       ).to.be.revertedWithCustomError(externalControlListManagement, "AlreadyInitialized");
@@ -344,7 +354,7 @@ describe("ExternalControlList Management Tests", () => {
 
   describe("Access Control Tests", () => {
     it("GIVEN an account without _CONTROL_LIST_MANAGER_ROLE WHEN adding an external control list THEN it reverts", async () => {
-      const newControlList = externalWhitelistMock2.address;
+      const newControlList = externalWhitelistMock2.target as string;
       await expect(
         externalControlListManagement.connect(signer_B).addExternalControlList(newControlList, {
           gasLimit: GAS_LIMIT.default,
@@ -353,7 +363,7 @@ describe("ExternalControlList Management Tests", () => {
     });
 
     it("GIVEN an account with _CONTROL_LIST_MANAGER_ROLE WHEN adding an external control list THEN it succeeds", async () => {
-      const newControlList = externalWhitelistMock2.address;
+      const newControlList = externalWhitelistMock2.target as string;
       expect(await externalControlListManagement.isExternalControlList(newControlList)).to.be.false;
       await expect(
         externalControlListManagement.addExternalControlList(newControlList, {
@@ -366,30 +376,36 @@ describe("ExternalControlList Management Tests", () => {
     });
 
     it("GIVEN an account without _CONTROL_LIST_MANAGER_ROLE WHEN removing an external control list THEN it reverts", async () => {
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.true;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .true;
       await expect(
-        externalControlListManagement.connect(signer_B).removeExternalControlList(externalWhitelistMock1.address, {
-          gasLimit: GAS_LIMIT.default,
-        }),
+        externalControlListManagement
+          .connect(signer_B)
+          .removeExternalControlList(externalWhitelistMock1.target as string, {
+            gasLimit: GAS_LIMIT.default,
+          }),
       ).to.be.rejectedWith("AccountHasNoRole");
     });
 
     it("GIVEN an account with _CONTROL_LIST_MANAGER_ROLE WHEN removing an external control list THEN it succeeds", async () => {
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.true;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .true;
       await expect(
-        externalControlListManagement.removeExternalControlList(externalWhitelistMock1.address, {
+        externalControlListManagement.removeExternalControlList(externalWhitelistMock1.target as string, {
           gasLimit: GAS_LIMIT.default,
         }),
       )
         .to.emit(externalControlListManagement, "RemovedFromExternalControlLists")
-        .withArgs(signer_A.address, externalWhitelistMock1.address);
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.false;
+        .withArgs(signer_A.address, externalWhitelistMock1.target as string);
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .false;
     });
 
     it("GIVEN an account without _CONTROL_LIST_MANAGER_ROLE WHEN updating external control lists THEN it reverts", async () => {
-      const controlLists = [externalWhitelistMock1.address];
+      const controlLists = [externalWhitelistMock1.target as string];
       const actives = [false];
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.true;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .true;
       await expect(
         externalControlListManagement.connect(signer_B).updateExternalControlLists(controlLists, actives, {
           gasLimit: GAS_LIMIT.high,
@@ -398,9 +414,11 @@ describe("ExternalControlList Management Tests", () => {
     });
 
     it("GIVEN an account with _CONTROL_LIST_MANAGER_ROLE WHEN updating external control lists THEN it succeeds", async () => {
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.true;
-      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.address)).to.be.true;
-      const controlLists = [externalWhitelistMock1.address, externalBlacklistMock1.address];
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .true;
+      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.target as string)).to.be
+        .true;
+      const controlLists = [externalWhitelistMock1.target as string, externalBlacklistMock1.target as string];
       const actives = [false, true]; // Remove whitelist1, keep blacklist1
       await expect(
         externalControlListManagement.updateExternalControlLists(controlLists, actives, {
@@ -409,8 +427,10 @@ describe("ExternalControlList Management Tests", () => {
       )
         .to.emit(externalControlListManagement, "ExternalControlListsUpdated")
         .withArgs(signer_A.address, controlLists, actives);
-      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.address)).to.be.false;
-      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.address)).to.be.true;
+      expect(await externalControlListManagement.isExternalControlList(externalWhitelistMock1.target as string)).to.be
+        .false;
+      expect(await externalControlListManagement.isExternalControlList(externalBlacklistMock1.target as string)).to.be
+        .true;
     });
   });
 

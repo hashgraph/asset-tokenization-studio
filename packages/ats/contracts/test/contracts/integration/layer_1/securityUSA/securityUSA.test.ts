@@ -44,7 +44,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.address, signer_B);
+      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_B);
       // retrieve security regulation data
       const regulation = await equityUSAFacet.getSecurityRegulationData();
 
@@ -77,7 +77,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.address, signer_B);
+      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_B);
 
       // retrieve security regulation data
       const regulation = await equityUSAFacet.getSecurityRegulationData();
@@ -110,7 +110,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.address, signer_B);
+      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_B);
 
       // retrieve security regulation data
       const regulation = await equityUSAFacet.getSecurityRegulationData();
@@ -145,7 +145,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.address);
+      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target);
 
       // retrieve security regulation data
       const regulation = await bondUSAFacet.getSecurityRegulationData();
@@ -178,7 +178,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.address);
+      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target);
       // retrieve security regulation data
       const regulation = await bondUSAFacet.getSecurityRegulationData();
 
@@ -210,7 +210,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.address);
+      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target);
       // retrieve security regulation data
       const regulation = await bondUSAFacet.getSecurityRegulationData();
 

@@ -38,11 +38,11 @@ describe("ERC1643 Tests", () => {
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-    erc1643Facet = await ethers.getContractAt("ERC1643Facet", diamond.address);
+    erc1643Facet = await ethers.getContractAt("ERC1643Facet", diamond.target);
 
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
   }
 
   beforeEach(async () => {

@@ -37,7 +37,7 @@ describe("SSI Tests", () => {
     pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
     ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_C);
     revocationList = await (await ethers.getContractFactory("MockedT3RevocationRegistry", signer_C)).deploy();
-    await revocationList.deployed();
+    await revocationList.waitForDeployment();
   }
 
   beforeEach(async () => {
@@ -115,11 +115,11 @@ describe("SSI Tests", () => {
     it("GIVEN a revocationList WHEN setRevocationRegistryAddress THEN transaction succeed", async () => {
       expect(await ssiManagementFacet.setRevocationRegistryAddress(revocationList.target))
         .to.emit(ssiManagementFacet, "RevocationRegistryAddressSet")
-        .withArgs(ethers.ZeroAddress, revocationList.address);
+        .withArgs(ethers.ZeroAddress, revocationList.target);
 
       const revocationListAddress = await ssiManagementFacet.getRevocationRegistryAddress();
 
-      expect(revocationListAddress).to.equal(revocationList.address);
+      expect(revocationListAddress).to.equal(revocationList.target);
     });
 
     it("GIVEN an unlisted issuer WHEN addIssuer THEN transaction succeed", async () => {

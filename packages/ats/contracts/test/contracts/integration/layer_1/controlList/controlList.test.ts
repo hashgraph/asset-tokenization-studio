@@ -27,9 +27,9 @@ describe("Control List Tests", () => {
     signer_C = base.user2;
     signer_D = base.user3;
 
-    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
+    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
 
     await executeRbac(base.accessControlFacet, [{ role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] }]);
   }

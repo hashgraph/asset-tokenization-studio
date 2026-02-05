@@ -71,16 +71,16 @@ describe("ERC1594 Tests", () => {
           members: [signer_B.address],
         },
       ]);
-      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
+      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target);
 
-      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
 
-      controlList = await ethers.getContractAt("ControlList", diamond.address);
+      controlList = await ethers.getContractAt("ControlList", diamond.target);
 
-      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
-      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
+      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_B);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
 
       accessControlFacet = accessControlFacet.connect(signer_A);
       await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
@@ -196,28 +196,28 @@ describe("ERC1594 Tests", () => {
         },
       ]);
 
-      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
+      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target);
       erc1594Issuer = erc1594Facet.connect(signer_C);
       erc1594Transferor = erc1594Facet.connect(signer_E);
       erc1594Approved = erc1594Facet.connect(signer_D);
-      erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_E);
-      erc1410SnapshotFacet = await ethers.getContractAt("IERC1410", diamond.address);
+      erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target, signer_E);
+      erc1410SnapshotFacet = await ethers.getContractAt("IERC1410", diamond.target);
 
-      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
 
-      controlList = await ethers.getContractAt("ControlList", diamond.address);
+      controlList = await ethers.getContractAt("ControlList", diamond.target);
 
-      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
-      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
 
       accessControlFacet = accessControlFacet.connect(signer_A);
       await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
       await ssiManagementFacet.addIssuer(signer_E.address);
       await kycFacet.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
       await kycFacet.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
+      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_B);
     }
 
     beforeEach(async () => {
@@ -286,28 +286,28 @@ describe("ERC1594 Tests", () => {
 
         // accounts are blacklisted by default (white list)
         await accessControlFacet
-          .attach(newTokenFixture.diamond.address)
+          .attach(newTokenFixture.diamond.target)
           .connect(signer_A)
           .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
         await accessControlFacet
-          .attach(newTokenFixture.diamond.address)
+          .attach(newTokenFixture.diamond.target)
           .connect(signer_A)
           .grantRole(ATS_ROLES._KYC_ROLE, signer_B.address);
         await accessControlFacet
-          .attach(newTokenFixture.diamond.address)
+          .attach(newTokenFixture.diamond.target)
           .connect(signer_A)
           .grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address);
 
-        await ssiManagementFacet.attach(newTokenFixture.diamond.address).connect(signer_A).addIssuer(signer_E.address);
+        await ssiManagementFacet.attach(newTokenFixture.diamond.target).connect(signer_A).addIssuer(signer_E.address);
 
         await kycFacet
-          .attach(newTokenFixture.diamond.address)
+          .attach(newTokenFixture.diamond.target)
           .connect(signer_B)
           .grantKyc(signer_E.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_E.address);
 
         // issue fails
         await expect(
-          erc1594Facet.attach(newTokenFixture.diamond.address).connect(signer_A).issue(signer_E.address, AMOUNT, DATA),
+          erc1594Facet.attach(newTokenFixture.diamond.target).connect(signer_A).issue(signer_E.address, AMOUNT, DATA),
         ).to.be.revertedWithCustomError(erc1594Facet, "AccountIsBlocked");
       });
 
@@ -339,7 +339,7 @@ describe("ERC1594 Tests", () => {
         await clearingActionsFacet.activateClearing();
       });
       it("GIVEN a token with clearing mode active WHEN transfer THEN transaction fails with ClearingIsActivated", async () => {
-        const clearingInterface = await ethers.getContractAt("IClearing", diamond.address);
+        const clearingInterface = await ethers.getContractAt("IClearing", diamond.target);
 
         // transfer with data fails
         await expect(
@@ -353,7 +353,7 @@ describe("ERC1594 Tests", () => {
       });
 
       it("GIVEN a token with clearing mode active WHEN redeem THEN transaction fails with ClearingIsActivated", async () => {
-        const clearingInterface = await ethers.getContractAt("IClearing", diamond.address);
+        const clearingInterface = await ethers.getContractAt("IClearing", diamond.target);
 
         await expect(erc1594Facet.connect(signer_C).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(
           clearingInterface,
@@ -695,8 +695,8 @@ describe("ERC1594 Tests", () => {
       let erc3643ReadFacet: any;
 
       beforeEach(async () => {
-        erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address, signer_A);
-        erc3643ReadFacet = await ethers.getContractAt("ERC3643ReadFacet", diamond.address);
+        erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.target, signer_A);
+        erc3643ReadFacet = await ethers.getContractAt("ERC3643ReadFacet", diamond.target);
 
         // Grant AGENT_ROLE to signer_A for recovery operations
         await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
@@ -783,15 +783,15 @@ describe("ERC1594 Tests", () => {
           },
         ]);
 
-        accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
-        erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
+        accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
+        erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target);
         erc1594Issuer = erc1594Facet.connect(signer_C);
         erc1594Transferor = erc1594Facet.connect(signer_E);
-        erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_E);
-        erc1410SnapshotFacet = await ethers.getContractAt("IERC1410", diamond.address);
-        kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
-        ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
-        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", diamond.address, signer_A);
+        erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target, signer_E);
+        erc1410SnapshotFacet = await ethers.getContractAt("IERC1410", diamond.target);
+        kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
+        ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
+        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", diamond.target, signer_A);
 
         // Setup KYC
         await ssiManagementFacet.addIssuer(signer_E.address);

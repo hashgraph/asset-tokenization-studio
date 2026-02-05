@@ -43,9 +43,9 @@ describe("ScheduledCouponListing Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
 
-    scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.address);
-    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.address);
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
+    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
     // Grant corporate action role to signer_A
     await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);

@@ -36,8 +36,8 @@ describe("Kpi Linked Rate Tests", () => {
       },
     ]);
 
-    kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
+    kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
