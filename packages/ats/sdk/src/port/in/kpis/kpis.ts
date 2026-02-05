@@ -19,7 +19,7 @@ class KpisInPort implements IKpisInPort {
     ValidatedRequest.handleValidation("GetLatestKpiDataRequest", request);
 
     const response = await this.queryBus.execute(
-      new GetLatestKpiDataQuery(request.securityId, request.from, request.to),
+      new GetLatestKpiDataQuery(request.securityId, request.from, request.to, request.kpi),
     );
     return { value: response.value, exists: response.exists };
   }

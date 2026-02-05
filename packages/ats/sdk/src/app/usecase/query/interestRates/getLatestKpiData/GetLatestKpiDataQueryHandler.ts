@@ -21,10 +21,11 @@ export class GetLatestKpiDataQueryHandler implements IQueryHandler<GetLatestKpiD
 
   async execute(query: GetLatestKpiDataQuery): Promise<GetLatestKpiDataQueryResponse> {
     try {
-      const { securityId, from, to } = query;
+      const { securityId, from, to, kpi } = query;
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
-      const res = await this.queryAdapter.getKpiLatestKpiData(securityEvmAddress, from, to);
+      const kpiEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(kpi);
+      const res = await this.queryAdapter.getKpiLatestKpiData(securityEvmAddress, from, to, kpiEvmAddress);
 
       return new GetLatestKpiDataQueryResponse(res.value.toString(), res.exists);
     } catch (error) {

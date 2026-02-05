@@ -16,6 +16,7 @@ export class GetLatestKpiDataQuery extends Query<GetLatestKpiDataQueryResponse> 
     public readonly securityId: string,
     public readonly from: BigNumber,
     public readonly to: BigNumber,
+    public readonly kpi: string,
   ) {
     super();
   }

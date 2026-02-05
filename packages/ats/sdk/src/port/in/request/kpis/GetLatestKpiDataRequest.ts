@@ -7,11 +7,13 @@ export default class GetLatestKpiDataRequest extends ValidatedRequest<GetLatestK
   securityId: string;
   from: BigNumber;
   to: BigNumber;
+  kpi: string;
 
-  constructor({ securityId, from, to }: { securityId: string; from: BigNumber; to: BigNumber }) {
+  constructor({ securityId, from, to, kpi }: { securityId: string; from: BigNumber; to: BigNumber; kpi: string }) {
     super({});
     this.securityId = securityId;
     this.from = from;
     this.to = to;
+    this.kpi = kpi;
   }
 }

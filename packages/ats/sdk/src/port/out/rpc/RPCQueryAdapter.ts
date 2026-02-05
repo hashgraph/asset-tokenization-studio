@@ -1374,9 +1374,9 @@ export class RPCQueryAdapter {
     return [result.rate_, result.decimals_];
   }
 
-  async getKpiLatestKpiData(address: EvmAddress, from: BigNumber, to: BigNumber): Promise<{ value: BigNumber; exists: boolean }> {
+  async getKpiLatestKpiData(address: EvmAddress, from: BigNumber, to: BigNumber, kpi: EvmAddress): Promise<{ value: BigNumber; exists: boolean }> {
     LogService.logTrace(`Getting latest KPI data for the security: ${address.toString()}`);
-    const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, address.toString());
+    const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, kpi.toString());
     return { value: result[0], exists: result[1] };
   }
 }
