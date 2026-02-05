@@ -5,71 +5,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { ethers } from "ethers";
-import { BigNumber } from "@ethersproject/bignumber";
-import { singleton } from "tsyringe";
-import { lazyInject } from "@core/decorator/LazyInjectDecorator";
-import NetworkService from "@service/network/NetworkService";
-import LogService from "@service/log/LogService";
-import EvmAddress from "@domain/context/contract/EvmAddress";
-import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
-import { Security } from "@domain/context/security/Security";
-import { BondDetails } from "@domain/context/bond/BondDetails";
-import { Dividend } from "@domain/context/equity/Dividend";
-import BigDecimal from "@domain/context/shared/BigDecimal";
-import { HederaId } from "@domain/context/shared/HederaId";
-import {
-  AccessControlFacet__factory,
-  BondRead__factory,
-  CapFacet__factory,
-  ClearingActionsFacet__factory,
-  ClearingHoldCreationFacet__factory,
-  ClearingReadFacet__factory,
-  ClearingRedeemFacet__factory,
-  ClearingTransferFacet__factory,
-  ControlListFacet__factory,
-  DiamondFacet__factory,
-  Equity__factory,
-  ERC1410ReadFacet__factory,
-  ERC20Votes__factory,
-  ERC1594Facet__factory,
-  ERC1643Facet__factory,
-  ERC1644Facet__factory,
-  ERC20Facet__factory,
-  ExternalControlListManagementFacet__factory,
-  ExternalKycListManagementFacet__factory,
-  ExternalPauseManagementFacet__factory,
-  Factory__factory,
-  FreezeFacet__factory,
-  HoldReadFacet__factory,
-  KycFacet__factory,
-  LockFacet__factory,
-  MockedBlacklist__factory,
-  MockedExternalKycList__factory,
-  MockedExternalPause__factory,
-  MockedWhitelist__factory,
-  PauseFacet__factory,
-  ProtectedPartitionsFacet__factory,
-  ScheduledSnapshotsFacet__factory,
-  Security__factory,
-  SnapshotsFacet__factory,
-  SsiManagementFacet__factory,
-  ERC3643ReadFacet__factory,
-  TREXFactoryAts__factory,
-  ProceedRecipientsFacet__factory,
-  CorporateActionsFacet__factory,
-  NoncesFacet__factory,
-  FixedRate__factory,
-  FixedRateFacet__factory,
-} from "@hashgraph/asset-tokenization-contracts";
-import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
-import { VotingRights } from "@domain/context/equity/VotingRights";
-import { Coupon } from "@domain/context/bond/Coupon";
-import { EquityDetails } from "@domain/context/equity/EquityDetails";
-import { CastDividendType } from "@domain/context/equity/DividendType";
-import { CastSecurityType } from "@domain/context/factory/SecurityType";
-import { Regulation } from "@domain/context/factory/Regulation";
 import { _PARTITION_ID_1 } from "@core/Constants";
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import { BondDetails } from "@domain/context/bond/BondDetails";
+import { Coupon } from "@domain/context/bond/Coupon";
+import { CouponAmountFor } from "@domain/context/bond/CouponAmountFor";
+import { CouponFor } from "@domain/context/bond/CouponFor";
+import { PrincipalFor } from "@domain/context/bond/PrincipalFor";
+import { CastRateStatus } from "@domain/context/bond/RateStatus";
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { Dividend } from "@domain/context/equity/Dividend";
+import { DividendAmountFor } from "@domain/context/equity/DividendAmountFor";
+import { DividendFor } from "@domain/context/equity/DividendFor";
+import { CastDividendType } from "@domain/context/equity/DividendType";
+import { EquityDetails } from "@domain/context/equity/EquityDetails";
+import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
+import { VotingFor } from "@domain/context/equity/VotingFor";
+import { VotingRights } from "@domain/context/equity/VotingRights";
+import { Regulation } from "@domain/context/factory/Regulation";
 import {
   CastAccreditedInvestors,
   CastInternationalInvestorscation,
@@ -78,9 +31,7 @@ import {
   CastRegulationType,
   CastResaleHoldPeriodorscation,
 } from "@domain/context/factory/RegulationType";
-import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
-import { DividendFor } from "@domain/context/equity/DividendFor";
-import { VotingFor } from "@domain/context/equity/VotingFor";
+import { CastSecurityType } from "@domain/context/factory/SecurityType";
 import { Kyc } from "@domain/context/kyc/Kyc";
 import { KycAccountData } from "@domain/context/kyc/KycAccountData";
 import {
@@ -91,12 +42,59 @@ import {
   ClearingTransfer,
 } from "@domain/context/security/Clearing";
 import { HoldDetails } from "@domain/context/security/Hold";
-import { CouponAmountFor } from "@domain/context/bond/CouponAmountFor";
-import { PrincipalFor } from "@domain/context/bond/PrincipalFor";
-import { DividendAmountFor } from "@domain/context/equity/DividendAmountFor";
-import { CastRateStatus } from "@domain/context/bond/RateStatus";
-import { CouponFor } from "@domain/context/bond/CouponFor";
-import { InternalsFixedInterestRate__factory } from '../../../../../contracts/typechain-types/factories/contracts/layer_0_extensions/bond/fixedInterestRate/Internals.sol/InternalsFixedInterestRate__factory';
+import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
+import { Security } from "@domain/context/security/Security";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { HederaId } from "@domain/context/shared/HederaId";
+import { BigNumber } from "@ethersproject/bignumber";
+import {
+  AccessControlFacet__factory,
+  BondRead__factory,
+  CapFacet__factory,
+  ClearingActionsFacet__factory,
+  ClearingHoldCreationFacet__factory,
+  ClearingReadFacet__factory,
+  ClearingRedeemFacet__factory,
+  ClearingTransferFacet__factory,
+  ControlListFacet__factory,
+  CorporateActionsFacet__factory,
+  DiamondFacet__factory,
+  Equity__factory,
+  ERC1410ReadFacet__factory,
+  ERC1594Facet__factory,
+  ERC1643Facet__factory,
+  ERC1644Facet__factory,
+  ERC20Facet__factory,
+  ERC20Votes__factory,
+  ERC3643ReadFacet__factory,
+  ExternalControlListManagementFacet__factory,
+  ExternalKycListManagementFacet__factory,
+  ExternalPauseManagementFacet__factory,
+  Factory__factory,
+  FixedRate__factory,
+  FreezeFacet__factory,
+  HoldReadFacet__factory,
+  KycFacet__factory,
+  LockFacet__factory,
+  MockedBlacklist__factory,
+  MockedExternalKycList__factory,
+  MockedExternalPause__factory,
+  MockedWhitelist__factory,
+  NoncesFacet__factory,
+  PauseFacet__factory,
+  ProceedRecipientsFacet__factory,
+  ProtectedPartitionsFacet__factory,
+  ScheduledSnapshotsFacet__factory,
+  Security__factory,
+  SnapshotsFacet__factory,
+  SsiManagementFacet__factory,
+  TREXFactoryAts__factory
+} from "@hashgraph/asset-tokenization-contracts";
+import LogService from "@service/log/LogService";
+import NetworkService from "@service/network/NetworkService";
+import { ethers } from "ethers";
+import { singleton } from "tsyringe";
+import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 
 const LOCAL_JSON_RPC_RELAY_URL = "http://127.0.0.1:7546/api";
 
@@ -1283,6 +1281,14 @@ export class RPCQueryAdapter {
     const total = await this.connect(BondRead__factory, address.toString()).getTotalCouponHolders(couponId);
 
     return total.toNumber();
+  }
+
+  async getCouponFromOrderedListAt(address: EvmAddress, pos: number): Promise<number> {
+    LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
+
+    const couponId = await this.connect(BondRead__factory, address.toString()).getCouponFromOrderedListAt(pos);
+
+    return couponId.toNumber();
   }
 
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
