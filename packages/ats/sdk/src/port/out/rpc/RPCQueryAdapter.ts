@@ -60,7 +60,7 @@ import {
   CorporateActionsFacet__factory,
   NoncesFacet__factory,
   FixedRate__factory,
-  FixedRateFacet__factory,
+  Kpis__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -96,7 +96,6 @@ import { PrincipalFor } from "@domain/context/bond/PrincipalFor";
 import { DividendAmountFor } from "@domain/context/equity/DividendAmountFor";
 import { CastRateStatus } from "@domain/context/bond/RateStatus";
 import { CouponFor } from "@domain/context/bond/CouponFor";
-import { InternalsFixedInterestRate__factory } from '../../../../../contracts/typechain-types/factories/contracts/layer_0_extensions/bond/fixedInterestRate/Internals.sol/InternalsFixedInterestRate__factory';
 
 const LOCAL_JSON_RPC_RELAY_URL = "http://127.0.0.1:7546/api";
 
@@ -1373,5 +1372,11 @@ export class RPCQueryAdapter {
   async getRate(address: EvmAddress): Promise<[BigNumber, number]> {
     const result = await this.connect(FixedRate__factory, address.toString()).getRate();
     return [result.rate_, result.decimals_];
+  }
+
+  async getKpiLatestKpiData(address: EvmAddress, from: BigNumber, to: BigNumber): Promise<{ value: BigNumber; exists: boolean }> {
+    LogService.logTrace(`Getting latest KPI data for the security: ${address.toString()}`);
+    const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, address.toString());
+    return { value: result[0], exists: result[1] };
   }
 }

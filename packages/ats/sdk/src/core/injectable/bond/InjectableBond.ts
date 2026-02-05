@@ -18,6 +18,7 @@ import { GetBondDetailsQueryHandler } from "@query/bond/get/getBondDetails/GetBo
 import { GetPrincipalForQueryHandler } from "@query/bond/get/getPrincipalFor/GetPrincipalForQueryHandler";
 import { GetRateQueryHandler } from "@query/interestRates/getRate/GetRateQueryHandler";
 import { TOKENS } from "../Tokens";
+import { GetLatestKpiDataQueryHandler } from "@query/interestRates/getLatestKpiData/GetLatestKpiDataQueryHandler";
 
 export const COMMAND_HANDLERS_BOND = [
   {
@@ -90,5 +91,9 @@ export const QUERY_HANDLERS_BOND = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetRateQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetLatestKpiDataQueryHandler,
   },
 ];
