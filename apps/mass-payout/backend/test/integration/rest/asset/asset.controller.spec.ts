@@ -382,7 +382,7 @@ describe(AssetController.name, () => {
         hederaTokenAddress,
         name: faker.finance.accountName(),
         symbol: faker.finance.currencyCode(),
-        assetType: AssetType.BOND,
+        assetType: AssetType.BOND_VARIABLE_RATE,
         maturityDate,
       }
 
@@ -399,7 +399,7 @@ describe(AssetController.name, () => {
       expect(response.body.hederaTokenAddress).toBe(hederaTokenAddress)
       expect(response.body.name).toBe(expectedBasicInfo.name)
       expect(response.body.symbol).toBe(expectedBasicInfo.symbol)
-      expect(response.body.assetType).toBe(AssetType.BOND)
+      expect(response.body.assetType).toBe(AssetType.BOND_VARIABLE_RATE)
       expect(response.body.maturityDate).toBe(maturityDate.toISOString())
       expect(getBasicAssetInformationUseCaseMock.execute).toHaveBeenCalledWith(hederaTokenAddress)
     })
@@ -693,7 +693,7 @@ describe(AssetController.name, () => {
       const assetId = faker.string.uuid()
       const syncEnabledAsset = AssetUtils.newInstance({
         id: assetId,
-        type: AssetType.BOND,
+        type: AssetType.BOND_VARIABLE_RATE,
         syncEnabled: true,
       })
       enableAssetSyncUseCaseMock.execute.mockResolvedValue(syncEnabledAsset)
@@ -748,7 +748,7 @@ describe(AssetController.name, () => {
       const assetId = faker.string.uuid()
       const syncEnabledAsset = AssetUtils.newInstance({
         id: assetId,
-        type: AssetType.BOND,
+        type: AssetType.BOND_VARIABLE_RATE,
         syncEnabled: true,
       })
       disableAssetSyncUseCaseMock.execute.mockResolvedValue(syncEnabledAsset)

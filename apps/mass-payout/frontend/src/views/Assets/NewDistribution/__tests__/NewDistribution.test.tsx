@@ -25,7 +25,7 @@ jest.mock("../../hooks/queries/AssetQueries", () => ({
     data: {
       id: "0.0.890123",
       name: "Test Asset",
-      type: "Bond",
+      type: "Bond Variable Rate",
     },
   }),
 }));
@@ -63,7 +63,7 @@ describe("NewDistribution Component", () => {
       render(<NewDistribution />, { history });
       expect(screen.getByText("0.0.890123")).toBeInTheDocument();
       expect(screen.getByText("Test Asset")).toBeInTheDocument();
-      expect(screen.getByText("Bond")).toBeInTheDocument();
+      expect(screen.getByText("Bond Variable Rate")).toBeInTheDocument();
     });
 
     test("should display configuration section", () => {
@@ -356,7 +356,7 @@ describe("NewDistribution Component", () => {
           data: {
             id: "0.0.890123",
             name: "Test Asset",
-            type: "Bond",
+            type: "Bond Variable Rate",
           },
         }),
       }));
