@@ -1,22 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { TOKENS } from "../Tokens";
-import { GetCouponForQueryHandler } from "@query/bond/coupons/getCouponFor/GetCouponForQueryHandler";
-import { GetCouponAmountForQueryHandler } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQueryHandler";
-import { GetPrincipalForQueryHandler } from "@query/bond/get/getPrincipalFor/GetPrincipalForQueryHandler";
-import { GetCouponQueryHandler } from "@query/bond/coupons/getCoupon/GetCouponQueryHandler";
-import { GetCouponCountQueryHandler } from "@query/bond/coupons/getCouponCount/GetCouponCountQueryHandler";
-import { UpdateMaturityDateCommandHandler } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommandHandler";
 import { SetCouponCommandHandler } from "@command/bond/coupon/set/SetCouponCommandHandler";
 import { CreateBondCommandHandler } from "@command/bond/create/CreateBondCommandHandler";
 import { CreateBondFixedRateCommandHandler } from "@command/bond/createfixedrate/CreateBondFixedRateCommandHandler";
-import { GetBondDetailsQueryHandler } from "@query/bond/get/getBondDetails/GetBondDetailsQueryHandler";
-import { GetRateQueryHandler } from "@query/interestRates/getRate/GetRateQueryHandler";
-import { RedeemAtMaturityByPartitionCommandHandler } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommandHandler";
-import { GetTotalCouponHoldersQueryHandler } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler";
-import { GetCouponHoldersQueryHandler } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQueryHandler";
+import { CreateBondKpiLinkedRateCommandHandler } from "@command/bond/createkpilinkedrate/CreateBondKpiLinkedRateCommandHandler";
 import { FullRedeemAtMaturityCommandHandler } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommandHandler";
+import { RedeemAtMaturityByPartitionCommandHandler } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommandHandler";
+import { UpdateMaturityDateCommandHandler } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommandHandler";
 import { SetRateCommandHandler } from "@command/interestRates/setRate/SetRateCommandHandler";
+import { GetCouponQueryHandler } from "@query/bond/coupons/getCoupon/GetCouponQueryHandler";
+import { GetCouponAmountForQueryHandler } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQueryHandler";
+import { GetCouponCountQueryHandler } from "@query/bond/coupons/getCouponCount/GetCouponCountQueryHandler";
+import { GetCouponForQueryHandler } from "@query/bond/coupons/getCouponFor/GetCouponForQueryHandler";
+import { GetCouponHoldersQueryHandler } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQueryHandler";
+import { GetTotalCouponHoldersQueryHandler } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler";
+import { GetBondDetailsQueryHandler } from "@query/bond/get/getBondDetails/GetBondDetailsQueryHandler";
+import { GetPrincipalForQueryHandler } from "@query/bond/get/getPrincipalFor/GetPrincipalForQueryHandler";
+import { GetRateQueryHandler } from "@query/interestRates/getRate/GetRateQueryHandler";
+import { TOKENS } from "../Tokens";
 
 export const COMMAND_HANDLERS_BOND = [
   {
@@ -26,6 +27,10 @@ export const COMMAND_HANDLERS_BOND = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: CreateBondFixedRateCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateBondKpiLinkedRateCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,
