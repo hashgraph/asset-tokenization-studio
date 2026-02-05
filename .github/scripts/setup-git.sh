@@ -11,17 +11,17 @@
 # Usage: bash .github/scripts/setup-git.sh
 ###############################################################################
 
-set -e
+set -euo pipefail
 
 echo "🔧 Setting up Git configuration for Asset Tokenization Studio..."
 echo ""
 
 # Colors for output
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly RED='\033[0;31m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
 
 ###############################################################################
 # Step 1: Verify Author Identity (SECURITY CRITICAL)
@@ -34,7 +34,7 @@ echo ""
 CURRENT_NAME=$(git config user.name || echo "")
 CURRENT_EMAIL=$(git config user.email || echo "")
 
-if [ -z "$CURRENT_NAME" ] || [ -z "$CURRENT_EMAIL" ]; then
+if [[ -z "${CURRENT_NAME}" ]] || [[ -z "${CURRENT_EMAIL}" ]]; then
     echo -e "${RED}❌ Git identity not configured${NC}"
     echo ""
     echo "You must configure your identity before proceeding:"
@@ -54,15 +54,15 @@ if [ -z "$CURRENT_NAME" ] || [ -z "$CURRENT_EMAIL" ]; then
 fi
 
 echo -e "${GREEN}✅ Current Git identity:${NC}"
-echo "   Name:  $CURRENT_NAME"
-echo "   Email: $CURRENT_EMAIL"
+echo "   Name:  ${CURRENT_NAME}"
+echo "   Email: ${CURRENT_EMAIL}"
 echo ""
 
 # Confirm identity
 echo -e "${YELLOW}⚠️  Important: Commits will be signed with this identity${NC}"
 read -p "Is this correct? (y/N): " -n 1 -r
 echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+if [[ ! "${REPLY}" =~ ^[Yy]$ ]]; then
     echo ""
     echo "Please update your Git identity first:"
     echo "  git config user.name \"Your Name\""
@@ -71,8 +71,8 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-AUTHOR_NAME="$CURRENT_NAME"
-AUTHOR_EMAIL="$CURRENT_EMAIL"
+readonly AUTHOR_NAME="${CURRENT_NAME}"
+readonly AUTHOR_EMAIL="${CURRENT_EMAIL}"
 
 echo ""
 
@@ -87,7 +87,7 @@ git config format.signoff true
 
 echo -e "${GREEN}✅ DCO sign-off enabled${NC}"
 echo "   All commits will automatically include:"
-echo "   Signed-off-by: $AUTHOR_NAME <$AUTHOR_EMAIL>"
+echo "   Signed-off-by: ${AUTHOR_NAME} <${AUTHOR_EMAIL}>"
 echo ""
 
 ###############################################################################
@@ -98,7 +98,7 @@ echo "📝 Step 3: Enabling GPG commit signing..."
 echo ""
 
 # Check if GPG is available
-if ! command -v gpg &> /dev/null; then
+if ! command -v gpg &>/dev/null; then
     echo -e "${RED}❌ GPG not found${NC}"
     echo ""
     echo "Please install GPG:"
@@ -112,7 +112,7 @@ fi
 # Check if user has GPG keys
 GPG_KEYS=$(gpg --list-secret-keys --keyid-format=long 2>/dev/null | grep ^sec || true)
 
-if [ -z "$GPG_KEYS" ]; then
+if [[ -z "${GPG_KEYS}" ]]; then
     echo -e "${YELLOW}⚠️  No GPG keys found${NC}"
     echo ""
     echo "You need to create a GPG key for signing commits."
@@ -122,14 +122,14 @@ if [ -z "$GPG_KEYS" ]; then
     echo "  2. Choose: RSA and RSA (default)"
     echo "  3. Key size: 4096 bits"
     echo "  4. Expiration: 0 (does not expire) or 2y (2 years)"
-    echo "  5. Real name: $AUTHOR_NAME"
-    echo "  6. Email: $AUTHOR_EMAIL"
+    echo "  5. Real name: ${AUTHOR_NAME}"
+    echo "  6. Email: ${AUTHOR_EMAIL}"
     echo "  7. Enter a passphrase (store it safely!)"
     echo ""
 
     read -p "Would you like to generate a GPG key now? (y/N): " -n 1 -r
     echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if [[ "${REPLY}" =~ ^[Yy]$ ]]; then
         echo ""
         echo "Launching GPG key generation wizard..."
         echo ""
@@ -149,10 +149,10 @@ if [ -z "$GPG_KEYS" ]; then
 fi
 
 # Get the GPG key ID for the user's email
-GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=long "$AUTHOR_EMAIL" 2>/dev/null | grep ^sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1 || true)
+GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=long "${AUTHOR_EMAIL}" 2>/dev/null | grep ^sec | head -1 | cut -d'/' -f2 | cut -d' ' -f1 || true)
 
-if [ -z "$GPG_KEY_ID" ]; then
-    echo -e "${YELLOW}⚠️  No GPG key found for email: $AUTHOR_EMAIL${NC}"
+if [[ -z "${GPG_KEY_ID}" ]]; then
+    echo -e "${YELLOW}⚠️  No GPG key found for email: ${AUTHOR_EMAIL}${NC}"
     echo ""
     echo "Available GPG keys:"
     gpg --list-secret-keys --keyid-format=long | grep -A 1 ^sec
@@ -164,19 +164,17 @@ if [ -z "$GPG_KEY_ID" ]; then
     exit 1
 fi
 
-git config user.signingkey "$GPG_KEY_ID"
+git config user.signingkey "${GPG_KEY_ID}"
 git config commit.gpgsign true
 
 echo -e "${GREEN}✅ GPG signing enabled${NC}"
-echo "   Signing key: $GPG_KEY_ID"
+echo "   Signing key: ${GPG_KEY_ID}"
 echo "   All commits will be cryptographically signed"
 echo ""
 
 # Test GPG signing
 echo "🧪 Testing GPG signature..."
-echo "test" | gpg --clearsign --default-key "$GPG_KEY_ID" > /dev/null 2>&1
-
-if [ $? -eq 0 ]; then
+if echo "test" | gpg --clearsign --default-key "${GPG_KEY_ID}" &>/dev/null; then
     echo -e "${GREEN}✅ GPG signing test successful${NC}"
 else
     echo -e "${YELLOW}⚠️  GPG signing test failed${NC}"
@@ -200,25 +198,25 @@ echo "📝 Step 4: Configuring GPG agent..."
 echo ""
 
 # Ensure GPG agent is running
-if pgrep -x "gpg-agent" > /dev/null; then
+if pgrep -x "gpg-agent" &>/dev/null; then
     echo -e "${GREEN}✅ GPG agent is running${NC}"
 else
     echo -e "${YELLOW}⚠️  Starting GPG agent...${NC}"
-    gpg-agent --daemon > /dev/null 2>&1 || true
+    gpg-agent --daemon &>/dev/null || true
 fi
 
 # Check shell profile for GPG_TTY
 SHELL_PROFILE=""
-if [ -f ~/.zshrc ]; then
-    SHELL_PROFILE="~/.zshrc"
-elif [ -f ~/.bashrc ]; then
-    SHELL_PROFILE="~/.bashrc"
+if [[ -f "${HOME}/.zshrc" ]]; then
+    SHELL_PROFILE="${HOME}/.zshrc"
+elif [[ -f "${HOME}/.bashrc" ]]; then
+    SHELL_PROFILE="${HOME}/.bashrc"
 fi
 
-if [ -n "$SHELL_PROFILE" ]; then
-    if ! grep -q "export GPG_TTY" "$SHELL_PROFILE" 2>/dev/null; then
+if [[ -n "${SHELL_PROFILE}" ]]; then
+    if ! grep -q "export GPG_TTY" "${SHELL_PROFILE}" 2>/dev/null; then
         echo ""
-        echo -e "${BLUE}💡 Tip: Add this to your $SHELL_PROFILE for better GPG integration:${NC}"
+        echo -e "${BLUE}💡 Tip: Add this to your ${SHELL_PROFILE##*/} for better GPG integration:${NC}"
         echo "   export GPG_TTY=\$(tty)"
         echo ""
     fi
@@ -235,14 +233,14 @@ echo -e "${GREEN}✅ Git configuration complete!${NC}"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""
 echo "Configuration applied for:"
-echo "  👤 Author: $AUTHOR_NAME <$AUTHOR_EMAIL>"
+echo "  👤 Author: ${AUTHOR_NAME} <${AUTHOR_EMAIL}>"
 echo "  ✅ DCO sign-off: Automatic (format.signoff = true)"
 echo "  ✅ GPG signing: Automatic (commit.gpgsign = true)"
-echo "  🔑 GPG key: $GPG_KEY_ID"
+echo "  🔑 GPG key: ${GPG_KEY_ID}"
 echo ""
 echo "Your commits will now automatically include:"
 echo "  1. 🔏 GPG signature (cryptographic verification)"
-echo "  2. ✍️  DCO sign-off (Signed-off-by: $AUTHOR_NAME <$AUTHOR_EMAIL>)"
+echo "  2. ✍️  DCO sign-off (Signed-off-by: ${AUTHOR_NAME} <${AUTHOR_EMAIL}>)"
 echo ""
 echo "Test it:"
 echo "  git commit -m \"test: verify automatic signatures\""

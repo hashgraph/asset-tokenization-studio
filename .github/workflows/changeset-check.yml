@@ -78,7 +78,7 @@ jobs:
           git diff "${BASE_BRANCH}...HEAD" --name-only --diff-filter=A | head -10
           echo ""
           echo "NEW changeset files in this PR: ${NEW_CHANGESET_COUNT}"
-          if [ -n "${NEW_CHANGESETS}" ]; then
+          if [[ -n "${NEW_CHANGESETS}" ]]; then
             echo "Found NEW changesets:"
             echo "${NEW_CHANGESETS}"
           fi
@@ -113,7 +113,7 @@ jobs:
       - name: Success summary
         if: ${{ always() }}
         run: |
-          if [ "${{ steps.bypass.outputs.bypass }}" = "true" ]; then
+          if [[ "${{ steps.bypass.outputs.bypass }}" == "true" ]]; then
             echo "✅ Changeset check bypassed due to label"
           else
             echo "✅ Changeset validation completed successfully"
