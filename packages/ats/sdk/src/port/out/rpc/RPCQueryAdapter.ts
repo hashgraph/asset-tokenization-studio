@@ -59,6 +59,8 @@ import {
   ProceedRecipientsFacet__factory,
   CorporateActionsFacet__factory,
   NoncesFacet__factory,
+  FixedRate__factory,
+  FixedRateFacet__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -94,6 +96,7 @@ import { PrincipalFor } from "@domain/context/bond/PrincipalFor";
 import { DividendAmountFor } from "@domain/context/equity/DividendAmountFor";
 import { CastRateStatus } from "@domain/context/bond/RateStatus";
 import { CouponFor } from "@domain/context/bond/CouponFor";
+import { InternalsFixedInterestRate__factory } from '../../../../../contracts/typechain-types/factories/contracts/layer_0_extensions/bond/fixedInterestRate/Internals.sol/InternalsFixedInterestRate__factory';
 
 const LOCAL_JSON_RPC_RELAY_URL = "http://127.0.0.1:7546/api";
 
@@ -1365,5 +1368,10 @@ export class RPCQueryAdapter {
   async actionContentHashExists(address: EvmAddress, contentHash: string): Promise<boolean> {
     LogService.logTrace(`Getting actionContentHashExists for ${contentHash} for the security: ${address.toString()}`);
     return await this.connect(CorporateActionsFacet__factory, address.toString()).actionContentHashExists(contentHash);
+  }
+
+  async getRate(address: EvmAddress): Promise<[string, number]> {
+    const result = await this.connect(InternalsFixedInterestRate__factory, address.toString()).getRate();
+    return [result.rate_.toString(), result.decimals_];
   }
 }
