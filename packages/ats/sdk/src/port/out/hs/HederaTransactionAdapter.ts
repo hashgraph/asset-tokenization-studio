@@ -104,6 +104,9 @@ import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
 import { ProtectionData } from '@domain/context/factory/ProtectionData';
 import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
 import { BondFixedRateDetailsData } from '@domain/context/factory/BondFixedRateDetailsData';
+import { BondKpiLinkedRateDetails } from "@domain/context/bond/BondKpiLinkedRateDetails";
+import { InterestRate } from "@domain/context/bond/InterestRate";
+import { ImpactData } from "@domain/context/bond/ImpactData";
 
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
@@ -527,6 +530,148 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         factoryId!,
         GAS.CREATE_BOND_ST,
         [bondFixedRateData],
+      );
+    } catch (error) {
+      LogService.logError(error);
+      throw new SigningError(
+        `Unexpected error in HederaTransactionAdapter create operation : ${error}`,
+      );
+    }
+  }
+
+  async createBondKpiLinkedRate(
+    securityInfo: Security,
+    bondInfo: BondKpiLinkedRateDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistry: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients: EvmAddress[] = [],
+    proceedRecipientsData: string[] = [],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    try {
+      if (!securityInfo.regulationType) {
+        throw new MissingRegulationType();
+      }
+      if (!securityInfo.regulationsubType) {
+        throw new MissingRegulationSubType();
+      }
+
+      const rbacAdmin: Rbac = {
+        role: SecurityRole._DEFAULT_ADMIN_ROLE,
+        members: [diamondOwnerAccount!.toString()],
+      };
+      const rbacs: Rbac[] = [rbacAdmin];
+
+      const erc20MetadataInfo: ERC20MetadataInfo = {
+        name: securityInfo.name,
+        symbol: securityInfo.symbol,
+        isin: securityInfo.isin,
+        decimals: securityInfo.decimals,
+      };
+
+      const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: configId,
+        version: configVersion,
+      };
+
+      const security: SecurityData = {
+        arePartitionsProtected: securityInfo.arePartitionsProtected,
+        isMultiPartition: securityInfo.isMultiPartition,
+        resolver: resolver.toString(),
+        resolverProxyConfiguration: resolverProxyConfiguration,
+        rbacs: rbacs,
+        isControllable: securityInfo.isControllable,
+        isWhiteList: securityInfo.isWhiteList,
+        maxSupply: securityInfo.maxSupply
+          ? securityInfo.maxSupply.toString()
+          : '0',
+        erc20VotesActivated: securityInfo.erc20VotesActivated,
+        erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: securityInfo.clearingActive,
+        internalKycActivated: securityInfo.internalKycActivated,
+        externalPauses:
+          externalPauses?.map((address) => address.toString()) ?? [],
+        externalControlLists:
+          externalControlLists?.map((address) => address.toString()) ?? [],
+        externalKycLists:
+          externalKycLists?.map((address) => address.toString()) ?? [],
+        compliance: compliance.toString(),
+        identityRegistry: identityRegistry.toString(),
+      };
+
+      const bondDetails = new BondDetailsData(
+        bondInfo.currency,
+        bondInfo.nominalValue.toString(),
+        bondInfo.nominalValueDecimals,
+        bondInfo.startingDate.toString(),
+        bondInfo.maturityDate.toString(),
+      );
+
+      const securityTokenToCreate = new FactoryBondToken(
+        security,
+        bondDetails,
+        proceedRecipients.map((addr) => addr.toString()),
+        proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
+      );
+
+      const additionalSecurityData: AdditionalSecurityData = {
+        countriesControlListType: securityInfo.isCountryControlListWhiteList,
+        listOfCountries: securityInfo.countries ?? '',
+        info: securityInfo.info ?? '',
+      };
+
+      const factoryRegulationData = new FactoryRegulationData(
+        CastRegulationType.toNumber(securityInfo.regulationType),
+        CastRegulationSubType.toNumber(securityInfo.regulationsubType),
+        additionalSecurityData,
+      );
+
+      const interestRate = new InterestRate(
+        bondInfo.interestRate.maxRate,
+        bondInfo.interestRate.baseRate,
+        bondInfo.interestRate.minRate,
+        bondInfo.interestRate.startPeriod,
+        bondInfo.interestRate.startRate,
+        bondInfo.interestRate.missedPenalty,
+        bondInfo.interestRate.reportPeriod,
+        bondInfo.interestRate.rateDecimals
+      );
+
+      const impactData = new ImpactData(
+        bondInfo.impactData.maxDeviationCap,
+        bondInfo.impactData.baseLine,
+        bondInfo.impactData.maxDeviationFloor,
+        bondInfo.impactData.impactDataDecimals,
+        bondInfo.impactData.adjustmentPrecision
+      );
+      
+      const bondKpiLinkedRateData = {
+            bondData: securityTokenToCreate,
+            factoryRegulationData: factoryRegulationData,
+            interestRate: interestRate,
+            impactData: impactData
+        };
+
+      LogService.logTrace(
+        `Deploying bond kpi linked rate: ${{
+          security: securityTokenToCreate,
+        }}`,
+      );
+
+      return this.executeWithArgs(
+        new Factory__factory().attach(factory.toString()),
+        'deployBondKpiLinkedRate',
+        factoryId!,
+        GAS.CREATE_BOND_ST,
+        [bondKpiLinkedRateData],
       );
     } catch (error) {
       LogService.logError(error);

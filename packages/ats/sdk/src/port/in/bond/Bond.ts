@@ -1,70 +1,72 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
-import Injectable from "@core/injectable/Injectable";
 import { LogError } from "@core/decorator/LogErrorDecorator";
+import Injectable from "@core/injectable/Injectable";
 import { QueryBus } from "@core/query/QueryBus";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
+import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
 
-import GetBondDetailsRequest from "../request/bond/GetBondDetailsRequest";
-import BondDetailsViewModel from "../response/BondDetailsViewModel";
-import CouponViewModel from "../response/CouponViewModel";
-import CouponForViewModel from "../response/CouponForViewModel";
-import CouponAmountForViewModel from "../response/CouponAmountForViewModel";
-import PrincipalForViewModel from "../response/PrincipalForViewModel";
-import GetAllCouponsRequest from "../request/bond/GetAllCouponsRequest";
-import GetCouponForRequest from "../request/bond/GetCouponForRequest";
-import GetPrincipalForRequest from "../request/bond/GetPrincipalForRequest";
-import GetCouponRequest from "../request/bond/GetCouponRequest";
-import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
-import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
-import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
-import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
-import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
-import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
-import CreateBondRequest from "../request/bond/CreateBondRequest";
-import { SecurityViewModel } from "../security/Security";
-import { CommandBus } from "@core/command/CommandBus";
-import NetworkService from "@service/network/NetworkService";
-import { SecurityProps } from "@domain/context/security/Security";
-import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
-import ContractId from "@domain/context/contract/ContractId";
-import { GetSecurityQuery } from "@query/security/get/GetSecurityQuery";
-import BigDecimal from "@domain/context/shared/BigDecimal";
-import SetCouponRequest from "../request/bond/SetCouponRequest";
 import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
-import { CastRegulationSubType, CastRegulationType } from "@domain/context/factory/RegulationType";
-import UpdateMaturityDateRequest from "../request/bond/UpdateMaturityDateRequest";
-import { UpdateMaturityDateCommand } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommand";
-import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
+import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
+import { CreateBondFixedRateCommand } from "@command/bond/createfixedrate/CreateBondFixedRateCommand";
+import { CreateBondKpiLinkedRateCommand } from "@command/bond/createkpilinkedrate/CreateBondKpiLinkedRateCommand";
+import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
 import { FullRedeemAtMaturityCommand } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand";
-import RedeemAtMaturityByPartitionRequest from "../request/bond/RedeemAtMaturityByPartitionRequest";
-import FullRedeemAtMaturityRequest from "../request/bond/FullRedeemAtMaturityRequest";
+import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
+import { UpdateMaturityDateCommand } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommand";
+import { AddProceedRecipientCommand } from "@command/security/proceedRecipients/addProceedRecipient/AddProceedRecipientCommand";
+import { RemoveProceedRecipientCommand } from "@command/security/proceedRecipients/removeProceedRecipient/RemoveProceedRecipientCommand";
+import { UpdateProceedRecipientDataCommand } from "@command/security/proceedRecipients/updateProceedRecipientData/UpdateProceedRecipientDataCommand";
+import { CommandBus } from "@core/command/CommandBus";
+import { CastRateStatus } from "@domain/context/bond/RateStatus";
+import ContractId from "@domain/context/contract/ContractId";
+import { CastRegulationSubType, CastRegulationType } from "@domain/context/factory/RegulationType";
+import { SecurityProps } from "@domain/context/security/Security";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
+import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
+import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
+import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
+import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
 import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery";
 import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
-import CreateTrexSuiteBondRequest from "../request/bond/CreateTrexSuiteBondRequest";
-import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
-import AddProceedRecipientRequest from "../request/bond/AddProceedRecipientRequest";
-import RemoveProceedRecipientRequest from "../request/bond/RemoveProceedRecipientRequest";
-import UpdateProceedRecipientDataRequest from "../request/bond/UpdateProceedRecipientDataRequest";
-import { UpdateProceedRecipientDataCommand } from "@command/security/proceedRecipients/updateProceedRecipientData/UpdateProceedRecipientDataCommand";
-import { RemoveProceedRecipientCommand } from "@command/security/proceedRecipients/removeProceedRecipient/RemoveProceedRecipientCommand";
-import { AddProceedRecipientCommand } from "@command/security/proceedRecipients/addProceedRecipient/AddProceedRecipientCommand";
-import IsProceedRecipientRequest from "../request/bond/IsProceedRecipientRequest";
+import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
+import { GetSecurityQuery } from "@query/security/get/GetSecurityQuery";
+import { GetProceedRecipientDataQuery } from "@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery";
 import { GetProceedRecipientsQuery } from "@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQuery";
 import { GetProceedRecipientsCountQuery } from "@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQuery";
-import { GetProceedRecipientDataQuery } from "@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery";
 import { IsProceedRecipientQuery } from "@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery";
+import NetworkService from "@service/network/NetworkService";
 import {
   GetCouponHoldersRequest,
-  GetTotalCouponHoldersRequest,
   GetProceedRecipientDataRequest,
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
+  GetTotalCouponHoldersRequest,
 } from "../request";
-import { CastRateStatus } from "@domain/context/bond/RateStatus";
+import AddProceedRecipientRequest from "../request/bond/AddProceedRecipientRequest";
 import CreateBondFixedRateRequest from "../request/bond/CreateBondFixedRateRequest";
-import { CreateBondFixedRateCommand } from "@command/bond/createfixedrate/CreateBondFixedRateCommand";
+import CreateBondKpiLinkedRateRequest from "../request/bond/CreateBondKpiLinkedRateRequest";
+import CreateBondRequest from "../request/bond/CreateBondRequest";
+import CreateTrexSuiteBondRequest from "../request/bond/CreateTrexSuiteBondRequest";
+import FullRedeemAtMaturityRequest from "../request/bond/FullRedeemAtMaturityRequest";
+import GetAllCouponsRequest from "../request/bond/GetAllCouponsRequest";
+import GetBondDetailsRequest from "../request/bond/GetBondDetailsRequest";
+import GetCouponForRequest from "../request/bond/GetCouponForRequest";
+import GetCouponRequest from "../request/bond/GetCouponRequest";
+import GetPrincipalForRequest from "../request/bond/GetPrincipalForRequest";
+import IsProceedRecipientRequest from "../request/bond/IsProceedRecipientRequest";
+import RedeemAtMaturityByPartitionRequest from "../request/bond/RedeemAtMaturityByPartitionRequest";
+import RemoveProceedRecipientRequest from "../request/bond/RemoveProceedRecipientRequest";
+import SetCouponRequest from "../request/bond/SetCouponRequest";
+import UpdateMaturityDateRequest from "../request/bond/UpdateMaturityDateRequest";
+import UpdateProceedRecipientDataRequest from "../request/bond/UpdateProceedRecipientDataRequest";
+import BondDetailsViewModel from "../response/BondDetailsViewModel";
+import CouponAmountForViewModel from "../response/CouponAmountForViewModel";
+import CouponForViewModel from "../response/CouponForViewModel";
+import CouponViewModel from "../response/CouponViewModel";
+import PrincipalForViewModel from "../response/PrincipalForViewModel";
+import { SecurityViewModel } from "../security/Security";
 
 interface IBondInPort {
   create(request: CreateBondRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
@@ -210,6 +212,88 @@ class BondInPort implements IBondInPort {
         req.maturityDate,
         req.rate,
         req.rateDecimals,
+        securityFactory ? new ContractId(securityFactory) : undefined,
+        resolver ? new ContractId(resolver) : undefined,
+        req.configId,
+        req.configVersion,
+        diamondOwnerAccount,
+        externalPausesIds,
+        externalControlListsIds,
+        externalKycListsIds,
+        req.complianceId,
+        req.identityRegistryId,
+        req.proceedRecipientsIds,
+        req.proceedRecipientsData,
+      ),
+    );
+
+    const securityCreated = createResponse.securityId.toString() !== ContractId.NULL.toString();
+
+    const res = securityCreated
+      ? (await this.queryBus.execute(new GetSecurityQuery(createResponse.securityId.toString()))).security
+      : {};
+
+    return {
+      security: securityCreated
+        ? {
+            ...res,
+          }
+        : {},
+      transactionId: createResponse.transactionId,
+    };
+  }
+
+  @LogError
+  async createKpiLinkedRate(
+    req: CreateBondKpiLinkedRateRequest,
+  ): Promise<{ security: SecurityViewModel; transactionId: string }> {
+    ValidatedRequest.handleValidation("CreateBondKpiLinkedRateRequest", req);
+    const { diamondOwnerAccount, externalPausesIds, externalControlListsIds, externalKycListsIds } = req;
+
+    const securityFactory = this.networkService.configuration.factoryAddress;
+    const resolver = this.networkService.configuration.resolverAddress;
+
+    const newSecurity: SecurityProps = {
+      name: req.name,
+      symbol: req.symbol,
+      isin: req.isin,
+      decimals: req.decimals,
+      isWhiteList: req.isWhiteList,
+      erc20VotesActivated: req.erc20VotesActivated,
+      isControllable: req.isControllable,
+      arePartitionsProtected: req.arePartitionsProtected,
+      clearingActive: req.clearingActive,
+      internalKycActivated: req.internalKycActivated,
+      isMultiPartition: req.isMultiPartition,
+      maxSupply: BigDecimal.fromString(req.numberOfUnits),
+      regulationType: CastRegulationType.fromNumber(req.regulationType),
+      regulationsubType: CastRegulationSubType.fromNumber(req.regulationSubType),
+      isCountryControlListWhiteList: req.isCountryControlListWhiteList,
+      countries: req.countries,
+      info: req.info,
+    };
+
+    const createResponse = await this.commandBus.execute(
+      new CreateBondKpiLinkedRateCommand(
+        newSecurity,
+        req.currency,
+        req.nominalValue,
+        req.nominalValueDecimals,
+        req.startingDate,
+        req.maturityDate,
+        req.maxRate,
+        req.baseRate,
+        req.minRate,
+        req.startPeriod,
+        req.startRate,
+        req.missedPenalty,
+        req.reportPeriod,
+        req.rateDecimals,
+        req.maxDeviationCap,
+        req.baseLine,
+        req.maxDeviationFloor,
+        req.impactDataDecimals,
+        req.adjustmentPrecision,
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
         req.configId,

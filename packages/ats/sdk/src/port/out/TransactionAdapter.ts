@@ -2,23 +2,24 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import TransactionResponse from '@domain/context/transaction/TransactionResponse';
-import BigDecimal from '@domain/context/shared/BigDecimal';
-import Account from '@domain/context/account/Account';
-import { Environment } from '@domain/context/network/Environment';
-import LogService from '@service/log/LogService';
-import { Security } from '@domain/context/security/Security';
-import EvmAddress from '@domain/context/contract/EvmAddress';
-import { BondDetails } from '@domain/context/bond/BondDetails';
-import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
-import { EquityDetails } from '@domain/context/equity/EquityDetails';
-import HWCSettings from '@core/settings/walletConnect/HWCSettings';
-import { ContractId } from '@hiero-ledger/sdk';
+import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
 import DfnsSettings from '@core/settings/custodialWalletSettings/DfnsSettings';
 import FireblocksSettings from '@core/settings/custodialWalletSettings/FireblocksSettings';
-import AWSKMSSettings from '@core/settings/custodialWalletSettings/AWSKMSSettings';
-import { ClearingOperationType } from '@domain/context/security/Clearing';
+import HWCSettings from '@core/settings/walletConnect/HWCSettings';
+import Account from '@domain/context/account/Account';
+import { BondDetails } from '@domain/context/bond/BondDetails';
+import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
+import { BondKpiLinkedRateDetails } from '@domain/context/bond/BondKpiLinkedRateDetails';
 import { RateStatus } from '@domain/context/bond/RateStatus';
+import EvmAddress from '@domain/context/contract/EvmAddress';
+import { EquityDetails } from '@domain/context/equity/EquityDetails';
+import { Environment } from '@domain/context/network/Environment';
+import { ClearingOperationType } from '@domain/context/security/Clearing';
+import { Security } from '@domain/context/security/Security';
+import BigDecimal from '@domain/context/shared/BigDecimal';
+import TransactionResponse from '@domain/context/transaction/TransactionResponse';
+import { ContractId } from '@hiero-ledger/sdk';
+import LogService from '@service/log/LogService';
 
 export interface InitializationData {
   account?: Account;
@@ -83,6 +84,24 @@ interface ITransactionAdapter {
 createBondFixedRate(
     security: Security,
     bondFixedRateDetails: BondFixedRateDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  createBondKpiLinkedRate(
+    security: Security,
+    bondKpiLinkedRateDetails: BondKpiLinkedRateDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -920,6 +939,23 @@ export default abstract class TransactionAdapter
   abstract createBondFixedRate(
     security: Security,
     bondFixedRateDetails: BondFixedRateDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract createBondKpiLinkedRate(
+    security: Security,
+    bondKpiLinkedRateDetails: BondKpiLinkedRateDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,

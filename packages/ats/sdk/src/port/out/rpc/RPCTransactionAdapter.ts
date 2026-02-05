@@ -4,22 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import TransactionResponse from "@domain/context/transaction/TransactionResponse";
-import TransactionAdapter, { InitializationData } from "../TransactionAdapter";
-import { BaseContract, ContractTransaction, Signer } from "ethers";
-import { singleton } from "tsyringe";
-import Account from "@domain/context/account/Account";
-import { lazyInject } from "@core/decorator/LazyInjectDecorator";
-import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
-import EventService from "@service/event/EventService";
-import LogService from "@service/log/LogService";
 import { CommandBus } from "@core/command/CommandBus";
-import { MirrorNodes } from "@domain/context/network/MirrorNode";
-import { JsonRpcRelays } from "@domain/context/network/JsonRpcRelay";
-import { Factories } from "@domain/context/factory/Factories";
-import BigDecimal from "@domain/context/shared/BigDecimal";
-import { ContractId } from "@hiero-ledger/sdk";
-import { RPCTransactionResponseAdapter } from "./RPCTransactionResponseAdapter";
 import {
   _PARTITION_ID_1,
   EVM_ZERO_ADDRESS,
@@ -29,14 +14,42 @@ import {
   SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
   SET_VOTING_RIGHTS_EVENT,
 } from '@core/Constants';
-import { Security } from '@domain/context/security/Security';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import Account from "@domain/context/account/Account";
+import { BondDetails } from "@domain/context/bond/BondDetails";
+import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
+import { BondKpiLinkedRateDetails } from "@domain/context/bond/BondKpiLinkedRateDetails";
+import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { EquityDetails } from "@domain/context/equity/EquityDetails";
+import { BasicTransferInfo, IssueData, OperatorTransferData } from "@domain/context/factory/ERC1410Metadata";
+import { Factories } from "@domain/context/factory/Factories";
 import {
   FactoryBondFixedRateToken,
+  FactoryBondKpiLinkedRateToken,
   FactoryBondToken,
   FactoryEquityToken,
 } from '@domain/context/factory/FactorySecurityToken';
-import { SigningError } from '../error/SigningError';
+import { ProtectionData } from '@domain/context/factory/ProtectionData';
+import { Resolvers } from "@domain/context/factory/Resolvers";
+import { SecurityData } from "@domain/context/factory/SecurityData";
+import { JsonRpcRelays } from "@domain/context/network/JsonRpcRelay";
+import { MirrorNodes } from "@domain/context/network/MirrorNode";
+import {
+  CastClearingOperationType,
+  ClearingOperation,
+  ClearingOperationFrom,
+  ClearingOperationIdentifier,
+  ClearingOperationType,
+  ProtectedClearingOperation,
+} from '@domain/context/security/Clearing';
+import { Hold, HoldIdentifier, ProtectedHold } from "@domain/context/security/Hold";
+import { Security } from '@domain/context/security/Security';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import TransactionResponse from "@domain/context/transaction/TransactionResponse";
+import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
+import type { Provider } from "@ethersproject/providers";
 import {
   AccessControlFacet__factory,
   Bond__factory,
@@ -48,7 +61,9 @@ import {
   ControlListFacet__factory,
   DiamondFacet__factory,
   Equity__factory,
+  ERC1410IssuerFacet__factory,
   ERC1410ManagementFacet__factory,
+  ERC1410TokenHolderFacet__factory,
   ERC1643Facet__factory,
   ERC3643BatchFacet__factory,
   ERC3643ManagementFacet__factory,
@@ -57,6 +72,7 @@ import {
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
   Factory__factory,
+  FixedRate__factory,
   FreezeFacet__factory,
   HoldManagementFacet__factory,
   HoldTokenHolderFacet__factory,
@@ -69,40 +85,25 @@ import {
   MockedExternalPause__factory,
   MockedWhitelist__factory,
   PauseFacet__factory,
+  ProceedRecipientsFacet__factory,
   ProtectedPartitionsFacet__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   TransferAndLockFacet__factory,
-  ERC1410TokenHolderFacet__factory,
   TREXFactoryAts__factory,
-  ProceedRecipientsFacet__factory,
-  ERC1410IssuerFacet__factory,
-  FixedRate__factory,
 } from "@hashgraph/asset-tokenization-contracts";
-import { Resolvers } from "@domain/context/factory/Resolvers";
-import EvmAddress from "@domain/context/contract/EvmAddress";
-import { BondDetails } from "@domain/context/bond/BondDetails";
-import { EquityDetails } from "@domain/context/equity/EquityDetails";
-import { SecurityData } from "@domain/context/factory/SecurityData";
-import { TransferAndLock } from "@domain/context/security/TransferAndLock";
-import type { Provider } from "@ethersproject/providers";
-import { Hold, HoldIdentifier, ProtectedHold } from "@domain/context/security/Hold";
-import { BasicTransferInfo, IssueData, OperatorTransferData } from "@domain/context/factory/ERC1410Metadata";
-import {
-  CastClearingOperationType,
-  ClearingOperation,
-  ClearingOperationFrom,
-  ClearingOperationIdentifier,
-  ClearingOperationType,
-  ProtectedClearingOperation,
-} from '@domain/context/security/Clearing';
-import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
+import { ContractId } from "@hiero-ledger/sdk";
+import EventService from "@service/event/EventService";
+import LogService from "@service/log/LogService";
 import NetworkService from '@service/network/NetworkService';
 import MetamaskService from '@service/wallet/metamask/MetamaskService';
-import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
-import { ProtectionData } from '@domain/context/factory/ProtectionData';
-import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
+import { BaseContract, ContractTransaction, Signer } from "ethers";
+import { singleton } from "tsyringe";
+import { SigningError } from '../error/SigningError';
+import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
+import TransactionAdapter, { InitializationData } from "../TransactionAdapter";
+import { RPCTransactionResponseAdapter } from "./RPCTransactionResponseAdapter";
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
@@ -288,7 +289,52 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         compliance,
         identityRegistryAddress,
       );
-    }
+  }
+
+  async createBondKpiLinkedRate(
+      securityInfo: Security,
+      bondKpiLinkedRateDetails: BondKpiLinkedRateDetails,
+      factory: EvmAddress,
+      resolver: EvmAddress,
+      configId: string,
+      configVersion: number,
+      compliance: EvmAddress,
+      identityRegistryAddress: EvmAddress,
+      externalPauses?: EvmAddress[],
+      externalControlLists?: EvmAddress[],
+      externalKycLists?: EvmAddress[],
+      diamondOwnerAccount?: EvmAddress,
+      proceedRecipients: EvmAddress[] = [],
+      proceedRecipientsData: string[] = [],
+      factoryId?: ContractId | string,
+    ): Promise<TransactionResponse> {
+      return this.createSecurity(
+        securityInfo,
+        {
+          bondDetails: SecurityDataBuilder.buildBondKpiLinkedRateDetails(bondKpiLinkedRateDetails),
+        },
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+        diamondOwnerAccount!,
+        (security, details) =>
+          new FactoryBondKpiLinkedRateToken(
+            security,
+            details.bondDetails,
+            proceedRecipients.map((addr) => addr.toString()),
+            proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
+          ),
+        'deployBondKpiLinkedRate',
+        GAS.CREATE_BOND_ST,
+        'BondKpiLinkedRateDeployed',
+        compliance,
+        identityRegistryAddress,
+      );
+  }
 
   async transfer(security: EvmAddress, targetId: EvmAddress, amount: BigDecimal): Promise<TransactionResponse> {
     LogService.logTrace(`Transfering ${amount} securities to account ${targetId.toString()}`);

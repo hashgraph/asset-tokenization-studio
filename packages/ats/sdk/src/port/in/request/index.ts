@@ -201,11 +201,13 @@ import GetPrincipalForRequest from "./bond/GetPrincipalForRequest";
 import ActionContentHashExistsRequest from "./security/operations/corporateActions/ActionContentHashExistsRequest";
 import SetRateRequest from "@port/in/request/interestRates/SetRateRequest";
 import GetRateRequest from "@port/in/request/interestRates/GetRateRequest";
+import CreateBondKpiLinkedRateRequest from "./bond/CreateBondKpiLinkedRateRequest";
 
 export {
   CreateEquityRequest,
   CreateBondRequest,
   CreateBondFixedRateRequest,
+  CreateBondKpiLinkedRateRequest,
   ValidationResponse,
   IssueRequest,
   RedeemRequest,
