@@ -81,7 +81,8 @@ describe("ERC3643 Tests", () => {
   let erc1644Facet: ERC1644Facet;
   let erc1594Facet: ERC1594Facet;
   let lockFacet: LockFacet;
-  let clearingFacet: Contract;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let clearingFacet: any;
   let holdFacet: IHold;
   let protectedPartitionsFacet: ProtectedPartitions;
   let diamondFacet: DiamondFacet;
