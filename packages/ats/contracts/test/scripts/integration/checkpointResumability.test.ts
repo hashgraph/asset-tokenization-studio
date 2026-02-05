@@ -1042,6 +1042,253 @@ describe("Checkpoint Resumability - Integration Tests", () => {
     });
   });
 
+  describe("Scenario 8: Partial Facet Deployment Recovery via Failure Injection", () => {
+    let testDir: string;
+    let manager: CheckpointManager;
+
+    beforeEach(async () => {
+      testDir = createTestCheckpointsDir();
+      manager = new CheckpointManager(undefined, testDir);
+      await cleanupTestCheckpoints(testDir);
+      // Clear any failure injection env vars
+      delete process.env.CHECKPOINT_TEST_FAIL_AT;
+      delete process.env.FAIL_AT_FACET;
+    });
+
+    afterEach(async () => {
+      await cleanupTestCheckpoints(testDir);
+      // Restore original env vars
+      delete process.env.CHECKPOINT_TEST_FAIL_AT;
+      delete process.env.FAIL_AT_FACET;
+    });
+
+    after(() => {
+      // Full env restoration
+      Object.keys(process.env).forEach((key) => {
+        if (key === "CHECKPOINT_TEST_FAIL_AT" || key === "FAIL_AT_FACET") {
+          delete process.env[key];
+        }
+      });
+    });
+
+    it("should preserve partial facet addresses when resuming after failure", async () => {
+      const deployer = signers[0];
+      const deployerAddress = await deployer.getAddress();
+
+      // Simulate a checkpoint state where 5 facets were deployed before failure
+      const partialCheckpoint = await createCheckpointWithState(manager, {
+        network: "hardhat",
+        deployer: deployerAddress,
+        status: "failed",
+        currentStep: 2,
+        workflowType: "newBlr",
+        steps: {
+          proxyAdmin: createDeployedContract("0x1111111111111111111111111111111111111111", "0xabc123"),
+          blr: {
+            address: "0x2222222222222222222222222222222222222222",
+            implementation: "0x3333333333333333333333333333333333333333",
+            proxy: "0x2222222222222222222222222222222222222222",
+            txHash: "0xdef456",
+            deployedAt: new Date().toISOString(),
+          },
+          // 5 facets were deployed before the test failure
+          facets: new Map([
+            ["AccessControlFacet", createDeployedContract("0xaaaa111111111111111111111111111111111111", "0x111...")],
+            ["ERC20Facet", createDeployedContract("0xaaaa222222222222222222222222222222222222", "0x222...")],
+            ["ERC1410Facet", createDeployedContract("0xaaaa333333333333333333333333333333333333", "0x333...")],
+            ["ERC1594Facet", createDeployedContract("0xaaaa444444444444444444444444444444444444", "0x444...")],
+            ["ERC1643Facet", createDeployedContract("0xaaaa555555555555555555555555555555555555", "0x555...")],
+          ]),
+        },
+      });
+
+      // Simulate failure
+      simulateFailureAtStep(
+        partialCheckpoint,
+        2,
+        "[TEST] Intentional failure after deploying facet #5 (ERC1643Facet) for checkpoint testing",
+        "newBlr",
+      );
+      await manager.saveCheckpoint(partialCheckpoint);
+
+      // Verify checkpoint was saved with partial facets
+      const loadedCheckpoint = await manager.loadCheckpoint(partialCheckpoint.checkpointId);
+      expect(loadedCheckpoint).to.exist;
+      expect(loadedCheckpoint?.status).to.equal("failed");
+      expect(loadedCheckpoint?.steps.facets?.size).to.equal(5);
+
+      // Verify all partial facet addresses are preserved
+      const facetNames = Array.from(loadedCheckpoint!.steps.facets!.keys());
+      expect(facetNames).to.include("AccessControlFacet");
+      expect(facetNames).to.include("ERC20Facet");
+      expect(facetNames).to.include("ERC1410Facet");
+      expect(facetNames).to.include("ERC1594Facet");
+      expect(facetNames).to.include("ERC1643Facet");
+
+      // Verify addresses match original
+      expect(loadedCheckpoint?.steps.facets?.get("AccessControlFacet")?.address).to.equal(
+        "0xaaaa111111111111111111111111111111111111",
+      );
+      expect(loadedCheckpoint?.steps.facets?.get("ERC1643Facet")?.address).to.equal(
+        "0xaaaa555555555555555555555555555555555555",
+      );
+    });
+
+    it("should correctly identify resumable checkpoints with partial facets", async () => {
+      const deployer = signers[0];
+      const deployerAddress = await deployer.getAddress();
+
+      // Create a failed checkpoint with partial facets
+      const partialCheckpoint = await createCheckpointWithState(manager, {
+        network: "hardhat",
+        deployer: deployerAddress,
+        status: "failed",
+        currentStep: 2,
+        workflowType: "newBlr",
+        steps: {
+          proxyAdmin: createDeployedContract("0x1111111111111111111111111111111111111111", "0xabc"),
+          blr: {
+            address: "0x2222222222222222222222222222222222222222",
+            implementation: "0x3333333333333333333333333333333333333333",
+            proxy: "0x2222222222222222222222222222222222222222",
+            txHash: "0xdef",
+            deployedAt: new Date().toISOString(),
+          },
+          facets: new Map([
+            ["Facet1", createDeployedContract("0xf1f1111111111111111111111111111111111111", "0x1")],
+            ["Facet2", createDeployedContract("0xf2f2222222222222222222222222222222222222", "0x2")],
+            ["Facet3", createDeployedContract("0xf3f3333333333333333333333333333333333333", "0x3")],
+          ]),
+        },
+      });
+
+      simulateFailureAtStep(partialCheckpoint, 2, "Test failure during facet deployment", "newBlr");
+      await manager.saveCheckpoint(partialCheckpoint);
+
+      // Find resumable checkpoints
+      const resumable = await manager.findResumableCheckpoints("hardhat", "newBlr");
+
+      expect(resumable.length).to.be.greaterThan(0);
+
+      const found = resumable.find((cp) => cp.checkpointId === partialCheckpoint.checkpointId);
+      expect(found).to.exist;
+      expect(found?.status).to.equal("failed");
+      expect(found?.steps.facets?.size).to.equal(3);
+    });
+
+    it("should support step-level failure injection identifiers", async () => {
+      const deployer = signers[0];
+      const deployerAddress = await deployer.getAddress();
+
+      // Test each supported step
+      const supportedSteps = ["proxyAdmin", "blr", "facets", "register", "equity", "bond", "factory"];
+
+      for (const stepName of supportedSteps) {
+        const checkpoint = await createCheckpointWithState(manager, {
+          network: "hardhat",
+          deployer: deployerAddress,
+          status: "failed",
+          currentStep: supportedSteps.indexOf(stepName),
+          workflowType: "newBlr",
+          steps: {
+            proxyAdmin: createDeployedContract("0x1111111111111111111111111111111111111111", "0xabc"),
+          },
+        });
+
+        simulateFailureAtStep(
+          checkpoint,
+          supportedSteps.indexOf(stepName) + 1,
+          `[TEST] Failure at ${stepName}`,
+          "newBlr",
+        );
+        await manager.saveCheckpoint(checkpoint);
+
+        const loaded = await manager.loadCheckpoint(checkpoint.checkpointId);
+        expect(loaded?.failure?.error).to.include(`[TEST] Failure at ${stepName}`);
+
+        // Cleanup for next iteration
+        await manager.deleteCheckpoint(checkpoint.checkpointId);
+      }
+    });
+
+    it("should merge checkpoint facets with newly deployed facets after resume", async () => {
+      const deployer = signers[0];
+      const deployerAddress = await deployer.getAddress();
+
+      // Initial checkpoint with 3 facets
+      const initialFacets = new Map([
+        ["Facet1", createDeployedContract("0xf111111111111111111111111111111111111111", "0x1")],
+        ["Facet2", createDeployedContract("0xf222222222222222222222222222222222222222", "0x2")],
+        ["Facet3", createDeployedContract("0xf333333333333333333333333333333333333333", "0x3")],
+      ]);
+
+      const checkpoint = await createCheckpointWithState(manager, {
+        network: "hardhat",
+        deployer: deployerAddress,
+        status: "failed",
+        currentStep: 2,
+        workflowType: "newBlr",
+        steps: {
+          proxyAdmin: createDeployedContract("0x1111111111111111111111111111111111111111", "0xabc"),
+          blr: {
+            address: "0x2222222222222222222222222222222222222222",
+            implementation: "0x3333333333333333333333333333333333333333",
+            proxy: "0x2222222222222222222222222222222222222222",
+            txHash: "0xdef",
+            deployedAt: new Date().toISOString(),
+          },
+          facets: initialFacets,
+        },
+      });
+
+      await manager.saveCheckpoint(checkpoint);
+
+      // Simulate "resume" by adding more facets
+      const loaded = await manager.loadCheckpoint(checkpoint.checkpointId);
+      expect(loaded).to.exist;
+
+      // Add new facets (simulating what deploySystemWithNewBlr does on resume)
+      addFacetToCheckpoint(
+        loaded!,
+        "Facet4",
+        createDeployedContract("0xf444444444444444444444444444444444444444", "0x4"),
+      );
+      addFacetToCheckpoint(
+        loaded!,
+        "Facet5",
+        createDeployedContract("0xf555555555555555555555555555555555555555", "0x5"),
+      );
+
+      // Update status to completed
+      loaded!.status = "completed";
+      loaded!.currentStep = 6;
+      await manager.saveCheckpoint(loaded!);
+
+      // Verify merged facets
+      const finalCheckpoint = await manager.loadCheckpoint(checkpoint.checkpointId);
+      expect(finalCheckpoint?.steps.facets?.size).to.equal(5);
+
+      // Original facets preserved
+      expect(finalCheckpoint?.steps.facets?.get("Facet1")?.address).to.equal(
+        "0xf111111111111111111111111111111111111111",
+      );
+      expect(finalCheckpoint?.steps.facets?.get("Facet2")?.address).to.equal(
+        "0xf222222222222222222222222222222222222222",
+      );
+      expect(finalCheckpoint?.steps.facets?.get("Facet3")?.address).to.equal(
+        "0xf333333333333333333333333333333333333333",
+      );
+
+      // New facets added
+      expect(finalCheckpoint?.steps.facets?.get("Facet4")?.address).to.equal(
+        "0xf444444444444444444444444444444444444444",
+      );
+      expect(finalCheckpoint?.steps.facets?.get("Facet5")?.address).to.equal(
+        "0xf555555555555555555555555555555555555555",
+      );
+    });
+  });
+
   describe("Edge Cases and Error Handling", () => {
     let testDir: string;
     let manager: CheckpointManager;

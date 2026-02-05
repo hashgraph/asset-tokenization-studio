@@ -304,3 +304,20 @@ export {
   isSuccess,
   isFailure,
 } from "./checkpoint/converters";
+
+// ============================================================================
+// Testing Utilities
+// ============================================================================
+
+export {
+  parseFailureConfig,
+  shouldFailAtStep,
+  shouldFailAtFacet,
+  createTestFailureMessage,
+  isTestFailureError,
+  SUPPORTED_STEPS,
+  CHECKPOINT_TEST_FAIL_AT_ENV,
+  LEGACY_FAIL_AT_FACET_ENV,
+  type FailureConfig,
+  type SupportedStep,
+} from "./testing";

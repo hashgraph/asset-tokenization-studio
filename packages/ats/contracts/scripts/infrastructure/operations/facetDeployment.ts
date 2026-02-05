@@ -20,6 +20,7 @@ import {
   retryTransaction,
   RetryOptions,
 } from "@scripts/infrastructure";
+import { shouldFailAtFacet, createTestFailureMessage } from "../testing/failureInjection";
 
 /**
  * Options for deploying facets (all optional).
@@ -189,6 +190,24 @@ export async function deployFacets(
         // Deployment failed after all retry attempts
         const errorMessage = err instanceof Error ? err.message : String(err);
         failed.set(facetName, `Failed after retries: ${errorMessage}`);
+      }
+
+      // Testing hook: Allow intentional failure for checkpoint testing
+      // Returns partial result instead of throwing to preserve deployed facets in checkpoint
+      // Supports both:
+      // - Legacy FAIL_AT_FACET=N (numeric)
+      // - New CHECKPOINT_TEST_FAIL_AT=facet:N or facet:FacetName
+      if (shouldFailAtFacet(deployed.size, facetName)) {
+        const testError = createTestFailureMessage("facet", deployed.size, facetName);
+        failed.set("__TEST_FAILURE__", testError);
+        warn(testError);
+        // Return partial result - workflow will save checkpoint before failing
+        return {
+          success: false,
+          deployed,
+          failed,
+          skipped,
+        };
       }
     }
 

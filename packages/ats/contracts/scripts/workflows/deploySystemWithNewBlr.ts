@@ -57,6 +57,7 @@ import {
   IStaticFunctionSelectors__factory,
   ProxyAdmin__factory,
 } from "@contract-types";
+import { shouldFailAtStep, createTestFailureMessage } from "../infrastructure/testing/failureInjection";
 
 /**
  * Options for complete system deployment.
@@ -276,6 +277,11 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("proxyAdmin")) {
+      throw new Error(createTestFailureMessage("step", "proxyAdmin"));
+    }
+
     // Step 1: Deploy BusinessLogicResolver
     let blrResult: Awaited<ReturnType<typeof deployBlr>>;
 
@@ -311,10 +317,28 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("blr")) {
+      throw new Error(createTestFailureMessage("step", "blr"));
+    }
+
     // Step 2: Deploy all facets (with incremental checkpoint saves)
     let facetsResult: Awaited<ReturnType<typeof deployFacets>>;
 
-    if (checkpoint.steps.facets && checkpoint.currentStep >= 2) {
+    // Determine expected facet count for complete deployment check
+    let expectedFacets = atsRegistry.getAllFacets();
+    if (!useTimeTravel) {
+      expectedFacets = expectedFacets.filter((f) => f.name !== "TimeTravelFacet");
+    }
+    const expectedFacetCount = expectedFacets.length;
+
+    // Check if ALL facets are deployed (not just if some facets exist)
+    // This fixes the partial resume bug where checkpoint.steps.facets could have
+    // partial deployment (e.g., 50 facets) but code would skip to "all deployed"
+    const allFacetsDeployed =
+      checkpoint.steps.facets && checkpoint.steps.facets.size >= expectedFacetCount && checkpoint.currentStep >= 2;
+
+    if (allFacetsDeployed && checkpoint.steps.facets) {
       info("\n✓ Step 3/7: All facets already deployed (resuming)");
       // Use converter to reconstruct facetsResult with proper DeploymentResult types
       facetsResult = {
@@ -370,11 +394,8 @@ export async function deploySystemWithNewBlr(
           verifyDeployment,
         });
 
-        if (!facetsResult.success) {
-          throw new Error("Facet deployment had failures");
-        }
-
-        // Save checkpoint after EACH facet deployment
+        // Always save deployed facets to checkpoint (even if some failed)
+        // This enables resume from partial deployment
         facetsResult.deployed.forEach((deploymentResult, facetName) => {
           checkpoint.steps.facets!.set(facetName, {
             address: deploymentResult.address!,
@@ -386,11 +407,34 @@ export async function deploySystemWithNewBlr(
           totalGasUsed += parseInt(deploymentResult.gasUsed?.toString() || "0");
         });
 
-        // Save checkpoint with all deployed facets
+        // Save checkpoint with deployed facets before checking for failures
         checkpoint.currentStep = 2;
         await checkpointManager.saveCheckpoint(checkpoint);
 
-        info(`✅ Deployed ${facetsResult.deployed.size} facets successfully`);
+        // Now check for failures - checkpoint already saved with partial progress
+        if (!facetsResult.success) {
+          const failedNames = Array.from(facetsResult.failed.keys()).join(", ");
+          throw new Error(`Facet deployment had failures: ${failedNames}`);
+        }
+
+        // Merge checkpoint facets with newly deployed facets for complete result
+        // This ensures the final facetsResult contains ALL deployed facets (both
+        // from checkpoint and from this deployment batch)
+        const checkpointFacets = checkpoint.steps.facets ? convertCheckpointFacets(checkpoint.steps.facets) : new Map();
+        const mergedDeployed = new Map(checkpointFacets);
+        facetsResult.deployed.forEach((result, name) => {
+          mergedDeployed.set(name, result);
+        });
+
+        const newlyDeployedCount = facetsResult.deployed.size;
+        facetsResult = {
+          success: true,
+          deployed: mergedDeployed,
+          failed: new Map(),
+          skipped: new Map(),
+        };
+
+        info(`✅ Deployed ${newlyDeployedCount} new facets (${mergedDeployed.size} total)`);
       } else {
         info("   All facets already deployed from previous checkpoint");
         // Use converter to reconstruct existing facets from checkpoint
@@ -401,6 +445,11 @@ export async function deploySystemWithNewBlr(
           skipped: new Map(), // No facets were skipped
         };
       }
+    }
+
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("facets")) {
+      throw new Error(createTestFailureMessage("step", "facets"));
     }
 
     // Step 3: Register facets in BLR
@@ -459,6 +508,11 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("register")) {
+      throw new Error(createTestFailureMessage("step", "register"));
+    }
+
     // Build facetAddresses map for configuration creation
     const facetAddresses: Record<string, string> = {};
     facetsResult.deployed.forEach((deploymentResult, facetName) => {
@@ -513,6 +567,11 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("equity")) {
+      throw new Error(createTestFailureMessage("step", "equity"));
+    }
+
     // Step 5: Create Bond configuration
     let bondConfig: Awaited<ReturnType<typeof createBondConfiguration>>;
 
@@ -554,6 +613,11 @@ export async function deploySystemWithNewBlr(
       };
       checkpoint.currentStep = 5;
       await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("bond")) {
+      throw new Error(createTestFailureMessage("step", "bond"));
     }
 
     // Step 6: Create Bond Fixed Rate configuration
@@ -601,6 +665,11 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("bondFixedRate")) {
+      throw new Error(createTestFailureMessage("step", "bondFixedRate"));
+    }
+
     // Step 7: Create Bond KpiLinked Rate configuration
     let bondKpiLinkedRateConfig: Awaited<ReturnType<typeof createBondKpiLinkedRateConfiguration>>;
 
@@ -644,6 +713,11 @@ export async function deploySystemWithNewBlr(
       };
       checkpoint.currentStep = 6;
       await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("bondKpiLinkedRate")) {
+      throw new Error(createTestFailureMessage("step", "bondKpiLinkedRate"));
     }
 
     // Step 8: Create Bond Sustainability Performance Target Rate configuration
@@ -708,6 +782,11 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("bondSustainabilityPerformanceTargetRate")) {
+      throw new Error(createTestFailureMessage("step", "bondSustainabilityPerformanceTargetRate"));
+    }
+
     // Step 8: Deploy Factory
     let factoryResult: Awaited<ReturnType<typeof deployFactory>>;
 
@@ -757,6 +836,11 @@ export async function deploySystemWithNewBlr(
       };
       checkpoint.currentStep = 6;
       await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("factory")) {
+      throw new Error(createTestFailureMessage("step", "factory"));
     }
 
     // Get Hedera Contract IDs if on Hedera network

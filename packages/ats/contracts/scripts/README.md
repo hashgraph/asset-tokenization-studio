@@ -17,6 +17,7 @@ This README provides comprehensive reference documentation for the deployment sy
 
 **Before deploying:**
 
+- **🔴 Build first**: Run `npm run build` before deploying (scripts do not auto-build)
 - **🔴 NETWORK required**: Must set `NETWORK` environment variable (no default fallback)
 - **🔴 Environment setup**: Real networks require `.env` configuration (RPC endpoint + private key)
 - **🔴 Gas costs**: Full deployment costs ~$20-50 on testnet, ensure sufficient balance
@@ -24,12 +25,13 @@ This README provides comprehensive reference documentation for the deployment sy
 
 **Quick Command Reference:**
 
-| Command                         | Use Case                 | Requirements         |
-| ------------------------------- | ------------------------ | -------------------- |
-| `npm run deploy:local`          | Local testing            | Hardhat node running |
-| `npm run deploy:hedera:testnet` | Testnet deployment       | `.env` configured    |
-| `npm run deploy:hedera:mainnet` | Mainnet deployment       | `.env` configured    |
-| `npm run generate:registry`     | Update contract metadata | Contracts compiled   |
+| Command                         | Use Case                 | Requirements                |
+| ------------------------------- | ------------------------ | --------------------------- |
+| `npm run build`                 | Build contracts/scripts  | First time or after changes |
+| `npm run deploy:local`          | Local testing            | Build + Hardhat node        |
+| `npm run deploy:hedera:testnet` | Testnet deployment       | Build + `.env` configured   |
+| `npm run deploy:hedera:mainnet` | Mainnet deployment       | Build + `.env` configured   |
+| `npm run generate:registry`     | Update contract metadata | Contracts compiled          |
 
 ---
 
@@ -682,6 +684,116 @@ For comprehensive documentation including:
 - Best practices and advanced topics
 
 **See the [Checkpoint Guide](./CHECKPOINT_GUIDE.md)** for complete details.
+
+### Checkpoint Testing with Failure Injection
+
+For testing checkpoint recovery scenarios, the deployment system provides a failure injection mechanism via environment variables.
+
+#### Environment Variable
+
+Use `CHECKPOINT_TEST_FAIL_AT` to simulate failures at specific points during deployment:
+
+```bash
+# Format: CHECKPOINT_TEST_FAIL_AT=<type>:<target>
+```
+
+#### Supported Failure Types
+
+| Format            | Description                         | Example            |
+| ----------------- | ----------------------------------- | ------------------ |
+| `facet:<number>`  | Fail after deploying N facets       | `facet:50`         |
+| `facet:<name>`    | Fail after deploying specific facet | `facet:ERC20Facet` |
+| `step:<stepName>` | Fail at workflow step               | `step:equity`      |
+
+#### Supported Steps
+
+- `proxyAdmin` - After ProxyAdmin deployment
+- `blr` - After BusinessLogicResolver deployment
+- `facets` - After all facets deployed
+- `register` - After facets registered in BLR
+- `equity` - After Equity configuration created
+- `bond` - After Bond configuration created
+- `bondFixedRate` - After Bond Fixed Rate configuration created
+- `bondKpiLinkedRate` - After Bond KPI Linked Rate configuration created
+- `bondSustainabilityPerformanceTargetRate` - After Bond Sustainability configuration created
+- `factory` - After Factory deployment
+
+#### Examples
+
+```bash
+# Fail after deploying 50 facets
+CHECKPOINT_TEST_FAIL_AT=facet:50 npm run deploy:newBlr
+
+# Fail after deploying ERC20Facet
+CHECKPOINT_TEST_FAIL_AT=facet:ERC20Facet npm run deploy:newBlr
+
+# Fail at equity configuration step
+CHECKPOINT_TEST_FAIL_AT=step:equity npm run deploy:newBlr
+
+# Fail at bond configuration step
+CHECKPOINT_TEST_FAIL_AT=step:bond npm run deploy:newBlr
+```
+
+#### Testing Resume Behavior
+
+1. **Start deployment with failure injection:**
+
+   ```bash
+   CHECKPOINT_TEST_FAIL_AT=facet:5 npm run deploy:newBlr
+   # Deployment fails after 5 facets
+   ```
+
+2. **Remove failure injection and resume:**
+
+   ```bash
+   npm run deploy:newBlr
+   # Resumes from checkpoint, deploying remaining facets
+   ```
+
+3. **Verify checkpoint preserves partial progress:**
+   ```bash
+   npm run checkpoint:show -- <network>-<timestamp>
+   # Shows 5 facets deployed before failure
+   ```
+
+#### Legacy Support
+
+The legacy `FAIL_AT_FACET` environment variable is still supported for backward compatibility:
+
+```bash
+# Legacy format (equivalent to facet:10)
+FAIL_AT_FACET=10 npm run deploy:newBlr
+```
+
+#### Programmatic Usage
+
+The failure injection utilities are available for use in custom scripts and tests:
+
+```typescript
+import {
+  parseFailureConfig,
+  shouldFailAtStep,
+  shouldFailAtFacet,
+  createTestFailureMessage,
+  SUPPORTED_STEPS,
+} from "@scripts/infrastructure";
+
+// Parse current configuration
+const config = parseFailureConfig();
+if (config?.type === "step" && config.target === "equity") {
+  throw new Error(createTestFailureMessage("step", "equity"));
+}
+
+// Check if should fail at facet
+if (shouldFailAtFacet(deployedCount, facetName)) {
+  // Handle test failure
+}
+
+// Check if should fail at step
+if (shouldFailAtStep("bond")) {
+  // Handle test failure
+}
+```
 
 ---
 
