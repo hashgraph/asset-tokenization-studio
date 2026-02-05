@@ -13,6 +13,7 @@ import {
   Role,
   ApplyRolesRequest,
   CreateBondFixedRateRequest,
+  GetRateRequest,
 } from "@port/in";
 import { DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
@@ -158,5 +159,12 @@ describe("DFNS Transaction Adapter test", () => {
 
     const result = await FixedRate.setRate(request);
     console.log("result: " + JSON.stringify(result));
+
+    const getRateRequest = new GetRateRequest({
+      securityId: contractAddress,
+    });
+
+    const rate = await FixedRate.getRate(getRateRequest);
+    console.log("rate: " + JSON.stringify(rate));
   }, 60_000);
 });

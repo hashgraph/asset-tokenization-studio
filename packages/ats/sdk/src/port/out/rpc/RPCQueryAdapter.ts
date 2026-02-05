@@ -1370,8 +1370,8 @@ export class RPCQueryAdapter {
     return await this.connect(CorporateActionsFacet__factory, address.toString()).actionContentHashExists(contentHash);
   }
 
-  async getRate(address: EvmAddress): Promise<[string, number]> {
-    const result = await this.connect(InternalsFixedInterestRate__factory, address.toString()).getRate();
-    return [result.rate_.toString(), result.decimals_];
+  async getRate(address: EvmAddress): Promise<[BigNumber, number]> {
+    const result = await this.connect(FixedRate__factory, address.toString()).getRate();
+    return [result.rate_, result.decimals_];
   }
 }
