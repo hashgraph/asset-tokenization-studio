@@ -3,6 +3,7 @@ import { createMock } from "@golevelup/ts-jest";
 import { ErrorMsgFixture, EvmAddressPropsFixture } from "@test/fixtures/shared/DataFixture";
 import { ErrorCode } from "@core/error/BaseError";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
+import { BigNumber } from "ethers";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import AccountService from "@service/account/AccountService";
 import { GetRateQueryHandler } from "./GetRateQueryHandler";
@@ -16,7 +17,7 @@ describe("GetRateQueryHandler", () => {
   const accountServiceMock = createMock<AccountService>();
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const errorMsg = ErrorMsgFixture.create().msg;
-  const rate = BigInt(1500000);
+  const rate = BigNumber.from(1500000);
   const decimals = 6;
 
   beforeEach(() => {

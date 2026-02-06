@@ -32,7 +32,11 @@ class FixedRateInPort implements IFixedRateInPort {
   async getRate(request: GetRateRequest): Promise<{ rate: string; decimals: number }> {
     ValidatedRequest.handleValidation("GetRateRequest", request);
 
-    return await this.queryBus.execute(new GetRateQuery(request.securityId));
+    const result = await this.queryBus.execute(new GetRateQuery(request.securityId));
+    return {
+      rate: result.rate.toString(),
+      decimals: result.decimals,
+    };
   }
 }
 

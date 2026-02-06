@@ -654,9 +654,21 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return coupons.length;
   });
 
-  singletonInstance.getCouponsOrderedList = jest.fn(async (address: EvmAddress) => {
-    return coupons.map((_, index) => index + 1); // Return 1-based coupon IDs
-  });
+  singletonInstance.getCouponsOrderedList = jest.fn(
+    async (address: EvmAddress, pageIndex?: number, pageLength?: number) => {
+      const allCoupons = coupons.map((_, index) => index + 1); // Return 1-based coupon IDs
+
+      // If pagination parameters are provided, return paginated result
+      if (pageIndex !== undefined && pageLength !== undefined) {
+        const start = pageIndex * pageLength;
+        const end = start + pageLength;
+        return allCoupons.slice(start, end);
+      }
+
+      // Otherwise return all coupons
+      return allCoupons;
+    },
+  );
 
   singletonInstance.getCouponFromOrderedListAt = jest.fn(async (address: EvmAddress, pos: number) => {
     if (pos >= coupons.length || pos < 0) {
