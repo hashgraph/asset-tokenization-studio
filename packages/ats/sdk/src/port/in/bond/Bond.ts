@@ -28,6 +28,7 @@ import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
 import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
 import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
 import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
+import { GetCouponFromOrderedListAtQuery } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQuery";
 import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery";
 import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
 import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
@@ -53,6 +54,7 @@ import FullRedeemAtMaturityRequest from "../request/bond/FullRedeemAtMaturityReq
 import GetAllCouponsRequest from "../request/bond/GetAllCouponsRequest";
 import GetBondDetailsRequest from "../request/bond/GetBondDetailsRequest";
 import GetCouponForRequest from "../request/bond/GetCouponForRequest";
+import GetCouponFromOrderedListAtRequest from "../request/bond/GetCouponFromOrderedListAtRequest";
 import GetCouponRequest from "../request/bond/GetCouponRequest";
 import GetPrincipalForRequest from "../request/bond/GetPrincipalForRequest";
 import IsProceedRecipientRequest from "../request/bond/IsProceedRecipientRequest";
@@ -85,6 +87,7 @@ interface IBondInPort {
   fullRedeemAtMaturity(request: FullRedeemAtMaturityRequest): Promise<{ payload: boolean; transactionId: string }>;
   getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
   getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
+  getCouponFromOrderedListAt(request: GetCouponFromOrderedListAtRequest): Promise<number>;
   createTrexSuite(request: CreateTrexSuiteBondRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
 
   addProceedRecipient(request: AddProceedRecipientRequest): Promise<{ payload: boolean; transactionId: string }>;
@@ -506,6 +509,14 @@ class BondInPort implements IBondInPort {
     ValidatedRequest.handleValidation(GetTotalCouponHoldersRequest.name, request);
 
     return (await this.queryBus.execute(new GetTotalCouponHoldersQuery(securityId, couponId))).payload;
+  }
+
+  @LogError
+  async getCouponFromOrderedListAt(request: GetCouponFromOrderedListAtRequest): Promise<number> {
+    const { securityId, pos } = request;
+    ValidatedRequest.handleValidation(GetCouponFromOrderedListAtRequest.name, request);
+
+    return (await this.queryBus.execute(new GetCouponFromOrderedListAtQuery(securityId, pos))).couponId;
   }
 
   @LogError

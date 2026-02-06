@@ -1286,6 +1286,7 @@ export class RPCQueryAdapter {
   async getCouponFromOrderedListAt(address: EvmAddress, pos: number): Promise<number> {
     LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
 
+    const factory = await this.connect(BondRead__factory, address.toString())
     const couponId = await this.connect(BondRead__factory, address.toString()).getCouponFromOrderedListAt(pos);
 
     return couponId.toNumber();

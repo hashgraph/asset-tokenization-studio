@@ -29,6 +29,7 @@ import {
 } from "@domain/context/factory/RegulationType";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
 import { Time } from "@core/Time";
+import GetCouponFromOrderedListAtRequest from "@port/in/request/bond/GetCouponFromOrderedListAtRequest";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -166,5 +167,23 @@ describe("DFNS Transaction Adapter test", () => {
 
     const rate = await FixedRate.getRate(getRateRequest);
     console.log("rate: " + JSON.stringify(rate));
+  }, 60_000);
+
+  it("get coupon from ordered list at", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const getCouponFromOrderedListAt = await Bond.getCouponFromOrderedListAt(
+      new GetCouponFromOrderedListAtRequest({
+        securityId: contractAddress,
+        pos: 0,
+      }),
+    );
+
+    console.log("couponId: " + getCouponFromOrderedListAt);
   }, 60_000);
 });
