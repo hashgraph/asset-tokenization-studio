@@ -654,6 +654,20 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return coupons.length;
   });
 
+  singletonInstance.getCouponsOrderedList = jest.fn(
+    async (address: EvmAddress, pageIndex: number, pageLength: number) => {
+      const start = pageIndex * pageLength;
+      const end = start + pageLength;
+      const couponIds = [];
+
+      for (let i = start; i < end && i < coupons.length; i++) {
+        couponIds.push(i + 1); // Coupon IDs start from 1
+      }
+
+      return couponIds;
+    },
+  );
+
   singletonInstance.getAccountSecurityRelationship = jest.fn(async (address: EvmAddress, target: EvmAddress) => {});
 
   singletonInstance.isPaused = jest.fn(async (address: EvmAddress) => {
