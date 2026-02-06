@@ -1,0 +1,18 @@
+{
+  "name": "diamond-architecture-comparison",
+  "version": "1.0.0",
+  "description": "PoC: Inheritance vs Library-based Diamond facets - proving zero-loss migration",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:old": "hardhat test --grep 'OLD Architecture'",
+    "test:new": "hardhat test --grep 'NEW Architecture'",
+    "test:compare": "hardhat test --grep 'COMPARISON'",
+    "clean": "hardhat clean"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0",
+    "solc": "^0.8.28"
+  }
+}
