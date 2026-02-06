@@ -22,7 +22,7 @@ describe("Security USA Tests", () => {
   let bondUSAFacet: BondUSAReadFacet;
 
   before(async () => {
-    currentTimeInSeconds = (await ethers.provider.getBlock("latest")).timestamp;
+    currentTimeInSeconds = (await ethers.provider.getBlock("latest"))!.timestamp;
     startingDate = currentTimeInSeconds + TIME;
     maturityDate = startingDate + numberOfCoupons * frequency;
     expect(startingDate).to.be.gt(currentTimeInSeconds);

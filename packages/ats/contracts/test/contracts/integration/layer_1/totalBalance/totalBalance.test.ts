@@ -14,6 +14,7 @@ import {
   type KycFacet,
   type SsiManagementFacet,
   type TotalBalanceFacet,
+  type IHold,
 } from "@contract-types";
 import { ATS_ROLES, ADDRESS_ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
@@ -47,7 +48,7 @@ describe("Total Balance Tests", () => {
 
   let erc1410Facet: IERC1410;
   let lockFacet: LockFacet;
-  let holdFacet: Contract;
+  let holdFacet: IHold;
   let clearingFacet: Contract;
   let clearingActionsFacet: ClearingActionsFacet;
   let freezeFacet: FreezeFacet;
@@ -63,7 +64,7 @@ describe("Total Balance Tests", () => {
     // Get clearing facets and combine their interfaces
     const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
     const clearingHoldCreationFacet = await ethers.getContractAt("ClearingHoldCreationFacet", diamond.target, signer_A);
-    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.target, signer_A);
+    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.target as string, signer_A);
 
     const fragmentMap = new Map<string, any>();
     [
@@ -145,7 +146,7 @@ describe("Total Balance Tests", () => {
   }
 
   beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+    currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
     expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
   });
 

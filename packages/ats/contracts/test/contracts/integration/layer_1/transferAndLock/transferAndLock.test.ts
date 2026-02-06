@@ -107,7 +107,7 @@ describe("Transfer and lock Tests", () => {
   }
 
   beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+    currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
     expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
   });
 

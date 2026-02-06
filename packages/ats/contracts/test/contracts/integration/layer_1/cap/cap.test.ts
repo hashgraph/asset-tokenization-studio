@@ -342,7 +342,7 @@ describe("Cap Tests", () => {
 
       // First adjustment
       const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`);
-      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [adjustmentFactor + 1n], [0]);
+      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [Number(adjustmentFactor + 1n)], [0]);
       await setupScheduledBalanceAdjustments(adjustments);
 
       await timeTravelFacet.changeSystemTimestamp(adjustments[0].executionDate + 1);

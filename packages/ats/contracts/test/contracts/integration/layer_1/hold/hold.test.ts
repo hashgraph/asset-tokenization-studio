@@ -69,7 +69,8 @@ describe("Hold Tests", () => {
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
 
-  let holdFacet: Contract;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let holdFacet: any;
   let pauseFacet: PauseFacet;
   let lock: LockFacet;
   let erc1410Facet: IERC1410;
@@ -281,7 +282,7 @@ describe("Hold Tests", () => {
 
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
-      currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+      currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
       expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
 
       hold = {
@@ -1385,7 +1386,7 @@ describe("Hold Tests", () => {
       diamond = base.diamond;
       await setFacets({ diamond });
 
-      currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+      currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
       hold = {
         amount: _AMOUNT,
@@ -1413,7 +1414,7 @@ describe("Hold Tests", () => {
       diamond = base.diamond;
       await setFacets({ diamond });
 
-      currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+      currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
       hold = {
         amount: _AMOUNT,
@@ -1565,7 +1566,7 @@ describe("Hold Tests", () => {
         const balance_Before_Partition_1_C = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_C.address);
 
         // HOLD TWICE
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         const hold = {
           amount: _AMOUNT,
@@ -1638,7 +1639,7 @@ describe("Hold Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD TWICE
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         const hold = {
           amount: _AMOUNT,
@@ -1696,7 +1697,7 @@ describe("Hold Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD TWICE
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         const hold = {
           amount: _AMOUNT,
@@ -1722,7 +1723,7 @@ describe("Hold Tests", () => {
 
         // RECLAIM HOLD
         await timeTravelFacet.changeSystemTimestamp(
-          (await ethers.provider.getBlock("latest")).timestamp + 2 * ONE_SECOND,
+          (await ethers.provider.getBlock("latest"))!.timestamp + 2 * ONE_SECOND,
         );
         await holdFacet.connect(signer_B).reclaimHoldByPartition(holdIdentifier);
 
@@ -1757,7 +1758,7 @@ describe("Hold Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD BEFORE BALANCE ADJUSTMENT
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         const hold = {
           amount: _AMOUNT,

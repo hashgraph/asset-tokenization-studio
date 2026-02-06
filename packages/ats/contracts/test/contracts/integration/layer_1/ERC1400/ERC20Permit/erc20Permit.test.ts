@@ -62,7 +62,7 @@ describe("ERC20Permit Tests", () => {
           name: CONTRACT_NAME,
           version: CONTRACT_VERSION,
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.target,
+          verifyingContract: diamond.target as string,
         };
         const domainHash = ethers.TypedDataEncoder.hashDomain(domain);
         expect(domainSeparator).to.equal(domainHash);
@@ -187,7 +187,7 @@ describe("ERC20Permit Tests", () => {
           name: CONTRACT_NAME,
           version: CONTRACT_VERSION,
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.target,
+          verifyingContract: diamond.target as string,
         };
 
         const types = {
@@ -226,7 +226,7 @@ describe("ERC20Permit Tests", () => {
           name: CONTRACT_NAME,
           version: CONTRACT_VERSION,
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.target,
+          verifyingContract: diamond.target as string,
         };
 
         const types = {
@@ -267,17 +267,15 @@ describe("ERC20Permit Tests", () => {
       const expiry = (await getDltTimestamp()) + 3600;
 
       await expect(
-        erc20PermitFacet
-          .attach(base.diamond.target)
-          .permit(
-            signer_B.address,
-            signer_C.address,
-            1,
-            expiry,
-            27,
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          ),
+        (erc20PermitFacet.attach(base.diamond.target) as ERC20PermitFacet).permit(
+          signer_B.address,
+          signer_C.address,
+          1,
+          expiry,
+          27,
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        ),
       ).to.be.revertedWithCustomError(erc20PermitFacet, "NotAllowedInMultiPartitionMode");
     });
   });

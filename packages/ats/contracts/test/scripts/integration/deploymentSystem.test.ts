@@ -462,7 +462,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       const factoryImplementationFactory = new Factory__factory(deployer);
       const factoryResult = await deployProxy(deployer, {
         implementationFactory: factoryImplementationFactory,
-        existingProxyAdmin: proxyAdminResult.contract as ProxyAdmin,
+        existingProxyAdmin: proxyAdminResult.contract as unknown as ProxyAdmin,
       });
       expect(factoryResult.proxyAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
     });

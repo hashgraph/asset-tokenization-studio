@@ -14,7 +14,7 @@
 import { expect } from "chai";
 import { promises as fs } from "fs";
 import { join } from "path";
-import { CheckpointManager } from "@scripts/infrastructure";
+import { CheckpointManager, type DeployedContract } from "@scripts/infrastructure";
 import {
   TEST_ADDRESSES,
   TEST_NETWORKS,
@@ -264,13 +264,13 @@ describe("CheckpointManager", () => {
         options: {},
       });
 
-      const facet1 = {
+      const facet1: DeployedContract = {
         address: TEST_ADDRESSES.VALID_3,
         txHash: TEST_TX_HASHES.SAMPLE_1,
         deployedAt: new Date().toISOString(),
       };
 
-      const facet2 = {
+      const facet2: DeployedContract = {
         address: TEST_ADDRESSES.VALID_4,
         txHash: TEST_TX_HASHES.SAMPLE_2,
         deployedAt: new Date().toISOString(),

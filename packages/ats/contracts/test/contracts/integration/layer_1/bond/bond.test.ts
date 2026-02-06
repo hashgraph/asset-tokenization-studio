@@ -422,7 +422,7 @@ describe("Bond Tests", () => {
         );
 
         const wrongcouponData_2 = {
-          recordDate: ((await ethers.provider.getBlock("latest")).timestamp - 1).toString(),
+          recordDate: ((await ethers.provider.getBlock("latest"))!.timestamp - 1).toString(),
           executionDate: couponExecutionDateInSeconds.toString(),
           rate: couponRate,
           rateDecimals: couponRateDecimals,

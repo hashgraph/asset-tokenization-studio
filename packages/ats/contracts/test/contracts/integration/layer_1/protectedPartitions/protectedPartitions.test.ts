@@ -210,7 +210,8 @@ describe("ProtectedPartitions Tests", () => {
   let kycFacet: KycFacet;
   let ssiManagementFacet: SsiManagementFacet;
   let holdFacet: IHold;
-  let clearingFacet: Contract;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let clearingFacet: any;
   let protectedHold: ProtectedHoldData;
   let hold: HoldData;
   let clearingOperation: ClearingOperationData;
@@ -259,7 +260,7 @@ describe("ProtectedPartitions Tests", () => {
 
     const uniqueFragmentsHold = Array.from(fragmentMapHold.values());
 
-    holdFacet = new Contract(address, uniqueFragmentsHold, signer_A) as IHold;
+    holdFacet = new Contract(address, uniqueFragmentsHold, signer_A) as unknown as IHold;
 
     protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", address);
     pauseFacet = await ethers.getContractAt("PauseFacet", address);

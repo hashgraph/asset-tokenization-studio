@@ -140,7 +140,7 @@ describe("Lock Tests", () => {
   }
 
   beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+    currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
     expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
   });
 
@@ -444,7 +444,7 @@ describe("Lock Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // LOCK TWICE
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         await lockFacet
           .connect(signer_A)
@@ -464,7 +464,7 @@ describe("Lock Tests", () => {
 
         // RELEASE LOCK
         await timeTravelFacet.changeSystemTimestamp(
-          (await ethers.provider.getBlock("latest")).timestamp + 2 * ONE_SECOND,
+          (await ethers.provider.getBlock("latest"))!.timestamp + 2 * ONE_SECOND,
         );
         await lockFacet.connect(signer_A).releaseByPartition(_PARTITION_ID_1, 1, signer_A.address);
 
@@ -499,7 +499,7 @@ describe("Lock Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // LOCK BEFORE BALANCE ADJUSTMENT
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         await lockFacet
           .connect(signer_A)
