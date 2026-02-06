@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import type { LinkThemeConfiguration } from "@Components/Interaction/Link";
+import type { ComponentStyleConfig } from "@chakra-ui/react";
 
-export const Link: LinkThemeConfiguration = {
+export const Link: ComponentStyleConfig = {
   variants: {
     table: {
       color: "grey.900",

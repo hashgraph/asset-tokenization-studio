@@ -135,7 +135,7 @@
     "ats:sdk:test:ci": "npm run test:ci --workspace=packages/ats/sdk --if-present || npm run test --workspace=packages/ats/sdk",
     "ats:sdk:clean": "npm run clean --workspace=packages/ats/sdk",
     "ats:sdk:publish": "npm run publish --workspace=packages/ats/sdk",
-    "ats:web:build": "npm run build --workspace=apps/ats/web",
+    "ats:web:build": "NODE_OPTIONS='--max-old-space-size=8192' npm run build --workspace=apps/ats/web",
     "ats:web:test": "NODE_OPTIONS='--max-old-space-size=8192' npm run test --workspace=apps/ats/web",
     "ats:web:test:update": "npm run test:update --workspace=apps/ats/web",
     "ats:web:test:ci": "npm run test:ci --workspace=apps/ats/web",
