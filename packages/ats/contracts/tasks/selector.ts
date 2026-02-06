@@ -1,11 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-// Para Ethers v5, EventFragment nos ayuda con el tipado si lo necesitamos.
-// Puedes importarlo de 'ethers/lib/utils' o '@ethersproject/abi' dependiendo de tu setup.
-// Si hre.ethers ya es v5, no necesitas esta importación explícita para EventFragment
-// a menos que quieras un tipado más estricto.
-import { FunctionFragment } from "@ethersproject/abi"; // O 'ethers/lib/utils'
-import { id } from "ethers/lib/utils";
+import { FunctionFragment, id } from "ethers";
 
 task("list-events-v5", "Muestra los nombres y selectores (topic hash) de los eventos para Ethers v5").setAction(
   async (taskArgs, hre: HardhatRuntimeEnvironment) => {
@@ -32,7 +29,7 @@ task("list-events-v5", "Muestra los nombres y selectores (topic hash) de los eve
         }
 
         // En Ethers v5, creamos la instancia de Interface así:
-        const contractInterface = new hre.ethers.utils.Interface(artifact.abi);
+        const contractInterface = new hre.ethers.Interface(artifact.abi);
 
         const eventsData = [];
 
@@ -113,7 +110,7 @@ task("list-functions-v5", "Muestra los nombres y selectores (topic hash) de los 
         }
 
         // En Ethers v5, creamos la instancia de Interface así:
-        const contractInterface = new hre.ethers.utils.Interface(artifact.abi);
+        const contractInterface = new hre.ethers.Interface(artifact.abi);
 
         const eventsData = [];
 

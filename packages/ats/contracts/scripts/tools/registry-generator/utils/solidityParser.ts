@@ -9,7 +9,7 @@
  * @module registry-generator/utils/solidityParser
  */
 
-import { utils } from "ethers";
+import { keccak256, toUtf8Bytes } from "ethers";
 import type {
   MethodDefinition,
   EventDefinition,
@@ -17,8 +17,6 @@ import type {
   RoleDefinition,
   ResolverKeyDefinition,
 } from "../types";
-
-const { keccak256, toUtf8Bytes } = utils;
 
 /**
  * Infrastructure base classes to exclude from event/error inheritance traversal.

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BigNumber } from "ethers";
 import BigDecimal from "../shared/BigDecimal";
 import {
   InvalidClearingOperationType,
@@ -9,7 +8,7 @@ import {
 
 export class ClearingOperation {
   partition: string;
-  expirationTimestamp: BigNumber;
+  expirationTimestamp: bigint;
   data: string;
 }
 
@@ -22,8 +21,8 @@ export class ClearingOperationFrom {
 export class ProtectedClearingOperation {
   clearingOperation: ClearingOperation;
   from: string;
-  deadline: BigNumber;
-  nonce: BigNumber;
+  deadline: bigint;
+  nonce: bigint;
 }
 
 export class ClearingOperationIdentifier {
@@ -40,16 +39,16 @@ export enum ClearingOperationType {
 }
 
 export class CastClearingOperationType {
-  static fromNumber(id: number): ClearingOperationType {
+  static fromBigint(id: bigint): ClearingOperationType {
     switch (id) {
-      case 0:
+      case 0n:
         return ClearingOperationType.Transfer;
-      case 1:
+      case 1n:
         return ClearingOperationType.Redeem;
-      case 2:
+      case 2n:
         return ClearingOperationType.HoldCreation;
       default:
-        throw new InvalidClearingOperationTypeNumber(id);
+        throw new InvalidClearingOperationTypeNumber(Number(id));
     }
   }
 

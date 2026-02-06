@@ -9,7 +9,7 @@
  * @module core/utils/verification
  */
 
-import { providers, Contract, utils } from "ethers";
+import { BaseContract, Provider, Interface, Contract } from "ethers";
 import { retryTransaction, RetryOptions } from "./transaction";
 import { debug } from "./logging";
 
@@ -70,7 +70,7 @@ export interface VerificationResult {
  * ```
  */
 export async function verifyContractCode(
-  provider: providers.Provider,
+  provider: Provider,
   address: string,
   options: VerificationOptions = {},
 ): Promise<VerificationResult> {
@@ -139,7 +139,7 @@ export async function verifyContractCode(
  * ```
  */
 export async function verifyContractInterface(
-  contract: Contract,
+  contract: BaseContract,
   expectedSelectors: string[],
   options: VerificationOptions = {},
 ): Promise<VerificationResult> {
@@ -147,19 +147,29 @@ export async function verifyContractInterface(
 
   try {
     const checkInterface = async (): Promise<VerificationResult> => {
+      const contractAddress = await contract.getAddress();
       if (verbose) {
-        debug(`Verifying interface at ${contract.address}...`);
+        debug(`Verifying interface at ${contractAddress}...`);
       }
 
       const foundSelectors: string[] = [];
       const missingSelectors: string[] = [];
 
+      // Get provider from contract runner
+      const provider = contract.runner?.provider;
+      if (!provider) {
+        return {
+          success: false,
+          error: "Contract has no connected provider",
+        };
+      }
+
       // Check each expected selector
       for (const selector of expectedSelectors) {
         try {
           // Try to call the function with selector (static call)
-          await contract.provider.call({
-            to: contract.address,
+          await provider.call({
+            to: contractAddress,
             data: selector + "0".repeat(56), // Pad selector to full function call
           });
 
@@ -223,9 +233,9 @@ export async function verifyContractInterface(
  * ```
  */
 export async function verifyContract(
-  provider: providers.Provider,
+  provider: Provider,
   address: string,
-  contractInterface?: utils.Interface,
+  contractInterface?: Interface,
   options: VerificationOptions = {},
 ): Promise<VerificationResult> {
   // First, verify bytecode exists
@@ -237,7 +247,9 @@ export async function verifyContract(
 
   // If interface provided, verify function selectors
   if (contractInterface) {
-    const selectors = Object.keys(contractInterface.functions).map((sig) => contractInterface.getSighash(sig));
+    const selectors = contractInterface.fragments
+      .filter((f): f is import("ethers").FunctionFragment => f.type === "function")
+      .map((f) => f.selector);
 
     const contract = new Contract(address, contractInterface, provider);
     const interfaceResult = await verifyContractInterface(contract, selectors.slice(0, 3), options); // Check first 3 functions as sample

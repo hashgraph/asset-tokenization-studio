@@ -14,7 +14,7 @@ import SecurityService from "@service/security/SecurityService";
 import { LockedBalanceOfQueryError } from "./error/LockedBalanceOfQueryError";
 import { Security } from "@domain/context/security/Security";
 import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
-import { BigNumber } from "ethers";
+
 import BigDecimal from "@domain/context/shared/BigDecimal";
 
 describe("LockedBalanceOfQueryHandler", () => {
@@ -30,7 +30,7 @@ describe("LockedBalanceOfQueryHandler", () => {
   const targetEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const security = new Security(SecurityPropsFixture.create());
   const errorMsg = ErrorMsgFixture.create().msg;
-  const amount = BigNumber.from(1);
+  const amount = BigInt(1);
 
   beforeEach(() => {
     handler = new LockedBalanceOfQueryHandler(

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { type ResolverProxy, PauseFacet, SsiManagementFacet, MockedT3RevocationRegistry } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
@@ -9,9 +9,9 @@ import { executeRbac } from "@test";
 
 describe("SSI Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let pauseFacet: PauseFacet;
   let ssiManagementFacet: SsiManagementFacet;
@@ -34,10 +34,10 @@ describe("SSI Tests", () => {
         members: [signer_C.address],
       },
     ]);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_C);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_C);
     revocationList = await (await ethers.getContractFactory("MockedT3RevocationRegistry", signer_C)).deploy();
-    await revocationList.deployed();
+    await revocationList.waitForDeployment();
   }
 
   beforeEach(async () => {
@@ -52,7 +52,7 @@ describe("SSI Tests", () => {
 
     it("GIVEN a paused Token WHEN setRevocationRegistryAddress THEN transaction fails with TokenIsPaused", async () => {
       await expect(
-        ssiManagementFacet.setRevocationRegistryAddress(revocationList.address),
+        ssiManagementFacet.setRevocationRegistryAddress(revocationList.target),
       ).to.be.revertedWithCustomError(ssiManagementFacet, "TokenIsPaused");
     });
 
@@ -74,7 +74,7 @@ describe("SSI Tests", () => {
   describe("Access Control", () => {
     it("GIVEN a non SSIManager account WHEN setRevocationRegistryAddress THEN transaction fails with AccountHasNoRole", async () => {
       await expect(
-        ssiManagementFacet.connect(signer_B).setRevocationRegistryAddress(revocationList.address),
+        ssiManagementFacet.connect(signer_B).setRevocationRegistryAddress(revocationList.target),
       ).to.be.revertedWithCustomError(ssiManagementFacet, "AccountHasNoRole");
     });
 
@@ -113,13 +113,13 @@ describe("SSI Tests", () => {
 
   describe("SsiManagement OK", () => {
     it("GIVEN a revocationList WHEN setRevocationRegistryAddress THEN transaction succeed", async () => {
-      expect(await ssiManagementFacet.setRevocationRegistryAddress(revocationList.address))
+      expect(await ssiManagementFacet.setRevocationRegistryAddress(revocationList.target))
         .to.emit(ssiManagementFacet, "RevocationRegistryAddressSet")
-        .withArgs(ethers.constants.AddressZero, revocationList.address);
+        .withArgs(ethers.ZeroAddress, revocationList.target);
 
       const revocationListAddress = await ssiManagementFacet.getRevocationRegistryAddress();
 
-      expect(revocationListAddress).to.equal(revocationList.address);
+      expect(revocationListAddress).to.equal(revocationList.target);
     });
 
     it("GIVEN an unlisted issuer WHEN addIssuer THEN transaction succeed", async () => {

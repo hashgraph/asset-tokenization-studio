@@ -113,7 +113,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       expect(() => validateAddress(deployerAddress, "deployer")).to.not.throw();
       expect(() => validateAddress(userAddress, "user")).to.not.throw();
-      expect(() => validateAddress(ethers.constants.AddressZero, "zero address")).to.not.throw();
+      expect(() => validateAddress(ethers.ZeroAddress, "zero address")).to.not.throw();
     });
 
     it("should reject invalid addresses", () => {
@@ -348,10 +348,11 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
     it("should deploy ProxyAdmin", async () => {
       const proxyAdmin = await deployProxyAdmin(deployer);
 
-      expect(proxyAdmin.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-      expect(proxyAdmin.deployTransaction).to.exist;
-      expect(proxyAdmin.deployTransaction.hash).to.exist;
-      expect(proxyAdmin.deployTransaction.blockNumber).to.be.greaterThan(0);
+      expect(proxyAdmin.target).to.match(/^0x[a-fA-F0-9]{40}$/);
+      const deployTx = proxyAdmin.deploymentTransaction();
+      expect(deployTx).to.exist;
+      expect(deployTx!.hash).to.exist;
+      expect(deployTx!.blockNumber).to.be.greaterThan(0);
     });
 
     it("should deploy Factory with BLR reference", async () => {
@@ -371,7 +372,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(factoryResult.proxyAdminAddress).to.equal(blrResult.proxyAdminAddress);
 
       // Verify Factory deployment was successful (Factory doesn't have a getter for BLR address)
-      expect(factoryResult.factoryAddress).to.not.equal(ethers.constants.AddressZero);
+      expect(factoryResult.factoryAddress).to.not.equal(ethers.ZeroAddress);
     });
 
     it("should deploy multiple facets in batch", async () => {
@@ -459,7 +460,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       const factoryImplementationFactory = new Factory__factory(deployer);
       const factoryResult = await deployProxy(deployer, {
         implementationFactory: factoryImplementationFactory,
-        existingProxyAdmin: proxyAdminResult.contract as ProxyAdmin,
+        existingProxyAdmin: proxyAdminResult.contract as unknown as ProxyAdmin,
       });
       expect(factoryResult.proxyAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
     });

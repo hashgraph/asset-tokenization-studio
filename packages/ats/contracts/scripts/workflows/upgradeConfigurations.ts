@@ -477,7 +477,7 @@ async function registerFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   info(`   Found ${existingCount.toString()} existing business logics`);
 
   const existingFacets: FacetRegistrationData[] = [];
-  const existingCountNum = existingCount.toNumber();
+  const existingCountNum = Number(existingCount);
 
   if (existingCountNum > 0) {
     // Fetch all existing keys (using pagination if needed)

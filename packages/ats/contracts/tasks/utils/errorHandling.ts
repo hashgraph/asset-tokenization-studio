@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { ADDRESS_ZERO } from "@scripts";
 import { exec } from "child_process";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -52,7 +54,7 @@ export const validateAddress = (
     throw new Error(`${paramName} cannot be zero address`);
   }
 
-  if (address !== ADDRESS_ZERO && !hre.ethers.utils.isAddress(address)) {
+  if (address !== ADDRESS_ZERO && !hre.ethers.isAddress(address)) {
     throw new Error(`Invalid address format for ${paramName}: ${address}`);
   }
 };

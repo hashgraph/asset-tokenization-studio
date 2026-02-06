@@ -11,8 +11,6 @@ import { GetNounceQueryHandler } from "./GetNounceQueryHandler";
 import AccountService from "@service/account/AccountService";
 import { GetNounceQueryFixture } from "@test/fixtures/protectedPartitions/ProtectedPartitionsFixture";
 import { GetNounceQueryError } from "./error/GetNounceQueryError";
-import { BigNumber } from "ethers";
-
 describe("GetNounceQueryHandler", () => {
   let handler: GetNounceQueryHandler;
   let query: GetNounceQuery;
@@ -53,12 +51,12 @@ describe("GetNounceQueryHandler", () => {
     it("should successfully get nounce", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
-      queryAdapterServiceMock.getNonceFor.mockResolvedValueOnce(BigNumber.from(1));
+      queryAdapterServiceMock.getNonceFor.mockResolvedValueOnce(BigInt(1));
 
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(GetNounceQueryResponse);
-      expect(result.payload).toBe(BigNumber.from(1).toNumber());
+      expect(result.payload).toBe(Number(BigInt(1)));
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);

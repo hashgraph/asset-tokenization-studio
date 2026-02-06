@@ -17,17 +17,16 @@ import { getSecurityData, getRegulationData } from "./tokens/common.fixture";
 import { getEquityDetails } from "./tokens/equity.fixture";
 import { getBondDetails } from "./tokens/bond.fixture";
 import { DiamondFacet__factory } from "@contract-types";
-import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import type { Contract } from "ethers";
-import type { BusinessLogicResolver, IFactory, ProxyAdmin, DiamondFacet } from "@contract-types";
+import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import type { BusinessLogicResolver, IFactory, ProxyAdmin, DiamondFacet, ResolverProxy } from "@contract-types";
 
 /**
  * Result of deploying the upgrade test environment.
  */
 export interface UpgradeTestFixtureResult {
   // Signers
-  deployer: SignerWithAddress;
-  unknownSigner: SignerWithAddress;
+  deployer: HardhatEthersSigner;
+  unknownSigner: HardhatEthersSigner;
 
   // Core infrastructure
   blr: BusinessLogicResolver;
@@ -42,11 +41,11 @@ export interface UpgradeTestFixtureResult {
   bondConfigId: string;
 
   // Deployed token proxies for testing updates
-  equityTokenProxy: Contract;
+  equityTokenProxy: ResolverProxy;
   equityTokenAddress: string;
   equityDiamondCut: DiamondFacet;
 
-  bondTokenProxy: Contract;
+  bondTokenProxy: ResolverProxy;
   bondTokenAddress: string;
   bondDiamondCut: DiamondFacet;
 
@@ -105,7 +104,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
     equityRegulationData,
   );
 
-  const equityTokenAddress = equityTokenProxy.address;
+  const equityTokenAddress = await equityTokenProxy.getAddress();
   const equityDiamondCut = DiamondFacet__factory.connect(equityTokenAddress, deployer);
 
   // Deploy sample Bond token via Factory
@@ -130,7 +129,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
     bondRegulationData,
   );
 
-  const bondTokenAddress = bondTokenProxy.address;
+  const bondTokenAddress = await bondTokenProxy.getAddress();
   const bondDiamondCut = DiamondFacet__factory.connect(bondTokenAddress, deployer);
 
   return {
@@ -140,7 +139,7 @@ export async function deployUpgradeTestFixture(): Promise<UpgradeTestFixtureResu
 
     // Core infrastructure
     blr,
-    blrAddress: blr.address,
+    blrAddress: await blr.getAddress(),
     factory,
     proxyAdmin,
 
@@ -196,7 +195,7 @@ export async function deployUpgradeInfrastructureOnlyFixture() {
     deployer,
     unknownSigner,
     blr,
-    blrAddress: blr.address,
+    blrAddress: await blr.getAddress(),
     factory,
     proxyAdmin,
     initialEquityVersion,

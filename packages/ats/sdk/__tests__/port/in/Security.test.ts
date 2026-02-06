@@ -137,7 +137,7 @@ describe("🧪 Security tests", () => {
   let equity: SecurityViewModel;
 
   const url = "http://127.0.0.1:7546";
-  const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
+  const customHttpProvider = new ethers.JsonRpcProvider(url);
 
   beforeAll(async () => {
     mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
@@ -982,7 +982,7 @@ describe("🧪 Security tests", () => {
       }),
     );
 
-    const encodedValue = ethers.utils.defaultAbiCoder.encode(
+    const encodedValue = ethers.AbiCoder.defaultAbiCoder().encode(
       ["bytes32", "bytes32"],
       [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
     );
@@ -1101,7 +1101,7 @@ describe("🧪 Security tests", () => {
       }),
     );
 
-    const encodedValue = ethers.utils.defaultAbiCoder.encode(
+    const encodedValue = ethers.AbiCoder.defaultAbiCoder().encode(
       ["bytes32", "bytes32"],
       [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
     );
@@ -1229,7 +1229,7 @@ describe("🧪 Security tests", () => {
       const issuedAmount = "10";
       const clearedAmount = "2";
       const expirationTimeStamp = "9991976120";
-      const date = new Date(BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() * ONE_THOUSAND);
+      const date = new Date(Number(BigDecimal.fromString(expirationTimeStamp).toBigInt()) * ONE_THOUSAND);
 
       await Security.issue(
         new IssueRequest({
@@ -1362,7 +1362,7 @@ describe("🧪 Security tests", () => {
       const issuedAmount = "10";
       const clearedAmount = "2";
       const expirationTimeStamp = "9991976120";
-      const date = new Date(BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() * ONE_THOUSAND);
+      const date = new Date(Number(BigDecimal.fromString(expirationTimeStamp).toBigInt()) * ONE_THOUSAND);
 
       await Security.issue(
         new IssueRequest({
@@ -1488,7 +1488,7 @@ describe("🧪 Security tests", () => {
       const issuedAmount = "10";
       const clearedAmount = "2";
       const expirationTimeStamp = "9991976120";
-      const date = new Date(BigDecimal.fromString(expirationTimeStamp).toBigNumber().toNumber() * ONE_THOUSAND);
+      const date = new Date(Number(BigDecimal.fromString(expirationTimeStamp).toBigInt()) * ONE_THOUSAND);
 
       await Security.issue(
         new IssueRequest({
@@ -2007,7 +2007,7 @@ describe("🧪 Security tests", () => {
         }),
       );
 
-      const encodedValue = ethers.utils.defaultAbiCoder.encode(
+      const encodedValue = ethers.AbiCoder.defaultAbiCoder().encode(
         ["bytes32", "bytes32"],
         [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
       );
@@ -2128,7 +2128,7 @@ describe("🧪 Security tests", () => {
         }),
       );
 
-      const encodedValue = ethers.utils.defaultAbiCoder.encode(
+      const encodedValue = ethers.AbiCoder.defaultAbiCoder().encode(
         ["bytes32", "bytes32"],
         [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
       );
@@ -2245,7 +2245,7 @@ describe("🧪 Security tests", () => {
         }),
       );
 
-      const encodedValue = ethers.utils.defaultAbiCoder.encode(
+      const encodedValue = ethers.AbiCoder.defaultAbiCoder().encode(
         ["bytes32", "bytes32"],
         [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
       );
