@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { CouponViewModel, GetAllCouponsRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useGetAllCoupons } from "../../../../hooks/queries/useCoupons";
 import { useParams } from "react-router-dom";

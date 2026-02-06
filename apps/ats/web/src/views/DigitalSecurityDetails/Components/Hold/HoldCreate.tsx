@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Center, HStack, Stack, useDisclosure, VStack } from "@chakra-ui/react";
 import {
   Button,

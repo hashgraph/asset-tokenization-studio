@@ -1,5 +1,12 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @hashgraph/asset-tokenization-contracts@4.1.1
+
 ## 4.1.0
 
 ### Patch Changes

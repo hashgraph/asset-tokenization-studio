@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { DefinitionList } from "io-bricks-ui";
 import { useGetAllBalanceAdjustments } from "../../../../../hooks/queries/useBalanceAdjustment";
 import { GetAllScheduledBalanceAdjustmentsRequest, SecurityViewModel } from "@hashgraph/asset-tokenization-sdk";
