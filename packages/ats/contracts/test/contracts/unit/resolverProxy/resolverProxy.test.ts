@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { type BusinessLogicResolver, type AccessControlFacet, type PauseFacet, DiamondFacet } from "@contract-types";

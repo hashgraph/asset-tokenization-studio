@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { ethers } from "ethers";
 import { AtsRoleName, AtsRoleHash } from "../constants";
 export interface Rbac {

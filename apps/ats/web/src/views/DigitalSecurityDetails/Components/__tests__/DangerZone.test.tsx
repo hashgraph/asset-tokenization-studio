@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { render } from "../../../../test-utils";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";

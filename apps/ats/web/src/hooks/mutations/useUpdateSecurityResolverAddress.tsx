@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { UpdateResolverRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SDKService from "../../services/SDKService";

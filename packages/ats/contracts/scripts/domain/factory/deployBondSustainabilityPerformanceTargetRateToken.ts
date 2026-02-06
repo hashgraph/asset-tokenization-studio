@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { ethers } from "ethers";
 import type { ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
