@@ -198,6 +198,7 @@ import GetProceedRecipientDataRequest from "./bond/GetProceedRecipientDataReques
 import GetProceedRecipientsCountRequest from "./bond/GetProceedRecipientsCountRequest";
 import GetProceedRecipientsRequest from "./bond/GetProceedRecipientsRequest";
 import IsProceedRecipientRequest from "./bond/IsProceedRecipientRequest";
+import GetCouponFromOrderedListAtRequest from "./bond/GetCouponFromOrderedListAtRequest";
 import GetPrincipalForRequest from "./bond/GetPrincipalForRequest";
 import ActionContentHashExistsRequest from "./security/operations/corporateActions/ActionContentHashExistsRequest";
 import SetRateRequest from "@port/in/request/interestRates/SetRateRequest";
@@ -230,6 +231,7 @@ export {
   GetVotingRightsRequest,
   GetAllVotingRightsRequest,
   GetCouponForRequest,
+  GetCouponFromOrderedListAtRequest,
   GetPrincipalForRequest,
   GetCouponRequest,
   GetCouponsOrderedListRequest,

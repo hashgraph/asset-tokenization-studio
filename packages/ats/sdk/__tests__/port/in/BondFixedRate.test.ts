@@ -1,36 +1,36 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //import "../environmentMock";
-import {
-  SDK,
-  LoggerTransports,
-  SupportedWallets,
-  Network,
-  Bond,
-  InitializationRequest,
-  FixedRate,
-  SetRateRequest,
-  Role,
-  ApplyRolesRequest,
-  CreateBondFixedRateRequest,
-  GetRateRequest,
-  GetCouponsOrderedListRequest,
-} from "@port/in";
-import { DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
-import ConnectRequest from "@port/in/request/network/ConnectRequest";
-import { MirrorNode } from "@domain/context/network/MirrorNode";
-import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
-import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import Injectable from "@core/injectable/Injectable";
+import { Time } from "@core/Time";
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
 } from "@domain/context/factory/RegulationType";
+import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
+import { MirrorNode } from "@domain/context/network/MirrorNode";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
-import { Time } from "@core/Time";
+import {
+  ApplyRolesRequest,
+  Bond,
+  CreateBondFixedRateRequest,
+  FixedRate,
+  GetCouponsOrderedListRequest,
+  GetRateRequest,
+  InitializationRequest,
+  LoggerTransports,
+  Network,
+  Role,
+  SDK,
+  SetRateRequest,
+  SupportedWallets,
+} from "@port/in";
 import GetCouponFromOrderedListAtRequest from "@port/in/request/bond/GetCouponFromOrderedListAtRequest";
+import ConnectRequest from "@port/in/request/network/ConnectRequest";
+import SecurityViewModel from "@port/in/response/SecurityViewModel";
+import { DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -178,14 +178,16 @@ describe("DFNS Transaction Adapter test", () => {
       throw new Error("No se encontró address del bond creado");
     }
 
-    const getCouponFromOrderedListAt = await Bond.getCouponFromOrderedListAt(
+    const couponId = await Bond.getCouponFromOrderedListAt(
       new GetCouponFromOrderedListAtRequest({
         securityId: contractAddress,
         pos: 0,
       }),
     );
 
-    console.log("couponId: " + getCouponFromOrderedListAt);
+    console.log("couponId: " + couponId);
+    expect(typeof couponId).toBe("number");
+    expect(couponId).toBeGreaterThanOrEqual(0);
   }, 60_000);
 
   it("getCouponsOrderedList from DLT", async () => {

@@ -654,19 +654,16 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return coupons.length;
   });
 
-  singletonInstance.getCouponsOrderedList = jest.fn(
-    async (address: EvmAddress, pageIndex: number, pageLength: number) => {
-      const start = pageIndex * pageLength;
-      const end = start + pageLength;
-      const couponIds = [];
+  singletonInstance.getCouponsOrderedList = jest.fn(async (address: EvmAddress) => {
+    return coupons.map((_, index) => index + 1); // Return 1-based coupon IDs
+  });
 
-      for (let i = start; i < end && i < coupons.length; i++) {
-        couponIds.push(i + 1); // Coupon IDs start from 1
-      }
-
-      return couponIds;
-    },
-  );
+  singletonInstance.getCouponFromOrderedListAt = jest.fn(async (address: EvmAddress, pos: number) => {
+    if (pos >= coupons.length || pos < 0) {
+      throw new Error(`Invalid position ${pos}. Valid range is 0 to ${coupons.length - 1}`);
+    }
+    return pos + 1;
+  });
 
   singletonInstance.getAccountSecurityRelationship = jest.fn(async (address: EvmAddress, target: EvmAddress) => {});
 
