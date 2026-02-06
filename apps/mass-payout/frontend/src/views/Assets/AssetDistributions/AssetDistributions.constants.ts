@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { ProcessStatus } from "@/types/status";
 import {
   DistributionFilterType,
@@ -50,7 +52,7 @@ export const DISTRIBUTION_TYPE_OPTIONS = [
   { value: "CORPORATE_ACTION", label: "Corporate Action" },
 ] as const;
 
-//TODO: AÑADIR KEYS
+//TODO: ADD KEYS
 export const TAB_TITLE_MAP: TabTitleMap = {
   upcoming: "Upcoming Distributions",
   ongoing: "Ongoing Distributions",

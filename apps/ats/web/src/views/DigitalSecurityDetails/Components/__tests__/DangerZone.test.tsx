@@ -21,7 +21,6 @@ jest.mock("../../../../hooks/queries/usePauseSecurity", () => ({
   })),
 }));
 
-// Mock para useGetIsPaused
 jest.mock("../../../../hooks/queries/useGetSecurityDetails", () => ({
   useGetIsPaused: jest.fn(() => ({
     data: false,
