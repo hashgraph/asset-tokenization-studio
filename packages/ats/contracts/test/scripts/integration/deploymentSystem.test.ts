@@ -350,10 +350,11 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
     it("should deploy ProxyAdmin", async () => {
       const proxyAdmin = await deployProxyAdmin(deployer);
 
-      expect(proxyAdmin.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-      expect(proxyAdmin.deployTransaction).to.exist;
-      expect(proxyAdmin.deployTransaction.hash).to.exist;
-      expect(proxyAdmin.deployTransaction.blockNumber).to.be.greaterThan(0);
+      expect(proxyAdmin.target).to.match(/^0x[a-fA-F0-9]{40}$/);
+      const deployTx = proxyAdmin.deploymentTransaction();
+      expect(deployTx).to.exist;
+      expect(deployTx!.hash).to.exist;
+      expect(deployTx!.blockNumber).to.be.greaterThan(0);
     });
 
     it("should deploy Factory with BLR reference", async () => {

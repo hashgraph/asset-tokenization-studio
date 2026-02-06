@@ -1781,12 +1781,12 @@ describe("TREX Factory Tests", () => {
     describe("Getter functions", () => {
       it("GIVEN deployed factory WHEN calling getImplementationAuthority THEN correct address is returned", async () => {
         const authority = await factoryAts.getImplementationAuthority();
-        expect(authority).to.equal(trexDeployment.authorities.trexImplementationAuthority.address);
+        expect(authority).to.equal(trexDeployment.authorities.trexImplementationAuthority.target);
       });
 
       it("GIVEN deployed factory WHEN calling getIdFactory THEN correct address is returned", async () => {
         const idFactory = await factoryAts.getIdFactory();
-        expect(idFactory).to.equal(trexDeployment.factories.identityFactory.address);
+        expect(idFactory).to.equal(trexDeployment.factories.identityFactory.target);
       });
 
       it("GIVEN non-existent salt WHEN calling getToken THEN zero address is returned", async () => {

@@ -219,7 +219,7 @@ describe("Equity Tests", () => {
 
       // Verify getDividendHolders returns holders from snapshot (line 211-212)
       const dividendHolders = await equityFacet.getDividendHolders(1, 0, 99);
-      expect(dividendHolders).to.have.members([signer_A.address]);
+      expect([...dividendHolders]).to.have.members([signer_A.address]);
 
       // Verify getTotalDividendHolders returns count from snapshot (line 222)
       const totalHolders = await equityFacet.getTotalDividendHolders(1);
@@ -269,7 +269,7 @@ describe("Equity Tests", () => {
 
       // Also verify getDividendHolders returns current holders (line 214)
       const holders = await equityFacet.getDividendHolders(1, 0, 99);
-      expect(holders).to.have.members([signer_A.address]);
+      expect([...holders]).to.have.members([signer_A.address]);
     });
 
     it("GIVEN an account without corporateActions role WHEN setDividends THEN transaction fails with AccountHasNoRole", async () => {
@@ -414,10 +414,10 @@ describe("Equity Tests", () => {
       expect(dividendFor.recordDateReached).to.equal(true);
       expect(dividendTotalHolder).to.equal(1);
       expect(dividendHolders.length).to.equal(dividendTotalHolder);
-      expect(dividendHolders).to.have.members([signer_A.address]);
+      expect([...dividendHolders]).to.have.members([signer_A.address]);
       expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
       expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-      expect(dividendAmountFor.denominator).to.equal(BigInt(10 ** (dividendFor.decimals + dividendFor.amountDecimals)));
+      expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
     });
 
     it("GIVEN an account with corporateActions role WHEN setDividends and hold THEN transaction succeeds", async () => {
@@ -470,10 +470,10 @@ describe("Equity Tests", () => {
       expect(dividendFor.recordDateReached).to.equal(true);
       expect(dividendTotalHolder).to.equal(1);
       expect(dividendHolders.length).to.equal(dividendTotalHolder);
-      expect(dividendHolders).to.have.members([signer_A.address]);
+      expect([...dividendHolders]).to.have.members([signer_A.address]);
       expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
       expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-      expect(dividendAmountFor.denominator).to.equal(BigInt(10 ** (dividendFor.decimals + dividendFor.amountDecimals)));
+      expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
     });
 
     it("GIVEN scheduled dividends WHEN record date is reached AND scheduled balance adjustments is set after record date THEN dividends are paid without adjusted balance", async () => {
@@ -534,7 +534,7 @@ describe("Equity Tests", () => {
       expect(dividendFor.amountDecimals).to.equal(dividendsAmountDecimalsPerEquity);
       expect(dividendAmountFor.recordDateReached).to.equal(dividendFor.recordDateReached);
       expect(dividendAmountFor.numerator).to.equal(dividendFor.tokenBalance * dividendFor.amount);
-      expect(dividendAmountFor.denominator).to.equal(BigInt(10 ** (dividendFor.decimals + dividendFor.amountDecimals)));
+      expect(dividendAmountFor.denominator).to.equal(10n ** (dividendFor.decimals + dividendFor.amountDecimals));
     });
 
     it("GIVEN frozen tokens WHEN calculating dividends without snapshot THEN frozen tokens are included in dividend calculation", async () => {
@@ -577,7 +577,7 @@ describe("Equity Tests", () => {
 
       // Verify dividend calculation: (tokenBalance * amount) / (10^(decimals + amountDecimals))
       const expectedDividendNumerator = dividendFor.tokenBalance * dividendFor.amount;
-      const expectedDividendDenominator = BigInt(10 ** (dividendFor.decimals + dividendFor.amountDecimals));
+      const expectedDividendDenominator = 10n ** (dividendFor.decimals + dividendFor.amountDecimals);
       // Division result: expectedDividendNumerator / expectedDividendDenominator
 
       // Also get the dividendAmountFor to verify
@@ -624,7 +624,7 @@ describe("Equity Tests", () => {
 
       // Verify getVotingHolders returns holders from snapshot (line 279)
       const votingHolders = await equityFacet.getVotingHolders(1, 0, 99);
-      expect(votingHolders).to.have.members([signer_A.address]);
+      expect([...votingHolders]).to.have.members([signer_A.address]);
 
       // Verify getTotalVotingHolders returns count from snapshot (line 292)
       const totalHolders = await equityFacet.getTotalVotingHolders(1);
@@ -672,7 +672,7 @@ describe("Equity Tests", () => {
 
       // Also verify getVotingHolders returns current holders (line 281)
       const holders = await equityFacet.getVotingHolders(1, 0, 99);
-      expect(holders).to.have.members([signer_A.address]);
+      expect([...holders]).to.have.members([signer_A.address]);
     });
 
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
@@ -839,7 +839,7 @@ describe("Equity Tests", () => {
       expect(votingFor.recordDateReached).to.equal(true);
       expect(votingTotalHolder).to.equal(1);
       expect(votingHolders.length).to.equal(votingTotalHolder);
-      expect(votingHolders).to.have.members([signer_A.address]);
+      expect([...votingHolders]).to.have.members([signer_A.address]);
     });
   });
 

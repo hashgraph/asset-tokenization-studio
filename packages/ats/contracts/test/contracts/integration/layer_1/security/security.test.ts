@@ -82,7 +82,7 @@ describe("Security Tests", () => {
 
       expect(TotalTokenHolders_2).to.equal(3);
       expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2);
-      expect(TokenHolders_2).to.have.members([signer_A.address, signer_B.address, signer_C.address]);
+      expect([...TokenHolders_2]).to.have.members([signer_A.address, signer_B.address, signer_C.address]);
     });
 
     it("Check Security Total Holders and Holders when removing", async () => {
@@ -127,15 +127,15 @@ describe("Security Tests", () => {
 
       expect(TotalTokenHolders_1).to.equal(3);
       expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);
-      expect(TokenHolders_1).to.have.members([signer_A.address, signer_B.address, signer_C.address]);
+      expect([...TokenHolders_1]).to.have.members([signer_A.address, signer_B.address, signer_C.address]);
 
       expect(TotalTokenHolders_2).to.equal(2);
       expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2);
-      expect(TokenHolders_2).to.have.members([signer_A.address, signer_C.address]);
+      expect([...TokenHolders_2]).to.have.members([signer_A.address, signer_C.address]);
 
       expect(TotalTokenHolders_3).to.equal(1);
       expect(TokenHolders_3.length).to.equal(TotalTokenHolders_3);
-      expect(TokenHolders_3).to.have.members([signer_C.address]);
+      expect([...TokenHolders_3]).to.have.members([signer_C.address]);
 
       expect(TotalTokenHolders_4).to.equal(0);
       expect(TokenHolders_4.length).to.equal(TotalTokenHolders_4);
@@ -166,11 +166,11 @@ describe("Security Tests", () => {
 
       expect(TotalTokenHolders_1).to.equal(1);
       expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);
-      expect(TokenHolders_1).to.have.members([signer_A.address]);
+      expect([...TokenHolders_1]).to.have.members([signer_A.address]);
 
       expect(TotalTokenHolders_2).to.equal(1);
       expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2);
-      expect(TokenHolders_2).to.have.members([signer_B.address]);
+      expect([...TokenHolders_2]).to.have.members([signer_B.address]);
     });
   });
 });

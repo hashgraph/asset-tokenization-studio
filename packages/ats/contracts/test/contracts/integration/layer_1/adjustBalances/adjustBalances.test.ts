@@ -136,7 +136,7 @@ describe("Adjust Balances Tests", () => {
     await erc1410Facet.connect(signer_A).issueByPartition({
       partition: _PARTITION_ID_2,
       tokenHolder: signer_B.address,
-      value: balanceOf_B_Original,
+      value: balanceOf_B_Original[0],
       data: "0x",
     });
 

@@ -198,7 +198,7 @@ describe("ERC20Votes Tests", () => {
   describe("Voting Power", () => {
     async function checkTotalSupply(amount: number) {
       const now = await erc20VotesFacet.clock();
-      await timeTravelFacet.changeSystemBlocknumber(now + 100);
+      await timeTravelFacet.changeSystemBlocknumber(now + 100n);
       const totalSupply = await erc20VotesFacet.getPastTotalSupply(now);
       expect(totalSupply).to.equal(amount);
     }

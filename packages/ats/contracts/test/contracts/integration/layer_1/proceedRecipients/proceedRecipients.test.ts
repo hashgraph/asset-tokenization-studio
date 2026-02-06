@@ -100,7 +100,7 @@ describe("Proceed Recipients Tests", () => {
 
       expect(await proceedRecipientsFacet.getProceedRecipientsCount()).to.equal(2);
 
-      expect(await proceedRecipientsFacet.getProceedRecipients(0, 100)).to.have.same.members([
+      expect([...(await proceedRecipientsFacet.getProceedRecipients(0, 100))]).to.have.same.members([
         PROCEED_RECIPIENT_2,
         PROCEED_RECIPIENT_1,
       ]);
@@ -154,7 +154,7 @@ describe("Proceed Recipients Tests", () => {
 
       expect(await proceedRecipientsFacet.getProceedRecipientsCount()).to.equal(0);
 
-      expect(await proceedRecipientsFacet.getProceedRecipients(0, 100)).to.have.same.members([]);
+      expect([...(await proceedRecipientsFacet.getProceedRecipients(0, 100))]).to.have.same.members([]);
     });
   });
 

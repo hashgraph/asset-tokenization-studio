@@ -2,38 +2,32 @@ import { expect } from "chai";
 import { ethers, network } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
-  type ResolverProxy,
-  type PauseFacet,
-  type AccessControl,
-  type Equity,
-  type IERC1410,
-  KycFacet,
-  SsiManagementFacet,
-  ERC20Facet,
-  ERC1594Facet,
-  ERC1644Facet,
   AdjustBalancesFacet,
   Cap,
+  ClearingActionsFacet,
+  ControlListFacet,
+  DiamondFacet,
+  type Equity,
+  ERC1594Facet,
+  ERC1644Facet,
+  ERC20Facet,
   IClearing,
+  type PauseFacet,
+  ProtectedPartitionsFacet,
+  type ResolverProxy,
   SnapshotsFacet,
   TimeTravelFacet,
-  ControlListFacet,
-  ProtectedPartitionsFacet,
-  DiamondFacet,
 } from "@contract-types";
-import { grantRoleAndPauseToken } from "@test";
+import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ClearingActionsFacet } from "@contract-types";
-import { deployEquityTokenFixture } from "@test";
-import { executeRbac, MAX_UINT256 } from "@test";
 import {
-  ZERO,
-  EMPTY_STRING,
-  ATS_ROLES,
   ADDRESS_ZERO,
+  ATS_ROLES,
   dateToUnixTimestamp,
-  EIP1066_CODES,
   DEFAULT_PARTITION,
+  EIP1066_CODES,
+  EMPTY_STRING,
+  ZERO,
 } from "@scripts";
 
 const amount = 1;
@@ -81,7 +75,7 @@ interface BalanceAdjustedValues {
   balanceOf_B: bigint;
   balanceOf_B_Partition_1: bigint;
   balanceOf_B_Partition: bigint;
-  decimals: number;
+  decimals: bigint;
   metadata?: any;
 }
 const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
@@ -100,18 +94,18 @@ describe("ERC1410 Tests", () => {
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
 
-  let erc1410Facet: IERC1410;
-  let accessControlFacet: AccessControl;
+  let erc1410Facet: any;
+  let accessControlFacet: any;
   let pauseFacet: PauseFacet;
   let equityFacet: Equity;
-  let controlList: ControlListFacet;
+  let controlList: any;
   let capFacet: Cap;
   let erc20Facet: ERC20Facet;
   let erc1594Facet: ERC1594Facet;
   let erc1644Facet: ERC1644Facet;
   let adjustBalancesFacet: AdjustBalancesFacet;
-  let kycFacet: KycFacet;
-  let ssiManagementFacet: SsiManagementFacet;
+  let kycFacet: any;
+  let ssiManagementFacet: any;
   let clearingActionsFacet: ClearingActionsFacet;
   let snapshotsFacet: SnapshotsFacet;
   let timeTravelFacet: TimeTravelFacet;
@@ -269,7 +263,7 @@ describe("ERC1410 Tests", () => {
     expect(after.balanceOf_B_Partition_1).to.be.equal(before.balanceOf_B_Partition_1 * factorSquared);
     expect(after.balanceOf_B_Partition).to.be.equal(before.balanceOf_B_Partition * factorSquared);
 
-    expect(after.decimals).to.be.equal(before.decimals + doubleDecimals);
+    expect(after.decimals).to.be.equal(before.decimals + BigInt(doubleDecimals));
     expect(after.metadata?.info?.decimals).to.be.equal(after.decimals);
   }
 
@@ -311,7 +305,7 @@ describe("ERC1410 Tests", () => {
     );
     expect(after.balanceOf_B_Partition).to.be.equal(before.balanceOf_B_Partition * BigInt(adjustFactor));
 
-    expect(after.decimals).to.be.equal(before.decimals + adjustDecimals);
+    expect(after.decimals).to.be.equal(before.decimals + BigInt(adjustDecimals));
     expect(after.metadata?.info?.decimals).to.be.equal(after.decimals);
   }
 
@@ -2444,7 +2438,7 @@ describe("ERC1410 Tests", () => {
             name: (await erc20Facet.getERC20Metadata()).info.name,
             version: (await diamondCutFacet.getConfigInfo()).version_.toString(),
             chainId: await network.provider.send("eth_chainId"),
-            verifyingContract: diamond.target,
+            verifyingContract: diamond.target.toString(),
           };
 
           const redeemType = {

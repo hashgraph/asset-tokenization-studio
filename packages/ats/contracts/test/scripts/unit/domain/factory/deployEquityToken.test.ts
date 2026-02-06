@@ -436,7 +436,7 @@ describe("Equity Token Deployment", () => {
       const result = await deployEquityFromFactory(params, regulationData);
 
       // The result should be connected to the diamond address
-      expect(result.address).to.equal(diamondAddress);
+      expect(result.target).to.equal(diamondAddress);
     });
 
     it("should return ResolverProxy contract instance", async () => {
@@ -447,8 +447,8 @@ describe("Equity Token Deployment", () => {
 
       const result = await deployEquityFromFactory(params, regulationData);
 
-      expect(result).to.have.property("address");
-      expect(result.address).to.equal(diamondAddress);
+      expect(result).to.have.property("target");
+      expect(result.target).to.equal(diamondAddress);
     });
   });
 });

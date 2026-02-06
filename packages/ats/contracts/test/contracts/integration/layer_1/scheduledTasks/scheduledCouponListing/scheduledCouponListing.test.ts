@@ -127,10 +127,11 @@ describe("ScheduledCouponListing Tests", () => {
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing THEN returns tasks with correct structure", async () => {
       const coupons = await scheduledCouponListingFacet.getScheduledCouponListing(0, 1);
       expect(coupons.length).to.equal(1);
-      expect(coupons[0]).to.have.property("scheduledTimestamp");
-      expect(coupons[0]).to.have.property("data");
-      expect(coupons[0].scheduledTimestamp).to.be.gt(0);
-      expect(coupons[0].data).to.not.equal("0x");
+      const coupon = coupons[0].toObject();
+      expect(coupon).to.have.property("scheduledTimestamp");
+      expect(coupon).to.have.property("data");
+      expect(coupon.scheduledTimestamp).to.be.gt(0);
+      expect(coupon.data).to.not.equal("0x");
     });
   });
 });

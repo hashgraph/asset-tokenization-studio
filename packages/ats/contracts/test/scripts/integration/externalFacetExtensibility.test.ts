@@ -685,7 +685,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       if (firstConfigResult.success) {
         // Verify returned version matches BLR's configuration version
         const blrVersion1 = await blrContract.getLatestVersionByConfiguration(firstConfigId);
-        expect(firstConfigResult.data.version).to.equal(blrVersion1.toNumber());
+        expect(firstConfigResult.data.version).to.equal(Number(blrVersion1));
         expect(firstConfigResult.data.version).to.equal(1);
       }
 
@@ -706,7 +706,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       if (secondConfigResult.success) {
         // BUG FIX VERIFICATION: Version must match BLR's per-config version
         const blrVersion2 = await blrContract.getLatestVersionByConfiguration(secondConfigId);
-        expect(secondConfigResult.data.version).to.equal(blrVersion2.toNumber());
+        expect(secondConfigResult.data.version).to.equal(Number(blrVersion2));
         // Second config should also start at version 1
         expect(secondConfigResult.data.version).to.equal(1);
       }

@@ -43,13 +43,18 @@ export function getSelector(
 ): string {
   const iface = contractFactory.interface;
   const func = iface.getFunction(selector);
-  if (!func) {
-    throw new Error(`Selector "${selector}" is not implemented`);
+  if (func) {
+    const sigHash = func.selector;
+    if (asBytes4) return sigHash;
+    return sigHash.padEnd(66, "0");
   }
 
-  const sigHash = func.selector;
+  const error = iface.getError(selector);
+  if (error) {
+    const sigHash = error.selector;
+    if (asBytes4) return sigHash;
+    return sigHash.padEnd(66, "0");
+  }
 
-  if (asBytes4) return sigHash;
-
-  return sigHash.padEnd(66, "0");
+  throw new Error(`Selector "${selector}" is not implemented`);
 }

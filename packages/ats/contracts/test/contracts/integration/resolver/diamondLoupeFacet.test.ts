@@ -76,7 +76,7 @@ describe("DiamondLoupeFacet", () => {
 
       expect(selectors.length).to.be.greaterThan(0);
       expect(selectors.length).to.equal(facets[0].selectors.length);
-      expect(selectors).to.have.members(facets[0].selectors);
+      expect([...selectors]).to.have.members([...facets[0].selectors]);
     });
 
     it("GIVEN a resolver WHEN getting facet selectors length THEN returns correct count", async () => {
@@ -114,7 +114,7 @@ describe("DiamondLoupeFacet", () => {
       expect(facetIds.length).to.equal(facets.length);
 
       const facetIdsFromFacets = facets.map((f) => f.id);
-      expect(facetIds).to.have.members(facetIdsFromFacets);
+      expect([...facetIds]).to.have.members([...facetIdsFromFacets]);
     });
 
     it("GIVEN a resolver WHEN getting facet IDs by page THEN returns paginated IDs", async () => {
@@ -138,7 +138,7 @@ describe("DiamondLoupeFacet", () => {
       expect(facetAddresses.length).to.equal(facets.length);
 
       const addressesFromFacets = facets.map((f) => f.addr);
-      expect(facetAddresses).to.have.members(addressesFromFacets);
+      expect([...facetAddresses]).to.have.members([...addressesFromFacets]);
 
       for (const addr of facetAddresses) {
         expect(addr).to.not.equal("0x0000000000000000000000000000000000000000");
@@ -167,8 +167,8 @@ describe("DiamondLoupeFacet", () => {
 
       expect(facet.id).to.equal(testFacetId);
       expect(facet.addr).to.equal(allFacets[0].addr);
-      expect(facet.selectors).to.have.members(allFacets[0].selectors);
-      expect(facet.interfaceIds).to.have.members(allFacets[0].interfaceIds);
+      expect([...facet.selectors]).to.have.members([...allFacets[0].selectors]);
+      expect([...facet.interfaceIds]).to.have.members([...allFacets[0].interfaceIds]);
     });
 
     it("GIVEN a resolver WHEN getting facet address by selector THEN returns correct address", async () => {
@@ -252,13 +252,13 @@ describe("DiamondLoupeFacet", () => {
         const individualFacet = await diamondLoupe.getFacet(facets[i].id);
         expect(individualFacet.id).to.equal(facets[i].id);
         expect(individualFacet.addr).to.equal(facets[i].addr);
-        expect(individualFacet.selectors).to.have.members(facets[i].selectors);
+        expect([...individualFacet.selectors]).to.have.members([...facets[i].selectors]);
 
         const selectorsLength = await diamondLoupe.getFacetSelectorsLength(facets[i].id);
         expect(Number(selectorsLength)).to.equal(facets[i].selectors.length);
 
         const selectors = await diamondLoupe.getFacetSelectors(facets[i].id);
-        expect(selectors).to.have.members(facets[i].selectors);
+        expect([...selectors]).to.have.members([...facets[i].selectors]);
 
         for (const selector of facets[i].selectors) {
           const facetAddress = await diamondLoupe.getFacetAddress(selector);

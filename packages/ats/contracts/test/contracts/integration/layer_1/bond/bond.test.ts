@@ -234,7 +234,7 @@ describe("Bond Tests", () => {
       const bondDetails = await bondReadFacet.getBondDetails();
 
       expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount));
-      expect(principalFor.denominator).to.equal(10 ** (bondDetails.nominalValueDecimals + DECIMALS));
+      expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
     });
 
     describe("Redeem At Maturity", () => {
@@ -616,13 +616,13 @@ describe("Bond Tests", () => {
         expect(couponFor.recordDateReached).to.equal(true);
         expect(couponTotalHolders).to.equal(1);
         expect(couponHolders.length).to.equal(couponTotalHolders);
-        expect(couponHolders).to.have.members([signer_A.address]);
+        expect([...couponHolders]).to.have.members([signer_A.address]);
         expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
         expect(couponAmountFor.numerator).to.equal(
           couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
         );
         expect(couponAmountFor.denominator).to.equal(
-          BigInt(10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals)) *
+          10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
             BigInt(YEAR_SECONDS),
         );
       });
@@ -681,13 +681,13 @@ describe("Bond Tests", () => {
         expect(couponFor.recordDateReached).to.equal(true);
         expect(couponTotalHolders).to.equal(1);
         expect(couponHolders.length).to.equal(couponTotalHolders);
-        expect(couponHolders).to.have.members([signer_A.address]);
+        expect([...couponHolders]).to.have.members([signer_A.address]);
         expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
         expect(couponAmountFor.numerator).to.equal(
           couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
         );
         expect(couponAmountFor.denominator).to.equal(
-          BigInt(10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals)) *
+          10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
             BigInt(YEAR_SECONDS),
         );
       });
@@ -851,7 +851,7 @@ describe("Bond Tests", () => {
           couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
         );
         expect(couponAmountForAfter.denominator).to.equal(
-          BigInt(10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals)) *
+          10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
             BigInt(YEAR_SECONDS),
         );
       });
@@ -881,7 +881,7 @@ describe("Bond Tests", () => {
       const bondDetails = await bondReadFacet.getBondDetails();
 
       expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount) * 2n);
-      expect(principalFor.denominator).to.equal(10 ** (bondDetails.nominalValueDecimals + DECIMALS));
+      expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
     });
 
     it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
@@ -976,7 +976,7 @@ describe("Bond Tests", () => {
 
       expect(coupon.snapshotId).to.be.greaterThan(0); // Snapshot should have been taken
       expect(couponTotalHolders).to.equal(1);
-      expect(couponHolders).to.have.members([signer_A.address]);
+      expect([...couponHolders]).to.have.members([signer_A.address]);
     });
 
     it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses current balance", async () => {

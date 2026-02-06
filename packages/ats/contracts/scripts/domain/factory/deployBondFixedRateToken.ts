@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers, EventLog } from "ethers";
+import { ethers, type EventLog } from "ethers";
 import type { ResolverProxy } from "@contract-types";
 import { ResolverProxy__factory } from "@contract-types";
 import { GAS_LIMIT } from "@scripts/infrastructure";
@@ -158,12 +158,12 @@ export async function deployBondFixedRateFromFactory(
 
   // Find BondDeployed event to get diamond address
   const event = receipt?.logs.find(
-    (log): log is EventLog => log instanceof EventLog && log.eventName === "BondFixedRateDeployed",
-  );
+    (log) => "eventName" in log && (log as EventLog).eventName === "BondFixedRateDeployed",
+  ) as EventLog | undefined;
   if (!event || !event.args) {
     throw new Error(
       `BondFixedRateDeployed event not found in deployment transaction. Events: ${JSON.stringify(
-        receipt?.logs.filter((log): log is EventLog => log instanceof EventLog).map((e) => e.eventName),
+        receipt?.logs.filter((log) => "eventName" in log).map((e) => (e as EventLog).eventName),
       )}`,
     );
   }

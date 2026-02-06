@@ -399,7 +399,7 @@ describe("Bond Token Deployment", () => {
 
       const result = await deployBondFromFactory(params, regulationData);
 
-      expect(result.address).to.equal(diamondAddress);
+      expect(result.target).to.equal(diamondAddress);
     });
 
     it("should return ResolverProxy contract instance", async () => {
@@ -410,8 +410,8 @@ describe("Bond Token Deployment", () => {
 
       const result = await deployBondFromFactory(params, regulationData);
 
-      expect(result).to.have.property("address");
-      expect(result.address).to.equal(diamondAddress);
+      expect(result).to.have.property("target");
+      expect(result.target).to.equal(diamondAddress);
     });
   });
 });

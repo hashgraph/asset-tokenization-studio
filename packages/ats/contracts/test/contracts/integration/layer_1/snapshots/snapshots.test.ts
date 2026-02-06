@@ -481,11 +481,11 @@ describe("Snapshots Tests", () => {
 
     expect(snapshot_TotalTokenHolders_1).to.equal(1);
     expect(snapshot_TokenHolders_1.length).to.equal(snapshot_TotalTokenHolders_1);
-    expect(snapshot_TokenHolders_1).to.have.members([signer_C.address]);
+    expect([...snapshot_TokenHolders_1]).to.have.members([signer_C.address]);
 
     expect(snapshot_TotalTokenHolders_2).to.equal(2);
     expect(snapshot_TokenHolders_2.length).to.equal(snapshot_TotalTokenHolders_2);
-    expect(snapshot_TokenHolders_2).to.have.members([signer_A.address, signer_C.address]);
+    expect([...snapshot_TokenHolders_2]).to.have.members([signer_A.address, signer_C.address]);
   });
 
   it("GIVEN snapshot exists WHEN querying cleared balances THEN returns correct values", async () => {
@@ -722,7 +722,7 @@ describe("Snapshots Tests", () => {
     // Get all holders in one call to verify consistency
     const allHolders_single_call = await snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 10);
     expect(allHolders_single_call.length).to.equal(3);
-    expect(allHolders_single_call).to.have.members([signer_C.address, signer_A.address, signer_B.address]);
+    expect([...allHolders_single_call]).to.have.members([signer_C.address, signer_A.address, signer_B.address]);
   });
 
   describe("Scheduled tasks", async () => {
