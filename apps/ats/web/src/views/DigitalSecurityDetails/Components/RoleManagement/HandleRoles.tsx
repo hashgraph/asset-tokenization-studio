@@ -86,9 +86,16 @@ export const HandleRoles = ({ currentRoles, address }: { currentRoles: string[];
         <Text textStyle="HeadingMediumLG">{t("rolesDefinitions")}</Text>
       </HStack>
       <VStack w="full" gap={2}>
-        <HStack bgColor="white" w="full" p={4} cursor="pointer" onClick={handleSelectAllRoles}>
-          <Checkbox id="selectAllRoles" isChecked={allRolesSelected} onChange={handleSelectAllRoles} />
-          <Text textStyle="BodyRegularXS">{t("selectAllRoles")}</Text>
+        <HStack bgColor="white" w="full" p={4}>
+          <Checkbox
+            id="selectAllRoles"
+            isChecked={allRolesSelected}
+            onChange={handleSelectAllRoles}
+            aria-label={t("selectAllRoles")}
+          />
+          <Text textStyle="BodyRegularXS" cursor="pointer" onClick={handleSelectAllRoles}>
+            {t("selectAllRoles")}
+          </Text>
         </HStack>
         <CheckboxGroupController
           control={controlRoles}
