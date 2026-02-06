@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Box, HStack, Stack, useDisclosure } from "@chakra-ui/react";
 import { History } from "../../components/History";
 import { RouteName } from "../../router/RouteName";

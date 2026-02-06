@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import React from "react";
 import { Checkbox, HStack, Stack, useDisclosure } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/table-core";

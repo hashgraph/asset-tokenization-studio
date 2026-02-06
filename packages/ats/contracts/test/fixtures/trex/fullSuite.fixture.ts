@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
 import OnchainID from "@onchain-id/solidity";

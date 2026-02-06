@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 /**
  * Utility for generating Solidity function selectors from contract interfaces.
  *

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
 /**

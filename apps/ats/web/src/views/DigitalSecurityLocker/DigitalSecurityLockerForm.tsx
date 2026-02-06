@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import { Button, CalendarInputController, Heading, InputController, InputNumberController, Text } from "io-bricks-ui";
 import { DATE_TIME_FORMAT } from "../../utils/constants";

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Divider, HStack, VStack } from "@chakra-ui/react";
 import { Spinner, Text, Toggle } from "io-bricks-ui";
 import { useRolesStore } from "../../../store/rolesStore";

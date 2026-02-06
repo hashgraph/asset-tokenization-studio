@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { fireEvent, waitFor } from "@testing-library/react";
 import { render } from "../../../../../test-utils";
 import { Locker } from "../Locker";
