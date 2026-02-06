@@ -8,6 +8,8 @@ import {
   Network,
   Bond,
   InitializationRequest,
+  Role,
+  ApplyRolesRequest,
   CreateBondFixedRateRequest,
   GetCouponsOrderedListRequest,
 } from "@port/in";
@@ -23,6 +25,8 @@ import {
   RegulationSubType,
   RegulationType,
 } from "@domain/context/factory/RegulationType";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
+import { Time } from "@core/Time";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -39,12 +43,13 @@ const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
 const startingDate = currentTimeInSeconds + TIME;
 const numberOfCoupons = 15;
 const couponFrequency = 7;
+
 const maturityDate = startingDate + numberOfCoupons * couponFrequency;
 const regulationType = RegulationType.REG_S;
 const regulationSubType = RegulationSubType.NONE;
 const countries = "AF,HG,BN";
 const info = "Anything";
-const configId = "0x0000000000000000000000000000000000000000000000000000000000003";
+const configId = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const configVersion = 0;
 const rate = 5;
 const rateDecimals = 2;
@@ -130,7 +135,17 @@ describe("Bond getCouponsOrderedList DLT Integration Test", () => {
       throw new Error("No se encontró address del bond creado");
     }
 
-    // Test with first page
+    await Role.applyRoles(
+      new ApplyRolesRequest({
+        securityId: contractAddress,
+        targetId: DFNS_SETTINGS.hederaAccountId,
+        roles: [SecurityRole._INTEREST_RATE_MANAGER_ROLE],
+        actives: [true],
+      }),
+    );
+    console.log("applyRoles [_INTEREST_RATE_MANAGER_ROLE]");
+    await Time.delay(4, "seconds");
+
     const request = new GetCouponsOrderedListRequest({
       securityId: contractAddress,
       pageIndex: 0,
@@ -140,16 +155,12 @@ describe("Bond getCouponsOrderedList DLT Integration Test", () => {
     const result = await Bond.getCouponsOrderedList(request);
     console.log("getCouponsOrderedList result: " + JSON.stringify(result));
 
-    // Verify it's an array
     expect(Array.isArray(result)).toBe(true);
-
-    // Verify all elements are numbers
     result.forEach((couponId) => {
       expect(typeof couponId).toBe("number");
       expect(couponId).toBeGreaterThan(0);
     });
 
-    // Test with second page
     const request2 = new GetCouponsOrderedListRequest({
       securityId: contractAddress,
       pageIndex: 1,
@@ -165,7 +176,6 @@ describe("Bond getCouponsOrderedList DLT Integration Test", () => {
       expect(couponId).toBeGreaterThan(0);
     });
 
-    // Test with empty page (beyond available coupons)
     const request3 = new GetCouponsOrderedListRequest({
       securityId: contractAddress,
       pageIndex: 100,
@@ -176,7 +186,6 @@ describe("Bond getCouponsOrderedList DLT Integration Test", () => {
     console.log("getCouponsOrderedList result empty page: " + JSON.stringify(result3));
 
     expect(Array.isArray(result3)).toBe(true);
-    // Empty page should return empty array
     expect(result3.length).toBe(0);
   }, 60_000);
 });
