@@ -182,7 +182,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
 
   try {
     await execWithErrorHandling(
-      "npx prettier --write ./contracts/factory/ERC3643/interfaces --single-quote=false",
+      "npx prettier --write ./contracts/factory/ERC3643/interfaces",
       "Prettier code formatting",
     );
     console.log("✅ Successfully formatted ERC3643 interface files");
