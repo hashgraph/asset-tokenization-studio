@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 // Para Ethers v5, EventFragment nos ayuda con el tipado si lo necesitamos.
