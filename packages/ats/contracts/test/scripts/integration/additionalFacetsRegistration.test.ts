@@ -18,20 +18,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import {
-  deployContract,
-  registerFacets,
-  registerAdditionalFacets,
-  configureLogger,
-  LogLevel,
-} from "@scripts/infrastructure";
+import { deployContract, registerFacets, registerAdditionalFacets } from "@scripts/infrastructure";
 import { atsRegistry } from "@scripts/domain";
-import { TEST_SIZES, BLR_VERSIONS, deployBlrFixture } from "@test";
+import { TEST_SIZES, BLR_VERSIONS, deployBlrFixture, silenceScriptLogging } from "@test";
 
 describe("registerAdditionalFacets - Integration Tests", () => {
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   // Fixture that deploys BLR with 3 initial facets registered
   async function setupWithInitialFacets() {

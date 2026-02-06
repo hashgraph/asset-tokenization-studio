@@ -1082,3 +1082,117 @@ export const TEST_IMPACT_DATA = {
   /** Impact data mode */
   IMPACT_DATA_MODE: 1,
 } as const;
+
+// ╔═══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                           ║
+// ║  SECTION 8: PROXY UPGRADE CONSTANTS                                       ║
+// ║                                                                           ║
+// ║  EIP-1967 slots, gas limits, initialization values for proxy tests        ║
+// ║                                                                           ║
+// ╚═══════════════════════════════════════════════════════════════════════════╝
+
+// ============================================================================
+// EIP-1967 Storage Slots
+// ============================================================================
+
+/**
+ * EIP-1967 standard storage slots for proxy contracts.
+ *
+ * These slots are used by TransparentUpgradeableProxy and similar proxies
+ * to store admin and implementation addresses.
+ *
+ * @see https://eips.ethereum.org/EIPS/eip-1967
+ */
+export const EIP1967_SLOTS = {
+  /** Admin slot: keccak256("eip1967.proxy.admin") - 1 */
+  ADMIN: "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103",
+
+  /** Implementation slot: keccak256("eip1967.proxy.implementation") - 1 */
+  IMPLEMENTATION: "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+} as const;
+
+// ============================================================================
+// Gas Limits for Proxy Upgrade Tests
+// ============================================================================
+
+/**
+ * Gas limit constants for proxy upgrade operations.
+ *
+ * Used to verify gas usage stays within reasonable bounds.
+ */
+export const TEST_GAS_LIMITS = {
+  /** Gas limit for basic upgrade() call */
+  UPGRADE: 200_000,
+
+  /** Gas limit for upgradeAndCall() (includes initialization) */
+  UPGRADE_AND_CALL: 300_000,
+
+  /** Gas limit for facet deployment */
+  FACET_DEPLOY: 5_000_000,
+} as const;
+
+// ============================================================================
+// Test Initialization Values
+// ============================================================================
+
+/**
+ * Initialization values for proxy upgrade tests.
+ *
+ * Used in upgradeAndCall scenarios to verify initialization data is executed.
+ */
+export const TEST_INIT_VALUES = {
+  /** Basic test value (same as TEST_VALUES.INIT_VALUE) */
+  BASIC: 42,
+
+  /** Value for upgrade with init tests */
+  UPGRADE: 123,
+
+  /** Value for state verification tests */
+  STATE_VERIFY: 999,
+} as const;
+
+// ============================================================================
+// Test Timing Constants
+// ============================================================================
+
+/**
+ * Timing delay constants for async test operations.
+ *
+ * Used with `sleep()` or `setTimeout()` in tests that require short waits
+ * for filesystem I/O, timestamp differentiation, or async operation completion.
+ */
+export const TEST_DELAYS = {
+  /** Short delay for async operations (5ms) - e.g., ensuring unique timestamps */
+  SHORT: 5,
+
+  /** Medium delay for filesystem operations (10ms) - e.g., file write completion */
+  MEDIUM: 10,
+} as const;
+
+// ============================================================================
+// Test Options
+// ============================================================================
+
+/**
+ * Common test configuration options.
+ *
+ * Provides named constants for frequently-used test configuration values
+ * with documentation explaining their purpose and when to use them.
+ */
+export const TEST_OPTIONS = {
+  /**
+   * Confirmations for instant-mining networks (0 = no wait).
+   *
+   * Transactions on Hardhat, Anvil, and other local test networks are mined
+   * immediately, so no confirmation wait is needed. Using 0 prevents tests
+   * from hanging while waiting for confirmations.
+   *
+   * @example
+   * await upgradeProxy(proxyAdmin, {
+   *   proxyAddress,
+   *   newImplementationAddress,
+   *   confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+   * });
+   */
+  CONFIRMATIONS_INSTANT: 0,
+} as const;

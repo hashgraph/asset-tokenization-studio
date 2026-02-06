@@ -17,6 +17,8 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+
+// Infrastructure layer
 import {
   updateResolverProxyVersion,
   updateResolverProxyConfig,
@@ -24,28 +26,34 @@ import {
   getResolverProxyConfigInfo,
   deployProxy,
   registerFacets,
-  configureLogger,
-  LogLevel,
 } from "@scripts/infrastructure";
+
+// Domain layer
 import { atsRegistry } from "@scripts/domain";
-import { BusinessLogicResolver__factory } from "@contract-types";
+
+// Test helpers
 import {
   BLR_VERSIONS,
   deployResolverProxyFixture,
   deployResolverProxyWithAltConfigFixture,
   TEST_ADDRESSES,
+  silenceScriptLogging,
+  TEST_OPTIONS,
 } from "@test";
 
+// Contract types
+import { BusinessLogicResolver__factory } from "@contract-types";
+
 describe("updateResolverProxy* - Integration Tests", () => {
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   describe("updateResolverProxyVersion", () => {
     it("should update version successfully", async () => {
       const { deployer, proxyAddress, initialVersion } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
+      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+      });
 
       expect(result.success).to.be.true;
       expect(result.updateType).to.equal("version");
@@ -57,7 +65,9 @@ describe("updateResolverProxy* - Integration Tests", () => {
       const { deployer, proxyAddress, configId, blrAddress, initialVersion } =
         await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
+      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+      });
 
       expect(result.success).to.be.true;
       expect(result.previousConfig).to.deep.include({
@@ -80,7 +90,9 @@ describe("updateResolverProxy* - Integration Tests", () => {
       expect(configBefore.version).to.equal(BLR_VERSIONS.FIRST);
 
       // Update version
-      await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
+      await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+      });
 
       // Verify new version on-chain
       const configAfter = await getResolverProxyConfigInfo(deployer, proxyAddress);
@@ -95,7 +107,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       );
 
       const result = await updateResolverProxyConfig(deployer, proxyAddress, altConfigId, initialVersion + 1, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.success).to.be.true;
@@ -114,7 +126,9 @@ describe("updateResolverProxy* - Integration Tests", () => {
       expect(configBefore.configurationId).to.equal(configId);
 
       // Update config
-      await updateResolverProxyConfig(deployer, proxyAddress, altConfigId, initialVersion + 1, { confirmations: 0 });
+      await updateResolverProxyConfig(deployer, proxyAddress, altConfigId, initialVersion + 1, {
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+      });
 
       // Verify new configId on-chain
       const configAfter = await getResolverProxyConfigInfo(deployer, proxyAddress);
@@ -126,7 +140,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       const unregisteredConfigId = "0x00000000000000000000000000000000000000000000000000000000000000ff";
 
       const result = await updateResolverProxyConfig(deployer, proxyAddress, unregisteredConfigId, initialVersion + 1, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.success).to.be.false;
@@ -141,7 +155,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       // Deploy a new BLR for testing
       const newBlrResult = await deployProxy(deployer, {
         implementationFactory: new BusinessLogicResolver__factory(deployer),
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         verifyDeployment: false,
       });
       const newBlr = BusinessLogicResolver__factory.connect(newBlrResult.proxyAddress, deployer);
@@ -174,7 +188,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
         newBlrResult.proxyAddress,
         newConfigId,
         initialVersion + 1,
-        { confirmations: 0 },
+        { confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT },
       );
 
       expect(result.success).to.be.true;
@@ -201,7 +215,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Update resolver (using same BLR but different config)
       await updateResolverProxyResolver(deployer, proxyAddress, blrAddress, newConfigId, initialVersion + 1, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       // Verify proxy still functions (can still call getConfigInfo)
@@ -215,7 +229,9 @@ describe("updateResolverProxy* - Integration Tests", () => {
     it("should succeed when caller has DEFAULT_ADMIN_ROLE", async () => {
       const { deployer, proxyAddress, initialVersion } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
+      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+      });
 
       expect(result.success).to.be.true;
     });
@@ -224,7 +240,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       const { unknownSigner, proxyAddress, initialVersion } = await loadFixture(deployResolverProxyFixture);
 
       const result = await updateResolverProxyVersion(unknownSigner, proxyAddress, initialVersion + 1, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.success).to.be.false;
@@ -238,7 +254,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       );
 
       const result = await updateResolverProxyConfig(unknownSigner, proxyAddress, altConfigId, initialVersion + 1, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.success).to.be.false;
@@ -257,7 +273,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
         blrAddress,
         altConfigId,
         initialVersion + 1,
-        { confirmations: 0 },
+        { confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT },
       );
 
       expect(result.success).to.be.false;
@@ -271,7 +287,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       const { deployer } = await loadFixture(deployResolverProxyFixture);
 
       const result = await updateResolverProxyVersion(deployer, TEST_ADDRESSES.NO_CODE, 2, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.success).to.be.false;
@@ -283,7 +299,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // This should not throw, but return a structured error
       const result = await updateResolverProxyVersion(deployer, TEST_ADDRESSES.NO_CODE, 2, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result).to.be.an("object");
@@ -299,7 +315,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // Will fail due to access control, but previousConfig should be set
       const result = await updateResolverProxyVersion(unknownSigner, proxyAddress, initialVersion + 1, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.success).to.be.false;
@@ -313,7 +329,9 @@ describe("updateResolverProxy* - Integration Tests", () => {
     it("should preserve proxy address (unchanged)", async () => {
       const { deployer, proxyAddress, initialVersion } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
+      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+      });
 
       expect(result.success).to.be.true;
       expect(result.proxyAddress).to.equal(proxyAddress);
@@ -323,7 +341,9 @@ describe("updateResolverProxy* - Integration Tests", () => {
       const { deployer, proxyAddress, initialVersion } = await loadFixture(deployResolverProxyFixture);
 
       // Update version
-      await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
+      await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+      });
 
       // Verify persistence by reading again
       const configInfo = await getResolverProxyConfigInfo(deployer, proxyAddress);
@@ -335,7 +355,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // First update: version 1 -> 2
       const result1 = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
       expect(result1.success).to.be.true;
 
@@ -351,7 +371,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
 
       // First update: configId -> altConfigId at version 2
       const result1 = await updateResolverProxyConfig(deployer, proxyAddress, altConfigId, initialVersion + 1, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
       expect(result1.success).to.be.true;
 
@@ -366,7 +386,9 @@ describe("updateResolverProxy* - Integration Tests", () => {
     it("should report gas used for version update", async () => {
       const { deployer, proxyAddress, initialVersion } = await loadFixture(deployResolverProxyFixture);
 
-      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, { confirmations: 0 });
+      const result = await updateResolverProxyVersion(deployer, proxyAddress, initialVersion + 1, {
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
+      });
 
       expect(result.success).to.be.true;
       expect(result.gasUsed).to.be.greaterThan(0);
@@ -378,7 +400,7 @@ describe("updateResolverProxy* - Integration Tests", () => {
       );
 
       const result = await updateResolverProxyConfig(deployer, proxyAddress, altConfigId, initialVersion + 1, {
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.success).to.be.true;

@@ -57,12 +57,6 @@ import {
 } from "@contract-types";
 
 /**
- * Complete deployment output structure.
- * Re-exported from infrastructure for backward compatibility.
- */
-export type DeploymentOutput = DeploymentOutputType;
-
-/**
  * Options for complete system deployment.
  */
 export interface DeploySystemWithNewBlrOptions extends ResumeOptions {
@@ -140,7 +134,7 @@ export async function deploySystemWithNewBlr(
   signer: Signer,
   network: string,
   options: DeploySystemWithNewBlrOptions = {},
-): Promise<DeploymentOutput> {
+): Promise<DeploymentOutputType> {
   // Get network-specific deployment configuration
   const networkConfig = getDeploymentConfig(network);
 
@@ -748,7 +742,7 @@ export async function deploySystemWithNewBlr(
       return network.toLowerCase().includes("hedera") ? await fetchHederaContractId(network, address) : undefined;
     };
 
-    const output: DeploymentOutput = {
+    const output: DeploymentOutputType = {
       network,
       timestamp: new Date().toISOString(),
       deployer,
