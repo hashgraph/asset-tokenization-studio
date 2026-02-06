@@ -29,6 +29,7 @@ import {
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
 } from "@scripts";
+import { SecurityType } from "@scripts/domain";
 import { getBondDetails, getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture } from "@test";
@@ -197,6 +198,12 @@ describe("Bond Tests", () => {
   });
 
   describe("Initialization", () => {
+    it("GIVEN a bond variable rate WHEN deployed THEN securityType is BOND_VARIABLE_RATE", async () => {
+      const erc20Facet = await ethers.getContractAt("ERC20", diamond.address);
+      const metadata = await erc20Facet.getERC20Metadata();
+      expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
+    });
+
     it("GIVEN an initialized bond WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
       const regulationData = {
         regulationType: 1, // REG_S

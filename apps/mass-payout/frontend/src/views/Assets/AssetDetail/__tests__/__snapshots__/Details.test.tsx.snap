@@ -260,7 +260,7 @@ exports[`Details Component Basic Rendering should match snapshot 1`] = `
             <p
               class="chakra-text css-uivqlt"
             >
-              Bond
+              Bond Variable Rate
             </p>
           </div>
         </div>

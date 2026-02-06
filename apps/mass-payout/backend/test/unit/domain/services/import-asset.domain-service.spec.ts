@@ -137,7 +137,7 @@ describe(ImportAssetDomainService.name, () => {
         hederaTokenAddress: hederaTokenAddress,
         name: name,
         symbol: faker.finance.currencySymbol(),
-        assetType: AssetType.BOND,
+        assetType: AssetType.BOND_VARIABLE_RATE,
       }
       const lifeCycleCashFlowAddress = LifeCycleCashFlowAddress.create(
         lifeCycleCashFlowHederaAddress,
@@ -145,7 +145,14 @@ describe(ImportAssetDomainService.name, () => {
       )
       const symbol = faker.string.alpha({ length: 3 })
       const maturityDate = faker.date.future()
-      const initialAsset = Asset.create(name, AssetType.BOND, hederaTokenAddress, evmTokenAddress, symbol, maturityDate)
+      const initialAsset = Asset.create(
+        name,
+        AssetType.BOND_VARIABLE_RATE,
+        hederaTokenAddress,
+        evmTokenAddress,
+        symbol,
+        maturityDate,
+      )
       const assetWithLifeCycleCashFlow = initialAsset.withLifeCycleCashFlow(lifeCycleCashFlowAddress)
 
       assetRepositoryMock.getAssetByName.mockResolvedValue(undefined)
@@ -166,7 +173,7 @@ describe(ImportAssetDomainService.name, () => {
       expect(assetRepositoryMock.saveAsset).toHaveBeenCalledWith(
         expect.objectContaining({
           name: name,
-          type: AssetType.BOND,
+          type: AssetType.BOND_VARIABLE_RATE,
           hederaTokenAddress: hederaTokenAddress,
           evmTokenAddress: evmTokenAddress,
           lifeCycleCashFlowHederaAddress: lifeCycleCashFlowHederaAddress,
@@ -174,7 +181,7 @@ describe(ImportAssetDomainService.name, () => {
         }),
       )
       expect(assetRepositoryMock.updateAsset).not.toHaveBeenCalled()
-      expect(result.type).toBe(AssetType.BOND)
+      expect(result.type).toBe(AssetType.BOND_VARIABLE_RATE)
     })
 
     it("should handle errors during syncAsset call", async () => {

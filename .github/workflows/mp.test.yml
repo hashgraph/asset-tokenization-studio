@@ -68,7 +68,7 @@ jobs:
         run: npm install -g @nestjs/cli
 
       - name: Build mass-payout
-        run: npm run mass-payout:build
+        run: npm run mass-payout:build:ci
 
       - name: Test mass-payout
         run: npm run mass-payout:test

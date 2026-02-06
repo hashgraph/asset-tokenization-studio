@@ -66,7 +66,7 @@ describe(GetBasicAssetInformationUseCase.name, () => {
         hederaTokenAddress,
         name,
         symbol,
-        assetType: AssetType.BOND,
+        assetType: AssetType.BOND_VARIABLE_RATE,
         maturityDate,
       }
       assetTokenizationStudioServiceMock.getAssetInfo.mockResolvedValue(mockAssetInfo)
@@ -78,7 +78,7 @@ describe(GetBasicAssetInformationUseCase.name, () => {
         hederaTokenAddress,
         name,
         symbol,
-        assetType: AssetType.BOND,
+        assetType: AssetType.BOND_VARIABLE_RATE,
         maturityDate,
       })
     })
@@ -107,7 +107,7 @@ describe(GetBasicAssetInformationUseCase.name, () => {
       const hederaTokenAddress = fakeHederaAddress()
       const name = faker.finance.accountName()
       const symbol = faker.finance.currencyCode()
-      const assetTypes = [AssetType.EQUITY, AssetType.BOND]
+      const assetTypes = [AssetType.EQUITY, AssetType.BOND_VARIABLE_RATE]
 
       for (const assetType of assetTypes) {
         const mockAssetInfo = {
@@ -115,7 +115,7 @@ describe(GetBasicAssetInformationUseCase.name, () => {
           name,
           symbol,
           assetType,
-          maturityDate: assetType === AssetType.BOND ? faker.date.future() : undefined,
+          maturityDate: assetType === AssetType.BOND_VARIABLE_RATE ? faker.date.future() : undefined,
         }
         assetTokenizationStudioServiceMock.getAssetInfo.mockResolvedValue(mockAssetInfo)
 
@@ -125,7 +125,7 @@ describe(GetBasicAssetInformationUseCase.name, () => {
         expect(result.hederaTokenAddress).toBe(hederaTokenAddress)
         expect(result.name).toBe(name)
         expect(result.symbol).toBe(symbol)
-        if (assetType === AssetType.BOND) {
+        if (assetType === AssetType.BOND_VARIABLE_RATE) {
           expect(result.maturityDate).toBeDefined()
         }
       }

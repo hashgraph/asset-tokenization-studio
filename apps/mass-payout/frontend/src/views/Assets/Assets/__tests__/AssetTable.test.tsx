@@ -27,7 +27,7 @@ const mockAssets: Asset[] = [
   {
     id: "2",
     name: "Test Asset 2",
-    type: AssetType.BOND,
+    type: AssetType.BOND_VARIABLE_RATE,
     symbol: "TST2",
     hederaTokenAddress: "0.0.654321",
     evmTokenAddress: "0x654321",
@@ -159,7 +159,7 @@ describe("AssetTable", () => {
       const largeDataset = Array.from({ length: 100 }, (_, index) => ({
         id: `asset-${index}`,
         name: `Asset ${index}`,
-        type: index % 2 === 0 ? AssetType.EQUITY : AssetType.BOND,
+        type: index % 2 === 0 ? AssetType.EQUITY : AssetType.BOND_VARIABLE_RATE,
         symbol: `SYM${index}`,
         hederaTokenAddress: `0.0.${index}`,
         evmTokenAddress: `0x${index}`,
