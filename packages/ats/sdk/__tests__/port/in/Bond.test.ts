@@ -8,6 +8,7 @@ import {
   GetBondDetailsRequest,
   GetCouponRequest,
   GetAllCouponsRequest,
+  GetCouponsOrderedListRequest,
   SupportedWallets,
   Network,
   Bond,
@@ -298,5 +299,69 @@ describe("🧪 Bond test", () => {
       thrownError = error;
     }
     expect(thrownError).toBeInstanceOf(BaseError);
+  }, 600_000);
+
+  it("Get coupons ordered list correctly", async () => {
+    const mockGetCouponsOrderedList = jest
+      .spyOn(rpcQueryAdapter, "getCouponsOrderedList")
+      .mockResolvedValue([1, 2, 3, 4, 5]);
+
+    const request = new GetCouponsOrderedListRequest({
+      securityId: bond.evmDiamondAddress!.toString(),
+      pageIndex: 0,
+      pageLength: 10,
+    });
+
+    const result = await Bond.getCouponsOrderedList(request);
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toEqual([1, 2, 3, 4, 5]);
+
+    mockGetCouponsOrderedList.mockRestore();
+  }, 600_000);
+
+  it("Get coupons ordered list with pagination", async () => {
+    const mockGetCouponsOrderedList = jest
+      .spyOn(rpcQueryAdapter, "getCouponsOrderedList")
+      .mockResolvedValueOnce([1, 2, 3, 4, 5])
+      .mockResolvedValueOnce([6, 7, 8, 9, 10]);
+
+    const request1 = new GetCouponsOrderedListRequest({
+      securityId: bond.evmDiamondAddress!.toString(),
+      pageIndex: 0,
+      pageLength: 5,
+    });
+
+    const result1 = await Bond.getCouponsOrderedList(request1);
+    expect(Array.isArray(result1)).toBe(true);
+    expect(result1).toEqual([1, 2, 3, 4, 5]);
+
+    const request2 = new GetCouponsOrderedListRequest({
+      securityId: bond.evmDiamondAddress!.toString(),
+      pageIndex: 1,
+      pageLength: 5,
+    });
+
+    const result2 = await Bond.getCouponsOrderedList(request2);
+    expect(Array.isArray(result2)).toBe(true);
+    expect(result2).toEqual([6, 7, 8, 9, 10]);
+
+    mockGetCouponsOrderedList.mockRestore();
+  }, 600_000);
+
+  it("Get coupons ordered list with empty page", async () => {
+    const mockGetCouponsOrderedList = jest.spyOn(rpcQueryAdapter, "getCouponsOrderedList").mockResolvedValue([]);
+
+    const request = new GetCouponsOrderedListRequest({
+      securityId: bond.evmDiamondAddress!.toString(),
+      pageIndex: 100,
+      pageLength: 10,
+    });
+
+    const result = await Bond.getCouponsOrderedList(request);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBe(0);
+
+    mockGetCouponsOrderedList.mockRestore();
   }, 600_000);
 });
