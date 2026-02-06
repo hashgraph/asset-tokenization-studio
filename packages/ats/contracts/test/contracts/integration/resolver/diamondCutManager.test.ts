@@ -165,7 +165,17 @@ describe("DiamondCutManager", () => {
 
     expect(facet.interfaceIds).to.exist;
     expect(facet.interfaceIds).to.not.be.empty;
-    expect(facet.toObject()).to.deep.equal(facet_2.toObject());
+    expect({
+      id: facet.id,
+      addr: facet.addr,
+      selectors: [...facet.selectors],
+      interfaceIds: [...facet.interfaceIds],
+    }).to.deep.equal({
+      id: facet_2.id,
+      addr: facet_2.addr,
+      selectors: [...facet_2.selectors],
+      interfaceIds: [...facet_2.interfaceIds],
+    });
 
     await validateSelectors(configId, configVersion, facet, selectorsLength);
     await validateInterfaces(configId, configVersion, facet);
@@ -427,7 +437,9 @@ describe("DiamondCutManager", () => {
     });
 
     await expect(
-      diamondCutManager.connect(signer_A).createConfiguration(EQUITY_CONFIG_ID, facetConfigurations),
+      diamondCutManager
+        .connect(signer_A)
+        .createConfiguration(EQUITY_CONFIG_ID, facetConfigurations, { gasLimit: 30_000_000 }),
     ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
@@ -550,7 +562,9 @@ describe("DiamondCutManager", () => {
     });
 
     await expect(
-      diamondCutManager.connect(signer_A).createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false),
+      diamondCutManager
+        .connect(signer_A)
+        .createBatchConfiguration(EQUITY_CONFIG_ID, facetConfigurations, false, { gasLimit: 30_000_000 }),
     ).to.be.revertedWithCustomError(diamondCutManager, "DuplicatedFacetInConfiguration");
   });
 
@@ -568,7 +582,9 @@ describe("DiamondCutManager", () => {
     );
 
     await expect(
-      diamondCutManager.connect(signer_A).createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations),
+      diamondCutManager
+        .connect(signer_A)
+        .createConfiguration(TEST_CONFIG_IDS.BLACKLIST_TEST, facetConfigurations, { gasLimit: 30_000_000 }),
     )
       .to.be.revertedWithCustomError(diamondCutManager, "SelectorBlacklisted")
       .withArgs(blackListedSelectors[0]);
