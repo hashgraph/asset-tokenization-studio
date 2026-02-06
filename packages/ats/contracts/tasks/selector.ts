@@ -2,19 +2,19 @@
 
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-// Para Ethers v5, EventFragment nos ayuda con el tipado si lo necesitamos.
-// Puedes importarlo de 'ethers/lib/utils' o '@ethersproject/abi' dependiendo de tu setup.
-// Si hre.ethers ya es v5, no necesitas esta importación explícita para EventFragment
-// a menos que quieras un tipado más estricto.
-import { FunctionFragment } from "@ethersproject/abi"; // O 'ethers/lib/utils'
+// For Ethers v5, EventFragment helps us with typing if we need it.
+// You can import it from 'ethers/lib/utils' or '@ethersproject/abi' depending on your setup.
+// If hre.ethers is already v5, you don't need this explicit import for EventFragment
+// unless you want stricter typing.
+import { FunctionFragment } from "@ethersproject/abi"; // Or 'ethers/lib/utils'
 import { id } from "ethers/lib/utils";
 
-task("list-events-v5", "Muestra los nombres y selectores (topic hash) de los eventos para Ethers v5").setAction(
+task("list-events-v5", "Shows event names and selectors (topic hash) for Ethers v5").setAction(
   async (taskArgs, hre: HardhatRuntimeEnvironment) => {
-    console.log("Obteniendo firmas de eventos (Ethers v5)...");
+    console.log("Getting event signatures (Ethers v5)...");
 
-    // Asegurarse de que ethers en HRE es v5.
-    // Esto es una comprobación rudimentaria; la versión exacta puede variar (e.g., 5.7.2).
+    // Ensure that ethers in HRE is v5.
+    // This is a rudimentary check; the exact version may vary (e.g., 5.7.2).
 
     const allContractEvents: {
       [contractName: string]: { name: string; selector: string }[];
@@ -33,18 +33,18 @@ task("list-events-v5", "Muestra los nombres y selectores (topic hash) de los eve
           continue;
         }
 
-        // En Ethers v5, creamos la instancia de Interface así:
+        // In Ethers v5, we create the Interface instance like this:
         const contractInterface = new hre.ethers.utils.Interface(artifact.abi);
 
         const eventsData = [];
 
         for (const fragment of contractInterface.fragments) {
           if (fragment.type === "function") {
-            // Casteamos a FunctionFragment para tener mejor autocompletado y seguridad de tipos
+            // Cast to FunctionFragment for better autocomplete and type safety
             const functionFragment = fragment as FunctionFragment;
             const functionName = functionFragment.name;
 
-            // En Ethers v5, usamos getSighash para obtener el selector de la función
+            // In Ethers v5, we use getSighash to get the function selector
             const functionSelector = contractInterface.getSighash(functionFragment);
 
             eventsData.push({
@@ -55,47 +55,47 @@ task("list-events-v5", "Muestra los nombres y selectores (topic hash) de los eve
         }
 
         if (eventsData.length > 0) {
-          // Podrías querer almacenar por qualifiedName si tienes colisiones de contractName
+          // You might want to store by qualifiedName if you have contractName collisions
           allContractEvents[contractName] = eventsData;
         }
       } catch (error) {
-        console.warn(`No se pudo procesar ${qualifiedName}: ${(error as Error).message}`);
+        console.warn(`Could not process ${qualifiedName}: ${(error as Error).message}`);
       }
     }
 
     if (Object.keys(allContractEvents).length === 0) {
-      console.log("No se encontraron eventos en ningún contrato.");
+      console.log("No events found in any contract.");
     } else {
-      // Imprimir el JSON
+      // Print the JSON
       console.log(JSON.stringify(allContractEvents, null, 2));
 
-      // Si prefieres un objeto plano { 'EventName(params)': 'selector', ... }
-      // (esto puede tener colisiones si diferentes contratos tienen el mismo evento)
+      // If you prefer a flat object { 'EventName(params)': 'selector', ... }
+      // (this can have collisions if different contracts have the same event)
       /*
       const flatEventMap: { [signature: string]: string } = {};
       for (const contractName in allContractEvents) {
         allContractEvents[contractName].forEach(event => {
-          // Para obtener una firma más completa como la de 'sighash' en ethers v6
-          // necesitamos reconstruirla un poco o usar el fragmento completo.
-          // Por ahora, solo nombre y selector simple.
+          // To get a more complete signature like 'sighash' in ethers v6
+          // we need to rebuild it a bit or use the complete fragment.
+          // For now, just name and simple selector.
           // const fullSignature = `${event.name}(${(contractInterface.getEvent(event.name).inputs.map(i => i.type)).join(',')})`;
-          // flatEventMap[`${contractName}.${event.name}`] = event.selector; // Evitar colisiones
-          flatEventMap[event.name] = event.selector; // Simple, puede haber colisiones
+          // flatEventMap[`${contractName}.${event.name}`] = event.selector; // Avoid collisions
+          flatEventMap[event.name] = event.selector; // Simple, may have collisions
         });
       }
-      console.log("Eventos como objeto plano (nombre: selector):");
+      console.log("Events as flat object (name: selector):");
       console.log(JSON.stringify(flatEventMap, null, 2));
       */
     }
   },
 );
 
-task("list-functions-v5", "Muestra los nombres y selectores (topic hash) de los eventos para Ethers v5").setAction(
+task("list-functions-v5", "Shows function names and selectors (topic hash) for Ethers v5").setAction(
   async (taskArgs, hre: HardhatRuntimeEnvironment) => {
-    console.log("Obteniendo firmas de las funciones (Ethers v5)...");
+    console.log("Getting function signatures (Ethers v5)...");
 
-    // Asegurarse de que ethers en HRE es v5.
-    // Esto es una comprobación rudimentaria; la versión exacta puede variar (e.g., 5.7.2).
+    // Ensure that ethers in HRE is v5.
+    // This is a rudimentary check; the exact version may vary (e.g., 5.7.2).
 
     const allContractEvents: {
       [contractName: string]: { name: string; selector: string }[];
@@ -114,18 +114,18 @@ task("list-functions-v5", "Muestra los nombres y selectores (topic hash) de los 
           continue;
         }
 
-        // En Ethers v5, creamos la instancia de Interface así:
+        // In Ethers v5, we create the Interface instance like this:
         const contractInterface = new hre.ethers.utils.Interface(artifact.abi);
 
         const eventsData = [];
 
         for (const fragment of contractInterface.fragments) {
           if (fragment.type === "function") {
-            // Casteamos a EventFragment para tener mejor autocompletado y seguridad de tipos
+            // Cast to EventFragment for better autocomplete and type safety
             const functionFragment = fragment as FunctionFragment;
             const functionName = functionFragment.name;
 
-            // En Ethers v5, usamos getEventTopic para obtener el selector del evento (topic hash)
+            // In Ethers v5, we use getEventTopic to get the event selector (topic hash)
             const functionSelector = id(functionFragment.format("sighash")).substring(0, 10);
 
             eventsData.push({
@@ -136,35 +136,35 @@ task("list-functions-v5", "Muestra los nombres y selectores (topic hash) de los 
         }
 
         if (eventsData.length > 0) {
-          // Podrías querer almacenar por qualifiedName si tienes colisiones de contractName
+          // You might want to store by qualifiedName if you have contractName collisions
           allContractEvents[contractName] = eventsData;
         }
       } catch (error) {
-        console.warn(`No se pudo procesar ${qualifiedName}: ${(error as Error).message}`);
+        console.warn(`Could not process ${qualifiedName}: ${(error as Error).message}`);
       }
     }
 
     if (Object.keys(allContractEvents).length === 0) {
-      console.log("No se encontraron eventos en ningún contrato.");
+      console.log("No events found in any contract.");
     } else {
-      // Imprimir el JSON
+      // Print the JSON
       console.log(JSON.stringify(allContractEvents, null, 2));
 
-      // Si prefieres un objeto plano { 'EventName(params)': 'selector', ... }
-      // (esto puede tener colisiones si diferentes contratos tienen el mismo evento)
+      // If you prefer a flat object { 'EventName(params)': 'selector', ... }
+      // (this can have collisions if different contracts have the same event)
       /*
       const flatEventMap: { [signature: string]: string } = {};
       for (const contractName in allContractEvents) {
         allContractEvents[contractName].forEach(event => {
-          // Para obtener una firma más completa como la de 'sighash' en ethers v6
-          // necesitamos reconstruirla un poco o usar el fragmento completo.
-          // Por ahora, solo nombre y selector simple.
+          // To get a more complete signature like 'sighash' in ethers v6
+          // we need to rebuild it a bit or use the complete fragment.
+          // For now, just name and simple selector.
           // const fullSignature = `${event.name}(${(contractInterface.getEvent(event.name).inputs.map(i => i.type)).join(',')})`;
-          // flatEventMap[`${contractName}.${event.name}`] = event.selector; // Evitar colisiones
-          flatEventMap[event.name] = event.selector; // Simple, puede haber colisiones
+          // flatEventMap[`${contractName}.${event.name}`] = event.selector; // Avoid collisions
+          flatEventMap[event.name] = event.selector; // Simple, may have collisions
         });
       }
-      console.log("Eventos como objeto plano (nombre: selector):");
+      console.log("Events as flat object (name: selector):");
       console.log(JSON.stringify(flatEventMap, null, 2));
       */
     }
