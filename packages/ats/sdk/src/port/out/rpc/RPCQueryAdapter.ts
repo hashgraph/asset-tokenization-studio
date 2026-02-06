@@ -1292,6 +1292,14 @@ export class RPCQueryAdapter {
     return couponId.toNumber();
   }
 
+  async getCouponsOrderedList(address: EvmAddress, pageIndex: number, pageLength: number): Promise<number[]> {
+    LogService.logTrace(`Getting coupons ordered list for security ${address.toString()}, page ${pageIndex}, length ${pageLength}`);
+
+    const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(pageIndex, pageLength);
+
+    return couponIds.map(id => id.toNumber());
+  }
+
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`);
     return await this.connect(Equity__factory, address.toString()).getDividendHolders(dividendId, start, end);

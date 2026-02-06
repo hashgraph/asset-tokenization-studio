@@ -26,6 +26,7 @@ import GetVotingRightsRequest from "./equity/GetVotingRightsRequest";
 import GetAllVotingRightsRequest from "./equity/GetAllVotingRightsRequest";
 import GetCouponForRequest from "./bond/GetCouponForRequest";
 import GetCouponRequest from "./bond/GetCouponRequest";
+import GetCouponsOrderedListRequest from "./bond/GetCouponsOrderedListRequest";
 import GetAllCouponsRequest from "./bond/GetAllCouponsRequest";
 import GetRoleCountForRequest from "./security/roles/GetRoleCountForRequest";
 import GetRolesForRequest from "./security/roles/GetRolesForRequest";
@@ -231,6 +232,7 @@ export {
   GetCouponForRequest,
   GetPrincipalForRequest,
   GetCouponRequest,
+  GetCouponsOrderedListRequest,
   GetAllCouponsRequest,
   GetRoleCountForRequest,
   GetRolesForRequest,

@@ -14,6 +14,7 @@ import { GetCouponCountQueryHandler } from "@query/bond/coupons/getCouponCount/G
 import { GetCouponForQueryHandler } from "@query/bond/coupons/getCouponFor/GetCouponForQueryHandler";
 import { GetCouponHoldersQueryHandler } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQueryHandler";
 import { GetTotalCouponHoldersQueryHandler } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler";
+import { GetCouponsOrderedListQueryHandler } from "@query/bond/coupons/getCouponsOrderedList/GetCouponsOrderedListQueryHandler";
 import { GetBondDetailsQueryHandler } from "@query/bond/get/getBondDetails/GetBondDetailsQueryHandler";
 import { GetPrincipalForQueryHandler } from "@query/bond/get/getPrincipalFor/GetPrincipalForQueryHandler";
 import { GetRateQueryHandler } from "@query/interestRates/getRate/GetRateQueryHandler";
@@ -91,6 +92,10 @@ export const QUERY_HANDLERS_BOND = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetCouponFromOrderedListAtQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetCouponsOrderedListQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

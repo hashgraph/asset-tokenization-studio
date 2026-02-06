@@ -24,6 +24,7 @@ import AddProceedRecipientRequest from "@port/in/request/bond/AddProceedRecipien
 import CreateBondRequest from "@port/in/request/bond/CreateBondRequest";
 import FullRedeemAtMaturityRequest from "@port/in/request/bond/FullRedeemAtMaturityRequest";
 import GetAllCouponsRequest from "@port/in/request/bond/GetAllCouponsRequest";
+import GetCouponsOrderedListRequest from "@port/in/request/bond/GetCouponsOrderedListRequest";
 import GetBondDetailsRequest from "@port/in/request/bond/GetBondDetailsRequest";
 import GetCouponForRequest from "@port/in/request/bond/GetCouponForRequest";
 import GetCouponHoldersRequest from "@port/in/request/bond/GetCouponHoldersRequest";
@@ -312,6 +313,12 @@ export const GetCouponRequestFixture = createFixture<GetCouponRequest>((request)
 
 export const GetAllCouponsRequestFixture = createFixture<GetAllCouponsRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const GetCouponsOrderedListRequestFixture = createFixture<GetCouponsOrderedListRequest>((request) => {
+  request.securityId.as(() => HederaIdPropsFixture.create().value);
+  request.pageIndex.as(() => faker.number.int({ min: 0, max: 10 }));
+  request.pageLength.as(() => faker.number.int({ min: 1, max: 50 }));
 });
 
 export const UpdateMaturityDateRequestFixture = createFixture<UpdateMaturityDateRequest>((request) => {

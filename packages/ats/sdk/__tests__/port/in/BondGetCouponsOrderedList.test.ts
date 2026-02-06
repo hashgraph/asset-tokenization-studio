@@ -8,12 +8,7 @@ import {
   Network,
   Bond,
   InitializationRequest,
-  FixedRate,
-  SetRateRequest,
-  Role,
-  ApplyRolesRequest,
   CreateBondFixedRateRequest,
-  GetRateRequest,
   GetCouponsOrderedListRequest,
 } from "@port/in";
 import { DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
@@ -28,9 +23,6 @@ import {
   RegulationSubType,
   RegulationType,
 } from "@domain/context/factory/RegulationType";
-import { SecurityRole } from "@domain/context/security/SecurityRole";
-import { Time } from "@core/Time";
-import GetCouponFromOrderedListAtRequest from "@port/in/request/bond/GetCouponFromOrderedListAtRequest";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -52,7 +44,7 @@ const regulationType = RegulationType.REG_S;
 const regulationSubType = RegulationSubType.NONE;
 const countries = "AF,HG,BN";
 const info = "Anything";
-const configId = "0x0000000000000000000000000000000000000000000000000000000000000003";
+const configId = "0x0000000000000000000000000000000000000000000000000000000000003";
 const configVersion = 0;
 const rate = 5;
 const rateDecimals = 2;
@@ -67,7 +59,7 @@ const rpcNode: JsonRpcRelay = {
   baseUrl: "http://localhost:7546",
 };
 
-describe("DFNS Transaction Adapter test", () => {
+describe("Bond getCouponsOrderedList DLT Integration Test", () => {
   let bond: SecurityViewModel;
 
   beforeAll(async () => {
@@ -127,14 +119,10 @@ describe("DFNS Transaction Adapter test", () => {
 
     bond = (await Bond.createFixedRate(requestST)).security;
 
-    console.log(bond.diamondAddress);
-    console.log(bond.evmDiamondAddress);
-
     console.log("bond: " + JSON.stringify(bond));
   }, 600_000);
 
-  it("set fixed rate", async () => {
-    // Usar el contract ID que sabemos que fue creado exitosamente
+  it("should get coupons ordered list from DLT", async () => {
     const contractAddress = bond?.diamondAddress?.toString();
     console.log("contractAddress: " + contractAddress);
 
@@ -142,60 +130,7 @@ describe("DFNS Transaction Adapter test", () => {
       throw new Error("No se encontró address del bond creado");
     }
 
-    await Role.applyRoles(
-      new ApplyRolesRequest({
-        securityId: contractAddress,
-        targetId: DFNS_SETTINGS.hederaAccountId,
-        roles: [SecurityRole._INTEREST_RATE_MANAGER_ROLE],
-        actives: [true],
-      }),
-    );
-    console.log("applyRoles [_INTEREST_RATE_MANAGER_ROLE]");
-    await Time.delay(4, "seconds");
-
-    const request = new SetRateRequest({
-      securityId: contractAddress,
-      rate: "5.5",
-      rateDecimals: 8,
-    });
-
-    const result = await FixedRate.setRate(request);
-    console.log("result: " + JSON.stringify(result));
-
-    const getRateRequest = new GetRateRequest({
-      securityId: contractAddress,
-    });
-
-    const rate = await FixedRate.getRate(getRateRequest);
-    console.log("rate: " + JSON.stringify(rate));
-  }, 60_000);
-
-  it("get coupon from ordered list at", async () => {
-    const contractAddress = bond?.diamondAddress?.toString();
-    console.log("contractAddress: " + contractAddress);
-
-    if (!contractAddress) {
-      throw new Error("No se encontró address del bond creado");
-    }
-
-    const getCouponFromOrderedListAt = await Bond.getCouponFromOrderedListAt(
-      new GetCouponFromOrderedListAtRequest({
-        securityId: contractAddress,
-        pos: 0,
-      }),
-    );
-
-    console.log("couponId: " + getCouponFromOrderedListAt);
-  }, 60_000);
-
-  it("getCouponsOrderedList from DLT", async () => {
-    const contractAddress = bond?.diamondAddress?.toString();
-    console.log("contractAddress: " + contractAddress);
-
-    if (!contractAddress) {
-      throw new Error("No se encontró address del bond creado");
-    }
-
+    // Test with first page
     const request = new GetCouponsOrderedListRequest({
       securityId: contractAddress,
       pageIndex: 0,
@@ -205,12 +140,16 @@ describe("DFNS Transaction Adapter test", () => {
     const result = await Bond.getCouponsOrderedList(request);
     console.log("getCouponsOrderedList result: " + JSON.stringify(result));
 
+    // Verify it's an array
     expect(Array.isArray(result)).toBe(true);
+
+    // Verify all elements are numbers
     result.forEach((couponId) => {
       expect(typeof couponId).toBe("number");
       expect(couponId).toBeGreaterThan(0);
     });
 
+    // Test with second page
     const request2 = new GetCouponsOrderedListRequest({
       securityId: contractAddress,
       pageIndex: 1,
@@ -225,5 +164,19 @@ describe("DFNS Transaction Adapter test", () => {
       expect(typeof couponId).toBe("number");
       expect(couponId).toBeGreaterThan(0);
     });
+
+    // Test with empty page (beyond available coupons)
+    const request3 = new GetCouponsOrderedListRequest({
+      securityId: contractAddress,
+      pageIndex: 100,
+      pageLength: 10,
+    });
+
+    const result3 = await Bond.getCouponsOrderedList(request3);
+    console.log("getCouponsOrderedList result empty page: " + JSON.stringify(result3));
+
+    expect(Array.isArray(result3)).toBe(true);
+    // Empty page should return empty array
+    expect(result3.length).toBe(0);
   }, 60_000);
 });
