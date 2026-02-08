@@ -61,6 +61,7 @@ abstract contract Internals is Modifiers {
     function _adjustMaxSupply(uint256 factor) internal virtual;
     function _adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal virtual;
     function _adjustTotalAndMaxSupplyForPartition(bytes32 _partition) internal virtual;
+    function _adjustTotalBalanceFor(uint256 abaf, address account) internal virtual;
     function _adjustTotalBalanceAndPartitionBalanceFor(bytes32 partition, address account) internal virtual;
     function _adjustTotalSupply(uint256 factor) internal virtual;
     function _adjustTotalSupplyByPartition(bytes32 _partition, uint256 _factor) internal virtual;
@@ -156,6 +157,7 @@ abstract contract Internals is Modifiers {
     function _delegate(address delegatee) internal virtual;
     function _delegate(address delegator, address delegatee) internal virtual;
     function _deletePartitionForHolder(address _holder, bytes32 _partition, uint256 index) internal virtual;
+    function _emitTransferEvent(address from, address to, uint256 value) internal virtual returns (bool);
     function _executeHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         address _to,
@@ -174,8 +176,10 @@ abstract contract Internals is Modifiers {
     function _grantRole(bytes32 _role, address _account) internal virtual returns (bool success_);
     function _increaseAllowance(address spender, uint256 addedValue) internal virtual returns (bool);
     function _increaseAllowedBalance(address from, address spender, uint256 value) internal virtual;
+    function _increaseBalance(address _from, uint256 _value) internal virtual;
     function _increaseBalanceByPartition(address _from, uint256 _value, bytes32 _partition) internal virtual;
     function _increaseClearedAmounts(address _tokenHolder, bytes32 _partition, uint256 _amount) internal virtual;
+    function _increaseTotalSupply(uint256 _value) internal virtual;
     function _increaseTotalSupplyByPartition(bytes32 _partition, uint256 _value) internal virtual;
     function _initBalanceAdjustment(bytes32 _actionId, bytes memory _data) internal virtual;
     function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual;
@@ -452,7 +456,9 @@ abstract contract Internals is Modifiers {
         bytes memory _operatorData
     ) internal virtual;
     function _redeemFrom(address _tokenHolder, uint256 _value, bytes memory _data) internal virtual;
+    function _reduceBalance(address _from, uint256 _value) internal virtual;
     function _reduceBalanceByPartition(address _from, uint256 _value, bytes32 _partition) internal virtual;
+    function _reduceTotalSupply(uint256 _value) internal virtual;
     function _reduceTotalSupplyByPartition(bytes32 _partition, uint256 _value) internal virtual;
     function _releaseByPartition(
         bytes32 _partition,

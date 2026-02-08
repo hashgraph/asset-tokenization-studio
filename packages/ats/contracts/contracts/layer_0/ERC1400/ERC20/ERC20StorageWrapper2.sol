@@ -104,7 +104,7 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
         emit Approval(from, spender, _erc20Storage().allowed[from][spender]);
     }
 
-    function _emitTransferEvent(address from, address to, uint256 value) private returns (bool) {
+    function _emitTransferEvent(address from, address to, uint256 value) internal override returns (bool) {
         emit Transfer(from, to, value);
         return true;
     }

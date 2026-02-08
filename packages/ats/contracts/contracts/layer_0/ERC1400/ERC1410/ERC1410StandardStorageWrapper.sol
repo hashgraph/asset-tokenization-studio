@@ -80,7 +80,7 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
         erc1410Storage.partitions[_account].push(Partition(_value, _partition));
         erc1410Storage.partitionToIndex[_account][_partition] = _erc1410BasicStorage().partitions[_account].length;
 
-        if (_value != 0) erc1410Storage.balances[_account] += _value;
+        if (_value != 0) _increaseBalance(_account, _value);
     }
 
     function _issueByPartition(IssueData memory _issueData) internal override {
@@ -141,17 +141,13 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
     }
 
     function _reduceTotalSupplyByPartition(bytes32 _partition, uint256 _value) internal override {
-        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
-
-        erc1410Storage.totalSupply -= _value;
-        erc1410Storage.totalSupplyByPartition[_partition] -= _value;
+        _erc1410BasicStorage().totalSupplyByPartition[_partition] -= _value;
+        _reduceTotalSupply(_value);
     }
 
     function _increaseTotalSupplyByPartition(bytes32 _partition, uint256 _value) internal override {
-        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
-
-        erc1410Storage.totalSupply += _value;
-        erc1410Storage.totalSupplyByPartition[_partition] += _value;
+        _erc1410BasicStorage().totalSupplyByPartition[_partition] += _value;
+        _increaseTotalSupply(_value);
     }
 
     function _totalSupplyAdjustedAt(uint256 _timestamp) internal view override returns (uint256) {
