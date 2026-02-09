@@ -3,16 +3,17 @@
 ## The Journey
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                                                             │
-│   ORIGINAL IDEA          PROBLEM              WORKAROUND         SOLUTION   │
-│   ─────────────          ───────              ──────────         ────────   │
-│                                                                             │
-│   Small focused    →   Circular deps    →   One giant      →   Libraries   │
-│   internal             between them         Internals          (no deps!)  │
-│   contracts                                 monster                         │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                  │
+│   ORIGINAL      PROBLEM         WORKAROUND #1      WORKAROUND #2     SOLUTION   │
+│   ────────      ───────         ─────────────      ─────────────     ────────   │
+│                                                                                  │
+│   Small     →  Circular    →  Common layer:    →  Internals.sol: →  Libraries   │
+│   focused      deps           serialize all       1,456 virtual     (no deps!)  │
+│   contracts    everywhere     storage into        declarations                   │
+│                               one chain           for bond variants              │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -115,33 +116,58 @@ abstract contract FreezeInternal is ERC1410TransferInternal {  // 🔴 CIRCULAR!
 
 ---
 
-## Phase 3: The Workaround (Internals Monster)
+## Phase 3: The First Workaround (Common Layer)
 
-To break circular dependencies, you put EVERYTHING in ONE contract:
+The first approach to break circular dependencies was the **Common layer** — serialize all storage wrappers into one linear inheritance chain:
 
 ```solidity
-// ⚠️ THE WORKAROUND - Works but creates source code chaos!
+// ⚠️ WORKAROUND #1 - Common layer: chain all storage into one path
 
-// layer_0/Internals.sol - 1456 lines!
+// layer_0/common/Common.sol
+abstract contract Common is SecurityStorageWrapper { /* 3 modifier overrides */ }
+
+// SecurityStorageWrapper.sol → EquityStorageWrapper → BondStorageWrapper → ...
+// One long chain — no circular deps because it's one linear path
+
+// Every facet inherits Common → gets ALL storage operations
+contract PauseFacet is PauseFacetBase, Common { /* ... */ }
+```
+
+**It works.** But the chain is arbitrary (why does Security inherit from Equity?) and adding new storage domains means inserting into the chain.
+
+When **bond variants** arrived (FixedRate, KpiLinked, SustainabilityPerformanceTarget), empty bridge contracts appeared:
+
+```solidity
+// CommonFixedInterestRate.sol — literally empty!
+abstract contract CommonFixedInterestRate is BondStorageWrapperFixedInterestRate {}
+```
+
+## Phase 3b: The Second Workaround (Internals Monster)
+
+The Common chain handled storage, but bond variants needed virtual function dispatch across the variant hierarchy. So `Internals.sol` was added ON TOP of Common:
+
+```solidity
+// ⚠️ WORKAROUND #2 - Internals.sol: 1456 virtual declarations!
+
 abstract contract Internals is Modifiers {
 
-    // ALL functions in one place = no circular deps
-    // But now it's a 1456-line monster to navigate
-
+    // ALL functions in one place for variant-specific overrides
     function _pause() internal virtual;
     function _unpause() internal virtual;
     function _checkRole(bytes32 role) internal view virtual;
     function _grantRole(...) internal virtual;
     function _transferByPartition(...) internal virtual;
-    function _freezeTokens(...) internal virtual;
-    function _createHoldByPartition(...) internal virtual;
     function _setCoupon(...) internal virtual;
-    // ... 1448 more functions ...
+    // ... 1450 more functions ...
+}
+
+// Bond variant extensions override per-variant behavior
+abstract contract InternalsFixedInterestRate is Internals {
+    function _setCoupon(...) internal override { /* fixed-rate specific */ }
 }
 ```
 
-**Note**: The compiler will only include USED functions in bytecode.
-**But**: Developers have to navigate 1456 lines to understand the code!
+**Now we have TWO workaround layers stacked.** The Common chain serializes storage, and Internals serializes virtual dispatch. Developers navigate both to understand the code.
 
 ---
 
@@ -384,7 +410,9 @@ Step 4: Delete Internals.sol 🎉
 
 | Problem | Root Cause | Solution |
 |---------|------------|----------|
-| Internals monster exists | Circular inheritance workaround | Libraries (no inheritance) |
+| Common chain exists | Original circular inheritance workaround (serialized storage) | Libraries (no inheritance chain needed) |
+| Internals monster exists | Added later for bond variant virtual dispatch | Libraries (no virtual/override ceremony) |
+| Two workaround layers stacked | Each solved one problem but added complexity | Libraries solve both at once |
 | Hard to navigate | 1456 lines in one file | Split into focused libraries |
 | Hidden dependencies | Implicit inheritance | Explicit imports |
 | Hard to find implementations | Search through monster | Open the specific library |
@@ -400,6 +428,100 @@ Step 4: Delete Internals.sol 🎉
 - "What does this facet do?" 🤷 → "Look at the imports" ✅
 
 **Libraries solve the circular dependency problem AND make code easier to read.**
+
+---
+
+## Library Layering: Not Spaghetti, But Architecture
+
+A common concern: "If libraries can call each other freely — even circularly — won't that create spaghetti code?"
+
+No. The libraries naturally organize into **clean tiers**:
+
+```
+LAYER 3 — FACETS            Thin wrappers: auth + pause + call libraries
+LAYER 2 — ORCHESTRATORS     Coordinate domain libs (LibScheduledTasks, LibInterestRate)
+LAYER 1 — DOMAIN LIBS       Own one domain (LibERC1410, LibABAF, LibSnapshots, LibBond)
+LAYER 0 — LEAF LIBS         Zero lib dependencies (LibPause, LibAccess, LibCompliance)
+```
+
+**Why this is the opposite of spaghetti:**
+
+In the current architecture, `_pause()` (leaf-level) sits next to `_executeScheduledTask()` (orchestrator-level) in the same 1,456-line Internals file, and storage access is serialized into a single Common chain where `SecurityStorageWrapper` inherits from `EquityStorageWrapper` for no domain reason. No structural hint of what orchestrates what. Everything is flat and arbitrary.
+
+With libraries, the layers are visible in the import list. A leaf library importing an orchestrator would be an obvious code review red flag. And the compiler *enforces* the boundaries: if a facet doesn't import `LibERC1410`, it cannot call token functions. Period.
+
+**Inheritance offers NO such enforcement.** Every facet inherits everything and can call any function. The only boundary is developer discipline.
+
+See `contracts/complex-example/COMPLEX_EXAMPLE.md` for a full demonstration of this layering with 10 libraries handling the most complex workflow in the system (scheduled tasks + ABAF/LABAF + KPI-linked coupons).
+
+---
+
+## Why Not Fix Inheritance Instead of Using Libraries?
+
+You could restructure inheritance into smaller abstract contracts for non-circular parts. But the circular dependency `ERC1410 ↔ ABAF ↔ Snapshots ↔ ERC1410` cannot be expressed in Solidity's inheritance system (C3 linearization rejects it). Your only options are:
+
+| Approach | Result |
+|----------|--------|
+| Split into small abstract contracts | Circular inheritance — won't compile |
+| Virtual functions in a shared base | This IS what Internals.sol already does |
+| Interface-based decoupling | Doesn't work inside Diamond delegatecall context |
+| Hook pattern (`_afterTransfer`) | Fails when dependency is bidirectional (ABAF reads balances, ERC1410 reads ABAF) |
+| **Libraries** | **Circular calls compile. Root cause solved.** |
+
+Libraries work because they're resolved at link-time, not inheritance-time. The compiler only needs function signatures, not a complete hierarchy.
+
+See the ADR (FAQ Q7) for a detailed analysis of each workaround and why it fails.
+
+---
+
+## The Common Layer: A Retrospective
+
+The Common layer was the **original** workaround for circular inheritance, and understanding why it worked — and where it broke — is key to understanding why libraries are the right next step.
+
+### What Common Did
+
+The insight was pragmatic: if you can't have a graph of storage wrappers (circular inheritance), **flatten the graph into a single chain**. One linear path can't be circular:
+
+```
+Common → SecurityStorageWrapper → EquityStorageWrapper → BondStorageWrapper → ...
+```
+
+Every facet does `is FacetBase, Common` and gets access to everything. It shipped. It worked.
+
+### Where Common Broke Down
+
+**1. It serializes a graph into a chain — an information-destroying operation.**
+
+The real dependencies between domains are a graph. Security and Equity are unrelated. But the chain forces `SecurityStorageWrapper` to inherit from `EquityStorageWrapper`, coupling them for no domain reason. The real structure is lost.
+
+**2. Empty bridge contracts are pure ceremony.**
+
+```solidity
+abstract contract CommonFixedInterestRate is BondStorageWrapperFixedInterestRate {}
+```
+
+Zero lines of code. Exists solely to satisfy the compiler's diamond inheritance resolution. When a system needs increasing ceremony to add features, the architecture is working against you.
+
+**3. It hid the circular dependency instead of resolving it.**
+
+ERC1410 and ABAF genuinely need each other. Common doesn't model that interaction — it just makes everything available through one path. The circular dependency is still *conceptually* there; it's just invisible. An auditor can't see the real dependency structure.
+
+**4. Internals.sol had to be layered on top.**
+
+When bond variants needed virtual dispatch, Common couldn't help (it's about storage, not behavior). So Internals.sol was added — a second workaround on the first. Two layers of compromise, each making the other harder to reason about. This is the ultimate proof Common alone wasn't enough.
+
+### What Libraries Do Differently
+
+```
+Common layer:  dependency graph → serialized into chain → structure lost → ceremony added
+Libraries:     dependency graph → expressed directly    → structure preserved → no ceremony
+```
+
+When `LibERC1410` imports `LibABAF` and `LibSnapshots`, and `LibSnapshots` imports `LibERC1410` back, you're looking at the *real* relationships. Nothing serialized, nothing hidden, nothing arbitrary. The circular dependency is expressed, compiled, and working — not swept under a rug.
+
+Libraries eliminate **both** workaround layers (Common chain AND Internals monster) in one move.
+
+See ADR FAQ Q9 for the full analysis.
 
 ---
 
