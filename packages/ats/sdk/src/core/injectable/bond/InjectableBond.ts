@@ -22,6 +22,7 @@ import { TOKENS } from "../Tokens";
 import { GetLatestKpiDataQueryHandler } from "@query/interestRates/getLatestKpiData/GetLatestKpiDataQueryHandler";
 import { GetCouponFromOrderedListAtQueryHandler } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQueryHandler";
 import { GetMinDateQueryHandler } from "@query/kpis/getMinDate/GetMinDateQueryHandler";
+import { IsCheckPointDateQueryHandler } from "@query/kpis/isCheckPointDate/IsCheckPointDateQueryHandler";
 
 export const COMMAND_HANDLERS_BOND = [
   {
@@ -110,5 +111,9 @@ export const QUERY_HANDLERS_BOND = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetMinDateQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsCheckPointDateQueryHandler,
   },
 ];

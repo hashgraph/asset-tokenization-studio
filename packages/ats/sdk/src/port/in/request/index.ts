@@ -206,6 +206,7 @@ import GetRateRequest from "@port/in/request/interestRates/GetRateRequest";
 import CreateBondKpiLinkedRateRequest from "./bond/CreateBondKpiLinkedRateRequest";
 import GetLatestKpiDataRequest from "@port/in/request/kpis/GetLatestKpiDataRequest";
 import GetMinDateRequest from "@port/in/request/kpis/GetMinDateRequest";
+import IsCheckPointDateRequest from "@port/in/request/kpis/IsCheckPointDateRequest";
 
 export {
   CreateEquityRequest,
@@ -413,4 +414,5 @@ export {
   GetRateRequest,
   GetLatestKpiDataRequest,
   GetMinDateRequest,
+  IsCheckPointDateRequest,
 };

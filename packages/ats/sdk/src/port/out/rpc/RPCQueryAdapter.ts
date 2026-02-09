@@ -1402,4 +1402,9 @@ export class RPCQueryAdapter {
     const result = await this.connect(Kpis__factory, address.toString()).getMinDate();
     return result.toNumber();
   }
+
+  async isCheckPointDate(address: EvmAddress, date: BigNumber, project: EvmAddress): Promise<boolean> {
+    LogService.logTrace(`Checking if date ${date.toString()} is a checkpoint date for project ${project.toString()}`);
+    return await this.connect(Kpis__factory, address.toString()).isCheckPointDate(date, project.toString());
+  }
 }

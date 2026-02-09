@@ -16,6 +16,7 @@ import {
   GetLatestKpiDataRequest,
   GetMinDateRequest,
   InitializationRequest,
+  IsCheckPointDateRequest,
   LoggerTransports,
   Network,
   SDK,
@@ -183,6 +184,24 @@ describe("DFNS Transaction Adapter test", () => {
     const request = new GetMinDateRequest({ securityId: contractAddress });
 
     const result = await Kpis.getMinDate(request);
+    console.log("result: " + JSON.stringify(result));
+  }, 60_000);
+
+  it("query getIsCheckPointDate", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const request = new IsCheckPointDateRequest({
+      securityId: contractAddress,
+      date: BigNumber.from(1),
+      project: "",
+    });
+
+    const result = await Kpis.isCheckPointDate(request);
     console.log("result: " + JSON.stringify(result));
   }, 60_000);
 });
