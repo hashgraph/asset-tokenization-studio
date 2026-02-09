@@ -198,7 +198,7 @@ describe("DFNS Transaction Adapter test", () => {
     const request = new IsCheckPointDateRequest({
       securityId: contractAddress,
       date: BigNumber.from(1),
-      project: "",
+      project: contractAddress,
     });
 
     const result = await Kpis.isCheckPointDate(request);
