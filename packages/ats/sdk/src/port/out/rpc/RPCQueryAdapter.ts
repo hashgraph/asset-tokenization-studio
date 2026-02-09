@@ -1418,6 +1418,18 @@ export class RPCQueryAdapter {
     return result.toNumber();
   }
 
+  async getImpactData(address: EvmAddress): Promise<[BigNumber, BigNumber, BigNumber, number, BigNumber]> {
+    LogService.logTrace(`Getting impact data for the security: ${address.toString()}`);
+    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getImpactData();
+    return [
+      result.maxDeviationCap,
+      result.baseLine,
+      result.maxDeviationFloor,
+      result.impactDataDecimals,
+      result.adjustmentPrecision,
+    ];
+  }
+
   async isCheckPointDate(address: EvmAddress, date: BigNumber, project: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if date ${date.toString()} is a checkpoint date for project ${project.toString()}`);
     return await this.connect(Kpis__factory, address.toString()).isCheckPointDate(date, project.toString());

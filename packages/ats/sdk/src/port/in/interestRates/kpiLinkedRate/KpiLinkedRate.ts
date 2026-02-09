@@ -6,13 +6,20 @@ import { LogError } from "@core/decorator/LogErrorDecorator";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRateRequest";
 import InterestRateViewModel from "@port/in/response/interestRates/InterestRateViewModel";
+import ImpactDataViewModel from "@port/in/response/interestRates/ImpactDataViewModel";
+import GetImpactDataRequest from "@port/in/request/kpiLinkedRate/GetImpactDataRequest";
 import {
   GetInterestRateQuery,
   GetInterestRateQueryResponse,
 } from "../../../../app/usecase/query/interestRates/getInterestRate/GetInterestRateQuery";
+import {
+  GetImpactDataQuery,
+  GetImpactDataQueryResponse,
+} from "../../../../app/usecase/query/interestRates/getImpactData/GetImpactDataQuery";
 
 interface IKpiLinkedRateInPort {
   getInterestRate(request: GetInterestRateRequest): Promise<InterestRateViewModel>;
+  getImpactData(request: GetImpactDataRequest): Promise<ImpactDataViewModel>;
 }
 
 class KpiLinkedRateInPort implements IKpiLinkedRateInPort {
@@ -35,6 +42,23 @@ class KpiLinkedRateInPort implements IKpiLinkedRateInPort {
       missedPenalty: result.missedPenalty,
       reportPeriod: result.reportPeriod,
       rateDecimals: result.rateDecimals,
+    };
+  }
+
+  @LogError
+  async getImpactData(request: GetImpactDataRequest): Promise<ImpactDataViewModel> {
+    ValidatedRequest.handleValidation("GetImpactDataRequest", request);
+
+    const query = new GetImpactDataQuery(request.securityId);
+
+    const result: GetImpactDataQueryResponse = await this.queryBus.execute(query);
+
+    return {
+      maxDeviationCap: result.maxDeviationCap,
+      baseLine: result.baseLine,
+      maxDeviationFloor: result.maxDeviationFloor,
+      impactDataDecimals: result.impactDataDecimals,
+      adjustmentPrecision: result.adjustmentPrecision,
     };
   }
 }

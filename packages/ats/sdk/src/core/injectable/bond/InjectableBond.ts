@@ -19,6 +19,7 @@ import { GetBondDetailsQueryHandler } from "@query/bond/get/getBondDetails/GetBo
 import { GetPrincipalForQueryHandler } from "@query/bond/get/getPrincipalFor/GetPrincipalForQueryHandler";
 import { GetRateQueryHandler } from "@query/interestRates/getRate/GetRateQueryHandler";
 import { GetInterestRateQueryHandler } from "@query/interestRates/getInterestRate/GetInterestRateQueryHandler";
+import { GetImpactDataQueryHandler } from "@query/interestRates/getImpactData/GetImpactDataQueryHandler";
 import { TOKENS } from "../Tokens";
 import { GetLatestKpiDataQueryHandler } from "@query/interestRates/getLatestKpiData/GetLatestKpiDataQueryHandler";
 import { GetCouponFromOrderedListAtQueryHandler } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQueryHandler";
@@ -108,6 +109,10 @@ export const QUERY_HANDLERS_BOND = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetInterestRateQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetImpactDataQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
