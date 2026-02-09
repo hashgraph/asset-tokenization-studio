@@ -14,7 +14,7 @@
 import { expect } from "chai";
 import { promises as fs } from "fs";
 import { join } from "path";
-import { CheckpointManager } from "@scripts/infrastructure";
+import { CheckpointManager, type DeployedContract } from "@scripts/infrastructure";
 import {
   TEST_ADDRESSES,
   TEST_NETWORKS,
@@ -24,6 +24,7 @@ import {
   TEST_DIRS,
   TEST_TIME,
   TEST_STANDARD_CONTRACTS,
+  TEST_DELAYS,
 } from "@test";
 
 describe("CheckpointManager", () => {
@@ -88,7 +89,7 @@ describe("CheckpointManager", () => {
       });
 
       // Wait to ensure different timestamp (non-blocking)
-      await new Promise((resolve) => setTimeout(resolve, 5));
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.SHORT));
 
       const checkpoint2 = manager.createCheckpoint({
         network,
@@ -150,7 +151,7 @@ describe("CheckpointManager", () => {
       const originalLastUpdate = checkpoint.lastUpdate;
 
       // Wait a bit
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
 
       await manager.saveCheckpoint(checkpoint);
 
@@ -193,16 +194,16 @@ describe("CheckpointManager", () => {
         [
           TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET,
           {
-            address: TEST_ADDRESSES.VALID_3,
-            txHash: TEST_TX_HASHES.SAMPLE_1,
+            address: TEST_ADDRESSES.VALID_3 as string,
+            txHash: TEST_TX_HASHES.SAMPLE_1 as string,
             deployedAt: new Date().toISOString(),
           },
         ],
         [
           TEST_STANDARD_CONTRACTS.PAUSABLE_FACET,
           {
-            address: TEST_ADDRESSES.VALID_4,
-            txHash: TEST_TX_HASHES.SAMPLE_2,
+            address: TEST_ADDRESSES.VALID_4 as string,
+            txHash: TEST_TX_HASHES.SAMPLE_2 as string,
             deployedAt: new Date().toISOString(),
           },
         ],
@@ -264,15 +265,15 @@ describe("CheckpointManager", () => {
         options: {},
       });
 
-      const facet1 = {
-        address: TEST_ADDRESSES.VALID_3,
-        txHash: TEST_TX_HASHES.SAMPLE_1,
+      const facet1: DeployedContract = {
+        address: TEST_ADDRESSES.VALID_3 as string,
+        txHash: TEST_TX_HASHES.SAMPLE_1 as string,
         deployedAt: new Date().toISOString(),
       };
 
-      const facet2 = {
-        address: TEST_ADDRESSES.VALID_4,
-        txHash: TEST_TX_HASHES.SAMPLE_2,
+      const facet2: DeployedContract = {
+        address: TEST_ADDRESSES.VALID_4 as string,
+        txHash: TEST_TX_HASHES.SAMPLE_2 as string,
         deployedAt: new Date().toISOString(),
       };
 
@@ -330,7 +331,7 @@ describe("CheckpointManager", () => {
       await manager.saveCheckpoint(checkpoint1);
 
       // Wait to ensure different timestamp
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
 
       const checkpoint2 = manager.createCheckpoint({
         network: TEST_NETWORKS.TESTNET,
@@ -357,7 +358,7 @@ describe("CheckpointManager", () => {
       await manager.saveCheckpoint(checkpoint1);
 
       // Wait to ensure different timestamp
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
 
       const checkpoint2 = manager.createCheckpoint({
         network: TEST_NETWORKS.TESTNET,
@@ -369,7 +370,7 @@ describe("CheckpointManager", () => {
       await manager.saveCheckpoint(checkpoint2);
 
       // Wait to ensure different timestamp
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
 
       const checkpoint3 = manager.createCheckpoint({
         network: TEST_NETWORKS.TESTNET,
@@ -411,7 +412,7 @@ describe("CheckpointManager", () => {
       });
       await manager.saveCheckpoint(checkpoint1);
 
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
 
       const checkpoint2 = manager.createCheckpoint({
         network: TEST_NETWORKS.TESTNET,
@@ -421,7 +422,7 @@ describe("CheckpointManager", () => {
       });
       await manager.saveCheckpoint(checkpoint2);
 
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, TEST_DELAYS.MEDIUM));
 
       const checkpoint3 = manager.createCheckpoint({
         network: TEST_NETWORKS.TESTNET,

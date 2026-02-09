@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BigNumber } from "ethers";
 import { Query } from "@core/query/Query";
 import { QueryResponse } from "@core/query/QueryResponse";
 
 export class LocksIdQueryResponse implements QueryResponse {
-  constructor(public readonly payload: BigNumber[]) {}
+  constructor(public readonly payload: bigint[]) {}
 }
 
 export class LocksIdQuery extends Query<LocksIdQueryResponse> {

@@ -52,7 +52,7 @@ describe("Checkpoint Converters", () => {
     it("should return false for failed result", () => {
       const result: OperationResult<string, "VALIDATION_ERROR"> = {
         success: false,
-        code: "VALIDATION_ERROR",
+        error: "VALIDATION_ERROR",
         message: "Validation failed",
       };
 
@@ -62,7 +62,7 @@ describe("Checkpoint Converters", () => {
     it("should narrow type when used in filter", () => {
       const results: OperationResult<number, "ERROR">[] = [
         { success: true, data: 1 },
-        { success: false, code: "ERROR", message: "Failed" },
+        { success: false, error: "ERROR", message: "Failed" },
         { success: true, data: 2 },
       ];
 
@@ -79,7 +79,7 @@ describe("Checkpoint Converters", () => {
     it("should return true for failed result", () => {
       const result: OperationResult<string, "VALIDATION_ERROR"> = {
         success: false,
-        code: "VALIDATION_ERROR",
+        error: "VALIDATION_ERROR",
         message: "Validation failed",
       };
 
@@ -98,8 +98,8 @@ describe("Checkpoint Converters", () => {
     it("should narrow type when used in filter", () => {
       const results: OperationResult<number, "ERROR">[] = [
         { success: true, data: 1 },
-        { success: false, code: "ERROR", message: "Failed 1" },
-        { success: false, code: "ERROR", message: "Failed 2" },
+        { success: false, error: "ERROR", message: "Failed 1" },
+        { success: false, error: "ERROR", message: "Failed 2" },
       ];
 
       const failures = results.filter(isFailure);
@@ -121,6 +121,7 @@ describe("Checkpoint Converters", () => {
         address: TEST_ADDRESSES.VALID_0,
         txHash: TEST_TX_HASHES.SAMPLE_0,
         gasUsed: "1000000",
+        deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
       };
 
       const result = toDeploymentResult(deployed);
@@ -131,13 +132,14 @@ describe("Checkpoint Converters", () => {
       expect(result.gasUsed).to.equal(1000000);
       expect(result.blockNumber).to.equal(0); // Not persisted
       expect(result.contract).to.exist;
-      expect(result.contract.address).to.equal(TEST_ADDRESSES.VALID_0);
+      expect(result.contract!.address).to.equal(TEST_ADDRESSES.VALID_0);
     });
 
     it("should handle missing gasUsed", () => {
       const deployed: DeployedContract = {
         address: TEST_ADDRESSES.VALID_1,
         txHash: TEST_TX_HASHES.SAMPLE_1,
+        deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
       };
 
       const result = toDeploymentResult(deployed);
@@ -152,6 +154,7 @@ describe("Checkpoint Converters", () => {
         address: TEST_ADDRESSES.VALID_2,
         txHash: TEST_TX_HASHES.SAMPLE_2,
         gasUsed: "5000000",
+        deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
       };
 
       const result = toDeploymentResult(deployed);
@@ -168,6 +171,7 @@ describe("Checkpoint Converters", () => {
         implementation: TEST_ADDRESSES.VALID_1,
         proxy: TEST_ADDRESSES.VALID_2,
         txHash: TEST_TX_HASHES.SAMPLE_0,
+        deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
       };
 
       const result = toDeployBlrResult(blrCheckpoint);
@@ -185,6 +189,7 @@ describe("Checkpoint Converters", () => {
         implementation: TEST_ADDRESSES.VALID_1,
         proxy: TEST_ADDRESSES.VALID_2,
         txHash: TEST_TX_HASHES.SAMPLE_0,
+        deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
       };
       const overrideAdmin = TEST_ADDRESSES.VALID_3;
 
@@ -199,6 +204,7 @@ describe("Checkpoint Converters", () => {
         implementation: TEST_ADDRESSES.VALID_1,
         proxy: TEST_ADDRESSES.VALID_2,
         txHash: TEST_TX_HASHES.SAMPLE_0,
+        deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
       };
 
       const result = toDeployBlrResult(blrCheckpoint);
@@ -215,6 +221,7 @@ describe("Checkpoint Converters", () => {
         implementation: TEST_ADDRESSES.VALID_1,
         proxy: TEST_ADDRESSES.VALID_2,
         txHash: TEST_TX_HASHES.SAMPLE_0,
+        deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
         isExternal: true,
       };
 
@@ -233,6 +240,7 @@ describe("Checkpoint Converters", () => {
         implementation: TEST_ADDRESSES.VALID_1,
         proxy: TEST_ADDRESSES.VALID_2,
         txHash: TEST_TX_HASHES.SAMPLE_0,
+        deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
       };
 
       const result = toDeployFactoryResult(factoryCheckpoint);
@@ -240,7 +248,7 @@ describe("Checkpoint Converters", () => {
       expect(result.success).to.be.true;
       expect(result.proxyAddress).to.equal(TEST_ADDRESSES.VALID_2);
       expect(result.contract).to.exist;
-      expect(result.contract.address).to.equal(TEST_ADDRESSES.VALID_2);
+      expect(result.contract!.address).to.equal(TEST_ADDRESSES.VALID_2);
     });
 
     it("should set configuration fields as undefined", () => {
@@ -249,6 +257,7 @@ describe("Checkpoint Converters", () => {
         implementation: TEST_ADDRESSES.VALID_1,
         proxy: TEST_ADDRESSES.VALID_2,
         txHash: TEST_TX_HASHES.SAMPLE_0,
+        deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
       };
 
       const result = toDeployFactoryResult(factoryCheckpoint);
@@ -268,6 +277,7 @@ describe("Checkpoint Converters", () => {
       const configCheckpoint: ConfigurationResult = {
         configId: TEST_CONFIG_IDS.EQUITY,
         version: 1,
+        facetCount: 5,
         txHash: TEST_TX_HASHES.SAMPLE_0,
         gasUsed: "2000000",
       };
@@ -275,33 +285,40 @@ describe("Checkpoint Converters", () => {
       const result = toConfigurationData(configCheckpoint);
 
       expect(result.success).to.be.true;
-      expect(result.data?.configurationId).to.equal(TEST_CONFIG_IDS.EQUITY);
-      expect(result.data?.version).to.equal(1);
-      expect(result.data?.transactionHash).to.equal(TEST_TX_HASHES.SAMPLE_0);
+      if (!result.success) throw new Error("Expected success");
+      expect(result.data.configurationId).to.equal(TEST_CONFIG_IDS.EQUITY);
+      expect(result.data.version).to.equal(1);
+      expect(result.data.transactionHash).to.equal(TEST_TX_HASHES.SAMPLE_0);
     });
 
     it("should set facetKeys to empty array", () => {
       const configCheckpoint: ConfigurationResult = {
         configId: TEST_CONFIG_IDS.BOND,
         version: 2,
+        facetCount: 3,
         txHash: TEST_TX_HASHES.SAMPLE_1,
       };
 
       const result = toConfigurationData(configCheckpoint);
 
-      expect(result.data?.facetKeys).to.deep.equal([]);
+      expect(result.success).to.be.true;
+      if (!result.success) throw new Error("Expected success");
+      expect(result.data.facetKeys).to.deep.equal([]);
     });
 
     it("should set blockNumber to 0", () => {
       const configCheckpoint: ConfigurationResult = {
         configId: TEST_CONFIG_IDS.EQUITY,
         version: 1,
+        facetCount: 5,
         txHash: TEST_TX_HASHES.SAMPLE_0,
       };
 
       const result = toConfigurationData(configCheckpoint);
 
-      expect(result.data?.blockNumber).to.equal(0);
+      expect(result.success).to.be.true;
+      if (!result.success) throw new Error("Expected success");
+      expect(result.data.blockNumber).to.equal(0);
     });
   });
 
@@ -312,8 +329,14 @@ describe("Checkpoint Converters", () => {
   describe("convertCheckpointFacets", () => {
     it("should convert facet map to deployment results", () => {
       const checkpointFacets = new Map<string, DeployedContract>([
-        ["AccessControlFacet", { address: TEST_ADDRESSES.VALID_0, txHash: TEST_TX_HASHES.SAMPLE_0 }],
-        ["PauseFacet", { address: TEST_ADDRESSES.VALID_1, txHash: TEST_TX_HASHES.SAMPLE_1 }],
+        [
+          "AccessControlFacet",
+          { address: TEST_ADDRESSES.VALID_0, txHash: TEST_TX_HASHES.SAMPLE_0, deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE },
+        ],
+        [
+          "PauseFacet",
+          { address: TEST_ADDRESSES.VALID_1, txHash: TEST_TX_HASHES.SAMPLE_1, deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE },
+        ],
       ]);
 
       const results = convertCheckpointFacets(checkpointFacets);
@@ -339,6 +362,7 @@ describe("Checkpoint Converters", () => {
           {
             address: TEST_ADDRESSES[`VALID_${i}` as keyof typeof TEST_ADDRESSES] as string,
             txHash: TEST_TX_HASHES[`SAMPLE_${i}` as keyof typeof TEST_TX_HASHES] as string,
+            deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
           },
         ]),
       );
@@ -358,41 +382,56 @@ describe("Checkpoint Converters", () => {
   describe("extractCheckpointResults", () => {
     it("should extract all results from complete checkpoint", () => {
       const checkpoint: DeploymentCheckpoint = {
-        id: "test-checkpoint",
+        checkpointId: "test-checkpoint",
         network: TEST_NETWORKS.TESTNET,
-        workflow: TEST_WORKFLOWS.NEW_BLR,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         status: TEST_CHECKPOINT_STATUS.COMPLETED as "completed",
         currentStep: 8,
-        timestamp: TEST_TIMESTAMPS.ISO_SAMPLE,
+        startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
         lastUpdate: TEST_TIMESTAMPS.ISO_SAMPLE_LATER,
         deployer: TEST_ADDRESSES.VALID_0,
+        options: {},
         steps: {
           proxyAdmin: {
             address: TEST_ADDRESSES.VALID_0,
             txHash: TEST_TX_HASHES.SAMPLE_0,
+            deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
           },
           blr: {
             address: TEST_ADDRESSES.VALID_1,
             implementation: TEST_ADDRESSES.VALID_2,
             proxy: TEST_ADDRESSES.VALID_3,
             txHash: TEST_TX_HASHES.SAMPLE_1,
+            deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
           },
-          facets: new Map([["TestFacet", { address: TEST_ADDRESSES.VALID_4, txHash: TEST_TX_HASHES.SAMPLE_2 }]]),
+          facets: new Map([
+            [
+              "TestFacet",
+              {
+                address: TEST_ADDRESSES.VALID_4,
+                txHash: TEST_TX_HASHES.SAMPLE_2,
+                deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
+              },
+            ],
+          ]),
           factory: {
             address: TEST_ADDRESSES.VALID_5,
             implementation: TEST_ADDRESSES.VALID_6,
             proxy: TEST_ADDRESSES.VALID_5,
             txHash: TEST_TX_HASHES.SAMPLE_3,
+            deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
           },
           configurations: {
             equity: {
               configId: TEST_CONFIG_IDS.EQUITY,
               version: 1,
+              facetCount: 5,
               txHash: TEST_TX_HASHES.SAMPLE_4,
             },
             bond: {
               configId: TEST_CONFIG_IDS.BOND,
               version: 1,
+              facetCount: 5,
               txHash: TEST_TX_HASHES.SAMPLE_5,
             },
           },
@@ -420,18 +459,20 @@ describe("Checkpoint Converters", () => {
 
     it("should return undefined for missing steps", () => {
       const checkpoint: DeploymentCheckpoint = {
-        id: "partial-checkpoint",
+        checkpointId: "partial-checkpoint",
         network: TEST_NETWORKS.TESTNET,
-        workflow: TEST_WORKFLOWS.NEW_BLR,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         status: TEST_CHECKPOINT_STATUS.IN_PROGRESS as "in-progress",
         currentStep: 1,
-        timestamp: TEST_TIMESTAMPS.ISO_SAMPLE,
+        startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
         lastUpdate: TEST_TIMESTAMPS.ISO_SAMPLE,
         deployer: TEST_ADDRESSES.VALID_0,
+        options: {},
         steps: {
           proxyAdmin: {
             address: TEST_ADDRESSES.VALID_0,
             txHash: TEST_TX_HASHES.SAMPLE_0,
+            deployedAt: TEST_TIMESTAMPS.ISO_SAMPLE,
           },
         },
       };
@@ -447,19 +488,21 @@ describe("Checkpoint Converters", () => {
 
     it("should handle partial configurations", () => {
       const checkpoint: DeploymentCheckpoint = {
-        id: "partial-configs",
+        checkpointId: "partial-configs",
         network: TEST_NETWORKS.TESTNET,
-        workflow: TEST_WORKFLOWS.NEW_BLR,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         status: TEST_CHECKPOINT_STATUS.IN_PROGRESS as "in-progress",
         currentStep: 5,
-        timestamp: TEST_TIMESTAMPS.ISO_SAMPLE,
+        startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
         lastUpdate: TEST_TIMESTAMPS.ISO_SAMPLE,
         deployer: TEST_ADDRESSES.VALID_0,
+        options: {},
         steps: {
           configurations: {
             equity: {
               configId: TEST_CONFIG_IDS.EQUITY,
               version: 1,
+              facetCount: 5,
               txHash: TEST_TX_HASHES.SAMPLE_0,
             },
             // bond not present
@@ -476,14 +519,15 @@ describe("Checkpoint Converters", () => {
 
     it("should handle empty steps", () => {
       const checkpoint: DeploymentCheckpoint = {
-        id: "empty-checkpoint",
+        checkpointId: "empty-checkpoint",
         network: TEST_NETWORKS.TESTNET,
-        workflow: TEST_WORKFLOWS.NEW_BLR,
+        workflowType: TEST_WORKFLOWS.NEW_BLR,
         status: TEST_CHECKPOINT_STATUS.IN_PROGRESS as "in-progress",
         currentStep: 0,
-        timestamp: TEST_TIMESTAMPS.ISO_SAMPLE,
+        startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
         lastUpdate: TEST_TIMESTAMPS.ISO_SAMPLE,
         deployer: TEST_ADDRESSES.VALID_0,
+        options: {},
         steps: {},
       };
 

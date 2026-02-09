@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type AccessControlFacet, PauseFacet } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
@@ -11,10 +11,10 @@ describe("Access Control Tests", () => {
   let diamond: ResolverProxy;
   let pauseFacet: PauseFacet;
   let accessControlFacet: AccessControlFacet;
-  let deployer: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let unknownSigner: SignerWithAddress;
+  let deployer: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let unknownSigner: HardhatEthersSigner;
 
   async function deployFixture() {
     const base = await deployEquityTokenFixture();
@@ -26,7 +26,7 @@ describe("Access Control Tests", () => {
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target);
     deployer = base.deployer;
     pauseFacet = base.pauseFacet;
     signer_B = base.user1;

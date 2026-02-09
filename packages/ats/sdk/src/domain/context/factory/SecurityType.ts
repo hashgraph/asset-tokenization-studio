@@ -9,17 +9,17 @@ export enum SecurityType {
 }
 
 export class CastSecurityType {
-  static fromNumber(id: number): SecurityType {
+  static fromBigint(id: bigint): SecurityType {
     switch (id) {
-      case 0:
+      case 0n:
         return SecurityType.BOND_VARIABLE_RATE;
-      case 1:
+      case 1n:
         return SecurityType.EQUITY;
-      case 2:
+      case 2n:
         return SecurityType.BOND_FIXED_RATE;
-      case 3:
+      case 3n:
         return SecurityType.BOND_KPI_LINKED_RATE;
-      case 4:
+      case 4n:
         return SecurityType.BOND_SPT_RATE;
       default:
         return SecurityType.BOND_VARIABLE_RATE;

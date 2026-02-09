@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type CapFacet,
@@ -34,9 +34,9 @@ interface Adjustment {
 
 describe("Cap Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let capFacet: CapFacet;
   let accessControlFacet: AccessControl;
@@ -81,15 +81,15 @@ describe("Cap Tests", () => {
       },
     ]);
 
-    capFacet = await ethers.getContractAt("CapFacet", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
+    capFacet = await ethers.getContractAt("CapFacet", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target, signer_A);
+    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.target, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
   }
@@ -334,15 +334,15 @@ describe("Cap Tests", () => {
     });
 
     it("GIVEN a token with max supply equal to MAX_UINT THEN balance adjustment occurs but max supply remains unchanged", async () => {
-      let adjustmentFactor = 2;
+      let adjustmentFactor = 2n;
 
       // Before
-      await capFacet.setMaxSupply(MAX_UINT256.div(adjustmentFactor));
-      await capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, MAX_UINT256.div(adjustmentFactor));
+      await capFacet.setMaxSupply(MAX_UINT256 / adjustmentFactor);
+      await capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, MAX_UINT256 / adjustmentFactor);
 
       // First adjustment
       const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`);
-      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [adjustmentFactor + 1], [0]);
+      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [Number(adjustmentFactor + 1n)], [0]);
       await setupScheduledBalanceAdjustments(adjustments);
 
       await timeTravelFacet.changeSystemTimestamp(adjustments[0].executionDate + 1);

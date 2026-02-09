@@ -19,7 +19,7 @@ describe("Regulation Tests", () => {
   beforeEach(async () => {
     const MockedRegulationFactory = await ethers.getContractFactory("MockedRegulation");
     regulationHelper = await MockedRegulationFactory.deploy();
-    await regulationHelper.deployed();
+    await regulationHelper.waitForDeployment();
   });
 
   describe("buildRegulationData", () => {

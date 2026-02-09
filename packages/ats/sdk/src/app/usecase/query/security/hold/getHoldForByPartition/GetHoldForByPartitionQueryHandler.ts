@@ -40,7 +40,7 @@ export class GetHoldForByPartitionQueryHandler implements IQueryHandler<GetHoldF
         holdId,
       );
 
-      holdDetail.amount = BigDecimal.fromStringFixed(holdDetail.amount.toString(), security.decimals);
+      holdDetail.amount = BigDecimal.fromStringFixed(holdDetail.amount.toString(), security.decimals).toBigInt();
 
       return new GetHoldForByPartitionQueryResponse(holdDetail);
     } catch (error) {

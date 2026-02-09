@@ -138,7 +138,7 @@ describe("Bond Variant Deployments", () => {
 
         const result = await deployBondFixedRateFromFactory(params, regulationData, fixedRateParams);
 
-        expect(result.address).to.equal(diamondAddress);
+        expect(result.target).to.equal(diamondAddress);
       });
 
       it("should throw if BondFixedRateDeployed event not found", async () => {
@@ -278,7 +278,7 @@ describe("Bond Variant Deployments", () => {
           impactDataParams,
         );
 
-        expect(result.address).to.equal(diamondAddress);
+        expect(result.target).to.equal(diamondAddress);
       });
 
       it("should throw if BondKpiLinkedRateDeployed event not found", async () => {
@@ -518,7 +518,7 @@ describe("Bond Variant Deployments", () => {
           projects,
         );
 
-        expect(result.address).to.equal(diamondAddress);
+        expect(result.target).to.equal(diamondAddress);
       });
 
       it("should throw if BondSustainabilityPerformanceTargetRateDeployed event not found", async () => {

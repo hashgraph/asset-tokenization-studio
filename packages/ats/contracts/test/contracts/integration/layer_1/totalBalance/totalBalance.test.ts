@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   type ResolverProxy,
@@ -14,10 +14,11 @@ import {
   type KycFacet,
   type SsiManagementFacet,
   type TotalBalanceFacet,
+  type IHold,
 } from "@contract-types";
 import { ATS_ROLES, ADDRESS_ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
 import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
-import { BigNumber, Contract } from "ethers";
+import { Contract } from "ethers";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _SECOND_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000002";
@@ -31,8 +32,8 @@ interface ClearingOperation {
 }
 
 interface Hold {
-  amount: BigNumber;
-  expirationTimestamp: BigNumber;
+  amount: bigint | number;
+  expirationTimestamp: bigint | number;
   escrow: string;
   to: string;
   data: string;
@@ -40,14 +41,14 @@ interface Hold {
 
 describe("Total Balance Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let erc1410Facet: IERC1410;
   let lockFacet: LockFacet;
-  let holdFacet: Contract;
+  let holdFacet: IHold;
   let clearingFacet: Contract;
   let clearingActionsFacet: ClearingActionsFacet;
   let freezeFacet: FreezeFacet;
@@ -61,13 +62,9 @@ describe("Total Balance Tests", () => {
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
     // Get clearing facets and combine their interfaces
-    const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address, signer_A);
-    const clearingHoldCreationFacet = await ethers.getContractAt(
-      "ClearingHoldCreationFacet",
-      diamond.address,
-      signer_A,
-    );
-    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.address, signer_A);
+    const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
+    const clearingHoldCreationFacet = await ethers.getContractAt("ClearingHoldCreationFacet", diamond.target, signer_A);
+    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.target as string, signer_A);
 
     const fragmentMap = new Map<string, any>();
     [
@@ -82,15 +79,15 @@ describe("Total Balance Tests", () => {
     });
 
     const uniqueFragments = Array.from(fragmentMap.values());
-    clearingFacet = new Contract(diamond.address, uniqueFragments, signer_A);
+    clearingFacet = new Contract(diamond.target, uniqueFragments, signer_A);
 
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-    lockFacet = await ethers.getContractAt("LockFacet", diamond.address, signer_C);
-    holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address, signer_D);
-    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
-    totalBalanceFacet = await ethers.getContractAt("TotalBalanceFacet", diamond.address, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_B);
+    lockFacet = await ethers.getContractAt("LockFacet", diamond.target, signer_C);
+    holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
+    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target, signer_D);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
+    totalBalanceFacet = await ethers.getContractAt("TotalBalanceFacet", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -149,7 +146,7 @@ describe("Total Balance Tests", () => {
   }
 
   beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+    currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
     expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
   });
 
@@ -197,8 +194,8 @@ describe("Total Balance Tests", () => {
 
       // Hold tokens in DEFAULT partition
       const holdDefault: Hold = {
-        amount: BigNumber.from(defaultHoldAmount),
-        expirationTimestamp: BigNumber.from(expirationTimestamp),
+        amount: BigInt(defaultHoldAmount),
+        expirationTimestamp: BigInt(expirationTimestamp),
         escrow: signer_B.address,
         to: ADDRESS_ZERO,
         data: EMPTY_HEX_BYTES,
@@ -207,8 +204,8 @@ describe("Total Balance Tests", () => {
 
       // Hold tokens in SECOND partition
       const holdSecond: Hold = {
-        amount: BigNumber.from(secondHoldAmount),
-        expirationTimestamp: BigNumber.from(expirationTimestamp),
+        amount: BigInt(secondHoldAmount),
+        expirationTimestamp: BigInt(expirationTimestamp),
         escrow: signer_B.address,
         to: ADDRESS_ZERO,
         data: EMPTY_HEX_BYTES,
@@ -279,8 +276,8 @@ describe("Total Balance Tests", () => {
 
       // Hold tokens
       const hold: Hold = {
-        amount: BigNumber.from(holdAmount),
-        expirationTimestamp: BigNumber.from(expirationTimestamp),
+        amount: BigInt(holdAmount),
+        expirationTimestamp: BigInt(expirationTimestamp),
         escrow: signer_B.address,
         to: ADDRESS_ZERO,
         data: EMPTY_HEX_BYTES,

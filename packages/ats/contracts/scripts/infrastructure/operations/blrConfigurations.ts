@@ -28,7 +28,6 @@
  * @module core/operations/blrConfigurations
  */
 
-import { Contract } from "ethers";
 import { BusinessLogicResolver } from "@contract-types";
 import {
   DEFAULT_TRANSACTION_TIMEOUT,
@@ -71,7 +70,7 @@ export async function getConfigurationVersion(blr: BusinessLogicResolver, config
     validateBytes32(configurationId, "configuration ID");
 
     const version = await blr.getLatestVersionByConfiguration(configurationId);
-    return version.toNumber();
+    return Number(version);
   } catch (err) {
     logError(`Error getting configuration version: ${extractRevertReason(err)}`);
     throw err;
@@ -161,7 +160,7 @@ export async function processFacetLists(
   configId: string,
   facetIdList: string[],
   facetVersionList: number[],
-  blrContract: Contract,
+  blrContract: BusinessLogicResolver,
   partialBatchDeploy: boolean,
   batchSize: number = DEFAULT_BATCH_SIZE,
   gasLimit?: number,
@@ -251,7 +250,7 @@ export async function sendBatchConfiguration(
   configId: string,
   configurations: BatchFacetConfiguration[],
   isFinalBatch: boolean,
-  blrContract: Contract,
+  blrContract: BusinessLogicResolver,
   partialBatchDeploy: boolean,
   gasLimit?: number,
   confirmations: number = 0,
@@ -282,7 +281,7 @@ export async function sendBatchConfiguration(
     debug(gasUsed);
 
     success(`Batch configuration ${finalBatch ? "(final)" : "(partial)"} completed successfully`);
-    info(`  Transaction: ${receipt.transactionHash}`);
+    info(`  Transaction: ${receipt.hash}`);
     info(`  Block: ${receipt.blockNumber}`);
   } catch (err) {
     const errorMessage = extractRevertReason(err);
@@ -333,7 +332,7 @@ export async function sendBatchConfiguration(
  * ```
  */
 export async function createBatchConfiguration(
-  blrContract: Contract,
+  blrContract: BusinessLogicResolver,
   options: {
     /** Configuration ID (bytes32) */
     configurationId: string;
@@ -372,7 +371,7 @@ export async function createBatchConfiguration(
   }
 
   try {
-    const blrAddress = blrContract.address;
+    const blrAddress = await blrContract.getAddress();
 
     info("Creating Batch BLR Configuration", {
       blrAddress,
@@ -395,7 +394,7 @@ export async function createBatchConfiguration(
     info(`Resolved ${facetKeys.length} facets with addresses`, {});
 
     const latestVersion = await blrContract.getLatestVersion();
-    const version = latestVersion.toNumber();
+    const version = Number(latestVersion);
 
     info("Retrieved latest version from BLR", { version });
 
@@ -422,7 +421,7 @@ export async function createBatchConfiguration(
 
     // Query the actual configuration-specific version after batch processing
     const configVersion = await blrContract.getLatestVersionByConfiguration(configurationId);
-    const actualVersion = configVersion.toNumber();
+    const actualVersion = Number(configVersion);
 
     // Dynamic import for parallel test performance (see module JSDoc)
     const { success: logSuccess } = await import("../utils/logging");

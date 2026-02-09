@@ -9,7 +9,7 @@
  * @module core/utils/transaction
  */
 
-import { ContractTransaction, ContractReceipt, providers, BigNumber } from "ethers";
+import { ContractTransactionResponse, ContractTransactionReceipt, Provider } from "ethers";
 import { DEFAULT_TRANSACTION_TIMEOUT } from "../constants";
 import { info, warn, debug } from "./logging";
 
@@ -25,7 +25,7 @@ export const DEFAULT_TRANSACTION_CONFIRMATIONS = 2;
  * @param tx - Transaction to wait for
  * @param confirmations - Number of confirmations to wait for (default: 2)
  * @param timeout - Timeout in milliseconds (default: 120000 = 2 minutes)
- * @returns Promise resolving to ContractReceipt
+ * @returns Promise resolving to ContractTransactionReceipt
  * @throws Error if transaction fails or times out
  *
  * @example
@@ -36,10 +36,10 @@ export const DEFAULT_TRANSACTION_CONFIRMATIONS = 2;
  * ```
  */
 export async function waitForTransaction(
-  tx: ContractTransaction,
+  tx: ContractTransactionResponse,
   confirmations: number = DEFAULT_TRANSACTION_CONFIRMATIONS,
   timeout: number = DEFAULT_TRANSACTION_TIMEOUT,
-): Promise<ContractReceipt> {
+): Promise<ContractTransactionReceipt> {
   try {
     const receipt = await Promise.race([
       tx.wait(confirmations),
@@ -69,10 +69,11 @@ export async function waitForTransaction(
  * const gasPrice = await getGasPrice(provider, 1.2) // 20% higher for faster tx
  * ```
  */
-export async function getGasPrice(provider: providers.Provider, multiplier: number = 1.0): Promise<BigNumber> {
+export async function getGasPrice(provider: Provider, multiplier: number = 1.0): Promise<bigint> {
   try {
-    const gasPrice = await provider.getGasPrice();
-    const adjusted = gasPrice.mul(Math.floor(multiplier * 100)).div(100);
+    const feeData = await provider.getFeeData();
+    const gasPrice = feeData.gasPrice ?? 0n;
+    const adjusted = (gasPrice * BigInt(Math.floor(multiplier * 100))) / 100n;
     return adjusted;
   } catch (error) {
     throw new Error(`Failed to get gas price: ${error instanceof Error ? error.message : String(error)}`);
@@ -92,8 +93,8 @@ export async function getGasPrice(provider: providers.Provider, multiplier: numb
  * const gasLimit = estimateGasLimit(estimated, 1.3) // 30% buffer
  * ```
  */
-export function estimateGasLimit(estimatedGas: BigNumber | number, buffer: number = 1.2): number {
-  const gas = typeof estimatedGas === "number" ? estimatedGas : estimatedGas.toNumber();
+export function estimateGasLimit(estimatedGas: bigint | number, buffer: number = 1.2): number {
+  const gas = typeof estimatedGas === "number" ? estimatedGas : Number(estimatedGas);
   return Math.floor(gas * buffer);
 }
 
@@ -266,14 +267,14 @@ function adjustDelayForErrorType(error: unknown, baseDelay: number): number {
  * // "Gas used: 123,456 (12.35% of limit 1,000,000)"
  * ```
  */
-export function formatGasUsage(receipt: ContractReceipt, gasLimit?: BigNumber): string {
-  const gasUsed = receipt.gasUsed.toNumber();
+export function formatGasUsage(receipt: ContractTransactionReceipt, gasLimit?: bigint): string {
+  const gasUsed = Number(receipt.gasUsed);
 
   if (!gasLimit) {
     return `Gas used: ${gasUsed.toLocaleString()}`;
   }
 
-  const limit = gasLimit.toNumber();
+  const limit = Number(gasLimit);
   const percentage = ((gasUsed / limit) * 100).toFixed(2);
 
   return `Gas used: ${gasUsed.toLocaleString()} (${percentage}% of limit ${limit.toLocaleString()})`;

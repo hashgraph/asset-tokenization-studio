@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-29T07:38:32.541Z
+ * Generated: 2026-02-02T10:12:47.105Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -846,7 +846,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "_initialize_bondUSA",
         signature:
-          "function _initialize_bondUSA(tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+          "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
       },
       {
@@ -862,7 +862,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "setCoupon",
         signature:
-          "function setCoupon(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
         selector: "0xb16fd0cc",
       },
       {
@@ -893,7 +893,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "_initialize_bondUSA",
         signature:
-          "function _initialize_bondUSA(tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+          "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
       },
       {
@@ -909,7 +909,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "setCoupon",
         signature:
-          "function setCoupon(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
         selector: "0xb16fd0cc",
       },
       {
@@ -941,7 +941,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "_initialize_bondUSA",
         signature:
-          "function _initialize_bondUSA(tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+          "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
       },
       {
@@ -957,7 +957,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "setCoupon",
         signature:
-          "function setCoupon(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
         selector: "0xb16fd0cc",
       },
       {
@@ -991,19 +991,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getBondDetails",
         signature:
-          "function getBondDetails() view returns (tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
+          "function getBondDetails() view returns ((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
         selector: "0x4ce02414",
       },
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
         selector: "0x936e3169",
       },
       {
         name: "getCouponAmountFor",
         signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
         selector: "0x439efc2e",
       },
       {
@@ -1014,7 +1014,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns (tuple(uint256 tokenBalance, uint8 decimals, bool recordDateReached, tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1042,7 +1042,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getPrincipalFor",
         signature:
-          "function getPrincipalFor(address _account) view returns (tuple(uint256 numerator, uint256 denominator) principalFor_)",
+          "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
         selector: "0x6f131c78",
       },
       {
@@ -1054,7 +1054,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getSecurityRegulationData",
         signature:
-          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+          "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
       },
       {
@@ -1083,19 +1083,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getBondDetails",
         signature:
-          "function getBondDetails() view returns (tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
+          "function getBondDetails() view returns ((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
         selector: "0x4ce02414",
       },
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
         selector: "0x936e3169",
       },
       {
         name: "getCouponAmountFor",
         signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
         selector: "0x439efc2e",
       },
       {
@@ -1106,7 +1106,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns (tuple(uint256 tokenBalance, uint8 decimals, bool recordDateReached, tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1134,7 +1134,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getPrincipalFor",
         signature:
-          "function getPrincipalFor(address _account) view returns (tuple(uint256 numerator, uint256 denominator) principalFor_)",
+          "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
         selector: "0x6f131c78",
       },
       {
@@ -1146,7 +1146,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getSecurityRegulationData",
         signature:
-          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+          "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
       },
       {
@@ -1178,19 +1178,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getBondDetails",
         signature:
-          "function getBondDetails() view returns (tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
+          "function getBondDetails() view returns ((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
         selector: "0x4ce02414",
       },
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
         selector: "0x936e3169",
       },
       {
         name: "getCouponAmountFor",
         signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
         selector: "0x439efc2e",
       },
       {
@@ -1201,7 +1201,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns (tuple(uint256 tokenBalance, uint8 decimals, bool recordDateReached, tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1229,7 +1229,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getPrincipalFor",
         signature:
-          "function getPrincipalFor(address _account) view returns (tuple(uint256 numerator, uint256 denominator) principalFor_)",
+          "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
         selector: "0x6f131c78",
       },
       {
@@ -1241,7 +1241,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getSecurityRegulationData",
         signature:
-          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+          "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
       },
       {
@@ -1272,19 +1272,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getBondDetails",
         signature:
-          "function getBondDetails() view returns (tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
+          "function getBondDetails() view returns ((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
         selector: "0x4ce02414",
       },
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
         selector: "0x936e3169",
       },
       {
         name: "getCouponAmountFor",
         signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
         selector: "0x439efc2e",
       },
       {
@@ -1295,7 +1295,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns (tuple(uint256 tokenBalance, uint8 decimals, bool recordDateReached, tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1323,7 +1323,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getPrincipalFor",
         signature:
-          "function getPrincipalFor(address _account) view returns (tuple(uint256 numerator, uint256 denominator) principalFor_)",
+          "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
         selector: "0x6f131c78",
       },
       {
@@ -1335,7 +1335,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getSecurityRegulationData",
         signature:
-          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+          "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
       },
       {
@@ -1365,7 +1365,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "_initialize_bondUSA",
         signature:
-          "function _initialize_bondUSA(tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+          "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
       },
       {
@@ -1381,7 +1381,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "setCoupon",
         signature:
-          "function setCoupon(tuple(uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
         selector: "0xb16fd0cc",
       },
       {
@@ -1416,8 +1416,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "initialize_Cap",
-        signature:
-          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
+        signature: "function initialize_Cap(uint256 maxSupply, (bytes32 partition, uint256 maxSupply)[] partitionCap)",
         selector: "0x56210c4e",
       },
       {
@@ -1455,8 +1454,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "initialize_Cap",
-        signature:
-          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
+        signature: "function initialize_Cap(uint256 maxSupply, (bytes32 partition, uint256 maxSupply)[] partitionCap)",
         selector: "0x56210c4e",
       },
       {
@@ -1495,8 +1493,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "initialize_Cap",
-        signature:
-          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
+        signature: "function initialize_Cap(uint256 maxSupply, (bytes32 partition, uint256 maxSupply)[] partitionCap)",
         selector: "0x56210c4e",
       },
       {
@@ -1534,8 +1531,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "initialize_Cap",
-        signature:
-          "function initialize_Cap(uint256 maxSupply, tuple(bytes32 partition, uint256 maxSupply)[] partitionCap)",
+        signature: "function initialize_Cap(uint256 maxSupply, (bytes32 partition, uint256 maxSupply)[] partitionCap)",
         selector: "0x56210c4e",
       },
       {
@@ -1571,13 +1567,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "approveClearingOperationByPartition",
         signature:
-          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
+          "function approveClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
         selector: "0xd849cea2",
       },
       {
         name: "cancelClearingOperationByPartition",
         signature:
-          "function cancelClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function cancelClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x679141fb",
       },
       {
@@ -1598,7 +1594,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "reclaimClearingOperationByPartition",
         signature:
-          "function reclaimClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function reclaimClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x67e57fe2",
       },
     ],
@@ -1649,13 +1645,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "approveClearingOperationByPartition",
         signature:
-          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
+          "function approveClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
         selector: "0xd849cea2",
       },
       {
         name: "cancelClearingOperationByPartition",
         signature:
-          "function cancelClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function cancelClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x679141fb",
       },
       {
@@ -1676,7 +1672,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "reclaimClearingOperationByPartition",
         signature:
-          "function reclaimClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function reclaimClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x67e57fe2",
       },
     ],
@@ -1730,13 +1726,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "approveClearingOperationByPartition",
         signature:
-          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
+          "function approveClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
         selector: "0xd849cea2",
       },
       {
         name: "cancelClearingOperationByPartition",
         signature:
-          "function cancelClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function cancelClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x679141fb",
       },
       {
@@ -1757,7 +1753,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "reclaimClearingOperationByPartition",
         signature:
-          "function reclaimClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function reclaimClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x67e57fe2",
       },
     ],
@@ -1810,13 +1806,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "approveClearingOperationByPartition",
         signature:
-          "function approveClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
+          "function approveClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_, bytes32 partition_)",
         selector: "0xd849cea2",
       },
       {
         name: "cancelClearingOperationByPartition",
         signature:
-          "function cancelClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function cancelClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x679141fb",
       },
       {
@@ -1837,7 +1833,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "reclaimClearingOperationByPartition",
         signature:
-          "function reclaimClearingOperationByPartition(tuple(uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
+          "function reclaimClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x67e57fe2",
       },
     ],
@@ -1858,31 +1854,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingCreateHoldByPartition",
         signature:
-          "function clearingCreateHoldByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function clearingCreateHoldByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x6ceae590",
       },
       {
         name: "clearingCreateHoldFromByPartition",
         signature:
-          "function clearingCreateHoldFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function clearingCreateHoldFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x5f1cf8c9",
       },
       {
         name: "getClearingCreateHoldForByPartition",
         signature:
-          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
+          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
         selector: "0x190eb09b",
       },
       {
         name: "operatorClearingCreateHoldByPartition",
         signature:
-          "function operatorClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x7ab0c73f",
       },
       {
         name: "protectedClearingCreateHoldByPartition",
         signature:
-          "function protectedClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x9b646ab9",
       },
     ],
@@ -1903,31 +1899,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingCreateHoldByPartition",
         signature:
-          "function clearingCreateHoldByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function clearingCreateHoldByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x6ceae590",
       },
       {
         name: "clearingCreateHoldFromByPartition",
         signature:
-          "function clearingCreateHoldFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function clearingCreateHoldFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x5f1cf8c9",
       },
       {
         name: "getClearingCreateHoldForByPartition",
         signature:
-          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
+          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
         selector: "0x190eb09b",
       },
       {
         name: "operatorClearingCreateHoldByPartition",
         signature:
-          "function operatorClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x7ab0c73f",
       },
       {
         name: "protectedClearingCreateHoldByPartition",
         signature:
-          "function protectedClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x9b646ab9",
       },
     ],
@@ -1949,31 +1945,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingCreateHoldByPartition",
         signature:
-          "function clearingCreateHoldByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function clearingCreateHoldByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x6ceae590",
       },
       {
         name: "clearingCreateHoldFromByPartition",
         signature:
-          "function clearingCreateHoldFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function clearingCreateHoldFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x5f1cf8c9",
       },
       {
         name: "getClearingCreateHoldForByPartition",
         signature:
-          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
+          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
         selector: "0x190eb09b",
       },
       {
         name: "operatorClearingCreateHoldByPartition",
         signature:
-          "function operatorClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x7ab0c73f",
       },
       {
         name: "protectedClearingCreateHoldByPartition",
         signature:
-          "function protectedClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x9b646ab9",
       },
     ],
@@ -1994,31 +1990,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingCreateHoldByPartition",
         signature:
-          "function clearingCreateHoldByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function clearingCreateHoldByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x6ceae590",
       },
       {
         name: "clearingCreateHoldFromByPartition",
         signature:
-          "function clearingCreateHoldFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function clearingCreateHoldFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x5f1cf8c9",
       },
       {
         name: "getClearingCreateHoldForByPartition",
         signature:
-          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
+          "function getClearingCreateHoldForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, address holdEscrow, uint256 holdExpirationTimestamp, address holdTo, bytes holdData, bytes operatorData, uint8 operatorType) clearingHoldCreationData_)",
         selector: "0x190eb09b",
       },
       {
         name: "operatorClearingCreateHoldByPartition",
         signature:
-          "function operatorClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 clearingId_)",
         selector: "0x7ab0c73f",
       },
       {
         name: "protectedClearingCreateHoldByPartition",
         signature:
-          "function protectedClearingCreateHoldByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x9b646ab9",
       },
     ],
@@ -2214,31 +2210,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingRedeemByPartition",
         signature:
-          "function clearingRedeemByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function clearingRedeemByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0x39921b12",
       },
       {
         name: "clearingRedeemFromByPartition",
         signature:
-          "function clearingRedeemFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function clearingRedeemFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0x35114a78",
       },
       {
         name: "getClearingRedeemForByPartition",
         signature:
-          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
+          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
         selector: "0x4ac3d940",
       },
       {
         name: "operatorClearingRedeemByPartition",
         signature:
-          "function operatorClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingRedeemByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0xc1d6d5a0",
       },
       {
         name: "protectedClearingRedeemByPartition",
         signature:
-          "function protectedClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingRedeemByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x498f1f65",
       },
     ],
@@ -2257,31 +2253,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingRedeemByPartition",
         signature:
-          "function clearingRedeemByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function clearingRedeemByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0x39921b12",
       },
       {
         name: "clearingRedeemFromByPartition",
         signature:
-          "function clearingRedeemFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function clearingRedeemFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0x35114a78",
       },
       {
         name: "getClearingRedeemForByPartition",
         signature:
-          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
+          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
         selector: "0x4ac3d940",
       },
       {
         name: "operatorClearingRedeemByPartition",
         signature:
-          "function operatorClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingRedeemByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0xc1d6d5a0",
       },
       {
         name: "protectedClearingRedeemByPartition",
         signature:
-          "function protectedClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingRedeemByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x498f1f65",
       },
     ],
@@ -2303,31 +2299,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingRedeemByPartition",
         signature:
-          "function clearingRedeemByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function clearingRedeemByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0x39921b12",
       },
       {
         name: "clearingRedeemFromByPartition",
         signature:
-          "function clearingRedeemFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function clearingRedeemFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0x35114a78",
       },
       {
         name: "getClearingRedeemForByPartition",
         signature:
-          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
+          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
         selector: "0x4ac3d940",
       },
       {
         name: "operatorClearingRedeemByPartition",
         signature:
-          "function operatorClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingRedeemByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0xc1d6d5a0",
       },
       {
         name: "protectedClearingRedeemByPartition",
         signature:
-          "function protectedClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingRedeemByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x498f1f65",
       },
     ],
@@ -2348,31 +2344,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingRedeemByPartition",
         signature:
-          "function clearingRedeemByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function clearingRedeemByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0x39921b12",
       },
       {
         name: "clearingRedeemFromByPartition",
         signature:
-          "function clearingRedeemFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function clearingRedeemFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0x35114a78",
       },
       {
         name: "getClearingRedeemForByPartition",
         signature:
-          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
+          "function getClearingRedeemForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, bytes data, bytes operatorData, uint8 operatorType) clearingRedeemData_)",
         selector: "0x4ac3d940",
       },
       {
         name: "operatorClearingRedeemByPartition",
         signature:
-          "function operatorClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingRedeemByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount) returns (bool success_, uint256 clearingId_)",
         selector: "0xc1d6d5a0",
       },
       {
         name: "protectedClearingRedeemByPartition",
         signature:
-          "function protectedClearingRedeemByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingRedeemByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x498f1f65",
       },
     ],
@@ -2393,31 +2389,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingTransferByPartition",
         signature:
-          "function clearingTransferByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function clearingTransferByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0xde32aaa8",
       },
       {
         name: "clearingTransferFromByPartition",
         signature:
-          "function clearingTransferFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function clearingTransferFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0x5c829d67",
       },
       {
         name: "getClearingTransferForByPartition",
         signature:
-          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
+          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
         selector: "0x6f438552",
       },
       {
         name: "operatorClearingTransferByPartition",
         signature:
-          "function operatorClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingTransferByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0x2ba8508d",
       },
       {
         name: "protectedClearingTransferByPartition",
         signature:
-          "function protectedClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingTransferByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x1f4eef27",
       },
     ],
@@ -2436,31 +2432,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingTransferByPartition",
         signature:
-          "function clearingTransferByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function clearingTransferByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0xde32aaa8",
       },
       {
         name: "clearingTransferFromByPartition",
         signature:
-          "function clearingTransferFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function clearingTransferFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0x5c829d67",
       },
       {
         name: "getClearingTransferForByPartition",
         signature:
-          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
+          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
         selector: "0x6f438552",
       },
       {
         name: "operatorClearingTransferByPartition",
         signature:
-          "function operatorClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingTransferByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0x2ba8508d",
       },
       {
         name: "protectedClearingTransferByPartition",
         signature:
-          "function protectedClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingTransferByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x1f4eef27",
       },
     ],
@@ -2482,31 +2478,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingTransferByPartition",
         signature:
-          "function clearingTransferByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function clearingTransferByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0xde32aaa8",
       },
       {
         name: "clearingTransferFromByPartition",
         signature:
-          "function clearingTransferFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function clearingTransferFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0x5c829d67",
       },
       {
         name: "getClearingTransferForByPartition",
         signature:
-          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
+          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
         selector: "0x6f438552",
       },
       {
         name: "operatorClearingTransferByPartition",
         signature:
-          "function operatorClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingTransferByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0x2ba8508d",
       },
       {
         name: "protectedClearingTransferByPartition",
         signature:
-          "function protectedClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingTransferByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x1f4eef27",
       },
     ],
@@ -2527,31 +2523,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "clearingTransferByPartition",
         signature:
-          "function clearingTransferByPartition(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function clearingTransferByPartition((bytes32 partition, uint256 expirationTimestamp, bytes data) _clearingOperation, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0xde32aaa8",
       },
       {
         name: "clearingTransferFromByPartition",
         signature:
-          "function clearingTransferFromByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function clearingTransferFromByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0x5c829d67",
       },
       {
         name: "getClearingTransferForByPartition",
         signature:
-          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns (tuple(uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
+          "function getClearingTransferForByPartition(bytes32 _partition, address _tokenHolder, uint256 _clearingId) view returns ((uint256 amount, uint256 expirationTimestamp, address destination, bytes data, bytes operatorData, uint8 operatorType) clearingTransferData_)",
         selector: "0x6f438552",
       },
       {
         name: "operatorClearingTransferByPartition",
         signature:
-          "function operatorClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
+          "function operatorClearingTransferByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, bytes operatorData) _clearingOperationFrom, uint256 _amount, address _to) returns (bool success_, uint256 clearingId_)",
         selector: "0x2ba8508d",
       },
       {
         name: "protectedClearingTransferByPartition",
         signature:
-          "function protectedClearingTransferByPartition(tuple(tuple(bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
+          "function protectedClearingTransferByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, uint256 _amount, address _to, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x1f4eef27",
       },
     ],
@@ -3090,7 +3086,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getFacet",
         signature:
-          "function getFacet(bytes32 _facetId) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds) facet_)",
+          "function getFacet(bytes32 _facetId) view returns ((bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds) facet_)",
         selector: "0xe317d12f",
       },
       {
@@ -3144,13 +3140,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getFacets",
         signature:
-          "function getFacets() view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
+          "function getFacets() view returns ((bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
         selector: "0x662ea47d",
       },
       {
         name: "getFacetsByPage",
         signature:
-          "function getFacetsByPage(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
+          "function getFacetsByPage(uint256 _pageIndex, uint256 _pageLength) view returns ((bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
         selector: "0xbf02c5b9",
       },
       {
@@ -3194,13 +3190,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "_initialize_equityUSA",
         signature:
-          "function _initialize_equityUSA(tuple(bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData, tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+          "function _initialize_equityUSA((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x8c505179",
       },
       {
         name: "getDividendAmountFor",
         signature:
-          "function getDividendAmountFor(uint256 _dividendID, address _account) view returns (tuple(uint256 numerator, uint256 denominator, bool recordDateReached) dividendAmountFor_)",
+          "function getDividendAmountFor(uint256 _dividendID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) dividendAmountFor_)",
         selector: "0xd258b2f1",
       },
       {
@@ -3212,7 +3208,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getDividends",
         signature:
-          "function getDividends(uint256 _dividendID) view returns (tuple(tuple(uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_)",
+          "function getDividends(uint256 _dividendID) view returns (((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_)",
         selector: "0x3837ac88",
       },
       {
@@ -3223,19 +3219,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getDividendsFor",
         signature:
-          "function getDividendsFor(uint256 _dividendID, address _account) view returns (tuple(uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached) dividendFor_)",
+          "function getDividendsFor(uint256 _dividendID, address _account) view returns ((uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached) dividendFor_)",
         selector: "0x323e22da",
       },
       {
         name: "getEquityDetails",
         signature:
-          "function getEquityDetails() view returns (tuple(bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetailsData_)",
+          "function getEquityDetails() view returns ((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetailsData_)",
         selector: "0xefcdcad8",
       },
       {
         name: "getScheduledBalanceAdjustment",
         signature:
-          "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns (tuple(uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_)",
+          "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns ((uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_)",
         selector: "0x3d5338e8",
       },
       {
@@ -3252,7 +3248,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getSecurityRegulationData",
         signature:
-          "function getSecurityRegulationData() pure returns (tuple(tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
+          "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
       },
       {
@@ -3273,7 +3269,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getVoting",
         signature:
-          "function getVoting(uint256 _voteID) view returns (tuple(tuple(uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_)",
+          "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_)",
         selector: "0x3afc7282",
       },
       {
@@ -3284,7 +3280,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getVotingFor",
         signature:
-          "function getVotingFor(uint256 _voteID, address _account) view returns (tuple(uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached) votingFor_)",
+          "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached) votingFor_)",
         selector: "0x7633eccf",
       },
       {
@@ -3296,18 +3292,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "setDividends",
         signature:
-          "function setDividends(tuple(uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
+          "function setDividends((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
         selector: "0x1129e1c1",
       },
       {
         name: "setScheduledBalanceAdjustment",
         signature:
-          "function setScheduledBalanceAdjustment(tuple(uint256 executionDate, uint256 factor, uint8 decimals) _newBalanceAdjustment) returns (uint256 balanceAdjustmentID_)",
+          "function setScheduledBalanceAdjustment((uint256 executionDate, uint256 factor, uint8 decimals) _newBalanceAdjustment) returns (uint256 balanceAdjustmentID_)",
         selector: "0xd1661084",
       },
       {
         name: "setVoting",
-        signature: "function setVoting(tuple(uint256 recordDate, bytes data) _newVoting) returns (uint256 voteID_)",
+        signature: "function setVoting((uint256 recordDate, bytes data) _newVoting) returns (uint256 voteID_)",
         selector: "0x5adaa49e",
       },
     ],
@@ -3326,7 +3322,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "issueByPartition",
         signature:
-          "function issueByPartition(tuple(bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
+          "function issueByPartition((bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
         selector: "0x18180262",
       },
     ],
@@ -3345,7 +3341,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "issueByPartition",
         signature:
-          "function issueByPartition(tuple(bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
+          "function issueByPartition((bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
         selector: "0x18180262",
       },
     ],
@@ -3367,7 +3363,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "issueByPartition",
         signature:
-          "function issueByPartition(tuple(bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
+          "function issueByPartition((bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
         selector: "0x18180262",
       },
     ],
@@ -3388,7 +3384,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "issueByPartition",
         signature:
-          "function issueByPartition(tuple(bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
+          "function issueByPartition((bytes32 partition, address tokenHolder, uint256 value, bytes data) _issueData)",
         selector: "0x18180262",
       },
     ],
@@ -3432,19 +3428,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "operatorTransferByPartition",
         signature:
-          "function operatorTransferByPartition(tuple(bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
+          "function operatorTransferByPartition((bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
         selector: "0x6b9894fe",
       },
       {
         name: "protectedRedeemFromByPartition",
         signature:
-          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
         selector: "0x7756e22e",
       },
       {
         name: "protectedTransferFromByPartition",
         signature:
-          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
         selector: "0x99b5ef4a",
       },
     ],
@@ -3488,19 +3484,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "operatorTransferByPartition",
         signature:
-          "function operatorTransferByPartition(tuple(bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
+          "function operatorTransferByPartition((bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
         selector: "0x6b9894fe",
       },
       {
         name: "protectedRedeemFromByPartition",
         signature:
-          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
         selector: "0x7756e22e",
       },
       {
         name: "protectedTransferFromByPartition",
         signature:
-          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
         selector: "0x99b5ef4a",
       },
     ],
@@ -3545,19 +3541,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "operatorTransferByPartition",
         signature:
-          "function operatorTransferByPartition(tuple(bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
+          "function operatorTransferByPartition((bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
         selector: "0x6b9894fe",
       },
       {
         name: "protectedRedeemFromByPartition",
         signature:
-          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
         selector: "0x7756e22e",
       },
       {
         name: "protectedTransferFromByPartition",
         signature:
-          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
         selector: "0x99b5ef4a",
       },
     ],
@@ -3601,19 +3597,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "operatorTransferByPartition",
         signature:
-          "function operatorTransferByPartition(tuple(bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
+          "function operatorTransferByPartition((bytes32 partition, address from, address to, uint256 value, bytes data, bytes operatorData) _operatorTransferData) returns (bytes32)",
         selector: "0x6b9894fe",
       },
       {
         name: "protectedRedeemFromByPartition",
         signature:
-          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
+          "function protectedRedeemFromByPartition(bytes32 _partition, address _from, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData)",
         selector: "0x7756e22e",
       },
       {
         name: "protectedTransferFromByPartition",
         signature:
-          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, tuple(uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
+          "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
         selector: "0x99b5ef4a",
       },
     ],
@@ -3926,7 +3922,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "transferByPartition",
         signature:
-          "function transferByPartition(bytes32 _partition, tuple(address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
+          "function transferByPartition(bytes32 _partition, (address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
         selector: "0x3bc9bcd8",
       },
       {
@@ -3969,7 +3965,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "transferByPartition",
         signature:
-          "function transferByPartition(bytes32 _partition, tuple(address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
+          "function transferByPartition(bytes32 _partition, (address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
         selector: "0x3bc9bcd8",
       },
       {
@@ -4013,7 +4009,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "transferByPartition",
         signature:
-          "function transferByPartition(bytes32 _partition, tuple(address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
+          "function transferByPartition(bytes32 _partition, (address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
         selector: "0x3bc9bcd8",
       },
       {
@@ -4056,7 +4052,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "transferByPartition",
         signature:
-          "function transferByPartition(bytes32 _partition, tuple(address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
+          "function transferByPartition(bytes32 _partition, (address to, uint256 value) _basicTransferInfo, bytes _data) returns (bytes32)",
         selector: "0x3bc9bcd8",
       },
       {
@@ -4640,7 +4636,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getERC20Metadata",
         signature:
-          "function getERC20Metadata() view returns (tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
+          "function getERC20Metadata() view returns (((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
         selector: "0x8e649195",
       },
       {
@@ -4651,7 +4647,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initialize_ERC20",
         signature:
-          "function initialize_ERC20(tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
+          "function initialize_ERC20(((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
         selector: "0xe04fb235",
       },
       { name: "name", signature: "function name() view returns (string)", selector: "0x06fdde03" },
@@ -4710,7 +4706,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getERC20Metadata",
         signature:
-          "function getERC20Metadata() view returns (tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
+          "function getERC20Metadata() view returns (((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
         selector: "0x8e649195",
       },
       {
@@ -4721,7 +4717,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initialize_ERC20",
         signature:
-          "function initialize_ERC20(tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
+          "function initialize_ERC20(((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
         selector: "0xe04fb235",
       },
       { name: "name", signature: "function name() view returns (string)", selector: "0x06fdde03" },
@@ -4781,7 +4777,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getERC20Metadata",
         signature:
-          "function getERC20Metadata() view returns (tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
+          "function getERC20Metadata() view returns (((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
         selector: "0x8e649195",
       },
       {
@@ -4792,7 +4788,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initialize_ERC20",
         signature:
-          "function initialize_ERC20(tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
+          "function initialize_ERC20(((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
         selector: "0xe04fb235",
       },
       { name: "name", signature: "function name() view returns (string)", selector: "0x06fdde03" },
@@ -4968,7 +4964,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getERC20Metadata",
         signature:
-          "function getERC20Metadata() view returns (tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
+          "function getERC20Metadata() view returns (((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType))",
         selector: "0x8e649195",
       },
       {
@@ -4979,7 +4975,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "initialize_ERC20",
         signature:
-          "function initialize_ERC20(tuple(tuple(string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
+          "function initialize_ERC20(((string name, string symbol, string isin, uint8 decimals) info, uint8 securityType) erc20Metadata)",
         selector: "0xe04fb235",
       },
       { name: "name", signature: "function name() view returns (string)", selector: "0x06fdde03" },
@@ -5012,8 +5008,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
       {
         name: "checkpoints",
-        signature:
-          "function checkpoints(address _account, uint256 _pos) view returns (tuple(uint256 from, uint256 value))",
+        signature: "function checkpoints(address _account, uint256 _pos) view returns ((uint256 from, uint256 value))",
         selector: "0x0cdfebfa",
       },
       { name: "clock", signature: "function clock() view returns (uint48)", selector: "0x91ddadf4" },
@@ -5072,8 +5067,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
       {
         name: "checkpoints",
-        signature:
-          "function checkpoints(address _account, uint256 _pos) view returns (tuple(uint256 from, uint256 value))",
+        signature: "function checkpoints(address _account, uint256 _pos) view returns ((uint256 from, uint256 value))",
         selector: "0x0cdfebfa",
       },
       { name: "clock", signature: "function clock() view returns (uint48)", selector: "0x91ddadf4" },
@@ -5135,8 +5129,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
       {
         name: "checkpoints",
-        signature:
-          "function checkpoints(address _account, uint256 _pos) view returns (tuple(uint256 from, uint256 value))",
+        signature: "function checkpoints(address _account, uint256 _pos) view returns ((uint256 from, uint256 value))",
         selector: "0x0cdfebfa",
       },
       { name: "clock", signature: "function clock() view returns (uint48)", selector: "0x91ddadf4" },
@@ -5197,8 +5190,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
       {
         name: "checkpoints",
-        signature:
-          "function checkpoints(address _account, uint256 _pos) view returns (tuple(uint256 from, uint256 value))",
+        signature: "function checkpoints(address _account, uint256 _pos) view returns ((uint256 from, uint256 value))",
         selector: "0x0cdfebfa",
       },
       { name: "clock", signature: "function clock() view returns (uint48)", selector: "0x91ddadf4" },
@@ -6675,7 +6667,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "initialize_FixedRate",
-        signature: "function initialize_FixedRate(tuple(uint256 rate, uint8 rateDecimals) _initData)",
+        signature: "function initialize_FixedRate((uint256 rate, uint8 rateDecimals) _initData)",
         selector: "0xd51e10d5",
       },
       {
@@ -6970,19 +6962,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "controllerCreateHoldByPartition",
         signature:
-          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0x5f3d8171",
       },
       {
         name: "operatorCreateHoldByPartition",
         signature:
-          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0xc6062c3c",
       },
       {
         name: "protectedCreateHoldByPartition",
         signature:
-          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, tuple(tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
+          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, ((uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
         selector: "0xc17f3554",
       },
     ],
@@ -7018,19 +7010,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "controllerCreateHoldByPartition",
         signature:
-          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0x5f3d8171",
       },
       {
         name: "operatorCreateHoldByPartition",
         signature:
-          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0xc6062c3c",
       },
       {
         name: "protectedCreateHoldByPartition",
         signature:
-          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, tuple(tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
+          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, ((uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
         selector: "0xc17f3554",
       },
     ],
@@ -7069,19 +7061,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "controllerCreateHoldByPartition",
         signature:
-          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0x5f3d8171",
       },
       {
         name: "operatorCreateHoldByPartition",
         signature:
-          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0xc6062c3c",
       },
       {
         name: "protectedCreateHoldByPartition",
         signature:
-          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, tuple(tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
+          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, ((uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
         selector: "0xc17f3554",
       },
     ],
@@ -7119,19 +7111,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "controllerCreateHoldByPartition",
         signature:
-          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function controllerCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0x5f3d8171",
       },
       {
         name: "operatorCreateHoldByPartition",
         signature:
-          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function operatorCreateHoldByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0xc6062c3c",
       },
       {
         name: "protectedCreateHoldByPartition",
         signature:
-          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, tuple(tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
+          "function protectedCreateHoldByPartition(bytes32 _partition, address _from, ((uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) hold, uint256 deadline, uint256 nonce) _protectedHold, bytes _signature) returns (bool success_, uint256 holdId_)",
         selector: "0xc17f3554",
       },
     ],
@@ -7169,13 +7161,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getHoldForByPartition",
         signature:
-          "function getHoldForByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
+          "function getHoldForByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
         selector: "0x8d41523d",
       },
       {
         name: "getHoldThirdParty",
         signature:
-          "function getHoldThirdParty(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
+          "function getHoldThirdParty((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
         selector: "0x3c36a695",
       },
       {
@@ -7217,13 +7209,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getHoldForByPartition",
         signature:
-          "function getHoldForByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
+          "function getHoldForByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
         selector: "0x8d41523d",
       },
       {
         name: "getHoldThirdParty",
         signature:
-          "function getHoldThirdParty(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
+          "function getHoldThirdParty((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
         selector: "0x3c36a695",
       },
       {
@@ -7268,13 +7260,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getHoldForByPartition",
         signature:
-          "function getHoldForByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
+          "function getHoldForByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
         selector: "0x8d41523d",
       },
       {
         name: "getHoldThirdParty",
         signature:
-          "function getHoldThirdParty(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
+          "function getHoldThirdParty((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
         selector: "0x3c36a695",
       },
       {
@@ -7318,13 +7310,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getHoldForByPartition",
         signature:
-          "function getHoldForByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
+          "function getHoldForByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (uint256 amount_, uint256 expirationTimestamp_, address escrow_, address destination_, bytes data_, bytes operatorData_, uint8 thirdPartyType_)",
         selector: "0x8d41523d",
       },
       {
         name: "getHoldThirdParty",
         signature:
-          "function getHoldThirdParty(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
+          "function getHoldThirdParty((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) view returns (address)",
         selector: "0x3c36a695",
       },
       {
@@ -7351,31 +7343,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "createHoldByPartition",
         signature:
-          "function createHoldByPartition(bytes32 _partition, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
+          "function createHoldByPartition(bytes32 _partition, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
         selector: "0x5d23449e",
       },
       {
         name: "createHoldFromByPartition",
         signature:
-          "function createHoldFromByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function createHoldFromByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0x2361f007",
       },
       {
         name: "executeHoldByPartition",
         signature:
-          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
+          "function executeHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
         selector: "0x25fe8720",
       },
       {
         name: "reclaimHoldByPartition",
         signature:
-          "function reclaimHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
+          "function reclaimHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
         selector: "0xb437969e",
       },
       {
         name: "releaseHoldByPartition",
         signature:
-          "function releaseHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
+          "function releaseHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
         selector: "0xf8bafc1c",
       },
     ],
@@ -7421,31 +7413,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "createHoldByPartition",
         signature:
-          "function createHoldByPartition(bytes32 _partition, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
+          "function createHoldByPartition(bytes32 _partition, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
         selector: "0x5d23449e",
       },
       {
         name: "createHoldFromByPartition",
         signature:
-          "function createHoldFromByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function createHoldFromByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0x2361f007",
       },
       {
         name: "executeHoldByPartition",
         signature:
-          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
+          "function executeHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
         selector: "0x25fe8720",
       },
       {
         name: "reclaimHoldByPartition",
         signature:
-          "function reclaimHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
+          "function reclaimHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
         selector: "0xb437969e",
       },
       {
         name: "releaseHoldByPartition",
         signature:
-          "function releaseHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
+          "function releaseHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
         selector: "0xf8bafc1c",
       },
     ],
@@ -7494,31 +7486,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "createHoldByPartition",
         signature:
-          "function createHoldByPartition(bytes32 _partition, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
+          "function createHoldByPartition(bytes32 _partition, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
         selector: "0x5d23449e",
       },
       {
         name: "createHoldFromByPartition",
         signature:
-          "function createHoldFromByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function createHoldFromByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0x2361f007",
       },
       {
         name: "executeHoldByPartition",
         signature:
-          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
+          "function executeHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
         selector: "0x25fe8720",
       },
       {
         name: "reclaimHoldByPartition",
         signature:
-          "function reclaimHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
+          "function reclaimHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
         selector: "0xb437969e",
       },
       {
         name: "releaseHoldByPartition",
         signature:
-          "function releaseHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
+          "function releaseHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
         selector: "0xf8bafc1c",
       },
     ],
@@ -7566,31 +7558,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "createHoldByPartition",
         signature:
-          "function createHoldByPartition(bytes32 _partition, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
+          "function createHoldByPartition(bytes32 _partition, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold) returns (bool success_, uint256 holdId_)",
         selector: "0x5d23449e",
       },
       {
         name: "createHoldFromByPartition",
         signature:
-          "function createHoldFromByPartition(bytes32 _partition, address _from, tuple(uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
+          "function createHoldFromByPartition(bytes32 _partition, address _from, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _operatorData) returns (bool success_, uint256 holdId_)",
         selector: "0x2361f007",
       },
       {
         name: "executeHoldByPartition",
         signature:
-          "function executeHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
+          "function executeHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, address _to, uint256 _amount) returns (bool success_, bytes32 partition_)",
         selector: "0x25fe8720",
       },
       {
         name: "reclaimHoldByPartition",
         signature:
-          "function reclaimHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
+          "function reclaimHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier) returns (bool success_)",
         selector: "0xb437969e",
       },
       {
         name: "releaseHoldByPartition",
         signature:
-          "function releaseHoldByPartition(tuple(bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
+          "function releaseHoldByPartition((bytes32 partition, address tokenHolder, uint256 holdId) _holdIdentifier, uint256 _amount) returns (bool success_)",
         selector: "0xf8bafc1c",
       },
     ],
@@ -7611,31 +7603,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getImpactData",
         signature:
-          "function getImpactData() view returns (tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData_)",
+          "function getImpactData() view returns ((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData_)",
         selector: "0x24bffca8",
       },
       {
         name: "getInterestRate",
         signature:
-          "function getInterestRate() view returns (tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate_)",
+          "function getInterestRate() view returns ((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate_)",
         selector: "0x5257b566",
       },
       {
         name: "initialize_KpiLinkedRate",
         signature:
-          "function initialize_KpiLinkedRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData)",
+          "function initialize_KpiLinkedRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _impactData)",
         selector: "0x0b7c89d7",
       },
       {
         name: "setImpactData",
         signature:
-          "function setImpactData(tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _newImpactData)",
+          "function setImpactData((uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) _newImpactData)",
         selector: "0x9ce6e100",
       },
       {
         name: "setInterestRate",
         signature:
-          "function setInterestRate(tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _newInterestRate)",
+          "function setInterestRate((uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) _newInterestRate)",
         selector: "0x9a833a5b",
       },
     ],
@@ -7770,13 +7762,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getKycAccountsData",
         signature:
-          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
+          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, (uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
         selector: "0x00497afb",
       },
       {
         name: "getKycFor",
         signature:
-          "function getKycFor(address _account) view returns (tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
+          "function getKycFor(address _account) view returns ((uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
         selector: "0x41322840",
       },
       {
@@ -7859,13 +7851,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getKycAccountsData",
         signature:
-          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
+          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, (uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
         selector: "0x00497afb",
       },
       {
         name: "getKycFor",
         signature:
-          "function getKycFor(address _account) view returns (tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
+          "function getKycFor(address _account) view returns ((uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
         selector: "0x41322840",
       },
       {
@@ -7949,13 +7941,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getKycAccountsData",
         signature:
-          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
+          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, (uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
         selector: "0x00497afb",
       },
       {
         name: "getKycFor",
         signature:
-          "function getKycFor(address _account) view returns (tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
+          "function getKycFor(address _account) view returns ((uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
         selector: "0x41322840",
       },
       {
@@ -8038,13 +8030,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getKycAccountsData",
         signature:
-          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
+          "function getKycAccountsData(uint8 _kycStatus, uint256 _pageIndex, uint256 _pageLength) view returns (address[] accounts_, (uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status)[] kycData_)",
         selector: "0x00497afb",
       },
       {
         name: "getKycFor",
         signature:
-          "function getKycFor(address _account) view returns (tuple(uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
+          "function getKycFor(address _account) view returns ((uint256 validFrom, uint256 validTo, string vcId, address issuer, uint8 status) kyc_)",
         selector: "0x41322840",
       },
       {
@@ -9051,7 +9043,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledBalanceAdjustments",
         signature:
-          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
+          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
         selector: "0xcb884d41",
       },
       {
@@ -9077,7 +9069,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledBalanceAdjustments",
         signature:
-          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
+          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
         selector: "0xcb884d41",
       },
       {
@@ -9103,7 +9095,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledBalanceAdjustments",
         signature:
-          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
+          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
         selector: "0xcb884d41",
       },
       {
@@ -9128,7 +9120,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledBalanceAdjustments",
         signature:
-          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
+          "function getScheduledBalanceAdjustments(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledBalanceAdjustment_)",
         selector: "0xcb884d41",
       },
       {
@@ -9154,7 +9146,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledCouponListing",
         signature:
-          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
+          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
         selector: "0x2fcfe49c",
       },
       {
@@ -9180,7 +9172,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledCouponListing",
         signature:
-          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
+          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
         selector: "0x2fcfe49c",
       },
       {
@@ -9207,7 +9199,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledCouponListing",
         signature:
-          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
+          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
         selector: "0x2fcfe49c",
       },
       {
@@ -9233,7 +9225,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledCouponListing",
         signature:
-          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
+          "function getScheduledCouponListing(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCouponListing_)",
         selector: "0x2fcfe49c",
       },
       {
@@ -9259,7 +9251,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledCrossOrderedTasks",
         signature:
-          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
+          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
         selector: "0x72ed9041",
       },
       {
@@ -9295,7 +9287,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledCrossOrderedTasks",
         signature:
-          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
+          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
         selector: "0x72ed9041",
       },
       {
@@ -9331,7 +9323,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledCrossOrderedTasks",
         signature:
-          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
+          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
         selector: "0x72ed9041",
       },
       {
@@ -9366,7 +9358,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledCrossOrderedTasks",
         signature:
-          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
+          "function getScheduledCrossOrderedTasks(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledCrossOrderedTask_)",
         selector: "0x72ed9041",
       },
       {
@@ -9402,7 +9394,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledSnapshots",
         signature:
-          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
         selector: "0xca21c53a",
       },
       {
@@ -9428,7 +9420,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledSnapshots",
         signature:
-          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
         selector: "0xca21c53a",
       },
       {
@@ -9455,7 +9447,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledSnapshots",
         signature:
-          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
         selector: "0xca21c53a",
       },
       {
@@ -9481,7 +9473,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledSnapshots",
         signature:
-          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns (tuple(uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
+          "function getScheduledSnapshots(uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 scheduledTimestamp, bytes data)[] scheduledSnapshot_)",
         selector: "0xca21c53a",
       },
       {
@@ -10211,31 +10203,31 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getImpactDataFor",
         signature:
-          "function getImpactDataFor(address _project) view returns (tuple(uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode) impactData_)",
+          "function getImpactDataFor(address _project) view returns ((uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode) impactData_)",
         selector: "0xb8cf9d2a",
       },
       {
         name: "getInterestRate",
         signature:
-          "function getInterestRate() view returns (tuple(uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate_)",
+          "function getInterestRate() view returns ((uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate_)",
         selector: "0x5257b566",
       },
       {
         name: "initialize_SustainabilityPerformanceTargetRate",
         signature:
-          "function initialize_SustainabilityPerformanceTargetRate(tuple(uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) _interestRate, tuple(uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] _impactData, address[] _projects)",
+          "function initialize_SustainabilityPerformanceTargetRate((uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) _interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] _impactData, address[] _projects)",
         selector: "0xe2ebedda",
       },
       {
         name: "setImpactData",
         signature:
-          "function setImpactData(tuple(uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] _newImpactData, address[] _projects)",
+          "function setImpactData((uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] _newImpactData, address[] _projects)",
         selector: "0x3c200ec4",
       },
       {
         name: "setInterestRate",
         signature:
-          "function setInterestRate(tuple(uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) _newInterestRate)",
+          "function setInterestRate((uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) _newInterestRate)",
         selector: "0xd7a0d0e8",
       },
     ],
@@ -10572,13 +10564,13 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "createBatchConfiguration",
         signature:
-          "function createBatchConfiguration(bytes32 _configurationId, tuple(bytes32 id, uint256 version)[] _facetConfigurations, bool _isLastBatch)",
+          "function createBatchConfiguration(bytes32 _configurationId, (bytes32 id, uint256 version)[] _facetConfigurations, bool _isLastBatch)",
         selector: "0xf4ec1fe4",
       },
       {
         name: "createConfiguration",
         signature:
-          "function createConfiguration(bytes32 _configurationId, tuple(bytes32 id, uint256 version)[] _facetConfigurations)",
+          "function createConfiguration(bytes32 _configurationId, (bytes32 id, uint256 version)[] _facetConfigurations)",
         selector: "0xf4d2a095",
       },
       {
@@ -10618,7 +10610,7 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "getFacetByConfigurationIdVersionAndFacetId",
         signature:
-          "function getFacetByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds) facet_)",
+          "function getFacetByConfigurationIdVersionAndFacetId(bytes32 _configurationId, uint256 _version, bytes32 _facetId) view returns ((bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds) facet_)",
         selector: "0x9e6030d1",
       },
       {
@@ -10648,7 +10640,7 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "getFacetsByConfigurationIdAndVersion",
         signature:
-          "function getFacetsByConfigurationIdAndVersion(bytes32 _configurationId, uint256 _version, uint256 _pageIndex, uint256 _pageLength) view returns (tuple(bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
+          "function getFacetsByConfigurationIdAndVersion(bytes32 _configurationId, uint256 _version, uint256 _pageIndex, uint256 _pageLength) view returns ((bytes32 id, address addr, bytes4[] selectors, bytes4[] interfaceIds)[] facets_)",
         selector: "0x6118ce2b",
       },
       {
@@ -10727,7 +10719,7 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "registerBusinessLogics",
         signature:
-          "function registerBusinessLogics(tuple(bytes32 businessLogicKey, address businessLogicAddress)[] _businessLogics)",
+          "function registerBusinessLogics((bytes32 businessLogicKey, address businessLogicAddress)[] _businessLogics)",
         selector: "0xb0f57ddb",
       },
       {
@@ -10781,37 +10773,37 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       {
         name: "deployBond",
         signature:
-          "function deployBond(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) _bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address bondAddress_)",
+          "function deployBond(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) _bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address bondAddress_)",
         selector: "0x5133f0e0",
       },
       {
         name: "deployBondFixedRate",
         signature:
-          "function deployBondFixedRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 rate, uint8 rateDecimals) fixedRateData) _bondFixedRateData) returns (address bondAddress_)",
+          "function deployBondFixedRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 rate, uint8 rateDecimals) fixedRateData) _bondFixedRateData) returns (address bondAddress_)",
         selector: "0x7c55cfdc",
       },
       {
         name: "deployBondKpiLinkedRate",
         signature:
-          "function deployBondKpiLinkedRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, tuple(uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData) _bondKpiLinkedRateData) returns (address bondAddress_)",
+          "function deployBondKpiLinkedRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 maxRate, uint256 baseRate, uint256 minRate, uint256 startPeriod, uint256 startRate, uint256 missedPenalty, uint256 reportPeriod, uint8 rateDecimals) interestRate, (uint256 maxDeviationCap, uint256 baseLine, uint256 maxDeviationFloor, uint8 impactDataDecimals, uint256 adjustmentPrecision) impactData) _bondKpiLinkedRateData) returns (address bondAddress_)",
         selector: "0x06e6effc",
       },
       {
         name: "deployBondSustainabilityPerformanceTargetRate",
         signature:
-          "function deployBondSustainabilityPerformanceTargetRate(tuple(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, tuple(uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, tuple(uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) _bondSustainabilityPerformanceTargetRateData) returns (address bondAddress_)",
+          "function deployBondSustainabilityPerformanceTargetRate((((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetails, address[] proceedRecipients, bytes[] proceedRecipientsData) bondData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) factoryRegulationData, (uint256 baseRate, uint256 startPeriod, uint256 startRate, uint8 rateDecimals) interestRate, (uint256 baseLine, uint8 baseLineMode, uint256 deltaRate, uint8 impactDataMode)[] impactData, address[] projects) _bondSustainabilityPerformanceTargetRateData) returns (address bondAddress_)",
         selector: "0x5bdc1ceb",
       },
       {
         name: "deployEquity",
         signature:
-          "function deployEquity(tuple(tuple(bool arePartitionsProtected, bool isMultiPartition, address resolver, tuple(bytes32 key, uint256 version) resolverProxyConfiguration, tuple(bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, tuple(string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, tuple(bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) _equityData, tuple(uint8 regulationType, uint8 regulationSubType, tuple(bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address equityAddress_)",
+          "function deployEquity(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) _equityData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address equityAddress_)",
         selector: "0xfb3c59d8",
       },
       {
         name: "getAppliedRegulationData",
         signature:
-          "function getAppliedRegulationData(uint8 _regulationType, uint8 _regulationSubType) pure returns (tuple(uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData_)",
+          "function getAppliedRegulationData(uint8 _regulationType, uint8 _regulationSubType) pure returns ((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData_)",
         selector: "0x7b5208d0",
       },
     ],

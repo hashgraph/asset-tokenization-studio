@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type AdjustBalancesFacet,
@@ -28,9 +28,9 @@ const EMPTY_VC_ID = "";
 
 describe("Adjust Balances Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let erc1410Facet: IERC1410;
   let adjustBalancesFacet: AdjustBalancesFacet;
@@ -69,22 +69,22 @@ describe("Adjust Balances Tests", () => {
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
 
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.target);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target);
 
-    equityFacet = await ethers.getContractAt("Equity", diamond.address);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target);
 
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacetTimeTravel", diamond.address);
+    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacetTimeTravel", diamond.target);
 
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
 
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target);
   }
 
   beforeEach(async () => {
@@ -136,7 +136,7 @@ describe("Adjust Balances Tests", () => {
     await erc1410Facet.connect(signer_A).issueByPartition({
       partition: _PARTITION_ID_2,
       tokenHolder: signer_B.address,
-      value: balanceOf_B_Original,
+      value: balanceOf_B_Original[0],
       data: "0x",
     });
 

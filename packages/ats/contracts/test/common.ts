@@ -41,5 +41,9 @@ export function assertObject(actual: any, expected: any, path = ""): void {
 }
 
 export async function getDltTimestamp(): Promise<number> {
-  return (await ethers.provider.getBlock("latest")).timestamp;
+  const block = await ethers.provider.getBlock("latest");
+  if (!block) {
+    throw new Error("Failed to get latest block");
+  }
+  return block.timestamp;
 }

@@ -10,8 +10,6 @@ import { ValidationError } from "@core/validation/ValidationError";
 import { GetAccountBalanceRequestFixture } from "@test/fixtures/account/AccountFixture";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import Security from "@port/in/security/Security";
-import BigDecimal from "@domain/context/shared/BigDecimal";
-import { BigNumber } from "ethers";
 import { BalanceOfQuery } from "@query/security/balanceof/BalanceOfQuery";
 
 describe("Balance", () => {
@@ -44,7 +42,7 @@ describe("Balance", () => {
     getAccountBalanceRequest = new GetAccountBalanceRequest(GetAccountBalanceRequestFixture.create());
 
     const expectedResponse = {
-      payload: new BigDecimal(BigNumber.from(1)),
+      payload: BigInt(1),
     };
     it("should get balance of successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);

@@ -24,7 +24,7 @@
  * @module infrastructure/signer
  */
 
-import { Wallet, providers, Signer } from "ethers";
+import { Wallet, JsonRpcProvider, Signer } from "ethers";
 import { getNetworkConfig, getPrivateKey } from "./config";
 import { error } from "./utils/logging";
 
@@ -81,7 +81,7 @@ export async function createNetworkSigner(network: string, keyIndex: number = 0)
   }
 
   // Create provider and signer
-  const provider = new providers.JsonRpcProvider(networkConfig.jsonRpcUrl);
+  const provider = new JsonRpcProvider(networkConfig.jsonRpcUrl);
   const signer = new Wallet(privateKey, provider);
   const address = await signer.getAddress();
 

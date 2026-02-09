@@ -15,7 +15,7 @@ async function createVcT3(address: string): Promise<string> {
   const claims = { kyc: "passed" };
   const revocationRegistryAddress = "0x77Fb69B24e4C659CE03fB129c19Ad591374C349e";
   const didRegistryAddress = "0x312C15922c22B60f5557bAa1A85F2CdA4891C39a";
-  const provider = new ethers.providers.JsonRpcProvider("https://testnet.hashio.io/api");
+  const provider = new ethers.JsonRpcProvider("https://testnet.hashio.io/api");
   const options = {
     revocationRegistryAddress,
     provider,

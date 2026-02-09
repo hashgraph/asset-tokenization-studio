@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ResolverProxy, BondUSAFixedRateFacet, FixedRate, BondUSAReadFacet } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
@@ -28,7 +28,7 @@ let couponData = {
 
 describe("Bond Fixed Rate Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
 
   let bondFixedRateFacet: BondUSAFixedRateFacet;
   let bondReadFacet: BondUSAReadFacet;
@@ -47,9 +47,9 @@ describe("Bond Fixed Rate Tests", () => {
       },
     ]);
 
-    bondFixedRateFacet = await ethers.getContractAt("BondUSAFixedRateFacetTimeTravel", diamond.address, signer_A);
-    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.address, signer_A);
-    fixedRateFacet = await ethers.getContractAt("FixedRate", diamond.address, signer_A);
+    bondFixedRateFacet = await ethers.getContractAt("BondUSAFixedRateFacetTimeTravel", diamond.target, signer_A);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.target, signer_A);
+    fixedRateFacet = await ethers.getContractAt("FixedRate", diamond.target, signer_A);
   }
 
   beforeEach(async () => {

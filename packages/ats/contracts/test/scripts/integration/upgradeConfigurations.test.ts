@@ -17,9 +17,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { configureLogger, LogLevel, CheckpointManager, getResolverProxyConfigInfo } from "@scripts/infrastructure";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import { CheckpointManager, getResolverProxyConfigInfo } from "@scripts/infrastructure";
 import { upgradeConfigurations } from "@scripts";
+import { silenceScriptLogging } from "@test";
 import {
   deployUpgradeTestFixture,
   deployUpgradeInfrastructureOnlyFixture,
@@ -34,9 +35,7 @@ import {
 } from "../../helpers/checkpointTestHelpers";
 
 describe("upgradeConfigurations - Integration Tests", () => {
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   describe("Basic Upgrade Flow", () => {
     it("should deploy facets, register, and create both configurations", async () => {
@@ -261,7 +260,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
   describe("Checkpoint Resumability", () => {
     let testDir: string;
     let manager: CheckpointManager;
-    let signers: SignerWithAddress[];
+    let signers: HardhatEthersSigner[];
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();

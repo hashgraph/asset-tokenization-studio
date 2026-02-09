@@ -15,7 +15,7 @@ import GetHoldForByPartitionRequest from "@port/in/request/security/operations/h
 import ReleaseHoldByPartitionRequest from "@port/in/request/security/operations/release/ReleaseHoldByPartitionRequest";
 import ReclaimHoldByPartitionRequest from "@port/in/request/security/operations/hold/ReclaimHoldByPartitionRequest";
 import ExecuteHoldByPartitionRequest from "@port/in/request/security/operations/hold/ExecuteHoldByPartitionRequest";
-import { BigNumber } from "ethers";
+
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { GetHeldAmountForQuery } from "@query/security/hold/getHeldAmountFor/GetHeldAmountForQuery";
 import { GetHeldAmountForByPartitionQuery } from "@query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQuery";
@@ -131,7 +131,7 @@ export const ExecuteHoldByPartitionRequestFixture = createFixture<ExecuteHoldByP
 });
 
 export const HoldDetailsFixture = createFixture<HoldDetails>((props) => {
-  props.amount.faker((faker) => new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()));
+  props.amount.faker((faker) => new BigDecimal(BigInt(faker.number.int({ max: 999 })).toString()));
   props.expirationTimeStamp.faker((faker) => faker.date.future());
   props.escrowAddress.as(() => HederaIdPropsFixture.create().value);
   props.tokenHolderAddress.as(() => HederaIdPropsFixture.create().value);
@@ -177,7 +177,7 @@ export const CreateHoldCommandFixture = createFixture<ProtectedCreateHoldByParti
   command.partitionId.as(() => PartitionIdFixture.create().value);
   command.escrowId.as(() => HederaIdPropsFixture.create().value);
   command.targetId.as(() => HederaIdPropsFixture.create().value);
-  command.amount.faker((faker) => new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()));
+  command.amount.faker((faker) => new BigDecimal(BigInt(faker.number.int({ max: 999 })).toString()));
   command.sourceId.as(() => HederaIdPropsFixture.create().value);
   command.targetId.as(() => HederaIdPropsFixture.create().value);
   command.expirationDate.faker((faker) => faker.date.future().getTime().toString());
@@ -191,5 +191,5 @@ export const HandleHoldCommandFixture = createFixture<ExecuteHoldByPartitionComm
   command.partitionId.as(() => PartitionIdFixture.create().value);
   command.targetId.as(() => HederaIdPropsFixture.create().value);
   command.holdId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
-  command.amount.faker((faker) => new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()));
+  command.amount.faker((faker) => new BigDecimal(BigInt(faker.number.int({ max: 999 })).toString()));
 });
