@@ -38,7 +38,7 @@ describe("GetRateQueryHandler", () => {
 
       await expect(resultPromise).rejects.toBeInstanceOf(GetRateQueryError);
       await expect(resultPromise).rejects.toMatchObject({
-        message: expect.stringContaining(`An error occurred while querying rate: ${errorMsg}`),
+        message: expect.stringContaining(`An error occurred while querying bond rate: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });

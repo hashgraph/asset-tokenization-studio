@@ -8,6 +8,7 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import ValidationService from "@service/validation/ValidationService";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { ErrorCode } from "@core/error/BaseError";
+import TransactionAdapter from "@port/out/TransactionAdapter";
 import { SetRateCommandHandler } from "./SetRateCommandHandler";
 import { SetRateCommand, SetRateCommandResponse } from "./SetRateCommand";
 import { SetRateCommandError } from "./error/SetRateCommandError";
@@ -56,7 +57,7 @@ describe("SetRateCommandHandler", () => {
         await expect(resultPromise).rejects.toBeInstanceOf(SetRateCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(`An error occurred while setting rate: ${errorMsg}`),
+          message: expect.stringContaining(`Error setting rate: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
 
@@ -73,7 +74,7 @@ describe("SetRateCommandHandler", () => {
         await expect(resultPromise).rejects.toBeInstanceOf(SetRateCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(`An error occurred while setting rate: ${errorMsg}`),
+          message: expect.stringContaining(`Error setting rate: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
 
@@ -91,7 +92,7 @@ describe("SetRateCommandHandler", () => {
         await expect(resultPromise).rejects.toBeInstanceOf(SetRateCommandError);
 
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(`An error occurred while setting rate: ${errorMsg}`),
+          message: expect.stringContaining(`Error setting rate: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
 
@@ -107,24 +108,20 @@ describe("SetRateCommandHandler", () => {
 
       it("throws SetRateCommandError when command fails with uncaught error", async () => {
         const fakeError = new Error(errorMsg);
+        validationServiceMock.checkPause.mockResolvedValue(undefined);
+        validationServiceMock.checkRole.mockResolvedValue(undefined);
+        contractServiceMock.getContractEvmAddress.mockResolvedValue(evmAddress);
 
-        // Create a new handler instance to test uncaught error scenario
-        const faultyHandler = new SetRateCommandHandler(
-          transactionServiceMock,
-          contractServiceMock,
-          validationServiceMock,
-          accountServiceMock,
-        );
+        // Mock the transaction handler to throw an error
+        const mockHandler = createMock<TransactionAdapter>();
+        mockHandler.setRate.mockRejectedValue(fakeError);
+        transactionServiceMock.getHandler.mockReturnValue(mockHandler);
 
-        // Mock the execute method to throw an error
-        jest.spyOn(faultyHandler, "execute").mockRejectedValue(fakeError);
-
-        const resultPromise = faultyHandler.execute(command);
+        const resultPromise = handler.execute(command);
 
         await expect(resultPromise).rejects.toBeInstanceOf(SetRateCommandError);
-
         await expect(resultPromise).rejects.toMatchObject({
-          message: expect.stringContaining(`An error occurred while setting rate: ${errorMsg}`),
+          message: expect.stringContaining(`Error setting rate: ${errorMsg}`),
           errorCode: ErrorCode.UncaughtCommandError,
         });
       });
