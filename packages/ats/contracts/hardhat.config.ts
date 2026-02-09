@@ -39,7 +39,7 @@ const config: HardhatUserConfig = {
   },
   paths: {
     sources: "./contracts",
-    tests: "./test/contracts/unit",
+    tests: "./test/contracts/integration",
     cache: "./cache",
     artifacts: "./artifacts",
   },
@@ -93,6 +93,14 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 3_000_000,
+    require: ["./test/helpers/globalSetup.ts"],
+    rootHooks: {
+      beforeAll() {
+        // Direct require to avoid barrel import (prevents eager typechain loading)
+        const { configureLogger, LogLevel } = require("./scripts/infrastructure/utils/logging");
+        configureLogger({ level: LogLevel.SILENT });
+      },
+    },
   },
   dependencyCompiler: {
     paths: [

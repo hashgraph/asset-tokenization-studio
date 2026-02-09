@@ -10,14 +10,13 @@
  */
 
 import { promises as fs } from "fs";
-import { join } from "path";
 import type {
   DeploymentCheckpoint,
   DeployedContract,
   ConfigurationResult,
   WorkflowType,
 } from "@scripts/infrastructure";
-import { CheckpointManager, getStepName } from "@scripts/infrastructure";
+import { CheckpointManager, getStepName, getTestCheckpointsDir, getTestDeploymentsDir } from "@scripts/infrastructure";
 import {
   TEST_ADDRESSES,
   TEST_NETWORKS,
@@ -266,11 +265,7 @@ export function assertCheckpointAtStep(
  * ```
  */
 export function createTestCheckpointsDir(): string {
-  // Return test-specific checkpoint directory under deployments/test/
-  // Isolated from production deployments (deployments/hardhat/.checkpoints)
-  // Note: Tests run from build/ directory, so we need to go up 3 levels:
-  // build/test/helpers/ → ../../../ → contracts/deployments/test/hardhat/.checkpoints
-  return join(__dirname, "../../../deployments/test/hardhat/.checkpoints");
+  return getTestCheckpointsDir("hardhat");
 }
 
 /**
@@ -298,10 +293,8 @@ export function createTestCheckpointsDir(): string {
  */
 export async function cleanupTestCheckpoints(testCheckpointsDir: string): Promise<void> {
   try {
-    // Remove directory and all contents
     await fs.rm(testCheckpointsDir, { recursive: true, force: true });
   } catch (error) {
-    // Ignore if already removed
     if (error instanceof Error && "code" in error && error.code !== "ENOENT") {
       throw new Error(
         `Failed to cleanup test checkpoints directory: ${error instanceof Error ? error.message : String(error)}`,
@@ -316,6 +309,20 @@ export async function cleanupTestCheckpoints(testCheckpointsDir: string): Promis
     throw new Error(
       `Failed to create test checkpoints directory: ${error instanceof Error ? error.message : String(error)}`,
     );
+  }
+}
+
+/**
+ * Remove the entire deployments/test/ directory tree.
+ *
+ * Use in a top-level `after` hook for final cleanup after all tests complete.
+ * Unlike `cleanupTestCheckpoints`, this does NOT recreate the directory.
+ */
+export async function removeTestDeployments(): Promise<void> {
+  try {
+    await fs.rm(getTestDeploymentsDir(), { recursive: true, force: true });
+  } catch {
+    // Ignore cleanup errors
   }
 }
 
@@ -707,9 +714,9 @@ export function createCheckpointCleanupHooks(): {
      */
     afterCleanup: async () => {
       const fsModule = await import("fs").then((m) => m.promises);
-      const testCheckpointDir = "deployments/test/hardhat/.checkpoints";
+      const { getTestDeploymentsDir: getTestDir } = await import("@scripts/infrastructure");
       try {
-        await fsModule.rm(testCheckpointDir, { recursive: true, force: true });
+        await fsModule.rm(getTestDir(), { recursive: true, force: true });
       } catch {
         // Ignore cleanup errors
       }

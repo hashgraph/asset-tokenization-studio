@@ -17,9 +17,14 @@ import { TEST_LOGGER_PREFIXES } from "@test";
 import { getLoggerConfig, resetLogger } from "../../../../scripts/infrastructure/utils/logging";
 
 describe("Logging Utilities", () => {
-  // Reset logger after each test to avoid state leakage
-  afterEach(() => {
+  // Restore default logger state before each test (rootHooks sets SILENT globally)
+  beforeEach(() => {
     resetLogger();
+  });
+
+  // Re-silence logger after each test to prevent log noise between suites
+  afterEach(() => {
+    configureLogger({ level: LogLevel.SILENT });
   });
 
   // ============================================================================
