@@ -110,7 +110,7 @@ describe("FixedRate", () => {
 
       const result = await FixedRate.getRate(getRateRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetRateRequest", getRateRequest, undefined);
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRateRequest", getRateRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(new GetRateQuery(getRateRequest.securityId));
 
@@ -123,7 +123,7 @@ describe("FixedRate", () => {
 
       await expect(FixedRate.getRate(getRateRequest)).rejects.toThrow(error);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetRateRequest", getRateRequest, undefined);
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetRateRequest", getRateRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(new GetRateQuery(getRateRequest.securityId));
     });
