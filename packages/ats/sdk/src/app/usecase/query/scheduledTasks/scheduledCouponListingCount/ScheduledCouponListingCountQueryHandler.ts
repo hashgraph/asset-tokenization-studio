@@ -27,7 +27,7 @@ export class ScheduledCouponListingCountQueryHandler implements IQueryHandler<Sc
 
       const securityEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(securityId);
 
-      const count = await this.queryAdapter.getScheduledCouponListingCount(securityEvmAddress);
+      const count = await this.queryAdapter.scheduledCouponListingCount(securityEvmAddress);
 
       return Promise.resolve(new ScheduledCouponListingCountQueryResponse(count));
     } catch (error) {

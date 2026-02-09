@@ -2,7 +2,7 @@
 
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-export default class GetScheduledCouponListingCountRequest extends ValidatedRequest<GetScheduledCouponListingCountRequest> {
+export default class ScheduledCouponListingCountRequest extends ValidatedRequest<ScheduledCouponListingCountRequest> {
   public readonly securityId: string;
 
   constructor({ securityId }: { securityId: string }) {

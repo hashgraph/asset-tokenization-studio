@@ -19,7 +19,7 @@ describe("ScheduledCouponListingCountQueryHandler", () => {
 
   beforeEach(() => {
     mockQueryAdapter = {
-      getScheduledCouponListingCount: jest.fn(),
+      scheduledCouponListingCount: jest.fn(),
     } as any;
 
     mockAccountService = {
@@ -39,7 +39,7 @@ describe("ScheduledCouponListingCountQueryHandler", () => {
     const mockResult = 5;
 
     mockAccountService.getAccountEvmAddress.mockResolvedValue(evmAddress);
-    mockQueryAdapter.getScheduledCouponListingCount.mockResolvedValue(mockResult);
+    mockQueryAdapter.scheduledCouponListingCount.mockResolvedValue(mockResult);
 
     const query = new ScheduledCouponListingCountQuery(securityId);
 
@@ -50,7 +50,7 @@ describe("ScheduledCouponListingCountQueryHandler", () => {
     expect(result).toBeInstanceOf(ScheduledCouponListingCountQueryResponse);
     expect(result.count).toBe(5);
     expect(mockAccountService.getAccountEvmAddress).toHaveBeenCalledWith(securityId);
-    expect(mockQueryAdapter.getScheduledCouponListingCount).toHaveBeenCalledWith(evmAddress);
+    expect(mockQueryAdapter.scheduledCouponListingCount).toHaveBeenCalledWith(evmAddress);
   });
 
   it("should throw ScheduledCouponListingCountQueryError when service fails", async () => {

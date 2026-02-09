@@ -31,7 +31,7 @@ import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 import { BigNumber } from "ethers";
 import ScheduledCouponListing from "@port/in/scheduledTask/scheduledCouponListing/ScheduledCouponListing";
-import GetScheduledCouponListingCountRequest from "@port/in/request/scheduledTasks/GetScheduledCouponListingCountRequest";
+import ScheduledCouponListingCountRequest from "@port/in/request/scheduledTasks/ScheduledCouponListingCountRequest";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -265,11 +265,11 @@ describe("DFNS Transaction Adapter test", () => {
       throw new Error("No se encontró address del bond creado");
     }
 
-    const request = new GetScheduledCouponListingCountRequest({
+    const request = new ScheduledCouponListingCountRequest({
       securityId: contractAddress,
     });
 
-    const result = await ScheduledCouponListing.getScheduledCouponListingCount(request);
+    const result = await ScheduledCouponListing.scheduledCouponListingCount(request);
     console.log("result: " + JSON.stringify(result));
   }, 60_000);
 });

@@ -4,22 +4,22 @@ import Injectable from "@core/injectable/Injectable";
 import { QueryBus } from "@core/query/QueryBus";
 import { LogError } from "@core/decorator/LogErrorDecorator";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
-import GetScheduledCouponListingCountRequest from "@port/in/request/scheduledTasks/GetScheduledCouponListingCountRequest";
+import ScheduledCouponListingCountRequest from "@port/in/request/scheduledTasks/ScheduledCouponListingCountRequest";
 import {
   ScheduledCouponListingCountQuery,
   ScheduledCouponListingCountQueryResponse,
 } from "../../../../app/usecase/query/scheduledTasks/scheduledCouponListingCount/ScheduledCouponListingCountQuery";
 
 interface IScheduledCouponListingInPort {
-  getScheduledCouponListingCount(request: GetScheduledCouponListingCountRequest): Promise<number>;
+  scheduledCouponListingCount(request: ScheduledCouponListingCountRequest): Promise<number>;
 }
 
 class ScheduledCouponListingInPort implements IScheduledCouponListingInPort {
   constructor(private readonly queryBus: QueryBus = Injectable.resolve(QueryBus)) {}
 
   @LogError
-  async getScheduledCouponListingCount(request: GetScheduledCouponListingCountRequest): Promise<number> {
-    ValidatedRequest.handleValidation("GetScheduledCouponListingCountRequest", request);
+  async scheduledCouponListingCount(request: ScheduledCouponListingCountRequest): Promise<number> {
+    ValidatedRequest.handleValidation("ScheduledCouponListingCountRequest", request);
 
     const query = new ScheduledCouponListingCountQuery(request.securityId);
 
