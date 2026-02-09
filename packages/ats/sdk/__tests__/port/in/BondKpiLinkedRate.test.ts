@@ -14,13 +14,14 @@ import {
   Bond,
   CreateBondKpiLinkedRateRequest,
   GetLatestKpiDataRequest,
+  GetMinDateRequest,
   InitializationRequest,
   LoggerTransports,
   Network,
   SDK,
   SupportedWallets,
 } from "@port/in";
-import Kpis from "@port/in/kpis/kpis";
+import Kpis from "@port/in/kpis/Kpis";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
@@ -152,7 +153,7 @@ describe("DFNS Transaction Adapter test", () => {
     return true;
   }, 60_000);
 
-  it("get kpi latest", async () => {
+  it("query getLatestKpiData", async () => {
     const contractAddress = bond?.diamondAddress?.toString();
     console.log("contractAddress: " + contractAddress);
 
@@ -168,6 +169,20 @@ describe("DFNS Transaction Adapter test", () => {
     });
 
     const result = await Kpis.getLatestKpiData(request);
+    console.log("result: " + JSON.stringify(result));
+  }, 60_000);
+
+  it("query getMinDate", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const request = new GetMinDateRequest({ securityId: contractAddress });
+
+    const result = await Kpis.getMinDate(request);
     console.log("result: " + JSON.stringify(result));
   }, 60_000);
 });
