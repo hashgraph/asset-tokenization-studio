@@ -13,15 +13,18 @@ import { MirrorNode } from "@domain/context/network/MirrorNode";
 import {
   Bond,
   CreateBondKpiLinkedRateRequest,
+  GetLatestKpiDataRequest,
   InitializationRequest,
   LoggerTransports,
   Network,
   SDK,
   SupportedWallets,
 } from "@port/in";
+import Kpis from "@port/in/kpis/kpis";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
-import { DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
+import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
+import { BigNumber } from "ethers";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -147,5 +150,24 @@ describe("DFNS Transaction Adapter test", () => {
 
   it("test", async () => {
     return true;
+  }, 60_000);
+
+  it("get kpi latest", async () => {
+    const contractAddress = bond?.evmDiamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const request = new GetLatestKpiDataRequest({
+      securityId: contractAddress,
+      from: BigNumber.from(0),
+      to: BigNumber.from(1),
+      kpi: CLIENT_ACCOUNT_ECDSA.evmAddress || "",
+    });
+
+    const result = await Kpis.getLatestKpiData(request);
+    console.log("result: " + JSON.stringify(result));
   }, 60_000);
 });
