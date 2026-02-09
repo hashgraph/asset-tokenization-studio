@@ -198,7 +198,7 @@ describe("Bond Tests", () => {
 
   describe("Initialization", () => {
     it("GIVEN a bond variable rate WHEN deployed THEN securityType is BOND_VARIABLE_RATE", async () => {
-      const erc20Facet = await ethers.getContractAt("ERC20", diamond.address);
+      const erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
       const metadata = await erc20Facet.getERC20Metadata();
       expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
     });
