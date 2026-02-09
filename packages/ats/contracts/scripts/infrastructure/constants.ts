@@ -58,7 +58,7 @@ export const CHAIN_IDS: Record<string, number> = {
   "hedera-mainnet": 295,
   "hedera-testnet": 296,
   "hedera-previewnet": 297,
-  "hedera-local": 1337,
+  "hedera-local": 298, // Local Hedera node reports 298, not 1337
   local: 1337,
   hardhat: 31337,
 };
