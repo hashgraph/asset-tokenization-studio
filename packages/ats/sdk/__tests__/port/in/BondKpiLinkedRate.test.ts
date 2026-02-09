@@ -2,7 +2,6 @@
 
 //import "../environmentMock";
 import Injectable from "@core/injectable/Injectable";
-import { Validation } from "@core/validation/Validation";
 import {
   CastRegulationSubType,
   CastRegulationType,
@@ -24,29 +23,12 @@ import {
   SupportedWallets,
 } from "@port/in";
 import Kpis from "@port/in/kpis/Kpis";
+import KpiLinkedRate from "@port/in/interestRates/kpiLinkedRate/KpiLinkedRate";
 import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRateRequest";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
-import InterestRateViewModel from "@port/in/response/interestRates/InterestRateViewModel";
 import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 import { BigNumber } from "ethers";
-
-class MockKpiLinkedRateInPort {
-  async getInterestRate(request: GetInterestRateRequest): Promise<InterestRateViewModel> {
-    Validation.handleValidation("GetInterestRateRequest", request);
-
-    return {
-      maxRate: "10",
-      baseRate: "2",
-      minRate: "1",
-      startPeriod: "1",
-      startRate: "1",
-      missedPenalty: "1",
-      reportPeriod: "1",
-      rateDecimals: 1,
-    };
-  }
-}
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -201,13 +183,11 @@ describe("DFNS Transaction Adapter test", () => {
       throw new Error("No se encontró address del bond creado");
     }
 
-    const kpiLinkedRate = new MockKpiLinkedRateInPort();
-
     const request = new GetInterestRateRequest({
       securityId: contractAddress,
     });
 
-    const result = await kpiLinkedRate.getInterestRate(request);
+    const result = await KpiLinkedRate.getInterestRate(request);
     console.log("result: " + JSON.stringify(result));
 
     expect(result).toHaveProperty("maxRate");

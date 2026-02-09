@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
+import Injectable from "@core/injectable/Injectable";
 import { QueryBus } from "@core/query/QueryBus";
-import { lazyInject } from "@core/decorator/LazyInjectDecorator";
-import { Validation } from "@core/validation/Validation";
+import { LogError } from "@core/decorator/LogErrorDecorator";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
 import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRateRequest";
 import InterestRateViewModel from "@port/in/response/interestRates/InterestRateViewModel";
 import {
@@ -10,14 +11,16 @@ import {
   GetInterestRateQueryResponse,
 } from "../../../../app/usecase/query/interestRates/getInterestRate/GetInterestRateQuery";
 
-export class KpiLinkedRateInPort {
-  constructor(
-    @lazyInject(QueryBus)
-    private readonly queryBus: QueryBus,
-  ) {}
+interface IKpiLinkedRateInPort {
+  getInterestRate(request: GetInterestRateRequest): Promise<InterestRateViewModel>;
+}
 
+class KpiLinkedRateInPort implements IKpiLinkedRateInPort {
+  constructor(private readonly queryBus: QueryBus = Injectable.resolve(QueryBus)) {}
+
+  @LogError
   async getInterestRate(request: GetInterestRateRequest): Promise<InterestRateViewModel> {
-    Validation.handleValidation("GetInterestRateRequest", request);
+    ValidatedRequest.handleValidation("GetInterestRateRequest", request);
 
     const query = new GetInterestRateQuery(request.securityId);
 
@@ -35,3 +38,6 @@ export class KpiLinkedRateInPort {
     };
   }
 }
+
+const KpiLinkedRate = new KpiLinkedRateInPort();
+export default KpiLinkedRate;
