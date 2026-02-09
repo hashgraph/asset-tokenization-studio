@@ -16,7 +16,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { CheckpointManager } from "@scripts/infrastructure";
 import { silenceScriptLogging } from "@test";
 import {
@@ -30,7 +30,7 @@ import {
 } from "../../helpers/checkpointTestHelpers";
 
 describe("Checkpoint Resumability - Integration Tests", () => {
-  let signers: SignerWithAddress[];
+  let signers: HardhatEthersSigner[];
 
   before(async () => {
     silenceScriptLogging();

@@ -65,10 +65,10 @@ export async function deployTransparentProxy(
         gasLimit: GAS_LIMIT.default,
       },
     );
-    await proxy.deployed();
+    await proxy.waitForDeployment();
 
     success("TransparentUpgradeableProxy deployment complete");
-    info(`  Proxy: ${proxy.address}`);
+    info(`  Proxy: ${await proxy.getAddress()}`);
 
     return proxy;
   } catch (err) {

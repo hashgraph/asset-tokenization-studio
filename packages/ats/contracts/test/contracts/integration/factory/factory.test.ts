@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   BusinessLogicResolver,
   IFactory,
@@ -31,8 +31,8 @@ import { Rbac, SecurityType } from "@scripts/domain";
 import { getBondDetails } from "@test";
 
 describe("Factory Tests", () => {
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
 
   const init_rbacs: Rbac[] = [];
 
@@ -588,8 +588,16 @@ describe("Factory Tests", () => {
       await expect(tx).to.emit(factory, "EquityDeployed");
 
       const result = await tx;
-      const events = (await result.wait()).events!;
-      const deployedEquityEvent = events.find((e) => e.event == "EquityDeployed");
+      const receipt = await result.wait();
+      const deployedEquityEvent = receipt!.logs
+        .map((log) => {
+          try {
+            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "EquityDeployed");
       const equityAddress = deployedEquityEvent!.args!.equityAddress;
 
       await readFacets(equityAddress);
@@ -745,8 +753,16 @@ describe("Factory Tests", () => {
       await expect(tx).to.emit(factory, "BondDeployed");
 
       const result = await tx;
-      const events = (await result.wait()).events!;
-      const deployedBondEvent = events.find((e) => e.event == "BondDeployed");
+      const receipt = await result.wait();
+      const deployedBondEvent = receipt!.logs
+        .map((log) => {
+          try {
+            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "BondDeployed");
       const bondAddress = deployedBondEvent!.args!.bondAddress;
 
       await readFacets(bondAddress);
@@ -983,8 +999,16 @@ describe("Factory Tests", () => {
       await expect(tx).to.emit(factory, "BondFixedRateDeployed");
 
       const result = await tx;
-      const events = (await result.wait()).events!;
-      const deployedBondEvent = events.find((e) => e.event == "BondFixedRateDeployed");
+      const receipt = await result.wait();
+      const deployedBondEvent = receipt!.logs
+        .map((log) => {
+          try {
+            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "BondFixedRateDeployed");
       const bondAddress = deployedBondEvent!.args!.bondAddress;
 
       // Verify fixed rate was set
@@ -1140,8 +1164,16 @@ describe("Factory Tests", () => {
       await expect(tx).to.emit(factory, "BondKpiLinkedRateDeployed");
 
       const result = await tx;
-      const events = (await result.wait()).events!;
-      const deployedBondEvent = events.find((e) => e.event == "BondKpiLinkedRateDeployed");
+      const receipt = await result.wait();
+      const deployedBondEvent = receipt!.logs
+        .map((log) => {
+          try {
+            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "BondKpiLinkedRateDeployed");
       const bondAddress = deployedBondEvent!.args!.bondAddress;
 
       // Verify KPI linked rate was set
@@ -1517,8 +1549,16 @@ describe("Factory Tests", () => {
       await expect(tx).to.emit(factory, "BondSustainabilityPerformanceTargetRateDeployed");
 
       const result = await tx;
-      const events = (await result.wait()).events!;
-      const deployedBondEvent = events.find((e) => e.event == "BondSustainabilityPerformanceTargetRateDeployed");
+      const receipt = await result.wait();
+      const deployedBondEvent = receipt!.logs
+        .map((log) => {
+          try {
+            return factory.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          } catch {
+            return null;
+          }
+        })
+        .find((parsed) => parsed?.name === "BondSustainabilityPerformanceTargetRateDeployed");
       const bondAddress = deployedBondEvent!.args!.bondAddress;
 
       // Verify sustainability rate was set

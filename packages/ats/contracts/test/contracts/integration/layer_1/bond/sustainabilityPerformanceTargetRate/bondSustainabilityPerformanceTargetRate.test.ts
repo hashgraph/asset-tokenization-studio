@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   ResolverProxy,
   BondUSASustainabilityPerformanceTargetRateFacetTimeTravel,
@@ -37,9 +37,9 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
   };
 
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
   let project1: string;
   let project2: string;
 
@@ -98,38 +98,38 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
 
     bondSPTRateFacet = await ethers.getContractAt(
       "BondUSASustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     bondReadFacet = await ethers.getContractAt(
       "BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     sptRateFacet = await ethers.getContractAt(
       "SustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     erc1594Facet = await ethers.getContractAt(
       "ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     kpisFacet = await ethers.getContractAt(
       "KpisSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     scheduledTasksFacet = await ethers.getContractAt(
       "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
 

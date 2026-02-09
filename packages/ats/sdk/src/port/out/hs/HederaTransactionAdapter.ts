@@ -97,7 +97,7 @@ import {
 } from "@domain/context/security/Clearing";
 import { MissingRegulationSubType } from "@domain/context/factory/error/MissingRegulationSubType";
 import { MissingRegulationType } from "@domain/context/factory/error/MissingRegulationType";
-import { BaseContract, Contract, ContractTransaction } from "ethers";
+import { BaseContract, Contract, ContractTransactionResponse } from "ethers";
 import { CastRateStatus, RateStatus } from "@domain/context/bond/RateStatus";
 import { ProtectionData } from "@domain/context/factory/ProtectionData";
 
@@ -119,18 +119,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     super();
   }
 
-  private async executeWithArgs<
-    C extends BaseContract,
-    F extends {
-      [K in keyof C]: C[K] extends (...args: any[]) => Promise<ContractTransaction> ? K : never;
-    }[keyof C] &
-      string,
-  >(
+  private async executeWithArgs<C extends BaseContract>(
     contractInstance: C,
-    functionName: F,
+    functionName: string,
     contractId: ContractId | string,
     gas: number,
-    args: Parameters<C[F] extends (...args: infer P) => any ? (...args: P) => any : never>,
+    args: any[],
   ): Promise<TransactionResponse<any, Error>> {
     const encodedHex = contractInstance.interface.encodeFunctionData(functionName, args as any);
     const encoded = new Uint8Array(Buffer.from(encodedHex.slice(2), "hex"));
@@ -746,9 +740,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       executionDate: executionDate.toHexString(),
       rate: rate.toHexString(),
       rateDecimals: rate.decimals,
-      startDate: startDate.toBigNumber(),
-      endDate: endDate.toBigNumber(),
-      fixingDate: fixingDate.toBigNumber(),
+      startDate: startDate.toBigInt(),
+      endDate: endDate.toBigInt(),
+      fixingDate: fixingDate.toBigInt(),
       rateStatus: CastRateStatus.toNumber(rateStatus),
     };
     return this.executeWithArgs(
@@ -1102,8 +1096,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Protected Redeeming ${amount} securities from account ${sourceId.toString()}`);
 
     const protectionData: ProtectionData = {
-      deadline: deadline.toBigNumber(),
-      nounce: nounce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nounce: nounce.toBigInt(),
       signature: signature,
     };
 
@@ -1112,7 +1106,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "protectedRedeemFromByPartition",
       securityId,
       GAS.PROTECTED_REDEEM,
-      [partitionId, sourceId.toString(), amount.toBigNumber(), protectionData],
+      [partitionId, sourceId.toString(), amount.toBigInt(), protectionData],
     );
   }
 
@@ -1132,8 +1126,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const protectionData: ProtectionData = {
-      deadline: deadline.toBigNumber(),
-      nounce: nounce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nounce: nounce.toBigInt(),
       signature: signature,
     };
 
@@ -1142,7 +1136,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "protectedTransferFromByPartition",
       securityId,
       GAS.PROTECTED_TRANSFER,
-      [partitionId, sourceId.toString(), targetId.toString(), amount.toBigNumber(), protectionData],
+      [partitionId, sourceId.toString(), targetId.toString(), amount.toBigInt(), protectionData],
     );
   }
 
@@ -1159,8 +1153,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrowId}`,
     );
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: expirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: expirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1189,8 +1183,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: expirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: expirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1219,8 +1213,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: expirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: expirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1253,16 +1247,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: expirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: expirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
     };
     const protectedHold: ProtectedHold = {
       hold: hold,
-      deadline: deadline.toBigNumber(),
-      nonce: nonce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nonce: nonce.toBigInt(),
     };
 
     return this.executeWithArgs(
@@ -1295,7 +1289,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "releaseHoldByPartition",
       securityId,
       GAS.RELEASE_HOLD,
-      [holdIdentifier, amount.toBigNumber()],
+      [holdIdentifier, amount.toBigInt()],
     );
   }
 
@@ -1347,7 +1341,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "executeHoldByPartition",
       securityId,
       GAS.EXECUTE_HOLD_BY_PARTITION,
-      [holdIdentifier, targetId.toString(), amount.toBigNumber()],
+      [holdIdentifier, targetId.toString(), amount.toBigInt()],
     );
   }
 
@@ -1416,7 +1410,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "grantKyc",
       securityId,
       GAS.GRANT_KYC,
-      [targetId.toString(), vcBase64, validFrom.toBigNumber(), validTo.toBigNumber(), issuer.toString()],
+      [targetId.toString(), vcBase64, validFrom.toBigInt(), validTo.toBigInt(), issuer.toString()],
     );
   }
 
@@ -1469,7 +1463,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const clearingOperation: ClearingOperation = {
       partition: partitionId,
-      expirationTimestamp: expirationDate.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigInt(),
       data: "0x",
     };
 
@@ -1478,7 +1472,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "clearingTransferByPartition",
       securityId,
       GAS.CLEARING_TRANSFER_BY_PARTITION,
-      [clearingOperation, amount.toBigNumber(), targetId.toString()],
+      [clearingOperation, amount.toBigInt(), targetId.toString()],
     );
   }
 
@@ -1496,7 +1490,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1508,7 +1502,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "clearingTransferFromByPartition",
       securityId,
       GAS.CLEARING_TRANSFER_FROM_BY_PARTITION,
-      [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
+      [clearingOperationFrom, amount.toBigInt(), targetId.toString()],
     );
   }
 
@@ -1529,12 +1523,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const protectedClearingOperation: ProtectedClearingOperation = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
-      deadline: deadline.toBigNumber(),
-      nonce: nonce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nonce: nonce.toBigInt(),
     };
 
     return this.executeWithArgs(
@@ -1542,7 +1536,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "protectedClearingTransferByPartition",
       securityId,
       GAS.PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
-      [protectedClearingOperation, amount.toBigNumber(), targetId.toString(), signature],
+      [protectedClearingOperation, amount.toBigInt(), targetId.toString(), signature],
     );
   }
 
@@ -1635,7 +1629,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const clearingOperation: ClearingOperation = {
       partition: partitionId,
-      expirationTimestamp: expirationDate.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigInt(),
       data: "0x",
     };
 
@@ -1644,7 +1638,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "clearingRedeemByPartition",
       securityId,
       GAS.CLEARING_REDEEM_BY_PARTITION,
-      [clearingOperation, amount.toBigNumber()],
+      [clearingOperation, amount.toBigInt()],
     );
   }
 
@@ -1661,7 +1655,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1673,7 +1667,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "clearingRedeemFromByPartition",
       securityId,
       GAS.CLEARING_REDEEM_FROM_BY_PARTITION,
-      [clearingOperationFrom, amount.toBigNumber()],
+      [clearingOperationFrom, amount.toBigInt()],
     );
   }
 
@@ -1693,12 +1687,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const protectedClearingOperation: ProtectedClearingOperation = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
-      deadline: deadline.toBigNumber(),
-      nonce: nonce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nonce: nonce.toBigInt(),
     };
 
     return this.executeWithArgs(
@@ -1706,7 +1700,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "protectedClearingRedeemByPartition",
       securityId,
       GAS.PROTECTED_CLEARING_REDEEM_BY_PARTITION,
-      [protectedClearingOperation, amount.toBigNumber(), signature],
+      [protectedClearingOperation, amount.toBigInt(), signature],
     );
   }
 
@@ -1724,13 +1718,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const clearingOperation: ClearingOperation = {
       partition: partitionId,
-      expirationTimestamp: clearingExpirationDate.toBigNumber(),
+      expirationTimestamp: clearingExpirationDate.toBigInt(),
       data: "0x",
     };
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: holdExpirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1761,7 +1755,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        expirationTimestamp: clearingExpirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1769,8 +1763,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     };
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: holdExpirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1804,17 +1798,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const protectedClearingOperation: ProtectedClearingOperation = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        expirationTimestamp: clearingExpirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
-      deadline: deadline.toBigNumber(),
-      nonce: nonce.toBigNumber(),
+      deadline: deadline.toBigInt(),
+      nonce: nonce.toBigInt(),
     };
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: holdExpirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1845,7 +1839,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        expirationTimestamp: clearingExpirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1853,8 +1847,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     };
 
     const hold: Hold = {
-      amount: amount.toBigNumber(),
-      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      amount: amount.toBigInt(),
+      expirationTimestamp: holdExpirationDate.toBigInt(),
       escrow: escrowId.toString(),
       to: targetId.toString(),
       data: "0x",
@@ -1882,7 +1876,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1894,7 +1888,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "operatorClearingRedeemByPartition",
       securityId,
       GAS.OPERATOR_CLEARING_REDEEM_BY_PARTITION,
-      [clearingOperationFrom, amount.toBigNumber()],
+      [clearingOperationFrom, amount.toBigInt()],
     );
   }
 
@@ -1912,7 +1906,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const clearingOperationFrom: ClearingOperationFrom = {
       clearingOperation: {
         partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
+        expirationTimestamp: expirationDate.toBigInt(),
         data: "0x",
       },
       from: sourceId.toString(),
@@ -1924,7 +1918,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "operatorClearingTransferByPartition",
       securityId,
       GAS.OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
-      [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
+      [clearingOperationFrom, amount.toBigInt(), targetId.toString()],
     );
   }
 
@@ -2358,7 +2352,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "freezePartialTokens",
       securityId,
       GAS.FREEZE_PARTIAL_TOKENS,
-      [targetId.toString(), amount.toBigNumber()],
+      [targetId.toString(), amount.toBigInt()],
     );
   }
 
@@ -2375,7 +2369,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "unfreezePartialTokens",
       securityId,
       GAS.UNFREEZE_PARTIAL_TOKENS,
-      [targetId.toString(), amount.toBigNumber()],
+      [targetId.toString(), amount.toBigInt()],
     );
   }
 
@@ -2443,7 +2437,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "batchTransfer",
       securityId,
       GAS.BATCH_TRANSFER,
-      [toList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigNumber())],
+      [toList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
     );
   }
 
@@ -2466,7 +2460,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       [
         fromList.map((addr) => addr.toString()),
         toList.map((addr) => addr.toString()),
-        amountList.map((amount) => amount.toBigNumber()),
+        amountList.map((amount) => amount.toBigInt()),
       ],
     );
   }
@@ -2484,7 +2478,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "batchMint",
       securityId,
       GAS.BATCH_MINT,
-      [toList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigNumber())],
+      [toList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
     );
   }
 
@@ -2501,7 +2495,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "batchBurn",
       securityId,
       GAS.BATCH_BURN,
-      [targetList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigNumber())],
+      [targetList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
     );
   }
 
@@ -2535,7 +2529,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "batchFreezePartialTokens",
       securityId,
       GAS.BATCH_FREEZE_PARTIAL_TOKENS,
-      [targetList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigNumber())],
+      [targetList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
     );
   }
 
@@ -2552,7 +2546,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "batchUnfreezePartialTokens",
       securityId,
       GAS.BATCH_UNFREEZE_PARTIAL_TOKENS,
-      [targetList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigNumber())],
+      [targetList.map((addr) => addr.toString()), amountList.map((amount) => amount.toBigInt())],
     );
   }
 
@@ -2587,7 +2581,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "redeemAtMaturityByPartition",
       securityId,
       GAS.REDEEM_AT_MATURITY_BY_PARTITION_GAS,
-      [sourceId.toString(), partitionId, amount.toBigNumber()],
+      [sourceId.toString(), partitionId, amount.toBigInt()],
     );
   }
 

@@ -12,7 +12,6 @@ import { ethers } from "ethers";
 import * as fs from "fs";
 import * as path from "path";
 import { MethodDefinition } from "../../infrastructure/types";
-import { id } from "ethers/lib/utils";
 
 /**
  * Load compiled ABI from Hardhat artifacts.
@@ -80,13 +79,13 @@ export function extractMethodsFromABI(abi: any[]): MethodDefinition[] {
   ]);
 
   const methods: MethodDefinition[] = [];
-  const iface = new ethers.utils.Interface(abi);
-  const functions = iface.functions;
-  for (const item of Object.values(functions)) {
+  const iface = new ethers.Interface(abi);
+  const functions = iface.fragments.filter((f): f is ethers.FunctionFragment => f.type === "function");
+  for (const item of functions) {
     if (!STATIC_METHODS_TO_EXCLUDE.has(item.name)) {
       const name = item.name;
       const signature = item.format("full");
-      const selector = id(item.format("sighash")).substring(0, 10);
+      const selector = item.selector;
 
       methods.push({ name, signature, selector });
     }

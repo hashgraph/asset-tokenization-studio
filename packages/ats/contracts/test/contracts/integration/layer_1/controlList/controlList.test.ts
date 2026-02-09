@@ -4,16 +4,16 @@ import { AccessControlFacet, ControlListFacet, PauseFacet, ResolverProxy } from 
 import { ATS_ROLES } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
 import { grantRoleAndPauseToken } from "@test";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import { executeRbac } from "@test";
 
 describe("Control List Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let controlListFacet: ControlListFacet;
   let pauseFacet: PauseFacet;
@@ -27,9 +27,9 @@ describe("Control List Tests", () => {
     signer_C = base.user2;
     signer_D = base.user3;
 
-    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
+    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
 
     await executeRbac(base.accessControlFacet, [{ role: ATS_ROLES._PAUSER_ROLE, members: [signer_B.address] }]);
   }

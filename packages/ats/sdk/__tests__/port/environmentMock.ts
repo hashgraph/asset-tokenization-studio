@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import BigDecimal from "@domain/context/shared/BigDecimal";
-import { BigNumber } from "ethers";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
 import { EquityDetails } from "@domain/context/equity/EquityDetails";
 import { BondDetails } from "@domain/context/bond/BondDetails";
@@ -98,7 +97,7 @@ const lastLockIds = new Map<string, number>();
 const lastHoldIds = new Map<string, number>();
 const lastClearingIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
-const nonces = new Map<string, BigNumber>();
+const nonces = new Map<string, bigint>();
 const kycAccountsData = new Map<string, Kyc>();
 const kycAccountsByStatus = new Map<number, string[]>();
 
@@ -153,31 +152,25 @@ function increaseHeldBalance(targetId: EvmAddress, amount: BigDecimal): void {
   const account = identifiers(targetId.toString())[1];
   let accountHeldBalance = heldBalances.get(account);
   if (accountHeldBalance) {
-    accountHeldBalance = BigDecimal.fromString(accountHeldBalance).toBigNumber().add(amount.toBigNumber()).toString();
+    accountHeldBalance = (BigInt(accountHeldBalance) + amount.toBigInt()).toString();
     heldBalances.set(account, accountHeldBalance);
-  } else heldBalances.set(account, amount.toString());
+  } else heldBalances.set(account, amount.toBigInt().toString());
 }
 
 function increaseClearedBalance(targetId: EvmAddress, amount: BigDecimal): void {
   const account = identifiers(targetId.toString())[1];
   let accountClearedBalance = clearedBalances.get(account);
   if (accountClearedBalance) {
-    accountClearedBalance = BigDecimal.fromString(accountClearedBalance)
-      .toBigNumber()
-      .add(amount.toBigNumber())
-      .toString();
+    accountClearedBalance = (BigInt(accountClearedBalance) + amount.toBigInt()).toString();
     clearedBalances.set(account, accountClearedBalance);
-  } else clearedBalances.set(account, amount.toString());
+  } else clearedBalances.set(account, amount.toBigInt().toString());
 }
 
 function decreaseClearedBalance(targetId: EvmAddress, amount: BigDecimal): void {
   const account = identifiers(targetId.toString())[1];
   let accountClearedBalance = clearedBalances.get(account);
   if (accountClearedBalance) {
-    accountClearedBalance = BigDecimal.fromString(accountClearedBalance)
-      .toBigNumber()
-      .sub(amount.toBigNumber())
-      .toString();
+    accountClearedBalance = (BigInt(accountClearedBalance) - amount.toBigInt()).toString();
     clearedBalances.set(account, accountClearedBalance);
   }
 }
@@ -217,7 +210,7 @@ function decreaseHeldBalance(targetId: EvmAddress, amount: BigDecimal): void {
   const account = identifiers(targetId.toString())[1];
   let accountHeldBalance = heldBalances.get(account);
   if (accountHeldBalance) {
-    accountHeldBalance = BigDecimal.fromString(accountHeldBalance).toBigNumber().sub(amount.toBigNumber()).toString();
+    accountHeldBalance = (BigInt(accountHeldBalance) - amount.toBigInt()).toString();
     heldBalances.set(account, accountHeldBalance);
   }
 }
@@ -226,22 +219,16 @@ function increaseLockedBalance(targetId: EvmAddress, amount: BigDecimal): void {
   const account = identifiers(targetId.toString())[1];
   let accountLockedBalance = lockedBalances.get(account);
   if (accountLockedBalance) {
-    accountLockedBalance = BigDecimal.fromString(accountLockedBalance)
-      .toBigNumber()
-      .add(amount.toBigNumber())
-      .toString();
+    accountLockedBalance = (BigInt(accountLockedBalance) + amount.toBigInt()).toString();
     lockedBalances.set(account, accountLockedBalance);
-  } else lockedBalances.set(account, amount.toString());
+  } else lockedBalances.set(account, amount.toBigInt().toString());
 }
 
 function decreaseLockedBalance(targetId: EvmAddress, amount: BigDecimal): void {
   const account = identifiers(targetId.toString())[1];
   let accountLockedBalance = lockedBalances.get(account);
   if (accountLockedBalance) {
-    accountLockedBalance = BigDecimal.fromString(accountLockedBalance)
-      .toBigNumber()
-      .sub(amount.toBigNumber())
-      .toString();
+    accountLockedBalance = (BigInt(accountLockedBalance) - amount.toBigInt()).toString();
     lockedBalances.set(account, accountLockedBalance);
   }
 }
@@ -250,16 +237,16 @@ function increaseBalance(targetId: EvmAddress, amount: BigDecimal): void {
   const account = identifiers(targetId.toString())[1];
   let accountBalance = balances.get(account);
   if (accountBalance) {
-    accountBalance = BigDecimal.fromString(accountBalance).toBigNumber().add(amount.toBigNumber()).toString();
+    accountBalance = (BigInt(accountBalance) + amount.toBigInt()).toString();
     balances.set(account, accountBalance);
-  } else balances.set(account, amount.toString());
+  } else balances.set(account, amount.toBigInt().toString());
 }
 
 function decreaseBalance(targetId: EvmAddress, amount: BigDecimal): void {
   const account = identifiers(targetId.toString())[1];
   let accountBalance = balances.get(account);
   if (accountBalance) {
-    accountBalance = BigDecimal.fromString(accountBalance).toBigNumber().sub(amount.toBigNumber()).toString();
+    accountBalance = (BigInt(accountBalance) - amount.toBigInt()).toString();
     balances.set(account, accountBalance);
   }
 }
@@ -348,8 +335,8 @@ const createHold = async (
 
   accountHolds.set(newLastHoldId, [
     new HoldDetails(
-      expirationDate.toBigNumber().toNumber(),
-      amount,
+      expirationDate.toUnsafeFloat(),
+      amount.toBigInt(),
       escrow.toString(),
       account,
       sourceId.toString(),
@@ -392,26 +379,20 @@ const createClearing = async (
     case ClearingOperationType.HoldCreation:
       clearing = new ClearingHoldCreation(
         amount,
-        clearingExpirationDate.toBigNumber().toNumber(),
+        clearingExpirationDate.toUnsafeFloat(),
         "0x",
         "0x",
         escrow!.toString(),
-        holdExpirationDate!.toBigNumber().toNumber(),
+        holdExpirationDate!.toUnsafeFloat(),
         target.toString(),
         "0x",
       );
       break;
     case ClearingOperationType.Redeem:
-      clearing = new ClearingRedeem(amount, clearingExpirationDate.toBigNumber().toNumber(), "0x", "0x");
+      clearing = new ClearingRedeem(amount, clearingExpirationDate.toUnsafeFloat(), "0x", "0x");
       break;
     default:
-      clearing = new ClearingTransfer(
-        amount,
-        clearingExpirationDate.toBigNumber().toNumber(),
-        targetId!.toString(),
-        "0x",
-        "0x",
-      );
+      clearing = new ClearingTransfer(amount, clearingExpirationDate.toUnsafeFloat(), targetId!.toString(), "0x", "0x");
       break;
   }
 
@@ -438,10 +419,10 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return {}; // Return a mock object as needed
   });
 
-  singletonInstance.balanceOf = jest.fn(async (address: EvmAddress, target: EvmAddress): Promise<BigNumber> => {
+  singletonInstance.balanceOf = jest.fn(async (address: EvmAddress, target: EvmAddress): Promise<bigint> => {
     const balance = balances.get("0x" + target.toString().toUpperCase().substring(2));
-    if (balance) return BigNumber.from(BigDecimal.fromString(balance, securityInfo.decimals));
-    return BigNumber.from(BigDecimal.fromString("0", securityInfo.decimals));
+    if (balance) return BigInt(BigDecimal.fromString(balance, securityInfo.decimals).toFixedNumber());
+    return BigInt(0);
   });
 
   singletonInstance.balanceOfByPartition = jest.fn(
@@ -457,13 +438,13 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
 
   singletonInstance.balanceOfAtSnapshot = jest.fn(
     async (address: EvmAddress, target: EvmAddress, snapshotId: number) => {
-      return BigNumber.from(0);
+      return BigInt(0);
     },
   );
 
   singletonInstance.balanceOfAtSnapshotByPartition = jest.fn(
     async (address: EvmAddress, target: EvmAddress, partitionId: string, snapshotId: number) => {
-      return BigNumber.from(0);
+      return BigInt(0);
     },
   );
 
@@ -478,11 +459,11 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
   );
 
   singletonInstance.totalSupply = jest.fn(async (address: EvmAddress) => {
-    return BigNumber.from(0);
+    return BigInt(0);
   });
 
   singletonInstance.totalSupplyAtSnapshot = jest.fn(async (address: EvmAddress, snapshotId: number) => {
-    return BigNumber.from(0);
+    return BigInt(0);
   });
 
   singletonInstance.getRolesFor = jest.fn(
@@ -821,7 +802,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
   );
 
   singletonInstance.getDocument = jest.fn(async (address: EvmAddress, name: string) => {
-    return ["", "", BigNumber.from(0)];
+    return ["", "", BigInt(0)];
   });
 
   singletonInstance.getAllDocuments = jest.fn(async (address: EvmAddress) => {
@@ -839,7 +820,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
   });
 
   singletonInstance.getScheduledSnapshots = jest.fn(async (address: EvmAddress, start: number, end: number) => {
-    return [new ScheduledSnapshot(BigNumber.from("43756347647"), "data")];
+    return [new ScheduledSnapshot(BigInt("43756347647"), "data")];
   });
 
   singletonInstance.scheduledSnapshotCount = jest.fn(async (address: EvmAddress) => {
@@ -867,8 +848,8 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
 
   singletonInstance.getLockedBalanceOf = jest.fn(async (address: EvmAddress, target: EvmAddress) => {
     const lockedBalance = lockedBalances.get("0x" + target.toString().toUpperCase().substring(2));
-    if (lockedBalance) return BigNumber.from(BigDecimal.fromString(lockedBalance, securityInfo.decimals));
-    return BigNumber.from(BigDecimal.fromString("0", securityInfo.decimals));
+    if (lockedBalance) return BigInt(BigDecimal.fromString(lockedBalance, securityInfo.decimals).toFixedNumber());
+    return BigInt(0);
   });
 
   singletonInstance.getLockCount = jest.fn(async (address: EvmAddress, target: EvmAddress) => {
@@ -881,9 +862,9 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     async (address: EvmAddress, target: EvmAddress, start: number, end: number) => {
       const lockIds = locksIds.get("0x" + target.toString().toUpperCase().substring(2));
       if (!lockIds) return [];
-      const returnedLocksId: BigNumber[] = [];
+      const returnedLocksId: bigint[] = [];
       for (let i = start; i < end; i++) {
-        returnedLocksId.push(BigNumber.from(lockIds[i]));
+        returnedLocksId.push(BigInt(lockIds[i]));
       }
       return returnedLocksId;
     },
@@ -891,9 +872,9 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
 
   singletonInstance.getLock = jest.fn(async (address: EvmAddress, target: EvmAddress, lockId: number) => {
     const accountLocks = locks.get("0x" + target.toString().toUpperCase().substring(2));
-    if (!accountLocks) return [BigNumber.from(0), BigNumber.from(0)];
+    if (!accountLocks) return [BigInt(0), BigInt(0)];
     const accountLock = accountLocks.get(lockId);
-    if (!accountLock) return [BigNumber.from(0), BigNumber.from(0)];
+    if (!accountLock) return [BigInt(0), BigInt(0)];
     return accountLock;
   });
 
@@ -937,7 +918,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
 
   singletonInstance.getNonceFor = jest.fn(async (address: EvmAddress, target: EvmAddress) => {
     const account = "0x" + target.toString().toUpperCase().substring(2);
-    return nonces.get(account) ?? new BigDecimal("0").toBigNumber();
+    return nonces.get(account) ?? BigInt(0);
   });
 
   singletonInstance.getKycStatusFor = jest.fn(async (address: EvmAddress, target: EvmAddress) => {
@@ -1046,7 +1027,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
   singletonInstance.getHoldForByPartition = jest.fn(
     async (address: EvmAddress, partitionId: string, targetId: EvmAddress, holdId: number) => {
       const accountHolds = holds.get("0x" + targetId.toString().toUpperCase().substring(2));
-      const emptyHold = new HoldDetails(0, new BigDecimal(BigNumber.from(0)), "", "", "", "", "");
+      const emptyHold = new HoldDetails(0, BigInt(0), "", "", "", "", "");
       if (!accountHolds) return emptyHold;
       const accountHold = accountHolds.get(holdId);
       if (!accountHold) return emptyHold;
@@ -1066,7 +1047,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
   singletonInstance.getClearingRedeemForByPartition = jest.fn(
     async (address: EvmAddress, partitionId: string, targetId: EvmAddress, clearingId: number) => {
       const accountClearings = clearings.get("0x" + targetId.toString().toUpperCase().substring(2));
-      const emptyClearingRedeem = new ClearingRedeem(new BigDecimal(BigNumber.from(0)), 0, "", "");
+      const emptyClearingRedeem = new ClearingRedeem(new BigDecimal(BigInt(0)), 0, "", "");
       if (!accountClearings) return emptyClearingRedeem;
       const accountClearingRedeem = accountClearings.get(clearingId);
       if (!accountClearingRedeem) return emptyClearingRedeem;
@@ -1077,16 +1058,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
   singletonInstance.getClearingCreateHoldForByPartition = jest.fn(
     async (address: EvmAddress, partitionId: string, targetId: EvmAddress, clearingId: number) => {
       const accountClearings = clearings.get("0x" + targetId.toString().toUpperCase().substring(2));
-      const emptyClearingCreateHold = new ClearingHoldCreation(
-        new BigDecimal(BigNumber.from(0)),
-        0,
-        "",
-        "",
-        "",
-        0,
-        "",
-        "",
-      );
+      const emptyClearingCreateHold = new ClearingHoldCreation(new BigDecimal(BigInt(0)), 0, "", "", "", 0, "", "");
       if (!accountClearings) return emptyClearingCreateHold;
       const accountClearingCreateHold = accountClearings.get(clearingId);
       if (!accountClearingCreateHold) return emptyClearingCreateHold;
@@ -1097,7 +1069,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
   singletonInstance.getClearingTransferForByPartition = jest.fn(
     async (address: EvmAddress, partitionId: string, targetId: EvmAddress, clearingId: number) => {
       const accountClearings = clearings.get("0x" + targetId.toString().toUpperCase().substring(2));
-      const emptyClearingTransfer = new ClearingTransfer(new BigDecimal(BigNumber.from(0)), 0, "", "", "");
+      const emptyClearingTransfer = new ClearingTransfer(new BigDecimal(BigInt(0)), 0, "", "", "");
       if (!accountClearings) return emptyClearingTransfer;
       const accountClearingTransfer = accountClearings.get(clearingId);
       if (!accountClearingTransfer) return emptyClearingTransfer;
@@ -1228,7 +1200,7 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     ): Promise<TransactionResponse<any, Error>> => {
       increaseBalance(targetId, amount);
       const totalSupply = securityInfo.totalSupply ? securityInfo.totalSupply : BigDecimal.fromString("0");
-      securityInfo.totalSupply = BigDecimal.fromString(totalSupply.toBigNumber().add(amount.toBigNumber()).toString());
+      securityInfo.totalSupply = BigDecimal.fromString((totalSupply.toBigInt() + amount.toBigInt()).toString());
 
       return {
         status: "success",
@@ -1265,10 +1237,10 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
       }
       if (!accountLocks) {
         const newLock: lock = new Map();
-        newLock.set(newLastLockId, [expirationDate.toString(), amount.toString()]);
+        newLock.set(newLastLockId, [expirationDate.toBigInt().toString(), amount.toBigInt().toString()]);
         locks.set(account, newLock);
       } else {
-        accountLocks.set(newLastLockId, [expirationDate.toString(), amount.toString()]);
+        accountLocks.set(newLastLockId, [expirationDate.toBigInt().toString(), amount.toBigInt().toString()]);
         locks.set(account, accountLocks);
       }
 
@@ -1516,7 +1488,7 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
 
   singletonInstance.release = jest.fn(async (address: EvmAddress, sourceId: EvmAddress, lockIdBd: BigDecimal) => {
     const account = "0x" + sourceId.toString().toUpperCase().substring(2);
-    const lockId = lockIdBd.toBigNumber().toNumber();
+    const lockId = lockIdBd.toUnsafeFloat();
 
     const accountLocks = locks.get(account);
     let lockIds = locksIds.get(account);
@@ -1831,7 +1803,8 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
       const accountHolds = holds.get("0x" + targetId.toString().toUpperCase().substring(2));
       const holdEntry = accountHolds?.get(holdId);
 
-      const heldAmount = holdEntry && holdEntry.length > 0 ? holdEntry[0].amount : BigDecimal.fromString("0");
+      const rawAmount = holdEntry && holdEntry.length > 0 ? holdEntry[0].amount : BigInt(0);
+      const heldAmount = typeof rawAmount === "bigint" ? BigDecimal.fromValue(rawAmount) : rawAmount;
 
       decreaseHeldBalance(targetId, heldAmount);
       const currentAccount = new EvmAddress(identifiers(user_account.id)[1]);

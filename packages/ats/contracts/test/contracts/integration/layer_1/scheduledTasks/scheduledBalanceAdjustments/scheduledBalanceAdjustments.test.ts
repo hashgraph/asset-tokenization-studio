@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type Equity,
@@ -16,9 +16,9 @@ import { executeRbac } from "@test";
 
 describe("Scheduled BalanceAdjustments Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let equityFacet: Equity;
   let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments;
@@ -43,15 +43,15 @@ describe("Scheduled BalanceAdjustments Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target, signer_A);
     scheduledBalanceAdjustmentsFacet = await ethers.getContractAt(
       "ScheduledBalanceAdjustments",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
+    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -103,17 +103,11 @@ describe("Scheduled BalanceAdjustments Tests", () => {
 
     expect(scheduledBalanceAdjustmentCount).to.equal(3);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
-    expect(scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()).to.equal(
-      balanceAdjustmentExecutionDateInSeconds_3,
-    );
+    expect(scheduledBalanceAdjustments[0].scheduledTimestamp).to.equal(balanceAdjustmentExecutionDateInSeconds_3);
     expect(scheduledBalanceAdjustments[0].data).to.equal(balanceAdjustment_3_Id);
-    expect(scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()).to.equal(
-      balanceAdjustmentExecutionDateInSeconds_2,
-    );
+    expect(scheduledBalanceAdjustments[1].scheduledTimestamp).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
     expect(scheduledBalanceAdjustments[1].data).to.equal(balanceAdjustment_2_Id);
-    expect(scheduledBalanceAdjustments[2].scheduledTimestamp.toNumber()).to.equal(
-      balanceAdjustmentExecutionDateInSeconds_1,
-    );
+    expect(scheduledBalanceAdjustments[2].scheduledTimestamp).to.equal(balanceAdjustmentExecutionDateInSeconds_1);
     expect(scheduledBalanceAdjustments[2].data).to.equal(balanceAdjustment_1_Id);
 
     // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
@@ -125,13 +119,9 @@ describe("Scheduled BalanceAdjustments Tests", () => {
 
     expect(scheduledBalanceAdjustmentCount).to.equal(2);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
-    expect(scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()).to.equal(
-      balanceAdjustmentExecutionDateInSeconds_3,
-    );
+    expect(scheduledBalanceAdjustments[0].scheduledTimestamp).to.equal(balanceAdjustmentExecutionDateInSeconds_3);
     expect(scheduledBalanceAdjustments[0].data).to.equal(balanceAdjustment_3_Id);
-    expect(scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()).to.equal(
-      balanceAdjustmentExecutionDateInSeconds_2,
-    );
+    expect(scheduledBalanceAdjustments[1].scheduledTimestamp).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
     expect(scheduledBalanceAdjustments[1].data).to.equal(balanceAdjustment_2_Id);
 
     // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
@@ -143,9 +133,7 @@ describe("Scheduled BalanceAdjustments Tests", () => {
 
     expect(scheduledBalanceAdjustmentCount).to.equal(1);
     expect(scheduledBalanceAdjustments.length).to.equal(scheduledBalanceAdjustmentCount);
-    expect(scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()).to.equal(
-      balanceAdjustmentExecutionDateInSeconds_3,
-    );
+    expect(scheduledBalanceAdjustments[0].scheduledTimestamp).to.equal(balanceAdjustmentExecutionDateInSeconds_3);
     expect(scheduledBalanceAdjustments[0].data).to.equal(balanceAdjustment_3_Id);
 
     // AFTER THIRD SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
