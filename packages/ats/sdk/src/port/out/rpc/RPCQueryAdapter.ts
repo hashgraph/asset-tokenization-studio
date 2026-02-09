@@ -1436,7 +1436,7 @@ export class RPCQueryAdapter {
     return await this.connect(Kpis__factory, address.toString()).isCheckPointDate(date, project.toString());
   }
 
-  async getScheduledCouponListingCount(address: EvmAddress): Promise<number> {
+  async scheduledCouponListingCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting scheduled coupon listing count for security: ${address.toString()}`);
     const result = await this.connect(ScheduledCouponListingFacet__factory, address.toString()).scheduledCouponListingCount();
     return result.toNumber();
