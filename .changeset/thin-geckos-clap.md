@@ -1,6 +1,6 @@
 ---
-"@hashgraph/asset-tokenization-contracts": major
-"@hashgraph/asset-tokenization-sdk": major
+"@hashgraph/asset-tokenization-contracts": minor
+"@hashgraph/asset-tokenization-sdk": minor
 ---
 
 Migrate from ether 5 to ether 6
