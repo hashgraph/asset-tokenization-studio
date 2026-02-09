@@ -53,6 +53,11 @@ deployments/*localhost*.json
 deployments/*local*.json
 deployments/test-*.json
 
+# Local deployment directories (entire directories for local testing)
+deployments/local/
+deployments/hedera-local/
+deployments/test/
+
 # Checkpoint files (deployment state tracking) - never commit checkpoints
 deployments/**/.checkpoints/
 *.checkpoint.json
