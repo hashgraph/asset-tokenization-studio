@@ -56,7 +56,7 @@ import { SignedCredential } from "@terminal3/vc_core";
 import { InvalidVcHolder } from "@domain/context/security/error/operations/InvalidVcHolder";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import { GetTotalSupplyByPartitionQuery } from "@query/security/cap/getTotalSupplyByPartition/GetTotalSupplyByPartitionQuery";
-import { BigNumber } from "ethers";
+
 import { SecurityUnPaused } from "@domain/context/security/error/operations/SecurityUnPaused";
 import { PartitionsProtected } from "@domain/context/security/error/operations/PartitionsProtected";
 import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
@@ -227,19 +227,13 @@ export default class ValidationService extends Service {
         new GetTotalSupplyByPartitionQuery(securityId, partitionId),
       );
       if (
-        this.isMaxSupplyExceeded(
-          res.payload.toBigNumber(),
-          amount.toBigNumber(),
-          partitionTotalSupply.payload.toBigNumber(),
-        )
+        this.isMaxSupplyExceeded(res.payload.toBigInt(), amount.toBigInt(), partitionTotalSupply.payload.toBigInt())
       ) {
         throw new MaxSupplyByPartitionReached();
       }
     }
     res = await this.queryBus.execute(new GetMaxSupplyQuery(securityId));
-    if (
-      this.isMaxSupplyExceeded(res.payload.toBigNumber(), amount.toBigNumber(), security.totalSupply!.toBigNumber())
-    ) {
+    if (this.isMaxSupplyExceeded(res.payload.toBigInt(), amount.toBigInt(), security.totalSupply!.toBigInt())) {
       throw new MaxSupplyReached();
     }
   }
@@ -297,7 +291,7 @@ export default class ValidationService extends Service {
     const holdDetails = await this.queryBus.execute(
       new GetHoldForByPartitionQuery(securityId, partitionId, sourceId, holdId),
     );
-    if (holdDetails.payload.amount.toBigNumber().lt(amount.toBigNumber())) {
+    if (holdDetails.payload.amount < amount.toBigInt()) {
       throw new InsufficientHoldBalance();
     }
   }
@@ -305,7 +299,7 @@ export default class ValidationService extends Service {
   async checkBalance(securityId: string, accountId: string, amount: BigDecimal): Promise<void> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(new BalanceOfQuery(securityId, accountId));
-    if (res.payload.toBigNumber().lt(amount.toBigNumber())) {
+    if (res.payload.toBigInt() < amount.toBigInt()) {
       throw new InsufficientBalance();
     }
   }
@@ -400,8 +394,8 @@ export default class ValidationService extends Service {
     }
   }
 
-  private isMaxSupplyExceeded(maxSupply: BigNumber, amount: BigNumber, totalSupply: BigNumber): boolean {
-    return maxSupply.lt(totalSupply.add(amount));
+  private isMaxSupplyExceeded(maxSupply: bigint, amount: bigint, totalSupply: bigint): boolean {
+    return maxSupply < totalSupply + amount;
   }
 
   private async validateAddressKyc(

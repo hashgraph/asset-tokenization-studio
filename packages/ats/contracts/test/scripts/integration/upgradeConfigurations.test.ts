@@ -17,7 +17,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { CheckpointManager, getResolverProxyConfigInfo } from "@scripts/infrastructure";
 import { upgradeConfigurations } from "@scripts";
 import { silenceScriptLogging } from "@test";
@@ -260,7 +260,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
   describe("Checkpoint Resumability", () => {
     let testDir: string;
     let manager: CheckpointManager;
-    let signers: SignerWithAddress[];
+    let signers: HardhatEthersSigner[];
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();

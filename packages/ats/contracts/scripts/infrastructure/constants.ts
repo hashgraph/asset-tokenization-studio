@@ -275,8 +275,8 @@ export const TIME_PERIODS_MS = {
   YEAR: TIME_PERIODS_S.YEAR * 1000,
 };
 
-export const ZERO = ethers.constants.Zero;
-export const ADDRESS_ZERO = ethers.constants.AddressZero;
+export const ZERO = 0n;
+export const ADDRESS_ZERO = ethers.ZeroAddress;
 export const EMPTY_HEX_BYTES = "0x";
 export const EMPTY_STRING = "";
 

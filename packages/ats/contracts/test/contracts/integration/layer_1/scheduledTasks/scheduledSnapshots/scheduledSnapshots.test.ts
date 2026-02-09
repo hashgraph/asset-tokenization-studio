@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type EquityUSAFacet,
@@ -16,9 +16,9 @@ import { executeRbac } from "@test";
 
 describe("Scheduled Snapshots Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let equityFacet: EquityUSAFacet;
   let scheduledSnapshotsFacet: ScheduledSnapshotsFacet;
@@ -44,11 +44,11 @@ describe("Scheduled Snapshots Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSAFacet", diamond.address, signer_A);
-    scheduledSnapshotsFacet = await ethers.getContractAt("ScheduledSnapshotsFacet", diamond.address, signer_A);
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacet", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("EquityUSAFacet", diamond.target, signer_A);
+    scheduledSnapshotsFacet = await ethers.getContractAt("ScheduledSnapshotsFacet", diamond.target, signer_A);
+    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacet", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -97,11 +97,11 @@ describe("Scheduled Snapshots Tests", () => {
 
     expect(scheduledSnapshotCount).to.equal(3);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
-    expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.equal(dividendsRecordDateInSeconds_3);
+    expect(scheduledSnapshots[0].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_3);
     expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id);
-    expect(scheduledSnapshots[1].scheduledTimestamp.toNumber()).to.equal(dividendsRecordDateInSeconds_2);
+    expect(scheduledSnapshots[1].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_2);
     expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id);
-    expect(scheduledSnapshots[2].scheduledTimestamp.toNumber()).to.equal(dividendsRecordDateInSeconds_1);
+    expect(scheduledSnapshots[2].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_1);
     expect(scheduledSnapshots[2].data).to.equal(dividend_1_Id);
 
     // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
@@ -115,9 +115,9 @@ describe("Scheduled Snapshots Tests", () => {
 
     expect(scheduledSnapshotCount).to.equal(2);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
-    expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.equal(dividendsRecordDateInSeconds_3);
+    expect(scheduledSnapshots[0].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_3);
     expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id);
-    expect(scheduledSnapshots[1].scheduledTimestamp.toNumber()).to.equal(dividendsRecordDateInSeconds_2);
+    expect(scheduledSnapshots[1].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_2);
     expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id);
 
     // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
@@ -131,7 +131,7 @@ describe("Scheduled Snapshots Tests", () => {
 
     expect(scheduledSnapshotCount).to.equal(1);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
-    expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.equal(dividendsRecordDateInSeconds_3);
+    expect(scheduledSnapshots[0].scheduledTimestamp).to.equal(dividendsRecordDateInSeconds_3);
     expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id);
 
     // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------

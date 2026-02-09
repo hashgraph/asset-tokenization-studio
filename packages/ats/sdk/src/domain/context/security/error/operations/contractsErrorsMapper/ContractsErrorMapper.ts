@@ -30,7 +30,7 @@ export class ContractsErrorMapper {
   }
 
   private static createSelector(signature: string): string {
-    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(signature)).slice(0, 10);
+    return ethers.keccak256(ethers.toUtf8Bytes(signature)).slice(0, 10);
   }
 
   private static readonly SELECTORS = {

@@ -353,16 +353,16 @@ export async function deploySystemWithExistingBlr(
       info("\n✓ Step 1/6: ProxyAdmin already deployed (resuming)");
       // Reconstruct ProxyAdmin from checkpoint - need to reconnect to contract
       proxyAdmin = ProxyAdmin__factory.connect(checkpoint.steps.proxyAdmin.address, signer);
-      info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
+      info(`✅ ProxyAdmin: ${proxyAdmin.target as string}`);
     } else if (existingProxyAdminAddress) {
       info("\n📋 Step 1/6: Using existing ProxyAdmin...");
       validateAddress(existingProxyAdminAddress, "ProxyAdmin address");
       proxyAdmin = ProxyAdmin__factory.connect(existingProxyAdminAddress, signer);
-      info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
+      info(`✅ ProxyAdmin: ${proxyAdmin.target as string}`);
 
       // Save checkpoint - mark as external
       checkpoint.steps.proxyAdmin = {
-        address: proxyAdmin.address,
+        address: proxyAdmin.target as string,
         txHash: "", // External ProxyAdmin has no tx hash
         deployedAt: new Date().toISOString(),
       };
@@ -371,11 +371,11 @@ export async function deploySystemWithExistingBlr(
     } else {
       info("\n📋 Step 1/6: Deploying ProxyAdmin...");
       proxyAdmin = await deployProxyAdmin(signer);
-      info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
+      info(`✅ ProxyAdmin: ${proxyAdmin.target as string}`);
 
       // Save checkpoint (ProxyAdmin doesn't have contractId property)
       checkpoint.steps.proxyAdmin = {
-        address: proxyAdmin.address,
+        address: proxyAdmin.target as string,
         txHash: "",
         deployedAt: new Date().toISOString(),
       };
@@ -842,7 +842,7 @@ export async function deploySystemWithExistingBlr(
       if (checkpoint.steps.factory && checkpoint.currentStep >= 5) {
         info("\n✓ Step 7/7: Factory already deployed (resuming)");
         // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
-        const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || proxyAdmin.address;
+        const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || (proxyAdmin.target as string);
         factoryResult = {
           success: true,
           proxyResult: {
@@ -906,8 +906,8 @@ export async function deploySystemWithExistingBlr(
 
       infrastructure: {
         proxyAdmin: {
-          address: proxyAdmin.address,
-          contractId: await getContractId(proxyAdmin.address),
+          address: proxyAdmin.target as string,
+          contractId: await getContractId(proxyAdmin.target as string),
         },
         blr: {
           implementation: options.existingBlrImplementation || "N/A (External BLR)",

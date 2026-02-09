@@ -9,10 +9,8 @@
  * @module registry-generator/utils/abiExtractor
  */
 
-import { utils } from "ethers";
+import { Interface, keccak256, toUtf8Bytes } from "ethers";
 import type { MethodDefinition } from "../types";
-
-const { Interface, keccak256, toUtf8Bytes } = utils;
 
 /**
  * Methods to exclude from facet registries (infrastructure methods).

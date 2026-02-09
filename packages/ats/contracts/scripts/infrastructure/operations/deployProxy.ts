@@ -9,7 +9,15 @@
  * @module core/operations/deployProxy
  */
 
-import { Contract, ContractFactory, ContractReceipt, Overrides, Signer, providers } from "ethers";
+import {
+  Contract,
+  ContractFactory,
+  ContractTransactionReceipt,
+  Overrides,
+  Signer,
+  Provider,
+  TransactionReceipt,
+} from "ethers";
 import { ProxyAdmin, TransparentUpgradeableProxy } from "@contract-types";
 import {
   DEFAULT_TRANSACTION_TIMEOUT,
@@ -68,9 +76,9 @@ export interface DeployProxyResult {
   proxyAdminAddress: string;
   /** Transaction receipts */
   receipts: {
-    implementation?: ContractReceipt;
-    proxyAdmin?: ContractReceipt;
-    proxy?: ContractReceipt;
+    implementation?: TransactionReceipt | null;
+    proxyAdmin?: TransactionReceipt | null;
+    proxy?: ContractTransactionReceipt | null;
   };
 }
 
@@ -149,7 +157,7 @@ export async function deployProxy(signer: Signer, options: DeployProxyOptions): 
 
     if (existingImplementation) {
       implementation = existingImplementation;
-      implementationAddress = implementation.address;
+      implementationAddress = await existingImplementation.getAddress();
       info(`Using existing implementation at ${implementationAddress}`);
     } else {
       info(`Deploying implementation: ${implementationContract}`);
@@ -167,8 +175,8 @@ export async function deployProxy(signer: Signer, options: DeployProxyOptions): 
       implementation = implResult.contract;
       implementationAddress = implResult.address;
 
-      if (implResult.transactionHash) {
-        receipts.implementation = await signer.provider!.getTransactionReceipt(implResult.transactionHash);
+      if (implResult.transactionHash && signer.provider) {
+        receipts.implementation = await signer.provider.getTransactionReceipt(implResult.transactionHash);
       }
     }
 
@@ -180,18 +188,19 @@ export async function deployProxy(signer: Signer, options: DeployProxyOptions): 
 
     if (existingProxyAdmin) {
       proxyAdmin = existingProxyAdmin;
-      proxyAdminAddress = proxyAdmin.address;
+      proxyAdminAddress = await existingProxyAdmin.getAddress();
       info(`Using existing ProxyAdmin at ${proxyAdminAddress}`);
     } else {
       info("Deploying ProxyAdmin");
       proxyAdmin = await deployProxyAdmin(signer, {
         gasLimit: GAS_LIMIT.default,
       });
-      proxyAdminAddress = proxyAdmin.address;
+      proxyAdminAddress = await proxyAdmin.getAddress();
 
       // Get receipt if available
-      if (proxyAdmin.deployTransaction) {
-        receipts.proxyAdmin = await signer.provider!.getTransactionReceipt(proxyAdmin.deployTransaction.hash);
+      const proxyAdminDeployTx = proxyAdmin.deploymentTransaction();
+      if (proxyAdminDeployTx && signer.provider) {
+        receipts.proxyAdmin = await signer.provider.getTransactionReceipt(proxyAdminDeployTx.hash);
       }
     }
 
@@ -199,23 +208,21 @@ export async function deployProxy(signer: Signer, options: DeployProxyOptions): 
 
     // Step 3: Deploy TransparentUpgradeableProxy
     const proxy = await deployTransparentProxy(signer, implementationAddress, proxyAdminAddress, initData);
+    const proxyAddress = await proxy.getAddress();
 
     // Get receipt if available
-    if (proxy.deployTransaction) {
-      const proxyReceipt = await waitForTransaction(
-        proxy.deployTransaction,
-        confirmations,
-        DEFAULT_TRANSACTION_TIMEOUT,
-      );
+    const proxyDeployTx = proxy.deploymentTransaction();
+    if (proxyDeployTx) {
+      const proxyReceipt = await waitForTransaction(proxyDeployTx, confirmations, DEFAULT_TRANSACTION_TIMEOUT);
 
       receipts.proxy = proxyReceipt;
 
-      const gasUsed = formatGasUsage(proxyReceipt, proxy.deployTransaction.gasLimit);
+      const gasUsed = formatGasUsage(proxyReceipt, proxyDeployTx.gasLimit);
       debug(gasUsed);
     }
 
     success(`Proxy deployment complete`);
-    info(`  Proxy:          ${proxy.address}`);
+    info(`  Proxy:          ${proxyAddress}`);
     info(`  Implementation: ${implementationAddress}`);
     info(`  ProxyAdmin:     ${proxyAdminAddress}`);
 
@@ -223,7 +230,7 @@ export async function deployProxy(signer: Signer, options: DeployProxyOptions): 
       implementation,
       implementationAddress,
       proxy,
-      proxyAddress: proxy.address,
+      proxyAddress,
       proxyAdmin,
       proxyAdminAddress,
       receipts,
@@ -270,13 +277,13 @@ export async function deployMultipleProxies(
 
   if (sharedProxyAdmin) {
     proxyAdmin = sharedProxyAdmin;
-    info(`Using shared ProxyAdmin at ${proxyAdmin.address}`);
+    info(`Using shared ProxyAdmin at ${await proxyAdmin.getAddress()}`);
   } else {
     info("Deploying shared ProxyAdmin for all proxies");
     proxyAdmin = await deployProxyAdmin(signer, {
       gasLimit: GAS_LIMIT.default,
     });
-    success(`Shared ProxyAdmin deployed at ${proxyAdmin.address}`);
+    success(`Shared ProxyAdmin deployed at ${await proxyAdmin.getAddress()}`);
   }
 
   // Deploy all proxies with shared ProxyAdmin
@@ -300,12 +307,12 @@ export async function deployMultipleProxies(
  *
  * @example
  * ```typescript
- * const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
+ * const provider = new ethers.JsonRpcProvider(rpcUrl)
  * const implAddress = await getProxyImplementation(provider, '0x123...')
  * console.log(`Current implementation: ${implAddress}`)
  * ```
  */
-export async function getProxyImplementation(provider: providers.Provider, proxyAddress: string): Promise<string> {
+export async function getProxyImplementation(provider: Provider, proxyAddress: string): Promise<string> {
   try {
     validateAddress(proxyAddress, "proxy address");
 
@@ -313,7 +320,7 @@ export async function getProxyImplementation(provider: providers.Provider, proxy
     // keccak256("eip1967.proxy.implementation") - 1
     const implSlot = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 
-    const implBytes = await provider.getStorageAt(proxyAddress, implSlot);
+    const implBytes = await provider.getStorage(proxyAddress, implSlot);
 
     // Convert bytes32 to address (take last 20 bytes)
     const implementationAddress = "0x" + implBytes.slice(-40);
@@ -337,12 +344,12 @@ export async function getProxyImplementation(provider: providers.Provider, proxy
  *
  * @example
  * ```typescript
- * const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
+ * const provider = new ethers.JsonRpcProvider(rpcUrl)
  * const adminAddress = await getProxyAdmin(provider, '0x123...')
  * console.log(`ProxyAdmin: ${adminAddress}`)
  * ```
  */
-export async function getProxyAdmin(provider: providers.Provider, proxyAddress: string): Promise<string> {
+export async function getProxyAdmin(provider: Provider, proxyAddress: string): Promise<string> {
   try {
     validateAddress(proxyAddress, "proxy address");
 
@@ -350,7 +357,7 @@ export async function getProxyAdmin(provider: providers.Provider, proxyAddress: 
     // keccak256("eip1967.proxy.admin") - 1
     const adminSlot = "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103";
 
-    const adminBytes = await provider.getStorageAt(proxyAddress, adminSlot);
+    const adminBytes = await provider.getStorage(proxyAddress, adminSlot);
 
     // Convert bytes32 to address (take last 20 bytes)
     const proxyAdminAddress = "0x" + adminBytes.slice(-40);

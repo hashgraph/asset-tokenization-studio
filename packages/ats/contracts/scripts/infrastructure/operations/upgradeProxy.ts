@@ -9,7 +9,7 @@
  * @module core/operations/upgradeProxy
  */
 
-import { ContractFactory, Overrides, providers } from "ethers";
+import { ContractFactory, Overrides, Provider } from "ethers";
 import { ProxyAdmin } from "@contract-types";
 import {
   DEFAULT_TRANSACTION_TIMEOUT,
@@ -111,20 +111,19 @@ export async function upgradeProxy<F extends ContractFactory = ContractFactory>(
 
   const deployOverrides: Overrides = { ...overrides };
   let oldImplementationAddress: string | undefined;
-  const proxyAdminAddress = proxyAdmin.address;
+  const proxyAdminAddress = await proxyAdmin.getAddress();
 
   try {
     section(`Upgrading Proxy at ${proxyAddress}`);
 
     // Get provider from ProxyAdmin contract (must be connected to signer with provider)
-    if (!proxyAdmin.provider) {
+    const provider = proxyAdmin.runner?.provider as Provider | undefined;
+    if (!provider) {
       throw new Error(
         "ProxyAdmin must be connected to a signer with a provider. " +
           "Use ProxyAdmin__factory.connect(address, signer) where signer has a provider.",
       );
     }
-
-    const provider = proxyAdmin.provider;
 
     // Step 1: Validate proxy exists
     validateAddress(proxyAddress, "proxy address");
@@ -235,9 +234,9 @@ export async function upgradeProxy<F extends ContractFactory = ContractFactory>(
       proxyAddress,
       oldImplementation: oldImplementationAddress,
       newImplementation: newImplementationAddress,
-      transactionHash: receipt.transactionHash,
+      transactionHash: receipt.hash,
       blockNumber: receipt.blockNumber,
-      gasUsed: receipt.gasUsed.toNumber(),
+      gasUsed: Number(receipt.gasUsed),
       upgraded: true,
     };
   } catch (err) {
@@ -311,7 +310,7 @@ export async function upgradeMultipleProxies(
  *
  * @example
  * ```typescript
- * const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
+ * const provider = new ethers.JsonRpcProvider(rpcUrl)
  * const needsUpgrade = await proxyNeedsUpgrade(
  *   provider,
  *   '0x123...',
@@ -323,7 +322,7 @@ export async function upgradeMultipleProxies(
  * ```
  */
 export async function proxyNeedsUpgrade(
-  provider: providers.Provider,
+  provider: Provider,
   proxyAddress: string,
   expectedImplementation: string,
 ): Promise<boolean> {

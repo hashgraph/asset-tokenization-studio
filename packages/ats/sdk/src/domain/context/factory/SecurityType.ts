@@ -6,8 +6,8 @@ export enum SecurityType {
 }
 
 export class CastSecurityType {
-  static fromNumber(id: number): SecurityType {
-    if (id == 0) return SecurityType.BOND;
+  static fromBigint(id: bigint): SecurityType {
+    if (id == 0n) return SecurityType.BOND;
     return SecurityType.EQUITY;
   }
 

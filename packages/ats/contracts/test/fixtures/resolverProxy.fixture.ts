@@ -15,6 +15,7 @@
  */
 
 import { ethers } from "hardhat";
+import { ZeroHash } from "ethers";
 import { deployBlrFixture } from "./integration.fixture";
 import { deployContract, registerFacets } from "@scripts/infrastructure";
 import { atsRegistry } from "@scripts/domain";
@@ -24,9 +25,8 @@ import {
   BusinessLogicResolver__factory,
   ResolverProxy__factory,
 } from "@contract-types";
-import type { BusinessLogicResolver, DiamondFacet, AccessControlFacet } from "@contract-types";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import type { Contract } from "ethers";
+import type { BusinessLogicResolver, DiamondFacet, AccessControlFacet, ResolverProxy } from "@contract-types";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 /**
  * Test configuration ID.
@@ -50,15 +50,15 @@ export const MAX_TEST_VERSION = 2;
  */
 export interface ResolverProxyFixtureResult {
   /** Deployer signer with DEFAULT_ADMIN_ROLE */
-  deployer: SignerWithAddress;
+  deployer: HardhatEthersSigner;
   /** Unknown signer without any roles (for access control tests) */
-  unknownSigner: SignerWithAddress;
+  unknownSigner: HardhatEthersSigner;
   /** BusinessLogicResolver contract instance */
   blr: BusinessLogicResolver;
   /** BLR proxy address */
   blrAddress: string;
   /** Deployed ResolverProxy contract */
-  resolverProxy: Contract;
+  resolverProxy: ResolverProxy;
   /** ResolverProxy address */
   proxyAddress: string;
   /** DiamondCutFacet interface connected to proxy */
@@ -142,13 +142,13 @@ export async function deployResolverProxyFixture(): Promise<ResolverProxyFixture
     blrAddress,
     TEST_CONFIG_ID,
     initialVersion,
-    [{ role: ethers.constants.HashZero, members: [deployer.address] }], // Grant DEFAULT_ADMIN_ROLE
+    [{ role: ZeroHash, members: [deployer.address] }], // Grant DEFAULT_ADMIN_ROLE
   );
-  await resolverProxy.deployed();
+  await resolverProxy.waitForDeployment();
 
   // Connect facet interfaces to proxy for convenient access
-  const diamondCutFacet = DiamondFacet__factory.connect(resolverProxy.address, deployer);
-  const accessControlFacet = AccessControlFacet__factory.connect(resolverProxy.address, deployer);
+  const diamondCutFacet = DiamondFacet__factory.connect(resolverProxy.target as string, deployer);
+  const accessControlFacet = AccessControlFacet__factory.connect(resolverProxy.target as string, deployer);
 
   return {
     deployer,
@@ -156,7 +156,7 @@ export async function deployResolverProxyFixture(): Promise<ResolverProxyFixture
     blr,
     blrAddress,
     resolverProxy,
-    proxyAddress: resolverProxy.address,
+    proxyAddress: resolverProxy.target as string,
     diamondCutFacet,
     accessControlFacet,
     facetAddresses,

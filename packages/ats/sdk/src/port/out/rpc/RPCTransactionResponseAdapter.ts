@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers } from "ethers";
+import { ContractTransactionResponse, EventLog } from "ethers";
 import LogService from "@service/log/LogService";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
 import { TransactionResponseError } from "../error/TransactionResponseError";
@@ -8,7 +8,7 @@ import { TransactionResponseAdapter } from "../TransactionResponseAdapter";
 
 export class RPCTransactionResponseAdapter extends TransactionResponseAdapter {
   public static async manageResponse(
-    response: ethers.ContractTransaction,
+    response: ContractTransactionResponse,
     network: string,
     eventName?: string,
   ): Promise<TransactionResponse> {
@@ -16,21 +16,23 @@ export class RPCTransactionResponseAdapter extends TransactionResponseAdapter {
     try {
       const receipt = await response.wait();
       LogService.logTrace("Receipt:", receipt);
-      if (receipt.events && eventName) {
-        const returnEvent = receipt.events.filter((e) => e.event && e.event === eventName);
+      if (receipt && receipt.logs && eventName) {
+        const returnEvent = receipt.logs.filter(
+          (e): e is EventLog => e instanceof EventLog && e.eventName === eventName,
+        );
         if (returnEvent.length > 0 && returnEvent[0].args) {
-          return new TransactionResponse(receipt.transactionHash, returnEvent[0].args);
+          return new TransactionResponse(receipt.hash, returnEvent[0].args);
         }
       }
-      return Promise.resolve(new TransactionResponse(receipt.transactionHash, receipt.status));
-    } catch (error) {
+      return Promise.resolve(new TransactionResponse(receipt?.hash ?? "", receipt?.status ?? 0));
+    } catch (error: unknown) {
       LogService.logError("Uncaught Exception:", JSON.stringify(error));
       throw new TransactionResponseError({
         message: "",
         network: network,
         name: eventName,
         status: "error",
-        transactionId: (error as any)?.transactionHash,
+        transactionId: (error as { transactionHash?: string })?.transactionHash,
         RPC_relay: true,
       });
     }

@@ -11,7 +11,7 @@ import { GetTotalSupplyByPartitionQueryFixture } from "@test/fixtures/erc1400/ER
 import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
 import { Security } from "@domain/context/security/Security";
 import BigDecimal from "@domain/context/shared/BigDecimal";
-import { BigNumber } from "ethers";
+
 import { GetTotalSupplyByPartitionQueryHandler } from "./GetTotalSupplyByPartitionQueryHandler";
 import {
   GetTotalSupplyByPartitionQuery,
@@ -29,7 +29,7 @@ describe("GetTotalSupplyByPartitionQueryHandler", () => {
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const security = new Security(SecurityPropsFixture.create());
-  const amount = BigNumber.from(1);
+  const amount = BigInt(1);
 
   const errorMsg = ErrorMsgFixture.create().msg;
 

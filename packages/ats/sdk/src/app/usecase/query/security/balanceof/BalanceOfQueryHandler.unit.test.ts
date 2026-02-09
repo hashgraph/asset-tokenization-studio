@@ -14,7 +14,7 @@ import { BalanceOfQueryFixture } from "@test/fixtures/erc1400/ERC1400Fixture";
 import { BalanceOfQueryError } from "./error/BalanceOfQueryError";
 import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
 import { Security } from "@domain/context/security/Security";
-import { BigNumber } from "ethers";
+
 import BigDecimal from "@domain/context/shared/BigDecimal";
 
 describe("BalanceOfQueryHandler", () => {
@@ -31,7 +31,7 @@ describe("BalanceOfQueryHandler", () => {
   const security = new Security(SecurityPropsFixture.create());
 
   const errorMsg = ErrorMsgFixture.create().msg;
-  const amount = BigNumber.from(1);
+  const amount = BigInt(1);
 
   beforeEach(() => {
     handler = new BalanceOfQueryHandler(

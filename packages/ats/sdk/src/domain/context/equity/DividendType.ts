@@ -13,6 +13,10 @@ export class CastDividendType {
     return DividendType.COMMON;
   }
 
+  static fromBigint(id: bigint): DividendType {
+    return this.fromNumber(Number(id));
+  }
+
   static toNumber(value: DividendType): number {
     if (value == DividendType.NONE) return 0;
     if (value == DividendType.PREFERRED) return 1;

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type PauseFacet,
@@ -24,13 +24,13 @@ import { executeRbac } from "@test";
 
 const amount = 1;
 
-const packedData = ethers.utils.defaultAbiCoder.encode(
+const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
   ["bytes32", "bytes32"],
   [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
 );
 const packedDataWithoutPrefix = packedData.slice(2);
 
-const ProtectedPartitionRole_1 = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
 
 const domain = {
   name: "",
@@ -196,9 +196,9 @@ let operatorTransferData: OperatorTransferData;
 describe("ProtectedPartitions Tests", () => {
   let diamond_UnprotectedPartitions: ResolverProxy;
   let diamond_ProtectedPartitions: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let protectedPartitionsFacet: ProtectedPartitionsFacet;
   let pauseFacet: PauseFacet;
@@ -210,7 +210,8 @@ describe("ProtectedPartitions Tests", () => {
   let kycFacet: KycFacet;
   let ssiManagementFacet: SsiManagementFacet;
   let holdFacet: IHold;
-  let clearingFacet: Contract;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let clearingFacet: any;
   let protectedHold: ProtectedHoldData;
   let hold: HoldData;
   let clearingOperation: ClearingOperationData;
@@ -259,7 +260,7 @@ describe("ProtectedPartitions Tests", () => {
 
     const uniqueFragmentsHold = Array.from(fragmentMapHold.values());
 
-    holdFacet = new Contract(address, uniqueFragmentsHold, signer_A) as IHold;
+    holdFacet = new Contract(address, uniqueFragmentsHold, signer_A) as unknown as IHold;
 
     protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", address);
     pauseFacet = await ethers.getContractAt("PauseFacet", address);
@@ -310,17 +311,17 @@ describe("ProtectedPartitions Tests", () => {
   }
 
   async function setProtected() {
-    await setFacets(diamond_ProtectedPartitions.address, complianceMockAddress);
+    await setFacets(diamond_ProtectedPartitions.target as string, complianceMockAddress);
 
     domain.name = (await erc20Facet.getERC20Metadata()).info.name;
     domain.version = (await diamondCutFacet.getConfigInfo()).version_.toString();
     domain.chainId = await network.provider.send("eth_chainId");
-    domain.verifyingContract = diamond_ProtectedPartitions.address;
+    domain.verifyingContract = diamond_ProtectedPartitions.target as string;
     await grantKyc();
   }
 
   async function setUnProtected() {
-    await setFacets(diamond_UnprotectedPartitions.address);
+    await setFacets(diamond_UnprotectedPartitions.target as string);
     await grantKyc();
   }
 
@@ -377,14 +378,14 @@ describe("ProtectedPartitions Tests", () => {
     signer_C = base.user3;
     await executeRbac(base.accessControlFacet, set_initRbacs());
 
-    await setFacets(diamond_UnprotectedPartitions.address);
+    await setFacets(diamond_UnprotectedPartitions.target as string);
   }
 
   async function deploySecurityFixtureProtectedPartitions() {
     const ComplianceMockFactory = await ethers.getContractFactory("ComplianceMock", signer_A);
     const complianceMockInstance = await ComplianceMockFactory.deploy(true, false);
-    await complianceMockInstance.deployed();
-    complianceMockAddress = complianceMockInstance.address;
+    await complianceMockInstance.waitForDeployment();
+    complianceMockAddress = complianceMockInstance.target as string;
 
     const base = await deployEquityTokenFixture({
       equityDataParams: {
@@ -402,7 +403,7 @@ describe("ProtectedPartitions Tests", () => {
     signer_C = base.user3;
     await executeRbac(base.accessControlFacet, set_initRbacs());
 
-    await setFacets(diamond_ProtectedPartitions.address, complianceMockAddress);
+    await setFacets(diamond_ProtectedPartitions.target as string, complianceMockAddress);
   }
 
   beforeEach(async () => {
@@ -715,15 +716,15 @@ describe("ProtectedPartitions Tests", () => {
         };
 
         /*const domainSeparator =
-                    ethers.utils._TypedDataEncoder.hashDomain(domain)
-                const messageHash = ethers.utils._TypedDataEncoder.hash(
+                    ethers.TypedDataEncoder.hashDomain(domain)
+                const messageHash = ethers.TypedDataEncoder.hash(
                     domain,
                     transferType,
                     message
                 )*/
 
         // Sign the message hash
-        const signature = await signer_A._signTypedData(domain, transferType, message);
+        const signature = await signer_A.signTypedData(domain, transferType, message);
 
         await erc1410Facet.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -842,15 +843,15 @@ describe("ProtectedPartitions Tests", () => {
         };
 
         /*const domainSeparator =
-                    ethers.utils._TypedDataEncoder.hashDomain(domain)
-                const messageHash = ethers.utils._TypedDataEncoder.hash(
+                    ethers.TypedDataEncoder.hashDomain(domain)
+                const messageHash = ethers.TypedDataEncoder.hash(
                     domain,
                     transferType,
                     message
                 )*/
 
         // Sign the message hash
-        const signature = await signer_A._signTypedData(domain, holdType, message);
+        const signature = await signer_A.signTypedData(domain, holdType, message);
 
         await erc1410Facet.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,
@@ -1014,7 +1015,7 @@ describe("ProtectedPartitions Tests", () => {
           _to: signer_C.address,
         };
         // Sign the message hash
-        const signature = await signer_A._signTypedData(domain, clearingTransferType, message);
+        const signature = await signer_A.signTypedData(domain, clearingTransferType, message);
         await erc1410Facet.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -1031,7 +1032,7 @@ describe("ProtectedPartitions Tests", () => {
           _hold: hold,
         };
         // Sign the message hash
-        const signatureHold = await signer_A._signTypedData(domain, clearingCreateHoldType, messageHold);
+        const signatureHold = await signer_A.signTypedData(domain, clearingCreateHoldType, messageHold);
         await erc1410Facet.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -1048,7 +1049,7 @@ describe("ProtectedPartitions Tests", () => {
           _amount: amount,
         };
         // Sign the message hash
-        const signatureRedeem = await signer_A._signTypedData(domain, clearingRedeemType, messageRedeem);
+        const signatureRedeem = await signer_A.signTypedData(domain, clearingRedeemType, messageRedeem);
         await erc1410Facet.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -1071,7 +1072,7 @@ describe("ProtectedPartitions Tests", () => {
           _to: signer_C.address,
         };
         // Sign the message hash
-        const signature = await signer_A._signTypedData(domain, clearingTransferType, message);
+        const signature = await signer_A.signTypedData(domain, clearingTransferType, message);
         await erc1410Facet.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_A.address,
@@ -1103,7 +1104,7 @@ describe("ProtectedPartitions Tests", () => {
           _nounce: 1,
         };
 
-        const signature = await signer_A._signTypedData(domain, transferType, message);
+        const signature = await signer_A.signTypedData(domain, transferType, message);
 
         await erc1410Facet.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,

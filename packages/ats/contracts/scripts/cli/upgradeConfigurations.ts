@@ -71,7 +71,7 @@ async function main() {
   try {
     // Use signer from network configuration
     info(`👤 Deployer: ${address}`);
-    info(`💰 Balance: ${ethers.utils.formatEther(await signer.provider!.getBalance(address))} ETH`);
+    info(`💰 Balance: ${ethers.formatEther(await signer.provider!.getBalance(address))} ETH`);
 
     // Upgrade configurations
     const output = await upgradeConfigurations(signer, network, {

@@ -139,7 +139,7 @@ export function toDeploymentResult(deployed: DeployedContract): DeploymentResult
     // The actual Contract instance would need to be reconnected separately
     contract: {
       address: deployed.address,
-    } as Contract,
+    } as unknown as Contract,
   };
 }
 
@@ -190,7 +190,7 @@ export function toDeployBlrResult(
     // TODO: These are minimal reconstructions - actual instances not available from checkpoint
     implementation: {
       address: blrCheckpoint.implementation,
-    } as Contract,
+    } as unknown as Contract,
     implementationAddress: blrCheckpoint.implementation,
     proxy: {
       address: blrCheckpoint.proxy,
@@ -257,7 +257,7 @@ export function toDeployFactoryResult(
     // TODO: contract not available from checkpoint
     contract: {
       address: factoryCheckpoint.proxy,
-    } as Contract,
+    } as unknown as Contract,
     // TODO: receipt not persisted in checkpoint
     receipt: undefined,
     // TODO: Configuration metadata not persisted in checkpoint

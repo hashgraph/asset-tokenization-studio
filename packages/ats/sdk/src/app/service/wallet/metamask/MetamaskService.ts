@@ -17,8 +17,7 @@ import { MetaMaskInpageProvider } from "@metamask/providers";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import EventService from "@service/event/EventService";
 import LogService from "@service/log/LogService";
-import { Signer, ethers } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Signer, Provider, BrowserProvider } from "ethers";
 import Injectable from "@core/injectable/Injectable";
 import TransactionAdapter, { InitializationData } from "@port/out/TransactionAdapter";
 import NetworkService from "@service/network/NetworkService";
@@ -100,10 +99,8 @@ export default class MetamaskService extends Service {
         name: SupportedWallets.METAMASK,
       });
       pair && (await this.pairWallet());
-      this.signerOrProvider = new ethers.providers.Web3Provider(
-        //@ts-expect-error No TS compatibility
-        ethereum,
-      ).getSigner();
+      const browserProvider = new BrowserProvider(ethereum as any);
+      this.signerOrProvider = await browserProvider.getSigner();
     } catch (error: any) {
       if ("code" in error && error.code === 4001) throw new WalletConnectRejectedError(SupportedWallets.METAMASK);
       if (error instanceof WalletConnectError) throw error;
@@ -211,10 +208,8 @@ export default class MetamaskService extends Service {
 
     await this.commandBus.execute(new SetNetworkCommand(network, mirrorNode, rpcNode));
     await this.commandBus.execute(new SetConfigurationCommand(factoryId, resolverId));
-    this.signerOrProvider = new ethers.providers.Web3Provider(
-      //@ts-expect-error No TS compatibility
-      ethereum,
-    ).getSigner();
+    const browserProvider = new BrowserProvider(ethereum as any);
+    this.signerOrProvider = await browserProvider.getSigner();
   }
 
   private async setMetasmaskAccount(evmAddress: string): Promise<void> {
@@ -225,10 +220,8 @@ export default class MetamaskService extends Service {
         evmAddress: mirrorAccount.evmAddress,
         publicKey: mirrorAccount.publicKey,
       });
-      this.signerOrProvider = new ethers.providers.Web3Provider(
-        //@ts-expect-error No TS compatibility
-        ethereum,
-      ).getSigner();
+      const browserProvider = new BrowserProvider(ethereum as any);
+      this.signerOrProvider = await browserProvider.getSigner();
       LogService.logTrace("Paired Metamask Wallet Event:", this.account);
     } catch (e) {
       LogService.logError("account could not be retrieved from mirror error : " + e);

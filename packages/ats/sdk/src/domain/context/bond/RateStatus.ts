@@ -6,9 +6,12 @@ export enum RateStatus {
 }
 
 export class CastRateStatus {
-  static fromNumber(id: number): RateStatus {
-    if (id == 0) return RateStatus.PENDING;
-    return RateStatus.SET;
+  static fromBigint(id: bigint): RateStatus {
+    return this.fromNumber(Number(id));
+  }
+
+  static fromNumber(value: number): RateStatus {
+    return value === 0 ? RateStatus.PENDING : RateStatus.SET;
   }
 
   static toNumber(value: RateStatus): number {
