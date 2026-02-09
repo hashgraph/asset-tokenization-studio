@@ -1396,4 +1396,10 @@ export class RPCQueryAdapter {
     const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, kpi.toString());
     return { value: result[0], exists: result[1] };
   }
+
+  async getMinDate(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting min date for the security: ${address.toString()}`);
+    const result = await this.connect(Kpis__factory, address.toString()).getMinDate();
+    return result.toNumber();
+  }
 }

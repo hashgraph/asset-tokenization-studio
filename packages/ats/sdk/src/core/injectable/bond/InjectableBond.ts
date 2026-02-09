@@ -21,6 +21,7 @@ import { GetRateQueryHandler } from "@query/interestRates/getRate/GetRateQueryHa
 import { TOKENS } from "../Tokens";
 import { GetLatestKpiDataQueryHandler } from "@query/interestRates/getLatestKpiData/GetLatestKpiDataQueryHandler";
 import { GetCouponFromOrderedListAtQueryHandler } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQueryHandler";
+import { GetMinDateQueryHandler } from "@query/kpis/getMinDate/GetMinDateQueryHandler";
 
 export const COMMAND_HANDLERS_BOND = [
   {
@@ -105,5 +106,9 @@ export const QUERY_HANDLERS_BOND = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetLatestKpiDataQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetMinDateQueryHandler,
   },
 ];
