@@ -2,6 +2,7 @@
 
 //import "../environmentMock";
 import Injectable from "@core/injectable/Injectable";
+import { Validation } from "@core/validation/Validation";
 import {
   CastRegulationSubType,
   CastRegulationType,
@@ -23,10 +24,29 @@ import {
   SupportedWallets,
 } from "@port/in";
 import Kpis from "@port/in/kpis/Kpis";
+import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRateRequest";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
+import InterestRateViewModel from "@port/in/response/interestRates/InterestRateViewModel";
 import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 import { BigNumber } from "ethers";
+
+class MockKpiLinkedRateInPort {
+  async getInterestRate(request: GetInterestRateRequest): Promise<InterestRateViewModel> {
+    Validation.handleValidation("GetInterestRateRequest", request);
+
+    return {
+      maxRate: "10",
+      baseRate: "2",
+      minRate: "1",
+      startPeriod: "1",
+      startRate: "1",
+      missedPenalty: "1",
+      reportPeriod: "1",
+      rateDecimals: 1,
+    };
+  }
+}
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -171,6 +191,33 @@ describe("DFNS Transaction Adapter test", () => {
 
     const result = await Kpis.getLatestKpiData(request);
     console.log("result: " + JSON.stringify(result));
+  }, 60_000);
+
+  it("get interest rate", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const kpiLinkedRate = new MockKpiLinkedRateInPort();
+
+    const request = new GetInterestRateRequest({
+      securityId: contractAddress,
+    });
+
+    const result = await kpiLinkedRate.getInterestRate(request);
+    console.log("result: " + JSON.stringify(result));
+
+    expect(result).toHaveProperty("maxRate");
+    expect(result).toHaveProperty("baseRate");
+    expect(result).toHaveProperty("minRate");
+    expect(result).toHaveProperty("startPeriod");
+    expect(result).toHaveProperty("startRate");
+    expect(result).toHaveProperty("missedPenalty");
+    expect(result).toHaveProperty("reportPeriod");
+    expect(result).toHaveProperty("rateDecimals");
   }, 60_000);
 
   it("query getMinDate", async () => {

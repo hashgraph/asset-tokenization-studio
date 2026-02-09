@@ -89,7 +89,7 @@ import {
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   TREXFactoryAts__factory,
-  Kpis__factory,
+  Kpis__factory, KpiLinkedRate__factory
 } from "@hashgraph/asset-tokenization-contracts";
 import LogService from "@service/log/LogService";
 import NetworkService from "@service/network/NetworkService";
@@ -1389,6 +1389,21 @@ export class RPCQueryAdapter {
   async getRate(address: EvmAddress): Promise<[BigNumber, number]> {
     const result = await this.connect(FixedRate__factory, address.toString()).getRate();
     return [result.rate_, result.decimals_];
+  }
+
+  async getInterestRate(address: EvmAddress): Promise<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, number]> {
+    LogService.logTrace(`Getting interest rate for security: ${address.toString()}`);
+    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getInterestRate();
+    return [
+      result.maxRate,
+      result.baseRate,
+      result.minRate,
+      result.startPeriod,
+      result.startRate,
+      result.missedPenalty,
+      result.reportPeriod,
+      result.rateDecimals,
+    ];
   }
 
   async getKpiLatestKpiData(address: EvmAddress, from: BigNumber, to: BigNumber, kpi: EvmAddress): Promise<{ value: BigNumber; exists: boolean }> {
