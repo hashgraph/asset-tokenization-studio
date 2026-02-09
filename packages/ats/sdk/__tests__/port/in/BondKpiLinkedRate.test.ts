@@ -153,7 +153,7 @@ describe("DFNS Transaction Adapter test", () => {
   }, 60_000);
 
   it("get kpi latest", async () => {
-    const contractAddress = bond?.evmDiamondAddress?.toString();
+    const contractAddress = bond?.diamondAddress?.toString();
     console.log("contractAddress: " + contractAddress);
 
     if (!contractAddress) {
