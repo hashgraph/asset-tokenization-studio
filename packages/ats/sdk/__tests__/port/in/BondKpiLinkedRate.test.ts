@@ -29,6 +29,8 @@ import ConnectRequest from "@port/in/request/network/ConnectRequest";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 import { BigNumber } from "ethers";
+import ScheduledCouponListing from "@port/in/scheduledTask/scheduledCouponListing/ScheduledCouponListing";
+import GetScheduledCouponListingCountRequest from "@port/in/request/scheduledTasks/GetScheduledCouponListingCountRequest";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -229,6 +231,22 @@ describe("DFNS Transaction Adapter test", () => {
     });
 
     const result = await Kpis.isCheckPointDate(request);
+    console.log("result: " + JSON.stringify(result));
+  }, 60_000);
+
+  it("query getScheduledCouponListingCount", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const request = new GetScheduledCouponListingCountRequest({
+      securityId: contractAddress,
+    });
+
+    const result = await ScheduledCouponListing.getScheduledCouponListingCount(request);
     console.log("result: " + JSON.stringify(result));
   }, 60_000);
 });

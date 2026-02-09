@@ -89,7 +89,8 @@ import {
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   TREXFactoryAts__factory,
-  Kpis__factory, KpiLinkedRate__factory
+  Kpis__factory, KpiLinkedRate__factory,
+  ScheduledCouponListingFacet__factory
 } from "@hashgraph/asset-tokenization-contracts";
 import LogService from "@service/log/LogService";
 import NetworkService from "@service/network/NetworkService";
@@ -1421,5 +1422,11 @@ export class RPCQueryAdapter {
   async isCheckPointDate(address: EvmAddress, date: BigNumber, project: EvmAddress): Promise<boolean> {
     LogService.logTrace(`Checking if date ${date.toString()} is a checkpoint date for project ${project.toString()}`);
     return await this.connect(Kpis__factory, address.toString()).isCheckPointDate(date, project.toString());
+  }
+
+  async getScheduledCouponListingCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting scheduled coupon listing count for security: ${address.toString()}`);
+    const result = await this.connect(ScheduledCouponListingFacet__factory, address.toString()).scheduledCouponListingCount();
+    return result.toNumber();
   }
 }

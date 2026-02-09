@@ -203,6 +203,8 @@ import GetPrincipalForRequest from "./bond/GetPrincipalForRequest";
 import ActionContentHashExistsRequest from "./security/operations/corporateActions/ActionContentHashExistsRequest";
 import SetRateRequest from "@port/in/request/interestRates/SetRateRequest";
 import GetRateRequest from "@port/in/request/interestRates/GetRateRequest";
+import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRateRequest";
+import GetScheduledCouponListingCountRequest from "@port/in/request/scheduledTasks/GetScheduledCouponListingCountRequest";
 import CreateBondKpiLinkedRateRequest from "./bond/CreateBondKpiLinkedRateRequest";
 import GetLatestKpiDataRequest from "@port/in/request/kpis/GetLatestKpiDataRequest";
 import GetMinDateRequest from "@port/in/request/kpis/GetMinDateRequest";
@@ -412,6 +414,8 @@ export {
   ActionContentHashExistsRequest,
   SetRateRequest,
   GetRateRequest,
+  GetInterestRateRequest,
+  GetScheduledCouponListingCountRequest as ScheduledCouponListingCountRequest,
   GetLatestKpiDataRequest,
   GetMinDateRequest,
   IsCheckPointDateRequest,

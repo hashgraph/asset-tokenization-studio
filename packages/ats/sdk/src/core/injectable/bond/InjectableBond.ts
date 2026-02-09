@@ -24,6 +24,7 @@ import { GetLatestKpiDataQueryHandler } from "@query/interestRates/getLatestKpiD
 import { GetCouponFromOrderedListAtQueryHandler } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQueryHandler";
 import { GetMinDateQueryHandler } from "@query/kpis/getMinDate/GetMinDateQueryHandler";
 import { IsCheckPointDateQueryHandler } from "@query/kpis/isCheckPointDate/IsCheckPointDateQueryHandler";
+import { ScheduledCouponListingCountQueryHandler } from "@query/scheduledTasks/scheduledCouponListingCount/ScheduledCouponListingCountQueryHandler";
 
 export const COMMAND_HANDLERS_BOND = [
   {
@@ -120,5 +121,9 @@ export const QUERY_HANDLERS_BOND = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsCheckPointDateQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: ScheduledCouponListingCountQueryHandler,
   },
 ];
