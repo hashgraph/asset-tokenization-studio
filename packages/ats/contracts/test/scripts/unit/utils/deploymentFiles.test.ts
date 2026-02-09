@@ -25,11 +25,11 @@ import {
   getNetworkDeploymentDir,
   type DeploymentOutputType,
 } from "@scripts/infrastructure";
-import { TEST_ADDRESSES, TEST_CONFIG_IDS, TEST_WORKFLOWS, TEST_TIMESTAMPS } from "@test";
+import { TEST_ADDRESSES, TEST_CONFIG_IDS, TEST_WORKFLOWS, TEST_TIMESTAMPS, removeTestDeployments } from "@test";
 
 describe("Deployment File Utilities", () => {
-  const TEST_DEPLOYMENTS_DIR = join(__dirname, "../../../../deployments");
-  const TEST_NETWORK = "test-network";
+  const TEST_DEPLOYMENTS_DIR = getDeploymentsDir();
+  const TEST_NETWORK = "test/test-network";
   const TEST_WORKFLOW = TEST_WORKFLOWS.NEW_BLR;
 
   // Sample deployment data
@@ -176,6 +176,8 @@ describe("Deployment File Utilities", () => {
   after(async () => {
     // Cleanup all test files
     await cleanupAllTestDeployments();
+    // Remove the entire deployments/test/ tree
+    await removeTestDeployments();
   });
 
   describe("loadDeployment", () => {
@@ -337,7 +339,7 @@ describe("Deployment File Utilities", () => {
 
     it("should filter files by network correctly", async () => {
       // Create deployment for different network
-      const otherNetwork = "other-network";
+      const otherNetwork = "test/other-network";
       const otherTimestamp = generateTimestamp();
 
       await createTestDeployment(otherTimestamp);
@@ -363,7 +365,8 @@ describe("Deployment File Utilities", () => {
       } finally {
         // Cleanup
         await cleanupTestDeployment(otherTimestamp);
-        await fs.unlink(join(otherNetworkDir, otherFilename));
+        await fs.unlink(join(otherNetworkDir, otherFilename)).catch(() => {});
+        await fs.rmdir(otherNetworkDir).catch(() => {});
       }
     });
 
@@ -412,7 +415,7 @@ describe("Deployment File Utilities", () => {
       expect(result.success).to.be.true;
       if (result.success) {
         // Filename should match workflow prefix pattern
-        expect(result.filename).to.match(/^newBlr-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.json$/);
+        expect(result.filename).to.match(/^newBlr-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}\.json$/);
         expect(result.filename).to.not.equal("unknown");
       }
     });
@@ -444,7 +447,7 @@ describe("Deployment File Utilities", () => {
     });
 
     it("should extract filename from nested paths correctly", async () => {
-      const nestedPath = join(TEST_DEPLOYMENTS_DIR, "very/deep/nested/path/to/deployment-file.json");
+      const nestedPath = join(TEST_DEPLOYMENTS_DIR, "test/very/deep/nested/path/to/deployment-file.json");
       const mockData = createSampleDeployment("2025-12-29T10-00-00");
 
       const result = await saveDeploymentOutput({
@@ -462,7 +465,7 @@ describe("Deployment File Utilities", () => {
       // Cleanup
       try {
         await fs.unlink(nestedPath);
-        await fs.rm(join(TEST_DEPLOYMENTS_DIR, "very"), { recursive: true, force: true });
+        await fs.rm(join(TEST_DEPLOYMENTS_DIR, "test/very"), { recursive: true, force: true });
       } catch {
         // Ignore cleanup errors
       }
@@ -474,7 +477,7 @@ describe("Deployment File Utilities", () => {
       const timestamp = generateTimestamp();
 
       // Format should be: YYYY-MM-DDTHH-MM-SS
-      expect(timestamp).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}$/);
+      expect(timestamp).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}$/);
     });
 
     it("should not contain colons or periods", () => {
@@ -504,7 +507,7 @@ describe("Deployment File Utilities", () => {
         expect(timestamp1).to.not.equal(timestamp2);
 
         // Verify second timestamp has correct format and is later
-        expect(timestamp2).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}$/);
+        expect(timestamp2).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}$/);
         expect(timestamp2 > timestamp1).to.be.true; // Lexicographic comparison works for ISO format
       } finally {
         clock.restore();
@@ -514,8 +517,8 @@ describe("Deployment File Utilities", () => {
     it("should be parseable back to a valid date", () => {
       const timestamp = generateTimestamp();
 
-      // Convert back to ISO format with colons
-      const isoFormat = timestamp.replace(/T(\d{2})-(\d{2})-(\d{2})$/, "T$1:$2:$3Z");
+      // Convert back to ISO format with colons and period for milliseconds
+      const isoFormat = timestamp.replace(/T(\d{2})-(\d{2})-(\d{2})-(\d{3})$/, "T$1:$2:$3.$4Z");
       const date = new Date(isoFormat);
 
       expect(isNaN(date.getTime())).to.be.false;
@@ -532,7 +535,7 @@ describe("Deployment File Utilities", () => {
     it("should use current timestamp when not provided", () => {
       const filename = generateDeploymentFilename(TEST_WORKFLOWS.NEW_BLR);
 
-      expect(filename).to.match(/^newBlr-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.json$/);
+      expect(filename).to.match(/^newBlr-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}\.json$/);
     });
 
     it("should handle existingBlr workflow", () => {
@@ -749,7 +752,7 @@ describe("Deployment File Utilities", () => {
 
   describe("findLatestDeployment edge cases", () => {
     it("should return null when JSON file is corrupted", async () => {
-      const networkDir = join(TEST_DEPLOYMENTS_DIR, "corrupted-network");
+      const networkDir = join(TEST_DEPLOYMENTS_DIR, "test/corrupted-network");
       const filename = `${TEST_WORKFLOW}-2025-11-08T20-00-00.json`;
       const filepath = join(networkDir, filename);
 
@@ -757,7 +760,7 @@ describe("Deployment File Utilities", () => {
       await fs.writeFile(filepath, "{ invalid json }");
 
       try {
-        const latest = await findLatestDeployment("corrupted-network", TEST_WORKFLOW);
+        const latest = await findLatestDeployment("test/corrupted-network", TEST_WORKFLOW);
         expect(latest).to.be.null; // Should handle corrupted file gracefully
       } finally {
         await fs.unlink(filepath).catch(() => {});
@@ -766,7 +769,7 @@ describe("Deployment File Utilities", () => {
     });
 
     it("should handle empty directory", async () => {
-      const emptyNetwork = "empty-network";
+      const emptyNetwork = "test/empty-network";
       const networkDir = join(TEST_DEPLOYMENTS_DIR, emptyNetwork);
       await fs.mkdir(networkDir, { recursive: true });
 
@@ -788,7 +791,7 @@ describe("Deployment File Utilities", () => {
       const mockData = createSampleDeployment(TEST_TIMESTAMPS.FILENAME_SAMPLE);
 
       const result = await saveDeploymentOutput({
-        network: "deep/nested/new-network",
+        network: "test/deep/nested/new-network",
         workflow: TEST_WORKFLOW,
         data: mockData,
       });
@@ -800,7 +803,7 @@ describe("Deployment File Utilities", () => {
         if (result.success) {
           await fs.unlink(result.filepath);
         }
-        await fs.rm(join(TEST_DEPLOYMENTS_DIR, "deep"), { recursive: true, force: true });
+        await fs.rm(join(TEST_DEPLOYMENTS_DIR, "test/deep"), { recursive: true, force: true });
       } catch {
         // Ignore cleanup errors
       }

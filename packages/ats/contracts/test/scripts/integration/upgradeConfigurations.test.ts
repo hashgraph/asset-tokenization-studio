@@ -18,7 +18,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { CheckpointManager, getResolverProxyConfigInfo } from "@scripts/infrastructure";
+import { CheckpointManager, getResolverProxyConfigInfo, getDeploymentsDir } from "@scripts/infrastructure";
 import { upgradeConfigurations } from "@scripts";
 import { silenceScriptLogging } from "@test";
 import {
@@ -30,6 +30,7 @@ import {
   simulateFailureAtStep,
   cleanupTestCheckpoints,
   createTestCheckpointsDir,
+  removeTestDeployments,
   createDeployedContract,
   createConfigurationResult,
 } from "../../helpers/checkpointTestHelpers";
@@ -271,6 +272,10 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
     afterEach(async () => {
       await cleanupTestCheckpoints(testDir);
+    });
+
+    after(async () => {
+      await removeTestDeployments();
     });
 
     it("should resume from facets step failure", async () => {
@@ -612,7 +617,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
       const path = require("path");
 
       // Use explicit output path for testing
-      const outputPath = path.join(__dirname, "../../..", "deployments", "test-output-verification.json");
+      const outputPath = path.join(getDeploymentsDir(), "test-output-verification.json");
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,

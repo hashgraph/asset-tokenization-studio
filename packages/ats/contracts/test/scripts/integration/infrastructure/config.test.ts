@@ -13,12 +13,14 @@
 
 import { expect } from "chai";
 import { getNetworkConfig, getAllNetworks, getPrivateKey, getPrivateKeys } from "@scripts/infrastructure";
-import { TEST_NETWORKS, TEST_CONTRACT_NAMES, TEST_NON_EXISTENT } from "@test";
+import { TEST_NETWORKS, TEST_CONTRACT_NAMES, TEST_NON_EXISTENT, silenceScriptLogging } from "@test";
 
 // Internal functions not exported from barrel - direct import required for unit testing
 import { hasNetwork, getDeployedAddress, isDeployed } from "../../../../scripts/infrastructure/config";
 
 describe("Network Configuration", () => {
+  before(silenceScriptLogging);
+
   // ============================================================================
   // getAllNetworks Tests
   // ============================================================================
