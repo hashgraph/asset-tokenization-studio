@@ -204,6 +204,7 @@ import ActionContentHashExistsRequest from "./security/operations/corporateActio
 import SetRateRequest from "@port/in/request/interestRates/SetRateRequest";
 import GetRateRequest from "@port/in/request/interestRates/GetRateRequest";
 import CreateBondKpiLinkedRateRequest from "./bond/CreateBondKpiLinkedRateRequest";
+import GetLatestKpiDataRequest from "@port/in/request/kpis/GetLatestKpiDataRequest";
 
 export {
   CreateEquityRequest,
@@ -409,4 +410,5 @@ export {
   ActionContentHashExistsRequest,
   SetRateRequest,
   GetRateRequest,
+  GetLatestKpiDataRequest,
 };

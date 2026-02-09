@@ -88,7 +88,8 @@ import {
   Security__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
-  TREXFactoryAts__factory
+  TREXFactoryAts__factory,
+  Kpis__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import LogService from "@service/log/LogService";
 import NetworkService from "@service/network/NetworkService";
@@ -1388,5 +1389,11 @@ export class RPCQueryAdapter {
   async getRate(address: EvmAddress): Promise<[BigNumber, number]> {
     const result = await this.connect(FixedRate__factory, address.toString()).getRate();
     return [result.rate_, result.decimals_];
+  }
+
+  async getKpiLatestKpiData(address: EvmAddress, from: BigNumber, to: BigNumber, kpi: EvmAddress): Promise<{ value: BigNumber; exists: boolean }> {
+    LogService.logTrace(`Getting latest KPI data for the security: ${address.toString()}`);
+    const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, kpi.toString());
+    return { value: result[0], exists: result[1] };
   }
 }
