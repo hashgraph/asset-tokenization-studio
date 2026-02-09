@@ -271,7 +271,7 @@ describe(SyncFromOnChainDomainService.name, () => {
     })
 
     it("should handle multiple assets correctly", async () => {
-      const bondAsset = AssetUtils.newInstance({ type: AssetType.BOND })
+      const bondAsset = AssetUtils.newInstance({ type: AssetType.BOND_VARIABLE_RATE })
       const equityAsset = AssetUtils.newInstance({ type: AssetType.EQUITY })
       const bondCorporateActionId = { value: "bond-1" } as any
       const equityCorporateActionId = { value: "equity-1" } as any

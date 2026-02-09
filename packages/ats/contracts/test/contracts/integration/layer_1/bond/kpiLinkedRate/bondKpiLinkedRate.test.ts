@@ -15,6 +15,7 @@ import {
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
+import { SecurityType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondKpiLinkedRateTokenFixture, DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, getDltTimestamp } from "@test";
 import { executeRbac } from "@test";
@@ -232,6 +233,13 @@ describe("Bond KpiLinked Rate Tests", () => {
     };
     await loadFixture(deploySecurityFixture);
   });
+
+  it("GIVEN a bond kpi linked rate WHEN deployed THEN securityType is BOND_KPI_LINKED_RATE", async () => {
+    const erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
+    const metadata = await erc20Facet.getERC20Metadata();
+    expect(metadata.securityType).to.be.equal(SecurityType.BOND_KPI_LINKED_RATE);
+  });
+
   describe("KpiLinkedRateFacet", () => {
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rateStatus = 1;

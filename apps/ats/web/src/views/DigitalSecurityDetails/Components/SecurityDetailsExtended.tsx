@@ -138,7 +138,7 @@ export const SecurityDetailsExtended = ({
       });
     }
 
-    const isBond = details?.type === "BOND";
+    const isBond = details?.type === "BOND_VARIABLE_RATE";
 
     if (isBond && bondDetailsResponse?.startingDate) {
       items.push({

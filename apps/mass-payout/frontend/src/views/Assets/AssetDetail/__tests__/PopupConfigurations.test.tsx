@@ -66,7 +66,7 @@ const mockAsset: Asset = {
   id: "asset-123",
   name: "Test Asset",
   symbol: "TEST",
-  type: AssetType.BOND,
+  type: AssetType.BOND_VARIABLE_RATE,
   hederaTokenAddress: "0.0.123456",
   evmTokenAddress: "0x1234567890abcdef",
   lifeCycleCashFlowEvmAddress: "0xabcdef1234567890",

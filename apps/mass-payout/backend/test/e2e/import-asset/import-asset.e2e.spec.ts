@@ -39,7 +39,7 @@ describe("Import Asset", () => {
         hederaTokenAddress: fakeHederaAddress(),
         name: faker.commerce.productName(),
         symbol: faker.finance.currencySymbol(),
-        assetType: AssetType.BOND,
+        assetType: AssetType.BOND_VARIABLE_RATE,
       }
       e2eTestApp.assetTokenizationStudioServiceMock.getAssetInfo.mockResolvedValue(getAssetInfoResponse)
       e2eTestApp.hederaServiceMock.getEvmAddressFromHedera.mockResolvedValue(faker.finance.ethereumAddress())
@@ -112,7 +112,7 @@ describe("Import Asset", () => {
         hederaTokenAddress: duplicatedHederaAddress,
         name: faker.commerce.productName(),
         symbol: faker.finance.currencySymbol(),
-        assetType: AssetType.BOND,
+        assetType: AssetType.BOND_VARIABLE_RATE,
       }
       e2eTestApp.assetTokenizationStudioServiceMock.getAssetInfo.mockResolvedValue(getAssetInfoResponse)
       e2eTestApp.hederaServiceMock.getEvmAddressFromHedera.mockResolvedValue(faker.finance.ethereumAddress())
@@ -147,7 +147,7 @@ describe("Import Asset", () => {
         hederaTokenAddress: payload.hederaTokenAddress,
         name: faker.commerce.productName(),
         symbol: faker.finance.currencySymbol(),
-        assetType: AssetType.BOND,
+        assetType: AssetType.BOND_VARIABLE_RATE,
       }
       e2eTestApp.assetTokenizationStudioServiceMock.getAssetInfo.mockResolvedValue(getAssetInfoResponse)
       e2eTestApp.hederaServiceMock.getEvmAddressFromHedera.mockResolvedValue(faker.finance.ethereumAddress())

@@ -15,8 +15,11 @@ import {TRexISustainabilityPerformanceTargetRate as ISustainabilityPerformanceTa
 
 interface TRexIFactory {
     enum SecurityType {
-        Bond,
-        Equity
+        BondVariableRate,
+        Equity,
+        BondFixedRate,
+        BondKpiLinkedRate,
+        BondSPTRate
     }
 
     struct ResolverProxyConfiguration {
