@@ -269,7 +269,7 @@ function createBondMockImplementation(
   const ids = identifiers(securityEvmAddress);
   securityInfo.diamondAddress = HederaId.from(ids[0]);
   securityInfo.evmDiamondAddress = new EvmAddress(ids[1]);
-  securityInfo.type = SecurityType.BOND;
+  securityInfo.type = SecurityType.BOND_VARIABLE_RATE;
   securityInfo.regulation = {
     type: _securityInfo.regulationType ?? "",
     subType: _securityInfo.regulationsubType ?? "",

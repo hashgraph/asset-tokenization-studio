@@ -481,9 +481,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
                 continue;
             }
 
-            uint256 amount = (_assetType == ILifeCycleCashFlow.AssetType.Bond)
-                ? _getCouponAmount(_asset, _distributionID, holder, paymentTokenDecimals)
-                : _getDividendAmount(_asset, _distributionID, holder, paymentTokenDecimals);
+            uint256 amount = (_assetType == ILifeCycleCashFlow.AssetType.Equity)
+                ? _getDividendAmount(_asset, _distributionID, holder, paymentTokenDecimals)
+                : _getCouponAmount(_asset, _distributionID, holder, paymentTokenDecimals);
 
             if (!_payHolderDistribution(_distributionID, holder, amount, paymentToken)) {
                 failedAddresses_[failedIndex] = holder;
@@ -726,10 +726,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageIndex,
         uint256 _pageLength
     ) private view returns (address[] memory holders_) {
-        if (_assetType == ILifeCycleCashFlow.AssetType.Bond) {
-            return IBondRead(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
-        } else {
+        if (_assetType == ILifeCycleCashFlow.AssetType.Equity) {
             return IEquity(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
+        } else {
+            return IBondRead(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
         }
     }
 
@@ -863,9 +863,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      */
     function _getDistributionExecutionDate(address _asset, uint256 _distributionID) private view returns (uint256) {
         return
-            (_lifeCycleCashFlowStorage().assetType == ILifeCycleCashFlow.AssetType.Bond)
-                ? IBondRead(_asset).getCoupon(_distributionID).coupon.executionDate
-                : IEquity(_asset).getDividends(_distributionID).dividend.executionDate;
+            (_lifeCycleCashFlowStorage().assetType == ILifeCycleCashFlow.AssetType.Equity)
+                ? IEquity(_asset).getDividends(_distributionID).dividend.executionDate
+                : IBondRead(_asset).getCoupon(_distributionID).coupon.executionDate;
     }
 
     /*

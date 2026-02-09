@@ -14,7 +14,7 @@ const mockAssetData = {
   lifecycleCashFlowId: "LIFECYCLE-789",
   maturityDate: "2024-12-31",
   name: "Test Asset",
-  assetType: "Bond",
+  assetType: "Bond Variable Rate",
   distributionId: "DIST-123456",
   actionType: "Manual",
   totalAmount: "$100",
@@ -40,7 +40,7 @@ describe.skip("AssetDetails", () => {
       expect(screen.getByText("LIFECYCLE-789")).toBeInTheDocument();
       expect(screen.getByText("2024-12-31")).toBeInTheDocument();
       expect(screen.getByText("Test Asset")).toBeInTheDocument();
-      expect(screen.getByText("Bond")).toBeInTheDocument();
+      expect(screen.getByText("Bond Variable Rate")).toBeInTheDocument();
     });
 
     it("renders correctly when loading", () => {

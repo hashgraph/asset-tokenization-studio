@@ -101,7 +101,7 @@ describe("ERC20 Tests", () => {
       await expect(
         erc20Facet.initialize_ERC20({
           info: info,
-          securityType: SecurityType.BOND,
+          securityType: SecurityType.BOND_VARIABLE_RATE,
         }),
       ).to.be.revertedWithCustomError(erc20Facet, "AlreadyInitialized");
     });

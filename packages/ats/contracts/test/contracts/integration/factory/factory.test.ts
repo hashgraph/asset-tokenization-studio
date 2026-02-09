@@ -786,7 +786,7 @@ describe("Factory Tests", () => {
       expect(metadata.info.symbol).to.be.equal(bondData.security.erc20MetadataInfo.symbol);
       expect(metadata.info.decimals).to.be.equal(bondData.security.erc20MetadataInfo.decimals);
       expect(metadata.info.isin).to.be.equal(bondData.security.erc20MetadataInfo.isin);
-      expect(metadata.securityType).to.be.equal(SecurityType.BOND);
+      expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
 
       const capFacet = await ethers.getContractAt("Cap", bondAddress);
       const maxSupply = await capFacet.getMaxSupply();

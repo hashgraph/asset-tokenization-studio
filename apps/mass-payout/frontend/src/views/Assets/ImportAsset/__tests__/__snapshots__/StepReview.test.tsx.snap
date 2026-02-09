@@ -90,7 +90,7 @@ exports[`StepReview Component Basic rendering should render correctly 1`] = `
             <p
               class="css-1wzmjm0"
             >
-              BOND
+              BOND_VARIABLE_RATE
             </p>
           </div>
         </div>

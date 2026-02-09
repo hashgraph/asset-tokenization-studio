@@ -6,7 +6,10 @@ import { AmountType, DistributionSubtype } from "./DistributionService";
 
 export enum AssetType {
   EQUITY = "Equity",
-  BOND = "Bond",
+  BOND_VARIABLE_RATE = "Bond Variable Rate",
+  BOND_FIXED_RATE = "Bond Fixed Rate",
+  BOND_KPI_LINKED_RATE = "Bond KPI Linked Rate",
+  BOND_SPT_RATE = "Bond SPT Rate",
 }
 
 export interface Asset {
