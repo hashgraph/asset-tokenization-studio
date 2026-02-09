@@ -25,6 +25,7 @@ import {
 import Kpis from "@port/in/kpis/Kpis";
 import KpiLinkedRate from "@port/in/interestRates/kpiLinkedRate/KpiLinkedRate";
 import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRateRequest";
+import GetImpactDataRequest from "@port/in/request/kpiLinkedRate/GetImpactDataRequest";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
@@ -200,6 +201,28 @@ describe("DFNS Transaction Adapter test", () => {
     expect(result).toHaveProperty("missedPenalty");
     expect(result).toHaveProperty("reportPeriod");
     expect(result).toHaveProperty("rateDecimals");
+  }, 60_000);
+
+  it("get impact data", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const request = new GetImpactDataRequest({
+      securityId: contractAddress,
+    });
+
+    const result = await KpiLinkedRate.getImpactData(request);
+    console.log("result: " + JSON.stringify(result));
+
+    expect(result).toHaveProperty("maxDeviationCap");
+    expect(result).toHaveProperty("baseLine");
+    expect(result).toHaveProperty("maxDeviationFloor");
+    expect(result).toHaveProperty("impactDataDecimals");
+    expect(result).toHaveProperty("adjustmentPrecision");
   }, 60_000);
 
   it("query getMinDate", async () => {
