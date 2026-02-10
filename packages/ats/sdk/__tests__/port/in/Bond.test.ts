@@ -19,6 +19,7 @@ import {
   RoleRequest,
   SetCouponRequest,
   UpdateMaturityDateRequest,
+  AddKpiDataRequest,
 } from "@port/in";
 import { CLIENT_ACCOUNT_ECDSA, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 import { TIME_PERIODS_S } from "@core/Constants";
@@ -29,6 +30,7 @@ import NetworkService from "@service/network/NetworkService";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import Injectable from "@core/injectable/Injectable";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
+import EvmAddress from "@domain/context/contract/EvmAddress";
 import {
   CastRegulationSubType,
   CastRegulationType,
@@ -372,4 +374,18 @@ describe("🧪 Bond test", () => {
     expect(typeof result).toBe("number");
     expect(result).toBeGreaterThanOrEqual(0);
   }, 600_000);
+
+  it("addKpiData", async () => {
+    const request = new AddKpiDataRequest({
+      securityId: bond.evmDiamondAddress!.toString(),
+      date: Math.floor(Date.now() / 1000),
+      value: "1000",
+      project: new EvmAddress("0x0000000000000000000000000000000000001"),
+    });
+
+    const result = await Bond.addKpiData(request);
+
+    expect(result).toHaveProperty("transactionId");
+    expect(typeof result.transactionId).toBe("string");
+  }, 60_000);
 });
