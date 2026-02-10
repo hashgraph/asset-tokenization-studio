@@ -2,6 +2,8 @@
 
 //import "../environmentMock";
 import Injectable from "@core/injectable/Injectable";
+import { Time } from "@core/Time";
+import EvmAddress from "@domain/context/contract/EvmAddress";
 import {
   CastRegulationSubType,
   CastRegulationType,
@@ -10,7 +12,10 @@ import {
 } from "@domain/context/factory/RegulationType";
 import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
 import { MirrorNode } from "@domain/context/network/MirrorNode";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
 import {
+  AddKpiDataRequest,
+  ApplyRolesRequest,
   Bond,
   CreateBondKpiLinkedRateRequest,
   GetLatestKpiDataRequest,
@@ -18,23 +23,22 @@ import {
   GetScheduledCouponListingRequest,
   InitializationRequest,
   IsCheckPointDateRequest,
-  AddKpiDataRequest,
   LoggerTransports,
   Network,
+  Role,
   SDK,
   SupportedWallets,
 } from "@port/in";
-import Kpis from "@port/in/kpis/Kpis";
 import KpiLinkedRate from "@port/in/interestRates/kpiLinkedRate/KpiLinkedRate";
+import Kpis from "@port/in/kpis/Kpis";
 import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRateRequest";
+import SetInterestRateRequest from "@port/in/request/interestRates/SetInterestRateRequest";
 import GetImpactDataRequest from "@port/in/request/kpiLinkedRate/GetImpactDataRequest";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
-import SecurityViewModel from "@port/in/response/SecurityViewModel";
-import EvmAddress from "@domain/context/contract/EvmAddress";
-import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
-import { BigNumber } from "ethers";
-import ScheduledCouponListing from "@port/in/scheduledTask/scheduledCouponListing/ScheduledCouponListing";
 import ScheduledCouponListingCountRequest from "@port/in/request/scheduledTasks/ScheduledCouponListingCountRequest";
+import SecurityViewModel from "@port/in/response/SecurityViewModel";
+import ScheduledCouponListing from "@port/in/scheduledTask/scheduledCouponListing/ScheduledCouponListing";
+import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 
 SDK.log = { level: "ERROR", transports: new LoggerTransports.Console() };
 
@@ -172,8 +176,8 @@ describe("DFNS Transaction Adapter test", () => {
 
     const request = new GetLatestKpiDataRequest({
       securityId: contractAddress,
-      from: BigNumber.from(0),
-      to: BigNumber.from(1),
+      from: "0",
+      to: "1",
       kpi: CLIENT_ACCOUNT_ECDSA.evmAddress || "",
     });
 
@@ -204,6 +208,45 @@ describe("DFNS Transaction Adapter test", () => {
     expect(result).toHaveProperty("missedPenalty");
     expect(result).toHaveProperty("reportPeriod");
     expect(result).toHaveProperty("rateDecimals");
+  }, 60_000);
+
+  it("set interest rate", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    await Role.applyRoles(
+      new ApplyRolesRequest({
+        securityId: contractAddress,
+        targetId: DFNS_SETTINGS.hederaAccountId,
+        roles: [SecurityRole._INTEREST_RATE_MANAGER_ROLE],
+        actives: [true],
+      }),
+    );
+    console.log("applyRoles [_INTEREST_RATE_MANAGER_ROLE]");
+    await Time.delay(4, "seconds");
+
+    const request = new SetInterestRateRequest({
+      securityId: contractAddress,
+      maxRate: "10.5",
+      baseRate: "5.5",
+      minRate: "1.5",
+      startPeriod: "1640995200",
+      startRate: "4.5",
+      missedPenalty: "2.5",
+      reportPeriod: "30",
+      rateDecimals: 8,
+    });
+
+    const result = await KpiLinkedRate.setInterestRate(request);
+    console.log("result: " + JSON.stringify(result));
+
+    expect(result).toHaveProperty("payload");
+    expect(result).toHaveProperty("transactionId");
+    expect(result.payload).toBe(true);
   }, 60_000);
 
   it("get impact data", async () => {
@@ -252,7 +295,7 @@ describe("DFNS Transaction Adapter test", () => {
 
     const request = new IsCheckPointDateRequest({
       securityId: contractAddress,
-      date: BigNumber.from(1),
+      date: 1,
       project: contractAddress,
     });
 

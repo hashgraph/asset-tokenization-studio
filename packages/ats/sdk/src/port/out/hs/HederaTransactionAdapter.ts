@@ -52,6 +52,7 @@ import {
   ERC1410IssuerFacet__factory,
   FixedRate__factory,
   Kpis__factory,
+  KpiLinkedRate__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from "@core/Constants";
 import TransactionAdapter from "../TransactionAdapter";
@@ -3192,6 +3193,39 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       securityId!,
       GAS.SET_RATE,
       [rate.toBigNumber(), rateDecimals],
+    );
+  }
+
+  setInterestRate(
+    security: EvmAddress,
+    maxRate: BigDecimal,
+    baseRate: BigDecimal,
+    minRate: BigDecimal,
+    startPeriod: BigDecimal,
+    startRate: BigDecimal,
+    missedPenalty: BigDecimal,
+    reportPeriod: BigDecimal,
+    rateDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting Interest Rate for security ${security.toString()}`,
+    );
+    return this.executeWithArgs(
+      new KpiLinkedRate__factory().attach(security.toString()),
+      "setInterestRate",
+      securityId!,
+      GAS.SET_INTEREST_RATE,
+      [{
+        maxRate: maxRate.toBigNumber(),
+        baseRate: baseRate.toBigNumber(),
+        minRate: minRate.toBigNumber(),
+        startPeriod: startPeriod.toBigNumber(),
+        startRate: startRate.toBigNumber(),
+        missedPenalty: missedPenalty.toBigNumber(),
+        reportPeriod: reportPeriod.toBigNumber(),
+        rateDecimals: rateDecimals,
+      }],
     );
   }
 
