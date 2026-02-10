@@ -380,7 +380,7 @@ describe("🧪 Bond test", () => {
       securityId: bond.evmDiamondAddress!.toString(),
       date: Math.floor(Date.now() / 1000),
       value: "1000",
-      project: new EvmAddress("0x0000000000000000000000000000000000001"),
+      project: new EvmAddress("0x0000000000000000000000000000000000000001"),
     });
 
     const result = await Bond.addKpiData(request);
