@@ -17,6 +17,7 @@ import {
   GetMinDateRequest,
   InitializationRequest,
   IsCheckPointDateRequest,
+  AddKpiDataRequest,
   LoggerTransports,
   Network,
   SDK,
@@ -28,6 +29,7 @@ import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRa
 import GetImpactDataRequest from "@port/in/request/kpiLinkedRate/GetImpactDataRequest";
 import ConnectRequest from "@port/in/request/network/ConnectRequest";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
+import EvmAddress from "@domain/context/contract/EvmAddress";
 import { CLIENT_ACCOUNT_ECDSA, DFNS_SETTINGS, FACTORY_ADDRESS, RESOLVER_ADDRESS } from "@test/config";
 import { BigNumber } from "ethers";
 import ScheduledCouponListing from "@port/in/scheduledTask/scheduledCouponListing/ScheduledCouponListing";
@@ -271,5 +273,27 @@ describe("DFNS Transaction Adapter test", () => {
 
     const result = await ScheduledCouponListing.scheduledCouponListingCount(request);
     console.log("result: " + JSON.stringify(result));
+  }, 60_000);
+
+  it("addKpiData", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const request = new AddKpiDataRequest({
+      securityId: contractAddress,
+      date: Math.floor(Date.now() / 1000),
+      value: "1000",
+      project: new EvmAddress("0x0000000000000000000000000000000000001"),
+    });
+
+    const result = await Bond.addKpiData(request);
+    console.log("addKpiData result: " + JSON.stringify(result));
+
+    expect(result).toHaveProperty("transactionId");
+    expect(typeof result.transactionId).toBe("string");
   }, 60_000);
 });
