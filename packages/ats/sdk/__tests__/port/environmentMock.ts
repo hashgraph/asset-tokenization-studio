@@ -670,6 +670,10 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     },
   );
 
+  singletonInstance.getCouponsOrderedListTotal = jest.fn(async (address: EvmAddress) => {
+    return coupons.length;
+  });
+
   singletonInstance.getCouponFromOrderedListAt = jest.fn(async (address: EvmAddress, pos: number) => {
     if (pos >= coupons.length || pos < 0) {
       // Return a default value instead of throwing error for tests

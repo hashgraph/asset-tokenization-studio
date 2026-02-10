@@ -9,6 +9,7 @@ import {
   GetCouponRequest,
   GetAllCouponsRequest,
   GetCouponsOrderedListRequest,
+  GetCouponsOrderedListTotalRequest,
   GetCouponFromOrderedListAtRequest,
   SupportedWallets,
   Network,
@@ -359,5 +360,16 @@ describe("🧪 Bond test", () => {
     const result = await Bond.getCouponFromOrderedListAt(request);
     expect(typeof result).toBe("number");
     expect(result).toBe(1);
+  }, 600_000);
+
+  it("Get coupons ordered list total", async () => {
+    const request = new GetCouponsOrderedListTotalRequest({
+      securityId: bond.evmDiamondAddress!.toString(),
+    });
+
+    const result = await Bond.getCouponsOrderedListTotal(request);
+
+    expect(typeof result).toBe("number");
+    expect(result).toBeGreaterThanOrEqual(0);
   }, 600_000);
 });

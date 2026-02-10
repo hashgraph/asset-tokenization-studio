@@ -1294,12 +1294,26 @@ export class RPCQueryAdapter {
     return couponId.toNumber();
   }
 
-  async getCouponsOrderedList(address: EvmAddress, pageIndex: number, pageLength: number): Promise<number[]> {
+  async getCouponsOrderedList(address: EvmAddress, pageIndex?: number, pageLength?: number): Promise<number[]> {
     LogService.logTrace(`Getting coupons ordered list for security ${address.toString()}, page ${pageIndex}, length ${pageLength}`);
 
-    const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(pageIndex, pageLength);
+    // If pagination parameters are provided, use paginated call
+    if (pageIndex !== undefined && pageLength !== undefined) {
+      const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(pageIndex, pageLength);
+      return couponIds.map(id => id.toNumber());
+    }
 
+    // Otherwise get all coupons (simulate by getting first page with large length)
+    const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(0, 1000);
     return couponIds.map(id => id.toNumber());
+  }
+
+  async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting coupons ordered list total for security ${address.toString()}`);
+
+    const total = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedListTotal();
+
+    return total.toNumber();
   }
 
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {

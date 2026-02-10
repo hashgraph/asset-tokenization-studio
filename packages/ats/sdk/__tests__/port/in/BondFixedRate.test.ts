@@ -18,6 +18,7 @@ import {
   CreateBondFixedRateRequest,
   FixedRate,
   GetCouponsOrderedListRequest,
+  GetCouponsOrderedListTotalRequest,
   GetRateRequest,
   InitializationRequest,
   LoggerTransports,
@@ -227,5 +228,24 @@ describe("DFNS Transaction Adapter test", () => {
       expect(typeof couponId).toBe("number");
       expect(couponId).toBeGreaterThan(0);
     });
+  }, 60_000);
+
+  it("getCouponsOrderedListTotal from DLT", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const request = new GetCouponsOrderedListTotalRequest({
+      securityId: contractAddress,
+    });
+
+    const result = await Bond.getCouponsOrderedListTotal(request);
+    console.log("getCouponsOrderedListTotal result: " + JSON.stringify(result));
+
+    expect(typeof result).toBe("number");
+    expect(result).toBeGreaterThanOrEqual(0);
   }, 60_000);
 });

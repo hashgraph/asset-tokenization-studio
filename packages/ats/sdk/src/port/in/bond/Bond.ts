@@ -31,6 +31,7 @@ import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponFor
 import { GetCouponFromOrderedListAtQuery } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQuery";
 import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery";
 import { GetCouponsOrderedListQuery } from "@query/bond/coupons/getCouponsOrderedList/GetCouponsOrderedListQuery";
+import { GetCouponsOrderedListTotalQuery } from "@query/bond/coupons/getCouponsOrderedListTotal/GetCouponsOrderedListTotalQuery";
 import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
 import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
 import { GetSecurityQuery } from "@query/security/get/GetSecurityQuery";
@@ -53,6 +54,7 @@ import CreateBondRequest from "../request/bond/CreateBondRequest";
 import CreateTrexSuiteBondRequest from "../request/bond/CreateTrexSuiteBondRequest";
 import FullRedeemAtMaturityRequest from "../request/bond/FullRedeemAtMaturityRequest";
 import GetCouponsOrderedListRequest from "../request/bond/GetCouponsOrderedListRequest";
+import GetCouponsOrderedListTotalRequest from "../request/bond/GetCouponsOrderedListTotalRequest";
 import GetAllCouponsRequest from "../request/bond/GetAllCouponsRequest";
 import GetBondDetailsRequest from "../request/bond/GetBondDetailsRequest";
 import GetCouponForRequest from "../request/bond/GetCouponForRequest";
@@ -83,6 +85,7 @@ interface IBondInPort {
   getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
   getCouponsOrderedList(request: GetCouponsOrderedListRequest): Promise<number[]>;
+  getCouponsOrderedListTotal(request: GetCouponsOrderedListTotalRequest): Promise<number>;
   updateMaturityDate(request: UpdateMaturityDateRequest): Promise<{ payload: boolean; transactionId: string }>;
   redeemAtMaturityByPartition(
     request: RedeemAtMaturityByPartitionRequest,
@@ -475,6 +478,17 @@ class BondInPort implements IBondInPort {
     const { securityId, pageIndex, pageLength } = request;
 
     const result = await this.queryBus.execute(new GetCouponsOrderedListQuery(securityId, pageIndex, pageLength));
+
+    return result.payload;
+  }
+
+  @LogError
+  async getCouponsOrderedListTotal(request: GetCouponsOrderedListTotalRequest): Promise<number> {
+    ValidatedRequest.handleValidation("GetCouponsOrderedListTotalRequest", request);
+
+    const { securityId } = request;
+
+    const result = await this.queryBus.execute(new GetCouponsOrderedListTotalQuery(securityId));
 
     return result.payload;
   }
