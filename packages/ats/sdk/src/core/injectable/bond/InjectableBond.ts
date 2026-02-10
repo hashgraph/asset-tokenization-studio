@@ -9,6 +9,7 @@ import { RedeemAtMaturityByPartitionCommandHandler } from "@command/bond/redeemA
 import { UpdateMaturityDateCommandHandler } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommandHandler";
 import { SetRateCommandHandler } from "@command/interestRates/setRate/SetRateCommandHandler";
 import { SetInterestRateCommandHandler } from "@command/interestRates/setInterestRate/SetInterestRateCommandHandler";
+import { SetImpactDataCommandHandler } from "@command/interestRates/setImpactData/SetImpactDataCommandHandler";
 import { GetCouponQueryHandler } from "@query/bond/coupons/getCoupon/GetCouponQueryHandler";
 import { GetCouponAmountForQueryHandler } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQueryHandler";
 import { GetCouponCountQueryHandler } from "@query/bond/coupons/getCouponCount/GetCouponCountQueryHandler";
@@ -66,6 +67,10 @@ export const COMMAND_HANDLERS_BOND = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetInterestRateCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetImpactDataCommandHandler,
   },
 ];
 

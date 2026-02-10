@@ -213,6 +213,7 @@ import GetMinDateRequest from "./kpis/GetMinDateRequest";
 import IsCheckPointDateRequest from "./kpis/IsCheckPointDateRequest";
 import { AddKpiDataRequest } from "./kpis/AddKpiDataRequest";
 import GetImpactDataRequest from "./kpiLinkedRate/GetImpactDataRequest";
+import SetImpactDataRequest from "./interestRates/SetImpactDataRequest";
 import GetScheduledCouponListingRequest from "./scheduledTasks/GetScheduledCouponListingRequest";
 
 export {
@@ -420,6 +421,7 @@ export {
   ActionContentHashExistsRequest,
   SetRateRequest,
   SetInterestRateRequest,
+  SetImpactDataRequest,
   GetRateRequest,
   GetInterestRateRequest,
   ScheduledCouponListingCountRequest as ScheduledCouponListingCountRequest,

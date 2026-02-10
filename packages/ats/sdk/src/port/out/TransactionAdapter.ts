@@ -47,6 +47,16 @@ export interface WalletAdapter {
 }
 
 interface ITransactionAdapter {
+  setImpactData(
+    security: EvmAddress,
+    maxDeviationCap: BigDecimal,
+    baseLine: BigDecimal,
+    maxDeviationFloor: BigDecimal,
+    impactDataDecimals: number,
+    adjustmentPrecision: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
   createEquity(
     security: Security,
     equityDetails: EquityDetails,
@@ -872,7 +882,18 @@ export default abstract class TransactionAdapter
     IAgent,
     IProceedRecipients,
     IFixedRate
-{abstract triggerPendingScheduledSnapshots(
+{
+  abstract setImpactData(
+    security: EvmAddress,
+    maxDeviationCap: BigDecimal,
+    baseLine: BigDecimal,
+    maxDeviationFloor: BigDecimal,
+    impactDataDecimals: number,
+    adjustmentPrecision: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract triggerPendingScheduledSnapshots(
     security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;

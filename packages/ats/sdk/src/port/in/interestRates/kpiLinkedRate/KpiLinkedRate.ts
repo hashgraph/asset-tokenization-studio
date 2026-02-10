@@ -10,6 +10,7 @@ import SetInterestRateRequest from "@port/in/request/interestRates/SetInterestRa
 import InterestRateViewModel from "@port/in/response/interestRates/InterestRateViewModel";
 import ImpactDataViewModel from "@port/in/response/interestRates/ImpactDataViewModel";
 import GetImpactDataRequest from "@port/in/request/kpiLinkedRate/GetImpactDataRequest";
+import SetImpactDataRequest from "@port/in/request/interestRates/SetImpactDataRequest";
 import {
   GetInterestRateQuery,
   GetInterestRateQueryResponse,
@@ -22,11 +23,16 @@ import {
   SetInterestRateCommand,
   SetInterestRateCommandResponse,
 } from "../../../../app/usecase/command/interestRates/setInterestRate/SetInterestRateCommand";
+import {
+  SetImpactDataCommand,
+  SetImpactDataCommandResponse,
+} from "../../../../app/usecase/command/interestRates/setImpactData/SetImpactDataCommand";
 
 interface IKpiLinkedRateInPort {
   getInterestRate(request: GetInterestRateRequest): Promise<InterestRateViewModel>;
   getImpactData(request: GetImpactDataRequest): Promise<ImpactDataViewModel>;
   setInterestRate(request: SetInterestRateRequest): Promise<{ payload: boolean; transactionId: string }>;
+  setImpactData(request: SetImpactDataRequest): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class KpiLinkedRateInPort implements IKpiLinkedRateInPort {
@@ -89,6 +95,27 @@ class KpiLinkedRateInPort implements IKpiLinkedRateInPort {
     );
 
     const result: SetInterestRateCommandResponse = await this.commandBus.execute(command);
+
+    return {
+      payload: result.payload,
+      transactionId: result.transactionId,
+    };
+  }
+
+  @LogError
+  async setImpactData(request: SetImpactDataRequest): Promise<{ payload: boolean; transactionId: string }> {
+    ValidatedRequest.handleValidation("SetImpactDataRequest", request);
+
+    const command = new SetImpactDataCommand(
+      request.securityId,
+      request.maxDeviationCap,
+      request.baseLine,
+      request.maxDeviationFloor,
+      request.impactDataDecimals,
+      request.adjustmentPrecision,
+    );
+
+    const result: SetImpactDataCommandResponse = await this.commandBus.execute(command);
 
     return {
       payload: result.payload,

@@ -3229,6 +3229,33 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  setImpactData(
+    security: EvmAddress,
+    maxDeviationCap: BigDecimal,
+    baseLine: BigDecimal,
+    maxDeviationFloor: BigDecimal,
+    impactDataDecimals: number,
+    adjustmentPrecision: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting Impact Data for security ${security.toString()}`,
+    );
+    return this.executeWithArgs(
+      new KpiLinkedRate__factory().attach(security.toString()),
+      "setImpactData",
+      securityId!,
+      GAS.SET_IMPACT_DATA,
+      [{
+        maxDeviationCap: maxDeviationCap.toBigNumber(),
+        baseLine: baseLine.toBigNumber(),
+        maxDeviationFloor: maxDeviationFloor.toBigNumber(),
+        impactDataDecimals: impactDataDecimals,
+        adjustmentPrecision: adjustmentPrecision.toBigNumber(),
+      }],
+    );
+  }
+
   addKpiData(
     security: EvmAddress,
     date: number,

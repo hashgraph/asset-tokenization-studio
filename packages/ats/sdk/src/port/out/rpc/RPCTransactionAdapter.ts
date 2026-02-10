@@ -2633,6 +2633,32 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  setImpactData(
+    security: EvmAddress,
+    maxDeviationCap: BigDecimal,
+    baseLine: BigDecimal,
+    maxDeviationFloor: BigDecimal,
+    impactDataDecimals: number,
+    adjustmentPrecision: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting Impact Data for security ${security.toString()}`,
+    );
+    return this.executeTransaction(
+      KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setImpactData",
+      [{
+        maxDeviationCap: maxDeviationCap.toBigNumber(),
+        baseLine: baseLine.toBigNumber(),
+        maxDeviationFloor: maxDeviationFloor.toBigNumber(),
+        impactDataDecimals: impactDataDecimals,
+        adjustmentPrecision: adjustmentPrecision.toBigNumber(),
+      }],
+      GAS.SET_IMPACT_DATA,
+    );
+  }
+
   addKpiData(
     security: EvmAddress,
     date: number,
