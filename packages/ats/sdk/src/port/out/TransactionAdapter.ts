@@ -1729,4 +1729,17 @@ export default abstract class TransactionAdapter
     rateDecimals: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+
+  abstract setInterestRate(
+    security: EvmAddress,
+    maxRate: BigDecimal,
+    baseRate: BigDecimal,
+    minRate: BigDecimal,
+    startPeriod: BigDecimal,
+    startRate: BigDecimal,
+    missedPenalty: BigDecimal,
+    reportPeriod: BigDecimal,
+    rateDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }

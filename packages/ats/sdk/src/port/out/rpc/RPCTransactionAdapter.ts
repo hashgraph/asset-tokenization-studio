@@ -93,6 +93,7 @@ import {
   TransferAndLockFacet__factory,
   TREXFactoryAts__factory,
   Kpis__factory,
+  KpiLinkedRate__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -2597,6 +2598,38 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "setRate",
       [rate.toBigNumber(), rateDecimals],
       GAS.SET_RATE,
+    );
+  }
+
+  setInterestRate(
+    security: EvmAddress,
+    maxRate: BigDecimal,
+    baseRate: BigDecimal,
+    minRate: BigDecimal,
+    startPeriod: BigDecimal,
+    startRate: BigDecimal,
+    missedPenalty: BigDecimal,
+    reportPeriod: BigDecimal,
+    rateDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting Interest Rate for security ${security.toString()}`,
+    );
+    return this.executeTransaction(
+      KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setInterestRate",
+      [{
+        maxRate: maxRate.toBigNumber(),
+        baseRate: baseRate.toBigNumber(),
+        minRate: minRate.toBigNumber(),
+        startPeriod: startPeriod.toBigNumber(),
+        startRate: startRate.toBigNumber(),
+        missedPenalty: missedPenalty.toBigNumber(),
+        reportPeriod: reportPeriod.toBigNumber(),
+        rateDecimals: rateDecimals,
+      }],
+      GAS.SET_INTEREST_RATE,
     );
   }
 
