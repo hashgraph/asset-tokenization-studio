@@ -10,6 +10,7 @@ import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
 import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
 import { CreateBondFixedRateCommand } from "@command/bond/createfixedrate/CreateBondFixedRateCommand";
 import { CreateBondKpiLinkedRateCommand } from "@command/bond/createkpilinkedrate/CreateBondKpiLinkedRateCommand";
+import { AddKpiDataCommand } from "@command/kpis/addKpiData/AddKpiDataCommand";
 import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
 import { FullRedeemAtMaturityCommand } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand";
 import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
@@ -67,6 +68,7 @@ import RemoveProceedRecipientRequest from "../request/bond/RemoveProceedRecipien
 import SetCouponRequest from "../request/bond/SetCouponRequest";
 import UpdateMaturityDateRequest from "../request/bond/UpdateMaturityDateRequest";
 import UpdateProceedRecipientDataRequest from "../request/bond/UpdateProceedRecipientDataRequest";
+import { AddKpiDataRequest } from "../request/kpis/AddKpiDataRequest";
 import BondDetailsViewModel from "../response/BondDetailsViewModel";
 import CouponAmountForViewModel from "../response/CouponAmountForViewModel";
 import CouponForViewModel from "../response/CouponForViewModel";
@@ -95,6 +97,7 @@ interface IBondInPort {
   getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
   getCouponFromOrderedListAt(request: GetCouponFromOrderedListAtRequest): Promise<number>;
   createTrexSuite(request: CreateTrexSuiteBondRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
+  addKpiData(request: AddKpiDataRequest): Promise<{ transactionId: string }>;
 
   addProceedRecipient(request: AddProceedRecipientRequest): Promise<{ payload: boolean; transactionId: string }>;
   removeProceedRecipient(request: RemoveProceedRecipientRequest): Promise<{ payload: boolean; transactionId: string }>;
@@ -678,6 +681,16 @@ class BondInPort implements IBondInPort {
   async isProceedRecipient(request: IsProceedRecipientRequest): Promise<{ payload: boolean }> {
     ValidatedRequest.handleValidation(IsProceedRecipientRequest.name, request);
     return await this.queryBus.execute(new IsProceedRecipientQuery(request.securityId, request.proceedRecipientId));
+  }
+
+  @LogError
+  async addKpiData(request: AddKpiDataRequest): Promise<{ transactionId: string }> {
+    ValidatedRequest.handleValidation(AddKpiDataRequest.name, request);
+
+    const response = await this.commandBus.execute(
+      new AddKpiDataCommand(request.securityId, request.date, request.value, request.project.toString()),
+    );
+    return { transactionId: response.transactionId };
   }
 }
 

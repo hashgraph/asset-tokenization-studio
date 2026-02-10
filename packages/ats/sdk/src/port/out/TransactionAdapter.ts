@@ -117,6 +117,14 @@ createBondFixedRate(
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
+  addKpiData(
+    security: EvmAddress,
+    date: number,
+    value: string,
+    project: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
   controllerTransfer(
     security: EvmAddress,
     sourceId: EvmAddress,
@@ -866,6 +874,14 @@ export default abstract class TransactionAdapter
     IFixedRate
 {abstract triggerPendingScheduledSnapshots(
     security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract addKpiData(
+    security: EvmAddress,
+    date: number,
+    value: string,
+    project: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 

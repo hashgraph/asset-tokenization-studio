@@ -207,9 +207,10 @@ import GetRateRequest from "@port/in/request/interestRates/GetRateRequest";
 import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRateRequest";
 import ScheduledCouponListingCountRequest from "@port/in/request/scheduledTasks/ScheduledCouponListingCountRequest";
 import CreateBondKpiLinkedRateRequest from "./bond/CreateBondKpiLinkedRateRequest";
-import GetLatestKpiDataRequest from "@port/in/request/kpis/GetLatestKpiDataRequest";
-import GetMinDateRequest from "@port/in/request/kpis/GetMinDateRequest";
-import IsCheckPointDateRequest from "@port/in/request/kpis/IsCheckPointDateRequest";
+import GetLatestKpiDataRequest from "./kpis/GetLatestKpiDataRequest";
+import GetMinDateRequest from "./kpis/GetMinDateRequest";
+import IsCheckPointDateRequest from "./kpis/IsCheckPointDateRequest";
+import { AddKpiDataRequest } from "./kpis/AddKpiDataRequest";
 import GetImpactDataRequest from "./kpiLinkedRate/GetImpactDataRequest";
 
 export {
@@ -422,5 +423,6 @@ export {
   GetLatestKpiDataRequest,
   GetMinDateRequest,
   IsCheckPointDateRequest,
+  AddKpiDataRequest,
   GetImpactDataRequest,
 };

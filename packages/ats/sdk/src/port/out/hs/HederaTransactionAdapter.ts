@@ -51,6 +51,7 @@ import {
   ProceedRecipientsFacet__factory,
   ERC1410IssuerFacet__factory,
   FixedRate__factory,
+  Kpis__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { _PARTITION_ID_1, EVM_ZERO_ADDRESS, GAS } from "@core/Constants";
 import TransactionAdapter from "../TransactionAdapter";
@@ -657,7 +658,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
             bondData: securityTokenToCreate,
             factoryRegulationData: factoryRegulationData,
             interestRate: interestRate,
-            impactData: impactData
+            impactData: impactData,
+            kpiOracle: EVM_ZERO_ADDRESS
         };
 
       LogService.logTrace(
@@ -3190,6 +3192,25 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       securityId!,
       GAS.SET_RATE,
       [rate.toBigNumber(), rateDecimals],
+    );
+  }
+
+  addKpiData(
+    security: EvmAddress,
+    date: number,
+    value: string,
+    project: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding KPI data for security ${security.toString()}, date: ${date}, value: ${value}, project: ${project.toString()}`,
+    );
+    return this.executeWithArgs(
+      new Contract(security.toString(), Kpis__factory.abi),
+      "addKpiData",
+      securityId!,
+      GAS.ADD_KPI_DATA,
+      [date, value, project.toString()],
     );
   }
 

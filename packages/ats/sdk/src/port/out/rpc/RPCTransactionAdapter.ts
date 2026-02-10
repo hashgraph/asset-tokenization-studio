@@ -92,6 +92,7 @@ import {
   SsiManagementFacet__factory,
   TransferAndLockFacet__factory,
   TREXFactoryAts__factory,
+  Kpis__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -2596,6 +2597,24 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "setRate",
       [rate.toBigNumber(), rateDecimals],
       GAS.SET_RATE,
+    );
+  }
+
+  addKpiData(
+    security: EvmAddress,
+    date: number,
+    value: string,
+    project: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding KPI data for security ${security.toString()}, date: ${date}, value: ${value}, project: ${project.toString()}`,
+    );
+    return this.executeTransaction(
+      Kpis__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "addKpiData",
+      [date, value, project.toString()],
+      GAS.ADD_KPI_DATA,
     );
   }
 }
