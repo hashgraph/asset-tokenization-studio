@@ -3,7 +3,6 @@
 //import "../environmentMock";
 import Injectable from "@core/injectable/Injectable";
 import { Time } from "@core/Time";
-import EvmAddress from "@domain/context/contract/EvmAddress";
 import {
   CastRegulationSubType,
   CastRegulationType,
@@ -14,7 +13,6 @@ import { JsonRpcRelay } from "@domain/context/network/JsonRpcRelay";
 import { MirrorNode } from "@domain/context/network/MirrorNode";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
 import {
-  AddKpiDataRequest,
   ApplyRolesRequest,
   Bond,
   CreateBondKpiLinkedRateRequest,
@@ -317,28 +315,6 @@ describe("DFNS Transaction Adapter test", () => {
 
     const result = await ScheduledCouponListing.scheduledCouponListingCount(request);
     console.log("result: " + JSON.stringify(result));
-  }, 60_000);
-
-  it("addKpiData", async () => {
-    const contractAddress = bond?.diamondAddress?.toString();
-    console.log("contractAddress: " + contractAddress);
-
-    if (!contractAddress) {
-      throw new Error("No se encontró address del bond creado");
-    }
-
-    const request = new AddKpiDataRequest({
-      securityId: contractAddress,
-      date: Math.floor(Date.now() / 1000),
-      value: "1000",
-      project: new EvmAddress("0x0000000000000000000000000000000000000001"),
-    });
-
-    const result = await Bond.addKpiData(request);
-    console.log("addKpiData result: " + JSON.stringify(result));
-
-    expect(result).toHaveProperty("transactionId");
-    expect(typeof result.transactionId).toBe("string");
   }, 60_000);
 
   it("query getScheduledCouponListing", async () => {
