@@ -1,0 +1,240 @@
+name: ATS Deployment Test
+
+on:
+  pull_request:
+    paths:
+      - "packages/ats/contracts/**"
+      - ".github/workflows/ats.deployment-test.yml"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ==========================================================================
+  # Job 1: Deploy ATS system to a persistent Hardhat node
+  # ==========================================================================
+  # Runs the real CLI deployment pipeline (npx tsx scripts/cli/deploySystemWithNewBlr.ts)
+  # against a Hardhat JSON-RPC node on port 8545.
+  #
+  # Env var flow:
+  #   NETWORK=local -> requireNetworkSigner() -> createNetworkSigner("local")
+  #     -> getNetworkConfig("local") returns { jsonRpcUrl: "http://127.0.0.1:8545" }
+  #     -> getPrivateKey("local", 0) reads LOCAL_PRIVATE_KEY_0
+  #     -> new Wallet(privateKey, new JsonRpcProvider(jsonRpcUrl))
+  # ==========================================================================
+  hardhat-deployment:
+    name: Deploy to Hardhat Network
+    runs-on: token-studio-linux-large
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: "--max-old-space-size=32768"
+      CONTRACT_SIZER_RUN_ON_COMPILE: "false"
+      REPORT_GAS: "false"
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build contracts
+        run: npm run ats:contracts:build
+
+      - name: Start Hardhat node
+        working-directory: packages/ats/contracts
+        run: |
+          npx hardhat node &
+          echo "Hardhat node started in background (PID: $!)"
+
+      - name: Wait for Hardhat node
+        run: |
+          echo "Waiting for Hardhat JSON-RPC on port 8545..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8545 -X POST \
+              -H "Content-Type: application/json" \
+              -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+              > /dev/null 2>&1; then
+              echo "Hardhat node is ready"
+              exit 0
+            fi
+            echo "  Attempt $i/30 - waiting..."
+            sleep 1
+          done
+          echo "::error::Hardhat node failed to start within 30 seconds"
+          exit 1
+
+      - name: Deploy ATS system
+        working-directory: packages/ats/contracts
+        env:
+          # NETWORK=local -> Configuration.endpoints.local.jsonRpc defaults to http://127.0.0.1:8545
+          NETWORK: local
+          # Hardhat Account #0 well-known private key (10,000 ETH pre-funded)
+          LOCAL_PRIVATE_KEY_0: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        run: npx tsx scripts/cli/deploySystemWithNewBlr.ts
+
+      - name: Verify deployment output
+        if: success()
+        working-directory: packages/ats/contracts
+        run: |
+          echo "Checking deployment output files..."
+          if ls deployments/local/*.json 1> /dev/null 2>&1; then
+            echo "Deployment output files found:"
+            ls -la deployments/local/
+          else
+            echo "::warning::No deployment output files found (non-fatal)"
+          fi
+
+  # ==========================================================================
+  # Job 2: Deploy ATS system to a Hedera Local Node
+  # ==========================================================================
+  # Runs the same CLI deployment pipeline against a real Hedera network running
+  # locally via Docker (consensus node + mirror node + JSON-RPC relay).
+  #
+  # This catches Hedera-specific issues that Hardhat misses:
+  #   - Gas estimation with real HBAR-based gas
+  #   - Transaction confirmation delays
+  #   - Hedera EVM differences
+  #   - Contract ID resolution (0.0.XXXX)
+  #
+  # Gracefully skips if Docker is not available on the runner.
+  #
+  # Env var flow:
+  #   NETWORK=hedera-local -> requireNetworkSigner() -> createNetworkSigner("hedera-local")
+  #     -> getNetworkConfig("hedera-local") returns { jsonRpcUrl: "http://127.0.0.1:7546" }
+  #     -> getPrivateKey("hedera-local", 0) reads HEDERA_LOCAL_PRIVATE_KEY_0
+  #     -> new Wallet(privateKey, new JsonRpcProvider(jsonRpcUrl))
+  # ==========================================================================
+  hedera-deployment:
+    name: Deploy to Hedera Local Node
+    runs-on: token-studio-linux-large
+    timeout-minutes: 30
+    env:
+      NODE_OPTIONS: "--max-old-space-size=32768"
+      CONTRACT_SIZER_RUN_ON_COMPILE: "false"
+      REPORT_GAS: "false"
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+
+      - name: Check Docker availability
+        id: docker-check
+        run: |
+          if docker info > /dev/null 2>&1; then
+            echo "available=true" >> $GITHUB_OUTPUT
+            echo "Docker is available"
+            docker --version
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+            echo "::warning::Docker not available - skipping Hedera deployment test"
+          fi
+
+      - name: Install dependencies
+        if: steps.docker-check.outputs.available == 'true'
+        run: npm ci
+
+      - name: Build contracts
+        if: steps.docker-check.outputs.available == 'true'
+        run: npm run ats:contracts:build
+
+      - name: Start Hedera Local Node
+        id: hedera-start
+        if: steps.docker-check.outputs.available == 'true'
+        run: |
+          echo "Starting Hedera Local Node..."
+          npx @hashgraph/hedera-local start -d 2>&1 | tee /tmp/hedera-startup.txt
+
+          echo "---"
+          echo "Extracting Alias ECDSA private key from startup output..."
+
+          # Extract the first Alias ECDSA private key (64 hex chars after 0x)
+          # The startup output contains account tables with private keys
+          # Look specifically in the Alias ECDSA section for EVM-compatible keys
+          ECDSA_KEY=$(sed -n '/Alias ECDSA/,/^$/p' /tmp/hedera-startup.txt | grep -oE '0x[a-fA-F0-9]{64}' | head -1)
+
+          # Fallback: search entire output for any 0x + 64 hex key
+          if [ -z "$ECDSA_KEY" ]; then
+            echo "Alias ECDSA section not found, searching full output..."
+            ECDSA_KEY=$(grep -oE '0x[a-fA-F0-9]{64}' /tmp/hedera-startup.txt | head -1)
+          fi
+
+          if [ -z "$ECDSA_KEY" ]; then
+            echo "::error::Failed to extract ECDSA private key from Hedera Local Node startup output"
+            echo "--- Startup output ---"
+            cat /tmp/hedera-startup.txt
+            echo "--- End output ---"
+            exit 1
+          fi
+
+          echo "ECDSA private key extracted successfully"
+          echo "HEDERA_LOCAL_PRIVATE_KEY_0=$ECDSA_KEY" >> $GITHUB_ENV
+
+      - name: Wait for JSON-RPC relay
+        if: steps.docker-check.outputs.available == 'true' && steps.hedera-start.outcome == 'success'
+        run: |
+          echo "Waiting for Hedera JSON-RPC relay on port 7546..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:7546 -X POST \
+              -H "Content-Type: application/json" \
+              -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+              > /dev/null 2>&1; then
+              echo "Hedera JSON-RPC relay is ready"
+              exit 0
+            fi
+            echo "  Attempt $i/60 - waiting..."
+            sleep 5
+          done
+          echo "::error::Hedera JSON-RPC relay failed to start within 5 minutes"
+          exit 1
+
+      - name: Deploy ATS system to Hedera
+        if: steps.docker-check.outputs.available == 'true' && steps.hedera-start.outcome == 'success'
+        working-directory: packages/ats/contracts
+        env:
+          # NETWORK=hedera-local -> Configuration.endpoints["hedera-local"].jsonRpc defaults to http://127.0.0.1:7546
+          NETWORK: hedera-local
+          # HEDERA_LOCAL_PRIVATE_KEY_0 is set dynamically from the startup output
+        run: npx tsx scripts/cli/deploySystemWithNewBlr.ts
+
+      - name: Verify deployment output
+        if: success() && steps.docker-check.outputs.available == 'true'
+        working-directory: packages/ats/contracts
+        run: |
+          echo "Checking deployment output files..."
+          if ls deployments/hedera-local/*.json 1> /dev/null 2>&1; then
+            echo "Deployment output files found:"
+            ls -la deployments/hedera-local/
+          else
+            echo "::warning::No deployment output files found (non-fatal)"
+          fi
+
+      - name: Teardown Hedera Local Node
+        if: always() && steps.docker-check.outputs.available == 'true'
+        run: |
+          echo "Stopping Hedera Local Node..."
+          npx @hashgraph/hedera-local stop || true
+          echo "Hedera Local Node stopped"
