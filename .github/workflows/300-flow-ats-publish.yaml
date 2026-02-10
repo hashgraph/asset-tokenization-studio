@@ -1,4 +1,4 @@
-name: ATS Publish
+name: "300: [FLOW] ATS Publish"
 
 on:
   # Manual trigger with dry-run option
@@ -79,7 +79,7 @@ jobs:
             ls -lh ${PKG_NAME}
           echo "::endgroup::"
 
-          echo "artifact-name=${PKG_NAME}" >> $GITHUB_OUTPUT
+          echo "artifact-name=${PKG_NAME}" >> "${GITHUB_OUTPUT}"
         working-directory: packages/ats/contracts
 
       - name: Upload NPM Package Artifact
@@ -146,7 +146,7 @@ jobs:
             ls -lh ${PKG_NAME}
           echo "::endgroup::"
 
-          echo "artifact-name=${PKG_NAME}" >> $GITHUB_OUTPUT
+          echo "artifact-name=${PKG_NAME}" >> "${GITHUB_OUTPUT}"
         working-directory: packages/ats/sdk
 
       - name: Upload NPM Package Artifact

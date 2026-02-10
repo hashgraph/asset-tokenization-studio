@@ -29,15 +29,15 @@ These documents explain how our automated workflows function, making it easier f
 
 ### Testing Workflows
 
-- **`.github/workflows/test-ats.yml`**: Runs ATS tests (contracts, SDK, web app)
+- **`.github/workflows/100-flow-ats-test.yaml`**: Runs ATS tests (contracts, SDK, web app)
   - Triggered on: Changes to `packages/ats/**` or `apps/ats/**`
 
-- **`.github/workflows/test-mp.yml`**: Runs Mass Payout tests
+- **`.github/workflows/100-flow-mp-test.yaml`**: Runs Mass Payout tests
   - Triggered on: Changes to `packages/mass-payout/**` or `apps/mass-payout/**`
 
 ### Release Workflows
 
-- **`.github/workflows/publish.yml`**: Publishes packages to npm
+- **`.github/workflows/300-flow-ats-publish.yaml`** / **`.github/workflows/300-flow-mp-publish.yaml`**: Publishes packages to npm
   - Triggered by: Release tags (`v*-ats`, `v*-mp`)
 
 - **ATS Release** / **Mass Payout Release**: Semi-automated release processes with manual version bumping (see [Release Process](#release-process) below)
@@ -123,15 +123,16 @@ git push
 
 ## Workflows Reference
 
-| Workflow                | Trigger                | Purpose                   |
-| ----------------------- | ---------------------- | ------------------------- |
-| **ATS Tests**           | PR to main (ATS files) | Run ATS package tests     |
-| **Mass Payout Tests**   | PR to main (MP files)  | Run Mass Payout tests     |
-| **Changeset Check**     | PR to develop          | Validate changeset exists |
-| **ATS Release**         | Manual                 | Create ATS release tag    |
-| **Mass Payout Release** | Manual                 | Create MP release tag     |
-| **ATS Publish**         | Tag push `v*-ats`      | Publish to npm            |
-| **Mass Payout Publish** | Tag push `v*-mp`       | Publish to npm            |
+| Workflow            | File                                    | Trigger                | Purpose                   |
+| ------------------- | --------------------------------------- | ---------------------- | ------------------------- |
+| **ATS Tests**       | `100-flow-ats-test.yaml`                | PR to main (ATS files) | Run ATS package tests     |
+| **MP Test**         | `100-flow-mp-test.yaml`                 | PR to main (MP files)  | Run Mass Payout tests     |
+| **Changeset Check** | `000-flow-changeset-check.yaml`         | PR to develop          | Validate changeset exists |
+| **PR Formatting**   | `000-flow-pull-request-formatting.yaml` | PR events              | Title and assignee checks |
+| **ATS Release**     | `000-user-ats-release.yaml`             | Manual                 | Create ATS release tag    |
+| **MP Release**      | `000-user-mp-release.yaml`              | Manual                 | Create MP release tag     |
+| **ATS Publish**     | `300-flow-ats-publish.yaml`             | Tag push `v*-ats`      | Publish to npm            |
+| **MP Publish**      | `300-flow-mp-publish.yaml`              | Tag push `v*-mp`       | Publish to npm            |
 
 ## Troubleshooting
 
