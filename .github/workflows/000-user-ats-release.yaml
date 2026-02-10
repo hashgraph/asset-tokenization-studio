@@ -1,4 +1,4 @@
-name: ATS Release
+name: "000: [USER] ATS Release"
 
 on:
   # Manual trigger with preview/release option
@@ -119,9 +119,9 @@ jobs:
           skipIfReleaseExists: true
 
       - name: Release Summary
-        if: always()
+        if: ${{ always() }}
         run: |
-          if [ "${{ inputs.release-type }}" = "preview" ]; then
+          if [[ "${{ inputs.release-type }}" == "preview" ]]; then
             echo "## 🔍 ATS Release Preview Completed" >> "${GITHUB_STEP_SUMMARY}"
             echo "Preview mode was selected. No actual release was created." >> "${GITHUB_STEP_SUMMARY}"
             echo "" >> "${GITHUB_STEP_SUMMARY}"
@@ -130,7 +130,7 @@ jobs:
             echo "2. Review and commit changes with GPG signature: \`git commit -S -m 'chore: release ATS packages'\`" >> "${GITHUB_STEP_SUMMARY}"
             echo "3. Push to remote: \`git push\`" >> "${GITHUB_STEP_SUMMARY}"
             echo "4. Run this workflow again with 'release' option" >> "${GITHUB_STEP_SUMMARY}"
-          elif [ "${{ job.status }}" = "success" ]; then
+          elif [[ "${{ job.status }}" == "success" ]]; then
             ATS_VERSION="${{ steps.validate.outputs.ats-version }}"
             TAG_NAME="${{ steps.create-release-tag.outputs.tag-name }}"
             echo "## ✅ ATS Release ${TAG_NAME} Completed Successfully" >> "${GITHUB_STEP_SUMMARY}"
@@ -141,7 +141,7 @@ jobs:
             echo "| GitHub Release | ✅ Created |" >> "${GITHUB_STEP_SUMMARY}"
             echo "" >> "${GITHUB_STEP_SUMMARY}"
             echo "**Next Steps:**" >> "${GITHUB_STEP_SUMMARY}"
-            echo "- NPM publishing will be triggered automatically via ats.publish.yml" >> "${GITHUB_STEP_SUMMARY}"
+            echo "- NPM publishing will be triggered automatically via 300-flow-ats-publish.yaml" >> "${GITHUB_STEP_SUMMARY}"
           else
             echo "## ❌ ATS Release Failed" >> "${GITHUB_STEP_SUMMARY}"
             echo "Check the logs above for details on what went wrong." >> "${GITHUB_STEP_SUMMARY}"

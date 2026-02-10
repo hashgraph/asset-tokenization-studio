@@ -1,4 +1,4 @@
-name: Tests Mass Payout
+name: "100: [FLOW] MP Test"
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
       - "packages/mass-payout/**"
       - "apps/mass-payout/**"
       - "package.json"
-      - ".github/workflows/*mp*.yml"
       - ".github/workflows/*mp*.yaml"
   workflow_dispatch:
 
