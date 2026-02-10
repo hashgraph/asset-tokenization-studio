@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 export function dateToUnixTimestamp(dateString: string): number {
   const date = new Date(dateString);
 

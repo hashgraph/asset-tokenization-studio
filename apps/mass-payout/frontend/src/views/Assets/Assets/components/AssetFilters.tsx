@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2024 IOB - Todos los derechos reservados.
- * Este archivo es parte del software propietario de IOB.
- * Queda prohibida su distribución, copia o uso no autorizado.
- */
+// SPDX-License-Identifier: Apache-2.0
 
 import { Box, Stack } from "@chakra-ui/react";
 import { SearchInputController, SelectController } from "io-bricks-ui";

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { TFunction } from "i18next";
 import {
   DistributionFilterType,

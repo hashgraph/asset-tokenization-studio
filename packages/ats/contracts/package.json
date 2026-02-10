@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "repository": "https://github.com/hashgraph/asset-tokenization-studio",
   "type": "commonjs",
   "main": "./build/typechain-types/index.js",
@@ -46,7 +46,7 @@
   "author": "",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "node -e \"const fs=require('fs'); fs.rmSync('build',{recursive:true,force:true})\" && npm run compile && npx tsc -p tsconfig.build.json && npx tsc-alias -p tsconfig.build.json",
+    "build": "node -e \"const fs=require('fs'); fs.rmSync('build',{recursive:true,force:true})\" && npm run compile && NODE_OPTIONS='--max-old-space-size=8192' npx tsc -p tsconfig.build.json && npx tsc-alias -p tsconfig.build.json",
     "clean": "npm run clean:build",
     "clean:build": "node -e \"const fs=require('fs'); ['dist','build','artifacts','cache','typechain-types','coverage','.nyc_output'].forEach(d=>fs.rmSync(d,{recursive:true,force:true}))\"",
     "clean:deps": "node -e \"const fs=require('fs'); fs.rmSync('node_modules',{recursive:true,force:true})\"",

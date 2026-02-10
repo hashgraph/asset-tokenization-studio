@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { DefinitionList } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { SecurityViewModel } from "@hashgraph/asset-tokenization-sdk";
