@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
 import { CURRENCIES, DeepPartial, BOND_FIXED_RATE_CONFIG_ID } from "../../../scripts";
 import {

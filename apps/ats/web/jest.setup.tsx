@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 process.env.VITE_API_URL = "http://localhost:8080/api/v1";
 
 // Mock Terminal3 modules to avoid LRU cache issues

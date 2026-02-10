@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Button, HStack } from "@chakra-ui/react";
 import { OperationContractType } from "../views/DigitalSecurityDetails/Components/Tabs/Operations";
 

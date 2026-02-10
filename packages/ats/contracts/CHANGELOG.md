@@ -1,5 +1,11 @@
 # @hashgraph/asset-tokenization-contracts
 
+## 4.1.1
+
+### Patch Changes
+
+- Fix ATS Publish github action because Package ATS Contracts job has an out of memory error and translate to English some Spanish text in compile.ts and selector.ts
+
 ## 4.1.0
 
 ### Minor Changes

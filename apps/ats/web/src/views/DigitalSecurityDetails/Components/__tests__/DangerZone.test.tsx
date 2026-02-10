@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { render } from "../../../../test-utils";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";
@@ -21,7 +23,6 @@ jest.mock("../../../../hooks/queries/usePauseSecurity", () => ({
   })),
 }));
 
-// Mock para useGetIsPaused
 jest.mock("../../../../hooks/queries/useGetSecurityDetails", () => ({
   useGetIsPaused: jest.fn(() => ({
     data: false,

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Control } from "react-hook-form";
 import { NavigateFunction } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";

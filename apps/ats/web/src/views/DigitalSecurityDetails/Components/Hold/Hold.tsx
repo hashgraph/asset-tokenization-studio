@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Stack } from "@chakra-ui/react";
 import { HoldList } from "./HoldList";
 import { HoldCreate } from "./HoldCreate";

@@ -551,13 +551,11 @@ describe("Asset Queries", () => {
         wrapper: queryWrapper,
       });
 
-      // Primera mutación
       result.current.mutate(assetIds[0]);
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      // Segunda mutación
       result.current.mutate(assetIds[1]);
       await waitFor(() => {
         expect(assetService.pauseAsset).toHaveBeenCalledWith(assetIds[1]);
@@ -581,13 +579,11 @@ describe("Asset Queries", () => {
         wrapper: queryWrapper,
       });
 
-      // Pausar asset
       pauseResult.current.mutate(assetId);
       await waitFor(() => {
         expect(pauseResult.current.isSuccess).toBe(true);
       });
 
-      // Despausar asset
       unpauseResult.current.mutate(assetId);
       await waitFor(() => {
         expect(unpauseResult.current.isSuccess).toBe(true);
