@@ -1455,4 +1455,9 @@ export class RPCQueryAdapter {
     const result = await this.connect(ScheduledCouponListingFacet__factory, address.toString()).scheduledCouponListingCount();
     return result.toNumber();
   }
+
+  async getScheduledCouponListing(address: EvmAddress, pageIndex: number, pageLength: number): Promise<any> {
+    LogService.logTrace(`Getting scheduled coupon listing for security: ${address.toString()}`);
+    return await this.connect(ScheduledCouponListingFacet__factory, address.toString()).getScheduledCouponListing(pageIndex, pageLength);
+  }
 }

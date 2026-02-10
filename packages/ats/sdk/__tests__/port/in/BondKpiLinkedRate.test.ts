@@ -15,6 +15,7 @@ import {
   CreateBondKpiLinkedRateRequest,
   GetLatestKpiDataRequest,
   GetMinDateRequest,
+  GetScheduledCouponListingRequest,
   InitializationRequest,
   IsCheckPointDateRequest,
   AddKpiDataRequest,
@@ -259,7 +260,7 @@ describe("DFNS Transaction Adapter test", () => {
     console.log("result: " + JSON.stringify(result));
   }, 60_000);
 
-  it("query getScheduledCouponListingCount", async () => {
+  it("query scheduledCouponListingCount", async () => {
     const contractAddress = bond?.diamondAddress?.toString();
     console.log("contractAddress: " + contractAddress);
 
@@ -295,5 +296,23 @@ describe("DFNS Transaction Adapter test", () => {
 
     expect(result).toHaveProperty("transactionId");
     expect(typeof result.transactionId).toBe("string");
+  }, 60_000);
+
+  it("query getScheduledCouponListing", async () => {
+    const contractAddress = bond?.diamondAddress?.toString();
+    console.log("contractAddress: " + contractAddress);
+
+    if (!contractAddress) {
+      throw new Error("No se encontró address del bond creado");
+    }
+
+    const request = new GetScheduledCouponListingRequest({
+      securityId: contractAddress,
+      pageIndex: 0,
+      pageLength: 10,
+    });
+
+    const result = await ScheduledCouponListing.getScheduledCouponListing(request);
+    console.log("result: " + JSON.stringify(result));
   }, 60_000);
 });
