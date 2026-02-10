@@ -1,4 +1,4 @@
-name: Changeset Check
+name: "000: [FLOW] Changeset Check"
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
       - opened
       - synchronize
       - reopened
-      - labeled
+      - labeled # checks for bypass labels (no-changeset, docs-only, hotfix, chore)
       - unlabeled
 
 permissions:

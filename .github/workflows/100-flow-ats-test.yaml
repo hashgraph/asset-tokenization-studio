@@ -1,4 +1,4 @@
-name: Tests ATS
+name: "100: [FLOW] ATS Tests"
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
       - "packages/ats/**"
       - "apps/ats/**"
       - "package.json"
-      - ".github/workflows/*ats*.yml"
       - ".github/workflows/*ats*.yaml"
   workflow_dispatch:
 
