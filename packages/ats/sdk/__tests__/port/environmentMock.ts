@@ -2108,6 +2108,15 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     } as TransactionResponse;
   });
 
+  singletonInstance.addKpiData = jest.fn(
+    async (security: EvmAddress, date: number, value: string, project: EvmAddress) => {
+      return {
+        status: "success",
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
   };
@@ -2179,6 +2188,15 @@ jest.mock("@port/out/hs/HederaTransactionAdapter", () => {
   singletonInstance.setupDisconnectEventHandler = jest.fn(async () => {
     return true;
   });
+
+  singletonInstance.addKpiData = jest.fn(
+    async (security: EvmAddress, date: number, value: string, project: EvmAddress) => {
+      return {
+        status: "success",
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
 
   return {
     HederaTransactionAdapter: jest.fn(() => singletonInstance),
