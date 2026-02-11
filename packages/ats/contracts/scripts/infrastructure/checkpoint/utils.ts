@@ -256,7 +256,7 @@ export function getTotalSteps(workflowType: WorkflowType = "newBlr"): number {
  * const status = formatCheckpointStatus(checkpoint)
  * console.log(status)
  * // Output:
- * // Checkpoint: hedera-testnet-1731085200000
+ * // Checkpoint: hedera-testnet-2025-02-04T10-15-30-456
  * // Status: in-progress
  * // Step: 3/7 - Register Facets
  * // Started: 2025-11-08T10:30:00Z

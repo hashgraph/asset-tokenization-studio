@@ -156,7 +156,7 @@ export class CheckpointManager {
    *
    * @example
    * ```typescript
-   * const checkpoint = await manager.loadCheckpoint('hedera-testnet-1731085200000')
+   * const checkpoint = await manager.loadCheckpoint('hedera-testnet-2025-02-04T10-15-30-456')
    * if (checkpoint) {
    *   console.log(`Loaded checkpoint from ${checkpoint.startTime}`)
    * }
