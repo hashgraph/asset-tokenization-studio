@@ -290,7 +290,7 @@ export interface ResumeOptions {
    * Explicit checkpoint ID to resume from.
    * Overrides auto-detection.
    *
-   * @example 'hedera-testnet-1731085200000'
+   * @example 'hedera-testnet-2025-02-04T10-15-30-456'
    */
   resumeFrom?: string;
 

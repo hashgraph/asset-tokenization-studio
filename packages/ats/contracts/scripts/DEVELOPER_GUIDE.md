@@ -1083,7 +1083,7 @@ Upgrade results are saved to `deployments/{network}/{network}-upgrade-tup-{times
 npm run checkpoint:list -- hedera-testnet
 
 # Show full details of the failed checkpoint
-npm run checkpoint:show -- hedera-testnet-1738675200000
+npm run checkpoint:show -- hedera-testnet-2025-02-04T10-00-00-000
 ```
 
 **What you'll see:**
@@ -1134,11 +1134,11 @@ npm run deploy:newBlr
 **What happens during resume:**
 
 ```
-[INFO] Found resumable checkpoint: hedera-testnet-1738675200000
+[INFO] Found resumable checkpoint: hedera-testnet-2025-02-04T10-00-00-000
 
 ⚠️  FOUND FAILED DEPLOYMENT
 ═══════════════════════════════════════════════════
-Checkpoint: hedera-testnet-1738675200000
+Checkpoint: hedera-testnet-2025-02-04T10-00-00-000
 Started:    2025-02-04T10:00:00Z
 Failed at:  Step 3 (Facets)
 Error:      Insufficient gas
@@ -1150,12 +1150,14 @@ Resume from this failed checkpoint? [Y/n]: Y
 [INFO] Clearing failure status from checkpoint.
 [INFO] Resuming from step 3...
 
-Step 3/8: Deploy Facets... ✅
-Step 4/8: Register Facets... ✅
-Step 5/8: Create Equity Config... ✅
-Step 6/8: Create Bond Config... ✅
-Step 7/8: Deploy Factory... ✅
-Step 8/8: Save Output... ✅
+Step 3/10: Deploy Facets... ✅
+Step 4/10: Register Facets... ✅
+Step 5/10: Create Equity Config... ✅
+Step 6/10: Create Bond Config... ✅
+Step 7/10: Create Bond Fixed Rate Config... ✅
+Step 8/10: Create Bond KPI Linked Rate Config... ✅
+Step 9/10: Create Bond SPT Rate Config... ✅
+Step 10/10: Deploy Factory... ✅
 
 [SUCCESS] Deployment completed!
 ```
@@ -1167,7 +1169,7 @@ Step 8/8: Save Output... ✅
 ls -la deployments/hedera-testnet/newBlr-*.json
 
 # View the output
-cat deployments/hedera-testnet/newBlr-1738675200000.json | jq
+cat deployments/hedera-testnet/newBlr-2025-02-04T10-00-00-000.json | jq
 ```
 
 ### Multiple Failed Attempts
@@ -1176,7 +1178,7 @@ If deployment keeps failing at the same step:
 
 ```bash
 # 1. Review the checkpoint details again
-npm run checkpoint:show -- hedera-testnet-1738675200000
+npm run checkpoint:show -- hedera-testnet-2025-02-04T10-00-00-000
 
 # 2. Check the error message carefully
 # Look for patterns: same error every time? Different errors?
@@ -1186,7 +1188,7 @@ cat .env | grep GAS_LIMIT
 cat .env | grep RPC_NODE
 
 # 4. If issue persists, start fresh
-npm run checkpoint:delete -- hedera-testnet-1738675200000
+npm run checkpoint:delete -- hedera-testnet-2025-02-04T10-00-00-000
 npm run deploy:newBlr
 ```
 
@@ -1199,8 +1201,8 @@ After successful deployment, clean up old failed attempts:
 npm run checkpoint:list -- hedera-testnet
 
 # Delete specific failed checkpoints
-npm run checkpoint:delete -- hedera-testnet-1738670000000
-npm run checkpoint:delete -- hedera-testnet-1738671000000
+npm run checkpoint:delete -- hedera-testnet-2025-02-04T09-30-00-000
+npm run checkpoint:delete -- hedera-testnet-2025-02-04T09-40-00-000
 
 # Or clean up completed checkpoints older than 7 days
 npm run checkpoint:cleanup -- hedera-testnet 7
