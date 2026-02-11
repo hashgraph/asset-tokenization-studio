@@ -42,7 +42,7 @@
     "commitlint": "commitlint --edit",
     "prepare": "husky",
     "changeset": "changeset",
-    "changeset:version": "changeset version && npm install --package-lock-only",
+    "changeset:version": "changeset version && npm install --package-lock-only && npm run format",
     "changeset:publish": "changeset publish",
     "changeset:status": "changeset status",
     "changeset:snapshot": "changeset version --snapshot",

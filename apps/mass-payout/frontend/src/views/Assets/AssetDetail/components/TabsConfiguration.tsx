@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { useMemo } from "react";
 import { Tabs } from "io-bricks-ui";
 import { Stack } from "@chakra-ui/react";

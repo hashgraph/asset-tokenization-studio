@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { VStack, HStack, Spacer } from "@chakra-ui/react";
 import { Breadcrumb, Tag, Text } from "io-bricks-ui";
 import { GobackButton } from "@/components/GobackButton";

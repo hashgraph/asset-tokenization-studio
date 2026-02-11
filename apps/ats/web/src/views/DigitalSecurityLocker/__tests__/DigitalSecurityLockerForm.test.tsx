@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { fireEvent } from "@testing-library/react";
 import { render, selectCalendar } from "../../../test-utils";
 import { waitFor } from "@testing-library/react";
