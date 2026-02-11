@@ -133,19 +133,19 @@ npm run deploy:newBlr
 deployments/
 ├── hedera-testnet/
 │   ├── .checkpoints/
-│   │   ├── hedera-testnet-1738675200000.json  ← Active checkpoint
-│   │   └── hedera-testnet-1738561800000.json  ← Old checkpoint
-│   └── newBlr-1738675200000.json  ← Final deployment output
+│   │   ├── hedera-testnet-2025-02-04T10-00-00-000.json  ← Active checkpoint
+│   │   └── hedera-testnet-2025-02-03T08-30-00-000.json  ← Old checkpoint
+│   └── newBlr-2025-02-04T10-00-00-000.json  ← Final deployment output
 └── local/
     └── .checkpoints/
-        └── local-1738675400000.json
+        └── local-2025-02-04T10-05-00-000.json
 ```
 
 **Key points:**
 
 - Checkpoints stored in `.checkpoints/` subdirectory per network
 - Filename format: `{network}-{timestamp}.json`
-- Timestamp ensures unique IDs (Unix milliseconds)
+- Timestamp ensures unique IDs (ISO format: YYYY-MM-DDTHH-MM-SS-sss)
 - Final deployment output saved in parent directory
 
 ---
@@ -160,16 +160,18 @@ deployments/
 $ npm run deploy:newBlr
 [INFO] Starting deployment to hedera-testnet...
 [INFO] No resumable checkpoints found. Starting fresh deployment.
-[INFO] Creating checkpoint: hedera-testnet-1738675200000
+[INFO] Creating checkpoint: hedera-testnet-2025-02-04T10-00-00-000
 
-Step 1/8: Deploy ProxyAdmin... ✅
-Step 2/8: Deploy BLR... ✅
-Step 3/8: Deploy Facets... ✅
-Step 4/8: Register Facets... ✅
-Step 5/8: Create Equity Config... ✅
-Step 6/8: Create Bond Config... ✅
-Step 7/8: Deploy Factory... ✅
-Step 8/8: Save Output... ✅
+Step 1/10: Deploy ProxyAdmin... ✅
+Step 2/10: Deploy BLR... ✅
+Step 3/10: Deploy Facets... ✅
+Step 4/10: Register Facets... ✅
+Step 5/10: Create Equity Config... ✅
+Step 6/10: Create Bond Config... ✅
+Step 7/10: Create Bond Fixed Rate Config... ✅
+Step 8/10: Create Bond KPI Linked Rate Config... ✅
+Step 9/10: Create Bond SPT Rate Config... ✅
+Step 10/10: Deploy Factory... ✅
 
 [SUCCESS] Deployment completed!
 [INFO] Checkpoint marked as completed.
@@ -192,9 +194,9 @@ Step 8/8: Save Output... ✅
 $ npm run deploy:newBlr
 [INFO] Starting deployment to hedera-testnet...
 
-Step 1/8: Deploy ProxyAdmin... ✅
-Step 2/8: Deploy BLR... ✅
-Step 3/8: Deploy Facets... ❌ FAILED
+Step 1/10: Deploy ProxyAdmin... ✅
+Step 2/10: Deploy BLR... ✅
+Step 3/10: Deploy Facets... ❌ FAILED
 [ERROR] Transaction failed: nonce too low
 
 [ERROR] Deployment failed at step 3: Facets
@@ -206,11 +208,11 @@ Step 3/8: Deploy Facets... ❌ FAILED
 
 ```bash
 $ npm run deploy:newBlr
-[INFO] Found resumable checkpoint: hedera-testnet-1738675200000
+[INFO] Found resumable checkpoint: hedera-testnet-2025-02-04T10-00-00-000
 
 ⚠️  FOUND FAILED DEPLOYMENT
 ═══════════════════════════════════════════════════
-Checkpoint: hedera-testnet-1738675200000
+Checkpoint: hedera-testnet-2025-02-04T10-00-00-000
 Started:    2025-02-04T10:00:00Z
 Failed at:  Step 3 (Facets)
 Error:      Transaction failed: nonce too low
@@ -222,12 +224,14 @@ Resume from this failed checkpoint? [Y/n]: Y
 [INFO] Clearing failure status from checkpoint.
 [INFO] Resuming from step 3...
 
-Step 3/8: Deploy Facets... ✅
-Step 4/8: Register Facets... ✅
-Step 5/8: Create Equity Config... ✅
-Step 6/8: Create Bond Config... ✅
-Step 7/8: Deploy Factory... ✅
-Step 8/8: Save Output... ✅
+Step 3/10: Deploy Facets... ✅
+Step 4/10: Register Facets... ✅
+Step 5/10: Create Equity Config... ✅
+Step 6/10: Create Bond Config... ✅
+Step 7/10: Create Bond Fixed Rate Config... ✅
+Step 8/10: Create Bond KPI Linked Rate Config... ✅
+Step 9/10: Create Bond SPT Rate Config... ✅
+Step 10/10: Deploy Factory... ✅
 
 [SUCCESS] Deployment completed!
 ```
@@ -250,9 +254,9 @@ Step 8/8: Save Output... ✅
 $ npm run deploy:newBlr
 [INFO] Starting deployment to hedera-testnet...
 
-Step 1/8: Deploy ProxyAdmin... ✅
-Step 2/8: Deploy BLR... ✅
-Step 3/8: Deploy Facets... (in progress)
+Step 1/10: Deploy ProxyAdmin... ✅
+Step 2/10: Deploy BLR... ✅
+Step 3/10: Deploy Facets... (in progress)
 ^C
 [WARN] Deployment interrupted by user.
 [INFO] Checkpoint saved at step 2. Safe to resume.
@@ -262,12 +266,12 @@ Step 3/8: Deploy Facets... (in progress)
 
 ```bash
 $ npm run deploy:newBlr
-[INFO] Found resumable checkpoint: hedera-testnet-1738675200000
+[INFO] Found resumable checkpoint: hedera-testnet-2025-02-04T10-00-00-000
 
 📋 INCOMPLETE DEPLOYMENT FOUND
 ═══════════════════════════════════════════════════
 
-[1] hedera-testnet-1738675200000
+[1] hedera-testnet-2025-02-04T10-00-00-000
     Status: ⏳ In Progress
     Step:   2 - Deploy BLR
     Started: 2025-02-04T10:00:00Z
@@ -280,7 +284,7 @@ $ npm run deploy:newBlr
 Select checkpoint to resume (default: 1): 1
 
 [INFO] Resuming from step 3...
-Step 3/8: Deploy Facets... ✅
+Step 3/10: Deploy Facets... ✅
 ...
 ```
 
@@ -309,19 +313,19 @@ $ npm run deploy:newBlr
 📋 MULTIPLE CHECKPOINTS FOUND
 ═══════════════════════════════════════════════════
 
-[1] hedera-testnet-1738680000000
+[1] hedera-testnet-2025-02-04T11-00-00-000
     Status: ❌ FAILED
     Step:   5 - Create Equity Config
     Error:  Insufficient gas
     Time:   2025-02-04T11:00:00Z
 
-[2] hedera-testnet-1738675200000
+[2] hedera-testnet-2025-02-04T10-00-00-000
     Status: ⏳ In Progress
     Step:   3 - Facets
     Started: 2025-02-04T10:00:00Z
     Updated: 2025-02-04T10:05:30Z
 
-[3] hedera-testnet-1738670000000
+[3] hedera-testnet-2025-02-04T09-30-00-000
     Status: ⏳ In Progress
     Step:   2 - Deploy BLR
     Started: 2025-02-04T09:30:00Z
@@ -346,7 +350,7 @@ Select checkpoint to resume (default: 1): 1
 **Best practice:** Review failure details before resuming:
 
 ```bash
-npm run checkpoint:show -- hedera-testnet-1738680000000
+npm run checkpoint:show -- hedera-testnet-2025-02-04T11-00-00-000
 ```
 
 ---
@@ -358,12 +362,12 @@ npm run checkpoint:show -- hedera-testnet-1738680000000
 ```bash
 # In CI/CD pipeline (non-TTY environment)
 $ npm run deploy:newBlr
-[INFO] Found resumable checkpoint: hedera-testnet-1738675200000
+[INFO] Found resumable checkpoint: hedera-testnet-2025-02-04T10-00-00-000
 [WARN] Non-interactive mode detected: auto-resuming from checkpoint
 [INFO] Resuming from step 3...
 
-Step 3/8: Deploy Facets... ✅
-Step 4/8: Register Facets... ✅
+Step 3/10: Deploy Facets... ✅
+Step 4/10: Register Facets... ✅
 ...
 ```
 
@@ -398,14 +402,14 @@ $ npm run checkpoint:list -- hedera-testnet
 Checkpoints for hedera-testnet (3 total):
 ═══════════════════════════════════════════════════
 
-✅ hedera-testnet-1738680000000
+✅ hedera-testnet-2025-02-04T11-00-00-000
    Workflow: newBlr
    Status:   completed
-   Step:     8
+   Step:     10
    Started:  2025-02-04T11:00:00Z
    Updated:  2025-02-04T11:15:32Z
 
-❌ hedera-testnet-1738675200000
+❌ hedera-testnet-2025-02-04T10-00-00-000
    Workflow: newBlr
    Status:   failed
    Step:     3
@@ -413,7 +417,7 @@ Checkpoints for hedera-testnet (3 total):
    Updated:  2025-02-04T10:15:23Z
    Error:    Transaction failed: nonce too low
 
-⏳ hedera-testnet-1738670000000
+⏳ hedera-testnet-2025-02-04T09-30-00-000
    Workflow: existingBlr
    Status:   in-progress
    Step:     2
@@ -438,11 +442,11 @@ npm run checkpoint:list -- <network>
 ### Show Checkpoint Details
 
 ```bash
-$ npm run checkpoint:show -- hedera-testnet-1738675200000
+$ npm run checkpoint:show -- hedera-testnet-2025-02-04T10-00-00-000
 
 Checkpoint Details:
 ═══════════════════════════════════════════════════
-ID:       hedera-testnet-1738675200000
+ID:       hedera-testnet-2025-02-04T10-00-00-000
 Network:  hedera-testnet
 Status:   failed
 Workflow: newBlr
@@ -479,15 +483,15 @@ npm run checkpoint:show -- <checkpoint-id>
 
 **Parameters:**
 
-- `<checkpoint-id>`: Full checkpoint ID (e.g., `hedera-testnet-1738675200000`)
+- `<checkpoint-id>`: Full checkpoint ID (e.g., `hedera-testnet-2025-02-04T10-00-00-000`)
 
 ---
 
 ### Delete Checkpoint
 
 ```bash
-$ npm run checkpoint:delete -- hedera-testnet-1738675200000
-✅ Deleted checkpoint: hedera-testnet-1738675200000
+$ npm run checkpoint:delete -- hedera-testnet-2025-02-04T10-00-00-000
+✅ Deleted checkpoint: hedera-testnet-2025-02-04T10-00-00-000
 ```
 
 **Usage:**
@@ -514,11 +518,11 @@ $ npm run checkpoint:cleanup -- hedera-testnet 30
 ✅ Deleted 5 completed checkpoint(s) older than 30 days.
 
 Deleted:
-  - hedera-testnet-1736083200000 (45 days old)
-  - hedera-testnet-1736169600000 (44 days old)
-  - hedera-testnet-1736256000000 (43 days old)
-  - hedera-testnet-1736342400000 (42 days old)
-  - hedera-testnet-1736428800000 (41 days old)
+  - hedera-testnet-2025-01-05T10-00-00-000 (45 days old)
+  - hedera-testnet-2025-01-06T10-00-00-000 (44 days old)
+  - hedera-testnet-2025-01-07T10-00-00-000 (43 days old)
+  - hedera-testnet-2025-01-08T10-00-00-000 (42 days old)
+  - hedera-testnet-2025-01-09T10-00-00-000 (41 days old)
 ```
 
 **Usage:**
@@ -553,15 +557,15 @@ npm run checkpoint:cleanup -- hedera-testnet 30
 ### Reset Failed Checkpoint
 
 ```bash
-$ npm run checkpoint:reset -- hedera-testnet-1738675200000
-[INFO] Resetting checkpoint: hedera-testnet-1738675200000
+$ npm run checkpoint:reset -- hedera-testnet-2025-02-04T10-00-00-000
+[INFO] Resetting checkpoint: hedera-testnet-2025-02-04T10-00-00-000
 
 Previous failure details:
   Step:  3 (Facets)
   Error: Transaction failed: nonce too low
   Time:  2025-02-04T10:15:23Z
 
-✅ Reset checkpoint to in-progress: hedera-testnet-1738675200000
+✅ Reset checkpoint to in-progress: hedera-testnet-2025-02-04T10-00-00-000
    Status changed: failed → in-progress
    Failure details cleared
 
@@ -596,7 +600,7 @@ npm run checkpoint:reset -- <checkpoint-id>
 ```json
 {
   "schemaVersion": 2,
-  "checkpointId": "hedera-testnet-1738675200000",
+  "checkpointId": "hedera-testnet-2025-02-04T10-00-00-000",
   "network": "hedera-testnet",
   "deployer": "0x1234567890123456789012345678901234567890",
   "status": "in-progress",
@@ -652,7 +656,7 @@ npm run checkpoint:reset -- <checkpoint-id>
 | Field           | Purpose                                    | Example Value                                                         |
 | --------------- | ------------------------------------------ | --------------------------------------------------------------------- |
 | `schemaVersion` | Checkpoint format version (for migrations) | `2`                                                                   |
-| `checkpointId`  | Unique ID: `{network}-{timestamp}`         | `hedera-testnet-1738675200000`                                        |
+| `checkpointId`  | Unique ID: `{network}-{timestamp}`         | `hedera-testnet-2025-02-04T10-00-00-000`                              |
 | `network`       | Target network name                        | `hedera-testnet`, `hedera-mainnet`                                    |
 | `deployer`      | Deployer address (from private key)        | `0x1234...7890`                                                       |
 | `status`        | Current state                              | `in-progress`, `failed`, `completed`                                  |
@@ -869,7 +873,7 @@ Checkpoints use schema versioning for forward compatibility:
 
 ```typescript
 // Loading v1 checkpoint
-const checkpoint = manager.loadCheckpoint("hedera-testnet-1234567890000");
+const checkpoint = manager.loadCheckpoint("hedera-testnet-2025-01-15T10-00-00-000");
 // → Automatically migrated to v2 in-memory
 
 // Saving checkpoint
