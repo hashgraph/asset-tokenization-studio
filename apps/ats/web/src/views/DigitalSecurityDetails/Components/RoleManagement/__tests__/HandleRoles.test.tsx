@@ -20,7 +20,9 @@ jest.mock("react-router-dom", () => ({
 const mockUseApplyRoles = useApplyRoles as jest.MockedFunction<typeof useApplyRoles>;
 const mockUseSecurityStore = useSecurityStore as jest.MockedFunction<typeof useSecurityStore>;
 
-const ALL_BOND_ROLES = rolesList.filter((role) => role.allowedSecurities.includes("BOND")).map((role) => role.label);
+const ALL_BOND_ROLES = rolesList
+  .filter((role) => role.allowedSecurities.includes("BOND_VARIABLE_RATE"))
+  .map((role) => role.label);
 
 describe("HandleRoles - Select All Roles", () => {
   const mockAddress = "0.0.654321";
