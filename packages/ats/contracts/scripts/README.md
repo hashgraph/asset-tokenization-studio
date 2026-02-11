@@ -648,16 +648,16 @@ npm run deploy:newBlr
 npm run checkpoint:list -- hedera-testnet
 
 # Show detailed checkpoint information
-npm run checkpoint:show -- hedera-testnet-1738675200000
+npm run checkpoint:show -- hedera-testnet-2025-02-04T10-00-00-000
 
 # Delete specific checkpoint
-npm run checkpoint:delete -- hedera-testnet-1738675200000
+npm run checkpoint:delete -- hedera-testnet-2025-02-04T10-00-00-000
 
 # Clean up old completed checkpoints (older than N days)
 npm run checkpoint:cleanup -- hedera-testnet 30
 
 # Reset failed checkpoint to in-progress (skip confirmation prompt)
-npm run checkpoint:reset -- hedera-testnet-1738675200000
+npm run checkpoint:reset -- hedera-testnet-2025-02-04T10-00-00-000
 ```
 
 ### Checkpoint Storage
@@ -667,8 +667,8 @@ Checkpoints are stored in `.checkpoints/` subdirectories:
 ```
 deployments/
 ├── hedera-testnet/.checkpoints/
-│   ├── hedera-testnet-1738675200000.json  ← Active checkpoint
-│   └── hedera-testnet-1738561800000.json  ← Old checkpoint
+│   ├── hedera-testnet-2025-02-04T10-00-00-000.json  ← Active checkpoint
+│   └── hedera-testnet-2025-02-03T08-30-00-000.json  ← Old checkpoint
 ├── hedera-mainnet/.checkpoints/
 └── local/.checkpoints/
 ```

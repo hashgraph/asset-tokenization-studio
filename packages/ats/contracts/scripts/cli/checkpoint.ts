@@ -14,13 +14,13 @@
  * npm run checkpoint:list -- hedera-testnet
  *
  * # Show checkpoint details
- * npm run checkpoint:show -- hedera-testnet-1731085200000
+ * npm run checkpoint:show -- hedera-testnet-2025-02-04T10-15-30-456
  *
  * # Reset a failed checkpoint to in-progress
- * npm run checkpoint:reset -- hedera-testnet-1731085200000
+ * npm run checkpoint:reset -- hedera-testnet-2025-02-04T10-15-30-456
  *
  * # Delete a specific checkpoint
- * npm run checkpoint:delete -- hedera-testnet-1731085200000
+ * npm run checkpoint:delete -- hedera-testnet-2025-02-04T10-15-30-456
  *
  * # Clean up completed checkpoints older than 30 days
  * npm run checkpoint:cleanup -- hedera-testnet 30
@@ -37,8 +37,8 @@ import { CheckpointManager, formatCheckpointStatus, info, warn, error } from "@s
  * Timestamp can be ISO format (YYYY-MM-DDTHH-MM-SS) or legacy numeric format
  */
 function extractNetworkFromId(checkpointId: string): string {
-  // Match ISO timestamp at end: YYYY-MM-DDTHH-MM-SS
-  const isoMatch = checkpointId.match(/^(.+)-(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})$/);
+  // Match ISO timestamp at end: YYYY-MM-DDTHH-MM-SS or YYYY-MM-DDTHH-MM-SS-sss (with milliseconds)
+  const isoMatch = checkpointId.match(/^(.+)-(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}(?:-\d{3})?)$/);
   if (isoMatch) {
     return isoMatch[1];
   }
@@ -103,7 +103,7 @@ const commands = {
   async show(checkpointId: string): Promise<void> {
     if (!checkpointId) {
       error("Usage: checkpoint show <checkpoint-id>");
-      error("Example: checkpoint show hedera-testnet-1731085200000");
+      error("Example: checkpoint show hedera-testnet-2025-02-04T10-15-30-456");
       process.exit(1);
     }
 
@@ -132,7 +132,7 @@ const commands = {
   async delete(checkpointId: string): Promise<void> {
     if (!checkpointId) {
       error("Usage: checkpoint delete <checkpoint-id>");
-      error("Example: checkpoint delete hedera-testnet-1731085200000");
+      error("Example: checkpoint delete hedera-testnet-2025-02-04T10-15-30-456");
       process.exit(1);
     }
 
@@ -182,7 +182,7 @@ const commands = {
   async reset(checkpointId: string): Promise<void> {
     if (!checkpointId) {
       error("Usage: checkpoint reset <checkpoint-id>");
-      error("Example: checkpoint reset hedera-testnet-1731085200000");
+      error("Example: checkpoint reset hedera-testnet-2025-02-04T10-15-30-456");
       process.exit(1);
     }
 
@@ -225,10 +225,10 @@ Commands:
 
 Examples:
   checkpoint list hedera-testnet
-  checkpoint show hedera-testnet-1731085200000
-  checkpoint reset hedera-testnet-1731085200000
+  checkpoint show hedera-testnet-2025-02-04T10-15-30-456
+  checkpoint reset hedera-testnet-2025-02-04T10-15-30-456
   checkpoint cleanup hedera-testnet 30
-  checkpoint delete hedera-testnet-1731085200000
+  checkpoint delete hedera-testnet-2025-02-04T10-15-30-456
 `);
   },
 };
