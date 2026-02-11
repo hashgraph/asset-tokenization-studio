@@ -114,8 +114,6 @@ export const DangerZone = () => {
     }
   };
 
-  console.log("isInternalKycActivated", isInternalKycActivated);
-
   return (
     <VStack w={"full"} layerStyle="container" align="start" gap={8} py={8}>
       {hasPauserRole && (
