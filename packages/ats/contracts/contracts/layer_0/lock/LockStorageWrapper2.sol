@@ -33,6 +33,9 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][_partition] += _amount;
         lockStorage.totalLockedAmountByAccount[_tokenHolder] += _amount;
 
+        emit TransferByPartition(_partition, _msgSender(), _tokenHolder, address(0), _amount, "", "");
+        _emitTransferEvent(_tokenHolder, address(0), _amount);
+
         success_ = true;
     }
 
@@ -64,6 +67,9 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         } else {
             _increaseBalanceByPartition(_tokenHolder, lockAmount, _partition);
         }
+
+        emit TransferByPartition(_partition, _msgSender(), address(0), _tokenHolder, lockAmount, "", "");
+        _emitTransferEvent(address(0), _tokenHolder, lockAmount);
 
         success_ = true;
     }

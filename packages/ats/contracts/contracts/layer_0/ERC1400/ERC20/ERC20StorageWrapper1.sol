@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IERC20 } from "../../../layer_1/interfaces/ERC1400/IERC20.sol";
+import { IERC20StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 import { ERC1410BasicStorageWrapperRead } from "../ERC1410/ERC1410BasicStorageWrapperRead.sol";
 import { IFactory } from "../../../interfaces/factory/IFactory.sol";
 
@@ -30,6 +31,7 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         erc20Storage.initialized = true;
     }
 
+    // Override functions
     function _adjustDecimals(uint8 decimals) internal override {
         _erc20Storage().decimals += decimals;
     }
@@ -40,7 +42,14 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
 
     function _adjustTotalBalanceFor(uint256 abaf, address account) internal override {
         uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
-        _erc20Storage().balances[account] *= factor;
+        uint256 oldBalance = _erc20Storage().balances[account];
+        uint256 newBalance = oldBalance * factor;
+        if (newBalance != oldBalance) {
+            _erc20Storage().balances[account] = newBalance;
+            unchecked {
+                emit IERC20StorageWrapper.Transfer(address(0), address(0), newBalance - oldBalance);
+            }
+        }
         _updateLabafByTokenHolder(abaf, account);
     }
 
@@ -72,27 +81,28 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         }
     }
 
-    function _migrateTotalSupplyIfNeeded() private {
+    // Migration functions - must come before internal view functions
+    function _migrateTotalSupplyIfNeeded() internal {
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage storage $ = _erc1410BasicStorage();
-        if ($._totalSupply_ == 0) return;
-        _erc20Storage().totalSupply = $._totalSupply_;
-        $._totalSupply_ = 0;
+        if ($.DEPRECATED_totalSupply == 0) return;
+        _erc20Storage().totalSupply = $.DEPRECATED_totalSupply;
+        $.DEPRECATED_totalSupply = 0;
     }
 
-    function _migrateBalanceIfNeeded(address _tokenHolder) private {
+    function _migrateBalanceIfNeeded(address _tokenHolder) internal {
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage storage $ = _erc1410BasicStorage();
-        if ($._balances_[_tokenHolder] == 0) return;
-        _erc20Storage().balances[_tokenHolder] = $._balances_[_tokenHolder];
-        $._balances_[_tokenHolder] = 0;
+        if ($.DEPRECATED_balances[_tokenHolder] == 0) return;
+        _erc20Storage().balances[_tokenHolder] = $.DEPRECATED_balances[_tokenHolder];
+        $.DEPRECATED_balances[_tokenHolder] = 0;
     }
 
     function _totalSupply() internal view override returns (uint256 totalSupply_) {
-        totalSupply_ = _erc1410BasicStorage()._totalSupply_;
+        totalSupply_ = _erc1410BasicStorage().DEPRECATED_totalSupply;
         return totalSupply_ == 0 ? _erc20Storage().totalSupply : totalSupply_;
     }
 
     function _balanceOf(address _tokenHolder) internal view override returns (uint256 balance_) {
-        balance_ = _erc1410BasicStorage()._balances_[_tokenHolder];
+        balance_ = _erc1410BasicStorage().DEPRECATED_balances[_tokenHolder];
         return balance_ == 0 ? _erc20Storage().balances[_tokenHolder] : balance_;
     }
 

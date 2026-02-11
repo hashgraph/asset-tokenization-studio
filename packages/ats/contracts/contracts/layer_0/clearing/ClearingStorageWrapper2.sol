@@ -125,6 +125,9 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         _setClearingIdByPartitionAndType(clearingDataStorage, _from, partition, clearingId_, _operationType);
 
         _increaseClearedAmounts(_from, partition, _amount);
+
+        emit TransferByPartition(partition, _msgSender(), _from, address(0), _amount, _clearingOperation.data, "");
+        _emitTransferEvent(_from, address(0), _amount);
     }
 
     function _clearingTransferCreation(
@@ -335,9 +338,13 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
     function _transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) internal override {
         if (_validPartitionForReceiver(_partition, _to)) {
             _increaseBalanceByPartition(_to, _amount, _partition);
+            emit TransferByPartition(_partition, _msgSender(), address(0), _to, _amount, "", "");
+            _emitTransferEvent(address(0), _to, _amount);
             return;
         }
         _addPartitionTo(_amount, _to, _partition);
+        emit TransferByPartition(_partition, _msgSender(), address(0), _to, _amount, "", "");
+        _emitTransferEvent(address(0), _to, _amount);
     }
 
     function _removeClearing(

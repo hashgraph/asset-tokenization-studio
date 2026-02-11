@@ -105,6 +105,17 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
 
         _afterTokenTransfer(_issueData.partition, address(0), _issueData.tokenHolder, _issueData.value);
 
+        // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
+        emit TransferByPartition(
+            _issueData.partition,
+            _msgSender(),
+            address(0),
+            _issueData.tokenHolder,
+            _issueData.value,
+            _issueData.data,
+            ""
+        );
+
         emit IssuedByPartition(
             _issueData.partition,
             _msgSender(),
@@ -125,6 +136,9 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
         _beforeTokenTransfer(_partition, _from, address(0), _value);
 
         _reduceBalanceByPartition(_from, _value, _partition);
+
+        // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
+        emit TransferByPartition(_partition, _operator, _from, address(0), _value, _data, _operatorData);
 
         _reduceTotalSupplyByPartition(_partition, _value);
 

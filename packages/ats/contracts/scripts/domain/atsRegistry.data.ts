@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-01-29T07:38:32.541Z
+ * Generated: 2026-02-11T09:16:17.458Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -10888,6 +10888,14 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "ERC1410BasicStorageWrapper",
     inheritance: ["IERC1410StorageWrapper", "ERC20StorageWrapper1"],
     methods: [],
+    events: [
+      {
+        name: "AFTER",
+        signature:
+          "AFTER(_partition,_operator,_from,_basicTransferInfo.to,_basicTransferInfo.value,_data,_operatorData)",
+        topic0: "0x0a4a4dcf12cc3759f8d86bdfe3971e21cdb3f9f5d026ba26d6368b183d01cfc5",
+      },
+    ],
   },
 
   ERC1410OperatorStorageWrapper: {

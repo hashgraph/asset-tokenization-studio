@@ -6,7 +6,6 @@ import { _ERC1410_BASIC_STORAGE_POSITION } from "../../constants/storagePosition
 import { IERC1410StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol";
 import { LockStorageWrapper1 } from "../../lock/LockStorageWrapper1.sol";
 import { LibCommon } from "../../../layer_0/common/libraries/LibCommon.sol";
-import "hardhat/console.sol";
 
 abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, LockStorageWrapper1 {
     // Represents a fungible set of tokens.
@@ -16,10 +15,12 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
     }
 
     struct ERC1410BasicStorage {
-        uint256 _totalSupply_;
+        // solhint-disable-next-line var-name-mixedcase
+        uint256 DEPRECATED_totalSupply;
         mapping(bytes32 => uint256) totalSupplyByPartition;
         /// @dev Mapping from investor to aggregated balance across all investor token sets
-        mapping(address => uint256) _balances_;
+        // solhint-disable-next-line var-name-mixedcase
+        mapping(address => uint256) DEPRECATED_balances;
         /// @dev Mapping from investor to their partitions
         mapping(address => Partition[]) partitions;
         /// @dev Mapping from (investor, partition) to index of corresponding partition in partitions
@@ -241,7 +242,22 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         uint256 partitionsIndex = basicStorage.partitionToIndex[account][partition];
         if (partitionsIndex == 0) return;
         uint256 factor = _calculateFactorByTokenHolderAndPartitionIndex(abaf, account, partitionsIndex);
-        basicStorage.partitions[account][partitionsIndex - 1].amount *= factor;
+        uint256 oldAmount = basicStorage.partitions[account][partitionsIndex - 1].amount;
+        uint256 newAmount = oldAmount * factor;
+        if (newAmount != oldAmount) {
+            basicStorage.partitions[account][partitionsIndex - 1].amount = newAmount;
+            unchecked {
+                emit IERC1410StorageWrapper.TransferByPartition(
+                    partition,
+                    _msgSender(),
+                    address(0),
+                    address(0),
+                    newAmount - oldAmount,
+                    "",
+                    ""
+                );
+            }
+        }
         _updateLabafByTokenHolderAndPartitionIndex(abaf, account, partitionsIndex);
     }
 

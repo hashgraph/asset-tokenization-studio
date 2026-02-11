@@ -51,6 +51,9 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         holdStorage.totalHeldAmountByAccountAndPartition[_from][_partition] += _hold.amount;
         holdStorage.totalHeldAmountByAccount[_from] += _hold.amount;
 
+        emit TransferByPartition(_partition, _msgSender(), _from, address(0), _hold.amount, _operatorData, "");
+        _emitTransferEvent(_from, address(0), _hold.amount);
+
         success_ = true;
     }
 
@@ -190,6 +193,8 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
                     IERC3643Management.ComplianceCallFailed.selector
                 );
             }
+            emit TransferByPartition(_holdIdentifier.partition, _msgSender(), address(0), _to, _amount, "", "");
+            _emitTransferEvent(address(0), _to, _amount);
             return;
         }
         _addPartitionTo(_amount, _to, _holdIdentifier.partition);
@@ -199,6 +204,8 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
                 IERC3643Management.ComplianceCallFailed.selector
             );
         }
+        emit TransferByPartition(_holdIdentifier.partition, _msgSender(), address(0), _to, _amount, "", "");
+        _emitTransferEvent(address(0), _to, _amount);
     }
 
     function _decreaseHeldAmount(
