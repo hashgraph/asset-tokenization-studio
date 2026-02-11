@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Box } from "@chakra-ui/react";
 import { Table, Text } from "io-bricks-ui";
 import { ColumnDef } from "@tanstack/react-table";

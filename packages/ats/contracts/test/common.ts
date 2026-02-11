@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { type Pause, type AccessControl } from "@contract-types";
 import { expect } from "chai";
 import { Signer } from "ethers";

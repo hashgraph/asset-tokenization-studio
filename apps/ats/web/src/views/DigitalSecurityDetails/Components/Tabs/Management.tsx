@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Box } from "@chakra-ui/react";
 import { RoleManagement } from "../RoleManagement/RoleManagement";
 import { useTranslation } from "react-i18next";

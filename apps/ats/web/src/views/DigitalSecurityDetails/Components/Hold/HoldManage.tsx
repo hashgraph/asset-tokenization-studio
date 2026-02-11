@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Box, Center, Flex, HStack, Stack, useDisclosure, VStack } from "@chakra-ui/react";
 import { Button, Heading, InputController, InputNumberController, PhosphorIcon, PopUp, Text } from "io-bricks-ui";
 import { isValidHederaId, min, required } from "../../../../utils/rules";

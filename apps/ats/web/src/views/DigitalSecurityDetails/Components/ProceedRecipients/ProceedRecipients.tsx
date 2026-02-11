@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Flex, HStack, Stack, useDisclosure } from "@chakra-ui/react";
 import { Button, PhosphorIcon, PopUp, Table, Text } from "io-bricks-ui";
 import { useMemo, useState } from "react";

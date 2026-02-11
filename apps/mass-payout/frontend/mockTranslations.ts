@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 export const mockTranslations: Record<string, string> = {
   // Asset Detail translations
   "detail.status.active": "Active",
