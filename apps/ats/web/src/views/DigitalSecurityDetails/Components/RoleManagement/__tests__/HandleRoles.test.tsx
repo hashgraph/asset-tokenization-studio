@@ -54,7 +54,7 @@ describe("HandleRoles - Select All Roles", () => {
 
     mockUseSecurityStore.mockReturnValue({
       details: {
-        type: "BOND",
+        type: "BOND_VARIABLE_RATE",
       },
     } as ReturnType<typeof useSecurityStore>);
   });
