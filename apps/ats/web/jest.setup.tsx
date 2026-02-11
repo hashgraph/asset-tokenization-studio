@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+
+// Mock @zag-js/focus-visible to avoid JSDOM focus property issues
+jest.mock("@zag-js/focus-visible", () => ({
+  trackFocusVisible: () => () => {},
+}));
+
 process.env.VITE_API_URL = "http://localhost:8080/api/v1";
 
 // Mock Terminal3 modules to avoid LRU cache issues
