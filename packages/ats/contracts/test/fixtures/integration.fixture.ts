@@ -89,6 +89,57 @@ export async function registerCommonFacetsFixture() {
 }
 
 /**
+ * BLR + ERC20Facet registered for testing SelectorAlreadyRegistered error.
+ *
+ * Provides a fixture for testing duplicate selector detection:
+ * - BLR with proxy
+ * - AccessControlFacet, KycFacet, PauseFacet (common facets)
+ * - ERC20Facet (has transfer.selector = 0xa9059cbb)
+ *
+ * Use this fixture together with DuplicateSelectorFacetTest to verify that
+ * the SelectorAlreadyRegistered error is thrown when two facets share the same selector.
+ */
+export async function registerERC20FacetFixture() {
+  const base = await registerCommonFacetsFixture();
+  const { deployer, blr, facetAddresses } = base;
+
+  // Deploy ERC20Facet
+  const erc20Factory = await ethers.getContractFactory("ERC20Facet", deployer);
+  const erc20Result = await deployContract(erc20Factory, {
+    confirmations: 0,
+    verifyDeployment: false,
+  });
+  const erc20FacetAddress = erc20Result.address!;
+
+  // Get resolver key for ERC20Facet
+  const erc20FacetDef = atsRegistry.getFacetDefinition("ERC20Facet");
+  if (!erc20FacetDef?.resolverKey?.value) {
+    throw new Error("No resolver key found for ERC20Facet");
+  }
+
+  // Register ERC20Facet in BLR
+  await registerFacets(blr, {
+    facets: [
+      {
+        name: "ERC20Facet",
+        address: erc20FacetAddress,
+        resolverKey: erc20FacetDef.resolverKey.value,
+      },
+    ],
+  });
+
+  return {
+    ...base,
+    facetAddresses: {
+      ...facetAddresses,
+      ERC20Facet: erc20FacetAddress,
+    },
+    erc20FacetAddress,
+    erc20ResolverKey: erc20FacetDef.resolverKey.value,
+  };
+}
+
+/**
  * BLR + Common facets + MigrationFacetTest registered.
  *
  * Provides a fixture for testing ERC20 storage migration:
