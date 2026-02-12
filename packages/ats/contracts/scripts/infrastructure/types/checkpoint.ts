@@ -10,6 +10,18 @@
  */
 
 /**
+ * Current checkpoint schema version.
+ *
+ * Increment this when making breaking changes to checkpoint structure.
+ * CheckpointManager will validate and migrate older schemas.
+ *
+ * Version History:
+ * - v1: Initial schema (implicit, pre-versioning)
+ * - v2: Added schemaVersion field for forward compatibility
+ */
+export const CHECKPOINT_SCHEMA_VERSION = 2;
+
+/**
  * Deployed contract information for checkpoint tracking.
  */
 export interface DeployedContract {
@@ -91,6 +103,18 @@ export type WorkflowType = AtsWorkflowType | string;
  * automatic resume from the exact point of failure.
  */
 export interface DeploymentCheckpoint {
+  // ============================================================================
+  // Schema Version (for forward compatibility)
+  // ============================================================================
+
+  /**
+   * Schema version for forward compatibility.
+   *
+   * Used to detect and migrate older checkpoint formats.
+   * If undefined, treated as v1 (legacy pre-versioned checkpoint).
+   */
+  schemaVersion?: number;
+
   // ============================================================================
   // Identity
   // ============================================================================
@@ -266,7 +290,7 @@ export interface ResumeOptions {
    * Explicit checkpoint ID to resume from.
    * Overrides auto-detection.
    *
-   * @example 'hedera-testnet-1731085200000'
+   * @example 'hedera-testnet-2025-02-04T10-15-30-456'
    */
   resumeFrom?: string;
 
@@ -305,7 +329,7 @@ export interface ResumeOptions {
    *
    * ⚠️ WARNING: Directories inside node_modules will be deleted on npm install.
    *
-   * @default 'node_modules/@hashgraph/asset-tokenization-contracts/build/deployments/.checkpoints'
+   * @default '{cwd}/deployments/{network}/.checkpoints'
    * @example './deployments/.checkpoints'
    * @example '/tmp/ats-deployments/.checkpoints'
    */

@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BigNumber } from "ethers";
-
 export class TransferAndLock {
   public from: string;
   public to: string;
-  public amount: BigNumber;
+  public amount: bigint;
   public data: string;
-  public expirationTimestamp: BigNumber;
+  public expirationTimestamp: bigint;
 }

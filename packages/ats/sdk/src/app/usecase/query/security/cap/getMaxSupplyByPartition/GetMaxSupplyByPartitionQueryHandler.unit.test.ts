@@ -11,7 +11,7 @@ import { GetMaxSupplyByPartitionQueryFixture } from "@test/fixtures/erc1400/ERC1
 import { SecurityPropsFixture } from "@test/fixtures/shared/SecurityFixture";
 import { Security } from "@domain/context/security/Security";
 import BigDecimal from "@domain/context/shared/BigDecimal";
-import { BigNumber } from "ethers";
+
 import { GetMaxSupplyByPartitionQueryHandler } from "./GetMaxSupplyByPartitionQueryHandler";
 import { GetMaxSupplyByPartitionQuery, GetMaxSupplyByPartitionQueryResponse } from "./GetMaxSupplyByPartitionQuery";
 import { GetMaxSupplyByPartitionQueryError } from "./error/GetMaxSupplyByPartitionQueryError";
@@ -26,7 +26,7 @@ describe("GetMaxSupplyByPartitionQueryHandler", () => {
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const security = new Security(SecurityPropsFixture.create());
-  const amount = BigNumber.from(1);
+  const amount = BigInt(1);
 
   const errorMsg = ErrorMsgFixture.create().msg;
 

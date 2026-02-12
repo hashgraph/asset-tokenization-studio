@@ -12,7 +12,6 @@
  * @module domain/equity/createConfiguration
  */
 
-import { Contract } from "ethers";
 import {
   ConfigurationData,
   ConfigurationError,
@@ -20,6 +19,7 @@ import {
   createBatchConfiguration,
   DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
+import { BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 
@@ -142,7 +142,7 @@ const EQUITY_FACETS = [
  * ```
  */
 export async function createEquityConfiguration(
-  blrContract: Contract,
+  blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
   useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,

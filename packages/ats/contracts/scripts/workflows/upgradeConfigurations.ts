@@ -39,6 +39,7 @@ import {
   getStepName,
   validateAddress,
   saveDeploymentOutput,
+  resolveCheckpointForResume,
 } from "@scripts/infrastructure";
 import { atsRegistry, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
@@ -297,15 +298,12 @@ async function validateAndInitialize(
       info(`✅ Loaded checkpoint from ${checkpoint.startTime}`);
       info(formatCheckpointStatus(checkpoint));
     } else if (autoResume) {
-      const incompleteCheckpoints = await checkpointManager.findCheckpoints(network, "in-progress");
-      const upgradeCheckpoints = incompleteCheckpoints.filter((cp) => cp.workflowType === "upgradeConfigurations");
-
-      if (upgradeCheckpoints.length > 0) {
-        const latestCheckpoint = upgradeCheckpoints[0];
-        info(`\n🔍 Found incomplete upgrade: ${latestCheckpoint.checkpointId}`);
-        info(formatCheckpointStatus(latestCheckpoint));
+      const resolved = await resolveCheckpointForResume(checkpointManager, network, "upgradeConfigurations");
+      if (resolved) {
+        info(`\n🔍 Found resumable upgrade: ${resolved.checkpointId}`);
+        info(formatCheckpointStatus(resolved));
         info("🔄 Resuming from checkpoint...");
-        checkpoint = latestCheckpoint;
+        checkpoint = resolved;
       }
     }
   }
@@ -477,7 +475,7 @@ async function registerFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   info(`   Found ${existingCount.toString()} existing business logics`);
 
   const existingFacets: FacetRegistrationData[] = [];
-  const existingCountNum = existingCount.toNumber();
+  const existingCountNum = Number(existingCount);
 
   if (existingCountNum > 0) {
     // Fetch all existing keys (using pagination if needed)
@@ -1142,11 +1140,13 @@ export async function upgradeConfigurations(
     logError("\n❌ Upgrade failed:", errorMessage);
 
     // Mark checkpoint as failed if context was initialized
+    // Note: currentStep tracks the last COMPLETED step, so the failed step is currentStep + 1
     if (ctx) {
+      const failedStep = ctx.checkpoint.currentStep + 1;
       ctx.checkpoint.status = "failed";
       ctx.checkpoint.failure = {
-        step: ctx.checkpoint.currentStep,
-        stepName: getStepName(ctx.checkpoint.currentStep, "upgradeConfigurations"),
+        step: failedStep,
+        stepName: getStepName(failedStep, "upgradeConfigurations"),
         error: errorMessage,
         timestamp: new Date().toISOString(),
         stackTrace,

@@ -21,7 +21,7 @@ export class AssetTokenizationStudioSdkService implements AssetTokenizationStudi
 
     if (!assetInfo) return null
 
-    if (assetInfo.type == AssetType.BOND) {
+    if (assetInfo.type?.includes("BOND")) {
       const getBondDetailsRequest = new GetBondDetailsRequest({ bondId: hederaTokenAddress })
       const bondDetails = await Bond.getBondDetails(getBondDetailsRequest)
       maturityDate = bondDetails.maturityDate

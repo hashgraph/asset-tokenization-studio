@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { BigNumber } from "ethers";
 import BigDecimal from "../shared/BigDecimal";
 
 export class Hold {
-  public amount: BigNumber;
-  public expirationTimestamp: BigNumber;
+  public amount: bigint;
+  public expirationTimestamp: bigint;
   public escrow: string;
   public to: string;
   public data: string;
@@ -13,8 +12,8 @@ export class Hold {
 
 export class ProtectedHold {
   public hold: Hold;
-  public deadline: BigNumber;
-  public nonce: BigNumber;
+  public deadline: bigint;
+  public nonce: bigint;
 }
 
 export class HoldIdentifier {
@@ -25,7 +24,7 @@ export class HoldIdentifier {
 
 export class HoldDetails {
   expirationTimeStamp: number;
-  amount: BigDecimal;
+  amount: bigint;
   escrowAddress: string;
   tokenHolderAddress: string;
   destinationAddress: string;
@@ -33,7 +32,7 @@ export class HoldDetails {
   operatorData: string;
   constructor(
     executionTimeStamp: number,
-    amount: BigDecimal,
+    amount: bigint,
     escrowAddress: string,
     tokenHolderAddress: string,
     destinationAddress: string,

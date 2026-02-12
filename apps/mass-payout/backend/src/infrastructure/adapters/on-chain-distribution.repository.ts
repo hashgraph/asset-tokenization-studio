@@ -19,7 +19,10 @@ import {
 export class OnChainDistributionRepository implements OnChainDistributionRepositoryPort {
   async getAllDistributionsByAsset(asset: Asset): Promise<Distribution[]> {
     switch (asset.type) {
-      case AssetType.BOND:
+      case AssetType.BOND_VARIABLE_RATE:
+      case AssetType.BOND_FIXED_RATE:
+      case AssetType.BOND_KPI_LINKED_RATE:
+      case AssetType.BOND_SPT_RATE:
         return this.getCouponsForAsset(asset)
       case AssetType.EQUITY:
         return this.getDividendsForAsset(asset)
@@ -39,7 +42,10 @@ export class OnChainDistributionRepository implements OnChainDistributionReposit
     const assetType = distribution.asset.type
 
     switch (assetType) {
-      case AssetType.BOND: {
+      case AssetType.BOND_VARIABLE_RATE:
+      case AssetType.BOND_FIXED_RATE:
+      case AssetType.BOND_KPI_LINKED_RATE:
+      case AssetType.BOND_SPT_RATE: {
         const couponRequest = new GetTotalCouponHoldersRequest({
           securityId: tokenId,
           couponId: corporateActionId,

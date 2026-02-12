@@ -16,16 +16,7 @@ import type { AnyDeploymentOutput, SaveDeploymentOptions, SaveResult, LoadDeploy
 import type { WorkflowType } from "../types/checkpoint";
 import { WORKFLOW_DESCRIPTORS } from "../constants";
 import { generateTimestamp } from "./time";
-
-/**
- * Get the root deployments directory path.
- *
- * @returns Absolute path to deployments directory
- * @internal
- */
-export function getDeploymentsDir(): string {
-  return join(__dirname, "../../../deployments");
-}
+import { getNetworkDeploymentDir as getNetworkDir } from "../paths";
 
 /**
  * Get the network-specific deployment directory.
@@ -35,8 +26,8 @@ export function getDeploymentsDir(): string {
  * @returns Absolute path to network directory
  */
 export function getNetworkDeploymentDir(network: string, deploymentsDir?: string): string {
-  const baseDir = deploymentsDir || getDeploymentsDir();
-  return join(baseDir, network);
+  if (deploymentsDir) return join(deploymentsDir, network);
+  return getNetworkDir(network);
 }
 
 /**

@@ -34,7 +34,7 @@ describe(Asset.name, () => {
 
     it("should create an Asset with BOND type", () => {
       const name = faker.string.alphanumeric()
-      const type = AssetType.BOND
+      const type = AssetType.BOND_VARIABLE_RATE
       const hederaTokenAddress = fakeHederaAddress()
       const evmTokenAddress = faker.finance.ethereumAddress()
       const asset = AssetUtils.newInstance({ name, type, hederaTokenAddress, evmTokenAddress })
@@ -121,7 +121,7 @@ describe(Asset.name, () => {
     it("should recreate an Asset with all provided valid data", () => {
       const id = faker.string.uuid()
       const name = faker.finance.currencyName()
-      const type = AssetType.BOND
+      const type = AssetType.BOND_VARIABLE_RATE
       const hederaTokenAddress = fakeHederaAddress()
       const evmTokenAddress = faker.finance.ethereumAddress()
       const hederaLifeCycleCashFlowAddress = fakeHederaAddress()
@@ -132,7 +132,7 @@ describe(Asset.name, () => {
       const updatedAt = faker.date.future({ refDate: createdAt })
 
       const symbol = faker.string.alpha({ length: 3 })
-      const maturityDate = type === AssetType.BOND ? faker.date.future() : undefined
+      const maturityDate = type === AssetType.BOND_VARIABLE_RATE ? faker.date.future() : undefined
       const asset = Asset.createExisting(
         id,
         name,
@@ -283,7 +283,7 @@ describe(Asset.name, () => {
     it("should fail if createdAt is after updatedAt when recreating from existing data", () => {
       const id = faker.string.uuid()
       const name = faker.finance.currencyName()
-      const type = AssetType.BOND
+      const type = AssetType.BOND_VARIABLE_RATE
       const hederaTokenAddress = fakeHederaAddress()
       const evmTokenAddress = faker.finance.ethereumAddress()
       const hederaLifeCycleCashFlowAddress = fakeHederaAddress()
@@ -296,7 +296,7 @@ describe(Asset.name, () => {
 
       try {
         const symbol = faker.string.alpha({ length: 3 })
-        const maturityDate = type === AssetType.BOND ? faker.date.future() : undefined
+        const maturityDate = type === AssetType.BOND_VARIABLE_RATE ? faker.date.future() : undefined
         Asset.createExisting(
           id,
           name,
@@ -387,7 +387,7 @@ describe(Asset.name, () => {
   describe("withLifeCycleCashFlow", () => {
     it("should add lifeCycleCashFlow addresses to an existing asset", () => {
       const name = faker.string.alphanumeric()
-      const type = AssetType.BOND
+      const type = AssetType.BOND_VARIABLE_RATE
       const hederaTokenAddress = fakeHederaAddress()
       const evmTokenAddress = faker.finance.ethereumAddress()
       const asset = AssetUtils.newInstance({ name, type, hederaTokenAddress, evmTokenAddress })
@@ -477,7 +477,7 @@ describe(Asset.name, () => {
     it("should create a new instance with updated type", () => {
       const name = faker.company.name()
       const originalType = AssetType.EQUITY
-      const newType = AssetType.BOND
+      const newType = AssetType.BOND_VARIABLE_RATE
       const hederaTokenAddress = fakeHederaAddress()
       const evmTokenAddress = faker.finance.ethereumAddress()
 
@@ -502,7 +502,7 @@ describe(Asset.name, () => {
     it("should preserve lifecycle cash flow addresses when updating type", () => {
       const name = faker.company.name()
       const originalType = AssetType.EQUITY
-      const newType = AssetType.BOND
+      const newType = AssetType.BOND_VARIABLE_RATE
       const hederaTokenAddress = fakeHederaAddress()
       const evmTokenAddress = faker.finance.ethereumAddress()
 
@@ -607,7 +607,7 @@ describe(Asset.name, () => {
 
     it("should allow multiple pause/unpause operations", () => {
       const name = faker.company.name()
-      const type = AssetType.BOND
+      const type = AssetType.BOND_VARIABLE_RATE
       const hederaTokenAddress = fakeHederaAddress()
       const evmTokenAddress = faker.finance.ethereumAddress()
 
@@ -630,7 +630,7 @@ describe(Asset.name, () => {
     it("should recreate existing asset with isPaused state", () => {
       const id = faker.string.uuid()
       const name = faker.finance.currencyName()
-      const type = AssetType.BOND
+      const type = AssetType.BOND_VARIABLE_RATE
       const hederaTokenAddress = fakeHederaAddress()
       const evmTokenAddress = faker.finance.ethereumAddress()
       const hederaLifeCycleCashFlowAddress = fakeHederaAddress()
@@ -641,7 +641,7 @@ describe(Asset.name, () => {
       const updatedAt = faker.date.future({ refDate: createdAt })
 
       const symbol = faker.string.alpha({ length: 3 })
-      const maturityDate = type === AssetType.BOND ? faker.date.future() : undefined
+      const maturityDate = type === AssetType.BOND_VARIABLE_RATE ? faker.date.future() : undefined
       const asset = Asset.createExisting(
         id,
         name,

@@ -17,9 +17,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { configureLogger, LogLevel, CheckpointManager, getResolverProxyConfigInfo } from "@scripts/infrastructure";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import { CheckpointManager, getResolverProxyConfigInfo, getDeploymentsDir } from "@scripts/infrastructure";
 import { upgradeConfigurations } from "@scripts";
+import { silenceScriptLogging } from "@test";
 import {
   deployUpgradeTestFixture,
   deployUpgradeInfrastructureOnlyFixture,
@@ -29,14 +30,13 @@ import {
   simulateFailureAtStep,
   cleanupTestCheckpoints,
   createTestCheckpointsDir,
+  removeTestDeployments,
   createDeployedContract,
   createConfigurationResult,
 } from "../../helpers/checkpointTestHelpers";
 
 describe("upgradeConfigurations - Integration Tests", () => {
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   describe("Basic Upgrade Flow", () => {
     it("should deploy facets, register, and create both configurations", async () => {
@@ -261,7 +261,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
   describe("Checkpoint Resumability", () => {
     let testDir: string;
     let manager: CheckpointManager;
-    let signers: SignerWithAddress[];
+    let signers: HardhatEthersSigner[];
 
     beforeEach(async () => {
       testDir = createTestCheckpointsDir();
@@ -272,6 +272,10 @@ describe("upgradeConfigurations - Integration Tests", () => {
 
     afterEach(async () => {
       await cleanupTestCheckpoints(testDir);
+    });
+
+    after(async () => {
+      await removeTestDeployments();
     });
 
     it("should resume from facets step failure", async () => {
@@ -613,7 +617,7 @@ describe("upgradeConfigurations - Integration Tests", () => {
       const path = require("path");
 
       // Use explicit output path for testing
-      const outputPath = path.join(__dirname, "../../..", "deployments", "test-output-verification.json");
+      const outputPath = path.join(getDeploymentsDir(), "test-output-verification.json");
 
       const result = await upgradeConfigurations(deployer, "hardhat", {
         blrAddress,

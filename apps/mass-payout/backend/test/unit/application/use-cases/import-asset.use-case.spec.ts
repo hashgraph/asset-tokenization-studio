@@ -96,7 +96,7 @@ describe(ImportAssetUseCase.name, () => {
         const maturityDate = faker.date.future()
         Asset.create(
           faker.commerce.productName(),
-          AssetType.BOND,
+          AssetType.BOND_VARIABLE_RATE,
           fakeHederaAddress(),
           faker.finance.ethereumAddress(),
           symbol,
@@ -113,7 +113,7 @@ describe(ImportAssetUseCase.name, () => {
         const maturityDate = faker.date.future()
         Asset.create(
           faker.commerce.productName(),
-          AssetType.BOND,
+          AssetType.BOND_VARIABLE_RATE,
           fakeHederaAddress(),
           faker.finance.ethereumAddress(),
           symbol,
@@ -130,7 +130,7 @@ describe(ImportAssetUseCase.name, () => {
         const maturityDate = faker.date.future()
         Asset.create(
           faker.commerce.productName(),
-          AssetType.BOND,
+          AssetType.BOND_VARIABLE_RATE,
           fakeHederaAddress(),
           faker.finance.ethereumAddress(),
           symbol,

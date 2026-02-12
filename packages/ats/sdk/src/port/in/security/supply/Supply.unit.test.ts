@@ -11,7 +11,7 @@ import { ValidationError } from "@core/validation/ValidationError";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import Security from "@port/in/security/Security";
 import BigDecimal from "@domain/context/shared/BigDecimal";
-import { BigNumber } from "ethers";
+
 import { GetMaxSupplyRequestFixture, SetMaxSupplyRequestFixture } from "@test/fixtures/erc1400/ERC1400Fixture";
 import { SetMaxSupplyCommand } from "@command/security/operations/cap/SetMaxSupplyCommand";
 import { GetMaxSupplyQuery } from "@query/security/cap/getMaxSupply/GetMaxSupplyQuery";
@@ -102,7 +102,7 @@ describe("Supply", () => {
     getMaxSupplyRequest = new GetMaxSupplyRequest(GetMaxSupplyRequestFixture.create());
 
     const expectedResponse = {
-      payload: new BigDecimal(BigNumber.from(1)),
+      payload: new BigDecimal(BigInt(1)),
     };
     it("should get max supply successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);

@@ -58,7 +58,7 @@ export const CHAIN_IDS: Record<string, number> = {
   "hedera-mainnet": 295,
   "hedera-testnet": 296,
   "hedera-previewnet": 297,
-  "hedera-local": 1337,
+  "hedera-local": 298, // Local Hedera node reports 298, not 1337
   local: 1337,
   hardhat: 31337,
 };
@@ -275,8 +275,8 @@ export const TIME_PERIODS_MS = {
   YEAR: TIME_PERIODS_S.YEAR * 1000,
 };
 
-export const ZERO = ethers.constants.Zero;
-export const ADDRESS_ZERO = ethers.constants.AddressZero;
+export const ZERO = 0n;
+export const ADDRESS_ZERO = ethers.ZeroAddress;
 export const EMPTY_HEX_BYTES = "0x";
 export const EMPTY_STRING = "";
 

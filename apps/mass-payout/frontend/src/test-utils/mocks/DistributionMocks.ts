@@ -36,7 +36,7 @@ export const mockDistributions: MockDistribution[] = [
     asset: {
       id: "0.0.123456",
       name: "Hedera Treasury Bond 2025",
-      type: "Bond",
+      type: "Bond Variable Rate",
       hederaTokenAddress: "0.0.123456",
       evmTokenAddress: "0x1234567890123456789012345678901234567890",
       lifeCycleCashFlowHederaAddress: "0.0.789012",

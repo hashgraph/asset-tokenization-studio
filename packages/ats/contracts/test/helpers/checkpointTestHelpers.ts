@@ -10,14 +10,23 @@
  */
 
 import { promises as fs } from "fs";
-import { join } from "path";
 import type {
   DeploymentCheckpoint,
   DeployedContract,
   ConfigurationResult,
   WorkflowType,
 } from "@scripts/infrastructure";
-import { CheckpointManager, getStepName } from "@scripts/infrastructure";
+import { CheckpointManager, getStepName, getTestCheckpointsDir, getTestDeploymentsDir } from "@scripts/infrastructure";
+import {
+  TEST_ADDRESSES,
+  TEST_NETWORKS,
+  TEST_WORKFLOWS,
+  TEST_CHECKPOINT_STATUS,
+  TEST_TX_HASHES,
+  TEST_CONFIG_IDS,
+  TEST_CONTRACT_IDS,
+  TEST_TIMESTAMPS,
+} from "./constants";
 
 /**
  * Create a pre-populated checkpoint with specific deployment state.
@@ -256,11 +265,7 @@ export function assertCheckpointAtStep(
  * ```
  */
 export function createTestCheckpointsDir(): string {
-  // Return test-specific checkpoint directory under deployments/test/
-  // Isolated from production deployments (deployments/hardhat/.checkpoints)
-  // Note: Tests run from build/ directory, so we need to go up 3 levels:
-  // build/test/helpers/ → ../../../ → contracts/deployments/test/hardhat/.checkpoints
-  return join(__dirname, "../../../deployments/test/hardhat/.checkpoints");
+  return getTestCheckpointsDir("hardhat");
 }
 
 /**
@@ -288,10 +293,8 @@ export function createTestCheckpointsDir(): string {
  */
 export async function cleanupTestCheckpoints(testCheckpointsDir: string): Promise<void> {
   try {
-    // Remove directory and all contents
     await fs.rm(testCheckpointsDir, { recursive: true, force: true });
   } catch (error) {
-    // Ignore if already removed
     if (error instanceof Error && "code" in error && error.code !== "ENOENT") {
       throw new Error(
         `Failed to cleanup test checkpoints directory: ${error instanceof Error ? error.message : String(error)}`,
@@ -306,6 +309,20 @@ export async function cleanupTestCheckpoints(testCheckpointsDir: string): Promis
     throw new Error(
       `Failed to create test checkpoints directory: ${error instanceof Error ? error.message : String(error)}`,
     );
+  }
+}
+
+/**
+ * Remove the entire deployments/test/ directory tree.
+ *
+ * Use in a top-level `after` hook for final cleanup after all tests complete.
+ * Unlike `cleanupTestCheckpoints`, this does NOT recreate the directory.
+ */
+export async function removeTestDeployments(): Promise<void> {
+  try {
+    await fs.rm(getTestDeploymentsDir(), { recursive: true, force: true });
+  } catch {
+    // Ignore cleanup errors
   }
 }
 
@@ -428,4 +445,281 @@ export function addFacetToCheckpoint(
   }
   checkpoint.steps.facets.set(facetName, facetData);
   return checkpoint;
+}
+
+/**
+ * Create a fully-populated completed checkpoint for conversion tests.
+ *
+ * Returns a checkpoint with all deployment steps completed, suitable for
+ * testing checkpoint-to-output conversion and format verification.
+ *
+ * @param overrides - Optional partial data to merge/override defaults
+ * @returns Complete checkpoint with all fields populated
+ *
+ * @example
+ * ```typescript
+ * // Create default completed checkpoint
+ * const checkpoint = createCompletedTestCheckpoint();
+ *
+ * // Create with custom network
+ * const mainnetCheckpoint = createCompletedTestCheckpoint({
+ *   network: TEST_NETWORKS.MAINNET
+ * });
+ * ```
+ */
+export function createCompletedTestCheckpoint(overrides: Partial<DeploymentCheckpoint> = {}): DeploymentCheckpoint {
+  const now = new Date().toISOString();
+
+  return {
+    checkpointId: `${TEST_NETWORKS.TESTNET}-1731085200000`,
+    network: TEST_NETWORKS.TESTNET,
+    deployer: TEST_ADDRESSES.VALID_0,
+    status: TEST_CHECKPOINT_STATUS.COMPLETED,
+    currentStep: 6,
+    workflowType: TEST_WORKFLOWS.NEW_BLR,
+    startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
+    lastUpdate: TEST_TIMESTAMPS.ISO_SAMPLE_LATER,
+    steps: {
+      proxyAdmin: {
+        address: TEST_ADDRESSES.VALID_2,
+        contractId: TEST_CONTRACT_IDS.SAMPLE_0,
+        txHash: TEST_TX_HASHES.SAMPLE_0,
+        deployedAt: now,
+      },
+      blr: {
+        address: TEST_ADDRESSES.VALID_3,
+        implementation: TEST_ADDRESSES.VALID_3.replace(/3/g, "2") + "1",
+        implementationContractId: TEST_CONTRACT_IDS.SAMPLE_1,
+        proxy: TEST_ADDRESSES.VALID_3,
+        proxyContractId: TEST_CONTRACT_IDS.SAMPLE_2,
+        txHash: TEST_TX_HASHES.SAMPLE_1,
+        deployedAt: now,
+      },
+      facets: new Map([
+        [
+          "AccessControlFacet",
+          {
+            address: TEST_ADDRESSES.VALID_4,
+            contractId: TEST_CONTRACT_IDS.SAMPLE_3,
+            txHash: TEST_TX_HASHES.SAMPLE_2,
+            gasUsed: "500000",
+            deployedAt: now,
+          },
+        ],
+        [
+          "PausableFacet",
+          {
+            address: TEST_ADDRESSES.VALID_5,
+            contractId: TEST_CONTRACT_IDS.SAMPLE_4,
+            txHash: TEST_TX_HASHES.SAMPLE_3,
+            gasUsed: "450000",
+            deployedAt: now,
+          },
+        ],
+      ]),
+      facetsRegistered: true,
+      configurations: {
+        equity: {
+          configId: TEST_CONFIG_IDS.EQUITY,
+          version: 1,
+          facetCount: 43,
+          txHash: TEST_TX_HASHES.SAMPLE_4,
+        },
+        bond: {
+          configId: TEST_CONFIG_IDS.BOND,
+          version: 1,
+          facetCount: 43,
+          txHash: TEST_TX_HASHES.SAMPLE_5,
+        },
+        bondFixedRate: {
+          configId: TEST_CONFIG_IDS.BOND_FIXED_RATE,
+          version: 1,
+          facetCount: 47,
+          txHash: "0xabc789",
+        },
+        bondKpiLinkedRate: {
+          configId: TEST_CONFIG_IDS.BOND_KPI_LINKED,
+          version: 1,
+          facetCount: 47,
+          txHash: "0xdef123",
+        },
+        bondSustainabilityPerformanceTargetRate: {
+          configId: TEST_CONFIG_IDS.BOND_SPT,
+          version: 1,
+          facetCount: 47,
+          txHash: "0xghi456",
+        },
+      },
+      factory: {
+        address: TEST_ADDRESSES.VALID_6,
+        implementation: TEST_ADDRESSES.VALID_6.replace(/5/g, "4"),
+        implementationContractId: TEST_CONTRACT_IDS.SAMPLE_5,
+        proxy: TEST_ADDRESSES.VALID_6,
+        proxyContractId: TEST_CONTRACT_IDS.SAMPLE_6,
+        txHash: "0xstu901",
+        gasUsed: "800000",
+        deployedAt: now,
+      },
+    },
+    options: {},
+    ...overrides,
+    // Deep merge steps if provided
+    ...(overrides.steps
+      ? {
+          steps: {
+            ...overrides.steps,
+          },
+        }
+      : {}),
+  };
+}
+
+/**
+ * Create a minimal incomplete checkpoint for error condition tests.
+ *
+ * Returns a checkpoint with only basic fields, suitable for testing
+ * validation error conditions (missing ProxyAdmin, BLR, etc.).
+ *
+ * @param overrides - Optional partial data to merge/override defaults
+ * @returns Minimal checkpoint with basic fields only
+ *
+ * @example
+ * ```typescript
+ * // Create empty checkpoint (for missing ProxyAdmin test)
+ * const checkpoint = createMinimalTestCheckpoint();
+ *
+ * // Create with only ProxyAdmin (for missing BLR test)
+ * const checkpoint = createMinimalTestCheckpoint({
+ *   steps: {
+ *     proxyAdmin: {
+ *       address: TEST_ADDRESSES.VALID_2,
+ *       txHash: TEST_TX_HASHES.SAMPLE_0,
+ *       deployedAt: new Date().toISOString()
+ *     }
+ *   }
+ * });
+ * ```
+ */
+export function createMinimalTestCheckpoint(overrides: Partial<DeploymentCheckpoint> = {}): DeploymentCheckpoint {
+  return {
+    checkpointId: `${TEST_NETWORKS.TESTNET}-1731085200000`,
+    network: TEST_NETWORKS.TESTNET,
+    deployer: TEST_ADDRESSES.VALID_0,
+    status: TEST_CHECKPOINT_STATUS.COMPLETED,
+    currentStep: 6,
+    workflowType: TEST_WORKFLOWS.NEW_BLR,
+    startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
+    lastUpdate: TEST_TIMESTAMPS.ISO_SAMPLE_LATER,
+    steps: {},
+    options: {},
+    ...overrides,
+  };
+}
+
+/**
+ * Create test checkpoint for status formatting tests.
+ *
+ * Returns a checkpoint with minimal fields needed for formatCheckpointStatus tests.
+ *
+ * @param status - Checkpoint status
+ * @param step - Current step number
+ * @param workflowType - Workflow type
+ * @param failure - Optional failure information
+ * @returns Checkpoint suitable for status formatting tests
+ */
+export function createStatusTestCheckpoint(
+  status: "in-progress" | "completed" | "failed",
+  step: number,
+  workflowType: WorkflowType = "newBlr",
+  failure?: DeploymentCheckpoint["failure"],
+): DeploymentCheckpoint {
+  return {
+    checkpointId: `${TEST_NETWORKS.TESTNET}-1731085200000`,
+    network: TEST_NETWORKS.TESTNET,
+    deployer: TEST_ADDRESSES.VALID_0,
+    status,
+    currentStep: step,
+    workflowType,
+    startTime: TEST_TIMESTAMPS.ISO_SAMPLE,
+    lastUpdate: "2025-11-08T10:05:00.000Z",
+    steps: {},
+    options: {},
+    ...(failure ? { failure } : {}),
+  };
+}
+
+/**
+ * Create checkpoint cleanup hooks for Mocha tests.
+ *
+ * Returns an object with methods for tracking and cleaning up checkpoint directories
+ * created during tests. Use `trackDir` to register directories for cleanup,
+ * `afterEachCleanup` in an `afterEach` hook, and `afterCleanup` in an `after` hook.
+ *
+ * @returns Object with trackDir, afterEachCleanup, and afterCleanup methods
+ *
+ * @example
+ * ```typescript
+ * import { createCheckpointCleanupHooks } from "@test";
+ *
+ * describe("My Checkpoint Tests", () => {
+ *   const { trackDir, afterEachCleanup, afterCleanup } = createCheckpointCleanupHooks();
+ *
+ *   afterEach(afterEachCleanup);
+ *   after(afterCleanup);
+ *
+ *   it("should create checkpoint", async () => {
+ *     const checkpointDir = `deployments/test/hardhat/.checkpoints/test-${Date.now()}`;
+ *     trackDir(checkpointDir);
+ *
+ *     // Test code that creates checkpoints in checkpointDir
+ *   });
+ * });
+ * ```
+ */
+export function createCheckpointCleanupHooks(): {
+  trackDir: (dir: string) => void;
+  afterEachCleanup: () => Promise<void>;
+  afterCleanup: () => Promise<void>;
+} {
+  const checkpointDirs: string[] = [];
+
+  return {
+    /**
+     * Track a checkpoint directory for cleanup.
+     * Call this with each directory created during tests.
+     */
+    trackDir: (dir: string) => {
+      checkpointDirs.push(dir);
+    },
+
+    /**
+     * Clean up tracked directories after each test.
+     * Use in an `afterEach` hook.
+     */
+    afterEachCleanup: async () => {
+      const fsModule = await import("fs").then((m) => m.promises);
+      for (const dir of checkpointDirs) {
+        try {
+          await fsModule.rm(dir, { recursive: true, force: true });
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+      checkpointDirs.length = 0; // Clear array
+    },
+
+    /**
+     * Clean up the shared test checkpoint directory after all tests.
+     * Use in an `after` hook.
+     */
+    afterCleanup: async () => {
+      const fsModule = await import("fs").then((m) => m.promises);
+      const { getTestDeploymentsDir: getTestDir } = await import("@scripts/infrastructure");
+      try {
+        await fsModule.rm(getTestDir(), { recursive: true, force: true });
+      } catch {
+        // Ignore cleanup errors
+      }
+    },
+  };
 }

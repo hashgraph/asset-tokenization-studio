@@ -12,7 +12,6 @@
  * @module domain/bond/createConfiguration
  */
 
-import { Contract } from "ethers";
 import {
   ConfigurationData,
   ConfigurationError,
@@ -22,6 +21,7 @@ import {
 } from "@scripts/infrastructure";
 import { BOND_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
+import { BusinessLogicResolver } from "@contract-types";
 
 /**
  * Bond-specific facets list (41 facets total).
@@ -144,7 +144,7 @@ const BOND_FACETS = [
  * ```
  */
 export async function createBondConfiguration(
-  blrContract: Contract,
+  blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
   useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,

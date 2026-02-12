@@ -16,8 +16,10 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { configureLogger, LogLevel } from "@scripts/infrastructure";
+import { join } from "path";
 import { upgradeTupProxies } from "@scripts";
+import { getTestCheckpointsDir } from "@scripts/infrastructure";
+import { silenceScriptLogging, createCheckpointCleanupHooks, removeTestDeployments, TEST_OPTIONS } from "@test";
 import {
   deployTupUpgradeTestFixture,
   deployBlrV2Implementation,
@@ -25,8 +27,10 @@ import {
 } from "../../fixtures/upgradeTupProxies.fixture";
 
 describe("upgradeTupProxies - Integration Tests", () => {
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
+  before(silenceScriptLogging);
+
+  after(async () => {
+    await removeTestDeployments();
   });
 
   describe("Basic Upgrade Flow - Deploy New Implementations", () => {
@@ -41,7 +45,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         deployNewFactoryImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -66,7 +70,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -87,7 +91,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         factoryProxyAddress,
         deployNewFactoryImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -107,7 +111,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -124,7 +128,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -143,7 +147,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         deployNewFactoryImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -168,7 +172,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -184,7 +188,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -196,7 +200,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         blrImplementationAddress: firstUpgrade.blrUpgrade?.newImplementation,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -220,7 +224,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrImplementationAddress: blrV2.address,
         factoryImplementationAddress: factoryV2.address,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -241,7 +245,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         blrImplementationAddress: blrV2.address,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -266,7 +270,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         factoryImplementationAddress: factoryV2.address,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -288,7 +292,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           blrProxyAddress,
           deployNewBlrImpl: true,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown");
@@ -304,7 +308,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         await upgradeTupProxies(deployer, "hardhat", {
           proxyAdminAddress,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown");
@@ -322,7 +326,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           proxyAdminAddress,
           blrProxyAddress,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown");
@@ -340,7 +344,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           proxyAdminAddress,
           factoryProxyAddress,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown");
@@ -359,7 +363,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           blrProxyAddress: "0x1111111111111111111111111111111111111111",
           deployNewBlrImpl: true,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         } as any);
         expect.fail("Should have thrown");
@@ -380,7 +384,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
       const after = new Date().toISOString();
@@ -398,7 +402,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         blrProxyAddress,
         deployNewBlrImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -416,7 +420,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         deployNewFactoryImpl: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -442,7 +446,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewFactoryImpl: true,
         enableRetry: false,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -452,38 +456,17 @@ describe("upgradeTupProxies - Integration Tests", () => {
   });
 
   describe("Checkpoint Resumability", () => {
-    const checkpointDirs: string[] = [];
+    const { trackDir, afterEachCleanup, afterCleanup } = createCheckpointCleanupHooks();
 
-    afterEach(async () => {
-      // Clean up any checkpoint directories created during tests
-      const fs = await import("fs").then((m) => m.promises);
-      for (const dir of checkpointDirs) {
-        try {
-          await fs.rm(dir, { recursive: true, force: true });
-        } catch (error) {
-          // Ignore cleanup errors
-        }
-      }
-      checkpointDirs.length = 0; // Clear array
-    });
-
-    after(async () => {
-      // Clean entire test checkpoint directory after all tests complete
-      const fs = await import("fs").then((m) => m.promises);
-      const testCheckpointDir = "deployments/test/hardhat/.checkpoints";
-      try {
-        await fs.rm(testCheckpointDir, { recursive: true, force: true });
-      } catch (error) {
-        // Ignore cleanup errors
-      }
-    });
+    afterEach(afterEachCleanup);
+    after(afterCleanup);
 
     it("should support checkpoint creation during workflow", async () => {
       const { deployer, proxyAdminAddress, blrProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
 
       const timestamp = Date.now();
-      const checkpointDir = `deployments/test/hardhat/.checkpoints/test-upgrade-${timestamp}`;
-      checkpointDirs.push(checkpointDir);
+      const checkpointDir = join(getTestCheckpointsDir("hardhat"), `test-upgrade-${timestamp}`);
+      trackDir(checkpointDir);
 
       const result = await upgradeTupProxies(deployer, "hardhat", {
         proxyAdminAddress,
@@ -491,7 +474,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         checkpointDir,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.summary.success).to.be.true;
@@ -506,7 +489,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         ignoreCheckpoint: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.summary.success).to.be.true;
@@ -516,8 +499,8 @@ describe("upgradeTupProxies - Integration Tests", () => {
       const { deployer, proxyAdminAddress, blrProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
 
       const timestamp = Date.now();
-      const checkpointDir = `deployments/test/hardhat/.checkpoints/test-delete-${timestamp}`;
-      checkpointDirs.push(checkpointDir);
+      const checkpointDir = join(getTestCheckpointsDir("hardhat"), `test-delete-${timestamp}`);
+      trackDir(checkpointDir);
 
       const result = await upgradeTupProxies(deployer, "hardhat", {
         proxyAdminAddress,
@@ -526,7 +509,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deleteOnSuccess: true,
         checkpointDir,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
       });
 
       expect(result.summary.success).to.be.true;
@@ -543,7 +526,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         verifyDeployment: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -561,7 +544,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
         deployNewBlrImpl: true,
         verifyDeployment: true,
         saveOutput: false,
-        confirmations: 0,
+        confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
         ignoreCheckpoint: true,
       });
 
@@ -582,7 +565,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
           blrProxyAddress: invalidProxyAddress,
           deployNewBlrImpl: true,
           saveOutput: false,
-          confirmations: 0,
+          confirmations: TEST_OPTIONS.CONFIRMATIONS_INSTANT,
           ignoreCheckpoint: true,
         });
         expect.fail("Should have thrown an error");

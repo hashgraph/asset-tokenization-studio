@@ -13,7 +13,7 @@ const sidebars: SidebarsConfig = {
         type: "doc",
         id: "getting-started/index",
       },
-      items: ["getting-started/quick-start", "getting-started/full-setup"],
+      items: ["getting-started/capabilities-overview", "getting-started/quick-start", "getting-started/full-setup"],
     },
     {
       type: "category",

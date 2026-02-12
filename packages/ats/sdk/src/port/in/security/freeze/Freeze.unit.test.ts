@@ -19,7 +19,7 @@ import { ValidationError } from "@core/validation/ValidationError";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
 import Security from "@port/in/security/Security";
 import BigDecimal from "@domain/context/shared/BigDecimal";
-import { BigNumber } from "ethers";
+
 import {
   BatchFreezePartialTokensResponse,
   BatchFreezePartialTokensCommand,
@@ -283,7 +283,7 @@ describe("Freeze", () => {
     getFrozenPartialTokensRequest = new GetFrozenPartialTokensRequest(GetFrozenPartialTokensQueryFixture.create());
 
     const expectedResponse = {
-      payload: new BigDecimal(BigNumber.from(1)),
+      payload: new BigDecimal(BigInt(1)),
     };
     it("should get hold count for by partition successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);

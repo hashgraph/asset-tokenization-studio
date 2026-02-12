@@ -15,16 +15,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import type { Signer } from "ethers";
-import {
-  ProxyAdmin__factory,
-  AccessControlFacet__factory,
-  AccessControlFacetTimeTravel__factory,
-  BusinessLogicResolver__factory,
-  KycFacet__factory,
-  Factory__factory,
-  PauseFacet__factory,
-  ProxyAdmin,
-} from "@contract-types";
 
 // Infrastructure layer
 import {
@@ -41,8 +31,6 @@ import {
   isTimeTravelVariant,
   validateAddress,
   validateBytes32,
-  configureLogger,
-  LogLevel,
 } from "@scripts/infrastructure";
 
 // Domain layer
@@ -56,15 +44,25 @@ import {
 } from "@scripts/domain";
 
 // Test helpers
-import { TEST_SIZES, BLR_VERSIONS } from "@test";
+import { TEST_SIZES, BLR_VERSIONS, silenceScriptLogging } from "@test";
+
+// Contract types
+import {
+  ProxyAdmin__factory,
+  AccessControlFacet__factory,
+  AccessControlFacetTimeTravel__factory,
+  BusinessLogicResolver__factory,
+  KycFacet__factory,
+  Factory__factory,
+  PauseFacet__factory,
+  ProxyAdmin,
+} from "@contract-types";
 
 describe("Phase 1 Deployment System - Integration Tests", () => {
   let deployer: Signer;
   let user: Signer;
 
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   beforeEach(async () => {
     [deployer, user] = await ethers.getSigners();
@@ -115,7 +113,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
       expect(() => validateAddress(deployerAddress, "deployer")).to.not.throw();
       expect(() => validateAddress(userAddress, "user")).to.not.throw();
-      expect(() => validateAddress(ethers.constants.AddressZero, "zero address")).to.not.throw();
+      expect(() => validateAddress(ethers.ZeroAddress, "zero address")).to.not.throw();
     });
 
     it("should reject invalid addresses", () => {
@@ -350,10 +348,11 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
     it("should deploy ProxyAdmin", async () => {
       const proxyAdmin = await deployProxyAdmin(deployer);
 
-      expect(proxyAdmin.address).to.match(/^0x[a-fA-F0-9]{40}$/);
-      expect(proxyAdmin.deployTransaction).to.exist;
-      expect(proxyAdmin.deployTransaction.hash).to.exist;
-      expect(proxyAdmin.deployTransaction.blockNumber).to.be.greaterThan(0);
+      expect(proxyAdmin.target).to.match(/^0x[a-fA-F0-9]{40}$/);
+      const deployTx = proxyAdmin.deploymentTransaction();
+      expect(deployTx).to.exist;
+      expect(deployTx!.hash).to.exist;
+      expect(deployTx!.blockNumber).to.be.greaterThan(0);
     });
 
     it("should deploy Factory with BLR reference", async () => {
@@ -373,7 +372,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(factoryResult.proxyAdminAddress).to.equal(blrResult.proxyAdminAddress);
 
       // Verify Factory deployment was successful (Factory doesn't have a getter for BLR address)
-      expect(factoryResult.factoryAddress).to.not.equal(ethers.constants.AddressZero);
+      expect(factoryResult.factoryAddress).to.not.equal(ethers.ZeroAddress);
     });
 
     it("should deploy multiple facets in batch", async () => {
@@ -461,7 +460,7 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       const factoryImplementationFactory = new Factory__factory(deployer);
       const factoryResult = await deployProxy(deployer, {
         implementationFactory: factoryImplementationFactory,
-        existingProxyAdmin: proxyAdminResult.contract as ProxyAdmin,
+        existingProxyAdmin: proxyAdminResult.contract as unknown as ProxyAdmin,
       });
       expect(factoryResult.proxyAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
     });

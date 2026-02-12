@@ -9,19 +9,16 @@
  * @module core/operations/deployContract
  */
 
-import { ContractFactory, Overrides } from "ethers";
+import { Contract, ContractFactory, ContractTransactionReceipt, Overrides } from "ethers";
 import {
-  DEFAULT_TRANSACTION_TIMEOUT,
   DeploymentResult,
   debug,
   error as logError,
-  estimateGasLimit,
   extractRevertReason,
   formatGasUsage,
   info,
   success,
   validateAddress,
-  waitForTransaction,
 } from "@scripts/infrastructure";
 import { verifyContractCode, VerificationOptions } from "@scripts/infrastructure";
 
@@ -95,33 +92,34 @@ export async function deployContract(
     // Prepare deployment overrides
     const deployOverrides: Overrides = { ...overrides };
 
-    // Estimate gas if not provided
-    if (!deployOverrides.gasLimit) {
-      try {
-        const estimated = await factory.signer.estimateGas(factory.getDeployTransaction(...args, deployOverrides));
-        deployOverrides.gasLimit = estimateGasLimit(estimated, 1.2);
-        debug(`Estimated gas limit: ${deployOverrides.gasLimit}`);
-      } catch (err) {
-        debug(`Could not estimate gas: ${extractRevertReason(err)}`);
-      }
-    }
+    // Note: Gas estimation in ethers v6 is done differently
+    // For now, we rely on the network's estimation or explicit overrides
 
     // Deploy contract
     const contract = await factory.deploy(...args, deployOverrides);
 
-    if (!silent) {
-      info(`Transaction sent: ${contract.deployTransaction.hash}`);
+    const deployTx = contract.deploymentTransaction();
+    if (!silent && deployTx) {
+      info(`Transaction sent: ${deployTx.hash}`);
     }
 
     // Wait for deployment
-    const receipt = await waitForTransaction(contract.deployTransaction, confirmations, DEFAULT_TRANSACTION_TIMEOUT);
+    await contract.waitForDeployment();
+    const contractAddress = await contract.getAddress();
 
     // Validate deployment
-    validateAddress(contract.address, "deployed contract address");
+    validateAddress(contractAddress, "deployed contract address");
+
+    // Get transaction receipt for gas usage
+    let receipt: ContractTransactionReceipt | null = null;
+    if (deployTx) {
+      receipt = await deployTx.wait(confirmations);
+    }
 
     // Verify deployment (bytecode existence check)
     if (verifyDeployment) {
-      const verificationResult = await verifyContractCode(factory.signer.provider!, contract.address, {
+      const provider = factory.runner && "provider" in factory.runner ? factory.runner.provider : null;
+      const verificationResult = await verifyContractCode(provider!, contractAddress, {
         ...verificationOptions,
         verbose: !silent,
       });
@@ -137,20 +135,24 @@ export async function deployContract(
       }
     }
 
-    const gasUsed = formatGasUsage(receipt, contract.deployTransaction.gasLimit);
+    if (receipt && deployTx) {
+      const gasUsed = formatGasUsage(receipt, deployTx.gasLimit);
+      if (!silent) {
+        debug(gasUsed);
+      }
+    }
 
     if (!silent) {
-      success(`${contractName} deployed at ${contract.address}`);
-      debug(gasUsed);
+      success(`${contractName} deployed at ${contractAddress}`);
     }
 
     return {
       success: true,
-      address: contract.address,
-      transactionHash: receipt.transactionHash,
-      blockNumber: receipt.blockNumber,
-      gasUsed: receipt.gasUsed.toNumber(),
-      contract,
+      address: contractAddress,
+      transactionHash: receipt?.hash,
+      blockNumber: receipt?.blockNumber,
+      gasUsed: receipt ? Number(receipt.gasUsed) : undefined,
+      contract: contract as unknown as Contract,
     };
   } catch (err) {
     const errorMessage = extractRevertReason(err);

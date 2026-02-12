@@ -37,10 +37,10 @@ describe("MetamaskService", () => {
     (global as any).ethereum = mockEthereum;
 
     const mockSigner = { getAddress: jest.fn().mockResolvedValue(evmAddress) };
-    jest.spyOn(ethers.providers, "Web3Provider").mockImplementation(
+    jest.spyOn(ethers, "BrowserProvider").mockImplementation(
       () =>
         ({
-          getSigner: jest.fn().mockReturnValue(mockSigner),
+          getSigner: jest.fn().mockResolvedValue(mockSigner),
         }) as any,
     );
   });

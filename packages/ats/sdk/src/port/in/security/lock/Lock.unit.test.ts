@@ -30,7 +30,7 @@ import {
 import { LockCommand } from "@command/security/operations/lock/LockCommand";
 import { ReleaseCommand } from "@command/security/operations/release/ReleaseCommand";
 import BigDecimal from "@domain/context/shared/BigDecimal";
-import { BigNumber } from "ethers";
+
 import { LockedBalanceOfQuery } from "@query/security/lockedBalanceOf/LockedBalanceOfQuery";
 import { LockCountQuery } from "@query/security/lockCount/LockCountQuery";
 import { LocksIdQuery } from "@query/security/locksId/LocksIdQuery";
@@ -201,7 +201,7 @@ describe("Lock", () => {
     getLockedBalanceRequest = new GetLockedBalanceRequest(GetLockedBalanceRequestFixture.create());
 
     const expectedResponse = {
-      payload: new BigDecimal(BigNumber.from(0)),
+      payload: new BigDecimal(BigInt(0)),
     };
     it("should get locked balance of successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);
@@ -311,7 +311,7 @@ describe("Lock", () => {
     getLocksIdRequest = new GetLocksIdRequest(GetLocksIdRequestFixture.create());
 
     const expectedResponse = {
-      payload: [BigNumber.from(1)],
+      payload: [BigInt(1)],
     };
     it("should get locks id successfully", async () => {
       queryBusMock.execute.mockResolvedValue(expectedResponse);

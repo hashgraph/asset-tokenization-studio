@@ -6,37 +6,57 @@ sidebar_position: 1
 
 # Getting Started with Asset Tokenization Studio
 
-Choose how you want to get started with ATS:
-
-## Quick Start
-
-Try the ATS web application to create and manage security tokens.
-
-**Best for:** End users who want to quickly test the application
-
-[Try the Web App →](./quick-start.md)
+Welcome to ATS! Choose your path based on what you want to accomplish.
 
 ---
 
-## Full Development Setup
+## Explore What's Possible
 
-Complete setup for developers who want to build, customize, or integrate ATS components.
+<div className="card-box card-note">
+  <h3>Product Capabilities</h3>
+  <p>Discover everything you can build with ATS - from equity and bond tokens to compliance automation and corporate actions.</p>
+  <a href="./capabilities-overview" className="card-link">Explore Capabilities →</a>
+</div>
 
-**Best for:** Developers who want to:
+---
 
-- Customize the smart contracts
-- Integrate the SDK into their projects
-- Contribute to the codebase
-- Deploy their own contracts
+## Start Using ATS
 
-[Full Setup Guide →](./full-setup.md)
+<div className="card-grid card-grid-2">
+  <div className="card-box card-info">
+    <h3>Quick Start</h3>
+    <p>Try the ATS web application to create and manage security tokens.</p>
+    <p><strong>Best for:</strong> Business users who want to quickly test the application</p>
+    <ul>
+      <li>No coding required</li>
+      <li>Create tokens in minutes</li>
+      <li>Manage compliance and KYC</li>
+    </ul>
+    <a href="./quick-start" className="card-link">Start Now →</a>
+  </div>
+
+  <div className="card-box card-info">
+    <h3>Full Development Setup</h3>
+    <p>Complete setup for developers who want to build, customize, or integrate ATS.</p>
+    <p><strong>Best for:</strong> Developers who want to:</p>
+    <ul>
+      <li>Integrate the SDK into their projects</li>
+      <li>Customize the smart contracts</li>
+      <li>Deploy their own contracts</li>
+    </ul>
+    <a href="./full-setup" className="card-link">Developer Setup →</a>
+  </div>
+</div>
 
 ---
 
 ## What's Next?
 
-After setup, explore:
+After getting started, explore:
 
-- [User Guides](../user-guides/index.md) - Learn how to create tokens, manage compliance, and execute corporate actions
-- [Developer Guides](../developer-guides/index.md) - Deep dive into contracts, SDK integration, and architecture
-- [API Documentation](../api/index.md) - Technical reference for contracts and SDK
+| Goal                                             | Where to Go                                                    |
+| ------------------------------------------------ | -------------------------------------------------------------- |
+| Learn how to create tokens and manage compliance | [User Guides](../user-guides/index.md)                         |
+| Integrate ATS into your application              | [SDK Integration](../developer-guides/sdk-integration.md)      |
+| Understand the contract architecture             | [Contract Overview](../developer-guides/contracts/overview.md) |
+| Browse API documentation                         | [API Reference](../api/index.md)                               |

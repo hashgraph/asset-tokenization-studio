@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { subtask, task, types } from "hardhat/config";
-import { Signer, Wallet } from "ethers";
+import { Signer, Wallet, keccak256 } from "ethers";
 import { ethers } from "ethers";
-import { keccak256 } from "ethers/lib/utils";
 import { GetSignerResult, GetSignerArgs, Keccak256Args, CreateVcArgs } from "@tasks";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { createEcdsaCredential, EthrDID } from "@terminal3/ecdsa_vc";
 import { DID, type VerificationOptions } from "@terminal3/vc_core";
 import * as path from "node:path";
@@ -25,7 +24,7 @@ subtask("getSigner", "Retrieve the signer for deployment. Defaults to the primar
     const { privateKey, signerAddress, signerPosition } = args;
     const signers = await hre.ethers.getSigners();
 
-    let signer: Signer | SignerWithAddress = signers[0];
+    let signer: Signer | HardhatEthersSigner = signers[0];
     if (privateKey) {
       signer = new Wallet(privateKey, hre.ethers.provider);
     } else if (signerPosition) {
@@ -62,7 +61,7 @@ task("createVC", "Generates a .vc file for a given issuer and holder")
     const claims = { kyc: "passed" };
     const revocationRegistryAddress = "0x77Fb69B24e4C659CE03fB129c19Ad591374C349e";
     const didRegistryAddress = "0x312C15922c22B60f5557bAa1A85F2CdA4891C39a";
-    const provider = new ethers.providers.JsonRpcProvider("https://testnet.hashio.io/api");
+    const provider = new ethers.JsonRpcProvider("https://testnet.hashio.io/api");
 
     const options = {
       revocationRegistryAddress,

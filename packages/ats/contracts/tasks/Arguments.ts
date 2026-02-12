@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 export interface GetSignerResult {
-  signer: SignerWithAddress;
+  signer: HardhatEthersSigner;
   address: string;
   privateKey: string;
 }
