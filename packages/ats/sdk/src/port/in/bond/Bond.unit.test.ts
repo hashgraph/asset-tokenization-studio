@@ -9,6 +9,7 @@ import {
   GetCouponForRequest,
   GetCouponRequest,
   GetAllCouponsRequest,
+  GetCouponsOrderedListRequest,
   UpdateMaturityDateRequest,
   RedeemAtMaturityByPartitionRequest,
   FullRedeemAtMaturityRequest,
@@ -35,6 +36,7 @@ import {
   CouponFixture,
   CreateBondRequestFixture,
   GetAllCouponsRequestFixture,
+  GetCouponsOrderedListRequestFixture,
   GetBondDetailsRequestFixture,
   GetCouponForRequestFixture,
   GetCouponHoldersQueryFixture,
@@ -69,6 +71,7 @@ import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponFor
 import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
 import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
 import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
+import { GetCouponsOrderedListQuery } from "@query/bond/coupons/getCouponsOrderedList/GetCouponsOrderedListQuery";
 import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
 import { UpdateMaturityDateCommand } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommand";
 import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
@@ -97,6 +100,7 @@ describe("Bond", () => {
   let getCouponForRequest: GetCouponForRequest;
   let getCouponRequest: GetCouponRequest;
   let getAllCouponsRequest: GetAllCouponsRequest;
+  let getCouponsOrderedListRequest: GetCouponsOrderedListRequest;
   let updateMaturityDateRequest: UpdateMaturityDateRequest;
   let redeemAtMaturityByPartitionRequest: RedeemAtMaturityByPartitionRequest;
   let fullRedeemAtMaturityRequest: FullRedeemAtMaturityRequest;
@@ -116,6 +120,8 @@ describe("Bond", () => {
     commandBusMock = createMock<CommandBus>();
     queryBusMock = createMock<QueryBus>();
     handleValidationSpy = jest.spyOn(ValidatedRequest, "handleValidation");
+    getAllCouponsRequest = new GetAllCouponsRequest(GetAllCouponsRequestFixture.create());
+    getCouponsOrderedListRequest = new GetCouponsOrderedListRequest(GetCouponsOrderedListRequestFixture.create());
     networkServiceMock = createMock<NetworkService>({
       configuration: {
         factoryAddress: factoryAddress,
@@ -900,6 +906,88 @@ describe("Bond", () => {
       expect(handleValidationSpy).toHaveBeenCalledWith("GetAllCouponsRequest", getAllCouponsRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(new GetCouponCountQuery(getAllCouponsRequest.securityId));
+    });
+  });
+
+  describe("getCouponsOrderedList", () => {
+    it("should get coupons ordered list successfully", async () => {
+      const expectedResponse = [1, 2, 3, 4, 5];
+
+      queryBusMock.execute.mockResolvedValue({ payload: expectedResponse });
+
+      const result = await BondToken.getCouponsOrderedList(getCouponsOrderedListRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponsOrderedListRequest", getCouponsOrderedListRequest);
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponsOrderedListQuery(
+          getCouponsOrderedListRequest.securityId,
+          getCouponsOrderedListRequest.pageIndex,
+          getCouponsOrderedListRequest.pageLength,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(BondToken.getCouponsOrderedList(getCouponsOrderedListRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponsOrderedListRequest", getCouponsOrderedListRequest);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new GetCouponsOrderedListQuery(
+          getCouponsOrderedListRequest.securityId,
+          getCouponsOrderedListRequest.pageIndex,
+          getCouponsOrderedListRequest.pageLength,
+        ),
+      );
+    });
+
+    it("should throw error if securityId is invalid", async () => {
+      const invalidRequest = new GetCouponsOrderedListRequest({
+        securityId: "invalid",
+        pageIndex: 0,
+        pageLength: 10,
+      });
+
+      await expect(BondToken.getCouponsOrderedList(invalidRequest)).rejects.toThrow(ValidationError);
+    });
+
+    it("should work with mocked query handler", async () => {
+      const expectedResponse = [10, 20, 30];
+
+      // Mock the query handler directly
+      const mockHandler = {
+        execute: jest.fn().mockResolvedValue({ payload: expectedResponse }),
+      };
+
+      // Replace the query bus execute for this specific query
+      queryBusMock.execute.mockImplementation((query) => {
+        if (query instanceof GetCouponsOrderedListQuery) {
+          return mockHandler.execute(query);
+        }
+        return Promise.resolve({});
+      });
+
+      const result = await BondToken.getCouponsOrderedList(getCouponsOrderedListRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponsOrderedListRequest", getCouponsOrderedListRequest);
+      expect(mockHandler.execute).toHaveBeenCalledWith(
+        new GetCouponsOrderedListQuery(
+          getCouponsOrderedListRequest.securityId,
+          getCouponsOrderedListRequest.pageIndex,
+          getCouponsOrderedListRequest.pageLength,
+        ),
+      );
+      expect(result).toEqual(expectedResponse);
     });
   });
 

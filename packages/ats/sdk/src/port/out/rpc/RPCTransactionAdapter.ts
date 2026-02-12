@@ -33,6 +33,43 @@ import { Security } from "@domain/context/security/Security";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
 import { FactoryBondToken, FactoryEquityToken } from "@domain/context/factory/FactorySecurityToken";
 import { SigningError } from "../error/SigningError";
+} from '@core/Constants';
+import { lazyInject } from "@core/decorator/LazyInjectDecorator";
+import Account from "@domain/context/account/Account";
+import { BondDetails } from "@domain/context/bond/BondDetails";
+import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
+import { BondKpiLinkedRateDetails } from "@domain/context/bond/BondKpiLinkedRateDetails";
+import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
+import EvmAddress from "@domain/context/contract/EvmAddress";
+import { EquityDetails } from "@domain/context/equity/EquityDetails";
+import { BasicTransferInfo, IssueData, OperatorTransferData } from "@domain/context/factory/ERC1410Metadata";
+import { Factories } from "@domain/context/factory/Factories";
+import {
+  FactoryBondFixedRateToken,
+  FactoryBondKpiLinkedRateToken,
+  FactoryBondToken,
+  FactoryEquityToken,
+} from '@domain/context/factory/FactorySecurityToken';
+import { ProtectionData } from '@domain/context/factory/ProtectionData';
+import { Resolvers } from "@domain/context/factory/Resolvers";
+import { SecurityData } from "@domain/context/factory/SecurityData";
+import { JsonRpcRelays } from "@domain/context/network/JsonRpcRelay";
+import { MirrorNodes } from "@domain/context/network/MirrorNode";
+import {
+  CastClearingOperationType,
+  ClearingOperation,
+  ClearingOperationFrom,
+  ClearingOperationIdentifier,
+  ClearingOperationType,
+  ProtectedClearingOperation,
+} from '@domain/context/security/Clearing';
+import { Hold, HoldIdentifier, ProtectedHold } from "@domain/context/security/Hold";
+import { Security } from '@domain/context/security/Security';
+import { SecurityRole } from '@domain/context/security/SecurityRole';
+import BigDecimal from "@domain/context/shared/BigDecimal";
+import TransactionResponse from "@domain/context/transaction/TransactionResponse";
+import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
+import type { Provider } from "@ethersproject/providers";
 import {
   AccessControlFacet__factory,
   Bond__factory,
@@ -44,7 +81,9 @@ import {
   ControlListFacet__factory,
   DiamondFacet__factory,
   Equity__factory,
+  ERC1410IssuerFacet__factory,
   ERC1410ManagementFacet__factory,
+  ERC1410TokenHolderFacet__factory,
   ERC1643Facet__factory,
   ERC3643BatchFacet__factory,
   ERC3643ManagementFacet__factory,
@@ -53,6 +92,7 @@ import {
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
   Factory__factory,
+  FixedRate__factory,
   FreezeFacet__factory,
   HoldManagementFacet__factory,
   HoldTokenHolderFacet__factory,
@@ -74,6 +114,8 @@ import {
   TREXFactoryAts__factory,
   ProceedRecipientsFacet__factory,
   ERC1410IssuerFacet__factory,
+  Kpis__factory,
+  KpiLinkedRate__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { Resolvers } from "@domain/context/factory/Resolvers";
 import EvmAddress from "@domain/context/contract/EvmAddress";
@@ -232,10 +274,100 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         ),
       "deployBond",
       GAS.CREATE_BOND_ST,
-      "BondDeployed",
+      'BondDeployed',
       compliance,
       identityRegistryAddress,
     );
+  }
+
+  async createBondFixedRate(
+      securityInfo: Security,
+      bondFixedRateDetails: BondFixedRateDetails,
+      factory: EvmAddress,
+      resolver: EvmAddress,
+      configId: string,
+      configVersion: number,
+      compliance: EvmAddress,
+      identityRegistryAddress: EvmAddress,
+      externalPauses?: EvmAddress[],
+      externalControlLists?: EvmAddress[],
+      externalKycLists?: EvmAddress[],
+      diamondOwnerAccount?: EvmAddress,
+      proceedRecipients: EvmAddress[] = [],
+      proceedRecipientsData: string[] = [],
+      factoryId?: ContractId | string,
+    ): Promise<TransactionResponse> {
+      return this.createSecurity(
+        securityInfo,
+        {
+          bondDetails: SecurityDataBuilder.buildBondFixedRateDetails(bondFixedRateDetails),
+        },
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+        diamondOwnerAccount!,
+        (security, details) =>
+          new FactoryBondFixedRateToken(
+            security,
+            details.bondDetails,
+            proceedRecipients.map((addr) => addr.toString()),
+            proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
+          ),
+        'deployBondFixedRate',
+        GAS.CREATE_BOND_ST,
+        'BondFixedRateDeployed',
+        compliance,
+        identityRegistryAddress,
+      );
+  }
+
+  async createBondKpiLinkedRate(
+      securityInfo: Security,
+      bondKpiLinkedRateDetails: BondKpiLinkedRateDetails,
+      factory: EvmAddress,
+      resolver: EvmAddress,
+      configId: string,
+      configVersion: number,
+      compliance: EvmAddress,
+      identityRegistryAddress: EvmAddress,
+      externalPauses?: EvmAddress[],
+      externalControlLists?: EvmAddress[],
+      externalKycLists?: EvmAddress[],
+      diamondOwnerAccount?: EvmAddress,
+      proceedRecipients: EvmAddress[] = [],
+      proceedRecipientsData: string[] = [],
+      factoryId?: ContractId | string,
+    ): Promise<TransactionResponse> {
+      return this.createSecurity(
+        securityInfo,
+        {
+          bondDetails: SecurityDataBuilder.buildBondKpiLinkedRateDetails(bondKpiLinkedRateDetails),
+        },
+        factory,
+        resolver,
+        configId,
+        configVersion,
+        externalPauses,
+        externalControlLists,
+        externalKycLists,
+        diamondOwnerAccount!,
+        (security, details) =>
+          new FactoryBondKpiLinkedRateToken(
+            security,
+            details.bondDetails,
+            proceedRecipients.map((addr) => addr.toString()),
+            proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
+          ),
+        'deployBondKpiLinkedRate',
+        GAS.CREATE_BOND_ST,
+        'BondKpiLinkedRateDeployed',
+        compliance,
+        identityRegistryAddress,
+      );
   }
 
   async transfer(security: EvmAddress, targetId: EvmAddress, amount: BigDecimal): Promise<TransactionResponse> {
@@ -2486,6 +2618,94 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "updateProceedRecipientData",
       [proceedRecipient.toString(), data],
       GAS.UPDATE_PROCEED_RECIPIENT,
+    );
+  }
+
+  setRate(security: EvmAddress, rate: BigDecimal, rateDecimals: number, securityId?: ContractId | string): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting Rate ${rate.toString()} with decimals ${rateDecimals} for security ${security.toString()}`,
+    );
+    return this.executeTransaction(
+      FixedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setRate",
+      [rate.toBigNumber(), rateDecimals],
+      GAS.SET_RATE,
+    );
+  }
+
+  setInterestRate(
+    security: EvmAddress,
+    maxRate: BigDecimal,
+    baseRate: BigDecimal,
+    minRate: BigDecimal,
+    startPeriod: BigDecimal,
+    startRate: BigDecimal,
+    missedPenalty: BigDecimal,
+    reportPeriod: BigDecimal,
+    rateDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting Interest Rate for security ${security.toString()}`,
+    );
+    return this.executeTransaction(
+      KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setInterestRate",
+      [{
+        maxRate: maxRate.toBigNumber(),
+        baseRate: baseRate.toBigNumber(),
+        minRate: minRate.toBigNumber(),
+        startPeriod: startPeriod.toBigNumber(),
+        startRate: startRate.toBigNumber(),
+        missedPenalty: missedPenalty.toBigNumber(),
+        reportPeriod: reportPeriod.toBigNumber(),
+        rateDecimals: rateDecimals,
+      }],
+      GAS.SET_INTEREST_RATE,
+    );
+  }
+
+  setImpactData(
+    security: EvmAddress,
+    maxDeviationCap: BigDecimal,
+    baseLine: BigDecimal,
+    maxDeviationFloor: BigDecimal,
+    impactDataDecimals: number,
+    adjustmentPrecision: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting Impact Data for security ${security.toString()}`,
+    );
+    return this.executeTransaction(
+      KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setImpactData",
+      [{
+        maxDeviationCap: maxDeviationCap.toBigNumber(),
+        baseLine: baseLine.toBigNumber(),
+        maxDeviationFloor: maxDeviationFloor.toBigNumber(),
+        impactDataDecimals: impactDataDecimals,
+        adjustmentPrecision: adjustmentPrecision.toBigNumber(),
+      }],
+      GAS.SET_IMPACT_DATA,
+    );
+  }
+
+  addKpiData(
+    security: EvmAddress,
+    date: number,
+    value: string,
+    project: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Adding KPI data for security ${security.toString()}, date: ${date}, value: ${value}, project: ${project.toString()}`,
+    );
+    return this.executeTransaction(
+      Kpis__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "addKpiData",
+      [date, value, project.toString()],
+      GAS.ADD_KPI_DATA,
     );
   }
 }

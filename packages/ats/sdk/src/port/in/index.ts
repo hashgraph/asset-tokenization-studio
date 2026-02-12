@@ -14,6 +14,8 @@ import ExternalPausesManagement from "./externalPausesManagement/ExternalPausesM
 import Kyc from "./kyc/Kyc";
 import ExternalControlListsManagement from "./externalControlListsManagement/ExternalControlListsManagement";
 import ExternalKycListsManagement from "./externalKycListsManagement/ExternalKycListsManagement";
+import FixedRate from "./interestRates/fixedRate/FixedRate";
+import KpiLinkedRate from "./interestRates/kpiLinkedRate/KpiLinkedRate";
 
 export {
   Security,
@@ -30,6 +32,8 @@ export {
   ExternalPausesManagement,
   ExternalControlListsManagement,
   ExternalKycListsManagement,
+  FixedRate,
+  KpiLinkedRate,
 };
 
 export * from "./request";
@@ -50,3 +54,5 @@ export * from "./ssiManagement/SsiManagement";
 export * from "./externalPausesManagement/ExternalPausesManagement";
 export * from "./externalControlListsManagement/ExternalControlListsManagement";
 export * from "./externalKycListsManagement/ExternalKycListsManagement";
+export * from "./interestRates/fixedRate/FixedRate";
+export * from "./interestRates/kpiLinkedRate/KpiLinkedRate";
