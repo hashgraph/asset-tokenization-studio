@@ -56,7 +56,7 @@ describe("atsRegistry.data - Factory Functions", () => {
 
           // Test TimeTravel factory (useTimeTravel = true)
           // This exercises the uncovered branch
-          const timeTravelFactory = facet.factory(signer, true);
+          const timeTravelFactory = facet.factory!(signer, true);
           expect(timeTravelFactory).to.not.be.undefined;
           expect(timeTravelFactory).to.have.property("deploy");
         });
@@ -75,7 +75,7 @@ describe("atsRegistry.data - Factory Functions", () => {
           expect(facet.factory).to.be.a("function");
 
           // Test normal factory (useTimeTravel = false)
-          const normalFactory = facet.factory(signer, false);
+          const normalFactory = facet.factory!(signer, false);
           expect(normalFactory).to.not.be.undefined;
           expect(normalFactory).to.have.property("deploy");
         });
@@ -136,8 +136,8 @@ describe("atsRegistry - Registry Helper Functions", () => {
     it("getFacetDefinition should return a valid facet definition", () => {
       const facet = getFacetDefinition("AccessControlFacet");
       expect(facet).to.not.be.undefined;
-      expect(facet.name).to.equal("AccessControlFacet");
-      expect(facet.methods).to.be.an("array");
+      expect(facet!.name).to.equal("AccessControlFacet");
+      expect(facet!.methods).to.be.an("array");
     });
 
     it("getFacetDefinition should return undefined for non-existent facet", () => {
@@ -169,7 +169,7 @@ describe("atsRegistry - Registry Helper Functions", () => {
     it("getContractDefinition should return a valid contract definition", () => {
       const contract = getContractDefinition("BusinessLogicResolver");
       expect(contract).to.not.be.undefined;
-      expect(contract.name).to.equal("BusinessLogicResolver");
+      expect(contract!.name).to.equal("BusinessLogicResolver");
     });
 
     it("getContractDefinition should return undefined for non-existent contract", () => {
@@ -196,7 +196,7 @@ describe("atsRegistry - Registry Helper Functions", () => {
     it("getStorageWrapperDefinition should return a valid wrapper definition", () => {
       const wrapper = getStorageWrapperDefinition("AccessControlStorageWrapper");
       expect(wrapper).to.not.be.undefined;
-      expect(wrapper.name).to.equal("AccessControlStorageWrapper");
+      expect(wrapper!.name).to.equal("AccessControlStorageWrapper");
     });
 
     it("getStorageWrapperDefinition should return undefined for non-existent wrapper", () => {

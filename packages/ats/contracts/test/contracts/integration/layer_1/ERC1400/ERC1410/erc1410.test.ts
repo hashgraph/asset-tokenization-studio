@@ -1,40 +1,35 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import { BigNumber } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
-  type ResolverProxy,
-  type PauseFacet,
-  type AccessControl,
-  type Equity,
-  type IERC1410,
-  KycFacet,
-  SsiManagementFacet,
-  ERC20Facet,
-  ERC1594Facet,
-  ERC1644Facet,
   AdjustBalancesFacet,
   Cap,
+  ClearingActionsFacet,
+  ControlListFacet,
+  DiamondFacet,
+  type Equity,
+  ERC1594Facet,
+  ERC1644Facet,
+  ERC20Facet,
   IClearing,
+  type PauseFacet,
+  ProtectedPartitionsFacet,
+  type ResolverProxy,
   SnapshotsFacet,
   TimeTravelFacet,
-  ControlListFacet,
-  ProtectedPartitionsFacet,
-  DiamondFacet,
 } from "@contract-types";
-import { grantRoleAndPauseToken } from "@test";
+import { deployEquityTokenFixture, executeRbac, grantRoleAndPauseToken, MAX_UINT256 } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ClearingActionsFacet } from "@contract-types";
-import { deployEquityTokenFixture } from "@test";
-import { executeRbac, MAX_UINT256 } from "@test";
 import {
-  ZERO,
-  EMPTY_STRING,
-  ATS_ROLES,
   ADDRESS_ZERO,
+  ATS_ROLES,
   dateToUnixTimestamp,
-  EIP1066_CODES,
   DEFAULT_PARTITION,
+  EIP1066_CODES,
+  EMPTY_STRING,
+  ZERO,
 } from "@scripts";
 
 const amount = 1;
@@ -70,49 +65,49 @@ let basicTransferInfo: TransferInfo;
 let operatorTransferData: OperatorTransferData;
 
 interface BalanceAdjustedValues {
-  maxSupply: BigNumber;
-  maxSupply_Partition_1: BigNumber;
-  maxSupply_Partition: BigNumber;
-  totalSupply: BigNumber;
-  totalSupply_Partition_1: BigNumber;
-  totalSupply_Partition: BigNumber;
-  balanceOf_A: BigNumber;
-  balanceOf_A_Partition_1: BigNumber;
-  balanceOf_A_Partition: BigNumber;
-  balanceOf_B: BigNumber;
-  balanceOf_B_Partition_1: BigNumber;
-  balanceOf_B_Partition: BigNumber;
-  decimals: number;
+  maxSupply: bigint;
+  maxSupply_Partition_1: bigint;
+  maxSupply_Partition: bigint;
+  totalSupply: bigint;
+  totalSupply_Partition_1: bigint;
+  totalSupply_Partition: bigint;
+  balanceOf_A: bigint;
+  balanceOf_A_Partition_1: bigint;
+  balanceOf_A_Partition: bigint;
+  balanceOf_B: bigint;
+  balanceOf_B_Partition_1: bigint;
+  balanceOf_B_Partition: bigint;
+  decimals: bigint;
   metadata?: any;
 }
-const packedData = ethers.utils.defaultAbiCoder.encode(
+const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
   ["bytes32", "bytes32"],
   [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
 );
 const packedDataWithoutPrefix = packedData.slice(2);
 
-const ProtectedPartitionRole_1 = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
 
 describe("ERC1410 Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
-  let signer_E: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
+  let signer_E: HardhatEthersSigner;
 
-  let erc1410Facet: IERC1410;
-  let accessControlFacet: AccessControl;
+  let erc1410Facet: any;
+  let accessControlFacet: any;
   let pauseFacet: PauseFacet;
   let equityFacet: Equity;
-  let controlList: ControlListFacet;
+  let controlList: any;
   let capFacet: Cap;
   let erc20Facet: ERC20Facet;
   let erc1594Facet: ERC1594Facet;
   let erc1644Facet: ERC1644Facet;
   let adjustBalancesFacet: AdjustBalancesFacet;
-  let kycFacet: KycFacet;
-  let ssiManagementFacet: SsiManagementFacet;
+  let kycFacet: any;
+  let ssiManagementFacet: any;
   let clearingActionsFacet: ClearingActionsFacet;
   let snapshotsFacet: SnapshotsFacet;
   let timeTravelFacet: TimeTravelFacet;
@@ -251,26 +246,26 @@ describe("ERC1410 Tests", () => {
 
   async function checkAdjustmentsAfterBalanceAdjustment(after: BalanceAdjustedValues, before: BalanceAdjustedValues) {
     // Has been adjusted 2 times
-    const factorSquared = BigNumber.from(adjustFactor).pow(2);
+    const factorSquared = BigInt(adjustFactor) ** 2n;
     const doubleDecimals = 2 * adjustDecimals;
 
-    expect(after.maxSupply).to.be.equal(before.maxSupply.mul(factorSquared));
-    expect(after.maxSupply_Partition_1).to.be.equal(before.maxSupply_Partition_1.mul(factorSquared));
-    expect(after.maxSupply_Partition).to.be.equal(before.maxSupply_Partition.mul(factorSquared));
+    expect(after.maxSupply).to.be.equal(before.maxSupply * factorSquared);
+    expect(after.maxSupply_Partition_1).to.be.equal(before.maxSupply_Partition_1 * factorSquared);
+    expect(after.maxSupply_Partition).to.be.equal(before.maxSupply_Partition * factorSquared);
 
-    expect(after.totalSupply).to.be.equal(before.totalSupply.mul(factorSquared));
-    expect(after.totalSupply_Partition_1).to.be.equal(before.totalSupply_Partition_1.mul(factorSquared));
-    expect(after.totalSupply_Partition).to.be.equal(before.totalSupply_Partition.mul(factorSquared));
+    expect(after.totalSupply).to.be.equal(before.totalSupply * factorSquared);
+    expect(after.totalSupply_Partition_1).to.be.equal(before.totalSupply_Partition_1 * factorSquared);
+    expect(after.totalSupply_Partition).to.be.equal(before.totalSupply_Partition * factorSquared);
 
-    expect(after.balanceOf_A).to.be.equal(before.balanceOf_A.mul(factorSquared));
-    expect(after.balanceOf_A_Partition_1).to.be.equal(before.balanceOf_A_Partition_1.mul(factorSquared));
-    expect(after.balanceOf_A_Partition).to.be.equal(before.balanceOf_A_Partition.mul(factorSquared));
+    expect(after.balanceOf_A).to.be.equal(before.balanceOf_A * factorSquared);
+    expect(after.balanceOf_A_Partition_1).to.be.equal(before.balanceOf_A_Partition_1 * factorSquared);
+    expect(after.balanceOf_A_Partition).to.be.equal(before.balanceOf_A_Partition * factorSquared);
 
-    expect(after.balanceOf_B).to.be.equal(before.balanceOf_B.mul(factorSquared));
-    expect(after.balanceOf_B_Partition_1).to.be.equal(before.balanceOf_B_Partition_1.mul(factorSquared));
-    expect(after.balanceOf_B_Partition).to.be.equal(before.balanceOf_B_Partition.mul(factorSquared));
+    expect(after.balanceOf_B).to.be.equal(before.balanceOf_B * factorSquared);
+    expect(after.balanceOf_B_Partition_1).to.be.equal(before.balanceOf_B_Partition_1 * factorSquared);
+    expect(after.balanceOf_B_Partition).to.be.equal(before.balanceOf_B_Partition * factorSquared);
 
-    expect(after.decimals).to.be.equal(before.decimals + doubleDecimals);
+    expect(after.decimals).to.be.equal(before.decimals + BigInt(doubleDecimals));
     expect(after.metadata?.info?.decimals).to.be.equal(after.decimals);
   }
 
@@ -288,31 +283,31 @@ describe("ERC1410 Tests", () => {
     subtractedAmount: number,
     addedAmount: number,
   ) {
-    const balanceReduction = subtractedAmount - addedAmount;
+    const balanceReduction = BigInt(subtractedAmount - addedAmount);
 
-    expect(after.maxSupply).to.be.equal(before.maxSupply.mul(adjustFactor));
-    expect(after.maxSupply_Partition_1).to.be.equal(before.maxSupply_Partition_1.mul(adjustFactor));
-    expect(after.maxSupply_Partition).to.be.equal(before.maxSupply_Partition.mul(adjustFactor));
+    expect(after.maxSupply).to.be.equal(before.maxSupply * BigInt(adjustFactor));
+    expect(after.maxSupply_Partition_1).to.be.equal(before.maxSupply_Partition_1 * BigInt(adjustFactor));
+    expect(after.maxSupply_Partition).to.be.equal(before.maxSupply_Partition * BigInt(adjustFactor));
 
-    expect(after.totalSupply).to.be.equal(before.totalSupply.mul(adjustFactor).sub(balanceReduction));
+    expect(after.totalSupply).to.be.equal(before.totalSupply * BigInt(adjustFactor) - balanceReduction);
     expect(after.totalSupply_Partition_1).to.be.equal(
-      before.totalSupply_Partition_1.mul(adjustFactor).sub(balanceReduction),
+      before.totalSupply_Partition_1 * BigInt(adjustFactor) - balanceReduction,
     );
-    expect(after.totalSupply_Partition).to.be.equal(before.totalSupply_Partition.mul(adjustFactor));
+    expect(after.totalSupply_Partition).to.be.equal(before.totalSupply_Partition * BigInt(adjustFactor));
 
-    expect(after.balanceOf_A).to.be.equal(before.balanceOf_A.mul(adjustFactor).sub(subtractedAmount));
+    expect(after.balanceOf_A).to.be.equal(before.balanceOf_A * BigInt(adjustFactor) - BigInt(subtractedAmount));
     expect(after.balanceOf_A_Partition_1).to.be.equal(
-      before.balanceOf_A_Partition_1.mul(adjustFactor).sub(subtractedAmount),
+      before.balanceOf_A_Partition_1 * BigInt(adjustFactor) - BigInt(subtractedAmount),
     );
-    expect(after.balanceOf_A_Partition).to.be.equal(before.balanceOf_A_Partition.mul(adjustFactor));
+    expect(after.balanceOf_A_Partition).to.be.equal(before.balanceOf_A_Partition * BigInt(adjustFactor));
 
-    expect(after.balanceOf_B).to.be.equal(before.balanceOf_B.mul(adjustFactor).add(addedAmount));
+    expect(after.balanceOf_B).to.be.equal(before.balanceOf_B * BigInt(adjustFactor) + BigInt(addedAmount));
     expect(after.balanceOf_B_Partition_1).to.be.equal(
-      before.balanceOf_B_Partition_1.mul(adjustFactor).add(addedAmount),
+      before.balanceOf_B_Partition_1 * BigInt(adjustFactor) + BigInt(addedAmount),
     );
-    expect(after.balanceOf_B_Partition).to.be.equal(before.balanceOf_B_Partition.mul(adjustFactor));
+    expect(after.balanceOf_B_Partition).to.be.equal(before.balanceOf_B_Partition * BigInt(adjustFactor));
 
-    expect(after.decimals).to.be.equal(before.decimals + adjustDecimals);
+    expect(after.decimals).to.be.equal(before.decimals + BigInt(adjustDecimals));
     expect(after.metadata?.info?.decimals).to.be.equal(after.decimals);
   }
 
@@ -353,27 +348,27 @@ describe("ERC1410 Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
 
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
-    capFacet = await ethers.getContractAt("CapFacet", diamond.address);
-    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address);
-    erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
-    erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address);
-    equityFacet = await ethers.getContractAt("Equity", diamond.address);
-    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address);
-    controlList = await ethers.getContractAt("ControlListFacet", diamond.address, signer_A);
-    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
-    snapshotsFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
-    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.address);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.target);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
+    capFacet = await ethers.getContractAt("CapFacet", diamond.target);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target);
+    erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target);
+    erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.target);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target);
+    controlList = await ethers.getContractAt("ControlListFacet", diamond.target, signer_A);
+    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
+    snapshotsFacet = await ethers.getContractAt("SnapshotsFacet", diamond.target);
+    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.target);
 
-    capFacet = await ethers.getContractAt("Cap", diamond.address);
+    capFacet = await ethers.getContractAt("Cap", diamond.target);
 
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
     await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
     await ssiManagementFacet.addIssuer(signer_E.address);
 
@@ -455,7 +450,7 @@ describe("ERC1410 Tests", () => {
       };
 
       await erc1410Facet.connect(signer_E).authorizeOperatorByPartition(_PARTITION_ID_1, signer_C.address);
-      clearingInterface = await ethers.getContractAt("IClearing", diamond.address);
+      clearingInterface = await ethers.getContractAt("IClearing", diamond.target);
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
@@ -471,12 +466,12 @@ describe("ERC1410 Tests", () => {
       // Schedule a snapshot
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);
       const currentTime = await timeTravelFacet.blockTimestamp();
-      const snapshotTime = currentTime.add(100);
+      const snapshotTime = currentTime + 100n;
       await snapshotsFacet.connect(signer_C).takeSnapshot();
 
       // Advance time to snapshot
       await timeTravelFacet.changeSystemTimestamp(snapshotTime);
-      const erc1410ReadFacet = await ethers.getContractAt("ERC1410ReadFacet", diamond.address);
+      const erc1410ReadFacet = await ethers.getContractAt("ERC1410ReadFacet", diamond.target);
       // Check balance at snapshot time
       const balanceAt = await erc1410ReadFacet.balanceOfAt(signer_C.address, snapshotTime);
       const currentBalance = await erc1410ReadFacet.balanceOf(signer_C.address);
@@ -894,24 +889,24 @@ describe("ERC1410 Tests", () => {
       });
 
       await accessControlFacet
-        .attach(newFixtureToken.diamond.address)
+        .attach(newFixtureToken.diamond.target)
         .grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address);
-      await accessControlFacet.attach(newFixtureToken.diamond.address).grantRole(ATS_ROLES._KYC_ROLE, signer_A.address);
-      await ssiManagementFacet.attach(newFixtureToken.diamond.address).connect(signer_A).addIssuer(signer_E.address);
+      await accessControlFacet.attach(newFixtureToken.diamond.target).grantRole(ATS_ROLES._KYC_ROLE, signer_A.address);
+      await ssiManagementFacet.attach(newFixtureToken.diamond.target).connect(signer_A).addIssuer(signer_E.address);
       await kycFacet
-        .attach(newFixtureToken.diamond.address)
+        .attach(newFixtureToken.diamond.target)
         .connect(signer_A)
         .grantKyc(signer_E.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_E.address);
 
       // accounts are blacklisted by default (white list)
       await accessControlFacet
-        .attach(newFixtureToken.diamond.address)
+        .attach(newFixtureToken.diamond.target)
         .connect(signer_A)
         .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
 
       // issue fails
       await expect(
-        erc1410Facet.attach(newFixtureToken.diamond.address).connect(signer_A).issueByPartition({
+        erc1410Facet.attach(newFixtureToken.diamond.target).connect(signer_A).issueByPartition({
           partition: _PARTITION_ID_1,
           tokenHolder: signer_E.address,
           value: amount,
@@ -1142,7 +1137,7 @@ describe("ERC1410 Tests", () => {
 
     it("GIVEN protected partitions without wildcard role WHEN transferByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
       // Initialize protected partitions
-      const protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", diamond.address);
+      const protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", diamond.target);
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
       await protectedPartitionsFacet.connect(signer_A).protectPartitions();
 
@@ -1153,7 +1148,7 @@ describe("ERC1410 Tests", () => {
 
     it("GIVEN protected partitions without wildcard role WHEN redeemByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
       // Initialize protected partitions
-      const protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", diamond.address);
+      const protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", diamond.target);
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
       await protectedPartitionsFacet.connect(signer_A).protectPartitions();
 
@@ -1213,8 +1208,8 @@ describe("ERC1410 Tests", () => {
       expect(balanceOf_D).to.equal(2 * amount);
       let dividend_1 = await equityFacet.getDividends(1);
       let dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(0);
-      expect(dividend.snapshotId.toNumber()).to.equal(0);
+      expect(dividend_1.snapshotId).to.equal(0);
+      expect(dividend.snapshotId).to.equal(0);
       let dividend_1_For_C = await equityFacet.getDividendsFor(1, signer_C.address);
       let dividend_1_For_E = await equityFacet.getDividendsFor(1, signer_E.address);
       let dividend_1_For_D = await equityFacet.getDividendsFor(1, signer_D.address);
@@ -1231,15 +1226,15 @@ describe("ERC1410 Tests", () => {
       await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_1 + 1);
 
       dividend_1 = await equityFacet.getDividends(1);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(0);
+      expect(dividend_1.snapshotId).to.equal(0);
 
       dividend_1_For_C = await equityFacet.getDividendsFor(1, signer_C.address);
       dividend_1_For_E = await equityFacet.getDividendsFor(1, signer_E.address);
       dividend_1_For_D = await equityFacet.getDividendsFor(1, signer_D.address);
 
-      expect(dividend_1_For_C.tokenBalance.toNumber()).to.equal(balanceOf_C.toNumber());
-      expect(dividend_1_For_E.tokenBalance.toNumber()).to.equal(balanceOf_E.toNumber());
-      expect(dividend_1_For_D.tokenBalance.toNumber()).to.equal(balanceOf_D.toNumber());
+      expect(dividend_1_For_C.tokenBalance).to.equal(balanceOf_C);
+      expect(dividend_1_For_E.tokenBalance).to.equal(balanceOf_E);
+      expect(dividend_1_For_D.tokenBalance).to.equal(balanceOf_D);
       expect(dividend_1_For_C.decimals).to.equal(decimals_Original);
       expect(dividend_1_For_E.decimals).to.equal(decimals_Original);
       expect(dividend_1_For_D.decimals).to.equal(decimals_Original);
@@ -1254,15 +1249,15 @@ describe("ERC1410 Tests", () => {
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
       dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(1);
-      expect(dividend.snapshotId.toNumber()).to.equal(0);
+      expect(dividend_1.snapshotId).to.equal(1);
+      expect(dividend.snapshotId).to.equal(0);
       dividend_1_For_C = await equityFacet.getDividendsFor(1, signer_C.address);
       dividend_1_For_E = await equityFacet.getDividendsFor(1, signer_E.address);
       dividend_1_For_D = await equityFacet.getDividendsFor(1, signer_D.address);
 
-      expect(dividend_1_For_C.tokenBalance.toNumber()).to.equal(balanceOf_C.toNumber());
-      expect(dividend_1_For_E.tokenBalance.toNumber()).to.equal(balanceOf_E.toNumber());
-      expect(dividend_1_For_D.tokenBalance.toNumber()).to.equal(balanceOf_D.toNumber());
+      expect(dividend_1_For_C.tokenBalance).to.equal(balanceOf_C);
+      expect(dividend_1_For_E.tokenBalance).to.equal(balanceOf_E);
+      expect(dividend_1_For_D.tokenBalance).to.equal(balanceOf_D);
       expect(dividend_1_For_C.decimals).to.equal(decimals_Original);
       expect(dividend_1_For_E.decimals).to.equal(decimals_Original);
       expect(dividend_1_For_D.decimals).to.equal(decimals_Original);
@@ -1281,8 +1276,8 @@ describe("ERC1410 Tests", () => {
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
       dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(1);
-      expect(dividend.snapshotId.toNumber()).to.equal(2);
+      expect(dividend_1.snapshotId).to.equal(1);
+      expect(dividend.snapshotId).to.equal(2);
     });
 
     it("GIVEN an account WHEN issue more than max supply THEN transaction fails with MaxSupplyReached or MaxSupplyReachedForPartition", async () => {
@@ -1359,12 +1354,12 @@ describe("ERC1410 Tests", () => {
       expect(balanceOf_D_Partition_1).to.equal(balanceOf_D);
       const totalSupply = await erc1410Facet.totalSupply();
       const totalSupplyByPartition = await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1);
-      expect(totalSupply).to.equal(balanceOf_C_Original + balanceOf_E_Original + balanceOf_D.toNumber());
+      expect(totalSupply).to.equal(BigInt(balanceOf_C_Original) + BigInt(balanceOf_E_Original) + balanceOf_D);
       expect(totalSupplyByPartition.toString()).to.equal(totalSupply.toString());
       let dividend_1 = await equityFacet.getDividends(1);
       let dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(0);
-      expect(dividend.snapshotId.toNumber()).to.equal(0);
+      expect(dividend_1.snapshotId).to.equal(0);
+      expect(dividend.snapshotId).to.equal(0);
 
       // Set Max supplies to test
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_A.address);
@@ -1392,8 +1387,8 @@ describe("ERC1410 Tests", () => {
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
       dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(1);
-      expect(dividend.snapshotId.toNumber()).to.equal(0);
+      expect(dividend_1.snapshotId).to.equal(1);
+      expect(dividend.snapshotId).to.equal(0);
     });
 
     it("GIVEN an account WHEN redeem THEN transaction succeeds", async () => {
@@ -1465,8 +1460,8 @@ describe("ERC1410 Tests", () => {
       expect(balanceOf_E_Partition_1).to.equal(balanceOf_E);
       let dividend_1 = await equityFacet.getDividends(1);
       let dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(0);
-      expect(dividend.snapshotId.toNumber()).to.equal(0);
+      expect(dividend_1.snapshotId).to.equal(0);
+      expect(dividend.snapshotId).to.equal(0);
       expect(totalSupply).to.be.equal(balanceOf_C_Original + balanceOf_E_Original - 2 * amount);
       expect(totalSupplyByPartition).to.be.equal(totalSupply);
 
@@ -1481,8 +1476,8 @@ describe("ERC1410 Tests", () => {
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
       dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(1);
-      expect(dividend.snapshotId.toNumber()).to.equal(0);
+      expect(dividend_1.snapshotId).to.equal(1);
+      expect(dividend.snapshotId).to.equal(0);
 
       // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
       await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
@@ -1499,8 +1494,8 @@ describe("ERC1410 Tests", () => {
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
       dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(1);
-      expect(dividend.snapshotId.toNumber()).to.equal(2);
+      expect(dividend_1.snapshotId).to.equal(1);
+      expect(dividend.snapshotId).to.equal(2);
     });
 
     it("GIVEN accounts USING WHITELIST WHEN issue THEN transaction succeeds", async () => {
@@ -1516,34 +1511,34 @@ describe("ERC1410 Tests", () => {
       // accounts are blacklisted by default (white list)
 
       await accessControlFacet
-        .attach(newTokenFixture.diamond.address)
+        .attach(newTokenFixture.diamond.target)
         .connect(signer_A)
         .grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
       await accessControlFacet
-        .attach(newTokenFixture.diamond.address)
+        .attach(newTokenFixture.diamond.target)
         .connect(signer_A)
         .grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
       await accessControlFacet
-        .attach(newTokenFixture.diamond.address)
+        .attach(newTokenFixture.diamond.target)
         .connect(signer_A)
         .grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address);
       await accessControlFacet
-        .attach(newTokenFixture.diamond.address)
+        .attach(newTokenFixture.diamond.target)
         .connect(signer_A)
         .grantRole(ATS_ROLES._KYC_ROLE, signer_B.address);
 
-      await ssiManagementFacet.attach(newTokenFixture.diamond.address).connect(signer_A).addIssuer(signer_E.address);
+      await ssiManagementFacet.attach(newTokenFixture.diamond.target).connect(signer_A).addIssuer(signer_E.address);
       await kycFacet
-        .attach(newTokenFixture.diamond.address)
+        .attach(newTokenFixture.diamond.target)
         .connect(signer_B)
         .grantKyc(signer_E.address, EMPTY_STRING, ZERO, MAX_UINT256, signer_E.address);
 
       // Using account A (with role)
-      await controlList.attach(newTokenFixture.diamond.address).connect(signer_A).addToControlList(signer_A.address);
-      await controlList.attach(newTokenFixture.diamond.address).connect(signer_A).addToControlList(signer_E.address);
+      await controlList.attach(newTokenFixture.diamond.target).connect(signer_A).addToControlList(signer_A.address);
+      await controlList.attach(newTokenFixture.diamond.target).connect(signer_A).addToControlList(signer_E.address);
 
       // issue succeds
-      await erc1410Facet.attach(newTokenFixture.diamond.address).connect(signer_A).issueByPartition({
+      await erc1410Facet.attach(newTokenFixture.diamond.target).connect(signer_A).issueByPartition({
         partition: _PARTITION_ID_1,
         tokenHolder: signer_E.address,
         value: amount,
@@ -1714,8 +1709,8 @@ describe("ERC1410 Tests", () => {
       expect(balanceOf_E_Partition_1).to.equal(balanceOf_E);
       let dividend_1 = await equityFacet.getDividends(1);
       let dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(0);
-      expect(dividend.snapshotId.toNumber()).to.equal(0);
+      expect(dividend_1.snapshotId).to.equal(0);
+      expect(dividend.snapshotId).to.equal(0);
 
       // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
       await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_1 + 1);
@@ -1739,8 +1734,8 @@ describe("ERC1410 Tests", () => {
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
       dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(1);
-      expect(dividend.snapshotId.toNumber()).to.equal(0);
+      expect(dividend_1.snapshotId).to.equal(1);
+      expect(dividend.snapshotId).to.equal(0);
 
       // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
       await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
@@ -1757,8 +1752,8 @@ describe("ERC1410 Tests", () => {
       // check that scheduled snapshots was triggered
       dividend_1 = await equityFacet.getDividends(1);
       dividend = await equityFacet.getDividends(2);
-      expect(dividend_1.snapshotId.toNumber()).to.equal(1);
-      expect(dividend.snapshotId.toNumber()).to.equal(2);
+      expect(dividend_1.snapshotId).to.equal(1);
+      expect(dividend.snapshotId).to.equal(2);
     });
 
     it("GIVEN token is not controllable WHEN controllerTransferByPartition THEN transaction fails with TokenIsNotControllable", async () => {
@@ -1869,9 +1864,11 @@ describe("ERC1410 Tests", () => {
             signer_A.address,
           );
 
-          expect(balanceOf_A_After).to.be.equal(balanceOf_A_Before.mul(adjustFactor).add(balanceOf_A_Original[0]));
+          expect(balanceOf_A_After).to.be.equal(
+            balanceOf_A_Before * BigInt(adjustFactor) + BigInt(balanceOf_A_Original[0]),
+          );
           expect(balanceOf_A_Partition_1_After).to.be.equal(
-            balanceOf_A_Partition_1_Before.mul(adjustFactor).add(balanceOf_A_Original[0]),
+            balanceOf_A_Partition_1_Before * BigInt(adjustFactor) + BigInt(balanceOf_A_Original[0]),
           );
         });
       });
@@ -2087,8 +2084,8 @@ describe("ERC1410 Tests", () => {
 
       beforeEach(async () => {
         // Initialize protected partitions
-        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", diamond.address);
-        controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address);
+        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitionsFacet", diamond.target);
+        controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.target);
         await loadFixture(protectedPartitionsFixture);
       });
       async function grant_WILD_CARD_ROLE_and_issue_tokens(
@@ -2443,7 +2440,7 @@ describe("ERC1410 Tests", () => {
             name: (await erc20Facet.getERC20Metadata()).info.name,
             version: (await diamondCutFacet.getConfigInfo()).version_.toString(),
             chainId: await network.provider.send("eth_chainId"),
-            verifyingContract: diamond.address,
+            verifyingContract: diamond.target.toString(),
           };
 
           const redeemType = {
@@ -2457,15 +2454,15 @@ describe("ERC1410 Tests", () => {
           };
 
           /*const domainSeparator =
-                    ethers.utils._TypedDataEncoder.hashDomain(domain)
-                const messageHash = ethers.utils._TypedDataEncoder.hash(
+                    ethers.TypedDataEncoder.hashDomain(domain)
+                const messageHash = ethers.TypedDataEncoder.hash(
                     domain,
                     transferType,
                     message
                 )*/
 
           // Sign the message hash
-          const signature = await signer_A._signTypedData(domain, redeemType, message);
+          const signature = await signer_A.signTypedData(domain, redeemType, message);
 
           await erc1410Facet.issueByPartition({
             partition: DEFAULT_PARTITION,
@@ -2503,13 +2500,13 @@ describe("ERC1410 Tests", () => {
       // Schedule a snapshot
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);
       const currentTime = await timeTravelFacet.blockTimestamp();
-      const snapshotTime = currentTime.add(100);
+      const snapshotTime = currentTime + 100n;
       await snapshotsFacet.connect(signer_C).takeSnapshot();
 
       // Advance time to snapshot
       await timeTravelFacet.changeSystemTimestamp(snapshotTime);
 
-      const erc1410ReadFacet = await ethers.getContractAt("ERC1410ReadFacet", diamond.address);
+      const erc1410ReadFacet = await ethers.getContractAt("ERC1410ReadFacet", diamond.target);
       // Check balance at snapshot time
       const balanceAt = await erc1410ReadFacet.balanceOfAt(signer_C.address, snapshotTime);
       const currentBalance = await erc1410ReadFacet.balanceOf(signer_C.address);
@@ -2595,9 +2592,11 @@ describe("ERC1410 Tests", () => {
           signer_A.address,
         );
 
-        expect(balanceOf_A_After).to.be.equal(balanceOf_A_Before.mul(adjustFactor).add(balanceOf_A_Original[0]));
+        expect(balanceOf_A_After).to.be.equal(
+          balanceOf_A_Before * BigInt(adjustFactor) + BigInt(balanceOf_A_Original[0]),
+        );
         expect(balanceOf_A_Partition_1_After).to.be.equal(
-          balanceOf_A_Partition_1_Before.mul(adjustFactor).add(balanceOf_A_Original[0]),
+          balanceOf_A_Partition_1_Before * BigInt(adjustFactor) + BigInt(balanceOf_A_Original[0]),
         );
       });
 
@@ -2705,7 +2704,7 @@ describe("ERC1410 Tests", () => {
         // After Transaction Partition 1 Values
         const after = await getBalanceAdjustedValues();
 
-        expect(after.balanceOf_A).to.equal(before.balanceOf_A.mul(adjustFactor).sub(expectedAllowance));
+        expect(after.balanceOf_A).to.equal(before.balanceOf_A * BigInt(adjustFactor) - BigInt(expectedAllowance));
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransfer succeeds", async () => {
@@ -2716,7 +2715,7 @@ describe("ERC1410 Tests", () => {
 
         expect(
           await erc1594Facet.connect(signer_A).canTransfer(signer_B.address, adjustFactor * amount, "0x"),
-        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.constants.HashZero]);
+        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferByPartition succeeds", async () => {
@@ -2734,7 +2733,7 @@ describe("ERC1410 Tests", () => {
             "0x",
             "0x",
           ),
-        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.constants.HashZero]);
+        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferFrom succeeds", async () => {
@@ -2749,7 +2748,7 @@ describe("ERC1410 Tests", () => {
           await erc1594Facet
             .connect(signer_A)
             .canTransferFrom(signer_A.address, signer_B.address, adjustFactor * amount, "0x"),
-        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.constants.HashZero]);
+        ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 transfer succeeds", async () => {
@@ -2783,7 +2782,7 @@ describe("ERC1410 Tests", () => {
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         // Transaction Partition 1 with updated balance
-        const updatedBalance = before.balanceOf_A.mul(adjustFactor);
+        const updatedBalance = before.balanceOf_A * BigInt(adjustFactor);
 
         await erc20Facet.connect(signer_B).transferFrom(signer_A.address, signer_B.address, updatedBalance);
 
@@ -2910,7 +2909,7 @@ describe("ERC1410 Tests", () => {
 
         const allowance_After = await erc20Facet.connect(signer_A).allowance(signer_A.address, signer_B.address);
 
-        expect(allowance_After).to.be.equal(allowance_Before.mul(adjustFactor));
+        expect(allowance_After).to.be.equal(allowance_Before * BigInt(adjustFactor));
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 increaseAllowance succeeds", async () => {
@@ -2929,7 +2928,7 @@ describe("ERC1410 Tests", () => {
 
         const allowance_After = await erc20Facet.connect(signer_A).allowance(signer_A.address, signer_B.address);
 
-        expect(allowance_After).to.be.equal(allowance_Before.mul(adjustFactor).add(amount));
+        expect(allowance_After).to.be.equal(allowance_Before * BigInt(adjustFactor) + BigInt(amount));
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 decreaseAllowance succeeds", async () => {
@@ -2944,11 +2943,13 @@ describe("ERC1410 Tests", () => {
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         // APPROVE 2
-        await erc20Facet.connect(signer_A).decreaseAllowance(signer_B.address, allowance_Before.add(amount));
+        await erc20Facet.connect(signer_A).decreaseAllowance(signer_B.address, allowance_Before + BigInt(amount));
 
         const allowance_After = await erc20Facet.connect(signer_A).allowance(signer_A.address, signer_B.address);
 
-        expect(allowance_After).to.be.equal(allowance_Before.mul(adjustFactor).sub(allowance_Before.add(amount)));
+        expect(allowance_After).to.be.equal(
+          allowance_Before * BigInt(adjustFactor) - (allowance_Before + BigInt(amount)),
+        );
       });
     });
   });

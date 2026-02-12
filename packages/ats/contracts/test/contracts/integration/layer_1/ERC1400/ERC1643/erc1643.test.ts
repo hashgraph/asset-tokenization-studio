@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type ERC1643Facet, type PauseFacet, AccessControl } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../../common";
@@ -17,9 +19,9 @@ const documentHASH_2 = "0x000000000000000000000000000000000000000000000000000000
 
 describe("ERC1643 Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let erc1643Facet: ERC1643Facet;
   let accessControlFacet: AccessControl;
@@ -38,11 +40,11 @@ describe("ERC1643 Tests", () => {
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-    erc1643Facet = await ethers.getContractAt("ERC1643Facet", diamond.address);
+    erc1643Facet = await ethers.getContractAt("ERC1643Facet", diamond.target);
 
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
   }
 
   beforeEach(async () => {

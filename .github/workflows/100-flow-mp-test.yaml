@@ -1,22 +1,21 @@
-name: Tests ATS
+name: "100: [FLOW] MP Test"
 
 on:
   push:
     branches: [main]
   pull_request:
     paths:
-      - "packages/ats/**"
-      - "apps/ats/**"
+      - "packages/mass-payout/**"
+      - "apps/mass-payout/**"
       - "package.json"
-      - ".github/workflows/*ats*.yml"
-      - ".github/workflows/*ats*.yaml"
+      - ".github/workflows/*mp*.yaml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  test-ats:
+  test-mass-payout:
     name: testing
     runs-on: token-studio-linux-large
     env:
@@ -49,7 +48,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 
@@ -64,12 +63,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build ATS packages
-        run: npm run ats:build
+      - name: Install NestJS CLI globally
+        run: npm install -g @nestjs/cli
 
-      - name: Run ATS tests
-        run: npm run ats:test:ci
+      - name: Build mass-payout
+        run: npm run mass-payout:build:ci
 
-      - name: Upload coverage report
-        if: ${{ !cancelled() && always() }}
-        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673
+      - name: Test mass-payout
+        run: npm run mass-payout:test

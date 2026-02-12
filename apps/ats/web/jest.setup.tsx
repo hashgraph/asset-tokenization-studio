@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+
+// Mock @zag-js/focus-visible to avoid JSDOM focus property issues
+jest.mock("@zag-js/focus-visible", () => ({
+  trackFocusVisible: () => () => {},
+}));
+
 process.env.VITE_API_URL = "http://localhost:8080/api/v1";
 
 // Mock Terminal3 modules to avoid LRU cache issues
@@ -37,3 +44,28 @@ Object.defineProperty(window, "matchMedia", {
 
 const noop = () => {};
 Object.defineProperty(window, "scrollTo", { value: noop, writable: true });
+
+const originalWarn = console.warn;
+const originalError = console.error;
+
+console.warn = (...args: any[]) => {
+  if (
+    typeof args[0] === "string" &&
+    ((args[0].includes("Warning: An update to") && args[0].includes("inside a test was not wrapped in act")) ||
+      args[0].includes("React.jsx: type is invalid"))
+  ) {
+    return;
+  }
+  originalWarn.call(console, ...args);
+};
+
+console.error = (...args: any[]) => {
+  if (
+    typeof args[0] === "string" &&
+    ((args[0].includes("Warning: An update to") && args[0].includes("inside a test was not wrapped in act")) ||
+      args[0].includes("Warning: React.jsx: type is invalid"))
+  ) {
+    return;
+  }
+  originalError.call(console, ...args);
+};

@@ -19,7 +19,7 @@ describe("Hedera Utilities", () => {
   });
 
   after(() => {
-    configureLogger({ level: LogLevel.INFO });
+    configureLogger({ level: LogLevel.SILENT });
   });
 
   // ============================================================================

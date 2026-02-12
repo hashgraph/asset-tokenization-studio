@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { join } from "path";
+import { getTestCheckpointsDir, getTestDeploymentsDir } from "@scripts/infrastructure";
 
 /**
  * Test-specific constants for all tests (unit, integration, contracts, scripts).
@@ -361,8 +362,8 @@ export const TEST_TIMESTAMPS = {
   /** ISO format sample timestamp */
   ISO_SAMPLE: "2025-11-08T10:00:00.000Z",
 
-  /** Filename-safe format sample timestamp */
-  FILENAME_SAMPLE: "2025-11-08T10-00-00",
+  /** Filename-safe format sample timestamp (with milliseconds) */
+  FILENAME_SAMPLE: "2025-11-08T10-00-00-000",
 
   // Time progression samples
   /** Alternative ISO sample (5 min later - for lastUpdate) */
@@ -418,7 +419,8 @@ export const TEST_STEPS_NEW_BLR = {
   BOND_CONFIG: 5,
   BOND_FIXED_RATE_CONFIG: 6,
   BOND_KPI_LINKED_CONFIG: 7,
-  FACTORY: 8,
+  BOND_SPT_CONFIG: 8,
+  FACTORY: 9,
 } as const;
 
 /**
@@ -432,7 +434,8 @@ export const TEST_STEPS_EXISTING_BLR = {
   BOND_CONFIG: 4,
   BOND_FIXED_RATE_CONFIG: 5,
   BOND_KPI_LINKED_CONFIG: 6,
-  FACTORY: 7,
+  BOND_SPT_CONFIG: 7,
+  FACTORY: 8,
 } as const;
 
 // ============================================================================
@@ -442,17 +445,18 @@ export const TEST_STEPS_EXISTING_BLR = {
 /**
  * Test directory paths.
  *
- * Note: Paths are relative to build output directory structure.
+ * Uses centralized path helpers from `@scripts/infrastructure` to avoid
+ * fragile `__dirname` + relative traversal patterns.
  */
 export const TEST_DIRS = {
   /** Unit test checkpoint directory */
-  UNIT_CHECKPOINTS: join(__dirname, "../../../deployments/test/unit/.checkpoints"),
+  UNIT_CHECKPOINTS: join(getTestDeploymentsDir(), "unit/.checkpoints"),
 
   /** Integration test checkpoint directory */
-  INTEGRATION_CHECKPOINTS: join(__dirname, "../../../deployments/test/hardhat/.checkpoints"),
+  INTEGRATION_CHECKPOINTS: getTestCheckpointsDir("hardhat"),
 
   /** Test deployments base directory */
-  DEPLOYMENTS: join(__dirname, "../../../deployments/test"),
+  DEPLOYMENTS: getTestDeploymentsDir(),
 } as const;
 
 // ╔═══════════════════════════════════════════════════════════════════════════╗

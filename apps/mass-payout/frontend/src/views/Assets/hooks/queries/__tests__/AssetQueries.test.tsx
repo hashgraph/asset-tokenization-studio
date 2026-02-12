@@ -17,8 +17,11 @@ jest.mock("../../../../../services/AssetService", () => ({
     unpauseAsset: jest.fn(),
   },
   AssetType: {
-    EQUITY: "EQUITY",
-    BOND: "BOND",
+    EQUITY: "Equity",
+    BOND_VARIABLE_RATE: "Bond Variable Rate",
+    BOND_FIXED_RATE: "Bond Fixed Rate",
+    BOND_KPI_LINKED_RATE: "Bond KPI Linked Rate",
+    BOND_SPT_RATE: "Bond SPT Rate",
   },
 }));
 
@@ -551,13 +554,11 @@ describe("Asset Queries", () => {
         wrapper: queryWrapper,
       });
 
-      // Primera mutación
       result.current.mutate(assetIds[0]);
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      // Segunda mutación
       result.current.mutate(assetIds[1]);
       await waitFor(() => {
         expect(assetService.pauseAsset).toHaveBeenCalledWith(assetIds[1]);
@@ -581,13 +582,11 @@ describe("Asset Queries", () => {
         wrapper: queryWrapper,
       });
 
-      // Pausar asset
       pauseResult.current.mutate(assetId);
       await waitFor(() => {
         expect(pauseResult.current.isSuccess).toBe(true);
       });
 
-      // Despausar asset
       unpauseResult.current.mutate(assetId);
       await waitFor(() => {
         expect(unpauseResult.current.isSuccess).toBe(true);

@@ -55,6 +55,14 @@ export * from "./infrastructure/operations/deployResolverProxy";
 export * from "./infrastructure/operations/updateResolverProxyConfig";
 // NOTE: generateRegistryPipeline moved to standalone module (./tools/registry-generator/)
 
+// Infrastructure paths
+export {
+  getDeploymentsDir,
+  getCheckpointsDir,
+  getTestCheckpointsDir,
+  getTestDeploymentsDir,
+} from "./infrastructure/paths";
+
 // Infrastructure utilities
 export * from "./infrastructure/utils/validation";
 export * from "./infrastructure/utils/deploymentFiles";

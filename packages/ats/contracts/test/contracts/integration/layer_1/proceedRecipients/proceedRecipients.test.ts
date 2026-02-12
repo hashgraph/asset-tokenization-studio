@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ProceedRecipientsFacet, ResolverProxy, AccessControl, PauseFacet } from "@contract-types";
 import { GAS_LIMIT, ATS_ROLES, ADDRESS_ZERO } from "@scripts";
 import { deployBondTokenFixture } from "@test";
@@ -12,8 +14,8 @@ const PROCEED_RECIPIENT_2 = "0x2345678901234567890123456789012345678901";
 const PROCEED_RECIPIENT_2_DATA = "0x88888888";
 
 describe("Proceed Recipients Tests", () => {
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
 
   let diamond: ResolverProxy;
   let proceedRecipientsFacet: ProceedRecipientsFacet;
@@ -32,10 +34,10 @@ describe("Proceed Recipients Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user2;
 
-    proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipientsFacet", diamond.address, signer_A);
+    proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipientsFacet", diamond.target, signer_A);
 
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
 
     await accessControlFacet.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
 
@@ -100,7 +102,7 @@ describe("Proceed Recipients Tests", () => {
 
       expect(await proceedRecipientsFacet.getProceedRecipientsCount()).to.equal(2);
 
-      expect(await proceedRecipientsFacet.getProceedRecipients(0, 100)).to.have.same.members([
+      expect([...(await proceedRecipientsFacet.getProceedRecipients(0, 100))]).to.have.same.members([
         PROCEED_RECIPIENT_2,
         PROCEED_RECIPIENT_1,
       ]);
@@ -154,7 +156,7 @@ describe("Proceed Recipients Tests", () => {
 
       expect(await proceedRecipientsFacet.getProceedRecipientsCount()).to.equal(0);
 
-      expect(await proceedRecipientsFacet.getProceedRecipients(0, 100)).to.have.same.members([]);
+      expect([...(await proceedRecipientsFacet.getProceedRecipients(0, 100))]).to.have.same.members([]);
     });
   });
 

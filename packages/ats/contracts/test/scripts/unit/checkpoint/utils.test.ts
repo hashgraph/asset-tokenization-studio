@@ -77,7 +77,7 @@ describe("Checkpoint Utilities", () => {
       // Summary
       expect(output.summary.totalContracts).to.equal(5); // ProxyAdmin + BLR + Factory + 2 facets
       expect(output.summary.totalFacets).to.equal(2);
-      expect(output.summary.totalConfigurations).to.equal(3);
+      expect(output.summary.totalConfigurations).to.equal(5);
       expect(output.summary.success).to.be.true;
       expect(output.summary.deploymentTime).to.be.a("number");
       expect(output.summary.gasUsed).to.equal("1750000"); // 500000 + 450000 + 800000
@@ -233,6 +233,9 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(TEST_STEPS_NEW_BLR.BOND_KPI_LINKED_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
           "Bond KpiLinked Rate Configuration",
         );
+        expect(getStepName(TEST_STEPS_NEW_BLR.BOND_SPT_CONFIG, TEST_WORKFLOWS.NEW_BLR)).to.equal(
+          "Bond SPT Rate Configuration",
+        );
         expect(getStepName(TEST_STEPS_NEW_BLR.FACTORY, TEST_WORKFLOWS.NEW_BLR)).to.equal("Factory");
       });
 
@@ -267,6 +270,9 @@ describe("Checkpoint Utilities", () => {
         expect(getStepName(TEST_STEPS_EXISTING_BLR.BOND_KPI_LINKED_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
           "Bond KpiLinked Rate Configuration",
         );
+        expect(getStepName(TEST_STEPS_EXISTING_BLR.BOND_SPT_CONFIG, TEST_WORKFLOWS.EXISTING_BLR)).to.equal(
+          "Bond SPT Rate Configuration",
+        );
         expect(getStepName(TEST_STEPS_EXISTING_BLR.FACTORY, TEST_WORKFLOWS.EXISTING_BLR)).to.equal("Factory");
       });
 
@@ -292,22 +298,41 @@ describe("Checkpoint Utilities", () => {
   });
 
   describe("getTotalSteps", () => {
-    const expectedNewBlrSteps = 8;
-    const expectedExistingBlrSteps = 7;
-
-    it("should return 8 for newBlr workflow", () => {
-      expect(getTotalSteps(TEST_WORKFLOWS.NEW_BLR)).to.equal(expectedNewBlrSteps);
+    it("should return consistent count for newBlr workflow", () => {
+      const total = getTotalSteps(TEST_WORKFLOWS.NEW_BLR);
+      expect(total).to.be.greaterThan(0);
+      // Last step should be valid (not "Unknown Step")
+      expect(getStepName(total - 1, TEST_WORKFLOWS.NEW_BLR)).to.not.include("Unknown Step");
+      // Step beyond total should be unknown
+      expect(getStepName(total, TEST_WORKFLOWS.NEW_BLR)).to.include("Unknown Step");
     });
 
-    it("should return 7 for existingBlr workflow", () => {
-      expect(getTotalSteps(TEST_WORKFLOWS.EXISTING_BLR)).to.equal(expectedExistingBlrSteps);
+    it("should return consistent count for existingBlr workflow", () => {
+      const total = getTotalSteps(TEST_WORKFLOWS.EXISTING_BLR);
+      expect(total).to.be.greaterThan(0);
+      expect(getStepName(total - 1, TEST_WORKFLOWS.EXISTING_BLR)).to.not.include("Unknown Step");
+      expect(getStepName(total, TEST_WORKFLOWS.EXISTING_BLR)).to.include("Unknown Step");
+    });
+
+    it("should return consistent count for upgradeConfigurations workflow", () => {
+      const total = getTotalSteps("upgradeConfigurations");
+      expect(total).to.be.greaterThan(0);
+      expect(getStepName(total - 1, "upgradeConfigurations")).to.not.include("Unknown Step");
+      expect(getStepName(total, "upgradeConfigurations")).to.include("Unknown Step");
+    });
+
+    it("should return consistent count for upgradeTupProxies workflow", () => {
+      const total = getTotalSteps("upgradeTupProxies");
+      expect(total).to.be.greaterThan(0);
+      expect(getStepName(total - 1, "upgradeTupProxies")).to.not.include("Unknown Step");
+      expect(getStepName(total, "upgradeTupProxies")).to.include("Unknown Step");
     });
 
     it("should handle unknown workflow type", () => {
       const unknownWorkflow = "unknownWorkflow" as typeof TEST_WORKFLOWS.NEW_BLR;
       const result = getTotalSteps(unknownWorkflow);
-      // Should return a number (implementation-dependent default)
-      expect(result).to.be.a("number");
+      // Falls back to newBlr steps
+      expect(result).to.equal(getTotalSteps(TEST_WORKFLOWS.NEW_BLR));
     });
   });
 
@@ -319,7 +344,7 @@ describe("Checkpoint Utilities", () => {
 
       expect(formatted).to.include(`Checkpoint: ${TEST_NETWORKS.TESTNET}-1731085200000`);
       expect(formatted).to.include(`Status: ${TEST_CHECKPOINT_STATUS.IN_PROGRESS}`);
-      expect(formatted).to.include("Step: 3/8 - Facets");
+      expect(formatted).to.include(`Step: 3/${getTotalSteps(TEST_WORKFLOWS.NEW_BLR)} - Facets`);
       expect(formatted).to.include(`Started: ${TEST_TIMESTAMPS.ISO_SAMPLE}`);
       expect(formatted).to.include(`Last Update: ${TEST_TIMESTAMPS.ISO_SAMPLE_5MIN_LATER}`);
       expect(formatted).to.not.include("Failed:");
@@ -341,17 +366,15 @@ describe("Checkpoint Utilities", () => {
     });
 
     it("should format completed checkpoint", () => {
-      const completedStep = 8;
-      const checkpoint = createStatusTestCheckpoint(
-        TEST_CHECKPOINT_STATUS.COMPLETED,
-        completedStep,
-        TEST_WORKFLOWS.NEW_BLR,
-      );
+      const totalSteps = getTotalSteps(TEST_WORKFLOWS.NEW_BLR);
+      const lastStep = totalSteps - 1;
+      const lastStepName = getStepName(lastStep, TEST_WORKFLOWS.NEW_BLR);
+      const checkpoint = createStatusTestCheckpoint(TEST_CHECKPOINT_STATUS.COMPLETED, lastStep, TEST_WORKFLOWS.NEW_BLR);
 
       const formatted = formatCheckpointStatus(checkpoint);
 
       expect(formatted).to.include(`Status: ${TEST_CHECKPOINT_STATUS.COMPLETED}`);
-      expect(formatted).to.include("Step: 9/8 - Factory");
+      expect(formatted).to.include(`Step: ${lastStep + 1}/${totalSteps} - ${lastStepName}`);
     });
 
     it("should format existingBlr workflow correctly", () => {
@@ -359,7 +382,7 @@ describe("Checkpoint Utilities", () => {
 
       const formatted = formatCheckpointStatus(checkpoint);
 
-      expect(formatted).to.include("Step: 2/7 - Facets");
+      expect(formatted).to.include(`Step: 2/${getTotalSteps(TEST_WORKFLOWS.EXISTING_BLR)} - Facets`);
     });
 
     it("should handle checkpoint without failure info", () => {

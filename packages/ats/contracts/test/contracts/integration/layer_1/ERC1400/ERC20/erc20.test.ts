@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 import {
@@ -28,10 +30,10 @@ const amount = 1000;
 // con erc20 y con erc1410 NO funciona
 describe("ERC20 Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let erc20Facet: ERC20Facet;
   let erc20FacetBlackList: ERC20Facet;
@@ -79,11 +81,11 @@ describe("ERC20 Tests", () => {
         },
       ]);
 
-      erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address);
-      erc20FacetBlackList = await ethers.getContractAt("ERC20Facet", diamond.address, signer_D);
-      pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_B);
-      controlListFacet = await ethers.getContractAt("ControlList", diamond.address, signer_A);
-      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
+      erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target);
+      erc20FacetBlackList = await ethers.getContractAt("ERC20Facet", diamond.target, signer_D);
+      pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_B);
+      controlListFacet = await ethers.getContractAt("ControlList", diamond.target, signer_A);
+      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
     }
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureMultiPartition);
@@ -101,7 +103,7 @@ describe("ERC20 Tests", () => {
       await expect(
         erc20Facet.initialize_ERC20({
           info: info,
-          securityType: SecurityType.BOND,
+          securityType: SecurityType.BOND_VARIABLE_RATE,
         }),
       ).to.be.revertedWithCustomError(erc20Facet, "AlreadyInitialized");
     });
@@ -192,18 +194,18 @@ describe("ERC20 Tests", () => {
         },
       ]);
 
-      erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address);
-      erc20FacetBlackList = await ethers.getContractAt("ERC20Facet", diamond.address, signer_D);
-      erc20SignerC = await ethers.getContractAt("ERC20Facet", diamond.address, signer_C);
-      erc20SignerE = await ethers.getContractAt("ERC20Facet", diamond.address, signer_D);
-      erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
-      erc1594Facet = await ethers.getContractAt("ERC1594", diamond.address, signer_B);
-      kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-      ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
-      pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_B);
+      erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target);
+      erc20FacetBlackList = await ethers.getContractAt("ERC20Facet", diamond.target, signer_D);
+      erc20SignerC = await ethers.getContractAt("ERC20Facet", diamond.target, signer_C);
+      erc20SignerE = await ethers.getContractAt("ERC20Facet", diamond.target, signer_D);
+      erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
+      erc1594Facet = await ethers.getContractAt("ERC1594", diamond.target, signer_B);
+      kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+      pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_B);
 
-      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
-      controlListFacet = await ethers.getContractAt("ControlList", diamond.address, signer_A);
+      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
+      controlListFacet = await ethers.getContractAt("ControlList", diamond.target, signer_A);
       await ssiManagementFacet.addIssuer(signer_D.address);
       await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_D.address);
       await kycFacet.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_D.address);
@@ -218,7 +220,7 @@ describe("ERC20 Tests", () => {
       it(
         "GIVEN a account with balance " + "WHEN approve to a zero account " + "THEN fails with SpenderWithZeroAddress",
         async () => {
-          await expect(erc20SignerC.approve(ethers.constants.AddressZero, amount / 2)).to.revertedWithCustomError(
+          await expect(erc20SignerC.approve(ethers.ZeroAddress, amount / 2)).to.revertedWithCustomError(
             erc20Facet,
             "SpenderWithZeroAddress",
           );
@@ -230,9 +232,10 @@ describe("ERC20 Tests", () => {
           "WHEN increaseAllowance to a zero account " +
           "THEN fails with SpenderWithZeroAddress",
         async () => {
-          await expect(
-            erc20SignerC.increaseAllowance(ethers.constants.AddressZero, amount / 2),
-          ).to.revertedWithCustomError(erc20Facet, "SpenderWithZeroAddress");
+          await expect(erc20SignerC.increaseAllowance(ethers.ZeroAddress, amount / 2)).to.revertedWithCustomError(
+            erc20Facet,
+            "SpenderWithZeroAddress",
+          );
         },
       );
 
@@ -241,9 +244,10 @@ describe("ERC20 Tests", () => {
           "WHEN decreaseAllowance to a zero account " +
           "THEN fails with SpenderWithZeroAddress",
         async () => {
-          await expect(
-            erc20SignerC.decreaseAllowance(ethers.constants.AddressZero, amount / 2),
-          ).to.revertedWithCustomError(erc20Facet, "SpenderWithZeroAddress");
+          await expect(erc20SignerC.decreaseAllowance(ethers.ZeroAddress, amount / 2)).to.revertedWithCustomError(
+            erc20Facet,
+            "SpenderWithZeroAddress",
+          );
         },
       );
 
@@ -369,11 +373,11 @@ describe("ERC20 Tests", () => {
     describe("Wallet Recovery Tests", () => {
       let erc3643Facet: IERC3643;
       let accessControlFacet: AccessControlFacet;
-      const ADDRESS_ZERO = ethers.constants.AddressZero;
+      const ADDRESS_ZERO = ethers.ZeroAddress;
 
       beforeEach(async () => {
-        erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
-        accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address);
+        erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target);
+        accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target);
       });
 
       it("GIVEN non-recovered wallets WHEN approve THEN transaction succeeds", async () => {
@@ -433,8 +437,8 @@ describe("ERC20 Tests", () => {
       let accessControlFacet: any;
 
       beforeEach(async () => {
-        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address);
-        accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.target);
+        accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
       });
 
       it("GIVEN protected partitions activated WHEN transfer without role THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -490,7 +494,7 @@ describe("ERC20 Tests", () => {
 
     it("GIVEN an ERC20 with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated", async () => {
       await clearingActionsFacet.activateClearing();
-      const clearingInterface = await ethers.getContractAt("IClearing", diamond.address);
+      const clearingInterface = await ethers.getContractAt("IClearing", diamond.target);
       await expect(erc20Facet.transfer(signer_D.address, amount)).to.be.revertedWithCustomError(
         clearingInterface,
         "ClearingIsActivated",

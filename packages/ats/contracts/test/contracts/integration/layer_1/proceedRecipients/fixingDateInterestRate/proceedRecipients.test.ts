@@ -2,7 +2,7 @@
 
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   ProceedRecipientsKpiLinkedRateFacetTimeTravel,
   ResolverProxy,
@@ -20,7 +20,7 @@ const PROCEED_RECIPIENT_1_DATA = "0xabcdef";
 const referenceDate = dateToUnixTimestamp(`2030-01-01T00:01:00Z`);
 
 describe("Proceed Recipients fixing Date Interest RateTests", () => {
-  let signer_A: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
 
   let diamond: ResolverProxy;
   let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
@@ -48,21 +48,21 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
 
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsKpiLinkedRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
     bondKpiLinkedRateFacet = await ethers.getContractAt(
       "BondUSAKpiLinkedRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
     scheduledTasksFacet = await ethers.getContractAt(
       "ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
 
     await accessControlFacet.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
     await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);

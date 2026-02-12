@@ -118,6 +118,37 @@ npm run deploy:hardhat -- --network hedera-testnet
 npm run deploy
 ```
 
+## Deployment Failures & Recovery
+
+If deployment fails or is interrupted, the checkpoint system automatically saves your progress:
+
+```bash
+# Resume from where it failed
+npm run deploy:newBlr
+```
+
+The checkpoint system:
+
+- ✅ Automatically resumes from failures
+- ✅ Skips completed steps (saves time and gas)
+- ✅ Allows safe interruption (Ctrl+C)
+- ✅ Provides detailed failure diagnostics
+
+**Checkpoint management:**
+
+```bash
+# List all checkpoints
+npm run checkpoint:list -- hedera-testnet
+
+# Show failure details
+npm run checkpoint:show -- <checkpoint-id>
+
+# Clean up old checkpoints
+npm run checkpoint:cleanup -- hedera-testnet 30
+```
+
+For comprehensive checkpoint documentation including troubleshooting, scenarios, and best practices, see the **[Checkpoint Guide](./scripts/CHECKPOINT_GUIDE.md)**.
+
 # Using ATS Deployment Utilities in Downstream Projects
 
 The ATS contracts package exports framework-agnostic deployment file management utilities that can be used by downstream projects (like GBP). These utilities provide standardized file organization, type-safe operations, and zero runtime dependencies on Hardhat or ethers.

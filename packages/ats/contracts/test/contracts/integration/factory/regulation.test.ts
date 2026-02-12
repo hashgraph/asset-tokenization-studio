@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { MockedRegulation } from "@contract-types";
@@ -19,7 +21,7 @@ describe("Regulation Tests", () => {
   beforeEach(async () => {
     const MockedRegulationFactory = await ethers.getContractFactory("MockedRegulation");
     regulationHelper = await MockedRegulationFactory.deploy();
-    await regulationHelper.deployed();
+    await regulationHelper.waitForDeployment();
   });
 
   describe("buildRegulationData", () => {

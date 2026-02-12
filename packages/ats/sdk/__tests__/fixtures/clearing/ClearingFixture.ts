@@ -37,7 +37,7 @@ import IsClearingActivatedRequest from "@port/in/request/security/operations/cle
 import OperatorClearingCreateHoldByPartitionRequest from "@port/in/request/security/operations/clearing/OperatorClearingCreateHoldByPartitionRequest";
 import OperatorClearingRedeemByPartitionRequest from "@port/in/request/security/operations/clearing/OperatorClearingRedeemByPartitionRequest";
 import OperatorClearingTransferByPartitionRequest from "@port/in/request/security/operations/clearing/OperatorClearingTransferByPartitionRequest";
-import { BigNumber } from "ethers";
+
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { GetClearingRedeemForByPartitionQuery } from "@query/security/clearing/getClearingRedeemForByPartition/GetClearingRedeemForByPartitionQuery";
 import { GetClearingsIdForByPartitionQuery } from "@query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery";
@@ -413,7 +413,7 @@ export const ClearingTransferByPartitionCommandFixture = createFixture<Protected
 );
 
 export const ClearingHoldCreationFixture = createFixture<ClearingHoldCreation>((props) => {
-  props.amount.faker((faker) => new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()));
+  props.amount.faker((faker) => BigInt(faker.number.int({ max: 999 })).toString());
   props.expirationTimestamp.faker((faker) => faker.date.future());
   props.data.faker((faker) => faker.lorem.words());
   props.operatorData.faker((faker) => faker.lorem.words());
@@ -424,14 +424,14 @@ export const ClearingHoldCreationFixture = createFixture<ClearingHoldCreation>((
 });
 
 export const ClearingRedeemFixture = createFixture<ClearingRedeem>((props) => {
-  props.amount.faker((faker) => new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()));
+  props.amount.faker((faker) => BigInt(faker.number.int({ max: 999 })).toString());
   props.expirationTimestamp.faker((faker) => faker.date.future());
   props.data.faker((faker) => faker.lorem.words());
   props.operatorData.faker((faker) => faker.lorem.words());
 });
 
 export const ClearingTransferFixture = createFixture<ClearingTransfer>((props) => {
-  props.amount.faker((faker) => new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()));
+  props.amount.faker((faker) => BigInt(faker.number.int({ max: 999 })).toString());
   props.expirationTimestamp.faker((faker) => faker.date.future());
   props.data.faker((faker) => faker.lorem.words());
   props.operatorData.faker((faker) => faker.lorem.words());

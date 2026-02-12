@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type Security, IERC1410 } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { executeRbac } from "@test";
@@ -12,9 +14,9 @@ const _PARTITION_ID_2 = "0x00000000000000000000000000000000000000000000000000000
 
 describe("Security Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let securityFacet: Security;
   let erc1410Facet: IERC1410;
@@ -40,8 +42,8 @@ describe("Security Tests", () => {
       },
     ]);
 
-    securityFacet = await ethers.getContractAt("Security", diamond.address);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
+    securityFacet = await ethers.getContractAt("Security", diamond.target);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
   }
 
   beforeEach(async () => {
@@ -82,7 +84,7 @@ describe("Security Tests", () => {
 
       expect(TotalTokenHolders_2).to.equal(3);
       expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2);
-      expect(TokenHolders_2).to.have.members([signer_A.address, signer_B.address, signer_C.address]);
+      expect([...TokenHolders_2]).to.have.members([signer_A.address, signer_B.address, signer_C.address]);
     });
 
     it("Check Security Total Holders and Holders when removing", async () => {
@@ -127,15 +129,15 @@ describe("Security Tests", () => {
 
       expect(TotalTokenHolders_1).to.equal(3);
       expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);
-      expect(TokenHolders_1).to.have.members([signer_A.address, signer_B.address, signer_C.address]);
+      expect([...TokenHolders_1]).to.have.members([signer_A.address, signer_B.address, signer_C.address]);
 
       expect(TotalTokenHolders_2).to.equal(2);
       expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2);
-      expect(TokenHolders_2).to.have.members([signer_A.address, signer_C.address]);
+      expect([...TokenHolders_2]).to.have.members([signer_A.address, signer_C.address]);
 
       expect(TotalTokenHolders_3).to.equal(1);
       expect(TokenHolders_3.length).to.equal(TotalTokenHolders_3);
-      expect(TokenHolders_3).to.have.members([signer_C.address]);
+      expect([...TokenHolders_3]).to.have.members([signer_C.address]);
 
       expect(TotalTokenHolders_4).to.equal(0);
       expect(TokenHolders_4.length).to.equal(TotalTokenHolders_4);
@@ -166,11 +168,11 @@ describe("Security Tests", () => {
 
       expect(TotalTokenHolders_1).to.equal(1);
       expect(TokenHolders_1.length).to.equal(TotalTokenHolders_1);
-      expect(TokenHolders_1).to.have.members([signer_A.address]);
+      expect([...TokenHolders_1]).to.have.members([signer_A.address]);
 
       expect(TotalTokenHolders_2).to.equal(1);
       expect(TokenHolders_2.length).to.equal(TotalTokenHolders_2);
-      expect(TokenHolders_2).to.have.members([signer_B.address]);
+      expect([...TokenHolders_2]).to.have.members([signer_B.address]);
     });
   });
 });

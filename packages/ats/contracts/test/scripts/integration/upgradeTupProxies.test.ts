@@ -16,8 +16,10 @@
 
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { join } from "path";
 import { upgradeTupProxies } from "@scripts";
-import { silenceScriptLogging, createCheckpointCleanupHooks, TEST_OPTIONS } from "@test";
+import { getTestCheckpointsDir } from "@scripts/infrastructure";
+import { silenceScriptLogging, createCheckpointCleanupHooks, removeTestDeployments, TEST_OPTIONS } from "@test";
 import {
   deployTupUpgradeTestFixture,
   deployBlrV2Implementation,
@@ -26,6 +28,10 @@ import {
 
 describe("upgradeTupProxies - Integration Tests", () => {
   before(silenceScriptLogging);
+
+  after(async () => {
+    await removeTestDeployments();
+  });
 
   describe("Basic Upgrade Flow - Deploy New Implementations", () => {
     it("should upgrade both BLR and Factory with new implementations", async () => {
@@ -459,7 +465,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
       const { deployer, proxyAdminAddress, blrProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
 
       const timestamp = Date.now();
-      const checkpointDir = `deployments/test/hardhat/.checkpoints/test-upgrade-${timestamp}`;
+      const checkpointDir = join(getTestCheckpointsDir("hardhat"), `test-upgrade-${timestamp}`);
       trackDir(checkpointDir);
 
       const result = await upgradeTupProxies(deployer, "hardhat", {
@@ -493,7 +499,7 @@ describe("upgradeTupProxies - Integration Tests", () => {
       const { deployer, proxyAdminAddress, blrProxyAddress } = await loadFixture(deployTupUpgradeTestFixture);
 
       const timestamp = Date.now();
-      const checkpointDir = `deployments/test/hardhat/.checkpoints/test-delete-${timestamp}`;
+      const checkpointDir = join(getTestCheckpointsDir("hardhat"), `test-delete-${timestamp}`);
       trackDir(checkpointDir);
 
       const result = await upgradeTupProxies(deployer, "hardhat", {

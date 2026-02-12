@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   type ResolverProxy,
@@ -40,10 +42,10 @@ const adjustDecimals = 2;
 
 describe("Lock Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let lockFacet: LockFacet;
   let pauseFacet: PauseFacet;
@@ -90,18 +92,18 @@ describe("Lock Tests", () => {
   }
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    lockFacet = await ethers.getContractAt("LockFacet", diamond.address, signer_C);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_D);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address, signer_A);
-    capFacet = await ethers.getContractAt("Cap", diamond.address, signer_A);
-    snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
+    lockFacet = await ethers.getContractAt("LockFacet", diamond.target, signer_C);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_D);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_B);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.target, signer_A);
+    capFacet = await ethers.getContractAt("Cap", diamond.target, signer_A);
+    snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.target);
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -140,7 +142,7 @@ describe("Lock Tests", () => {
   }
 
   beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+    currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
     expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
   });
 
@@ -426,16 +428,16 @@ describe("Lock Tests", () => {
         const balance_After = await erc1410Facet.balanceOf(signer_A.address);
         const balance_After_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
-        expect(lock_TotalAmount_After).to.be.equal(lock_TotalAmount_Before.mul(adjustFactor * adjustFactor));
+        expect(lock_TotalAmount_After).to.be.equal(lock_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
         expect(lock_TotalAmount_After_Partition_1).to.be.equal(
-          lock_TotalAmount_Before_Partition_1.mul(adjustFactor * adjustFactor),
+          lock_TotalAmount_Before_Partition_1 * BigInt(adjustFactor * adjustFactor),
         );
-        expect(balance_After).to.be.equal(balance_Before.sub(_AMOUNT).mul(adjustFactor * adjustFactor));
-        expect(lock_TotalAmount_After).to.be.equal(lock_TotalAmount_Before.mul(adjustFactor * adjustFactor));
+        expect(balance_After).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor));
+        expect(lock_TotalAmount_After).to.be.equal(lock_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
         expect(balance_After_Partition_1).to.be.equal(
-          balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor * adjustFactor),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor),
         );
-        expect(lock_After.amount_).to.be.equal(lock_Before.amount_.mul(adjustFactor * adjustFactor));
+        expect(lock_After.amount_).to.be.equal(lock_Before.amount_ * BigInt(adjustFactor * adjustFactor));
       });
 
       it("GIVEN a lock WHEN adjustBalances THEN release succeeds", async () => {
@@ -444,7 +446,7 @@ describe("Lock Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // LOCK TWICE
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         await lockFacet
           .connect(signer_A)
@@ -464,7 +466,7 @@ describe("Lock Tests", () => {
 
         // RELEASE LOCK
         await timeTravelFacet.changeSystemTimestamp(
-          (await ethers.provider.getBlock("latest")).timestamp + 2 * ONE_SECOND,
+          (await ethers.provider.getBlock("latest"))!.timestamp + 2 * ONE_SECOND,
         );
         await lockFacet.connect(signer_A).releaseByPartition(_PARTITION_ID_1, 1, signer_A.address);
 
@@ -479,17 +481,17 @@ describe("Lock Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Release).to.be.equal(balance_Before.sub(_AMOUNT).mul(adjustFactor));
+        expect(balance_After_Release).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor));
         expect(balance_After_Release_Partition_1).to.be.equal(
-          balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(locked_Amount_After).to.be.equal(locked_Amount_Before.sub(_AMOUNT).mul(adjustFactor));
+        expect(locked_Amount_After).to.be.equal((locked_Amount_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor));
         expect(locked_Amount_After_Partition_1).to.be.equal(
-          locked_Amount_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor),
+          (locked_Amount_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(balance_After_Release.add(locked_Amount_After)).to.be.equal(balance_Before.mul(adjustFactor));
-        expect(balance_After_Release_Partition_1.add(locked_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1.mul(adjustFactor),
+        expect(balance_After_Release + locked_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactor));
+        expect(balance_After_Release_Partition_1 + locked_Amount_After_Partition_1).to.be.equal(
+          balance_Before_Partition_1 * BigInt(adjustFactor),
         );
       });
 
@@ -499,7 +501,7 @@ describe("Lock Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // LOCK BEFORE BALANCE ADJUSTMENT
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         await lockFacet
           .connect(signer_A)
@@ -530,17 +532,19 @@ describe("Lock Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Lock).to.be.equal(balance_Before.sub(_AMOUNT).mul(adjustFactor).sub(_AMOUNT));
+        expect(balance_After_Lock).to.be.equal(
+          (balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor) - BigInt(_AMOUNT),
+        );
         expect(balance_After_Lock_Partition_1).to.be.equal(
-          balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor).sub(_AMOUNT),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor) - BigInt(_AMOUNT),
         );
-        expect(locked_Amount_After).to.be.equal(locked_Amount_Before.mul(adjustFactor).add(_AMOUNT));
+        expect(locked_Amount_After).to.be.equal(locked_Amount_Before * BigInt(adjustFactor) + BigInt(_AMOUNT));
         expect(locked_Amount_After_Partition_1).to.be.equal(
-          locked_Amount_Before_Partition_1.mul(adjustFactor).add(_AMOUNT),
+          locked_Amount_Before_Partition_1 * BigInt(adjustFactor) + BigInt(_AMOUNT),
         );
-        expect(balance_After_Lock.add(locked_Amount_After)).to.be.equal(balance_Before.mul(adjustFactor));
-        expect(balance_After_Lock_Partition_1.add(locked_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1.mul(adjustFactor),
+        expect(balance_After_Lock + locked_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactor));
+        expect(balance_After_Lock_Partition_1 + locked_Amount_After_Partition_1).to.be.equal(
+          balance_Before_Partition_1 * BigInt(adjustFactor),
         );
       });
     });

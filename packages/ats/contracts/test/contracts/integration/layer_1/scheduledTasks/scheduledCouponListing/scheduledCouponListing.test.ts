@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   ScheduledCouponListingFacet,
@@ -13,7 +15,7 @@ import { ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 
 describe("ScheduledCouponListing Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
 
   let scheduledCouponListingFacet: ScheduledCouponListingFacet;
   let bondFacet: BondUSAKpiLinkedRateFacet;
@@ -43,9 +45,9 @@ describe("ScheduledCouponListing Tests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
 
-    scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.address);
-    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.address);
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
+    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
     // Grant corporate action role to signer_A
     await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
@@ -127,10 +129,14 @@ describe("ScheduledCouponListing Tests", () => {
     it("GIVEN scheduled coupons WHEN getScheduledCouponListing THEN returns tasks with correct structure", async () => {
       const coupons = await scheduledCouponListingFacet.getScheduledCouponListing(0, 1);
       expect(coupons.length).to.equal(1);
-      expect(coupons[0]).to.have.property("scheduledTimestamp");
-      expect(coupons[0]).to.have.property("data");
-      expect(coupons[0].scheduledTimestamp).to.be.gt(0);
-      expect(coupons[0].data).to.not.equal("0x");
+      const coupon = {
+        scheduledTimestamp: coupons[0].scheduledTimestamp,
+        data: coupons[0].data,
+      };
+      expect(coupon).to.have.property("scheduledTimestamp");
+      expect(coupon).to.have.property("data");
+      expect(coupon.scheduledTimestamp).to.be.gt(0);
+      expect(coupon.data).to.not.equal("0x");
     });
   });
 });

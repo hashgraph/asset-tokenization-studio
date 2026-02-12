@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type BondUSAReadFacet } from "@contract-types";
 import { RegulationType, RegulationSubType, TIME_PERIODS_S } from "@scripts";
 import { deployEquityTokenFixture } from "@test";
@@ -17,12 +19,12 @@ const frequency = TIME_PERIODS_S.DAY;
 let maturityDate = startingDate + numberOfCoupons * frequency;
 
 describe("Security USA Tests", () => {
-  let signer_B: SignerWithAddress;
+  let signer_B: HardhatEthersSigner;
 
   let bondUSAFacet: BondUSAReadFacet;
 
   before(async () => {
-    currentTimeInSeconds = (await ethers.provider.getBlock("latest")).timestamp;
+    currentTimeInSeconds = (await ethers.provider.getBlock("latest"))!.timestamp;
     startingDate = currentTimeInSeconds + TIME;
     maturityDate = startingDate + numberOfCoupons * frequency;
     expect(startingDate).to.be.gt(currentTimeInSeconds);
@@ -44,7 +46,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.address, signer_B);
+      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_B);
       // retrieve security regulation data
       const regulation = await equityUSAFacet.getSecurityRegulationData();
 
@@ -77,7 +79,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.address, signer_B);
+      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_B);
 
       // retrieve security regulation data
       const regulation = await equityUSAFacet.getSecurityRegulationData();
@@ -110,7 +112,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.address, signer_B);
+      const equityUSAFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_B);
 
       // retrieve security regulation data
       const regulation = await equityUSAFacet.getSecurityRegulationData();
@@ -145,7 +147,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.address);
+      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target);
 
       // retrieve security regulation data
       const regulation = await bondUSAFacet.getSecurityRegulationData();
@@ -178,7 +180,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.address);
+      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target);
       // retrieve security regulation data
       const regulation = await bondUSAFacet.getSecurityRegulationData();
 
@@ -210,7 +212,7 @@ describe("Security USA Tests", () => {
       const diamond = base.diamond;
       signer_B = base.user2;
 
-      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.address);
+      bondUSAFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target);
       // retrieve security regulation data
       const regulation = await bondUSAFacet.getSecurityRegulationData();
 

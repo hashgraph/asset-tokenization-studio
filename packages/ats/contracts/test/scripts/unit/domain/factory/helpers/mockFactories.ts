@@ -237,11 +237,12 @@ export function createMockImpactDataParamsSPT() {
  */
 export function createMockReceipt(eventName: string, diamondAddress: string) {
   return {
-    events: [
+    logs: [
       {
-        event: eventName,
+        eventName: eventName,
         args: {
           diamondProxyAddress: diamondAddress,
+          1: diamondAddress,
         },
       },
     ],
@@ -253,7 +254,7 @@ export function createMockReceipt(eventName: string, diamondAddress: string) {
  */
 export function createMockReceiptWithNoEvents() {
   return {
-    events: [],
+    logs: [],
   };
 }
 
@@ -264,9 +265,9 @@ export function createMockReceiptWithNoEvents() {
  */
 export function createMockReceiptWithEventNoArgs(eventName: string) {
   return {
-    events: [
+    logs: [
       {
-        event: eventName,
+        eventName: eventName,
         args: undefined,
       },
     ],
@@ -341,13 +342,15 @@ export function createMockFactory(receiptEvent: string, diamondAddress: string) 
     hash: TEST_TX_HASHES.SAMPLE_0,
   };
 
+  const mockSigner = createMockSigner();
   return {
     deployEquity: sinon.stub().resolves(mockTx),
     deployBond: sinon.stub().resolves(mockTx),
     deployBondFixedRate: sinon.stub().resolves(mockTx),
     deployBondKpiLinkedRate: sinon.stub().resolves(mockTx),
     deployBondSustainabilityPerformanceTargetRate: sinon.stub().resolves(mockTx),
-    signer: createMockSigner(),
+    signer: mockSigner,
+    runner: mockSigner,
   };
 }
 
@@ -372,13 +375,15 @@ export function createMockFactoryWithNoArgs(eventName: string) {
     hash: TEST_TX_HASHES.SAMPLE_0,
   };
 
+  const mockSigner = createMockSigner();
   return {
     deployEquity: sinon.stub().resolves(mockTx),
     deployBond: sinon.stub().resolves(mockTx),
     deployBondFixedRate: sinon.stub().resolves(mockTx),
     deployBondKpiLinkedRate: sinon.stub().resolves(mockTx),
     deployBondSustainabilityPerformanceTargetRate: sinon.stub().resolves(mockTx),
-    signer: createMockSigner(),
+    signer: mockSigner,
+    runner: mockSigner,
   };
 }
 

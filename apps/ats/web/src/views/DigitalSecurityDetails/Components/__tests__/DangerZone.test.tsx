@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { render } from "../../../../test-utils";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";
@@ -21,7 +23,6 @@ jest.mock("../../../../hooks/queries/usePauseSecurity", () => ({
   })),
 }));
 
-// Mock para useGetIsPaused
 jest.mock("../../../../hooks/queries/useGetSecurityDetails", () => ({
   useGetIsPaused: jest.fn(() => ({
     data: false,
@@ -35,6 +36,49 @@ jest.mock("../../../../hooks/queries/useUnpauseSecurity", () => ({
     mutate: jest.fn(),
     isLoading: false,
   })),
+}));
+
+jest.mock("../../../../hooks/queries/useClearingOperations", () => ({
+  useGetIsClearingActivated: jest.fn(() => ({
+    data: false,
+    refetch: jest.fn(),
+    isLoading: false,
+  })),
+}));
+
+jest.mock("../../../../hooks/mutations/useClearingOperations", () => ({
+  useActivateClearing: jest.fn(() => ({
+    mutate: jest.fn(),
+    isPending: false,
+  })),
+  useDeactivateClearing: jest.fn(() => ({
+    mutate: jest.fn(),
+    isPending: false,
+  })),
+}));
+
+jest.mock("../../../../hooks/queries/useKYC", () => ({
+  useGetIsInternalKycActivated: jest.fn(() => ({
+    data: false,
+    refetch: jest.fn(),
+    isLoading: false,
+  })),
+}));
+
+jest.mock("../../../../hooks/mutations/useKYC", () => ({
+  useActivateInternalKyc: jest.fn(() => ({
+    mutate: jest.fn(),
+    isPending: false,
+  })),
+  useDeactivateInternalKyc: jest.fn(() => ({
+    mutate: jest.fn(),
+    isPending: false,
+  })),
+}));
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useParams: () => ({ id: "0.0.123456" }),
 }));
 
 const defaultAdminRole = [SecurityRole._DEFAULT_ADMIN_ROLE];

@@ -1,7 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { BigNumber } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   ResolverProxy,
   BondUSAFacet,
@@ -29,6 +30,7 @@ import {
   EMPTY_HEX_BYTES,
   EMPTY_STRING,
 } from "@scripts";
+import { SecurityType } from "@scripts/domain";
 import { getBondDetails, getDltTimestamp, grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture } from "@test";
@@ -68,10 +70,10 @@ let couponData = {
 
 describe("Bond Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let bondFacet: BondUSAFacet;
   let bondReadFacet: BondUSAReadFacet;
@@ -146,26 +148,26 @@ describe("Bond Tests", () => {
       },
     ]);
 
-    bondFacet = await ethers.getContractAt("BondUSAFacetTimeTravel", diamond.address, signer_A);
-    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.address, signer_A);
+    bondFacet = await ethers.getContractAt("BondUSAFacetTimeTravel", diamond.target, signer_A);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.target, signer_A);
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    lockFacet = await ethers.getContractAt("Lock", diamond.address, signer_A);
-    holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
-    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
+    lockFacet = await ethers.getContractAt("Lock", diamond.target, signer_A);
+    holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
 
-    controlListFacet = await ethers.getContractAt("ControlList", diamond.address, signer_D);
-    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
+    controlListFacet = await ethers.getContractAt("ControlList", diamond.target, signer_D);
+    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
 
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address, signer_A);
-    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address, signer_A);
+    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target, signer_A);
+    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
 
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
   }
@@ -197,6 +199,12 @@ describe("Bond Tests", () => {
   });
 
   describe("Initialization", () => {
+    it("GIVEN a bond variable rate WHEN deployed THEN securityType is BOND_VARIABLE_RATE", async () => {
+      const erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
+      const metadata = await erc20Facet.getERC20Metadata();
+      expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
+    });
+
     it("GIVEN an initialized bond WHEN trying to initialize again THEN transaction fails with AlreadyInitialized", async () => {
       const regulationData = {
         regulationType: 1, // REG_S
@@ -234,8 +242,8 @@ describe("Bond Tests", () => {
       const principalFor = await bondReadFacet.getPrincipalFor(signer_A.address);
       const bondDetails = await bondReadFacet.getBondDetails();
 
-      expect(principalFor.numerator).to.equal(bondDetails.nominalValue.mul(amount));
-      expect(principalFor.denominator).to.equal(10 ** (bondDetails.nominalValueDecimals + DECIMALS));
+      expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount));
+      expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
     });
 
     describe("Redeem At Maturity", () => {
@@ -423,7 +431,7 @@ describe("Bond Tests", () => {
         );
 
         const wrongcouponData_2 = {
-          recordDate: ((await ethers.provider.getBlock("latest")).timestamp - 1).toString(),
+          recordDate: ((await ethers.provider.getBlock("latest"))!.timestamp - 1).toString(),
           executionDate: couponExecutionDateInSeconds.toString(),
           rate: couponRate,
           rateDecimals: couponRateDecimals,
@@ -611,21 +619,20 @@ describe("Bond Tests", () => {
         const bondDetails = await bondReadFacet.getBondDetails();
         const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
         const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
-        const period = couponFor.coupon.endDate.sub(couponFor.coupon.startDate);
+        const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
 
         expect(couponFor.tokenBalance).to.equal(TotalAmount);
         expect(couponFor.recordDateReached).to.equal(true);
         expect(couponTotalHolders).to.equal(1);
         expect(couponHolders.length).to.equal(couponTotalHolders);
-        expect(couponHolders).to.have.members([signer_A.address]);
+        expect([...couponHolders]).to.have.members([signer_A.address]);
         expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
         expect(couponAmountFor.numerator).to.equal(
-          couponFor.tokenBalance.mul(bondDetails.nominalValue).mul(couponFor.coupon.rate).mul(period),
+          couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
         );
         expect(couponAmountFor.denominator).to.equal(
-          BigNumber.from(
-            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals),
-          ).mul(YEAR_SECONDS),
+          10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
+            BigInt(YEAR_SECONDS),
         );
       });
 
@@ -677,21 +684,20 @@ describe("Bond Tests", () => {
         const bondDetails = await bondReadFacet.getBondDetails();
         const couponTotalHolders = await bondReadFacet.getTotalCouponHolders(1);
         const couponHolders = await bondReadFacet.getCouponHolders(1, 0, couponTotalHolders);
-        const period = couponFor.coupon.endDate.sub(couponFor.coupon.startDate);
+        const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
 
         expect(couponFor.tokenBalance).to.equal(TotalAmount);
         expect(couponFor.recordDateReached).to.equal(true);
         expect(couponTotalHolders).to.equal(1);
         expect(couponHolders.length).to.equal(couponTotalHolders);
-        expect(couponHolders).to.have.members([signer_A.address]);
+        expect([...couponHolders]).to.have.members([signer_A.address]);
         expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
         expect(couponAmountFor.numerator).to.equal(
-          couponFor.tokenBalance.mul(bondDetails.nominalValue).mul(couponFor.coupon.rate).mul(period),
+          couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
         );
         expect(couponAmountFor.denominator).to.equal(
-          BigNumber.from(
-            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals),
-          ).mul(YEAR_SECONDS),
+          10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
+            BigInt(YEAR_SECONDS),
         );
       });
 
@@ -702,11 +708,11 @@ describe("Bond Tests", () => {
         // Get maturity date
         const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
         // New maturity date
-        const newMaturityDate = maturityDateBefore.add(BigNumber.from(86400));
+        const newMaturityDate = maturityDateBefore + 86400n;
 
         await expect(bondFacet.connect(signer_C).updateMaturityDate(newMaturityDate))
           .to.emit(bondFacet, "MaturityDateUpdated")
-          .withArgs(bondFacet.address, newMaturityDate, maturityDateBefore);
+          .withArgs(bondFacet.target, newMaturityDate, maturityDateBefore);
         // check date
         const maturityDateAfter = (await bondReadFacet.getBondDetails()).maturityDate;
         expect(maturityDateAfter).not.to.be.equal(maturityDateBefore);
@@ -721,7 +727,7 @@ describe("Bond Tests", () => {
         const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
         // New maturity date (earlier than current)
         // New maturity date (earlier than current)
-        const dayBeforeCurrentMaturity = maturityDateBefore.sub(BigNumber.from(86400));
+        const dayBeforeCurrentMaturity = maturityDateBefore - 86400n;
 
         // * Act & Assert
         // Set maturity date
@@ -738,7 +744,7 @@ describe("Bond Tests", () => {
         // Get maturity date
         const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
         // New maturity date
-        const newMaturityDate = maturityDateBefore.add(BigNumber.from(86400));
+        const newMaturityDate = maturityDateBefore + 86400n;
 
         // * Act & Assert
         // Set maturity date
@@ -764,7 +770,7 @@ describe("Bond Tests", () => {
         // Get maturity date
         const maturityDateBefore = (await bondReadFacet.getBondDetails()).maturityDate;
         // New maturity date
-        const newMaturityDate = maturityDateBefore.add(BigNumber.from(86400));
+        const newMaturityDate = maturityDateBefore + 86400n;
 
         // * Act & Assert
         // Set maturity date
@@ -846,17 +852,16 @@ describe("Bond Tests", () => {
         const couponFor = await bondReadFacet.getCouponFor(1, signer_A.address);
         const couponAmountForAfter = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
         const bondDetails = await bondReadFacet.getBondDetails();
-        const period = couponFor.coupon.endDate.sub(couponFor.coupon.startDate);
+        const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
         expect(couponFor.recordDateReached).to.equal(true);
         expect(couponFor.tokenBalance).to.equal(totalAmount); // normal+cleared+held+locked+frozen
         expect(couponAmountForAfter.recordDateReached).to.equal(couponFor.recordDateReached);
         expect(couponAmountForAfter.numerator).to.equal(
-          couponFor.tokenBalance.mul(bondDetails.nominalValue).mul(couponFor.coupon.rate).mul(period),
+          couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
         );
         expect(couponAmountForAfter.denominator).to.equal(
-          BigNumber.from(
-            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals),
-          ).mul(YEAR_SECONDS),
+          10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
+            BigInt(YEAR_SECONDS),
         );
       });
     });
@@ -884,8 +889,8 @@ describe("Bond Tests", () => {
       const principalFor = await bondReadFacet.getPrincipalFor(signer_A.address);
       const bondDetails = await bondReadFacet.getBondDetails();
 
-      expect(principalFor.numerator).to.equal(bondDetails.nominalValue.mul(amount).mul(2));
-      expect(principalFor.denominator).to.equal(10 ** (bondDetails.nominalValueDecimals + DECIMALS));
+      expect(principalFor.numerator).to.equal(bondDetails.nominalValue * BigInt(amount) * 2n);
+      expect(principalFor.denominator).to.equal(10n ** (bondDetails.nominalValueDecimals + BigInt(DECIMALS)));
     });
 
     it("GIVEN a new diamond contract with multi-partition WHEN redeemAtMaturityByPartition is called THEN transaction success", async () => {
@@ -980,7 +985,7 @@ describe("Bond Tests", () => {
 
       expect(coupon.snapshotId).to.be.greaterThan(0); // Snapshot should have been taken
       expect(couponTotalHolders).to.equal(1);
-      expect(couponHolders).to.have.members([signer_A.address]);
+      expect([...couponHolders]).to.have.members([signer_A.address]);
     });
 
     it("GIVEN a coupon without snapshot WHEN getCouponFor is called after record date THEN uses current balance", async () => {

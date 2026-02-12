@@ -1,14 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { AccessControl, Pause, BusinessLogicResolver } from "@contract-types";
 import { EQUITY_CONFIG_ID, ATS_ROLES } from "@scripts";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 
 describe("BusinessLogicResolver", () => {
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let businessLogicResolver: BusinessLogicResolver;
   let accessControl: AccessControl;
@@ -44,10 +46,10 @@ describe("BusinessLogicResolver", () => {
     businessLogicResolver = await (await ethers.getContractFactory("BusinessLogicResolver", signer_A)).deploy();
 
     await businessLogicResolver.initialize_BusinessLogicResolver();
-    accessControl = await ethers.getContractAt("AccessControl", businessLogicResolver.address, signer_A);
+    accessControl = await ethers.getContractAt("AccessControl", businessLogicResolver.target, signer_A);
     await accessControl.grantRole(ATS_ROLES._PAUSER_ROLE, signer_B.address);
 
-    pause = await ethers.getContractAt("Pause", businessLogicResolver.address);
+    pause = await ethers.getContractAt("Pause", businessLogicResolver.target);
   }
 
   beforeEach(async () => {
@@ -102,7 +104,7 @@ describe("BusinessLogicResolver", () => {
       expect(await businessLogicResolver.getLatestVersion()).is.equal(0);
       await expect(businessLogicResolver.getVersionStatus(0)).to.be.rejectedWith("BusinessLogicVersionDoesNotExist");
       expect(await businessLogicResolver.resolveLatestBusinessLogic(BUSINESS_LOGIC_KEYS[0].businessLogicKey)).is.equal(
-        ethers.constants.AddressZero,
+        ethers.ZeroAddress,
       );
       await expect(
         businessLogicResolver.resolveBusinessLogicByVersion(BUSINESS_LOGIC_KEYS[0].businessLogicKey, 0),
@@ -117,7 +119,7 @@ describe("BusinessLogicResolver", () => {
     it("GIVEN an empty key WHEN registerBusinessLogics THEN Fails with ZeroKeyNotValidForBusinessLogic", async () => {
       const BUSINESS_LOGICS_TO_REGISTER = [
         {
-          businessLogicKey: ethers.constants.HashZero,
+          businessLogicKey: ethers.ZeroHash,
           businessLogicAddress: "0x7773334dc2Db6F14aAF0C1D17c1B3F1769Cf31b9",
         },
       ];

@@ -12,7 +12,6 @@
  * @module domain/bondFixedRate/createConfiguration
  */
 
-import { Contract } from "ethers";
 import {
   ConfigurationData,
   ConfigurationError,
@@ -21,6 +20,7 @@ import {
   DEFAULT_BATCH_SIZE,
 } from "@scripts/infrastructure";
 import { BOND_FIXED_RATE_CONFIG_ID, atsRegistry } from "@scripts/domain";
+import { BusinessLogicResolver } from "@contract-types";
 
 /**
  * Bond-specific facets list (41 facets total).
@@ -146,7 +146,7 @@ const BOND_FIXED_RATE_FACETS = [
  * ```
  */
 export async function createBondFixedRateConfiguration(
-  blrContract: Contract,
+  blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
   useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,

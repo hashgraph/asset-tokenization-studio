@@ -1,8 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ResolverProxy, BondUSAFixedRateFacet, FixedRate, BondUSAReadFacet } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
+import { SecurityType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondFixedRateTokenFixture } from "@test";
 import { executeRbac } from "@test";
@@ -27,7 +30,7 @@ let couponData = {
 
 describe("Bond Fixed Rate Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
 
   let bondFixedRateFacet: BondUSAFixedRateFacet;
   let bondReadFacet: BondUSAReadFacet;
@@ -46,9 +49,9 @@ describe("Bond Fixed Rate Tests", () => {
       },
     ]);
 
-    bondFixedRateFacet = await ethers.getContractAt("BondUSAFixedRateFacetTimeTravel", diamond.address, signer_A);
-    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.address, signer_A);
-    fixedRateFacet = await ethers.getContractAt("FixedRate", diamond.address, signer_A);
+    bondFixedRateFacet = await ethers.getContractAt("BondUSAFixedRateFacetTimeTravel", diamond.target, signer_A);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.target, signer_A);
+    fixedRateFacet = await ethers.getContractAt("FixedRate", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -68,6 +71,12 @@ describe("Bond Fixed Rate Tests", () => {
       rateStatus: 0,
     };
     await loadFixture(deploySecurityFixture);
+  });
+
+  it("GIVEN a bond fixed rate WHEN deployed THEN securityType is BOND_FIXED_RATE", async () => {
+    const erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
+    const metadata = await erc20Facet.getERC20Metadata();
+    expect(metadata.securityType).to.be.equal(SecurityType.BOND_FIXED_RATE);
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsFixed", async () => {

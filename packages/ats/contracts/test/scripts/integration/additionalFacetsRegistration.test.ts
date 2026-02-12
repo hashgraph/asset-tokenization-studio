@@ -731,7 +731,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
         const facetDefinition = atsRegistry.getFacetDefinition(name);
         const key = facetDefinition!.resolverKey!.value;
         const address = await blr.resolveLatestBusinessLogic(key);
-        expect(address).to.not.equal(ethers.constants.AddressZero);
+        expect(address).to.not.equal(ethers.ZeroAddress);
       }
     });
   });

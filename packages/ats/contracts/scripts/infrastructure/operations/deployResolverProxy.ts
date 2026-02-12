@@ -10,9 +10,8 @@
  * @module infrastructure/operations/deployResolverProxy
  */
 
-import { Contract, ContractReceipt, Overrides, Signer } from "ethers";
+import { Contract, ContractTransactionReceipt, Overrides, Signer } from "ethers";
 import {
-  DEFAULT_TRANSACTION_TIMEOUT,
   debug,
   error as logError,
   formatGasUsage,
@@ -21,7 +20,6 @@ import {
   section,
   success,
   validateAddress,
-  waitForTransaction,
   GAS_LIMIT,
 } from "@scripts/infrastructure";
 
@@ -100,7 +98,7 @@ export interface DeployResolverProxyResult {
   version?: number;
 
   /** Deployment transaction receipt */
-  receipt?: ContractReceipt;
+  receipt?: ContractTransactionReceipt;
 
   /** Error type if failed */
   error?: string;
@@ -182,34 +180,45 @@ export async function deployResolverProxy(
 
     // Deploy ResolverProxy
     info("Deploying ResolverProxy contract...");
-    const resolverProxy = await ResolverProxyFactory.deploy(blrAddress, configurationId, version, rbac, overrides);
+    const resolverProxy = await ResolverProxyFactory.deploy(
+      blrAddress,
+      configurationId,
+      version,
+      rbac,
+      overrides as any,
+    );
+    await resolverProxy.waitForDeployment();
 
-    info(`Transaction sent: ${resolverProxy.deployTransaction.hash}`);
+    const deployTx = resolverProxy.deploymentTransaction();
+    if (deployTx) {
+      info(`Transaction sent: ${deployTx.hash}`);
+    }
 
     // Wait for deployment with proper timeout and confirmations
-    const receipt = await waitForTransaction(
-      resolverProxy.deployTransaction,
-      confirmations,
-      DEFAULT_TRANSACTION_TIMEOUT,
-    );
+    let receipt: ContractTransactionReceipt | null = null;
+    if (deployTx) {
+      receipt = await deployTx.wait(confirmations);
+    }
 
-    const proxyAddress = resolverProxy.address;
+    const proxyAddress = await resolverProxy.getAddress();
 
     validateAddress(proxyAddress, "ResolverProxy address");
 
-    const gasUsed = formatGasUsage(receipt, resolverProxy.deployTransaction.gasLimit);
-    debug(gasUsed);
+    if (receipt && deployTx) {
+      const gasUsed = formatGasUsage(receipt, deployTx.gasLimit);
+      debug(gasUsed);
+    }
 
     success("ResolverProxy deployment complete");
     info(`  ResolverProxy: ${proxyAddress}`);
 
     return {
       success: true,
-      contract: resolverProxy,
+      contract: resolverProxy as unknown as Contract,
       proxyAddress,
       configurationId,
       version,
-      receipt,
+      receipt: receipt ?? undefined,
     };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);

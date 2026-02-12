@@ -1,7 +1,9 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { type BusinessLogicResolver, type AccessControlFacet, type PauseFacet, DiamondFacet } from "@contract-types";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { ATS_ROLES } from "@scripts";
 import { assertObject } from "../../../common";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -15,7 +17,7 @@ describe("ResolverProxy Tests", () => {
   let diamondFacet: DiamondFacet;
   let accessControlImpl: AccessControlFacet;
   let pauseImpl: PauseFacet;
-  let signer_A: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
 
   async function deployContracts() {
     [signer_A] = await ethers.getSigners();
@@ -47,9 +49,9 @@ describe("ResolverProxy Tests", () => {
   }
 
   async function deployResolver(): Promise<BusinessLogicResolver> {
-    let newResolver = await (await ethers.getContractFactory("BusinessLogicResolver")).deploy();
+    const deployedResolver = await (await ethers.getContractFactory("BusinessLogicResolver")).deploy();
 
-    newResolver = newResolver.connect(signer_A);
+    const newResolver = deployedResolver.connect(signer_A) as BusinessLogicResolver;
 
     await newResolver.initialize_BusinessLogicResolver();
 
@@ -97,11 +99,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -109,17 +111,17 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, CONFIG_ID, 1, []);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
     const result = await diamondCut.getConfigInfo();
 
-    expect(result.resolver_).to.equal(resolver.address);
+    expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.version_).to.equal(1);
 
-    const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
+    const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
     await checkFacets(businessLogicsRegistryDatas, diamondLoupe);
   });
@@ -128,7 +130,7 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
     ];
 
@@ -136,10 +138,10 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, CONFIG_ID, 1, []);
 
-    const accessControl = await ethers.getContractAt("AccessControl", resolverProxy.address);
-    const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
+    const accessControl = await ethers.getContractAt("AccessControl", resolverProxy.target);
+    const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
     const GRANT_ROLE_SIGNATURE = "0x2f2ff15d";
     await expect(accessControl.grantRole(ATS_ROLES._DEFAULT_ADMIN_ROLE, signer_A.address))
@@ -152,26 +154,26 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas_1 = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
     const businessLogicsRegistryDatas_2 = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
       {
         businessLogicKey: await pauseImpl.getStaticResolverKey(),
-        businessLogicAddress: pauseImpl.address,
+        businessLogicAddress: pauseImpl.target,
       },
     ];
 
@@ -179,15 +181,15 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy_v1 = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, CONFIG_ID, 1, []);
 
     const resolverProxy_latest = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 0, []);
+    ).deploy(resolver.target, CONFIG_ID, 0, []);
 
-    const diamondFacet_v1 = await ethers.getContractAt("DiamondFacet", resolverProxy_v1.address);
+    const diamondFacet_v1 = await ethers.getContractAt("DiamondFacet", resolverProxy_v1.target);
 
-    const diamondFacet_latest = await ethers.getContractAt("DiamondFacet", resolverProxy_latest.address);
+    const diamondFacet_latest = await ethers.getContractAt("DiamondFacet", resolverProxy_latest.target);
 
     await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_v1);
     await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_latest);
@@ -202,11 +204,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -214,9 +216,9 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, CONFIG_ID, 1, []);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
     await expect(diamondCut.updateConfigVersion(0)).to.be.rejectedWith("AccountHasNoRole");
   });
@@ -225,11 +227,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -244,9 +246,9 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 1, rbac);
+    ).deploy(resolver.target, CONFIG_ID, 1, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
     await expect(diamondCut.updateConfigVersion(100)).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
   });
@@ -255,11 +257,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -276,13 +278,13 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac);
+    ).deploy(resolver.target, CONFIG_ID, oldVersion, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
     let result = await diamondCut.getConfigInfo();
 
-    expect(result.resolver_).to.equal(resolver.address);
+    expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.version_).to.equal(oldVersion);
 
@@ -292,7 +294,7 @@ describe("ResolverProxy Tests", () => {
 
     result = await diamondCut.getConfigInfo();
 
-    expect(result.resolver_).to.equal(resolver.address);
+    expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.version_).to.equal(newVersion);
   });
@@ -301,11 +303,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -313,9 +315,9 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, CONFIG_ID, 1, []);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
     await expect(diamondCut.updateConfig(CONFIG_ID_2, 1)).to.be.rejectedWith("AccountHasNoRole");
   });
@@ -324,11 +326,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -343,9 +345,9 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 1, rbac);
+    ).deploy(resolver.target, CONFIG_ID, 1, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
     await expect(diamondCut.updateConfig(CONFIG_ID_2, 1)).to.be.rejectedWith("ResolverProxyConfigurationNoRegistered");
   });
@@ -354,11 +356,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -376,13 +378,13 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac);
+    ).deploy(resolver.target, CONFIG_ID, oldVersion, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
     let result = await diamondCut.getConfigInfo();
 
-    expect(result.resolver_).to.equal(resolver.address);
+    expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.version_).to.equal(oldVersion);
 
@@ -392,7 +394,7 @@ describe("ResolverProxy Tests", () => {
 
     result = await diamondCut.getConfigInfo();
 
-    expect(result.resolver_).to.equal(resolver.address);
+    expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID_2);
     expect(result.version_).to.equal(newVersion);
   });
@@ -403,11 +405,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -415,11 +417,11 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 1, []);
+    ).deploy(resolver.target, CONFIG_ID, 1, []);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
-    await expect(diamondCut.updateResolver(resolver_2.address, CONFIG_ID_2, 1)).to.be.rejectedWith("AccountHasNoRole");
+    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1)).to.be.rejectedWith("AccountHasNoRole");
   });
 
   it("GIVEN resolverProxy and admin user WHEN updating to non existing resolver THEN fails with ResolverProxyConfigurationNoRegistered", async () => {
@@ -428,11 +430,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -447,11 +449,11 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, 1, rbac);
+    ).deploy(resolver.target, CONFIG_ID, 1, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
-    await expect(diamondCut.updateResolver(resolver_2.address, CONFIG_ID_2, 1)).to.be.rejectedWith(
+    await expect(diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, 1)).to.be.rejectedWith(
       "ResolverProxyConfigurationNoRegistered",
     );
   });
@@ -462,11 +464,11 @@ describe("ResolverProxy Tests", () => {
     const businessLogicsRegistryDatas = [
       {
         businessLogicKey: await diamondFacet.getStaticResolverKey(),
-        businessLogicAddress: diamondFacet.address,
+        businessLogicAddress: diamondFacet.target,
       },
       {
         businessLogicKey: await accessControlImpl.getStaticResolverKey(),
-        businessLogicAddress: accessControlImpl.address,
+        businessLogicAddress: accessControlImpl.target,
       },
     ];
 
@@ -484,23 +486,23 @@ describe("ResolverProxy Tests", () => {
 
     const resolverProxy = await (
       await ethers.getContractFactory("ResolverProxy")
-    ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac);
+    ).deploy(resolver.target, CONFIG_ID, oldVersion, rbac);
 
-    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.address, signer_A);
+    const diamondCut = await ethers.getContractAt("DiamondFacet", resolverProxy.target, signer_A);
 
     let result = await diamondCut.getConfigInfo();
 
-    expect(result.resolver_).to.equal(resolver.address);
+    expect(result.resolver_).to.equal(resolver.target);
     expect(result.configurationId_).to.equal(CONFIG_ID);
     expect(result.version_).to.equal(oldVersion);
 
     const newVersion = 0;
 
-    await diamondCut.updateResolver(resolver_2.address, CONFIG_ID_2, newVersion);
+    await diamondCut.updateResolver(resolver_2.target, CONFIG_ID_2, newVersion);
 
     result = await diamondCut.getConfigInfo();
 
-    expect(result.resolver_).to.equal(resolver_2.address);
+    expect(result.resolver_).to.equal(resolver_2.target);
     expect(result.configurationId_).to.equal(CONFIG_ID_2);
     expect(result.version_).to.equal(newVersion);
   });

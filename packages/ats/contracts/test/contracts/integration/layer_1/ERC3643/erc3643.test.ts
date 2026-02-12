@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 import {
   type ResolverProxy,
@@ -58,12 +60,12 @@ const onchainId = ethers.Wallet.createRandom().address;
 
 describe("ERC3643 Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
-  let signer_E: SignerWithAddress;
-  let signer_F: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
+  let signer_E: HardhatEthersSigner;
+  let signer_F: HardhatEthersSigner;
 
   let erc3643Facet: IERC3643;
   let erc1410Facet: IERC1410;
@@ -81,7 +83,8 @@ describe("ERC3643 Tests", () => {
   let erc1644Facet: ERC1644Facet;
   let erc1594Facet: ERC1594Facet;
   let lockFacet: LockFacet;
-  let clearingFacet: Contract;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let clearingFacet: any;
   let holdFacet: IHold;
   let protectedPartitionsFacet: ProtectedPartitions;
   let diamondFacet: DiamondFacet;
@@ -104,18 +107,18 @@ describe("ERC3643 Tests", () => {
     let erc20Facet: ERC20;
     async function deploySecurityFixtureSinglePartition() {
       complianceMock = await (await ethers.getContractFactory("ComplianceMock", signer_A)).deploy(true, false);
-      await complianceMock.deployed();
+      await complianceMock.waitForDeployment();
 
       identityRegistryMock = await (
         await ethers.getContractFactory("IdentityRegistryMock", signer_A)
       ).deploy(true, false);
-      await identityRegistryMock.deployed();
+      await identityRegistryMock.waitForDeployment();
 
       const base = await deployEquityTokenFixture({
         equityDataParams: {
           securityData: {
-            compliance: complianceMock.address,
-            identityRegistry: identityRegistryMock.address,
+            compliance: complianceMock.target as string,
+            identityRegistry: identityRegistryMock.target as string,
             maxSupply: MAX_SUPPLY,
             erc20MetadataInfo: { name, symbol, decimals, isin },
           },
@@ -164,44 +167,44 @@ describe("ERC3643 Tests", () => {
           members: [signer_A.address],
         },
       ]);
-      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-      erc20Facet = await ethers.getContractAt("ERC20", diamond.address);
+      erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
 
-      erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
+      erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target);
 
-      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_B);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_B);
 
       erc3643Issuer = erc3643Facet.connect(signer_C);
       erc3643Transferor = erc3643Facet.connect(signer_E);
 
-      erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_E);
-      erc1410SnapshotFacet = await ethers.getContractAt("IERC1410", diamond.address);
+      erc20Facet = await ethers.getContractAt("ERC20", diamond.target, signer_E);
+      erc1410SnapshotFacet = await ethers.getContractAt("IERC1410", diamond.target);
 
-      controlList = await ethers.getContractAt("ControlListFacet", diamond.address);
+      controlList = await ethers.getContractAt("ControlListFacet", diamond.target);
 
-      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
-      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address);
-      erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
-      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
-      timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
-      adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address, signer_A);
-      capFacet = await ethers.getContractAt("CapFacet", diamond.address, signer_A);
-      equityFacet = await ethers.getContractAt("EquityUSAFacet", diamond.address, signer_A);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target);
+      erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
+      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
+      timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
+      adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.target, signer_A);
+      capFacet = await ethers.getContractAt("CapFacet", diamond.target, signer_A);
+      equityFacet = await ethers.getContractAt("EquityUSAFacet", diamond.target, signer_A);
 
-      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
-      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
-      erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address);
-      lockFacet = await ethers.getContractAt("LockFacet", diamond.address);
-      snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
+      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_B);
+      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target);
+      erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.target);
+      lockFacet = await ethers.getContractAt("LockFacet", diamond.target);
+      snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.target);
 
-      const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", diamond.address, signer_A);
+      const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", diamond.target, signer_A);
       const clearingHoldCreationFacet = await ethers.getContractAt(
         "ClearingHoldCreationFacet",
-        diamond.address,
+        diamond.target,
         signer_A,
       );
-      const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address, signer_A);
+      const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
 
       const fragmentMap = new Map<string, any>();
       [
@@ -217,11 +220,11 @@ describe("ERC3643 Tests", () => {
       });
 
       const uniqueFragments = Array.from(fragmentMap.values());
-      clearingFacet = new Contract(diamond.address, uniqueFragments, signer_A);
-      holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
-      protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address);
-      diamondFacet = await ethers.getContractAt("DiamondFacet", diamond.address);
-      freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address);
+      clearingFacet = new Contract(diamond.target, uniqueFragments, signer_A);
+      holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
+      protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.target);
+      diamondFacet = await ethers.getContractAt("DiamondFacet", diamond.target);
+      freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
 
       accessControlFacet = accessControlFacet.connect(signer_A);
       await accessControlFacet.grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
@@ -258,7 +261,7 @@ describe("ERC3643 Tests", () => {
     describe("initialize", () => {
       it("GIVEN an already initialized token WHEN attempting to initialize again THEN transaction fails with AlreadyInitialized", async () => {
         await expect(
-          erc3643Facet.initialize_ERC3643(complianceMock.address, identityRegistryMock.address),
+          erc3643Facet.initialize_ERC3643(complianceMock.target as string, identityRegistryMock.target as string),
         ).to.be.rejectedWith("AlreadyInitialized");
       });
     });
@@ -492,7 +495,7 @@ describe("ERC3643 Tests", () => {
           expect(frozen1).to.equal(0); // No frozen tokens yet
           expect(balance2).to.equal(AMOUNT - 100); // Balance reduced
           expect(frozen2).to.equal(100); // Frozen tokens tracked
-          expect(balance2.add(frozen2)).to.equal(AMOUNT); // Total remains same
+          expect(balance2 + frozen2).to.equal(AMOUNT); // Total remains same
         });
       });
 
@@ -534,7 +537,7 @@ describe("ERC3643 Tests", () => {
           },
         ]);
         const newControlList = newTokenFixture.controlListFacet;
-        const newFreezeFacet = await ethers.getContractAt("FreezeFacet", newTokenFixture.diamond.address);
+        const newFreezeFacet = await ethers.getContractAt("FreezeFacet", newTokenFixture.diamond.target);
 
         await newControlList.addToControlList(signer_B.address);
         await expect(newFreezeFacet.setAddressFrozen(signer_B.address, true))
@@ -639,15 +642,15 @@ describe("ERC3643 Tests", () => {
 
       it("GIVEN an initialized token WHEN updating the identityRegistry THEN setIdentityRegistry emits IdentityRegistryAdded with updated identityRegistry", async () => {
         const retrieved_identityRegistry = await erc3643Facet.identityRegistry();
-        expect(retrieved_identityRegistry).to.equal(identityRegistryMock.address);
+        expect(retrieved_identityRegistry).to.equal(identityRegistryMock.target as string);
 
         //Update identityRegistry
-        expect(await erc3643Facet.setIdentityRegistry(identityRegistryMock.address))
+        expect(await erc3643Facet.setIdentityRegistry(identityRegistryMock.target as string))
           .to.emit(erc3643Facet, "IdentityRegistryAdded")
-          .withArgs(identityRegistryMock.address);
+          .withArgs(identityRegistryMock.target as string);
 
         const retrieved_newIdentityRegistry = await erc3643Facet.identityRegistry();
-        expect(retrieved_newIdentityRegistry).to.equal(identityRegistryMock.address);
+        expect(retrieved_newIdentityRegistry).to.equal(identityRegistryMock.target as string);
       });
 
       it("GIVEN non verified account with balance WHEN transfer THEN reverts with AddressNotVerified", async () => {
@@ -801,13 +804,13 @@ describe("ERC3643 Tests", () => {
           { role: ATS_ROLES._KYC_ROLE, members: [signer_B.address] },
         ]);
 
-        const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.address);
-        const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.address, signer_B);
-        const erc20NoCompliance = await ethers.getContractAt("ERC20", newTokenFixture.diamond.address, signer_E);
-        const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.address);
+        const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
+        const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.target, signer_B);
+        const erc20NoCompliance = await ethers.getContractAt("ERC20", newTokenFixture.diamond.target, signer_E);
+        const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.target);
 
         // Grant ATS_ROLES._SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer
-        const accessControlNoCompliance = await ethers.getContractAt("AccessControl", newTokenFixture.diamond.address);
+        const accessControlNoCompliance = await ethers.getContractAt("AccessControl", newTokenFixture.diamond.target);
         await accessControlNoCompliance.grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address);
         await ssiNoCompliance.addIssuer(signer_E.address);
         await kycNoCompliance.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -853,13 +856,13 @@ describe("ERC3643 Tests", () => {
         ]);
         // Deploy token without compliance contract (zero address)
 
-        const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.address);
-        const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.address, signer_B);
-        const erc20NoCompliance = await ethers.getContractAt("ERC20", newTokenFixture.diamond.address, signer_E);
-        const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.address);
+        const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
+        const kycNoCompliance = await ethers.getContractAt("Kyc", newTokenFixture.diamond.target, signer_B);
+        const erc20NoCompliance = await ethers.getContractAt("ERC20", newTokenFixture.diamond.target, signer_E);
+        const ssiNoCompliance = await ethers.getContractAt("SsiManagement", newTokenFixture.diamond.target);
 
         // Grant ATS_ROLES._SSI_MANAGER_ROLE to signer_A.address first, then add signer_E.address as an issuer
-        const accessControlNoCompliance = await ethers.getContractAt("AccessControl", newTokenFixture.diamond.address);
+        const accessControlNoCompliance = await ethers.getContractAt("AccessControl", newTokenFixture.diamond.target);
         await accessControlNoCompliance.grantRole(ATS_ROLES._SSI_MANAGER_ROLE, signer_A.address);
         await ssiNoCompliance.addIssuer(signer_E.address);
         await kycNoCompliance.grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -874,18 +877,18 @@ describe("ERC3643 Tests", () => {
     describe("Compliance", () => {
       it("GIVEN an initialized token WHEN updating the compliance THEN setCompliance emits ComplianceAdded with updated compliance", async () => {
         const retrieved_compliance = await erc3643Facet.compliance();
-        expect(retrieved_compliance).to.equal(complianceMock.address);
+        expect(retrieved_compliance).to.equal(complianceMock.target as string);
         const newComplianceMock = await (
           await ethers.getContractFactory("ComplianceMock", signer_A)
         ).deploy(true, false);
-        await newComplianceMock.deployed();
+        await newComplianceMock.waitForDeployment();
 
-        expect(await erc3643Facet.setCompliance(newComplianceMock.address))
+        expect(await erc3643Facet.setCompliance(newComplianceMock.target as string))
           .to.emit(erc3643Facet, "ComplianceAdded")
           .withArgs(newComplianceMock);
 
         const retrieved_newCompliance = await erc3643Facet.compliance();
-        expect(retrieved_newCompliance).to.equal(newComplianceMock.address);
+        expect(retrieved_newCompliance).to.equal(newComplianceMock.target as string);
       });
 
       it("GIVEN ComplianceMock flag set to true THEN canTransfer returns true", async () => {
@@ -1039,7 +1042,7 @@ describe("ERC3643 Tests", () => {
       });
 
       it("GIVEN a failed mint call THEN transaction reverts with custom error", async () => {
-        const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("created"));
+        const hash = ethers.keccak256(ethers.toUtf8Bytes("created"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
         let caught;
         try {
@@ -1053,11 +1056,14 @@ describe("ERC3643 Tests", () => {
           caught = err;
         }
         const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
+        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
         expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getSighash("MockErrorMint(address,uint256)");
-        const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [signer_E.address, AMOUNT]);
-        const args = ethers.utils.solidityPack(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
+        const targetErrorSelector = complianceMock.interface.getError("MockErrorMint")!.selector;
+        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
+          ["address", "uint256"],
+          [signer_E.address, AMOUNT],
+        );
+        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
         const returnedArgs = (caught.data as string).slice(10); // Skip custom error selector
         expect(returnedArgs).to.equal(args.slice(2));
       });
@@ -1069,7 +1075,7 @@ describe("ERC3643 Tests", () => {
           value: AMOUNT,
           data: "0x",
         });
-        const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("transferred"));
+        const hash = ethers.keccak256(ethers.toUtf8Bytes("transferred"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
         const basicTransferInfo = {
           to: signer_D.address,
@@ -1084,14 +1090,14 @@ describe("ERC3643 Tests", () => {
           caught = err;
         }
         const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
+        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
         expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getSighash("MockErrorTransfer(address,address,uint256)");
-        const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+        const targetErrorSelector = complianceMock.interface.getError("MockErrorTransfer")!.selector;
+        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
           ["address", "address", "uint256"],
           [signer_E.address, signer_D.address, AMOUNT],
         );
-        const args = ethers.utils.solidityPack(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
+        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
         const returnedArgs = (caught.data as string).slice(10); // Skip custom error selector
         expect(returnedArgs).to.equal(args.slice(2));
       });
@@ -1103,7 +1109,7 @@ describe("ERC3643 Tests", () => {
           value: AMOUNT,
           data: "0x",
         });
-        const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("destroyed"));
+        const hash = ethers.keccak256(ethers.toUtf8Bytes("destroyed"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
         let caught;
         try {
@@ -1112,17 +1118,20 @@ describe("ERC3643 Tests", () => {
           caught = err;
         }
         const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
+        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
         expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getSighash("MockErrorBurn(address,uint256)");
-        const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [signer_E.address, AMOUNT]);
-        const args = ethers.utils.solidityPack(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
+        const targetErrorSelector = complianceMock.interface.getError("MockErrorBurn")!.selector;
+        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
+          ["address", "uint256"],
+          [signer_E.address, AMOUNT],
+        );
+        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
         const returnedArgs = (caught.data as string).slice(10); // Skip custom error selector
         expect(returnedArgs).to.equal(args.slice(2));
       });
 
       it("GIVEN a failed canTransfer call THEN transaction reverts with custom error", async () => {
-        const hash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("canTransfer"));
+        const hash = ethers.keccak256(ethers.toUtf8Bytes("canTransfer"));
         await complianceMock.setFlagsByMethod([], [], [true], [hash]);
         let caught;
         try {
@@ -1131,16 +1140,14 @@ describe("ERC3643 Tests", () => {
           caught = err;
         }
         const returnedSelector = (caught.data as string).slice(0, 10);
-        const outerSelector = erc3643Facet.interface.getSighash("ComplianceCallFailed()");
+        const outerSelector = erc3643Facet.interface.getError("ComplianceCallFailed")!.selector;
         expect(returnedSelector).to.equal(outerSelector);
-        const targetErrorSelector = complianceMock.interface.getSighash(
-          "MockErrorCanTransfer(address,address,uint256)",
-        );
-        const targetErrorArgs = ethers.utils.defaultAbiCoder.encode(
+        const targetErrorSelector = complianceMock.interface.getError("MockErrorCanTransfer")!.selector;
+        const targetErrorArgs = ethers.AbiCoder.defaultAbiCoder().encode(
           ["address", "address", "uint256"],
           [signer_E.address, signer_D.address, ZERO], // During approvals amount is not checked
         );
-        const args = ethers.utils.solidityPack(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
+        const args = ethers.solidityPacked(["bytes4", "bytes"], [targetErrorSelector, targetErrorArgs]);
         const returnedArgs = (caught.data as string).slice(10);
         expect(returnedArgs).to.equal(args.slice(2));
       });
@@ -1306,9 +1313,9 @@ describe("ERC3643 Tests", () => {
           const finalBalanceE = await erc1410SnapshotFacet.balanceOf(signer_E.address);
           const finalTotalSupply = await erc1410SnapshotFacet.totalSupply();
 
-          expect(finalBalanceD).to.be.equal(initialBalanceD.add(mintAmount));
-          expect(finalBalanceE).to.be.equal(initialBalanceE.add(mintAmount));
-          expect(finalTotalSupply).to.be.equal(initialTotalSupply.add(mintAmount * 2));
+          expect(finalBalanceD).to.be.equal(initialBalanceD + BigInt(mintAmount));
+          expect(finalBalanceE).to.be.equal(initialBalanceE + BigInt(mintAmount));
+          expect(finalTotalSupply).to.be.equal(initialTotalSupply + BigInt(mintAmount * 2));
         });
 
         it("GIVEN an account without issuer role WHEN batchMint THEN transaction fails with AccountHasNoRole", async () => {
@@ -1367,9 +1374,9 @@ describe("ERC3643 Tests", () => {
           const finalBalanceF = await erc1410SnapshotFacet.balanceOf(signer_F.address);
           const finalBalanceD = await erc1410SnapshotFacet.balanceOf(signer_D.address);
 
-          expect(finalBalanceSender).to.equal(initialBalanceSender.sub(transferAmount * 2));
-          expect(finalBalanceF).to.equal(initialBalanceF.add(transferAmount));
-          expect(finalBalanceD).to.equal(initialBalanceD.add(transferAmount));
+          expect(finalBalanceSender).to.equal(initialBalanceSender - BigInt(transferAmount * 2));
+          expect(finalBalanceF).to.equal(initialBalanceF + BigInt(transferAmount));
+          expect(finalBalanceD).to.equal(initialBalanceD + BigInt(transferAmount));
         });
 
         it("GIVEN insufficient balance WHEN batchTransfer THEN transaction fails", async () => {
@@ -1480,9 +1487,9 @@ describe("ERC3643 Tests", () => {
           const finalBalanceD = await erc1410SnapshotFacet.balanceOf(signer_D.address);
           const finalBalanceE = await erc1410SnapshotFacet.balanceOf(signer_E.address);
 
-          expect(finalBalanceF).to.equal(initialBalanceF.sub(transferAmount));
-          expect(finalBalanceD).to.equal(initialBalanceD.sub(transferAmount));
-          expect(finalBalanceE).to.equal(initialBalanceE.add(transferAmount * 2));
+          expect(finalBalanceF).to.equal(initialBalanceF - BigInt(transferAmount));
+          expect(finalBalanceD).to.equal(initialBalanceD - BigInt(transferAmount));
+          expect(finalBalanceE).to.equal(initialBalanceE + BigInt(transferAmount * 2));
         });
 
         it("GIVEN account without controller role WHEN batchForcedTransfer THEN transaction fails with AccountHasNoRole", async () => {
@@ -1557,9 +1564,9 @@ describe("ERC3643 Tests", () => {
           const finalBalanceD = await erc1410SnapshotFacet.balanceOf(signer_D.address);
           const finalBalanceE = await erc1410SnapshotFacet.balanceOf(signer_E.address);
 
-          expect(finalBalanceD).to.equal(initialBalanceD.sub(burnAmount));
-          expect(finalBalanceE).to.equal(initialBalanceE.sub(burnAmount));
-          expect(finalTotalSupply).to.equal(initialTotalSupply.sub(burnAmount * 2));
+          expect(finalBalanceD).to.equal(initialBalanceD - BigInt(burnAmount));
+          expect(finalBalanceE).to.equal(initialBalanceE - BigInt(burnAmount));
+          expect(finalTotalSupply).to.equal(initialTotalSupply - BigInt(burnAmount * 2));
         });
 
         it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
@@ -1695,8 +1702,8 @@ describe("ERC3643 Tests", () => {
           const finalFrozenD = await freezeFacet.getFrozenTokens(signer_D.address);
           const finalFrozenE = await freezeFacet.getFrozenTokens(signer_E.address);
 
-          expect(finalFrozenD).to.equal(initialFrozenD.add(freezeAmount));
-          expect(finalFrozenE).to.equal(initialFrozenE.add(freezeAmount));
+          expect(finalFrozenD).to.equal(initialFrozenD + BigInt(freezeAmount));
+          expect(finalFrozenE).to.equal(initialFrozenE + BigInt(freezeAmount));
         });
 
         it("GIVEN an invalid input amounts array THEN transaction fails with InputAmountsArrayLengthMismatch", async () => {
@@ -1734,8 +1741,8 @@ describe("ERC3643 Tests", () => {
           const finalFrozenD = await freezeFacet.getFrozenTokens(signer_D.address);
           const finalFrozenE = await freezeFacet.getFrozenTokens(signer_E.address);
 
-          expect(finalFrozenD).to.equal(initialFrozenD.sub(unfreezeAmount));
-          expect(finalFrozenE).to.equal(initialFrozenE.sub(unfreezeAmount));
+          expect(finalFrozenD).to.equal(initialFrozenD - BigInt(unfreezeAmount));
+          expect(finalFrozenE).to.equal(initialFrozenE - BigInt(unfreezeAmount));
         });
 
         it("GIVEN insufficient frozen tokens WHEN batchUnfreezePartialTokens THEN transaction fails", async () => {
@@ -1877,11 +1884,11 @@ describe("ERC3643 Tests", () => {
       it("GIVEN an account without TREX_OWNER role WHEN setIdentityRegistry THEN transaction fails with AccountHasNoRole", async () => {
         // set IdentityRegistry fails
         await expect(
-          erc3643Facet.connect(signer_C).setIdentityRegistry(identityRegistryMock.address),
+          erc3643Facet.connect(signer_C).setIdentityRegistry(identityRegistryMock.target as string),
         ).to.be.rejectedWith("AccountHasNoRole");
       });
       it("GIVEN an account without TREX_OWNER role WHEN setCompliance THEN transaction fails with AccountHasNoRole", async () => {
-        await expect(erc3643Facet.connect(signer_C).setCompliance(complianceMock.address)).to.be.rejectedWith(
+        await expect(erc3643Facet.connect(signer_C).setCompliance(complianceMock.target as string)).to.be.rejectedWith(
           "AccountHasNoRole",
         );
       });
@@ -1919,7 +1926,7 @@ describe("ERC3643 Tests", () => {
 
     describe("Paused", () => {
       beforeEach(async () => {
-        const pause = await ethers.getContractAt("PauseFacet", diamond.address);
+        const pause = await ethers.getContractAt("PauseFacet", diamond.target);
 
         await pause.pause();
       });
@@ -1973,10 +1980,10 @@ describe("ERC3643 Tests", () => {
         await expect(erc3643Facet.setName(newName)).to.be.rejectedWith("TokenIsPaused");
         await expect(erc3643Facet.setSymbol(newSymbol)).to.be.rejectedWith("TokenIsPaused");
         await expect(erc3643Facet.setOnchainID(onchainId)).to.be.rejectedWith("TokenIsPaused");
-        await expect(erc3643Facet.setIdentityRegistry(identityRegistryMock.address)).to.be.rejectedWith(
+        await expect(erc3643Facet.setIdentityRegistry(identityRegistryMock.target as string)).to.be.rejectedWith(
           "TokenIsPaused",
         );
-        await expect(erc3643Facet.setCompliance(complianceMock.address)).to.be.rejectedWith("TokenIsPaused");
+        await expect(erc3643Facet.setCompliance(complianceMock.target as string)).to.be.rejectedWith("TokenIsPaused");
       });
     });
     describe("Adjust balances", () => {
@@ -2048,14 +2055,14 @@ describe("ERC3643 Tests", () => {
         const balance_After = await erc1410Facet.balanceOf(signer_E.address);
         const balance_After_Partition_1 = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address);
 
-        expect(frozen_TotalAmount_After).to.be.equal(frozen_TotalAmount_Before.mul(adjustFactor * adjustFactor));
+        expect(frozen_TotalAmount_After).to.be.equal(frozen_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
         expect(frozen_TotalAmount_After_Partition_1).to.be.equal(
-          frozen_TotalAmount_Before_Partition_1.mul(adjustFactor * adjustFactor),
+          frozen_TotalAmount_Before_Partition_1 * BigInt(adjustFactor * adjustFactor),
         );
-        expect(balance_After).to.be.equal(balance_Before.sub(_AMOUNT).mul(adjustFactor * adjustFactor));
-        expect(frozen_TotalAmount_After).to.be.equal(frozen_TotalAmount_Before.mul(adjustFactor * adjustFactor));
+        expect(balance_After).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor));
+        expect(frozen_TotalAmount_After).to.be.equal(frozen_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
         expect(balance_After_Partition_1).to.be.equal(
-          balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor * adjustFactor),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor),
         );
       });
 
@@ -2092,7 +2099,7 @@ describe("ERC3643 Tests", () => {
         const frozenAfter = await freezeFacet.getFrozenTokens(signer_E.address);
 
         // The previously frozen amount should be adjusted by factor 2
-        expect(frozenAfter).to.be.equal(frozenBefore.mul(2).add(amount / 2));
+        expect(frozenAfter).to.be.equal(frozenBefore * 2n + BigInt(amount / 2));
       });
 
       it("GIVEN frozen tokens WHEN freezing again without ABAF change THEN factor equals 1", async () => {
@@ -2115,7 +2122,7 @@ describe("ERC3643 Tests", () => {
         const frozenAfter = await freezeFacet.getFrozenTokens(signer_E.address);
 
         // The frozen amount should just be sum (no factor adjustment)
-        expect(frozenAfter).to.be.equal(frozenBefore.add(amount / 4));
+        expect(frozenAfter).to.be.equal(frozenBefore + BigInt(amount / 4));
       });
 
       it("GIVEN frozen tokens by partition WHEN checking total balance THEN frozen tokens are included", async () => {
@@ -2154,9 +2161,9 @@ describe("ERC3643 Tests", () => {
         const freeAfter = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address);
 
         // Verify _getTotalBalanceForByPartitionAdjusted was used: total = free + frozen, then multiplied by factor
-        expect(frozenAfter).to.equal(frozenBefore.mul(2));
-        expect(freeAfter).to.equal(freeBefore.mul(2));
-        expect(frozenAfter.add(freeAfter)).to.equal(amount * 2);
+        expect(frozenAfter).to.equal(frozenBefore * 2n);
+        expect(freeAfter).to.equal(freeBefore * 2n);
+        expect(frozenAfter + freeAfter).to.equal(amount * 2);
 
         // Verify snapshots captured the total balance including frozen tokens by partition
         const snapshot1BalanceByPartition = await snapshotFacet.balanceOfAtSnapshotByPartition(
@@ -2290,13 +2297,13 @@ describe("ERC3643 Tests", () => {
         await expect(
           erc20Facet.connect(signer_C).transferFrom(signer_A.address, basicTransferInfo.to, amount),
         ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
-        const packedData = ethers.utils.defaultAbiCoder.encode(
+        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
           [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
 
-        const ProtectedPartitionRole_1 = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
         await accessControlFacet.grantRole(ProtectedPartitionRole_1, signer_A.address);
         await protectedPartitionsFacet.protectPartitions();
         await expect(
@@ -2777,6 +2784,12 @@ describe("ERC3643 Tests", () => {
         },
       });
       diamond = base.diamond;
+      signer_A = base.deployer;
+      signer_B = base.user1;
+      signer_C = base.user2;
+      signer_D = base.user3;
+      signer_E = base.user4;
+      signer_F = base.user5;
       await executeRbac(base.accessControlFacet, [
         {
           role: ATS_ROLES._PAUSER_ROLE,
@@ -2788,16 +2801,16 @@ describe("ERC3643 Tests", () => {
         },
       ]);
 
-      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
 
-      controlList = await ethers.getContractAt("ControlListFacet", diamond.address);
+      controlList = await ethers.getContractAt("ControlListFacet", diamond.target);
 
-      erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
+      erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target);
 
-      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
-      freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address);
+      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_B);
+      freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
 
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
@@ -2905,6 +2918,12 @@ describe("ERC3643 Tests", () => {
         },
       });
       diamond = base.diamond;
+      signer_A = base.deployer;
+      signer_B = base.user1;
+      signer_C = base.user2;
+      signer_D = base.user3;
+      signer_E = base.user4;
+      signer_F = base.user5;
       await executeRbac(base.accessControlFacet, [
         {
           role: ATS_ROLES._CONTROLLER_ROLE,
@@ -2923,19 +2942,19 @@ describe("ERC3643 Tests", () => {
           members: [signer_A.address],
         },
       ]);
-      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address);
+      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
 
-      controlList = await ethers.getContractAt("ControlListFacet", diamond.address);
+      controlList = await ethers.getContractAt("ControlListFacet", diamond.target);
 
-      erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address);
-      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.address);
+      erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target);
+      erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target);
 
-      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_B);
-      freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address);
-      kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_A);
-      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
+      clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_B);
+      freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
+      kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_A);
+      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
       await ssiManagementFacet.addIssuer(signer_A.address);
       await kycFacet.grantKyc(signer_F.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
       await kycFacet.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);

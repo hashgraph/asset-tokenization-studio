@@ -365,7 +365,7 @@ exports[`Assets Component Basic rendering should render correctly 1`] = `
                   <div
                     class="css-zvlevn"
                   >
-                    EQUITY
+                    Equity
                   </div>
                 </td>
                 <td
@@ -578,7 +578,7 @@ exports[`Assets Component Basic rendering should render correctly 1`] = `
                   <div
                     class="css-zvlevn"
                   >
-                    BOND
+                    Bond Variable Rate
                   </div>
                 </td>
                 <td

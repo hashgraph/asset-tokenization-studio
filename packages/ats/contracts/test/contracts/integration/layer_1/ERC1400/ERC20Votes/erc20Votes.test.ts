@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type IERC1410,
@@ -20,10 +22,10 @@ const amount = 1000;
 
 describe("ERC20Votes Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
 
   let erc20VotesFacet: ERC20VotesFacet;
   let pauseFacet: Pause;
@@ -88,12 +90,12 @@ describe("ERC20Votes Tests", () => {
       },
     ]);
 
-    erc20VotesFacet = await ethers.getContractAt("ERC20VotesFacet", diamond.address);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_A);
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSA", diamond.address, signer_A);
+    erc20VotesFacet = await ethers.getContractAt("ERC20VotesFacet", diamond.target);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_A);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -125,7 +127,7 @@ describe("ERC20Votes Tests", () => {
         },
       });
 
-      const erc20VotesFacetInactive = await ethers.getContractAt("ERC20Votes", base.diamond.address);
+      const erc20VotesFacetInactive = await ethers.getContractAt("ERC20Votes", base.diamond.target);
       const isActivated = await erc20VotesFacetInactive.isActivated();
       expect(isActivated).to.equal(false);
     });
@@ -170,7 +172,7 @@ describe("ERC20Votes Tests", () => {
     it("GIVEN tokens issued WHEN delegate THEN delegate is set correctly", async () => {
       await expect(erc20VotesFacet.delegate(signer_B.address))
         .to.emit(erc20VotesFacet, "DelegateChanged")
-        .withArgs(signer_A.address, ethers.constants.AddressZero, signer_B.address);
+        .withArgs(signer_A.address, ethers.ZeroAddress, signer_B.address);
 
       const delegate = await erc20VotesFacet.delegates(signer_A.address);
       expect(delegate).to.equal(signer_B.address);
@@ -186,19 +188,19 @@ describe("ERC20Votes Tests", () => {
 
     it("GIVEN delegation WHEN delegate to zero address THEN delegation is removed", async () => {
       await erc20VotesFacet.delegate(signer_B.address);
-      await expect(erc20VotesFacet.delegate(ethers.constants.AddressZero))
+      await expect(erc20VotesFacet.delegate(ethers.ZeroAddress))
         .to.emit(erc20VotesFacet, "DelegateChanged")
-        .withArgs(signer_A.address, signer_B.address, ethers.constants.AddressZero);
+        .withArgs(signer_A.address, signer_B.address, ethers.ZeroAddress);
 
       const delegate = await erc20VotesFacet.delegates(signer_A.address);
-      expect(delegate).to.equal(ethers.constants.AddressZero);
+      expect(delegate).to.equal(ethers.ZeroAddress);
     });
   });
 
   describe("Voting Power", () => {
     async function checkTotalSupply(amount: number) {
       const now = await erc20VotesFacet.clock();
-      await timeTravelFacet.changeSystemBlocknumber(now + 100);
+      await timeTravelFacet.changeSystemBlocknumber(now + 100n);
       const totalSupply = await erc20VotesFacet.getPastTotalSupply(now);
       expect(totalSupply).to.equal(amount);
     }

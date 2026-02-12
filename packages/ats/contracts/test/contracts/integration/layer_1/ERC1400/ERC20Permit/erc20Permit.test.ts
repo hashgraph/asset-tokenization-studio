@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type Pause,
@@ -16,9 +18,9 @@ import { deployEquityTokenFixture, executeRbac, getDltTimestamp } from "@test";
 
 describe("ERC20Permit Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let erc20PermitFacet: ERC20PermitFacet;
   let noncesFacet: NoncesFacet;
@@ -42,14 +44,14 @@ describe("ERC20Permit Tests", () => {
       },
     ]);
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
-    controlList = await ethers.getContractAt("ControlList", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
+    controlList = await ethers.getContractAt("ControlList", diamond.target);
 
-    erc20PermitFacet = await ethers.getContractAt("ERC20PermitFacet", diamond.address);
-    noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.address);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_A);
-    erc20Facet = await ethers.getContractAt("ERC20", diamond.address, signer_A);
-    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.address);
+    erc20PermitFacet = await ethers.getContractAt("ERC20PermitFacet", diamond.target);
+    noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.target);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_A);
+    erc20Facet = await ethers.getContractAt("ERC20", diamond.target, signer_A);
+    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.target);
   });
 
   describe("Single Partition", () => {
@@ -62,9 +64,9 @@ describe("ERC20Permit Tests", () => {
           name: CONTRACT_NAME,
           version: CONTRACT_VERSION,
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.address,
+          verifyingContract: diamond.target as string,
         };
-        const domainHash = ethers.utils._TypedDataEncoder.hashDomain(domain);
+        const domainHash = ethers.TypedDataEncoder.hashDomain(domain);
         expect(domainSeparator).to.equal(domainHash);
       });
     });
@@ -187,7 +189,7 @@ describe("ERC20Permit Tests", () => {
           name: CONTRACT_NAME,
           version: CONTRACT_VERSION,
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.address,
+          verifyingContract: diamond.target as string,
         };
 
         const types = {
@@ -208,8 +210,8 @@ describe("ERC20Permit Tests", () => {
           deadline: expiry,
         };
 
-        const signature = await signer_A._signTypedData(domain, types, value);
-        const sig = ethers.utils.splitSignature(signature);
+        const signature = await signer_A.signTypedData(domain, types, value);
+        const sig = ethers.Signature.from(signature);
 
         await expect(
           erc20PermitFacet.permit(signer_B.address, signer_A.address, 1, expiry, sig.v, sig.r, sig.s),
@@ -226,7 +228,7 @@ describe("ERC20Permit Tests", () => {
           name: CONTRACT_NAME,
           version: CONTRACT_VERSION,
           chainId: await ethers.provider.getNetwork().then((n) => n.chainId),
-          verifyingContract: diamond.address,
+          verifyingContract: diamond.target as string,
         };
 
         const types = {
@@ -247,8 +249,8 @@ describe("ERC20Permit Tests", () => {
           deadline: expiry,
         };
 
-        const signature = await signer_A._signTypedData(domain, types, value);
-        const sig = ethers.utils.splitSignature(signature);
+        const signature = await signer_A.signTypedData(domain, types, value);
+        const sig = ethers.Signature.from(signature);
 
         await expect(erc20PermitFacet.permit(signer_A.address, signer_B.address, 1, expiry, sig.v, sig.r, sig.s))
           .to.emit(erc20Facet, "Approval")
@@ -267,24 +269,22 @@ describe("ERC20Permit Tests", () => {
       const expiry = (await getDltTimestamp()) + 3600;
 
       await expect(
-        erc20PermitFacet
-          .attach(base.diamond.address)
-          .permit(
-            signer_B.address,
-            signer_C.address,
-            1,
-            expiry,
-            27,
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          ),
+        (erc20PermitFacet.attach(base.diamond.target) as ERC20PermitFacet).permit(
+          signer_B.address,
+          signer_C.address,
+          1,
+          expiry,
+          27,
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+        ),
       ).to.be.revertedWithCustomError(erc20PermitFacet, "NotAllowedInMultiPartitionMode");
     });
   });
 
   describe("onlyUnrecoveredAddress modifier for permit", () => {
     it("GIVEN a recovered owner address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
-      const erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address);
+      const erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.target);
 
       // Grant _AGENT_ROLE to recover address
       await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
@@ -308,7 +308,7 @@ describe("ERC20Permit Tests", () => {
     });
 
     it("GIVEN a recovered spender address WHEN calling permit THEN transaction fails with WalletRecovered", async () => {
-      const erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address);
+      const erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.target);
 
       // Grant _AGENT_ROLE to recover address
       await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);

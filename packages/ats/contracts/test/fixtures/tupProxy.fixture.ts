@@ -21,9 +21,13 @@ import {
   MockImplementationV2__factory,
   TransparentUpgradeableProxy__factory,
 } from "@contract-types";
-import type { ProxyAdmin, MockImplementation, MockImplementationV2 } from "@contract-types";
-import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import type { Contract } from "ethers";
+import type {
+  ProxyAdmin,
+  MockImplementation,
+  MockImplementationV2,
+  TransparentUpgradeableProxy,
+} from "@contract-types";
+import type { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 /**
  * Test implementation version numbers.
@@ -38,19 +42,19 @@ export const TUP_VERSIONS = {
  */
 export interface TupProxyFixtureResult {
   /** Deployer signer (ProxyAdmin owner) */
-  deployer: SignerWithAddress;
+  deployer: HardhatEthersSigner;
   /** Unknown signer without any roles (for access control tests) */
-  unknownSigner: SignerWithAddress;
+  unknownSigner: HardhatEthersSigner;
   /** ProxyAdmin contract instance */
   proxyAdmin: ProxyAdmin;
   /** ProxyAdmin address */
   proxyAdminAddress: string;
   /** TransparentUpgradeableProxy contract instance */
-  proxy: Contract;
+  proxy: TransparentUpgradeableProxy;
   /** Proxy address */
   proxyAddress: string;
   /** Implementation V1 contract instance */
-  implementationV1: Contract;
+  implementationV1: MockImplementation;
   /** Implementation V1 address */
   implementationV1Address: string;
 }
@@ -73,7 +77,7 @@ export async function deployTupProxyFixture(): Promise<TupProxyFixtureResult> {
 
   // Step 1: Deploy ProxyAdmin
   const proxyAdmin = await deployProxyAdmin(deployer);
-  const proxyAdminAddress = proxyAdmin.address;
+  const proxyAdminAddress = await proxyAdmin.getAddress();
 
   // Step 2: Deploy MockImplementation (V1)
   const implV1Result = await deployContract(new MockImplementation__factory(deployer), {
@@ -95,7 +99,7 @@ export async function deployTupProxyFixture(): Promise<TupProxyFixtureResult> {
     proxyAdminAddress,
     initData,
   );
-  await proxy.deployed();
+  await proxy.waitForDeployment();
 
   return {
     deployer,
@@ -103,7 +107,7 @@ export async function deployTupProxyFixture(): Promise<TupProxyFixtureResult> {
     proxyAdmin,
     proxyAdminAddress,
     proxy,
-    proxyAddress: proxy.address,
+    proxyAddress: await proxy.getAddress(),
     implementationV1,
     implementationV1Address,
   };
@@ -118,7 +122,7 @@ export async function deployTupProxyFixture(): Promise<TupProxyFixtureResult> {
  * @returns Fixture with both V1 (active) and V2 (ready for upgrade) implementations
  */
 export async function deployTupProxyWithV2Fixture(): Promise<
-  TupProxyFixtureResult & { implementationV2: Contract; implementationV2Address: string }
+  TupProxyFixtureResult & { implementationV2: MockImplementationV2; implementationV2Address: string }
 > {
   const base = await deployTupProxyFixture();
   const { deployer } = base;

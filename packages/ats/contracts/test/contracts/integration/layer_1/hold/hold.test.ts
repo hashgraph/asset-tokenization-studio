@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
 import { executeRbac, MAX_UINT256 } from "@test";
@@ -63,13 +65,14 @@ enum ThirdPartyType {
 
 describe("Hold Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
-  let signer_E: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
+  let signer_E: HardhatEthersSigner;
 
-  let holdFacet: Contract;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let holdFacet: any;
   let pauseFacet: PauseFacet;
   let lock: LockFacet;
   let erc1410Facet: IERC1410;
@@ -95,12 +98,12 @@ describe("Hold Tests", () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let hold: any;
 
-  const packedData = ethers.utils.defaultAbiCoder.encode(
+  const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
     ["bytes32", "bytes32"],
     [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, DEFAULT_PARTITION],
   );
   const packedDataWithoutPrefix = packedData.slice(2);
-  const ProtectedPartitionRole_1 = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+  const ProtectedPartitionRole_1 = ethers.keccak256("0x" + packedDataWithoutPrefix);
 
   function set_initRbacs() {
     return [
@@ -149,10 +152,10 @@ describe("Hold Tests", () => {
   }
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    const holdManagementFacet = await ethers.getContractAt("HoldManagementFacet", diamond.address, signer_A);
+    const holdManagementFacet = await ethers.getContractAt("HoldManagementFacet", diamond.target, signer_A);
 
-    const holdReadFacet = await ethers.getContractAt("HoldReadFacet", diamond.address, signer_A);
-    const holdTokenHolderFacet = await ethers.getContractAt("HoldTokenHolderFacet", diamond.address, signer_A);
+    const holdReadFacet = await ethers.getContractAt("HoldReadFacet", diamond.target, signer_A);
+    const holdTokenHolderFacet = await ethers.getContractAt("HoldTokenHolderFacet", diamond.target, signer_A);
 
     const fragmentMap = new Map<string, any>();
     [
@@ -168,26 +171,26 @@ describe("Hold Tests", () => {
 
     const uniqueFragments = Array.from(fragmentMap.values());
 
-    holdFacet = new Contract(diamond.address, uniqueFragments, signer_A);
+    holdFacet = new Contract(diamond.target, uniqueFragments, signer_A);
 
-    lock = await ethers.getContractAt("LockFacet", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_D);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-    kycFacet = await ethers.getContractAt("KycFacet", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.address, signer_A);
-    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.address, signer_A);
-    snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.address);
+    lock = await ethers.getContractAt("LockFacet", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_D);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_B);
+    kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.target, signer_A);
+    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
+    snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.target);
 
-    capFacet = await ethers.getContractAt("CapFacet", diamond.address, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_A);
-    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_E);
-    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address, signer_A);
-    erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.address, signer_A);
-    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.address, signer_A);
+    capFacet = await ethers.getContractAt("CapFacet", diamond.target, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target, signer_A);
+    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.target, signer_E);
+    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target, signer_A);
+    erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.target, signer_A);
+    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.target, signer_A);
 
     // Set the initial RBACs
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
@@ -281,7 +284,7 @@ describe("Hold Tests", () => {
 
     beforeEach(async () => {
       await loadFixture(deploySecurityFixtureSinglePartition);
-      currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+      currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
       expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
 
       hold = {
@@ -1011,7 +1014,7 @@ describe("Hold Tests", () => {
 
         const balance_after = await erc1410Facet.balanceOf(signer_C.address);
 
-        expect(balance_after.toNumber()).to.equal(balance_before.add(_AMOUNT).toNumber());
+        expect(balance_after).to.equal(balance_before + BigInt(_AMOUNT));
       });
     });
 
@@ -1162,7 +1165,7 @@ describe("Hold Tests", () => {
           name: name,
           version: version,
           chainId: chainId,
-          verifyingContract: diamond.address,
+          verifyingContract: diamond.target,
         };
 
         protectedHold = {
@@ -1180,7 +1183,7 @@ describe("Hold Tests", () => {
           _from: signer_A.address,
           _protectedHold: protectedHold,
         };
-        const signature = await signer_A._signTypedData(domain, holdType, message);
+        const signature = await signer_A.signTypedData(domain, holdType, message);
 
         await expect(
           holdFacet
@@ -1197,7 +1200,7 @@ describe("Hold Tests", () => {
           _from: signer_A.address,
           _protectedHold: protectedHold,
         };
-        const signature = await signer_A._signTypedData(domain, holdType, message);
+        const signature = await signer_A.signTypedData(domain, holdType, message);
 
         await expect(
           holdFacet
@@ -1252,7 +1255,7 @@ describe("Hold Tests", () => {
           _protectedHold: protectedHold,
         };
         // Sign the message hash
-        const signature = await signer_A._signTypedData(domain, holdType, message);
+        const signature = await signer_A.signTypedData(domain, holdType, message);
         await expect(
           holdFacet
             .connect(signer_B)
@@ -1266,7 +1269,7 @@ describe("Hold Tests", () => {
           _from: signer_A.address,
           _protectedHold: protectedHold,
         };
-        const signature = await signer_A._signTypedData(domain, holdType, message);
+        const signature = await signer_A.signTypedData(domain, holdType, message);
 
         await expect(
           holdFacet
@@ -1282,7 +1285,7 @@ describe("Hold Tests", () => {
           _protectedHold: protectedHold,
         };
         // Sign the message hash
-        const signature = await signer_A._signTypedData(domain, holdType, message);
+        const signature = await signer_A.signTypedData(domain, holdType, message);
         await expect(
           holdFacet
             .connect(signer_B)
@@ -1330,7 +1333,7 @@ describe("Hold Tests", () => {
           _from: signer_A.address,
           _protectedHold: protectedHold,
         };
-        const signature = await signer_A._signTypedData(domain, holdType, message);
+        const signature = await signer_A.signTypedData(domain, holdType, message);
 
         await holdFacet
           .connect(signer_B)
@@ -1356,10 +1359,10 @@ describe("Hold Tests", () => {
           _protectedHold: protectedHold,
         };
         // Sign the message hash
-        const signature = await signer_A._signTypedData(domain, holdType, message);
+        const signature = await signer_A.signTypedData(domain, holdType, message);
         await expect(
           holdFacet
-            .attach(base.diamond.address)
+            .attach(base.diamond.target)
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
         ).to.rejectedWith("PartitionsAreUnProtected");
@@ -1385,7 +1388,7 @@ describe("Hold Tests", () => {
       diamond = base.diamond;
       await setFacets({ diamond });
 
-      currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+      currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
       hold = {
         amount: _AMOUNT,
@@ -1413,7 +1416,7 @@ describe("Hold Tests", () => {
       diamond = base.diamond;
       await setFacets({ diamond });
 
-      currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+      currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
       hold = {
         amount: _AMOUNT,
@@ -1545,16 +1548,16 @@ describe("Hold Tests", () => {
         const balance_After = await erc1410Facet.balanceOf(signer_A.address);
         const balance_After_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
-        expect(hold_TotalAmount_After).to.be.equal(hold_TotalAmount_Before.mul(adjustFactor * adjustFactor));
+        expect(hold_TotalAmount_After).to.be.equal(hold_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
         expect(hold_TotalAmount_After_Partition_1).to.be.equal(
-          hold_TotalAmount_Before_Partition_1.mul(adjustFactor * adjustFactor),
+          hold_TotalAmount_Before_Partition_1 * BigInt(adjustFactor * adjustFactor),
         );
-        expect(balance_After).to.be.equal(balance_Before.sub(_AMOUNT).mul(adjustFactor * adjustFactor));
-        expect(hold_TotalAmount_After).to.be.equal(hold_TotalAmount_Before.mul(adjustFactor * adjustFactor));
+        expect(balance_After).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor));
+        expect(hold_TotalAmount_After).to.be.equal(hold_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
         expect(balance_After_Partition_1).to.be.equal(
-          balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor * adjustFactor),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor),
         );
-        expect(hold_After.amount_).to.be.equal(hold_Before.amount_.mul(adjustFactor * adjustFactor));
+        expect(hold_After.amount_).to.be.equal(hold_Before.amount_ * BigInt(adjustFactor * adjustFactor));
       });
 
       it("GIVEN a hold WHEN adjustBalances THEN execute succeed", async () => {
@@ -1565,7 +1568,7 @@ describe("Hold Tests", () => {
         const balance_Before_Partition_1_C = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_C.address);
 
         // HOLD TWICE
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         const hold = {
           amount: _AMOUNT,
@@ -1610,23 +1613,25 @@ describe("Hold Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Execute_A).to.be.equal(balance_Before_A.sub(_AMOUNT).sub(_AMOUNT).mul(adjustFactor));
-        expect(balance_After_Execute_C).to.be.equal(balance_Before_C.add(_AMOUNT).mul(adjustFactor));
+        expect(balance_After_Execute_A).to.be.equal(
+          (balance_Before_A - BigInt(_AMOUNT) - BigInt(_AMOUNT)) * BigInt(adjustFactor),
+        );
+        expect(balance_After_Execute_C).to.be.equal((balance_Before_C + BigInt(_AMOUNT)) * BigInt(adjustFactor));
         expect(balance_After_Execute_Partition_1_A).to.be.equal(
-          balance_Before_Partition_1_A.sub(_AMOUNT).sub(_AMOUNT).mul(adjustFactor),
+          (balance_Before_Partition_1_A - BigInt(_AMOUNT) - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
         expect(balance_After_Execute_Partition_1_C).to.be.equal(
-          balance_Before_Partition_1_C.add(_AMOUNT).mul(adjustFactor),
+          (balance_Before_Partition_1_C + BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(held_Amount_After).to.be.equal(held_Amount_Before.sub(_AMOUNT).mul(adjustFactor));
+        expect(held_Amount_After).to.be.equal((held_Amount_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor));
         expect(held_Amount_After_Partition_1).to.be.equal(
-          held_Amount_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor),
+          (held_Amount_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(balance_After_Execute_A.add(held_Amount_After)).to.be.equal(
-          balance_Before_A.sub(_AMOUNT).mul(adjustFactor),
+        expect(balance_After_Execute_A + held_Amount_After).to.be.equal(
+          (balance_Before_A - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(balance_After_Execute_Partition_1_A.add(held_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1_A.sub(_AMOUNT).mul(adjustFactor),
+        expect(balance_After_Execute_Partition_1_A + held_Amount_After_Partition_1).to.be.equal(
+          (balance_Before_Partition_1_A - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
       });
 
@@ -1636,7 +1641,7 @@ describe("Hold Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD TWICE
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         const hold = {
           amount: _AMOUNT,
@@ -1674,17 +1679,17 @@ describe("Hold Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Release).to.be.equal(balance_Before.sub(_AMOUNT).mul(adjustFactor));
+        expect(balance_After_Release).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor));
         expect(balance_After_Release_Partition_1).to.be.equal(
-          balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(held_Amount_After).to.be.equal(held_Amount_Before.sub(_AMOUNT).mul(adjustFactor));
+        expect(held_Amount_After).to.be.equal((held_Amount_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor));
         expect(held_Amount_After_Partition_1).to.be.equal(
-          held_Amount_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor),
+          (held_Amount_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(balance_After_Release.add(held_Amount_After)).to.be.equal(balance_Before.mul(adjustFactor));
-        expect(balance_After_Release_Partition_1.add(held_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1.mul(adjustFactor),
+        expect(balance_After_Release + held_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactor));
+        expect(balance_After_Release_Partition_1 + held_Amount_After_Partition_1).to.be.equal(
+          balance_Before_Partition_1 * BigInt(adjustFactor),
         );
       });
 
@@ -1694,7 +1699,7 @@ describe("Hold Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD TWICE
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         const hold = {
           amount: _AMOUNT,
@@ -1720,7 +1725,7 @@ describe("Hold Tests", () => {
 
         // RECLAIM HOLD
         await timeTravelFacet.changeSystemTimestamp(
-          (await ethers.provider.getBlock("latest")).timestamp + 2 * ONE_SECOND,
+          (await ethers.provider.getBlock("latest"))!.timestamp + 2 * ONE_SECOND,
         );
         await holdFacet.connect(signer_B).reclaimHoldByPartition(holdIdentifier);
 
@@ -1735,17 +1740,17 @@ describe("Hold Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Release).to.be.equal(balance_Before.sub(_AMOUNT).mul(adjustFactor));
+        expect(balance_After_Release).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor));
         expect(balance_After_Release_Partition_1).to.be.equal(
-          balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(held_Amount_After).to.be.equal(held_Amount_Before.sub(_AMOUNT).mul(adjustFactor));
+        expect(held_Amount_After).to.be.equal((held_Amount_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor));
         expect(held_Amount_After_Partition_1).to.be.equal(
-          held_Amount_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor),
+          (held_Amount_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(balance_After_Release.add(held_Amount_After)).to.be.equal(balance_Before.mul(adjustFactor));
-        expect(balance_After_Release_Partition_1.add(held_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1.mul(adjustFactor),
+        expect(balance_After_Release + held_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactor));
+        expect(balance_After_Release_Partition_1 + held_Amount_After_Partition_1).to.be.equal(
+          balance_Before_Partition_1 * BigInt(adjustFactor),
         );
       });
 
@@ -1755,7 +1760,7 @@ describe("Hold Tests", () => {
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD BEFORE BALANCE ADJUSTMENT
-        const currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+        const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
 
         const hold = {
           amount: _AMOUNT,
@@ -1790,17 +1795,19 @@ describe("Hold Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Hold).to.be.equal(balance_Before.sub(_AMOUNT).mul(adjustFactor).sub(_AMOUNT));
+        expect(balance_After_Hold).to.be.equal(
+          (balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor) - BigInt(_AMOUNT),
+        );
         expect(balance_After_Hold_Partition_1).to.be.equal(
-          balance_Before_Partition_1.sub(_AMOUNT).mul(adjustFactor).sub(_AMOUNT),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor) - BigInt(_AMOUNT),
         );
-        expect(held_Amount_After).to.be.equal(held_Amount_Before.mul(adjustFactor).add(_AMOUNT));
+        expect(held_Amount_After).to.be.equal(held_Amount_Before * BigInt(adjustFactor) + BigInt(_AMOUNT));
         expect(held_Amount_After_Partition_1).to.be.equal(
-          held_Amount_Before_Partition_1.mul(adjustFactor).add(_AMOUNT),
+          held_Amount_Before_Partition_1 * BigInt(adjustFactor) + BigInt(_AMOUNT),
         );
-        expect(balance_After_Hold.add(held_Amount_After)).to.be.equal(balance_Before.mul(adjustFactor));
-        expect(balance_After_Hold_Partition_1.add(held_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1.mul(adjustFactor),
+        expect(balance_After_Hold + held_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactor));
+        expect(balance_After_Hold_Partition_1 + held_Amount_After_Partition_1).to.be.equal(
+          balance_Before_Partition_1 * BigInt(adjustFactor),
         );
       });
     });

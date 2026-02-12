@@ -15,7 +15,7 @@
  * @module infrastructure/operations/updateResolverProxyConfig
  */
 
-import { ContractReceipt, Overrides, Signer, providers } from "ethers";
+import { ContractTransactionReceipt, Overrides, Signer, Provider } from "ethers";
 import {
   DEFAULT_TRANSACTION_TIMEOUT,
   debug,
@@ -148,7 +148,7 @@ export interface UpdateResolverProxyConfigResult {
  * ```
  */
 export async function getResolverProxyConfigInfo(
-  signerOrProvider: Signer | providers.Provider,
+  signerOrProvider: Signer | Provider,
   proxyAddress: string,
 ): Promise<ResolverProxyConfigInfo> {
   try {
@@ -160,7 +160,7 @@ export async function getResolverProxyConfigInfo(
     return {
       resolver,
       configurationId: configId,
-      version: version.toNumber(),
+      version: Number(version),
     };
   } catch (err) {
     const errorMessage = extractRevertReason(err);
@@ -407,7 +407,7 @@ async function _updateResolverProxyInternal(
 
     info(`Transaction sent: ${updateTx.hash}`);
 
-    let receipt: ContractReceipt;
+    let receipt: ContractTransactionReceipt;
     try {
       receipt = await waitForTransaction(updateTx, confirmations, DEFAULT_TRANSACTION_TIMEOUT);
     } catch (waitErr) {
@@ -442,9 +442,9 @@ async function _updateResolverProxyInternal(
         proxyAddress,
         updateType,
         previousConfig,
-        transactionHash: receipt.transactionHash,
+        transactionHash: receipt.hash,
         blockNumber: receipt.blockNumber,
-        gasUsed: receipt.gasUsed.toNumber(),
+        gasUsed: Number(receipt.gasUsed),
         error: `Update succeeded but config verification failed: ${errorMessage}`,
       };
     }
@@ -467,9 +467,9 @@ async function _updateResolverProxyInternal(
       updateType,
       previousConfig,
       newConfig,
-      transactionHash: receipt.transactionHash,
+      transactionHash: receipt.hash,
       blockNumber: receipt.blockNumber,
-      gasUsed: receipt.gasUsed.toNumber(),
+      gasUsed: Number(receipt.gasUsed),
     };
   } catch (err) {
     const errorMessage = extractRevertReason(err);

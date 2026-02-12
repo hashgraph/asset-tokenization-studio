@@ -1,4 +1,4 @@
-name: Mass Payout Publish
+name: "300: [FLOW] MP Publish"
 
 on:
   # Manual trigger with dry-run option
@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 
@@ -69,7 +69,7 @@ jobs:
 
           # Loop through all directories in mass-payout
           for package_dir in packages/mass-payout/*/; do
-            if [ -d "${package_dir}" ] && [ -f "${package_dir}package.json" ]; then
+            if [[ -d "${package_dir}" ]] && [[ -f "${package_dir}package.json" ]]; then
               
               pushd "${package_dir}" > /dev/null
               PACKAGE_NAME=$(basename "${package_dir}")
@@ -89,7 +89,7 @@ jobs:
 
                 npm pack
 
-                if [ ! -f "$EXPECTED_FILENAME" ]; then
+                if [[ ! -f "$EXPECTED_FILENAME" ]]; then
                    echo "::error::Expected package file $EXPECTED_FILENAME not found in $package_dir"
                    exit 1
                 fi
@@ -105,7 +105,7 @@ jobs:
           done
 
           # Verify successful packing
-          if [ -z "$(ls -A dist-artifacts)" ]; then
+          if [[ -z "$(ls -A dist-artifacts)" ]]; then
              echo "::warning::No public packages were found to pack."
           else
              echo "::group::Contents of dist-artifacts"
@@ -129,7 +129,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 
@@ -151,14 +151,14 @@ jobs:
       - name: Publish Packages
         run: |
           # Check if directory exists and is not empty
-          if [ ! -d "./dist" ] || [ -z "$(ls -A ./dist)" ]; then
+          if [[ ! -d "./dist" ]] || [[ -z "$(ls -A ./dist)" ]]; then
             echo "⚠️ No artifacts found to publish. Skipping."
             exit 0
           fi
 
           # Iterate through every tarball in the dist folder
           for FILE in ./dist/*.tgz; do
-            [ -e "$FILE" ] || continue
+            [[ -e "$FILE" ]] || continue
             
             echo "🚀 Processing $FILE"
             
@@ -185,7 +185,7 @@ jobs:
     if: ${{ always() }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 

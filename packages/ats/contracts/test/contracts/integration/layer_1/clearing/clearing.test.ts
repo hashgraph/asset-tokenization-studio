@@ -1,34 +1,38 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers, network } from "hardhat";
-import { BigNumber, Contract } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { Contract } from "ethers";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 import {
-  type ResolverProxy,
-  type ClearingActionsFacet,
-  ClearingActionsFacet__factory,
-  type IHold,
-  ControlListFacet,
-  Pause,
-  ERC20Facet,
-  type IERC1410,
-  type IERC3643,
-  TimeTravelFacet,
-  NoncesFacet,
-  Kyc,
-  SsiManagement,
   AccessControl,
   AdjustBalances,
-  Equity,
-  Snapshots,
-  ERC3643Management,
-  ProtectedPartitions,
+  type ClearingActionsFacet,
+  ClearingActionsFacet__factory,
+  ControlListFacet,
   DiamondFacet,
+  Equity,
+  ERC20Facet,
+  ERC3643Management,
+  type IERC1410,
+  type IERC3643,
+  type IHold,
+  Kyc,
+  NoncesFacet,
+  Pause,
+  ProtectedPartitions,
+  type ResolverProxy,
+  Snapshots,
+  SsiManagement,
+  TimeTravelFacet,
 } from "@contract-types";
-import { ADDRESS_ZERO, ZERO, EMPTY_HEX_BYTES, EMPTY_STRING, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
-import { executeRbac } from "@test";
+import { ADDRESS_ZERO, ATS_ROLES, dateToUnixTimestamp, EMPTY_HEX_BYTES, EMPTY_STRING, ZERO } from "@scripts";
+import { deployEquityTokenFixture, executeRbac, MAX_UINT256 } from "@test";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ClearingFacetCombined = any;
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -55,8 +59,8 @@ enum ThirdPartyType {
 }
 
 interface Clearing {
-  amount_: BigNumber;
-  expirationTimestamp_: BigNumber;
+  amount_: bigint;
+  expirationTimestamp_: bigint;
   destination_: string;
   clearingOperationType_: ClearingOperationType;
   data_: string;
@@ -85,8 +89,8 @@ interface ClearingOperationFrom {
 }
 
 interface Hold {
-  amount: BigNumber;
-  expirationTimestamp: BigNumber;
+  amount: bigint;
+  expirationTimestamp: bigint;
   escrow: string;
   to: string;
   data: string;
@@ -99,11 +103,11 @@ let hold: Hold;
 
 describe("Clearing Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
-  let signer_D: SignerWithAddress;
-  let signer_E: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
+  let signer_D: HardhatEthersSigner;
+  let signer_E: HardhatEthersSigner;
 
   function set_initRbacs() {
     return [
@@ -150,7 +154,7 @@ describe("Clearing Tests", () => {
     ];
   }
 
-  let clearingFacet: Contract;
+  let clearingFacet: ClearingFacetCombined;
   let clearingActionsFacet: ClearingActionsFacet;
   let holdFacet: IHold;
   let accessControlFacet: AccessControl;
@@ -175,16 +179,12 @@ describe("Clearing Tests", () => {
   let expirationTimestamp = 0;
 
   async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address, signer_A);
+    const clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
 
-    const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", diamond.address, signer_A);
-    const clearingHoldCreationFacet = await ethers.getContractAt(
-      "ClearingHoldCreationFacet",
-      diamond.address,
-      signer_A,
-    );
-    const clearingReadFacet = await ethers.getContractAt("ClearingReadFacet", diamond.address, signer_A);
-    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.address, signer_A);
+    const clearingRedeemFacet = await ethers.getContractAt("ClearingRedeemFacet", diamond.target, signer_A);
+    const clearingHoldCreationFacet = await ethers.getContractAt("ClearingHoldCreationFacet", diamond.target, signer_A);
+    const clearingReadFacet = await ethers.getContractAt("ClearingReadFacet", diamond.target, signer_A);
+    clearingActionsFacet = ClearingActionsFacet__factory.connect(diamond.target.toString(), signer_A);
 
     const fragmentMap = new Map<string, any>();
     [
@@ -202,25 +202,25 @@ describe("Clearing Tests", () => {
 
     const uniqueFragments = Array.from(fragmentMap.values());
 
-    clearingFacet = new Contract(diamond.address, uniqueFragments, signer_A);
+    clearingFacet = new Contract(diamond.target, uniqueFragments, signer_A) as unknown as ClearingFacetCombined;
 
-    holdFacet = await ethers.getContractAt("IHold", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.address, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.address, signer_A);
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.address, signer_A);
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address, signer_D);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address, signer_B);
-    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.address, signer_E);
-    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.address, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address, signer_A);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
-    erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.address, signer_A);
-    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.address, signer_A);
-    protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address, signer_A);
-    noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.address, signer_A);
-    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.address, signer_A);
+    holdFacet = await ethers.getContractAt("IHold", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target, signer_A);
+    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
+    adjustBalancesFacet = await ethers.getContractAt("AdjustBalances", diamond.target, signer_A);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target, signer_D);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_B);
+    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.target, signer_E);
+    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target, signer_A);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.target);
+    erc3643ManagementFacet = await ethers.getContractAt("ERC3643ManagementFacet", diamond.target, signer_A);
+    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target, signer_A);
+    protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.target, signer_A);
+    noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.target, signer_A);
+    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -505,12 +505,14 @@ describe("Clearing Tests", () => {
   }
 
   beforeEach(async () => {
-    currentTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+    const block = await ethers.provider.getBlock("latest");
+    if (!block) throw new Error("Failed to get latest block");
+    currentTimestamp = block.timestamp;
     expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS;
     [signer_A, signer_B, signer_C, signer_D, signer_E] = await ethers.getSigners();
     hold = {
-      amount: BigNumber.from(_AMOUNT),
-      expirationTimestamp: BigNumber.from(expirationTimestamp),
+      amount: BigInt(_AMOUNT),
+      expirationTimestamp: BigInt(expirationTimestamp),
       escrow: signer_B.address,
       to: signer_C.address,
       data: _DATA,
@@ -627,10 +629,10 @@ describe("Clearing Tests", () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
 
         const currentTime = await timeTravelFacet.blockTimestamp();
-        const recordDate = currentTime.add(100);
-        const executionDate = recordDate.add(100);
+        const recordDate = currentTime + 100n;
+        const executionDate = recordDate + 100n;
 
-        clearingOperation.expirationTimestamp = executionDate.add(ONE_YEAR_IN_SECONDS).toNumber();
+        clearingOperation.expirationTimestamp = Number(executionDate + BigInt(ONE_YEAR_IN_SECONDS));
 
         await clearingFacet.connect(signer_A).clearingTransferByPartition(clearingOperation, 10, signer_B.address);
 
@@ -641,10 +643,10 @@ describe("Clearing Tests", () => {
           amountDecimals: 0,
         };
 
-        const dividendId = await equityFacet.connect(signer_A).callStatic.setDividends(dividendInput);
+        const dividendId = await equityFacet.connect(signer_A).setDividends.staticCall(dividendInput);
         await equityFacet.connect(signer_A).setDividends(dividendInput);
 
-        await timeTravelFacet.changeSystemTimestamp(recordDate.add(1));
+        await timeTravelFacet.changeSystemTimestamp(recordDate + 1n);
 
         const dividendFor = await equityFacet.getDividendsFor(dividendId, signer_A.address);
 
@@ -652,7 +654,7 @@ describe("Clearing Tests", () => {
         const clearedAmount = await clearingFacet.getClearedAmountFor(signer_A.address);
 
         expect(dividendFor.recordDateReached).to.equal(true);
-        expect(dividendFor.tokenBalance).to.equal(currentBalance.add(clearedAmount));
+        expect(dividendFor.tokenBalance).to.equal(currentBalance + clearedAmount);
       });
     });
 
@@ -1838,7 +1840,7 @@ describe("Clearing Tests", () => {
     });
 
     describe("Create clearing success", () => {
-      let balance_A_original: BigNumber;
+      let balance_A_original: bigint;
       let totalClearedAmount = 0;
 
       beforeEach(async () => {
@@ -1958,7 +1960,7 @@ describe("Clearing Tests", () => {
         );
 
         await checkCreatedClearingAmounts(
-          balance_A_original.toNumber() - totalClearedAmount,
+          Number(balance_A_original) - totalClearedAmount,
           signer_A.address,
           totalClearedAmount,
           totalClearedAmount,
@@ -2053,7 +2055,7 @@ describe("Clearing Tests", () => {
         );
 
         await checkCreatedClearingAmounts(
-          balance_A_original.toNumber() - totalClearedAmount,
+          Number(balance_A_original) - totalClearedAmount,
           signer_A.address,
           totalClearedAmount,
           totalClearedAmount,
@@ -2150,7 +2152,7 @@ describe("Clearing Tests", () => {
         );
 
         await checkCreatedClearingAmounts(
-          balance_A_original.toNumber() - totalClearedAmount,
+          Number(balance_A_original) - totalClearedAmount,
           signer_A.address,
           totalClearedAmount,
           totalClearedAmount,
@@ -2238,23 +2240,23 @@ describe("Clearing Tests", () => {
           ClearingOperationType.Transfer,
         );
 
-        expect(countAfter).to.equal(countBefore.add(3));
+        expect(countAfter).to.equal(countBefore + 3n);
 
         // Verify each clearing is independent
         const clearing1 = await clearingFacet.getClearingTransferForByPartition(
           _DEFAULT_PARTITION,
           signer_A.address,
-          countBefore.add(1).toNumber(),
+          Number(countBefore + 1n),
         );
         const clearing2 = await clearingFacet.getClearingTransferForByPartition(
           _DEFAULT_PARTITION,
           signer_A.address,
-          countBefore.add(2).toNumber(),
+          Number(countBefore + 2n),
         );
         const clearing3 = await clearingFacet.getClearingTransferForByPartition(
           _DEFAULT_PARTITION,
           signer_A.address,
-          countBefore.add(3).toNumber(),
+          Number(countBefore + 3n),
         );
 
         expect(clearing1.amount).to.equal(_AMOUNT / 2);
@@ -2439,18 +2441,18 @@ describe("Clearing Tests", () => {
             _PARTITION_ID_1,
             1,
             ClearingOperationType.HoldCreation,
-            ethers.utils.defaultAbiCoder.encode(["uint256"], [1]),
+            ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [1]),
           );
 
         const balance_A_final_HoldCreation = await erc1410Facet.balanceOf(signer_A.address);
         const balance_B_final_HoldCreation = await erc1410Facet.balanceOf(signer_B.address);
 
-        expect(balance_B_final_Transfer.toNumber()).to.equal(balance_B_original.toNumber() + _AMOUNT);
-        expect(balance_A_final_Transfer.toNumber()).to.equal(balance_A_original.toNumber() - _AMOUNT);
-        expect(balance_B_final_Redeem.toNumber()).to.equal(balance_B_original.toNumber() + _AMOUNT);
-        expect(balance_A_final_Redeem.toNumber()).to.equal(balance_A_original.toNumber() - 2 * _AMOUNT);
-        expect(balance_B_final_HoldCreation.toNumber()).to.equal(balance_B_original.toNumber() + _AMOUNT);
-        expect(balance_A_final_HoldCreation.toNumber()).to.equal(balance_A_original.toNumber() - 3 * _AMOUNT);
+        expect(balance_B_final_Transfer).to.equal(balance_B_original + BigInt(_AMOUNT));
+        expect(balance_A_final_Transfer).to.equal(balance_A_original - BigInt(_AMOUNT));
+        expect(balance_B_final_Redeem).to.equal(balance_B_original + BigInt(_AMOUNT));
+        expect(balance_A_final_Redeem).to.equal(balance_A_original - BigInt(2 * _AMOUNT));
+        expect(balance_B_final_HoldCreation).to.equal(balance_B_original + BigInt(_AMOUNT));
+        expect(balance_A_final_HoldCreation).to.equal(balance_A_original - BigInt(3 * _AMOUNT));
       });
 
       it("GIVEN a Token WHEN clearing operation cancelled THEN transaction succeeds", async () => {
@@ -2494,12 +2496,12 @@ describe("Clearing Tests", () => {
         const balance_A_final_HoldCreation = await erc1410Facet.balanceOf(signer_A.address);
         const balance_B_final_HoldCreation = await erc1410Facet.balanceOf(signer_B.address);
 
-        expect(balance_B_final_Transfer.toNumber()).to.equal(balance_B_original.toNumber());
-        expect(balance_A_final_Transfer.toNumber()).to.equal(balance_A_original.toNumber());
-        expect(balance_B_final_Redeem.toNumber()).to.equal(balance_B_original.toNumber());
-        expect(balance_A_final_Redeem.toNumber()).to.equal(balance_A_original.toNumber());
-        expect(balance_B_final_HoldCreation.toNumber()).to.equal(balance_B_original.toNumber());
-        expect(balance_A_final_HoldCreation.toNumber()).to.equal(balance_A_original.toNumber());
+        expect(balance_B_final_Transfer).to.equal(balance_B_original);
+        expect(balance_A_final_Transfer).to.equal(balance_A_original);
+        expect(balance_B_final_Redeem).to.equal(balance_B_original);
+        expect(balance_A_final_Redeem).to.equal(balance_A_original);
+        expect(balance_B_final_HoldCreation).to.equal(balance_B_original);
+        expect(balance_A_final_HoldCreation).to.equal(balance_A_original);
       });
 
       it("GIVEN a Token WHEN clearing operation recalimed THEN transaction succeeds", async () => {
@@ -2554,12 +2556,12 @@ describe("Clearing Tests", () => {
         const balance_A_final_HoldCreation = await erc1410Facet.balanceOf(signer_A.address);
         const balance_B_final_HoldCreation = await erc1410Facet.balanceOf(signer_B.address);
 
-        expect(balance_B_final_Transfer.toNumber()).to.equal(balance_B_original.toNumber());
-        expect(balance_A_final_Transfer.toNumber()).to.equal(balance_A_original.toNumber());
-        expect(balance_B_final_Redeem.toNumber()).to.equal(balance_B_original.toNumber());
-        expect(balance_A_final_Redeem.toNumber()).to.equal(balance_A_original.toNumber());
-        expect(balance_B_final_HoldCreation.toNumber()).to.equal(balance_B_original.toNumber());
-        expect(balance_A_final_HoldCreation.toNumber()).to.equal(balance_A_original.toNumber());
+        expect(balance_B_final_Transfer).to.equal(balance_B_original);
+        expect(balance_A_final_Transfer).to.equal(balance_A_original);
+        expect(balance_B_final_Redeem).to.equal(balance_B_original);
+        expect(balance_A_final_Redeem).to.equal(balance_A_original);
+        expect(balance_B_final_HoldCreation).to.equal(balance_B_original);
+        expect(balance_A_final_HoldCreation).to.equal(balance_A_original);
       });
 
       it("GIVEN a token WHEN clearing operation reclaimed or canceled THEN allowance is restored", async () => {
@@ -2711,16 +2713,16 @@ describe("Clearing Tests", () => {
         const balance_After = await erc1410Facet.balanceOf(signer_A.address);
         const balance_After_Partition_1 = await erc1410Facet.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address);
 
-        expect(cleared_TotalAmount_After).to.be.equal(cleared_TotalAmount_Before.mul(adjustFactor * adjustFactor));
+        expect(cleared_TotalAmount_After).to.be.equal(cleared_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
         expect(cleared_TotalAmount_After_Partition_1).to.be.equal(
-          cleared_TotalAmount_Before_Partition_1.mul(adjustFactor * adjustFactor),
+          cleared_TotalAmount_Before_Partition_1 * BigInt(adjustFactor * adjustFactor),
         );
-        expect(balance_After).to.be.equal(balance_Before.sub(9 * _AMOUNT).mul(adjustFactor * adjustFactor));
+        expect(balance_After).to.be.equal((balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor * adjustFactor));
 
         expect(balance_After_Partition_1).to.be.equal(
-          balance_Before_Partition_1.sub(9 * _AMOUNT).mul(adjustFactor * adjustFactor),
+          (balance_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor * adjustFactor),
         );
-        expect(cleared_After.amount).to.be.equal(cleared_Before.amount.mul(adjustFactor * adjustFactor));
+        expect(cleared_After.amount).to.be.equal(cleared_Before.amount * BigInt(adjustFactor * adjustFactor));
       });
 
       it("GIVEN a clearing WHEN adjustBalances THEN approve succeed", async () => {
@@ -2803,27 +2805,27 @@ describe("Clearing Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Approve_A).to.be.equal(balance_Before_A.sub(9 * _AMOUNT).mul(adjustFactor));
-        expect(balance_After_Approve_C).to.be.equal(balance_Before_C.add(3 * _AMOUNT).mul(adjustFactor));
+        expect(balance_After_Approve_A).to.be.equal((balance_Before_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor));
+        expect(balance_After_Approve_C).to.be.equal((balance_Before_C + BigInt(3 * _AMOUNT)) * BigInt(adjustFactor));
         expect(balance_After_Approve_Partition_1_A).to.be.equal(
-          balance_Before_Partition_1_A.sub(9 * _AMOUNT).mul(adjustFactor),
+          (balance_Before_Partition_1_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
         );
         expect(balance_After_Approve_Partition_1_C).to.be.equal(
-          balance_Before_Partition_1_C.add(3 * _AMOUNT).mul(adjustFactor),
+          (balance_Before_Partition_1_C + BigInt(3 * _AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(cleared_Amount_After).to.be.equal(cleared_Amount_Before.sub(9 * _AMOUNT).mul(adjustFactor));
+        expect(cleared_Amount_After).to.be.equal((cleared_Amount_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor));
         expect(cleared_Amount_After_Partition_1).to.be.equal(
-          cleared_Amount_Before_Partition_1.sub(9 * _AMOUNT).mul(adjustFactor),
+          (cleared_Amount_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(held_Amount_After).to.be.equal(held_Amount_Before.add(3 * _AMOUNT).mul(adjustFactor));
+        expect(held_Amount_After).to.be.equal((held_Amount_Before + BigInt(3 * _AMOUNT)) * BigInt(adjustFactor));
         expect(held_Amount_After_Partition_1).to.be.equal(
-          held_Amount_Before_Partition_1.add(3 * _AMOUNT).mul(adjustFactor),
+          (held_Amount_Before_Partition_1 + BigInt(3 * _AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(balance_After_Approve_A.add(cleared_Amount_After)).to.be.equal(
-          balance_Before_A.sub(9 * _AMOUNT).mul(adjustFactor),
+        expect(balance_After_Approve_A + cleared_Amount_After).to.be.equal(
+          (balance_Before_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(balance_After_Approve_Partition_1_A.add(cleared_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1_A.sub(9 * _AMOUNT).mul(adjustFactor),
+        expect(balance_After_Approve_Partition_1_A + cleared_Amount_After_Partition_1).to.be.equal(
+          (balance_Before_Partition_1_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
         );
       });
 
@@ -2907,19 +2909,19 @@ describe("Clearing Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Cancel_A).to.be.equal(balance_Before_A.mul(adjustFactor));
-        expect(balance_After_Cancel_C).to.be.equal(balance_Before_C.mul(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_A).to.be.equal(balance_Before_Partition_1_A.mul(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_C).to.be.equal(balance_Before_Partition_1_C.mul(adjustFactor));
-        expect(cleared_Amount_After).to.be.equal(cleared_Amount_Before.sub(9 * _AMOUNT).mul(adjustFactor));
+        expect(balance_After_Cancel_A).to.be.equal(balance_Before_A * BigInt(adjustFactor));
+        expect(balance_After_Cancel_C).to.be.equal(balance_Before_C * BigInt(adjustFactor));
+        expect(balance_After_Cancel_Partition_1_A).to.be.equal(balance_Before_Partition_1_A * BigInt(adjustFactor));
+        expect(balance_After_Cancel_Partition_1_C).to.be.equal(balance_Before_Partition_1_C * BigInt(adjustFactor));
+        expect(cleared_Amount_After).to.be.equal((cleared_Amount_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor));
         expect(cleared_Amount_After_Partition_1).to.be.equal(
-          cleared_Amount_Before_Partition_1.sub(9 * _AMOUNT).mul(adjustFactor),
+          (cleared_Amount_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(held_Amount_After).to.be.equal(held_Amount_Before.mul(adjustFactor));
-        expect(held_Amount_After_Partition_1).to.be.equal(held_Amount_Before_Partition_1.mul(adjustFactor));
-        expect(balance_After_Cancel_A.add(cleared_Amount_After)).to.be.equal(balance_Before_A.mul(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_A.add(cleared_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1_A.mul(adjustFactor),
+        expect(held_Amount_After).to.be.equal(held_Amount_Before * BigInt(adjustFactor));
+        expect(held_Amount_After_Partition_1).to.be.equal(held_Amount_Before_Partition_1 * BigInt(adjustFactor));
+        expect(balance_After_Cancel_A + cleared_Amount_After).to.be.equal(balance_Before_A * BigInt(adjustFactor));
+        expect(balance_After_Cancel_Partition_1_A + cleared_Amount_After_Partition_1).to.be.equal(
+          balance_Before_Partition_1_A * BigInt(adjustFactor),
         );
       });
 
@@ -3005,19 +3007,19 @@ describe("Clearing Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Cancel_A).to.be.equal(balance_Before_A.mul(adjustFactor));
-        expect(balance_After_Cancel_C).to.be.equal(balance_Before_C.mul(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_A).to.be.equal(balance_Before_Partition_1_A.mul(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_C).to.be.equal(balance_Before_Partition_1_C.mul(adjustFactor));
-        expect(cleared_Amount_After).to.be.equal(cleared_Amount_Before.sub(9 * _AMOUNT).mul(adjustFactor));
+        expect(balance_After_Cancel_A).to.be.equal(balance_Before_A * BigInt(adjustFactor));
+        expect(balance_After_Cancel_C).to.be.equal(balance_Before_C * BigInt(adjustFactor));
+        expect(balance_After_Cancel_Partition_1_A).to.be.equal(balance_Before_Partition_1_A * BigInt(adjustFactor));
+        expect(balance_After_Cancel_Partition_1_C).to.be.equal(balance_Before_Partition_1_C * BigInt(adjustFactor));
+        expect(cleared_Amount_After).to.be.equal((cleared_Amount_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor));
         expect(cleared_Amount_After_Partition_1).to.be.equal(
-          cleared_Amount_Before_Partition_1.sub(9 * _AMOUNT).mul(adjustFactor),
+          (cleared_Amount_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
         );
-        expect(held_Amount_After).to.be.equal(held_Amount_Before.mul(adjustFactor));
-        expect(held_Amount_After_Partition_1).to.be.equal(held_Amount_Before_Partition_1.mul(adjustFactor));
-        expect(balance_After_Cancel_A.add(cleared_Amount_After)).to.be.equal(balance_Before_A.mul(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_A.add(cleared_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1_A.mul(adjustFactor),
+        expect(held_Amount_After).to.be.equal(held_Amount_Before * BigInt(adjustFactor));
+        expect(held_Amount_After_Partition_1).to.be.equal(held_Amount_Before_Partition_1 * BigInt(adjustFactor));
+        expect(balance_After_Cancel_A + cleared_Amount_After).to.be.equal(balance_Before_A * BigInt(adjustFactor));
+        expect(balance_After_Cancel_Partition_1_A + cleared_Amount_After_Partition_1).to.be.equal(
+          balance_Before_Partition_1_A * BigInt(adjustFactor),
         );
       });
 
@@ -3100,24 +3102,18 @@ describe("Clearing Tests", () => {
         );
 
         expect(balance_After_Clearing).to.be.equal(
-          balance_Before
-            .sub(9 * _AMOUNT)
-            .mul(adjustFactor)
-            .sub(9 * _AMOUNT),
+          (balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor) - BigInt(9 * _AMOUNT),
         );
         expect(balance_After_Clearing_Partition_1).to.be.equal(
-          balance_Before_Partition_1
-            .sub(9 * _AMOUNT)
-            .mul(adjustFactor)
-            .sub(9 * _AMOUNT),
+          (balance_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor) - BigInt(9 * _AMOUNT),
         );
-        expect(cleared_Amount_After).to.be.equal(cleared_Amount_Before.mul(adjustFactor).add(9 * _AMOUNT));
+        expect(cleared_Amount_After).to.be.equal(cleared_Amount_Before * BigInt(adjustFactor) + BigInt(9 * _AMOUNT));
         expect(cleared_Amount_After_Partition_1).to.be.equal(
-          cleared_Amount_Before_Partition_1.mul(adjustFactor).add(9 * _AMOUNT),
+          cleared_Amount_Before_Partition_1 * BigInt(adjustFactor) + BigInt(9 * _AMOUNT),
         );
-        expect(balance_After_Clearing.add(cleared_Amount_After)).to.be.equal(balance_Before.mul(adjustFactor));
-        expect(balance_After_Clearing_Partition_1.add(cleared_Amount_After_Partition_1)).to.be.equal(
-          balance_Before_Partition_1.mul(adjustFactor),
+        expect(balance_After_Clearing + cleared_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactor));
+        expect(balance_After_Clearing_Partition_1 + cleared_Amount_After_Partition_1).to.be.equal(
+          balance_Before_Partition_1 * BigInt(adjustFactor),
         );
       });
     });
@@ -3598,7 +3594,7 @@ describe("Clearing Tests", () => {
         // Grant _PROTECTED_PARTITIONS_ROLE to call protectPartitions
         await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
         // Protect partitions
-        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.address);
+        protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.target.toString());
         await protectedPartitionsFacet.protectPartitions();
       });
 
@@ -4275,7 +4271,7 @@ describe("Clearing Tests", () => {
           name: "ProtectedPartitions",
           version: "1.0.0",
           chainId: chainId,
-          verifyingContract: diamond.address,
+          verifyingContract: diamond.target.toString(),
         };
 
         protectedClearingTransfer = {
@@ -4327,16 +4323,16 @@ describe("Clearing Tests", () => {
         await protectedPartitionsFacet.protectPartitions();
 
         // Grant role for protected partition
-        const packedData = ethers.utils.defaultAbiCoder.encode(
+        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
           [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
-        const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
         await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
         // Get the nonce for signer_A
-        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+        const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
         const protectedClearingOperation = {
           clearingOperation: {
@@ -4358,7 +4354,7 @@ describe("Clearing Tests", () => {
           name: name,
           version: version,
           chainId: parseInt(chainId, 16),
-          verifyingContract: diamond.address,
+          verifyingContract: diamond.target.toString(),
         };
 
         const types = {
@@ -4390,7 +4386,7 @@ describe("Clearing Tests", () => {
         };
 
         // Sign the message
-        const signature = await signer_A._signTypedData(domain, types, message);
+        const signature = await signer_A.signTypedData(domain, types, message);
 
         // Execute the protected clearing transfer
         await clearingFacet
@@ -4417,16 +4413,16 @@ describe("Clearing Tests", () => {
         await protectedPartitionsFacet.protectPartitions();
 
         // Grant role for protected partition
-        const packedData = ethers.utils.defaultAbiCoder.encode(
+        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
           [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
-        const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
         await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
         // Get the nonce for signer_A
-        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+        const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
         const protectedClearingOperation = {
           clearingOperation: {
@@ -4448,7 +4444,7 @@ describe("Clearing Tests", () => {
           name: name,
           version: version,
           chainId: parseInt(chainId, 16),
-          verifyingContract: diamond.address,
+          verifyingContract: diamond.target.toString(),
         };
 
         const types = {
@@ -4478,7 +4474,7 @@ describe("Clearing Tests", () => {
         };
 
         // Sign the message
-        const signature = await signer_A._signTypedData(domain, types, message);
+        const signature = await signer_A.signTypedData(domain, types, message);
 
         // Execute the protected clearing redeem
         await clearingFacet
@@ -4505,16 +4501,16 @@ describe("Clearing Tests", () => {
         await protectedPartitionsFacet.protectPartitions();
 
         // Grant role for protected partition
-        const packedData = ethers.utils.defaultAbiCoder.encode(
+        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
           [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
-        const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
         await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
         // Get the nonce for signer_A
-        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+        const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
         const protectedClearingOperation = {
           clearingOperation: {
@@ -4528,8 +4524,8 @@ describe("Clearing Tests", () => {
         };
 
         const holdForClearing = {
-          amount: BigNumber.from(_AMOUNT),
-          expirationTimestamp: BigNumber.from(expirationTimestamp),
+          amount: BigInt(_AMOUNT),
+          expirationTimestamp: BigInt(expirationTimestamp),
           escrow: signer_B.address,
           to: signer_C.address,
           data: _DATA,
@@ -4544,7 +4540,7 @@ describe("Clearing Tests", () => {
           name: name,
           version: version,
           chainId: parseInt(chainId, 16),
-          verifyingContract: diamond.address,
+          verifyingContract: diamond.target.toString(),
         };
 
         const types = {
@@ -4581,7 +4577,7 @@ describe("Clearing Tests", () => {
         };
 
         // Sign the message
-        const signature = await signer_A._signTypedData(domain, types, message);
+        const signature = await signer_A.signTypedData(domain, types, message);
 
         // Execute the protected clearing create hold
         await clearingFacet
@@ -4602,7 +4598,7 @@ describe("Clearing Tests", () => {
                 expirationTimestamp: expirationTimestamp,
                 data: _DATA,
               },
-              from: ethers.constants.AddressZero, // Invalid
+              from: ethers.ZeroAddress, // Invalid
               deadline: expirationTimestamp,
               nonce: 1,
             };
@@ -4612,7 +4608,7 @@ describe("Clearing Tests", () => {
               name: "ProtectedPartitions",
               version: "1.0.0",
               chainId: parseInt(chainId, 16),
-              verifyingContract: diamond.address,
+              verifyingContract: diamond.target.toString(),
             };
 
             const types = {
@@ -4640,7 +4636,7 @@ describe("Clearing Tests", () => {
               _to: signer_C.address,
             };
 
-            const sig = await signer_A._signTypedData(domain, types, message);
+            const sig = await signer_A.signTypedData(domain, types, message);
 
             await expect(
               clearingFacet
@@ -4666,15 +4662,15 @@ describe("Clearing Tests", () => {
             await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
             await protectedPartitionsFacet.protectPartitions();
 
-            const packedData = ethers.utils.defaultAbiCoder.encode(
+            const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
               [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
-            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
             await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
-            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+            const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -4692,7 +4688,7 @@ describe("Clearing Tests", () => {
               name: "ProtectedPartitions",
               version: "1.0.0",
               chainId: parseInt(chainId, 16),
-              verifyingContract: diamond.address,
+              verifyingContract: diamond.target.toString(),
             };
 
             const types = {
@@ -4717,15 +4713,15 @@ describe("Clearing Tests", () => {
             const message = {
               _protectedClearingOperation: protectedClearingOp,
               _amount: _AMOUNT,
-              _to: ethers.constants.AddressZero, // Invalid
+              _to: ethers.ZeroAddress, // Invalid
             };
 
-            const sig = await signer_A._signTypedData(domain, types, message);
+            const sig = await signer_A.signTypedData(domain, types, message);
 
             await expect(
               clearingFacet
                 .connect(signer_A)
-                .protectedClearingTransferByPartition(protectedClearingOp, _AMOUNT, ethers.constants.AddressZero, sig),
+                .protectedClearingTransferByPartition(protectedClearingOp, _AMOUNT, ethers.ZeroAddress, sig),
             ).to.be.reverted;
           });
 
@@ -4741,15 +4737,15 @@ describe("Clearing Tests", () => {
             await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
             await protectedPartitionsFacet.protectPartitions();
 
-            const packedData = ethers.utils.defaultAbiCoder.encode(
+            const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
               [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
-            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
             await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
-            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+            const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -4767,7 +4763,7 @@ describe("Clearing Tests", () => {
               name: "ProtectedPartitions",
               version: "1.0.0",
               chainId: parseInt(chainId, 16),
-              verifyingContract: diamond.address,
+              verifyingContract: diamond.target.toString(),
             };
 
             const types = {
@@ -4795,7 +4791,7 @@ describe("Clearing Tests", () => {
               _to: signer_C.address,
             };
 
-            const sig = await signer_A._signTypedData(domain, types, message);
+            const sig = await signer_A.signTypedData(domain, types, message);
 
             await expect(
               clearingFacet
@@ -4818,7 +4814,7 @@ describe("Clearing Tests", () => {
 
             // Don't grant protectedPartitionRole
 
-            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+            const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -4836,7 +4832,7 @@ describe("Clearing Tests", () => {
               name: "ProtectedPartitions",
               version: "1.0.0",
               chainId: parseInt(chainId, 16),
-              verifyingContract: diamond.address,
+              verifyingContract: diamond.target.toString(),
             };
 
             const types = {
@@ -4864,7 +4860,7 @@ describe("Clearing Tests", () => {
               _to: signer_C.address,
             };
 
-            const sig = await signer_A._signTypedData(domain, types, message);
+            const sig = await signer_A.signTypedData(domain, types, message);
 
             await expect(
               clearingFacet
@@ -4885,19 +4881,19 @@ describe("Clearing Tests", () => {
             await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
             await protectedPartitionsFacet.protectPartitions();
 
-            const packedData = ethers.utils.defaultAbiCoder.encode(
+            const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
               [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
-            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
             await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
             // Activate then deactivate clearing
             await clearingActionsFacet.activateClearing();
             await clearingActionsFacet.deactivateClearing();
 
-            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+            const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -4915,7 +4911,7 @@ describe("Clearing Tests", () => {
               name: "ProtectedPartitions",
               version: "1.0.0",
               chainId: parseInt(chainId, 16),
-              verifyingContract: diamond.address,
+              verifyingContract: diamond.target.toString(),
             };
 
             const types = {
@@ -4943,7 +4939,7 @@ describe("Clearing Tests", () => {
               _to: signer_C.address,
             };
 
-            const sig = await signer_A._signTypedData(domain, types, message);
+            const sig = await signer_A.signTypedData(domain, types, message);
 
             await expect(
               clearingFacet
@@ -4961,7 +4957,7 @@ describe("Clearing Tests", () => {
                 expirationTimestamp: expirationTimestamp,
                 data: _DATA,
               },
-              from: ethers.constants.AddressZero, // Invalid
+              from: ethers.ZeroAddress, // Invalid
               deadline: expirationTimestamp,
               nonce: 1,
             };
@@ -4971,7 +4967,7 @@ describe("Clearing Tests", () => {
               name: "ProtectedPartitions",
               version: "1.0.0",
               chainId: parseInt(chainId, 16),
-              verifyingContract: diamond.address,
+              verifyingContract: diamond.target.toString(),
             };
 
             const types = {
@@ -4997,7 +4993,7 @@ describe("Clearing Tests", () => {
               _amount: _AMOUNT,
             };
 
-            const sig = await signer_A._signTypedData(domain, types, message);
+            const sig = await signer_A.signTypedData(domain, types, message);
 
             await expect(
               clearingFacet
@@ -5018,19 +5014,19 @@ describe("Clearing Tests", () => {
             await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
             await protectedPartitionsFacet.protectPartitions();
 
-            const packedData = ethers.utils.defaultAbiCoder.encode(
+            const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
               [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
-            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
             await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
             // Activate then deactivate clearing to test the modifier
             await clearingActionsFacet.activateClearing();
             await clearingActionsFacet.deactivateClearing();
 
-            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+            const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -5048,7 +5044,7 @@ describe("Clearing Tests", () => {
               name: "ProtectedPartitions",
               version: "1.0.0",
               chainId: parseInt(chainId, 16),
-              verifyingContract: diamond.address,
+              verifyingContract: diamond.target.toString(),
             };
 
             const types = {
@@ -5074,7 +5070,7 @@ describe("Clearing Tests", () => {
               _amount: _AMOUNT,
             };
 
-            const sig = await signer_A._signTypedData(domain, types, message);
+            const sig = await signer_A.signTypedData(domain, types, message);
 
             await expect(
               clearingFacet.connect(signer_A).protectedClearingRedeemByPartition(protectedClearingOp, _AMOUNT, sig),
@@ -5090,7 +5086,7 @@ describe("Clearing Tests", () => {
                 expirationTimestamp: expirationTimestamp,
                 data: _DATA,
               },
-              from: ethers.constants.AddressZero, // Invalid
+              from: ethers.ZeroAddress, // Invalid
               deadline: expirationTimestamp,
               nonce: 1,
             };
@@ -5098,7 +5094,7 @@ describe("Clearing Tests", () => {
             const holdForClearing = {
               amount: _AMOUNT,
               expirationTimestamp: expirationTimestamp,
-              escrow: ethers.constants.AddressZero,
+              escrow: ethers.ZeroAddress,
               to: signer_C.address,
               data: _DATA,
             };
@@ -5108,7 +5104,7 @@ describe("Clearing Tests", () => {
               name: "ProtectedPartitions",
               version: "1.0.0",
               chainId: parseInt(chainId, 16),
-              verifyingContract: diamond.address,
+              verifyingContract: diamond.target.toString(),
             };
 
             const types = {
@@ -5141,7 +5137,7 @@ describe("Clearing Tests", () => {
               _hold: holdForClearing,
             };
 
-            const sig = await signer_A._signTypedData(domain, types, message);
+            const sig = await signer_A.signTypedData(domain, types, message);
 
             await expect(
               clearingFacet
@@ -5162,19 +5158,19 @@ describe("Clearing Tests", () => {
             await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
             await protectedPartitionsFacet.protectPartitions();
 
-            const packedData = ethers.utils.defaultAbiCoder.encode(
+            const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
               ["bytes32", "bytes32"],
               [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
             );
             const packedDataWithoutPrefix = packedData.slice(2);
-            const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+            const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
             await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
 
             // Activate then deactivate clearing to test the modifier
             await clearingActionsFacet.activateClearing();
             await clearingActionsFacet.deactivateClearing();
 
-            const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+            const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
             const protectedClearingOp = {
               clearingOperation: {
@@ -5190,7 +5186,7 @@ describe("Clearing Tests", () => {
             const holdForClearing = {
               amount: _AMOUNT,
               expirationTimestamp: expirationTimestamp,
-              escrow: ethers.constants.AddressZero,
+              escrow: ethers.ZeroAddress,
               to: signer_C.address,
               data: _DATA,
             };
@@ -5200,7 +5196,7 @@ describe("Clearing Tests", () => {
               name: "ProtectedPartitions",
               version: "1.0.0",
               chainId: parseInt(chainId, 16),
-              verifyingContract: diamond.address,
+              verifyingContract: diamond.target.toString(),
             };
 
             const types = {
@@ -5233,7 +5229,7 @@ describe("Clearing Tests", () => {
               _hold: holdForClearing,
             };
 
-            const sig = await signer_A._signTypedData(domain, types, message);
+            const sig = await signer_A.signTypedData(domain, types, message);
 
             await expect(
               clearingFacet
@@ -5264,7 +5260,7 @@ describe("Clearing Tests", () => {
           _amount: _AMOUNT,
         };
 
-        const signature = await signer_A._signTypedData(domain, clearingTransferType, message);
+        const signature = await signer_A.signTypedData(domain, clearingTransferType, message);
 
         await expect(
           clearingFacet
@@ -5292,7 +5288,7 @@ describe("Clearing Tests", () => {
           _amount: _AMOUNT,
         };
 
-        const signature = await signer_A._signTypedData(domain, clearingTransferType, message);
+        const signature = await signer_A.signTypedData(domain, clearingTransferType, message);
 
         await expect(
           clearingFacet
@@ -5332,12 +5328,12 @@ describe("Clearing Tests", () => {
         });
 
         // Grant partition-specific role to signer_B
-        const packedData = ethers.utils.defaultAbiCoder.encode(
+        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "bytes32"],
           [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
         );
         const packedDataWithoutPrefix = packedData.slice(2);
-        const protectedPartitionRole = ethers.utils.keccak256("0x" + packedDataWithoutPrefix);
+        const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
         await accessControlFacet.grantRole(protectedPartitionRole, signer_B.address);
 
         // Recover signer_A's address to signer_B
@@ -5377,7 +5373,7 @@ describe("Clearing Tests", () => {
           _hold: holdForClearing,
         };
 
-        const signature = await signer_A._signTypedData(domain, clearingHoldType, message);
+        const signature = await signer_A.signTypedData(domain, clearingHoldType, message);
 
         await expect(
           clearingFacet
@@ -5412,7 +5408,7 @@ describe("Clearing Tests", () => {
           _hold: holdForClearing,
         };
 
-        const signature = await signer_A._signTypedData(domain, clearingHoldType, message);
+        const signature = await signer_A.signTypedData(domain, clearingHoldType, message);
 
         await expect(
           clearingFacet
@@ -5431,7 +5427,7 @@ describe("Clearing Tests", () => {
           data: _DATA,
         });
 
-        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+        const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
         const protectedClearingOpExpired = {
           clearingOperation: {
@@ -5449,7 +5445,7 @@ describe("Clearing Tests", () => {
           _value: _AMOUNT,
         };
 
-        const signature = await signer_A._signTypedData(domain, clearingRedeemType, message);
+        const signature = await signer_A.signTypedData(domain, clearingRedeemType, message);
 
         await expect(
           clearingFacet
@@ -5467,7 +5463,7 @@ describe("Clearing Tests", () => {
           data: _DATA,
         });
 
-        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+        const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
         const protectedClearingOpExpired = {
           clearingOperation: {
@@ -5493,7 +5489,7 @@ describe("Clearing Tests", () => {
           _hold: holdForClearing,
         };
 
-        const signature = await signer_A._signTypedData(domain, clearingHoldType, message);
+        const signature = await signer_A.signTypedData(domain, clearingHoldType, message);
 
         await expect(
           clearingFacet
@@ -5512,7 +5508,7 @@ describe("Clearing Tests", () => {
         });
 
         // Don't grant the protected partition role for signer_A
-        const nonce = (await noncesFacet.nonces(signer_A.address)).toNumber() + 1;
+        const nonce = Number(await noncesFacet.nonces(signer_A.address)) + 1;
 
         const protectedClearingOp = {
           clearingOperation: {
@@ -5538,7 +5534,7 @@ describe("Clearing Tests", () => {
           _hold: holdForClearing,
         };
 
-        const signature = await signer_A._signTypedData(domain, clearingHoldType, message);
+        const signature = await signer_A.signTypedData(domain, clearingHoldType, message);
 
         await expect(
           clearingFacet

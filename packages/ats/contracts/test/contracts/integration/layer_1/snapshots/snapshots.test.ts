@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   type Snapshots,
@@ -38,9 +40,9 @@ const DECIMALS = 6;
 
 describe("Snapshots Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
 
   let erc1410Facet: IERC1410;
   let snapshotFacet: Snapshots;
@@ -73,22 +75,22 @@ describe("Snapshots Tests", () => {
   }
 
   async function setFacets(diamond: ResolverProxy) {
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.address);
+    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.address);
+    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target);
 
-    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.address);
+    snapshotFacet = await ethers.getContractAt("Snapshots", diamond.target);
 
-    pauseFacet = await ethers.getContractAt("Pause", diamond.address);
+    pauseFacet = await ethers.getContractAt("Pause", diamond.target);
 
-    lockFacet = await ethers.getContractAt("Lock", diamond.address);
-    holdFacet = await ethers.getContractAt("IHold", diamond.address);
-    kycFacet = await ethers.getContractAt("Kyc", diamond.address, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.address, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.address);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.address);
-    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.address);
-    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.address);
+    lockFacet = await ethers.getContractAt("Lock", diamond.target);
+    holdFacet = await ethers.getContractAt("IHold", diamond.target);
+    kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
+    ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+    equityFacet = await ethers.getContractAt("Equity", diamond.target);
+    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
+    freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
+    clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target);
   }
 
   function set_initRbacs(): any[] {
@@ -481,11 +483,11 @@ describe("Snapshots Tests", () => {
 
     expect(snapshot_TotalTokenHolders_1).to.equal(1);
     expect(snapshot_TokenHolders_1.length).to.equal(snapshot_TotalTokenHolders_1);
-    expect(snapshot_TokenHolders_1).to.have.members([signer_C.address]);
+    expect([...snapshot_TokenHolders_1]).to.have.members([signer_C.address]);
 
     expect(snapshot_TotalTokenHolders_2).to.equal(2);
     expect(snapshot_TokenHolders_2.length).to.equal(snapshot_TotalTokenHolders_2);
-    expect(snapshot_TokenHolders_2).to.have.members([signer_A.address, signer_C.address]);
+    expect([...snapshot_TokenHolders_2]).to.have.members([signer_A.address, signer_C.address]);
   });
 
   it("GIVEN snapshot exists WHEN querying cleared balances THEN returns correct values", async () => {
@@ -722,7 +724,7 @@ describe("Snapshots Tests", () => {
     // Get all holders in one call to verify consistency
     const allHolders_single_call = await snapshotFacet.getTokenHoldersAtSnapshot(1, 0, 10);
     expect(allHolders_single_call.length).to.equal(3);
-    expect(allHolders_single_call).to.have.members([signer_C.address, signer_A.address, signer_B.address]);
+    expect([...allHolders_single_call]).to.have.members([signer_C.address, signer_A.address, signer_B.address]);
   });
 
   describe("Scheduled tasks", async () => {

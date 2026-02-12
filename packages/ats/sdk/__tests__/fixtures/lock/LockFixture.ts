@@ -15,7 +15,7 @@ import GetLocksIdRequest from "@port/in/request/security/operations/lock/GetLock
 import GetLockRequest from "@port/in/request/security/operations/lock/GetLockRequest";
 import { Lock } from "@domain/context/security/Lock";
 import BigDecimal from "@domain/context/shared/BigDecimal";
-import { BigNumber } from "ethers";
+
 import { LockCommand } from "@command/security/operations/lock/LockCommand";
 import { ReleaseCommand } from "@command/security/operations/release/ReleaseCommand";
 
@@ -93,6 +93,6 @@ export const GetLockRequestFixture = createFixture<GetLockRequest>((request) => 
 
 export const LockFixture = createFixture<Lock>((props) => {
   props.id.as(() => new HederaId(HederaIdPropsFixture.create().value));
-  props.amount.faker((faker) => new BigDecimal(BigNumber.from(faker.number.int({ max: 999 })).toString()));
-  props.expiredTimestamp.faker((faker) => BigNumber.from(faker.date.future().getTime()).toString());
+  props.amount.faker((faker) => new BigDecimal(BigInt(faker.number.int({ max: 999 })).toString()));
+  props.expiredTimestamp.faker((faker) => BigInt(faker.date.future().getTime()));
 });

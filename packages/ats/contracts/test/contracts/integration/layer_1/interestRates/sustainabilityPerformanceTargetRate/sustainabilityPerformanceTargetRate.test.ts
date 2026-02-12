@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers.js";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
   PauseFacet,
@@ -18,9 +20,9 @@ import { executeRbac } from "@test";
 
 describe("Sustainability Performance Target Rate Tests", () => {
   let diamond: ResolverProxy;
-  let signer_A: SignerWithAddress;
-  let signer_B: SignerWithAddress;
-  let signer_C: SignerWithAddress;
+  let signer_A: HardhatEthersSigner;
+  let signer_B: HardhatEthersSigner;
+  let signer_C: HardhatEthersSigner;
   let project1: string;
   let project2: string;
 
@@ -56,11 +58,11 @@ describe("Sustainability Performance Target Rate Tests", () => {
 
     sustainabilityPerformanceTargetRateFacet = await ethers.getContractAt(
       "SustainabilityPerformanceTargetRateFacet",
-      diamond.address,
+      diamond.target,
       signer_A,
     );
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.address, signer_A);
-    proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipientsFacet", diamond.address, signer_A);
+    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
+    proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipientsFacet", diamond.target, signer_A);
 
     await proceedRecipientsFacet.connect(signer_A).addProceedRecipient(project1, "0x");
     await proceedRecipientsFacet.connect(signer_A).addProceedRecipient(project2, "0x");
@@ -100,7 +102,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
     // Deploy a raw ResolverProxy without initialization
     const ResolverProxyFactory = await ethers.getContractFactory("ResolverProxy");
     const uninitializedDiamond = await ResolverProxyFactory.deploy(
-      blr.address,
+      blr.target,
       BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
       1,
       [
@@ -110,12 +112,12 @@ describe("Sustainability Performance Target Rate Tests", () => {
         },
       ],
     );
-    await uninitializedDiamond.deployed();
+    await uninitializedDiamond.waitForDeployment();
 
     // Get facets for the uninitialized diamond
     const uninitializedAccessControl = await ethers.getContractAt(
       "AccessControlFacet",
-      uninitializedDiamond.address,
+      uninitializedDiamond.target,
       signer_A,
     );
 
@@ -129,7 +131,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
 
     const uninitializedProceedFacet = await ethers.getContractAt(
       "ProceedRecipientsFacet",
-      uninitializedDiamond.address,
+      uninitializedDiamond.target,
       signer_A,
     );
 
@@ -138,7 +140,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
 
     const uninitializedFacet = await ethers.getContractAt(
       "SustainabilityPerformanceTargetRateFacet",
-      uninitializedDiamond.address,
+      uninitializedDiamond.target,
       signer_A,
     );
 
@@ -317,11 +319,19 @@ describe("Sustainability Performance Target Rate Tests", () => {
 
       const receipt = await tx.wait();
 
-      const event = receipt.events!.find((e) => e.event === "ImpactDataUpdated")!;
+      const eventLog = receipt!.logs.find((log) => {
+        try {
+          const parsed = sustainabilityPerformanceTargetRateFacet.interface.parseLog(log as any);
+          return parsed?.name === "ImpactDataUpdated";
+        } catch {
+          return false;
+        }
+      });
+      const event = sustainabilityPerformanceTargetRateFacet.interface.parseLog(eventLog as any)!;
 
-      const decoded = event.args!.newImpactData[0];
-      const operator = event.args!.operator;
-      const projects = event.args!.projects;
+      const decoded = event.args.newImpactData[0];
+      const operator = event.args.operator;
+      const projects = event.args.projects;
 
       expect(operator).to.equal(signer_A.address);
       expect(projects[0]).to.equal(project1);
@@ -361,12 +371,20 @@ describe("Sustainability Performance Target Rate Tests", () => {
 
       const receipt = await tx.wait();
 
-      const event = receipt.events!.find((e) => e.event === "ImpactDataUpdated")!;
+      const eventLog = receipt!.logs.find((log) => {
+        try {
+          const parsed = sustainabilityPerformanceTargetRateFacet.interface.parseLog(log as any);
+          return parsed?.name === "ImpactDataUpdated";
+        } catch {
+          return false;
+        }
+      });
+      const event = sustainabilityPerformanceTargetRateFacet.interface.parseLog(eventLog as any)!;
 
-      const decoded_0 = event.args!.newImpactData[0];
-      const decoded_1 = event.args!.newImpactData[1];
-      const operator = event.args!.operator;
-      const projects = event.args!.projects;
+      const decoded_0 = event.args.newImpactData[0];
+      const decoded_1 = event.args.newImpactData[1];
+      const operator = event.args.operator;
+      const projects = event.args.projects;
 
       expect(operator).to.equal(signer_A.address);
       expect(projects[0]).to.equal(project1);

@@ -235,7 +235,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       // Create configuration with external facet
       // This should now WARN but NOT filter out the facet
       const configResult = await createBatchConfiguration(blrContract, {
-        configurationId: ethers.utils.formatBytes32String("TEST_CONFIG"),
+        configurationId: ethers.encodeBytes32String("TEST_CONFIG"),
         facets: [
           {
             facetName: "PauseFacet",
@@ -289,7 +289,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
       // Create mixed configuration
       const configResult = await createBatchConfiguration(blrContract, {
-        configurationId: ethers.utils.formatBytes32String("MIXED_CONFIG"),
+        configurationId: ethers.encodeBytes32String("MIXED_CONFIG"),
         facets: [
           {
             facetName: "AccessControlFacet",
@@ -348,7 +348,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
       // Create configuration with only external facets
       const configResult = await createBatchConfiguration(blrContract, {
-        configurationId: ethers.utils.formatBytes32String("EXTERNAL_CONFIG"),
+        configurationId: ethers.encodeBytes32String("EXTERNAL_CONFIG"),
         facets: [
           {
             facetName: "PauseFacet",
@@ -484,7 +484,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       // Try to create configuration with some facets not deployed
       // Only include facets that have been deployed
       const configResult = await createBatchConfiguration(blrContract, {
-        configurationId: ethers.utils.formatBytes32String("PARTIAL_CONFIG"),
+        configurationId: ethers.encodeBytes32String("PARTIAL_CONFIG"),
         facets: [
           {
             facetName: "AccessControlFacet",
@@ -536,7 +536,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
       // Configure the same facet - createBatchConfiguration should also warn but succeed
       const configResult = await createBatchConfiguration(blrContract, {
-        configurationId: ethers.utils.formatBytes32String("CONSISTENCY_TEST"),
+        configurationId: ethers.encodeBytes32String("CONSISTENCY_TEST"),
         facets: [
           {
             facetName: "PauseFacet",
@@ -572,7 +572,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       });
 
       // Create configuration
-      const configId = ethers.utils.formatBytes32String("TEST_CONFIG");
+      const configId = ethers.encodeBytes32String("TEST_CONFIG");
       await createBatchConfiguration(blrContract, {
         configurationId: configId,
         facets: [
@@ -613,7 +613,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       });
 
       // Create configuration
-      const configId = ethers.utils.formatBytes32String("DEFAULT_TEST");
+      const configId = ethers.encodeBytes32String("DEFAULT_TEST");
       await createBatchConfiguration(blrContract, {
         configurationId: configId,
         facets: [
@@ -667,7 +667,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       });
 
       // Create first configuration
-      const firstConfigId = ethers.utils.formatBytes32String("FIRST_CONFIG");
+      const firstConfigId = ethers.encodeBytes32String("FIRST_CONFIG");
       const firstConfigResult = await createBatchConfiguration(blrContract, {
         configurationId: firstConfigId,
         facets: [
@@ -683,12 +683,12 @@ describe("External Facet Extensibility - Integration Tests", () => {
       if (firstConfigResult.success) {
         // Verify returned version matches BLR's configuration version
         const blrVersion1 = await blrContract.getLatestVersionByConfiguration(firstConfigId);
-        expect(firstConfigResult.data.version).to.equal(blrVersion1.toNumber());
+        expect(firstConfigResult.data.version).to.equal(Number(blrVersion1));
         expect(firstConfigResult.data.version).to.equal(1);
       }
 
       // Create second configuration
-      const secondConfigId = ethers.utils.formatBytes32String("SECOND_CONFIG");
+      const secondConfigId = ethers.encodeBytes32String("SECOND_CONFIG");
       const secondConfigResult = await createBatchConfiguration(blrContract, {
         configurationId: secondConfigId,
         facets: [
@@ -704,7 +704,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       if (secondConfigResult.success) {
         // BUG FIX VERIFICATION: Version must match BLR's per-config version
         const blrVersion2 = await blrContract.getLatestVersionByConfiguration(secondConfigId);
-        expect(secondConfigResult.data.version).to.equal(blrVersion2.toNumber());
+        expect(secondConfigResult.data.version).to.equal(Number(blrVersion2));
         // Second config should also start at version 1
         expect(secondConfigResult.data.version).to.equal(1);
       }
@@ -733,7 +733,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
       // Try to create a configuration with a non-existent facet
       // The resolverKey is 0x0, which will cause FacetIdNotRegistered error
       const configResult = await createBatchConfiguration(blrContract, {
-        configurationId: ethers.utils.formatBytes32String("EMPTY_CONFIG"),
+        configurationId: ethers.encodeBytes32String("EMPTY_CONFIG"),
         facets: [
           {
             facetName: "NonExistentFacet",
@@ -769,7 +769,7 @@ describe("External Facet Extensibility - Integration Tests", () => {
 
       // Now try to create a configuration with empty facet list
       const configResult = await createBatchConfiguration(blrContract, {
-        configurationId: ethers.utils.formatBytes32String("NO_FACETS"),
+        configurationId: ethers.encodeBytes32String("NO_FACETS"),
         facets: [],
       });
 

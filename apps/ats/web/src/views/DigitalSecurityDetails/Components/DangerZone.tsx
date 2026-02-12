@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Divider, HStack, VStack } from "@chakra-ui/react";
 import { Spinner, Text, Toggle } from "io-bricks-ui";
 import { useRolesStore } from "../../../store/rolesStore";
@@ -111,8 +113,6 @@ export const DangerZone = () => {
       activateInternalKyc(activateInternalKycRequest);
     }
   };
-
-  console.log("isInternalKycActivated", isInternalKycActivated);
 
   return (
     <VStack w={"full"} layerStyle="container" align="start" gap={8} py={8}>
