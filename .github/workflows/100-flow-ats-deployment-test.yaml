@@ -1,10 +1,10 @@
-name: ATS Deployment Test
+name: "100: [FLOW] ATS Deployment Test"
 
 on:
   pull_request:
     paths:
       - "packages/ats/contracts/**"
-      - ".github/workflows/ats.deployment-test.yml"
+      - ".github/workflows/100-flow-ats-deployment-test.yaml"
   workflow_dispatch:
 
 permissions:
@@ -16,8 +16,11 @@ jobs:
   # ==========================================================================
   # Installs dependencies and builds contracts once, then caches both
   # node_modules and build artifacts for downstream deployment jobs.
-  # Uses actions/cache (save) here and actions/cache/restore (read-only)
-  # in downstream jobs to avoid redundant npm ci + Solidity compilation.
+  #
+  # Cache strategy:
+  #   - Dependencies: keyed on package-lock.json hash (skip npm ci on hit)
+  #   - Build artifacts: keyed on Solidity source + config hash (skip build on hit)
+  #   - Downstream jobs use actions/cache/restore (read-only)
   # ==========================================================================
   build:
     name: Build Contracts
@@ -42,11 +45,9 @@ jobs:
         with:
           node-version: 22.20.0
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Save dependencies to cache
-        uses: actions/cache/save@v4
+      - name: Restore dependencies from cache
+        id: deps-cache
+        uses: actions/cache@v4
         with:
           path: |
             node_modules
@@ -55,18 +56,24 @@ jobs:
             ~/.npm
           key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
 
-      - name: Build contracts
-        run: npm run ats:contracts:build
+      - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: npm ci
 
-      - name: Save build artifacts to cache
-        uses: actions/cache/save@v4
+      - name: Restore build artifacts from cache
+        id: build-cache
+        uses: actions/cache@v4
         with:
           path: |
             packages/ats/contracts/artifacts
             packages/ats/contracts/build
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
-          key: ${{ runner.os }}-contracts-build-${{ github.sha }}
+          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
+
+      - name: Build contracts
+        if: steps.build-cache.outputs.cache-hit != 'true'
+        run: npm run ats:contracts:build
 
   # ==========================================================================
   # Job 1: Deploy ATS system to a persistent Hardhat node
@@ -123,7 +130,7 @@ jobs:
             packages/ats/contracts/build
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
-          key: ${{ runner.os }}-contracts-build-${{ github.sha }}
+          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
           fail-on-cache-miss: true
 
       - name: Start Hardhat node
@@ -171,10 +178,11 @@ jobs:
           fi
 
   # ==========================================================================
-  # Job 2: Deploy ATS system to a Hedera Local Node
+  # Job 2: Deploy ATS system to a Hiero Solo network
   # ==========================================================================
-  # Runs the same CLI deployment pipeline against a real Hedera network running
-  # locally via Docker (consensus node + mirror node + JSON-RPC relay).
+  # Runs the same CLI deployment pipeline against a real Hedera network
+  # deployed locally via Hiero Solo (Kubernetes-based consensus node +
+  # JSON-RPC relay via hiero-solo-action).
   #
   # This catches Hedera-specific issues that Hardhat misses:
   #   - Gas estimation with real HBAR-based gas
@@ -182,7 +190,9 @@ jobs:
   #   - Hedera EVM differences
   #   - Contract ID resolution (0.0.XXXX)
   #
-  # Gracefully skips if Docker is not available on the runner.
+  # Uses the official hiero-solo-action GitHub Action to provision the network.
+  # Gracefully skips if Docker is not available on the runner (Solo needs
+  # Docker for Kubernetes via kind).
   #
   # Env var flow:
   #   NETWORK=hedera-local -> requireNetworkSigner() -> createNetworkSigner("hedera-local")
@@ -190,8 +200,8 @@ jobs:
   #     -> getPrivateKey("hedera-local", 0) reads HEDERA_LOCAL_PRIVATE_KEY_0
   #     -> new Wallet(privateKey, new JsonRpcProvider(jsonRpcUrl))
   # ==========================================================================
-  hedera-deployment:
-    name: Deploy to Hedera Local Node
+  solo-deployment:
+    name: Deploy to Hiero Solo Network
     needs: [build]
     runs-on: token-studio-linux-large
     timeout-minutes: 30
@@ -218,12 +228,12 @@ jobs:
         id: docker-check
         run: |
           if docker info > /dev/null 2>&1; then
-            echo "available=true" >> $GITHUB_OUTPUT
+            echo "available=true" >> "${GITHUB_OUTPUT}"
             echo "Docker is available"
             docker --version
           else
-            echo "available=false" >> $GITHUB_OUTPUT
-            echo "::warning::Docker not available - skipping Hedera deployment test"
+            echo "available=false" >> "${GITHUB_OUTPUT}"
+            echo "::warning::Docker not available - skipping Solo deployment test"
           fi
 
       - name: Restore dependencies from cache
@@ -247,66 +257,84 @@ jobs:
             packages/ats/contracts/build
             packages/ats/contracts/typechain-types
             packages/ats/contracts/cache
-          key: ${{ runner.os }}-contracts-build-${{ github.sha }}
+          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
           fail-on-cache-miss: true
 
-      - name: Start Hedera Local Node
-        id: hedera-start
+      - name: Setup Hiero Solo Network
+        id: solo
         if: steps.docker-check.outputs.available == 'true'
+        uses: hiero-ledger/hiero-solo-action@fbca3e7a99ce9aa8a250563a81187abe115e0dad # v0.16.0
+        with:
+          installRelay: true
+          installMirrorNode: true
+          hbarAmount: 10000000
+
+      - name: Register ECDSA deployer with EVM alias
+        id: extract-key
+        if: steps.docker-check.outputs.available == 'true' && steps.solo.outcome == 'success'
+        env:
+          DER_KEY: ${{ steps.solo.outputs.ecdsaPrivateKey }}
+          DEPLOYMENT: ${{ steps.solo.outputs.deployment }}
         run: |
-          echo "Starting Hedera Local Node..."
-          npx @hashgraph/hedera-local start -d 2>&1 | tee /tmp/hedera-startup.txt
+          # Solo outputs DER-encoded ECDSA secp256k1 key.
+          # The raw 32-byte private key is the last 64 hex characters.
+          RAW_KEY="0x${DER_KEY: -64}"
+          echo "key=${RAW_KEY}" >> "${GITHUB_OUTPUT}"
 
-          echo "---"
-          echo "Extracting Alias ECDSA private key from startup output..."
+          # Derive EVM address for relay readiness check
+          EVM_ADDR=$(node -e "const{Wallet}=require('ethers');console.log(new Wallet('${RAW_KEY}').address)")
+          echo "address=${EVM_ADDR}" >> "${GITHUB_OUTPUT}"
+          echo "Deployer EVM address: ${EVM_ADDR}"
 
-          # Extract the first Alias ECDSA private key (64 hex chars after 0x)
-          # The startup output contains account tables with private keys
-          # Look specifically in the Alias ECDSA section for EVM-compatible keys
-          ECDSA_KEY=$(sed -n '/Alias ECDSA/,/^$/p' /tmp/hedera-startup.txt | grep -oE '0x[a-fA-F0-9]{64}' | head -1)
+          # Solo's action creates ECDSA accounts WITHOUT an EVM alias.
+          # The JSON-RPC relay needs the alias to resolve EVM addresses.
+          # Create a new funded account with the same key but with --set-alias,
+          # which registers the ECDSA-derived EVM address on the Hedera network.
+          echo "Creating aliased account via Solo CLI..."
+          solo ledger account create \
+            --ecdsa-private-key "${DER_KEY}" \
+            --set-alias \
+            --hbar-amount 10000000 \
+            --deployment "${DEPLOYMENT}" \
+            --dev
 
-          # Fallback: search entire output for any 0x + 64 hex key
-          if [ -z "$ECDSA_KEY" ]; then
-            echo "Alias ECDSA section not found, searching full output..."
-            ECDSA_KEY=$(grep -oE '0x[a-fA-F0-9]{64}' /tmp/hedera-startup.txt | head -1)
-          fi
-
-          if [ -z "$ECDSA_KEY" ]; then
-            echo "::error::Failed to extract ECDSA private key from Hedera Local Node startup output"
-            echo "--- Startup output ---"
-            cat /tmp/hedera-startup.txt
-            echo "--- End output ---"
-            exit 1
-          fi
-
-          echo "ECDSA private key extracted successfully"
-          echo "HEDERA_LOCAL_PRIVATE_KEY_0=$ECDSA_KEY" >> $GITHUB_ENV
-
-      - name: Wait for JSON-RPC relay
-        if: steps.docker-check.outputs.available == 'true' && steps.hedera-start.outcome == 'success'
+      - name: Wait for EVM alias indexing
+        if: steps.docker-check.outputs.available == 'true' && steps.solo.outcome == 'success'
+        env:
+          EVM_ADDR: ${{ steps.extract-key.outputs.address }}
         run: |
-          echo "Waiting for Hedera JSON-RPC relay on port 7546..."
+          echo "Waiting for relay to recognize ${EVM_ADDR}..."
           for i in $(seq 1 60); do
-            if curl -sf http://localhost:7546 -X POST \
+            RESULT=$(curl -sf http://localhost:7546 -X POST \
               -H "Content-Type: application/json" \
-              -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
-              > /dev/null 2>&1; then
-              echo "Hedera JSON-RPC relay is ready"
+              -d "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${EVM_ADDR}\",\"latest\"],\"id\":1}" \
+              2>/dev/null || echo '{}')
+
+            # Check for non-zero balance (alias active + funded)
+            CHECK=$(echo "${RESULT}" | node -e "
+              const d = require('fs').readFileSync('/dev/stdin','utf8');
+              try { const r = JSON.parse(d).result;
+                console.log(r && r !== '0x0' && r !== '0x' ? 'ready' : 'waiting');
+              } catch(e) { console.log('error'); }
+            ")
+
+            if [[ "${CHECK}" == "ready" ]]; then
+              echo "Relay recognizes account with balance (attempt ${i})"
+              echo "Balance response: ${RESULT}"
               exit 0
             fi
-            echo "  Attempt $i/60 - waiting..."
+            echo "  Attempt ${i}/60 - status: ${CHECK}"
             sleep 5
           done
-          echo "::error::Hedera JSON-RPC relay failed to start within 5 minutes"
+          echo "::error::Relay cannot resolve ${EVM_ADDR} after 5 minutes"
           exit 1
 
-      - name: Deploy ATS system to Hedera
-        if: steps.docker-check.outputs.available == 'true' && steps.hedera-start.outcome == 'success'
+      - name: Deploy ATS system to Hiero Solo
+        if: steps.docker-check.outputs.available == 'true' && steps.solo.outcome == 'success'
         working-directory: packages/ats/contracts
         env:
-          # NETWORK=hedera-local -> Configuration.endpoints["hedera-local"].jsonRpc defaults to http://127.0.0.1:7546
           NETWORK: hedera-local
-          # HEDERA_LOCAL_PRIVATE_KEY_0 is set dynamically from the startup output
+          HEDERA_LOCAL_PRIVATE_KEY_0: ${{ steps.extract-key.outputs.key }}
         run: npx tsx scripts/cli/deploySystemWithNewBlr.ts
 
       - name: Verify deployment output
@@ -320,10 +348,3 @@ jobs:
           else
             echo "::warning::No deployment output files found (non-fatal)"
           fi
-
-      - name: Teardown Hedera Local Node
-        if: always() && steps.docker-check.outputs.available == 'true'
-        run: |
-          echo "Stopping Hedera Local Node..."
-          npx @hashgraph/hedera-local stop || true
-          echo "Hedera Local Node stopped"
