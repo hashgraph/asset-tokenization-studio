@@ -21,8 +21,10 @@ import {
   BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
   EQUITY_CONFIG_ID,
 } from "@scripts";
-import { deployAtsInfrastructureFixture } from "@test";
+import { deployAtsInfrastructureFixture, registerERC20FacetFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { ethers } from "hardhat";
+import { deployContract, registerFacets } from "@scripts/infrastructure";
 
 // Test-specific configuration IDs for negative test cases
 // These are separate from EQUITY_CONFIG_ID/BOND_CONFIG_ID to avoid conflicts
@@ -756,5 +758,51 @@ describe("DiamondCutManager", () => {
 
     const isRegisteredV0 = await diamondCutManager.isResolverProxyConfigurationRegistered(configId, 0);
     expect(isRegisteredV0).to.be.true;
+  });
+
+  it("GIVEN a resolver WHEN adding configuration with overlapping selectors from different facets THEN fails with SelectorAlreadyRegistered", async () => {
+    // Use the lightweight fixture that includes ERC20Facet
+    const fixture = await loadFixture(registerERC20FacetFixture);
+    const { deployer, blr, erc20ResolverKey } = fixture;
+
+    // Deploy DuplicateSelectorFacetTest which has the same transfer.selector (0xa9059cbb) as ERC20Facet
+    const duplicateFactory = await ethers.getContractFactory("DuplicateSelectorFacetTest", deployer);
+    const duplicateResult = await deployContract(duplicateFactory, {
+      confirmations: 0,
+      verifyDeployment: false,
+    });
+    const duplicateFacetAddress = duplicateResult.address!;
+
+    // Generate a unique resolver key for the duplicate selector facet
+    const duplicateResolverKey = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("DuplicateSelectorFacetTest"));
+
+    // Register the duplicate facet in BLR
+    await registerFacets(blr, {
+      facets: [
+        {
+          name: "DuplicateSelectorFacetTest",
+          address: duplicateFacetAddress,
+          resolverKey: duplicateResolverKey,
+        },
+      ],
+    });
+
+    // Connect DiamondCutManager to the BLR
+    const testDiamondCutManager = DiamondCutManager__factory.connect(blr.address, deployer);
+
+    // Try to create configuration with both ERC20Facet and DuplicateSelectorFacetTest
+    // Both have the same transfer.selector (0xa9059cbb)
+    const testConfigId = "0x0000000000000000000000000000000000000000000000000000000000000020";
+    const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] = [
+      { id: erc20ResolverKey, version: 1 },
+      { id: duplicateResolverKey, version: 1 },
+    ];
+
+    // Expect the transaction to revert with SelectorAlreadyRegistered error
+    // The error should contain: configurationId, version, facetId, selector
+    const transferSelector = "0xa9059cbb"; // transfer(address,uint256).selector
+    await expect(testDiamondCutManager.createConfiguration(testConfigId, facetConfigurations))
+      .to.be.revertedWithCustomError(testDiamondCutManager, "SelectorAlreadyRegistered")
+      .withArgs(testConfigId, 1, duplicateResolverKey, transferSelector);
   });
 });
