@@ -58,6 +58,9 @@ interface TRexIDiamondCutManager {
     /// @notice error that occurs when try to add a selector and the selector is blacklisted
     error SelectorBlacklisted(bytes4 selector);
 
+    /// @notice error that occurs when try to add a selector and the selector is already registered
+    error SelectorAlreadyRegistered(bytes32 configurationId, uint256 version, bytes32 facetId, bytes4 selector);
+
     /**
      * @notice Create a new configuration to the latest version of all facets.
      * @param _configurationId unused identifier to the configuration.
