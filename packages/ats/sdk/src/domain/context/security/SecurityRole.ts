@@ -38,13 +38,13 @@ export enum SecurityRole {
 export function getProtectedPartitionRole(partitionId: string): string {
   let partitionBytes32: string;
 
-  if (ethers.utils.isHexString(partitionId) && partitionId.length === 66) {
+  if (ethers.isHexString(partitionId) && partitionId.length === 66) {
     partitionBytes32 = partitionId;
   } else {
-    partitionBytes32 = ethers.utils.formatBytes32String(partitionId);
+    partitionBytes32 = ethers.encodeBytes32String(partitionId);
   }
 
-  const encodedValue = ethers.utils.defaultAbiCoder.encode(
+  const encodedValue = ethers.AbiCoder.defaultAbiCoder().encode(
     ["bytes32", "bytes32"],
     [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
   );

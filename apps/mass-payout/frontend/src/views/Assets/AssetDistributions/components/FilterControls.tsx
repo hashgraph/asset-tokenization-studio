@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import React from "react";
 import { Box, Stack } from "@chakra-ui/react";
 import { SearchInputController, SelectController } from "io-bricks-ui";

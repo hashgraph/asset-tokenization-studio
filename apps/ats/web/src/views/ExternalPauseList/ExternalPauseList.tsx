@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Box, HStack, Menu, MenuButton, Stack, useDisclosure } from "@chakra-ui/react";
 import { Header } from "./Components/Header";
 import { Button, Dropdown, DropdownItem, PhosphorIcon, PopUp, Spinner, Table, Text, useToast } from "io-bricks-ui";

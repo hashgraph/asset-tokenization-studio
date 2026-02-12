@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
         with:
           egress-policy: audit
 
@@ -31,12 +31,13 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          # Ensure we have the develop branch for comparison
+          # Ensure we have the head branch for comparison
           ref: ${{ github.head_ref }}
 
-      - name: Fetch develop branch
+      - name: Fetch base branch
         run: |
-          git fetch origin develop:develop || git fetch origin main:develop || true
+          echo "Base branch: ${{ github.base_ref }}"
+          git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
           git branch -a
 
       - name: Setup NodeJS Environment
@@ -64,17 +65,20 @@ jobs:
 
       - name: Check changeset status
         if: ${{ steps.bypass.outputs.bypass == 'false' }}
+        env:
+          BASE_BRANCH: ${{ github.base_ref }}
         run: |
           echo "🔍 Checking for NEW changesets in this PR..."
+          echo "Comparing HEAD against base branch: ${BASE_BRANCH}"
 
-          NEW_CHANGESETS=$(git diff develop...HEAD --name-only --diff-filter=A | grep "^\.changeset/.*\.md$" | grep -v "README.md" || true)
+          NEW_CHANGESETS=$(git diff "${BASE_BRANCH}...HEAD" --name-only --diff-filter=A | grep "^\.changeset/.*\.md$" | grep -v "README.md" || true)
           NEW_CHANGESET_COUNT=$(echo "${NEW_CHANGESETS}" | grep -c "\.md$" || echo "0")
 
           echo "Files changed in PR:"
-          git diff develop...HEAD --name-only --diff-filter=A | head -10
+          git diff "${BASE_BRANCH}...HEAD" --name-only --diff-filter=A | head -10
           echo ""
           echo "NEW changeset files in this PR: ${NEW_CHANGESET_COUNT}"
-          if [ -n "${NEW_CHANGESETS}" ]; then
+          if [[ -n "${NEW_CHANGESETS}" ]]; then
             echo "Found NEW changesets:"
             echo "${NEW_CHANGESETS}"
           fi
@@ -109,7 +113,7 @@ jobs:
       - name: Success summary
         if: ${{ always() }}
         run: |
-          if [ "${{ steps.bypass.outputs.bypass }}" = "true" ]; then
+          if [[ "${{ steps.bypass.outputs.bypass }}" == "true" ]]; then
             echo "✅ Changeset check bypassed due to label"
           else
             echo "✅ Changeset validation completed successfully"

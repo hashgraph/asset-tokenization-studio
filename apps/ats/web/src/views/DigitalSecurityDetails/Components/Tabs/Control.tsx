@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Box } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { KYC } from "../KYC/KYC";

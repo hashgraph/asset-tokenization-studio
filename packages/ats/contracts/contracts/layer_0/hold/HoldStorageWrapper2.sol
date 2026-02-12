@@ -302,7 +302,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _updateHold(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _abaf) internal override {
-        uint256 holdLabaf = _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
+        uint256 holdLabaf = _getHoldLabafById(_partition, _tokenHolder, _holdId);
 
         if (_abaf != holdLabaf) {
             uint256 holdFactor = _calculateFactor(_abaf, holdLabaf);
@@ -382,7 +382,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     {
         uint256 factor = _calculateFactor(
             _getAbafAdjustedAt(_timestamp),
-            _getHoldLabafByPartition(_holdIdentifier.partition, _holdIdentifier.holdId, _holdIdentifier.tokenHolder)
+            _getHoldLabafById(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId)
         );
 
         (

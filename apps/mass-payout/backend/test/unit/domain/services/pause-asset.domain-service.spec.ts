@@ -164,7 +164,7 @@ describe.skip(PauseAssetDomainService.name, () => {
       const asset = Asset.createExisting(
         assetId,
         name,
-        AssetType.BOND,
+        AssetType.BOND_VARIABLE_RATE,
         hederaTokenAddress,
         evmTokenAddress,
         symbol,

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
 const sidebars: SidebarsConfig = {
@@ -11,7 +13,7 @@ const sidebars: SidebarsConfig = {
         type: "doc",
         id: "getting-started/index",
       },
-      items: ["getting-started/quick-start", "getting-started/full-setup"],
+      items: ["getting-started/capabilities-overview", "getting-started/quick-start", "getting-started/full-setup"],
     },
     {
       type: "category",

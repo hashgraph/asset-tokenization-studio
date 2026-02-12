@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { GetBondDetailsRequest, UpdateMaturityDateRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";

@@ -62,6 +62,8 @@ export type {
   ResumeOptions,
 } from "./types";
 
+export { CHECKPOINT_SCHEMA_VERSION } from "./types";
+
 // Type guards
 export { isSaveSuccess, isSaveFailure, isAtsWorkflow } from "./types";
 
@@ -167,7 +169,12 @@ export {
   verifyProxyAdminControls,
 } from "./operations/proxyAdminDeployment";
 
-export { deployFacets, type DeployFacetsOptions, type DeployFacetsResult } from "./operations/facetDeployment";
+export {
+  deployFacets,
+  getFacetDeploymentSummary,
+  type DeployFacetsOptions,
+  type DeployFacetsResult,
+} from "./operations/facetDeployment";
 
 export {
   deployResolverProxy,
@@ -197,7 +204,20 @@ export {
 // Utilities
 // ============================================================================
 
-export { isValidAddress, validateAddress, isValidBytes32, validateBytes32 } from "./utils/validation";
+export {
+  isValidAddress,
+  validateAddress,
+  isValidBytes32,
+  validateBytes32,
+  isValidContractId,
+  validateContractId,
+  validateFacetName,
+  validateNetwork,
+  validatePositiveNumber,
+  validateNonNegativeInteger,
+} from "./utils/validation";
+
+export { getDeploymentsDir, getCheckpointsDir, getTestCheckpointsDir, getTestDeploymentsDir } from "./paths";
 
 export {
   saveDeploymentOutput,
@@ -206,7 +226,6 @@ export {
   findLatestDeployment,
   listDeploymentsByWorkflow,
   listDeploymentFiles,
-  getDeploymentsDir,
   getNetworkDeploymentDir,
   generateDeploymentFilename,
 } from "./utils/deploymentFiles";
@@ -253,6 +272,9 @@ export { getSelector } from "./utils/selector";
 
 export { dateToUnixTimestamp, generateTimestamp } from "./utils/time";
 
+export { withRetry, withRetryFn, DEFAULT_RETRYABLE_ERRORS } from "./utils/retry";
+export type { WithRetryOptions } from "./utils/retry";
+
 // ============================================================================
 // Checkpoint System
 // ============================================================================
@@ -268,6 +290,9 @@ export {
   formatCheckpointStatus,
   formatDuration,
   formatTimestamp,
+  confirmFailedCheckpointResume,
+  selectCheckpointToResume,
+  resolveCheckpointForResume,
 } from "./checkpoint/utils";
 
 // Checkpoint converters for resumability
@@ -281,3 +306,21 @@ export {
   isSuccess,
   isFailure,
 } from "./checkpoint/converters";
+
+// ============================================================================
+// Testing Utilities
+// ============================================================================
+
+export {
+  parseFailureConfig,
+  resetFailureConfig,
+  shouldFailAtStep,
+  shouldFailAtFacet,
+  createTestFailureMessage,
+  isTestFailureError,
+  SUPPORTED_STEPS,
+  CHECKPOINT_TEST_FAIL_AT_ENV,
+  LEGACY_FAIL_AT_FACET_ENV,
+  type FailureConfig,
+  type SupportedStep,
+} from "./testing";

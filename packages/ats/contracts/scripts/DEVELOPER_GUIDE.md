@@ -12,10 +12,11 @@ This guide provides practical, step-by-step instructions for the most common dev
 6. [Scenario 4: Selective Configuration Upgrades](#scenario-4-selective-configuration-upgrades)
 7. [Scenario 5: Multi-Environment Rollout](#scenario-5-multi-environment-rollout)
 8. [Scenario 6: Upgrading TUP Proxy Implementations (BLR/Factory)](#scenario-6-upgrading-tup-proxy-implementations-blrfactory)
-9. [Complete Deployment Workflows](#complete-deployment-workflows)
-10. [Registry System](#registry-system)
-11. [Advanced Topics](#advanced-topics)
-12. [Troubleshooting](#troubleshooting)
+9. [Scenario 7: Recovering from Failed Deployment](#scenario-7-recovering-from-failed-deployment)
+10. [Complete Deployment Workflows](#complete-deployment-workflows)
+11. [Registry System](#registry-system)
+12. [Advanced Topics](#advanced-topics)
+13. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -1061,6 +1062,170 @@ Upgrade results are saved to `deployments/{network}/{network}-upgrade-tup-{times
 - [Scenario 3: Upgrading Facet Implementations](#scenario-3-upgrading-facet-implementations) - For upgrading ResolverProxy tokens
 - [Upgrading Configurations in README.md](README.md#upgrading-configurations) - Complete API reference
 - [CLAUDE.md - TUP vs ResolverProxy Architecture](#repositry-claude-md) - Architecture details
+
+---
+
+## Scenario 7: Recovering from Failed Deployment
+
+**Situation**: Your deployment to testnet failed halfway through due to a network error or transaction failure.
+
+**Task**: Understand what failed, fix the issue, and resume the deployment from where it left off.
+
+### What You Need
+
+- Failed deployment that created a checkpoint
+- Understanding of the error (for fixing root cause)
+
+### Step 1: Check What Happened
+
+```bash
+# List checkpoints to find the failed one
+npm run checkpoint:list -- hedera-testnet
+
+# Show full details of the failed checkpoint
+npm run checkpoint:show -- hedera-testnet-1738675200000
+```
+
+**What you'll see:**
+
+- Which step failed (e.g., "Step 3: Deploy Facets")
+- Error message (e.g., "Transaction failed: nonce too low")
+- Completed steps (these will be skipped on resume)
+- Pending steps (what remains to be done)
+- Deployed addresses from completed steps
+
+### Step 2: Fix the Underlying Issue
+
+Common deployment failures and their solutions:
+
+| Error Message                               | Root Cause                            | Solution                             |
+| ------------------------------------------- | ------------------------------------- | ------------------------------------ |
+| "Insufficient gas"                          | `GAS_LIMIT` too low in environment    | Increase `GAS_LIMIT` in `.env` file  |
+| "Nonce too low"                             | Pending transactions or mempool issue | Wait 1-2 minutes, then retry         |
+| "Network unreachable"                       | RPC node down or misconfigured        | Check `REACT_APP_RPC_NODE` in `.env` |
+| "Transaction underpriced"                   | Gas price too low                     | Increase gas price in network config |
+| "Contract creation code storage out of gas" | Complex contract deployment           | Significantly increase `GAS_LIMIT`   |
+
+**Example fix:**
+
+```bash
+# Edit .env file
+# Change: GAS_LIMIT=5000000
+# To:     GAS_LIMIT=10000000
+
+# Save and verify
+cat .env | grep GAS_LIMIT
+```
+
+### Step 3: Resume Deployment
+
+```bash
+# Just run the same command again
+npm run deploy:newBlr
+
+# The checkpoint system will:
+# 1. Detect the failed checkpoint automatically
+# 2. Ask you to confirm resume (show failure details)
+# 3. Skip all completed steps (saves time and gas)
+# 4. Retry the failed step with your fix
+# 5. Continue to completion
+```
+
+**What happens during resume:**
+
+```
+[INFO] Found resumable checkpoint: hedera-testnet-1738675200000
+
+⚠️  FOUND FAILED DEPLOYMENT
+═══════════════════════════════════════════════════
+Checkpoint: hedera-testnet-1738675200000
+Started:    2025-02-04T10:00:00Z
+Failed at:  Step 3 (Facets)
+Error:      Insufficient gas
+Time:       2025-02-04T10:15:23Z
+═══════════════════════════════════════════════════
+
+Resume from this failed checkpoint? [Y/n]: Y
+
+[INFO] Clearing failure status from checkpoint.
+[INFO] Resuming from step 3...
+
+Step 3/8: Deploy Facets... ✅
+Step 4/8: Register Facets... ✅
+Step 5/8: Create Equity Config... ✅
+Step 6/8: Create Bond Config... ✅
+Step 7/8: Deploy Factory... ✅
+Step 8/8: Save Output... ✅
+
+[SUCCESS] Deployment completed!
+```
+
+### Step 4: Verify Deployment Output
+
+```bash
+# Check the deployment output file
+ls -la deployments/hedera-testnet/newBlr-*.json
+
+# View the output
+cat deployments/hedera-testnet/newBlr-1738675200000.json | jq
+```
+
+### Multiple Failed Attempts
+
+If deployment keeps failing at the same step:
+
+```bash
+# 1. Review the checkpoint details again
+npm run checkpoint:show -- hedera-testnet-1738675200000
+
+# 2. Check the error message carefully
+# Look for patterns: same error every time? Different errors?
+
+# 3. Verify your fix was applied
+cat .env | grep GAS_LIMIT
+cat .env | grep RPC_NODE
+
+# 4. If issue persists, start fresh
+npm run checkpoint:delete -- hedera-testnet-1738675200000
+npm run deploy:newBlr
+```
+
+### Cleaning Up Old Failed Checkpoints
+
+After successful deployment, clean up old failed attempts:
+
+```bash
+# List all checkpoints
+npm run checkpoint:list -- hedera-testnet
+
+# Delete specific failed checkpoints
+npm run checkpoint:delete -- hedera-testnet-1738670000000
+npm run checkpoint:delete -- hedera-testnet-1738671000000
+
+# Or clean up completed checkpoints older than 7 days
+npm run checkpoint:cleanup -- hedera-testnet 7
+```
+
+### Best Practices
+
+- ✅ Always review the failure details before resuming
+- ✅ Fix the root cause (don't just retry blindly)
+- ✅ Let checkpoint system skip completed steps automatically
+- ✅ Clean up old checkpoints after successful deployment
+- ❌ Don't manually edit checkpoint files
+- ❌ Don't change network configuration between resume attempts
+- ❌ Don't delete checkpoints immediately after failure (you may need them)
+
+### Learn More
+
+For comprehensive checkpoint documentation including:
+
+- How checkpoints work internally
+- All checkpoint management commands
+- Advanced troubleshooting scenarios
+- CI/CD integration patterns
+
+**See the [Checkpoint Guide](./CHECKPOINT_GUIDE.md)** for complete details.
 
 ---
 

@@ -31,8 +31,11 @@ export const Assets = () => {
 
   const assetTypeOptions = [
     { value: "all", label: t("filters.options.allTypes") },
-    { value: "Bond", label: t("filters.options.bond") },
-    { value: "Equity", label: t("filters.options.equity") },
+    { value: "BOND_VARIABLE_RATE", label: t("filters.options.bondVariableRate") },
+    { value: "BOND_FIXED_RATE", label: t("filters.options.bondFixedRate") },
+    { value: "BOND_KPI_LINKED_RATE", label: t("filters.options.bondKpiLinkedRate") },
+    { value: "BOND_SPT_RATE", label: t("filters.options.bondSptRate") },
+    { value: "EQUITY", label: t("filters.options.equity") },
   ];
 
   const selectedAssetType = useWatch({ control, name: "assetType" });

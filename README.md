@@ -39,6 +39,49 @@ This monorepo is structured with **npm workspaces** and is designed for scalabil
   - Strong CI/CD workflows with conditional builds and tests for each module.
   - Custodian integration at the SDK level (Dfns, Fireblocks, AWS KMS).
 
+## What Can You Build?
+
+### Asset Tokenization Studio (ATS)
+
+Digitize and manage securities on the blockchain with enterprise-grade compliance.
+
+| What You Can Do                    | Business Value                                                             | Example Scenarios                                                                                 |
+| ---------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Launch Digital Securities**      | Go to market faster with ready-to-use equity and bond token infrastructure | Issue tokenized shares for a private fund, create a corporate bond with automated coupon payments |
+| **Automate Investor Compliance**   | Reduce manual KYC/AML overhead with on-chain verification                  | Automatically block transfers to non-verified investors, enforce accreditation requirements       |
+| **Enforce Transfer Rules**         | Ensure regulatory compliance without manual intervention                   | Restrict trading during lock-up periods, limit ownership to specific jurisdictions                |
+| **Run Corporate Actions**          | Eliminate spreadsheets and manual calculations for distributions           | Pay dividends to 10,000 shareholders in one click, execute a 2-for-1 stock split                  |
+| **Manage Cap Tables in Real-Time** | Always know who owns what, with instant settlement                         | Track ownership changes as they happen, generate shareholder reports instantly                    |
+| **Handle Regulatory Requests**     | Respond to legal requirements with precision controls                      | Freeze a specific investor's account, pause all trading during an investigation                   |
+| **Enable Institutional Custody**   | Meet institutional requirements with enterprise wallet integrations        | Connect Fireblocks or Dfns for secure key management                                              |
+
+For detailed product capabilities, see the [ATS Product Guide](docs/ats/user-guides/capabilities-overview.md).
+
+### Mass Payout
+
+Distribute payments to thousands of token holders efficiently and reliably.
+
+| What You Can Do                      | Business Value                                                    | Example Scenarios                                                                |
+| ------------------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Pay Thousands of Holders at Once** | Replace manual payment processing with automated batch operations | Distribute quarterly dividends to 50,000 shareholders in a single transaction    |
+| **Set Up Recurring Distributions**   | "Set and forget" scheduled payments                               | Automate monthly rental income distributions, quarterly bond coupon payments     |
+| **Pay in Any Currency**              | Flexibility to distribute HBAR or any HTS token                   | Pay dividends in USDC stablecoin, distribute rewards in native tokens            |
+| **Guarantee Fair Distribution**      | Snapshot balances at record date for accurate pro-rata payments   | Ensure investors who held on the record date receive their share                 |
+| **Track Every Payment**              | Full audit trail for compliance and reconciliation                | Know exactly who was paid, when, and how much - with retry handling for failures |
+
+For detailed product capabilities, see the [Mass Payout User Guides](docs/mass-payout/user-guides/index.md).
+
+### Who Is This For?
+
+| Role                    | How ATS Helps You                                                            | How Mass Payout Helps You                                                |
+| ----------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Issuers**             | Launch securities in days instead of months, with compliance built-in        | Stop processing dividend checks manually - automate everything           |
+| **Asset Managers**      | Manage your entire portfolio from one dashboard with real-time data          | Run distributions across all your funds with a few clicks                |
+| **Transfer Agents**     | Replace legacy systems with real-time, blockchain-based cap table management | Process bulk payments with complete audit trails for regulators          |
+| **Custodians**          | Offer tokenized asset custody with enterprise-grade security integrations    | Ensure your clients receive distributions directly to custodied accounts |
+| **Compliance Officers** | Enforce rules automatically - no more chasing paperwork                      | Full visibility into every payment for audit and reporting               |
+| **Developers**          | Build on proven infrastructure instead of starting from scratch              | Add payment distribution to your app with simple SDK calls               |
+
 ## Monorepo Structure
 
 ```
@@ -75,7 +118,7 @@ This project follows a **"Docs-as-Code"** philosophy, treating documentation wit
 You can also run the documentation site locally:
 
 ```bash
-npm run docs:dev
+npm run docs:start
 ```
 
 ## Architecture

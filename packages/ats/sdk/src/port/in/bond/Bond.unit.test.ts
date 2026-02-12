@@ -66,7 +66,7 @@ import { faker } from "@faker-js/faker/.";
 import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
 import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
 import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
-import { BigNumber } from "ethers";
+
 import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
 import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
 import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
@@ -563,7 +563,7 @@ describe("Bond", () => {
     });
     it("should get coupon for successfully", async () => {
       const expectedResponse = {
-        tokenBalance: new BigDecimal(BigNumber.from(1000)),
+        tokenBalance: BigInt(1000),
         decimals: 2,
       };
 

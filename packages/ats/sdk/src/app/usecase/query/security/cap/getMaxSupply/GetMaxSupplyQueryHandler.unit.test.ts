@@ -14,7 +14,6 @@ import BigDecimal from "@domain/context/shared/BigDecimal";
 import { GetMaxSupplyQueryHandler } from "./GetMaxSupplyQueryHandler";
 import { GetMaxSupplyQuery, GetMaxSupplyQueryResponse } from "./GetMaxSupplyQuery";
 import { GetMaxSupplyQueryError } from "./error/GetMaxSupplyQueryError";
-import { BigNumber } from "ethers";
 
 describe("GetMaxSupplyQueryHandler", () => {
   let handler: GetMaxSupplyQueryHandler;
@@ -26,7 +25,7 @@ describe("GetMaxSupplyQueryHandler", () => {
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const security = new Security(SecurityPropsFixture.create());
-  const amount = BigNumber.from(1);
+  const amount = BigInt(1);
 
   const errorMsg = ErrorMsgFixture.create().msg;
 

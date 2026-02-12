@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { ProcessBlockchainEventsUseCase } from "@application/use-cases/process-blockchain-events.use-case"
 import { ConfigKeys } from "@config/config-keys"
 import { BlockchainPollingPort } from "@domain/ports/blockchain-polling.port"

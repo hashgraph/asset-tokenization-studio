@@ -5,48 +5,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { _PARTITION_ID_1 } from "@core/Constants";
+import { ethers } from "ethers";
+import { singleton } from "tsyringe";
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
-import { BondDetails } from "@domain/context/bond/BondDetails";
-import { Coupon } from "@domain/context/bond/Coupon";
-import { CouponAmountFor } from "@domain/context/bond/CouponAmountFor";
-import { CouponFor } from "@domain/context/bond/CouponFor";
-import { PrincipalFor } from "@domain/context/bond/PrincipalFor";
-import { CastRateStatus } from "@domain/context/bond/RateStatus";
+import NetworkService from "@service/network/NetworkService";
+import LogService from "@service/log/LogService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import { Dividend } from "@domain/context/equity/Dividend";
-import { DividendAmountFor } from "@domain/context/equity/DividendAmountFor";
-import { DividendFor } from "@domain/context/equity/DividendFor";
-import { CastDividendType } from "@domain/context/equity/DividendType";
-import { EquityDetails } from "@domain/context/equity/EquityDetails";
-import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
-import { VotingFor } from "@domain/context/equity/VotingFor";
-import { VotingRights } from "@domain/context/equity/VotingRights";
-import { Regulation } from "@domain/context/factory/Regulation";
-import {
-  CastAccreditedInvestors,
-  CastInternationalInvestorscation,
-  CastManualInvestorVerification,
-  CastRegulationSubType,
-  CastRegulationType,
-  CastResaleHoldPeriodorscation,
-} from "@domain/context/factory/RegulationType";
-import { CastSecurityType } from "@domain/context/factory/SecurityType";
-import { Kyc } from "@domain/context/kyc/Kyc";
-import { KycAccountData } from "@domain/context/kyc/KycAccountData";
-import {
-  CastClearingOperationType,
-  ClearingHoldCreation,
-  ClearingOperationType,
-  ClearingRedeem,
-  ClearingTransfer,
-} from "@domain/context/security/Clearing";
-import { HoldDetails } from "@domain/context/security/Hold";
-import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
+import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 import { Security } from "@domain/context/security/Security";
+import { BondDetails } from "@domain/context/bond/BondDetails";
+import { Dividend } from "@domain/context/equity/Dividend";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { HederaId } from "@domain/context/shared/HederaId";
-import { BigNumber } from "@ethersproject/bignumber";
 import {
   AccessControlFacet__factory,
   BondRead__factory,
@@ -57,16 +27,14 @@ import {
   ClearingRedeemFacet__factory,
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
-  CorporateActionsFacet__factory,
   DiamondFacet__factory,
   Equity__factory,
   ERC1410ReadFacet__factory,
+  ERC20Votes__factory,
   ERC1594Facet__factory,
   ERC1643Facet__factory,
   ERC1644Facet__factory,
   ERC20Facet__factory,
-  ERC20Votes__factory,
-  ERC3643ReadFacet__factory,
   ExternalControlListManagementFacet__factory,
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
@@ -80,23 +48,54 @@ import {
   MockedExternalKycList__factory,
   MockedExternalPause__factory,
   MockedWhitelist__factory,
-  NoncesFacet__factory,
   PauseFacet__factory,
-  ProceedRecipientsFacet__factory,
   ProtectedPartitionsFacet__factory,
   ScheduledSnapshotsFacet__factory,
   Security__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
+  ERC3643ReadFacet__factory,
   TREXFactoryAts__factory,
+  ProceedRecipientsFacet__factory,
+  CorporateActionsFacet__factory,
+  NoncesFacet__factory,
   Kpis__factory, KpiLinkedRate__factory,
   ScheduledCouponListingFacet__factory
 } from "@hashgraph/asset-tokenization-contracts";
-import LogService from "@service/log/LogService";
-import NetworkService from "@service/network/NetworkService";
-import { ethers } from "ethers";
-import { singleton } from "tsyringe";
-import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
+import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
+import { VotingRights } from "@domain/context/equity/VotingRights";
+import { Coupon } from "@domain/context/bond/Coupon";
+import { EquityDetails } from "@domain/context/equity/EquityDetails";
+import { CastDividendType } from "@domain/context/equity/DividendType";
+import { CastSecurityType } from "@domain/context/factory/SecurityType";
+import { Regulation } from "@domain/context/factory/Regulation";
+import { _PARTITION_ID_1 } from "@core/Constants";
+import {
+  CastAccreditedInvestors,
+  CastInternationalInvestorscation,
+  CastManualInvestorVerification,
+  CastRegulationSubType,
+  CastRegulationType,
+  CastResaleHoldPeriodorscation,
+} from "@domain/context/factory/RegulationType";
+import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
+import { DividendFor } from "@domain/context/equity/DividendFor";
+import { VotingFor } from "@domain/context/equity/VotingFor";
+import { Kyc } from "@domain/context/kyc/Kyc";
+import { KycAccountData } from "@domain/context/kyc/KycAccountData";
+import {
+  CastClearingOperationType,
+  ClearingHoldCreation,
+  ClearingOperationType,
+  ClearingRedeem,
+  ClearingTransfer,
+} from "@domain/context/security/Clearing";
+import { HoldDetails } from "@domain/context/security/Hold";
+import { CouponAmountFor } from "@domain/context/bond/CouponAmountFor";
+import { PrincipalFor } from "@domain/context/bond/PrincipalFor";
+import { DividendAmountFor } from "@domain/context/equity/DividendAmountFor";
+import { CastRateStatus } from "@domain/context/bond/RateStatus";
+import { CouponFor } from "@domain/context/bond/CouponFor";
 
 const LOCAL_JSON_RPC_RELAY_URL = "http://127.0.0.1:7546/api";
 
@@ -106,7 +105,7 @@ type FactoryContract<T extends StaticConnect> = T["connect"] extends (...args: a
 
 @singleton()
 export class RPCQueryAdapter {
-  provider: ethers.providers.JsonRpcProvider;
+  provider: ethers.JsonRpcProvider;
 
   constructor(
     @lazyInject(NetworkService)
@@ -117,7 +116,7 @@ export class RPCQueryAdapter {
 
   async init(urlRpcProvider?: string, apiKey?: string): Promise<string> {
     const url = urlRpcProvider ? (apiKey ? urlRpcProvider + apiKey : urlRpcProvider) : LOCAL_JSON_RPC_RELAY_URL;
-    this.provider = new ethers.providers.JsonRpcProvider(url);
+    this.provider = new ethers.JsonRpcProvider(url);
     LogService.logTrace("RPC Query Adapter Initialized on: ", url);
 
     return this.networkService.environment;
@@ -127,13 +126,13 @@ export class RPCQueryAdapter {
     return fac.connect(address, this.provider);
   }
 
-  async balanceOf(address: EvmAddress, target: EvmAddress): Promise<BigNumber> {
+  async balanceOf(address: EvmAddress, target: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting balance of ${address.toString()} security for the account ${target.toString()}`);
 
     return await this.connect(ERC1410ReadFacet__factory, address.toString()).balanceOf(target.toString());
   }
 
-  async balanceOfByPartition(address: EvmAddress, target: EvmAddress, partitionId: string): Promise<BigNumber> {
+  async balanceOfByPartition(address: EvmAddress, target: EvmAddress, partitionId: string): Promise<bigint> {
     LogService.logTrace(
       `Getting balance of ${address.toString()} security for partition ${partitionId} for the account ${target.toString()}`,
     );
@@ -144,7 +143,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async balanceOfAtSnapshot(address: EvmAddress, target: EvmAddress, snapshotId: number): Promise<BigNumber> {
+  async balanceOfAtSnapshot(address: EvmAddress, target: EvmAddress, snapshotId: number): Promise<bigint> {
     LogService.logTrace(
       `Getting balance of ${address.toString()} security at snapshot ${snapshotId.toString()} for the account ${target.toString()}`,
     );
@@ -160,7 +159,7 @@ export class RPCQueryAdapter {
     target: EvmAddress,
     partitionId: string,
     snapshotId: number,
-  ): Promise<BigNumber> {
+  ): Promise<bigint> {
     LogService.logTrace(
       `Getting balance of ${address.toString()} security for partition ${partitionId} at snapshot ${snapshotId.toString()} for the account ${target.toString()}`,
     );
@@ -172,7 +171,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getNonceFor(address: EvmAddress, target: EvmAddress): Promise<BigNumber> {
+  async getNonceFor(address: EvmAddress, target: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting Nounce`);
 
     return await this.connect(NoncesFacet__factory, address.toString()).nonces(target.toString());
@@ -193,13 +192,13 @@ export class RPCQueryAdapter {
     );
   }
 
-  async totalSupply(address: EvmAddress): Promise<BigNumber> {
+  async totalSupply(address: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting total supply of ${address.toString()} security`);
 
     return await this.connect(ERC1410ReadFacet__factory, address.toString()).totalSupply();
   }
 
-  async totalSupplyAtSnapshot(address: EvmAddress, snapshotId: number): Promise<BigNumber> {
+  async totalSupplyAtSnapshot(address: EvmAddress, snapshotId: number): Promise<bigint> {
     LogService.logTrace(`Getting total supply of ${address.toString()} security at snapshot ${snapshotId.toString()}`);
 
     return await this.connect(SnapshotsFacet__factory, address.toString()).totalSupplyAtSnapshot(snapshotId);
@@ -228,7 +227,7 @@ export class RPCQueryAdapter {
       target.toString(),
     );
 
-    return roleCount.toNumber();
+    return Number(roleCount);
   }
 
   async getRoleMemberCount(address: EvmAddress, role: string): Promise<number> {
@@ -236,7 +235,7 @@ export class RPCQueryAdapter {
 
     const membersCount = await this.connect(AccessControlFacet__factory, address.toString()).getRoleMemberCount(role);
 
-    return membersCount.toNumber();
+    return Number(membersCount);
   }
 
   async hasRole(address: EvmAddress, target: EvmAddress, role: string): Promise<boolean> {
@@ -266,26 +265,26 @@ export class RPCQueryAdapter {
     const regulationInfo = await this.connect(Security__factory, address.toString()).getSecurityRegulationData();
     const diamondAddress = await this.mirrorNode.getHederaIdfromContractAddress(address.toString());
     const regulation: Regulation = {
-      type: CastRegulationType.fromNumber(regulationInfo.regulationData.regulationType),
-      subType: CastRegulationSubType.fromNumber(regulationInfo.regulationData.regulationSubType),
+      type: CastRegulationType.fromBigint(regulationInfo.regulationData.regulationType),
+      subType: CastRegulationSubType.fromBigint(regulationInfo.regulationData.regulationSubType),
       dealSize: regulationInfo.regulationData.dealSize.toString(),
-      accreditedInvestors: CastAccreditedInvestors.fromNumber(regulationInfo.regulationData.accreditedInvestors),
-      maxNonAccreditedInvestors: regulationInfo.regulationData.maxNonAccreditedInvestors.toNumber(),
-      manualInvestorVerification: CastManualInvestorVerification.fromNumber(
+      accreditedInvestors: CastAccreditedInvestors.fromBigint(regulationInfo.regulationData.accreditedInvestors),
+      maxNonAccreditedInvestors: Number(regulationInfo.regulationData.maxNonAccreditedInvestors),
+      manualInvestorVerification: CastManualInvestorVerification.fromBigint(
         regulationInfo.regulationData.manualInvestorVerification,
       ),
-      internationalInvestors: CastInternationalInvestorscation.fromNumber(
+      internationalInvestors: CastInternationalInvestorscation.fromBigint(
         regulationInfo.regulationData.internationalInvestors,
       ),
-      resaleHoldPeriod: CastResaleHoldPeriodorscation.fromNumber(regulationInfo.regulationData.resaleHoldPeriod),
+      resaleHoldPeriod: CastResaleHoldPeriodorscation.fromBigint(regulationInfo.regulationData.resaleHoldPeriod),
     };
 
     return new Security({
       name: erc20Metadata.info.name,
       symbol: erc20Metadata.info.symbol,
       isin: erc20Metadata.info.isin,
-      type: CastSecurityType.fromNumber(erc20Metadata.securityType),
-      decimals: erc20Metadata.info.decimals,
+      type: CastSecurityType.fromBigint(erc20Metadata.securityType),
+      decimals: Number(erc20Metadata.info.decimals),
       isWhiteList: isWhiteList,
       erc20VotesActivated: erc20VotesActivated,
       isControllable: isControllable,
@@ -299,8 +298,8 @@ export class RPCQueryAdapter {
       diamondAddress: HederaId.from(diamondAddress),
       evmDiamondAddress: address,
       paused: isPaused,
-      regulationType: CastRegulationType.fromNumber(regulationInfo.regulationData.regulationType),
-      regulationsubType: CastRegulationSubType.fromNumber(regulationInfo.regulationData.regulationSubType),
+      regulationType: CastRegulationType.fromBigint(regulationInfo.regulationData.regulationType),
+      regulationsubType: CastRegulationSubType.fromBigint(regulationInfo.regulationData.regulationSubType),
       regulation: regulation,
       isCountryControlListWhiteList: regulationInfo.additionalSecurityData.countriesControlListType,
       countries: regulationInfo.additionalSecurityData.listOfCountries,
@@ -321,10 +320,10 @@ export class RPCQueryAdapter {
       res.conversionRight,
       res.redemptionRight,
       res.putRight,
-      CastDividendType.fromNumber(res.dividendRight),
+      CastDividendType.fromBigint(res.dividendRight),
       res.currency,
       new BigDecimal(res.nominalValue.toString()),
-      res.nominalValueDecimals,
+      Number(res.nominalValueDecimals),
     );
   }
 
@@ -336,9 +335,9 @@ export class RPCQueryAdapter {
     return new BondDetails(
       res.currency,
       new BigDecimal(res.nominalValue.toString()),
-      res.nominalValueDecimals,
-      res.startingDate.toNumber(),
-      res.maturityDate.toNumber(),
+      Number(res.nominalValueDecimals),
+      Number(res.startingDate),
+      Number(res.maturityDate),
     );
   }
 
@@ -353,7 +352,7 @@ export class RPCQueryAdapter {
 
     const controlListCount = await this.connect(ControlListFacet__factory, address.toString()).getControlListCount();
 
-    return controlListCount.toNumber();
+    return Number(controlListCount);
   }
 
   async getControlListType(address: EvmAddress): Promise<boolean> {
@@ -376,7 +375,7 @@ export class RPCQueryAdapter {
       target.toString(),
     );
 
-    return new DividendFor(new BigDecimal(dividendFor.tokenBalance), dividendFor.decimals);
+    return new DividendFor(new BigDecimal(dividendFor.tokenBalance), Number(dividendFor.decimals));
   }
 
   async getDividendAmountFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendAmountFor> {
@@ -401,10 +400,10 @@ export class RPCQueryAdapter {
 
     return new Dividend(
       new BigDecimal(dividendInfo.dividend.amount.toString()),
-      dividendInfo.dividend.amountDecimals,
-      dividendInfo.dividend.recordDate.toNumber(),
-      dividendInfo.dividend.executionDate.toNumber(),
-      dividendInfo.snapshotId.toNumber(),
+      Number(dividendInfo.dividend.amountDecimals),
+      Number(dividendInfo.dividend.recordDate),
+      Number(dividendInfo.dividend.executionDate),
+      Number(dividendInfo.snapshotId),
     );
   }
 
@@ -413,7 +412,7 @@ export class RPCQueryAdapter {
 
     const dividendsCount = await this.connect(Equity__factory, address.toString()).getDividendsCount();
 
-    return dividendsCount.toNumber();
+    return Number(dividendsCount);
   }
 
   async getVotingFor(address: EvmAddress, target: EvmAddress, voting: number): Promise<VotingFor> {
@@ -421,7 +420,7 @@ export class RPCQueryAdapter {
 
     const votingFor = await this.connect(Equity__factory, address.toString()).getVotingFor(voting, target.toString());
 
-    return new VotingFor(new BigDecimal(votingFor.tokenBalance), votingFor.decimals);
+    return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals));
   }
 
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
@@ -430,9 +429,9 @@ export class RPCQueryAdapter {
     const votingInfo = await this.connect(Equity__factory, address.toString()).getVoting(voting);
 
     return new VotingRights(
-      votingInfo.voting.recordDate.toNumber(),
+      Number(votingInfo.voting.recordDate),
       votingInfo.voting.data,
-      votingInfo.snapshotId.toNumber(),
+      Number(votingInfo.snapshotId),
     );
   }
 
@@ -441,7 +440,7 @@ export class RPCQueryAdapter {
 
     const votingsCount = await this.connect(Equity__factory, address.toString()).getVotingCount();
 
-    return votingsCount.toNumber();
+    return Number(votingsCount);
   }
 
   async getCouponFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponFor> {
@@ -449,7 +448,7 @@ export class RPCQueryAdapter {
 
     const couponFor = await this.connect(BondRead__factory, address.toString()).getCouponFor(coupon, target.toString());
 
-    return new CouponFor(new BigDecimal(couponFor.tokenBalance), couponFor.decimals);
+    return new CouponFor(new BigDecimal(couponFor.tokenBalance), Number(couponFor.decimals));
   }
 
   async getCouponAmountFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponAmountFor> {
@@ -481,15 +480,15 @@ export class RPCQueryAdapter {
     const couponInfo = await this.connect(BondRead__factory, address.toString()).getCoupon(coupon);
 
     return new Coupon(
-      couponInfo.coupon.recordDate.toNumber(),
-      couponInfo.coupon.executionDate.toNumber(),
+      Number(couponInfo.coupon.recordDate),
+      Number(couponInfo.coupon.executionDate),
       new BigDecimal(couponInfo.coupon.rate.toString()),
-      couponInfo.coupon.rateDecimals,
-      couponInfo.coupon.startDate.toNumber(),
-      couponInfo.coupon.endDate.toNumber(),
-      couponInfo.coupon.fixingDate.toNumber(),
-      CastRateStatus.fromNumber(couponInfo.coupon.rateStatus),
-      couponInfo.snapshotId.toNumber(),
+      Number(couponInfo.coupon.rateDecimals),
+      Number(couponInfo.coupon.startDate),
+      Number(couponInfo.coupon.endDate),
+      Number(couponInfo.coupon.fixingDate),
+      CastRateStatus.fromBigint(couponInfo.coupon.rateStatus),
+      Number(couponInfo.snapshotId),
     );
   }
 
@@ -498,7 +497,7 @@ export class RPCQueryAdapter {
 
     const couponCount = await this.connect(BondRead__factory, address.toString()).getCouponCount();
 
-    return couponCount.toNumber();
+    return Number(couponCount);
   }
 
   async isPaused(address: EvmAddress): Promise<boolean> {
@@ -529,7 +528,7 @@ export class RPCQueryAdapter {
       sourceId.toString(),
       targetId.toString(),
       partitionId,
-      amount.toBigNumber(),
+      amount.toBigInt(),
       data,
       operatorData,
       {
@@ -549,7 +548,7 @@ export class RPCQueryAdapter {
 
     return await this.connect(ERC1594Facet__factory, address.toString()).canTransfer(
       targetId.toString(),
-      amount.toBigNumber(),
+      amount.toBigInt(),
       data,
       {
         from: operatorId,
@@ -571,7 +570,7 @@ export class RPCQueryAdapter {
     return await this.connect(ERC1410ReadFacet__factory, address.toString()).canRedeemByPartition(
       sourceId.toString(),
       partitionId,
-      amount.toBigNumber(),
+      amount.toBigInt(),
       data,
       operatorData,
       {
@@ -580,7 +579,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getDocument(address: EvmAddress, name: string): Promise<[string, string, BigNumber]> {
+  async getDocument(address: EvmAddress, name: string): Promise<[string, string, bigint]> {
     LogService.logTrace(`Getting document: ${name}`);
 
     return await this.connect(ERC1643Facet__factory, address.toString()).getDocument(name);
@@ -627,7 +626,7 @@ export class RPCQueryAdapter {
     );
 
     return snapshots.map(
-      (s: { scheduledTimestamp: BigNumber; data: string }) => new ScheduledSnapshot(s.scheduledTimestamp, s.data),
+      (s: { scheduledTimestamp: bigint; data: string }) => new ScheduledSnapshot(s.scheduledTimestamp, s.data),
     );
   }
 
@@ -639,22 +638,22 @@ export class RPCQueryAdapter {
       address.toString(),
     ).scheduledSnapshotCount();
 
-    return scheduledSnapshotsCount.toNumber();
+    return Number(scheduledSnapshotsCount);
   }
 
-  async getMaxSupply(address: EvmAddress): Promise<BigNumber> {
+  async getMaxSupply(address: EvmAddress): Promise<bigint> {
     LogService.logTrace(`Getting max supply for ${address.toString()} security`);
 
     return await this.connect(CapFacet__factory, address.toString()).getMaxSupply();
   }
 
-  async getMaxSupplyByPartition(address: EvmAddress, partitionId: string): Promise<BigNumber> {
+  async getMaxSupplyByPartition(address: EvmAddress, partitionId: string): Promise<bigint> {
     LogService.logTrace(`Getting max supply by partition for ${address.toString()} security`);
 
     return await this.connect(CapFacet__factory, address.toString()).getMaxSupplyByPartition(partitionId);
   }
 
-  async getTotalSupplyByPartition(address: EvmAddress, partitionId: string): Promise<BigNumber> {
+  async getTotalSupplyByPartition(address: EvmAddress, partitionId: string): Promise<bigint> {
     LogService.logTrace(`Getting max supply by partition for ${address.toString()} security`);
 
     return await this.connect(ERC1410ReadFacet__factory, address.toString()).totalSupplyByPartition(partitionId);
@@ -668,19 +667,19 @@ export class RPCQueryAdapter {
     const res = await this.connect(Factory__factory, factoryAddress.toString()).getAppliedRegulationData(type, subType);
 
     const regulation: Regulation = {
-      type: CastRegulationType.fromNumber(res.regulationType),
-      subType: CastRegulationSubType.fromNumber(res.regulationSubType),
+      type: CastRegulationType.fromBigint(res.regulationType),
+      subType: CastRegulationSubType.fromBigint(res.regulationSubType),
       dealSize: res.dealSize.toString(),
-      accreditedInvestors: CastAccreditedInvestors.fromNumber(res.accreditedInvestors),
-      maxNonAccreditedInvestors: res.maxNonAccreditedInvestors.toNumber(),
-      manualInvestorVerification: CastManualInvestorVerification.fromNumber(res.manualInvestorVerification),
-      internationalInvestors: CastInternationalInvestorscation.fromNumber(res.internationalInvestors),
-      resaleHoldPeriod: CastResaleHoldPeriodorscation.fromNumber(res.resaleHoldPeriod),
+      accreditedInvestors: CastAccreditedInvestors.fromBigint(res.accreditedInvestors),
+      maxNonAccreditedInvestors: Number(res.maxNonAccreditedInvestors),
+      manualInvestorVerification: CastManualInvestorVerification.fromBigint(res.manualInvestorVerification),
+      internationalInvestors: CastInternationalInvestorscation.fromBigint(res.internationalInvestors),
+      resaleHoldPeriod: CastResaleHoldPeriodorscation.fromBigint(res.resaleHoldPeriod),
     };
     return regulation;
   }
 
-  async getLockedBalanceOf(address: EvmAddress, target: EvmAddress): Promise<BigNumber> {
+  async getLockedBalanceOf(address: EvmAddress, target: EvmAddress): Promise<bigint> {
     LogService.logTrace(
       `Getting locked balance of ${address.toString()} security for the account ${target.toString()}`,
     );
@@ -699,10 +698,10 @@ export class RPCQueryAdapter {
       target.toString(),
     );
 
-    return count.toNumber();
+    return Number(count);
   }
 
-  async getLocksId(address: EvmAddress, target: EvmAddress, start: number, end: number): Promise<BigNumber[]> {
+  async getLocksId(address: EvmAddress, target: EvmAddress, start: number, end: number): Promise<bigint[]> {
     LogService.logTrace(
       `Getting locks id of ${address.toString()} security for the account ${target.toString()} from ${start.toString()} to ${end.toString()}`,
     );
@@ -715,7 +714,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getLock(address: EvmAddress, target: EvmAddress, lockId: number): Promise<[BigNumber, BigNumber]> {
+  async getLock(address: EvmAddress, target: EvmAddress, lockId: number): Promise<[bigint, bigint]> {
     LogService.logTrace(
       `Getting lock ${lockId.toString()} of ${address.toString()} security for the account ${target.toString()}`,
     );
@@ -730,7 +729,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting config info for ${address.toString()}`);
     const configInfo = await this.connect(DiamondFacet__factory, address.toString()).getConfigInfo();
 
-    return [configInfo.resolver_.toString(), configInfo.configurationId_, configInfo.version_.toNumber()];
+    return [configInfo.resolver_.toString(), configInfo.configurationId_, Number(configInfo.version_)];
   }
 
   async getScheduledBalanceAdjustment(
@@ -745,9 +744,9 @@ export class RPCQueryAdapter {
     ).getScheduledBalanceAdjustment(balanceAdjustmentId);
 
     return new ScheduledBalanceAdjustment(
-      scheduledBalanceAdjustmentInfo.executionDate.toNumber(),
-      scheduledBalanceAdjustmentInfo.factor.toNumber(),
-      scheduledBalanceAdjustmentInfo.decimals,
+      Number(scheduledBalanceAdjustmentInfo.executionDate),
+      Number(scheduledBalanceAdjustmentInfo.factor),
+      Number(scheduledBalanceAdjustmentInfo.decimals),
     );
   }
 
@@ -759,7 +758,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getScheduledBalanceAdjustmentCount();
 
-    return scheduledBalanceAdjustmentCount.toNumber();
+    return Number(scheduledBalanceAdjustmentCount);
   }
 
   async getHeldAmountFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
@@ -769,7 +768,7 @@ export class RPCQueryAdapter {
       targetId.toString(),
     );
 
-    return heldAmountFor.toNumber();
+    return Number(heldAmountFor);
   }
 
   async getHeldAmountForByPartition(address: EvmAddress, partitionId: string, targetId: EvmAddress): Promise<number> {
@@ -780,7 +779,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getHeldAmountForByPartition(partitionId, targetId.toString());
 
-    return heldAmountForByPartition.toNumber();
+    return Number(heldAmountForByPartition);
   }
 
   async getHoldCountForByPartition(address: EvmAddress, partitionId: string, targetId: EvmAddress): Promise<number> {
@@ -791,7 +790,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getHoldCountForByPartition(partitionId, targetId.toString());
 
-    return holdCountForByPartition.toNumber();
+    return Number(holdCountForByPartition);
   }
 
   async getHoldsIdForByPartition(
@@ -808,7 +807,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getHoldsIdForByPartition(partitionId, target.toString(), start, end);
 
-    return holdsIdForByPartition.map((id) => id.toNumber());
+    return holdsIdForByPartition.map((id: bigint) => Number(id));
   }
 
   async getHoldForByPartition(
@@ -826,8 +825,8 @@ export class RPCQueryAdapter {
     });
 
     return new HoldDetails(
-      hold.expirationTimestamp_.toNumber(),
-      new BigDecimal(hold.amount_.toString()),
+      Number(hold.expirationTimestamp_),
+      hold.amount_,
       hold.escrow_,
       targetId.toString(),
       hold.destination_,
@@ -847,7 +846,7 @@ export class RPCQueryAdapter {
 
     const count = await this.connect(SsiManagementFacet__factory, address.toString()).getIssuerListCount();
 
-    return count.toNumber();
+    return Number(count);
   }
 
   async getIssuerListMembers(address: EvmAddress, start: number, end: number): Promise<string[]> {
@@ -872,7 +871,7 @@ export class RPCQueryAdapter {
       kycData.validTo.toString(),
       kycData.vcId,
       kycData.issuer,
-      kycData.status,
+      Number(kycData.status),
     );
   }
 
@@ -881,7 +880,7 @@ export class RPCQueryAdapter {
 
     const kycData = await this.connect(KycFacet__factory, address.toString()).getKycStatusFor(targetId.toString());
 
-    return kycData;
+    return Number(kycData);
   }
 
   async getKycAccountsData(
@@ -899,14 +898,14 @@ export class RPCQueryAdapter {
     );
 
     return accounts.map(
-      (account, index) =>
+      (account: string, index: number) =>
         new KycAccountData(
           account,
           kycAccountsData[index].validFrom.toString(),
           kycAccountsData[index].validTo.toString(),
           kycAccountsData[index].vcId,
           kycAccountsData[index].issuer,
-          kycAccountsData[index].status,
+          Number(kycAccountsData[index].status),
         ),
     );
   }
@@ -915,7 +914,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting count of accounts with KYC status ${kycStatus}}`);
     const kycAccountsCount = await this.connect(KycFacet__factory, address.toString()).getKycAccountsCount(kycStatus);
 
-    return kycAccountsCount.toNumber();
+    return Number(kycAccountsCount);
   }
 
   async getClearedAmountFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
@@ -925,7 +924,7 @@ export class RPCQueryAdapter {
       targetId.toString(),
     );
 
-    return clearedAmountFor.toNumber();
+    return Number(clearedAmountFor);
   }
 
   async getClearedAmountForByPartition(
@@ -940,7 +939,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getClearedAmountForByPartition(partitionId, targetId.toString());
 
-    return clearedAmountForByPartition.toNumber();
+    return Number(clearedAmountForByPartition);
   }
 
   async getClearingCountForByPartition(
@@ -960,7 +959,7 @@ export class RPCQueryAdapter {
       CastClearingOperationType.toNumber(clearingOperationType),
     );
 
-    return clearingCountForByPartition.toNumber();
+    return Number(clearingCountForByPartition);
   }
 
   async getClearingsIdForByPartition(
@@ -984,7 +983,7 @@ export class RPCQueryAdapter {
       end,
     );
 
-    return clearingsIdForByPartition.map((id) => id.toNumber());
+    return clearingsIdForByPartition.map((id: bigint) => Number(id));
   }
 
   async getClearingCreateHoldForByPartition(
@@ -1004,11 +1003,11 @@ export class RPCQueryAdapter {
 
     return new ClearingHoldCreation(
       new BigDecimal(clearing.amount.toString()),
-      clearing.expirationTimestamp.toNumber(),
+      Number(clearing.expirationTimestamp),
       clearing.data,
       clearing.operatorData,
       clearing.holdEscrow,
-      clearing.holdExpirationTimestamp.toNumber(),
+      Number(clearing.holdExpirationTimestamp),
       clearing.holdTo,
       clearing.holdData,
     );
@@ -1029,7 +1028,7 @@ export class RPCQueryAdapter {
 
     return new ClearingRedeem(
       new BigDecimal(clearing.amount.toString()),
-      clearing.expirationTimestamp.toNumber(),
+      Number(clearing.expirationTimestamp),
       clearing.data,
       clearing.operatorData,
     );
@@ -1052,7 +1051,7 @@ export class RPCQueryAdapter {
 
     return new ClearingTransfer(
       new BigDecimal(clearing.amount.toString()),
-      clearing.expirationTimestamp.toNumber(),
+      Number(clearing.expirationTimestamp),
       clearing.destination,
       clearing.data,
       clearing.operatorData,
@@ -1083,7 +1082,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getExternalPausesCount();
 
-    return getExternalPausesCount.toNumber();
+    return Number(getExternalPausesCount);
   }
 
   async getExternalPausesMembers(address: EvmAddress, start: number, end: number): Promise<string[]> {
@@ -1119,7 +1118,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getExternalControlListsCount();
 
-    return getExternalPausesCount.toNumber();
+    return Number(getExternalPausesCount);
   }
 
   async getExternalControlListsMembers(address: EvmAddress, start: number, end: number): Promise<string[]> {
@@ -1167,7 +1166,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getExternalKycListsCount();
 
-    return getExternalKycListsCount.toNumber();
+    return Number(getExternalKycListsCount);
   }
 
   async getExternalKycListsMembers(address: EvmAddress, start: number, end: number): Promise<string[]> {
@@ -1205,7 +1204,7 @@ export class RPCQueryAdapter {
       targetId.toString(),
     );
 
-    return kycStatus;
+    return Number(kycStatus);
   }
 
   async onchainID(address: EvmAddress): Promise<string> {
@@ -1235,7 +1234,7 @@ export class RPCQueryAdapter {
       targetId.toString(),
     );
 
-    return frozenTokens.toNumber();
+    return Number(frozenTokens);
   }
 
   async isAddressRecovered(address: EvmAddress, targetId: EvmAddress): Promise<boolean> {
@@ -1269,7 +1268,7 @@ export class RPCQueryAdapter {
       snapshotId,
     );
 
-    return total.toNumber();
+    return Number(total);
   }
 
   async getCouponHolders(address: EvmAddress, couponId: number, start: number, end: number): Promise<string[]> {
@@ -1282,39 +1281,39 @@ export class RPCQueryAdapter {
 
     const total = await this.connect(BondRead__factory, address.toString()).getTotalCouponHolders(couponId);
 
-    return total.toNumber();
+    return Number(total);
   }
 
   async getCouponFromOrderedListAt(address: EvmAddress, pos: number): Promise<number> {
-    LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
+      LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
 
-    const factory = await this.connect(BondRead__factory, address.toString())
-    const couponId = await this.connect(BondRead__factory, address.toString()).getCouponFromOrderedListAt(pos);
+      const factory = await this.connect(BondRead__factory, address.toString())
+      const couponId = await this.connect(BondRead__factory, address.toString()).getCouponFromOrderedListAt(pos);
 
-    return couponId.toNumber();
-  }
+      return couponId.toNumber();
+    }
 
-  async getCouponsOrderedList(address: EvmAddress, pageIndex?: number, pageLength?: number): Promise<number[]> {
-    LogService.logTrace(`Getting coupons ordered list for security ${address.toString()}, page ${pageIndex}, length ${pageLength}`);
+    async getCouponsOrderedList(address: EvmAddress, pageIndex?: number, pageLength?: number): Promise<number[]> {
+      LogService.logTrace(`Getting coupons ordered list for security ${address.toString()}, page ${pageIndex}, length ${pageLength}`);
 
-    // If pagination parameters are provided, use paginated call
-    if (pageIndex !== undefined && pageLength !== undefined) {
-      const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(pageIndex, pageLength);
+      // If pagination parameters are provided, use paginated call
+      if (pageIndex !== undefined && pageLength !== undefined) {
+        const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(pageIndex, pageLength);
+        return couponIds.map(id => id.toNumber());
+      }
+
+      // Otherwise get all coupons (simulate by getting first page with large length)
+      const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(0, 1000);
       return couponIds.map(id => id.toNumber());
     }
 
-    // Otherwise get all coupons (simulate by getting first page with large length)
-    const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(0, 1000);
-    return couponIds.map(id => id.toNumber());
-  }
+    async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
+      LogService.logTrace(`Getting coupons ordered list total for security ${address.toString()}`);
 
-  async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
-    LogService.logTrace(`Getting coupons ordered list total for security ${address.toString()}`);
+      const total = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedListTotal();
 
-    const total = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedListTotal();
-
-    return total.toNumber();
-  }
+      return total.toNumber();
+    }
 
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`);
@@ -1326,7 +1325,7 @@ export class RPCQueryAdapter {
 
     const total = await this.connect(Equity__factory, address.toString()).getTotalDividendHolders(dividendId);
 
-    return total.toNumber();
+    return Number(total);
   }
 
   async getVotingHolders(address: EvmAddress, voteId: number, start: number, end: number): Promise<string[]> {
@@ -1339,7 +1338,7 @@ export class RPCQueryAdapter {
 
     const total = await this.connect(Equity__factory, address.toString()).getTotalVotingHolders(voteId);
 
-    return total.toNumber();
+    return Number(total);
   }
 
   async getSecurityHolders(address: EvmAddress, start: number, end: number): Promise<string[]> {
@@ -1352,7 +1351,7 @@ export class RPCQueryAdapter {
 
     const total = await this.connect(Security__factory, address.toString()).getTotalSecurityHolders();
 
-    return total.toNumber();
+    return Number(total);
   }
 
   async getTrexTokenBySalt(factory: EvmAddress, salt: string): Promise<string> {
@@ -1381,9 +1380,9 @@ export class RPCQueryAdapter {
 
   async getProceedRecipientsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting proceedRecipients count for the security: ${address.toString()}`);
-    return (
-      await this.connect(ProceedRecipientsFacet__factory, address.toString()).getProceedRecipientsCount()
-    ).toNumber();
+    return Number(
+      await this.connect(ProceedRecipientsFacet__factory, address.toString()).getProceedRecipientsCount(),
+    );
   }
 
   async getProceedRecipients(address: EvmAddress, page: number, pageLength: number): Promise<string[]> {
@@ -1402,62 +1401,62 @@ export class RPCQueryAdapter {
   }
 
   async getRate(address: EvmAddress): Promise<[BigNumber, number]> {
-    const result = await this.connect(FixedRate__factory, address.toString()).getRate();
-    return [result.rate_, result.decimals_];
-  }
+      const result = await this.connect(FixedRate__factory, address.toString()).getRate();
+      return [result.rate_, result.decimals_];
+    }
 
-  async getInterestRate(address: EvmAddress): Promise<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, number]> {
-    LogService.logTrace(`Getting interest rate for security: ${address.toString()}`);
-    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getInterestRate();
-    return [
-      result.maxRate,
-      result.baseRate,
-      result.minRate,
-      result.startPeriod,
-      result.startRate,
-      result.missedPenalty,
-      result.reportPeriod,
-      result.rateDecimals,
-    ];
-  }
+    async getInterestRate(address: EvmAddress): Promise<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, number]> {
+      LogService.logTrace(`Getting interest rate for security: ${address.toString()}`);
+      const result = await this.connect(KpiLinkedRate__factory, address.toString()).getInterestRate();
+      return [
+        result.maxRate,
+        result.baseRate,
+        result.minRate,
+        result.startPeriod,
+        result.startRate,
+        result.missedPenalty,
+        result.reportPeriod,
+        result.rateDecimals,
+      ];
+    }
 
-  async getKpiLatestKpiData(address: EvmAddress, from: BigNumber, to: BigNumber, kpi: EvmAddress): Promise<{ value: BigNumber; exists: boolean }> {
-    LogService.logTrace(`Getting latest KPI data for the security: ${address.toString()}`);
-    const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, kpi.toString());
-    return { value: result[0], exists: result[1] };
-  }
+    async getKpiLatestKpiData(address: EvmAddress, from: BigNumber, to: BigNumber, kpi: EvmAddress): Promise<{ value: BigNumber; exists: boolean }> {
+      LogService.logTrace(`Getting latest KPI data for the security: ${address.toString()}`);
+      const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, kpi.toString());
+      return { value: result[0], exists: result[1] };
+    }
 
-  async getMinDate(address: EvmAddress): Promise<number> {
-    LogService.logTrace(`Getting min date for the security: ${address.toString()}`);
-    const result = await this.connect(Kpis__factory, address.toString()).getMinDate();
-    return result.toNumber();
-  }
+    async getMinDate(address: EvmAddress): Promise<number> {
+      LogService.logTrace(`Getting min date for the security: ${address.toString()}`);
+      const result = await this.connect(Kpis__factory, address.toString()).getMinDate();
+      return result.toNumber();
+    }
 
-  async getImpactData(address: EvmAddress): Promise<[BigNumber, BigNumber, BigNumber, number, BigNumber]> {
-    LogService.logTrace(`Getting impact data for the security: ${address.toString()}`);
-    const result = await this.connect(KpiLinkedRate__factory, address.toString()).getImpactData();
-    return [
-      result.maxDeviationCap,
-      result.baseLine,
-      result.maxDeviationFloor,
-      result.impactDataDecimals,
-      result.adjustmentPrecision,
-    ];
-  }
+    async getImpactData(address: EvmAddress): Promise<[BigNumber, BigNumber, BigNumber, number, BigNumber]> {
+      LogService.logTrace(`Getting impact data for the security: ${address.toString()}`);
+      const result = await this.connect(KpiLinkedRate__factory, address.toString()).getImpactData();
+      return [
+        result.maxDeviationCap,
+        result.baseLine,
+        result.maxDeviationFloor,
+        result.impactDataDecimals,
+        result.adjustmentPrecision,
+      ];
+    }
 
-  async isCheckPointDate(address: EvmAddress, date: BigNumber, project: EvmAddress): Promise<boolean> {
-    LogService.logTrace(`Checking if date ${date.toString()} is a checkpoint date for project ${project.toString()}`);
-    return await this.connect(Kpis__factory, address.toString()).isCheckPointDate(date, project.toString());
-  }
+    async isCheckPointDate(address: EvmAddress, date: BigNumber, project: EvmAddress): Promise<boolean> {
+      LogService.logTrace(`Checking if date ${date.toString()} is a checkpoint date for project ${project.toString()}`);
+      return await this.connect(Kpis__factory, address.toString()).isCheckPointDate(date, project.toString());
+    }
 
-  async scheduledCouponListingCount(address: EvmAddress): Promise<number> {
-    LogService.logTrace(`Getting scheduled coupon listing count for security: ${address.toString()}`);
-    const result = await this.connect(ScheduledCouponListingFacet__factory, address.toString()).scheduledCouponListingCount();
-    return result.toNumber();
-  }
+    async scheduledCouponListingCount(address: EvmAddress): Promise<number> {
+      LogService.logTrace(`Getting scheduled coupon listing count for security: ${address.toString()}`);
+      const result = await this.connect(ScheduledCouponListingFacet__factory, address.toString()).scheduledCouponListingCount();
+      return result.toNumber();
+    }
 
-  async getScheduledCouponListing(address: EvmAddress, pageIndex: number, pageLength: number): Promise<any> {
-    LogService.logTrace(`Getting scheduled coupon listing for security: ${address.toString()}`);
-    return await this.connect(ScheduledCouponListingFacet__factory, address.toString()).getScheduledCouponListing(pageIndex, pageLength);
-  }
+    async getScheduledCouponListing(address: EvmAddress, pageIndex: number, pageLength: number): Promise<any> {
+      LogService.logTrace(`Getting scheduled coupon listing for security: ${address.toString()}`);
+      return await this.connect(ScheduledCouponListingFacet__factory, address.toString()).getScheduledCouponListing(pageIndex, pageLength);
+    }
 }

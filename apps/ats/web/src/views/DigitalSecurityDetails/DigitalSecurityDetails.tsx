@@ -81,7 +81,7 @@ export const DigitalSecurityDetails = () => {
     }),
     {
       retry: false,
-      enabled: securityDetails?.type === "BOND",
+      enabled: securityDetails?.type === "BOND_VARIABLE_RATE",
     },
   );
 
@@ -184,12 +184,12 @@ export const DigitalSecurityDetails = () => {
         hasRole(rolesStored, SecurityRole._CORPORATEACTIONS_ROLE),
       showCoupons:
         !isSecurityPaused &&
-        securityDetails?.type === "BOND" &&
+        securityDetails?.type === "BOND_VARIABLE_RATE" &&
         hasRole(rolesStored, SecurityRole._CORPORATEACTIONS_ROLE),
     };
 
     const controlConfig = {
-      showProceedRecipients: !isSecurityPaused && securityDetails?.type === "BOND",
+      showProceedRecipients: !isSecurityPaused && securityDetails?.type === "BOND_VARIABLE_RATE",
       showControlList: !isSecurityPaused && hasRole(rolesStored, SecurityRole._CONTROLLIST_ROLE),
       showKYC: !isSecurityPaused && hasRole(rolesStored, SecurityRole._KYC_ROLE),
       showSSIManager: !isSecurityPaused && hasRole(rolesStored, SecurityRole._SSI_MANAGER_ROLE),

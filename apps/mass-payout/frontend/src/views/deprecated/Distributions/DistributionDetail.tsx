@@ -27,7 +27,7 @@ export const DistributionDetail = () => {
     assetId: "0.0.890123",
     lifecycleCashFlowId: "0.0.456789",
     name: "Hedera Asset Test",
-    assetType: "Bond",
+    assetType: "Bond Variable Rate",
     executionDate: "01/01/2024",
     maturityDate: "31/01/2025",
   };

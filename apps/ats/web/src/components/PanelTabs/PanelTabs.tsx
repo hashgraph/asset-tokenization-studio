@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { useMemo } from "react";
 import type { tabsAnatomy as ChakraTabsAnatomy } from "@chakra-ui/anatomy";
 import type { ComponentWithAs } from "@chakra-ui/system";

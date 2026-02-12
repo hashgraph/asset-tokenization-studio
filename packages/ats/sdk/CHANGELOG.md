@@ -1,5 +1,24 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies
+  - @hashgraph/asset-tokenization-contracts@4.1.1
+
+## 4.1.0
+
+### Patch Changes
+
+- 8ffc87f: Fixed all linting issues and applied code formatting across the codebase. Updated license headers in all source files to use standardized SPDX format (`// SPDX-License-Identifier: Apache-2.0`). Added automated license header validation script (`check-license.js`) that runs during pre-commit to ensure all `.sol`, `.ts`, and `.tsx` files include the required SPDX license identifier.
+- Updated dependencies [60f35fc]
+- Updated dependencies [5f579dc]
+- Updated dependencies [f1bac7a]
+- Updated dependencies [8ffc87f]
+- Updated dependencies [bde618b]
+  - @hashgraph/asset-tokenization-contracts@4.1.0
+
 ## 4.0.1
 
 ### Patch Changes

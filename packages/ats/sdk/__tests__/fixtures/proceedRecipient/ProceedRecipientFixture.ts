@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { HederaId } from "@domain/context/shared/HederaId";
 import { createFixture } from "../config";
 import { HederaIdPropsFixture } from "../shared/DataFixture";

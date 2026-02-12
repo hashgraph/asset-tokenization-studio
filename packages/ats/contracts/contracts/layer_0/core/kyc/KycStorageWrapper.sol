@@ -75,10 +75,6 @@ abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
             IRevocationList(revocationListAddress).revoked(kycFor.issuer, kycFor.vcId)
         ) return IKyc.KycStatus.NOT_GRANTED;
 
-        if (revocationListAddress != address(0)) {
-            if (IRevocationList(revocationListAddress).revoked(kycFor.issuer, kycFor.vcId))
-                return IKyc.KycStatus.NOT_GRANTED;
-        }
         return kycFor.status;
     }
 

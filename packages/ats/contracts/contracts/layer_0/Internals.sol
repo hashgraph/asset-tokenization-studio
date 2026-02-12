@@ -799,9 +799,6 @@ abstract contract Internals is Modifiers {
     function _getClearingLabafById(
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
     ) internal view virtual returns (uint256);
-    function _getClearingLabafByPartition(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
-    ) internal view virtual returns (uint256);
     function _getClearingRedeemForByPartition(
         bytes32 _partition,
         address _tokenHolder,
@@ -992,11 +989,6 @@ abstract contract Internals is Modifiers {
         address _tokenHolder,
         uint256 _holdId
     ) internal view virtual returns (uint256);
-    function _getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) internal view virtual returns (uint256);
     function _getHoldThirdParty(
         HoldIdentifier calldata _holdIdentifier
     ) internal view virtual returns (address thirdParty_);
@@ -1024,6 +1016,10 @@ abstract contract Internals is Modifiers {
     function _getLabafByPartition(bytes32 _partition) internal view virtual returns (uint256);
     function _getLabafByUser(address _account) internal view virtual returns (uint256);
     function _getLabafByUserAndPartition(bytes32 _partition, address _account) internal view virtual returns (uint256);
+    function _getLabafByUserAndPartitionIndex(
+        uint256 _partitionIndex,
+        address _account
+    ) internal view virtual returns (uint256);
     function _getLock(
         bytes32 _partition,
         address _tokenHolder,
@@ -1456,4 +1452,5 @@ abstract contract Internals is Modifiers {
         pure
         virtual
         returns (ISecurity.SecurityRegulationData memory securityRegulationData_);
+    function _zeroToOne(uint256 _input) internal pure virtual returns (uint256);
 }

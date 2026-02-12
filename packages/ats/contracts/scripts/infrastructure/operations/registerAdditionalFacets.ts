@@ -162,7 +162,7 @@ export async function registerAdditionalFacets(
 
     // Get total count of registered facets
     const facetCountBN = await blr.getBusinessLogicCount();
-    const facetCount = facetCountBN.toNumber();
+    const facetCount = Number(facetCountBN);
     info(`   Found ${facetCount} existing facets in BLR`);
 
     if (facetCount > maxExistingFacets) {
@@ -324,9 +324,9 @@ export async function registerAdditionalFacets(
       info(`Registration transaction sent: ${tx.hash}`);
 
       const receipt = await waitForTransaction(tx, 1, DEFAULT_TRANSACTION_TIMEOUT);
-      transactionHashes.push(receipt.transactionHash);
+      transactionHashes.push(receipt.hash);
       blockNumbers.push(receipt.blockNumber);
-      transactionGas.push(receipt.gasUsed.toNumber());
+      transactionGas.push(Number(receipt.gasUsed));
 
       const gasUsed = formatGasUsage(receipt, tx.gasLimit);
       debug(gasUsed);

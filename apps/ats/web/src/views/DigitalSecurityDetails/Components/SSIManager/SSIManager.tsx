@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { HStack, SkeletonText, Stack, useDisclosure, VStack } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/table-core";
 import { Button, PhosphorIcon, PopUp, Table, Text } from "io-bricks-ui";

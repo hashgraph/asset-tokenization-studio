@@ -1,5 +1,24 @@
 # @hashgraph/asset-tokenization-contracts
 
+## 4.1.1
+
+### Patch Changes
+
+- Fix ATS Publish github action because Package ATS Contracts job has an out of memory error and translate to English some Spanish text in compile.ts and selector.ts
+
+## 4.1.0
+
+### Minor Changes
+
+- 60f35fc: kpi linked interest rate coupons now use the kpi latest facet instead of the kpi oracle
+
+### Patch Changes
+
+- 5f579dc: Fix all lint issues in contracts package.
+- f1bac7a: Add three-layer DCO and GPG signature enforcement via git hooks (commit-msg, pre-push) and developer onboarding script.
+- 8ffc87f: Fixed all linting issues and applied code formatting across the codebase. Updated license headers in all source files to use standardized SPDX format (`// SPDX-License-Identifier: Apache-2.0`). Added automated license header validation script (`check-license.js`) that runs during pre-commit to ensure all `.sol`, `.ts`, and `.tsx` files include the required SPDX license identifier.
+- bde618b: Refactor registry generator into modular architecture and migrate CLI scripts from ts-node to tsx for faster execution (~3x improvement in startup time).
+
 ## 4.0.1
 
 ### Patch Changes

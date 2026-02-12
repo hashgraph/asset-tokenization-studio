@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Flex, HStack } from "@chakra-ui/react";
 import { Button, InputController, Table, Text } from "io-bricks-ui";
 import { useForm } from "react-hook-form";

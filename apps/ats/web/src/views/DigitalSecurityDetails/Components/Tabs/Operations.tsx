@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { Box, HStack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { Locker } from "../Locker/Locker";

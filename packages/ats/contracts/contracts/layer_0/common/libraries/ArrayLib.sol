@@ -4,16 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 library ArrayLib {
     error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
 
-    function getSlotForDynamicArrayItem(
-        uint256 _dynamicArraySlot,
-        uint256 _itemIndex,
-        uint256 _itemsSize
-    ) internal pure returns (uint256) {
-        uint256 dynamicArrayBaseSlot = uint256(keccak256(abi.encode(_dynamicArraySlot)));
-
-        return dynamicArrayBaseSlot + _itemIndex * _itemsSize;
-    }
-
     function checkUniqueValues(address[] memory _addresses, bool[] memory _bools) internal pure {
         uint256 length = _addresses.length;
         uint256 innerIndex;

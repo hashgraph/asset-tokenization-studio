@@ -31,6 +31,12 @@ import GetCouponHoldersRequest from "@port/in/request/bond/GetCouponHoldersReque
 import GetCouponRequest from "@port/in/request/bond/GetCouponRequest";
 import GetPrincipalForRequest from "@port/in/request/bond/GetPrincipalForRequest";
 import GetTotalCouponHoldersRequest from "@port/in/request/bond/GetTotalCouponHoldersRequest";
+import GetAllCouponsRequest from "@port/in/request/bond/GetAllCouponsRequest";
+import UpdateMaturityDateRequest from "@port/in/request/bond/UpdateMaturityDateRequest";
+import BigDecimal from "@domain/context/shared/BigDecimal";
+
+import { Coupon } from "@domain/context/bond/Coupon";
+import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
 import RedeemAtMaturityByPartitionRequest from "@port/in/request/bond/RedeemAtMaturityByPartitionRequest";
 import RemoveProceedRecipientRequest from "@port/in/request/bond/RemoveProceedRecipientRequest";
 import SetCouponRequest from "@port/in/request/bond/SetCouponRequest";
@@ -196,7 +202,7 @@ export const GetCouponFromOrderedListAtQueryFixture = createFixture<GetCouponFro
 export const CouponFixture = createFixture<Coupon>((props) => {
   props.recordTimeStamp.faker((faker) => faker.date.past().getTime().toString());
   props.executionTimeStamp.faker((faker) => faker.date.past().getTime().toString());
-  props.rate.faker((faker) => new BigDecimal(BigNumber.from(faker.number.int({ min: 1, max: 5 }))));
+  props.rate.faker((faker) => BigInt(faker.number.int({ min: 1, max: 5 })));
   props.rateDecimals.faker((faker) => faker.number.int({ min: 1, max: 10 }));
   props.startTimeStamp.faker((faker) => faker.date.past().getTime().toString());
   props.endTimeStamp.faker((faker) => faker.date.past().getTime().toString());

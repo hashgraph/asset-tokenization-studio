@@ -35,7 +35,7 @@ import ContractId from "@domain/context/contract/ContractId";
 import { CastRegulationSubType, CastRegulationType } from "@domain/context/factory/RegulationType";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
-import { BigNumber } from "ethers";
+
 import EquityToken from "./Equity";
 import {
   CreateEquityRequestFixture,
@@ -538,7 +538,7 @@ describe("Equity", () => {
     getVotingRightsForRequest = new GetVotingRightsForRequest(GetVotingRightsForRequestFixture.create());
     it("should get voting rights for successfully", async () => {
       const expectedResponse = {
-        tokenBalance: new BigDecimal(BigNumber.from(10)),
+        tokenBalance: new BigDecimal(BigInt(10)),
         decimals: 1,
       };
 
@@ -829,7 +829,7 @@ describe("Equity", () => {
     getDividendsForRequest = new GetDividendsForRequest(GetDividendsForRequestFixture.create());
     it("should get dividends for successfully", async () => {
       const expectedResponse = {
-        tokenBalance: new BigDecimal(BigNumber.from(10)),
+        tokenBalance: new BigDecimal(BigInt(10)),
         decimals: 1,
       };
 
