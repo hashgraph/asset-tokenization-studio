@@ -92,6 +92,14 @@ Adjust token balances for all holders (e.g., 2-for-1 stock split or 1-for-2 reve
 
 **Example**: If a holder has 100 tokens and you apply a factor of `2`, they will have 200 tokens after execution.
 
+> **⚠️ Important — Backend Balance Alignment:**
+> When a balance adjustment execution date is reached, the on-chain view methods
+> (`balanceOf`) will immediately reflect the adjusted amounts. However, no event is
+> emitted until the next on-chain operation (e.g., a transfer or issue) is executed for
+> that account. During this window, backend systems that track balances exclusively via
+> events may show balances that do not match on-chain state. Backend systems should
+> periodically reconcile with on-chain view methods around scheduled execution dates.
+
 ### Voting Rights
 
 Program voting events for equity holders.
