@@ -157,7 +157,6 @@ abstract contract Internals is Modifiers {
     function _delegate(address delegatee) internal virtual;
     function _delegate(address delegator, address delegatee) internal virtual;
     function _deletePartitionForHolder(address _holder, bytes32 _partition, uint256 index) internal virtual;
-    function _emitTransferEvent(address from, address to, uint256 value) internal virtual returns (bool);
     function _executeHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         address _to,

@@ -6,6 +6,7 @@ import { IClearing } from "../../layer_1/interfaces/clearing/IClearing.sol";
 import { IClearingActions } from "../../layer_1/interfaces/clearing/IClearingActions.sol";
 import { IClearingTransfer } from "../../layer_1/interfaces/clearing/IClearingTransfer.sol";
 import { IClearingStorageWrapper } from "../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol";
+import { IERC20StorageWrapper } from "../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { checkNounceAndDeadline } from "../../layer_0/common/libraries/ERC712Lib.sol";
 import { Hold } from "../../layer_1/interfaces/hold/IHold.sol";
@@ -127,7 +128,7 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         _increaseClearedAmounts(_from, partition, _amount);
 
         emit TransferByPartition(partition, _msgSender(), _from, address(0), _amount, _clearingOperation.data, "");
-        _emitTransferEvent(_from, address(0), _amount);
+        emit IERC20StorageWrapper.Transfer(_from, address(0), _amount);
     }
 
     function _clearingTransferCreation(
@@ -339,12 +340,12 @@ abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorag
         if (_validPartitionForReceiver(_partition, _to)) {
             _increaseBalanceByPartition(_to, _amount, _partition);
             emit TransferByPartition(_partition, _msgSender(), address(0), _to, _amount, "", "");
-            _emitTransferEvent(address(0), _to, _amount);
+            emit IERC20StorageWrapper.Transfer(address(0), _to, _amount);
             return;
         }
         _addPartitionTo(_amount, _to, _partition);
         emit TransferByPartition(_partition, _msgSender(), address(0), _to, _amount, "", "");
-        _emitTransferEvent(address(0), _to, _amount);
+        emit IERC20StorageWrapper.Transfer(address(0), _to, _amount);
     }
 
     function _removeClearing(

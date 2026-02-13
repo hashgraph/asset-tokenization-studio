@@ -70,7 +70,6 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         st.frozenTokensByPartition[_account][_partition] += _amount;
 
         _reduceBalanceByPartition(_account, _amount, _partition);
-        _emitTransferEvent(_account, address(0), _amount);
     }
 
     function _unfreezeTokensByPartition(bytes32 _partition, address _account, uint256 _amount) internal override {
@@ -84,7 +83,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         st.frozenTokensByPartition[_account][_partition] -= _amount;
 
         _transferFrozenBalance(_partition, _account, _amount);
-        _emitTransferEvent(address(0), _account, _amount);
+        emit IERC20StorageWrapper.Transfer(address(0), _account, _amount);
     }
 
     function _updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal override returns (uint256 abaf_) {

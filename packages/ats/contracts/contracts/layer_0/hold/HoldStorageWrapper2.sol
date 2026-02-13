@@ -5,6 +5,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { _DEFAULT_PARTITION } from "../constants/values.sol";
 import { ThirdPartyType } from "../common/types/ThirdPartyType.sol";
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
+import { IERC20StorageWrapper } from "../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 import { ICompliance } from "../../layer_1/interfaces/ERC3643/ICompliance.sol";
 import {
     IHold,
@@ -52,7 +53,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         holdStorage.totalHeldAmountByAccount[_from] += _hold.amount;
 
         emit TransferByPartition(_partition, _msgSender(), _from, address(0), _hold.amount, _operatorData, "");
-        _emitTransferEvent(_from, address(0), _hold.amount);
+        emit IERC20StorageWrapper.Transfer(_from, address(0), _hold.amount);
 
         success_ = true;
     }
@@ -194,7 +195,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
                 );
             }
             emit TransferByPartition(_holdIdentifier.partition, _msgSender(), address(0), _to, _amount, "", "");
-            _emitTransferEvent(address(0), _to, _amount);
+            emit IERC20StorageWrapper.Transfer(address(0), _to, _amount);
             return;
         }
         _addPartitionTo(_amount, _to, _holdIdentifier.partition);
@@ -205,7 +206,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             );
         }
         emit TransferByPartition(_holdIdentifier.partition, _msgSender(), address(0), _to, _amount, "", "");
-        _emitTransferEvent(address(0), _to, _amount);
+        emit IERC20StorageWrapper.Transfer(address(0), _to, _amount);
     }
 
     function _decreaseHeldAmount(
