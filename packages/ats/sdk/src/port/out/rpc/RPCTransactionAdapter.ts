@@ -4,22 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import TransactionResponse from "@domain/context/transaction/TransactionResponse";
-import TransactionAdapter, { InitializationData } from "../TransactionAdapter";
-import { BaseContract, ContractTransactionResponse, Signer, Provider } from "ethers";
-import { singleton } from "tsyringe";
-import Account from "@domain/context/account/Account";
-import { lazyInject } from "@core/decorator/LazyInjectDecorator";
-import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
-import EventService from "@service/event/EventService";
-import LogService from "@service/log/LogService";
 import { CommandBus } from "@core/command/CommandBus";
-import { MirrorNodes } from "@domain/context/network/MirrorNode";
-import { JsonRpcRelays } from "@domain/context/network/JsonRpcRelay";
-import { Factories } from "@domain/context/factory/Factories";
-import BigDecimal from "@domain/context/shared/BigDecimal";
-import { ContractId } from "@hiero-ledger/sdk";
-import { RPCTransactionResponseAdapter } from "./RPCTransactionResponseAdapter";
 import {
   _PARTITION_ID_1,
   EVM_ZERO_ADDRESS,
@@ -29,11 +14,6 @@ import {
   SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
   SET_VOTING_RIGHTS_EVENT,
 } from "@core/Constants";
-import { Security } from "@domain/context/security/Security";
-import { SecurityRole } from "@domain/context/security/SecurityRole";
-import { FactoryBondToken, FactoryEquityToken } from "@domain/context/factory/FactorySecurityToken";
-import { SigningError } from "../error/SigningError";
-} from '@core/Constants';
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import Account from "@domain/context/account/Account";
 import { BondDetails } from "@domain/context/bond/BondDetails";
@@ -46,10 +26,8 @@ import { BasicTransferInfo, IssueData, OperatorTransferData } from "@domain/cont
 import { Factories } from "@domain/context/factory/Factories";
 import {
   FactoryBondFixedRateToken,
-  FactoryBondKpiLinkedRateToken,
-  FactoryBondToken,
-  FactoryEquityToken,
-} from '@domain/context/factory/FactorySecurityToken';
+  FactoryBondKpiLinkedRateToken, FactoryBondToken, FactoryEquityToken
+} from "@domain/context/factory/FactorySecurityToken";
 import { ProtectionData } from '@domain/context/factory/ProtectionData';
 import { Resolvers } from "@domain/context/factory/Resolvers";
 import { SecurityData } from "@domain/context/factory/SecurityData";
@@ -64,12 +42,11 @@ import {
   ProtectedClearingOperation,
 } from '@domain/context/security/Clearing';
 import { Hold, HoldIdentifier, ProtectedHold } from "@domain/context/security/Hold";
-import { Security } from '@domain/context/security/Security';
-import { SecurityRole } from '@domain/context/security/SecurityRole';
+import { Security } from "@domain/context/security/Security";
+import { SecurityRole } from "@domain/context/security/SecurityRole";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
 import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
-import type { Provider } from "@ethersproject/providers";
 import {
   AccessControlFacet__factory,
   Bond__factory,
@@ -98,6 +75,8 @@ import {
   HoldTokenHolderFacet__factory,
   IBondRead,
   IEquity,
+  KpiLinkedRate__factory,
+  Kpis__factory,
   KycFacet__factory,
   LockFacet__factory,
   MockedBlacklist__factory,
@@ -105,39 +84,25 @@ import {
   MockedExternalPause__factory,
   MockedWhitelist__factory,
   PauseFacet__factory,
+  ProceedRecipientsFacet__factory,
   ProtectedPartitionsFacet__factory,
   ScheduledCrossOrderedTasksFacet__factory,
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   TransferAndLockFacet__factory,
-  ERC1410TokenHolderFacet__factory,
-  TREXFactoryAts__factory,
-  ProceedRecipientsFacet__factory,
-  ERC1410IssuerFacet__factory,
-  Kpis__factory,
-  KpiLinkedRate__factory,
+  TREXFactoryAts__factory
 } from "@hashgraph/asset-tokenization-contracts";
-import { Resolvers } from "@domain/context/factory/Resolvers";
-import EvmAddress from "@domain/context/contract/EvmAddress";
-import { BondDetails } from "@domain/context/bond/BondDetails";
-import { EquityDetails } from "@domain/context/equity/EquityDetails";
-import { SecurityData } from "@domain/context/factory/SecurityData";
-import { TransferAndLock } from "@domain/context/security/TransferAndLock";
-import { Hold, HoldIdentifier, ProtectedHold } from "@domain/context/security/Hold";
-import { BasicTransferInfo, IssueData, OperatorTransferData } from "@domain/context/factory/ERC1410Metadata";
-import {
-  CastClearingOperationType,
-  ClearingOperation,
-  ClearingOperationFrom,
-  ClearingOperationIdentifier,
-  ClearingOperationType,
-  ProtectedClearingOperation,
-} from "@domain/context/security/Clearing";
-import { SecurityDataBuilder } from "@domain/context/util/SecurityDataBuilder";
+import { ContractId } from "@hiero-ledger/sdk";
+import EventService from "@service/event/EventService";
+import LogService from "@service/log/LogService";
 import NetworkService from "@service/network/NetworkService";
 import MetamaskService from "@service/wallet/metamask/MetamaskService";
-import { CastRateStatus, RateStatus } from "@domain/context/bond/RateStatus";
-import { ProtectionData } from "@domain/context/factory/ProtectionData";
+import { BaseContract, ContractTransactionResponse, Provider, Signer } from "ethers";
+import { singleton } from "tsyringe";
+import { SigningError } from "../error/SigningError";
+import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
+import TransactionAdapter, { InitializationData } from "../TransactionAdapter";
+import { RPCTransactionResponseAdapter } from "./RPCTransactionResponseAdapter";
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
