@@ -28,6 +28,7 @@ jobs:
   build-mass-payout:
     name: Build Mass Payout Packages
     runs-on: token-studio-linux-large
+    timeout-minutes: 15
     # Only run if manual trigger OR tag push (already filtered by v*-mp pattern)
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
 
@@ -38,7 +39,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
@@ -50,7 +51,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Update npm
-        run: npm install -g npm@11.6.4
+        run: npm install -g npm@11.7.0
 
       - name: Install dependencies
         run: npm ci
@@ -124,6 +125,7 @@ jobs:
     name: Publish Mass Payout Packages
     needs: build-mass-payout
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       DRY_RUN: ${{ inputs.dry-run-enabled }}
 
@@ -140,7 +142,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Update npm
-        run: npm install -g npm@11.6.4
+        run: npm install -g npm@11.7.0
 
       - name: Download Artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -180,6 +182,7 @@ jobs:
   summary:
     name: Publish Summary
     runs-on: token-studio-linux-large
+    timeout-minutes: 5
     needs:
       - publish-mass-payout
     if: ${{ always() }}

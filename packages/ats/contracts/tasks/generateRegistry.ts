@@ -29,6 +29,7 @@ task("generate-registry", "Generate contract registry from Solidity source files
   .addFlag("silent", "Minimal output (only show final result)")
   .setAction(async (taskArgs, hre) => {
     console.log("📋 Generating contract registry...");
+    const startTime = performance.now();
 
     try {
       // Execute the registry generation script
@@ -44,11 +45,13 @@ task("generate-registry", "Generate contract registry from Solidity source files
         env,
       });
 
-      console.log("✅ Registry generation completed successfully");
-    } catch (error) {
+      const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+      console.log(`✅ Registry generation completed successfully (${elapsed}s)`);
+    } catch (error: unknown) {
       // If registry generation fails, log error but don't fail the build
       // This allows compilation to succeed even if registry generation has issues
-      console.error("❌ Registry generation failed:", error.message);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error("❌ Registry generation failed:", message);
       console.error("Build will continue, but registry may be out of date.");
       console.error('Run "npm run generate:registry" manually to diagnose.');
     }
