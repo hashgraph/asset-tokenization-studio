@@ -59,22 +59,24 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
     function _transferFrom(address spender, address from, address to, uint256 value) internal override returns (bool) {
         _decreaseAllowedBalance(from, spender, value);
         _transferByPartition(from, BasicTransferInfo(to, value), _DEFAULT_PARTITION, "", spender, "");
-        return _emitTransferEvent(from, to, value);
+        emit Transfer(from, to, value);
+        return true;
     }
 
     function _transfer(address from, address to, uint256 value) internal override returns (bool) {
         _transferByPartition(from, BasicTransferInfo(to, value), _DEFAULT_PARTITION, "", address(0), "");
-        return _emitTransferEvent(from, to, value);
+        emit Transfer(from, to, value);
+        return true;
     }
 
     function _mint(address to, uint256 value) internal override {
         _issueByPartition(IssueData(_DEFAULT_PARTITION, to, value, ""));
-        _emitTransferEvent(address(0), to, value);
+        emit Transfer(address(0), to, value);
     }
 
     function _burn(address from, uint256 value) internal override {
         _redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, "", "");
-        _emitTransferEvent(from, address(0), value);
+        emit Transfer(from, address(0), value);
     }
 
     function _burnFrom(address account, uint256 value) internal override {
@@ -102,10 +104,5 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
         erc20Storage.allowed[from][spender] += value;
 
         emit Approval(from, spender, _erc20Storage().allowed[from][spender]);
-    }
-
-    function _emitTransferEvent(address from, address to, uint256 value) private returns (bool) {
-        emit Transfer(from, to, value);
-        return true;
     }
 }
