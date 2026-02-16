@@ -200,7 +200,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
 
     function _checkValidKeys(
         IBusinessLogicResolver.BusinessLogicRegistryData[] calldata _businessLogicsRegistryDatas
-    ) private view {
+    ) private pure {
         // Check all previously activated keys are in the array.this
         // Check non duplicated keys.
         bytes32 currentKey;

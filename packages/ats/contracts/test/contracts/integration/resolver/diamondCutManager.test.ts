@@ -774,7 +774,7 @@ describe("DiamondCutManager", () => {
     const duplicateFacetAddress = duplicateResult.address!;
 
     // Generate a unique resolver key for the duplicate selector facet
-    const duplicateResolverKey = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("DuplicateSelectorFacetTest"));
+    const duplicateResolverKey = ethers.keccak256(ethers.toUtf8Bytes("DuplicateSelectorFacetTest"));
 
     // Register the duplicate facet in BLR
     await registerFacets(blr, {
@@ -788,7 +788,7 @@ describe("DiamondCutManager", () => {
     });
 
     // Connect DiamondCutManager to the BLR
-    const testDiamondCutManager = DiamondCutManager__factory.connect(blr.address, deployer);
+    const testDiamondCutManager = DiamondCutManager__factory.connect(await blr.getAddress(), deployer);
 
     // Try to create configuration with both ERC20Facet and DuplicateSelectorFacetTest
     // Both have the same transfer.selector (0xa9059cbb)
