@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import { ERC20StorageWrapper1 } from "../../layer_0/ERC1400/ERC20/ERC20StorageWrapper1.sol";
+import { Common } from "../../layer_0/common/Common.sol";
 
 /**
  * @dev Test facet for ERC20 storage migration testing.
@@ -10,7 +10,7 @@ import { ERC20StorageWrapper1 } from "../../layer_0/ERC1400/ERC20/ERC20StorageWr
  * This is an abstract contract to avoid implementing interface requirements not relevant for testing.
  * This facet is for testing purposes only and should not be deployed to production.
  */
-abstract contract MigrationFacetTest is ERC20StorageWrapper1, IStaticFunctionSelectors {
+contract MigrationFacetTest is Common, IStaticFunctionSelectors {
     // ========================================
     // Legacy Storage Setters (for test setup)
     // ========================================
@@ -157,5 +157,9 @@ abstract contract MigrationFacetTest is ERC20StorageWrapper1, IStaticFunctionSel
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
         staticInterfaceIds_ = new bytes4[](0);
+    }
+
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
+        staticResolverKey_ = keccak256("MigrationFacetTest");
     }
 }
