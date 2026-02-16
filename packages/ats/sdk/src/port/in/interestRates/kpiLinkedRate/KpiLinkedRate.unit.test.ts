@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { createMock } from "@golevelup/ts-jest";
+import { SetImpactDataCommand } from "@command/interestRates/setImpactData/SetImpactDataCommand";
+import { SetInterestRateCommand } from "@command/interestRates/setInterestRate/SetInterestRateCommand";
 import { CommandBus } from "@core/command/CommandBus";
 import { QueryBus } from "@core/query/QueryBus";
-import { TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
-import LogService from "@service/log/LogService";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import { ValidationError } from "@core/validation/ValidationError";
-import KpiLinkedRate from "./KpiLinkedRate";
-import { SetInterestRateCommand } from "@command/interestRates/setInterestRate/SetInterestRateCommand";
-import { SetImpactDataCommand } from "@command/interestRates/setImpactData/SetImpactDataCommand";
-import { GetInterestRateQuery } from "@query/interestRates/getInterestRate/GetInterestRateQuery";
+import { createMock } from "@golevelup/ts-jest";
 import { GetImpactDataQuery } from "@query/interestRates/getImpactData/GetImpactDataQuery";
-import SetInterestRateRequest from "../../request/interestRates/SetInterestRateRequest";
-import SetImpactDataRequest from "../../request/interestRates/SetImpactDataRequest";
+import { GetInterestRateQuery } from "@query/interestRates/getInterestRate/GetInterestRateQuery";
+import LogService from "@service/log/LogService";
+import { TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
 import GetInterestRateRequest from "../../request/interestRates/GetInterestRateRequest";
+import SetImpactDataRequest from "../../request/interestRates/SetImpactDataRequest";
+import SetInterestRateRequest from "../../request/interestRates/SetInterestRateRequest";
 import GetImpactDataRequest from "../../request/kpiLinkedRate/GetImpactDataRequest";
+import KpiLinkedRate from "./KpiLinkedRate";
 
 describe("KpiLinkedRate", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
