@@ -30,7 +30,14 @@ abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20Sto
 
         _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
 
-        // Emit transfer event.
+        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
+            _addPartitionTo(_basicTransferInfo.value, _basicTransferInfo.to, _partition);
+        } else {
+            _increaseBalanceByPartition(_basicTransferInfo.to, _basicTransferInfo.value, _partition);
+        }
+
+        // Emit transfer event AFTER all partition balance changes are complete.
+        // This ensures TransferByPartition is emitted when partitions[] changes.
         emit TransferByPartition(
             _partition,
             _operator,
@@ -40,12 +47,6 @@ abstract contract ERC1410BasicStorageWrapper is IERC1410StorageWrapper, ERC20Sto
             _data,
             _operatorData
         );
-
-        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            _addPartitionTo(_basicTransferInfo.value, _basicTransferInfo.to, _partition);
-        } else {
-            _increaseBalanceByPartition(_basicTransferInfo.to, _basicTransferInfo.value, _partition);
-        }
 
         if (_from != _basicTransferInfo.to && _partition == _DEFAULT_PARTITION) {
             (_erc3643Storage().compliance).functionCall(

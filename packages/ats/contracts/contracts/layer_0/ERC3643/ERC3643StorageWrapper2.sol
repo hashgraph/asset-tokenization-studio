@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _DEFAULT_PARTITION } from "../constants/values.sol";
 import { SnapshotsStorageWrapper2 } from "../snapshots/SnapshotsStorageWrapper2.sol";
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
+import { IERC20StorageWrapper } from "../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 import { ERC20StorageWrapper1 } from "../ERC1400/ERC20/ERC20StorageWrapper1.sol";
 
 abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
@@ -80,7 +81,9 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         IERC3643Management.ERC3643Storage storage st = _erc3643Storage();
         st.frozenTokens[_account] -= _amount;
         st.frozenTokensByPartition[_account][_partition] -= _amount;
+
         _transferFrozenBalance(_partition, _account, _amount);
+        emit IERC20StorageWrapper.Transfer(address(0), _account, _amount);
     }
 
     function _updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal override returns (uint256 abaf_) {
