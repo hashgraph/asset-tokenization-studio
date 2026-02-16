@@ -2593,7 +2593,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     return this.executeTransaction(
       FixedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setRate",
-      [rate.toBigNumber(), rateDecimals],
+      [rate.toBigInt(), rateDecimals],
       GAS.SET_RATE,
     );
   }
@@ -2617,13 +2617,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setInterestRate",
       [{
-        maxRate: maxRate.toBigNumber(),
-        baseRate: baseRate.toBigNumber(),
-        minRate: minRate.toBigNumber(),
-        startPeriod: startPeriod.toBigNumber(),
-        startRate: startRate.toBigNumber(),
-        missedPenalty: missedPenalty.toBigNumber(),
-        reportPeriod: reportPeriod.toBigNumber(),
+        maxRate: maxRate.toBigInt(),
+        baseRate: baseRate.toBigInt(),
+        minRate: minRate.toBigInt(),
+        startPeriod: startPeriod.toBigInt(),
+        startRate: startRate.toBigInt(),
+        missedPenalty: missedPenalty.toBigInt(),
+        reportPeriod: reportPeriod.toBigInt(),
         rateDecimals: rateDecimals,
       }],
       GAS.SET_INTEREST_RATE,
@@ -2646,11 +2646,11 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setImpactData",
       [{
-        maxDeviationCap: maxDeviationCap.toBigNumber(),
-        baseLine: baseLine.toBigNumber(),
-        maxDeviationFloor: maxDeviationFloor.toBigNumber(),
+        maxDeviationCap: maxDeviationCap.toBigInt(),
+        baseLine: baseLine.toBigInt(),
+        maxDeviationFloor: maxDeviationFloor.toBigInt(),
         impactDataDecimals: impactDataDecimals,
-        adjustmentPrecision: adjustmentPrecision.toBigNumber(),
+        adjustmentPrecision: adjustmentPrecision.toBigInt(),
       }],
       GAS.SET_IMPACT_DATA,
     );

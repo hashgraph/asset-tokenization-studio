@@ -7,7 +7,6 @@ import { GetInterestRateQuery, GetInterestRateQueryResponse } from "./GetInteres
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import AccountService from "@service/account/AccountService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import { BigNumber } from "ethers";
 import GetInterestRateQueryError from "./error/GetInterestRateQueryError";
 
 describe("GetInterestRateQueryHandler", () => {
@@ -34,15 +33,15 @@ describe("GetInterestRateQueryHandler", () => {
     // Arrange
     const securityId = "0.0.123456";
     const evmAddress = new EvmAddress("0x1234567890123456789012345678901234567890");
-    const mockResult: [BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, number] = [
-      BigNumber.from("1000"),
-      BigNumber.from("500"),
-      BigNumber.from("100"),
-      BigNumber.from("1640995200"),
-      BigNumber.from("400"),
-      BigNumber.from("50"),
-      BigNumber.from("30"),
-      2,
+    const mockResult: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint] = [
+      1000n,
+      500n,
+      100n,
+      1640995200n,
+      400n,
+      50n,
+      30n,
+      2n,
     ];
 
     mockAccountService.getAccountEvmAddress.mockResolvedValue(evmAddress);

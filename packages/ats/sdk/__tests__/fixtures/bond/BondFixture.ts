@@ -17,30 +17,24 @@ import {
   RegulationSubType,
   RegulationType,
 } from "@domain/context/factory/RegulationType";
-import BigDecimal from "@domain/context/shared/BigDecimal";
 import { HederaId } from "@domain/context/shared/HederaId";
 import { faker } from "@faker-js/faker/.";
 import AddProceedRecipientRequest from "@port/in/request/bond/AddProceedRecipientRequest";
 import CreateBondRequest from "@port/in/request/bond/CreateBondRequest";
 import FullRedeemAtMaturityRequest from "@port/in/request/bond/FullRedeemAtMaturityRequest";
 import GetAllCouponsRequest from "@port/in/request/bond/GetAllCouponsRequest";
-import GetCouponsOrderedListRequest from "@port/in/request/bond/GetCouponsOrderedListRequest";
 import GetBondDetailsRequest from "@port/in/request/bond/GetBondDetailsRequest";
 import GetCouponForRequest from "@port/in/request/bond/GetCouponForRequest";
 import GetCouponHoldersRequest from "@port/in/request/bond/GetCouponHoldersRequest";
 import GetCouponRequest from "@port/in/request/bond/GetCouponRequest";
+import GetCouponsOrderedListRequest from "@port/in/request/bond/GetCouponsOrderedListRequest";
 import GetPrincipalForRequest from "@port/in/request/bond/GetPrincipalForRequest";
 import GetTotalCouponHoldersRequest from "@port/in/request/bond/GetTotalCouponHoldersRequest";
-import GetAllCouponsRequest from "@port/in/request/bond/GetAllCouponsRequest";
 import UpdateMaturityDateRequest from "@port/in/request/bond/UpdateMaturityDateRequest";
-import BigDecimal from "@domain/context/shared/BigDecimal";
 
-import { Coupon } from "@domain/context/bond/Coupon";
-import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
 import RedeemAtMaturityByPartitionRequest from "@port/in/request/bond/RedeemAtMaturityByPartitionRequest";
 import RemoveProceedRecipientRequest from "@port/in/request/bond/RemoveProceedRecipientRequest";
 import SetCouponRequest from "@port/in/request/bond/SetCouponRequest";
-import UpdateMaturityDateRequest from "@port/in/request/bond/UpdateMaturityDateRequest";
 import UpdateProceedRecipientDataRequest from "@port/in/request/bond/UpdateProceedRecipientDataRequest";
 import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
 import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
@@ -51,7 +45,6 @@ import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetC
 import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
 import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
 import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
-import { BigNumber } from "ethers";
 import {
   CreateTrexSuiteBondRequest,
   GetProceedRecipientDataRequest,

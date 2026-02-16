@@ -2,11 +2,10 @@
 
 import { Query } from "@core/query/Query";
 import { QueryResponse } from "@core/query/QueryResponse";
-import { BigNumber } from "ethers";
 
 export class GetRateQueryResponse implements QueryResponse {
   constructor(
-    public readonly rate: BigNumber,
+    public readonly rate: bigint,
     public readonly decimals: number,
   ) {}
 }

@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import "reflect-metadata";
-import { container } from "tsyringe";
-import { GetImpactDataQueryHandler } from "./GetImpactDataQueryHandler";
-import { GetImpactDataQuery, GetImpactDataQueryResponse } from "./GetImpactDataQuery";
+import EvmAddress from "@domain/context/contract/EvmAddress";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import AccountService from "@service/account/AccountService";
-import EvmAddress from "@domain/context/contract/EvmAddress";
-import { BigNumber } from "ethers";
+import "reflect-metadata";
+import { container } from "tsyringe";
 import GetImpactDataQueryError from "./error/GetImpactDataQueryError";
+import { GetImpactDataQuery, GetImpactDataQueryResponse } from "./GetImpactDataQuery";
+import { GetImpactDataQueryHandler } from "./GetImpactDataQueryHandler";
 
 describe("GetImpactDataQueryHandler", () => {
   let handler: GetImpactDataQueryHandler;
@@ -34,13 +33,7 @@ describe("GetImpactDataQueryHandler", () => {
     // Arrange
     const securityId = "0.0.123456";
     const evmAddress = new EvmAddress("0x1234567890123456789012345678901234567890");
-    const mockResult: [BigNumber, BigNumber, BigNumber, number, BigNumber] = [
-      BigNumber.from("2000"),
-      BigNumber.from("1000"),
-      BigNumber.from("500"),
-      2,
-      BigNumber.from("10000"),
-    ];
+    const mockResult: [bigint, bigint, bigint, number, bigint] = [2000n, 1000n, 500n, 2, 10000n];
 
     mockAccountService.getAccountEvmAddress.mockResolvedValue(evmAddress);
     mockQueryAdapter.getImpactData.mockResolvedValue(mockResult);

@@ -36,7 +36,7 @@ export class GetInterestRateQueryHandler implements IQueryHandler<GetInterestRat
           startRate.toString(),
           missedPenalty.toString(),
           reportPeriod.toString(),
-          rateDecimals,
+          Number(rateDecimals),
         ),
       );
     } catch (error) {

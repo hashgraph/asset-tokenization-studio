@@ -1287,10 +1287,9 @@ export class RPCQueryAdapter {
   async getCouponFromOrderedListAt(address: EvmAddress, pos: number): Promise<number> {
       LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
 
-      const factory = await this.connect(BondRead__factory, address.toString())
       const couponId = await this.connect(BondRead__factory, address.toString()).getCouponFromOrderedListAt(pos);
 
-      return couponId.toNumber();
+      return Number(couponId);
     }
 
     async getCouponsOrderedList(address: EvmAddress, pageIndex?: number, pageLength?: number): Promise<number[]> {
@@ -1299,12 +1298,12 @@ export class RPCQueryAdapter {
       // If pagination parameters are provided, use paginated call
       if (pageIndex !== undefined && pageLength !== undefined) {
         const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(pageIndex, pageLength);
-        return couponIds.map(id => id.toNumber());
+        return couponIds.map(id => Number(id));
       }
 
       // Otherwise get all coupons (simulate by getting first page with large length)
       const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(0, 1000);
-      return couponIds.map(id => id.toNumber());
+      return couponIds.map(id => Number(id));
     }
 
     async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
@@ -1312,7 +1311,7 @@ export class RPCQueryAdapter {
 
       const total = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedListTotal();
 
-      return total.toNumber();
+      return Number(total);
     }
 
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
@@ -1400,12 +1399,12 @@ export class RPCQueryAdapter {
     return await this.connect(CorporateActionsFacet__factory, address.toString()).actionContentHashExists(contentHash);
   }
 
-  async getRate(address: EvmAddress): Promise<[BigNumber, number]> {
+  async getRate(address: EvmAddress): Promise<[bigint, number]> {
       const result = await this.connect(FixedRate__factory, address.toString()).getRate();
-      return [result.rate_, result.decimals_];
+      return [result.rate_, Number(result.decimals_)];
     }
 
-    async getInterestRate(address: EvmAddress): Promise<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, number]> {
+    async getInterestRate(address: EvmAddress): Promise<[bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint]> {
       LogService.logTrace(`Getting interest rate for security: ${address.toString()}`);
       const result = await this.connect(KpiLinkedRate__factory, address.toString()).getInterestRate();
       return [
@@ -1420,7 +1419,7 @@ export class RPCQueryAdapter {
       ];
     }
 
-    async getKpiLatestKpiData(address: EvmAddress, from: BigNumber, to: BigNumber, kpi: EvmAddress): Promise<{ value: BigNumber; exists: boolean }> {
+    async getKpiLatestKpiData(address: EvmAddress, from: bigint, to: bigint, kpi: EvmAddress): Promise<{ value: bigint; exists: boolean }> {
       LogService.logTrace(`Getting latest KPI data for the security: ${address.toString()}`);
       const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, kpi.toString());
       return { value: result[0], exists: result[1] };
@@ -1429,22 +1428,22 @@ export class RPCQueryAdapter {
     async getMinDate(address: EvmAddress): Promise<number> {
       LogService.logTrace(`Getting min date for the security: ${address.toString()}`);
       const result = await this.connect(Kpis__factory, address.toString()).getMinDate();
-      return result.toNumber();
+      return Number(result);
     }
 
-    async getImpactData(address: EvmAddress): Promise<[BigNumber, BigNumber, BigNumber, number, BigNumber]> {
+    async getImpactData(address: EvmAddress): Promise<[bigint, bigint, bigint, number, bigint]> {
       LogService.logTrace(`Getting impact data for the security: ${address.toString()}`);
       const result = await this.connect(KpiLinkedRate__factory, address.toString()).getImpactData();
       return [
         result.maxDeviationCap,
         result.baseLine,
         result.maxDeviationFloor,
-        result.impactDataDecimals,
+        Number(result.impactDataDecimals),
         result.adjustmentPrecision,
       ];
     }
 
-    async isCheckPointDate(address: EvmAddress, date: BigNumber, project: EvmAddress): Promise<boolean> {
+    async isCheckPointDate(address: EvmAddress, date: number, project: EvmAddress): Promise<boolean> {
       LogService.logTrace(`Checking if date ${date.toString()} is a checkpoint date for project ${project.toString()}`);
       return await this.connect(Kpis__factory, address.toString()).isCheckPointDate(date, project.toString());
     }
@@ -1452,7 +1451,7 @@ export class RPCQueryAdapter {
     async scheduledCouponListingCount(address: EvmAddress): Promise<number> {
       LogService.logTrace(`Getting scheduled coupon listing count for security: ${address.toString()}`);
       const result = await this.connect(ScheduledCouponListingFacet__factory, address.toString()).scheduledCouponListingCount();
-      return result.toNumber();
+      return Number(result);
     }
 
     async getScheduledCouponListing(address: EvmAddress, pageIndex: number, pageLength: number): Promise<any> {

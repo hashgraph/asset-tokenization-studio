@@ -3178,7 +3178,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       "setRate",
       securityId!,
       GAS.SET_RATE,
-      [rate.toBigNumber(), rateDecimals],
+      [rate, rateDecimals],
     );
   }
 
@@ -3203,13 +3203,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       securityId!,
       GAS.SET_INTEREST_RATE,
       [{
-        maxRate: maxRate.toBigNumber(),
-        baseRate: baseRate.toBigNumber(),
-        minRate: minRate.toBigNumber(),
-        startPeriod: startPeriod.toBigNumber(),
-        startRate: startRate.toBigNumber(),
-        missedPenalty: missedPenalty.toBigNumber(),
-        reportPeriod: reportPeriod.toBigNumber(),
+        maxRate: maxRate,
+        baseRate: baseRate,
+        minRate: minRate,
+        startPeriod: startPeriod,
+        startRate: startRate,
+        missedPenalty: missedPenalty,
+        reportPeriod: reportPeriod,
         rateDecimals: rateDecimals,
       }],
     );
@@ -3233,11 +3233,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       securityId!,
       GAS.SET_IMPACT_DATA,
       [{
-        maxDeviationCap: maxDeviationCap.toBigNumber(),
-        baseLine: baseLine.toBigNumber(),
-        maxDeviationFloor: maxDeviationFloor.toBigNumber(),
+        maxDeviationCap: maxDeviationCap,
+        baseLine: baseLine,
+        maxDeviationFloor: maxDeviationFloor,
         impactDataDecimals: impactDataDecimals,
-        adjustmentPrecision: adjustmentPrecision.toBigNumber(),
+        adjustmentPrecision: adjustmentPrecision,
       }],
     );
   }

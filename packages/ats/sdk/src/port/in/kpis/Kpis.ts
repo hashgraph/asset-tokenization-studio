@@ -10,7 +10,6 @@ import { GetMinDateQuery } from "@query/kpis/getMinDate/GetMinDateQuery";
 import GetMinDateRequest from "../request/kpis/GetMinDateRequest";
 import { IsCheckPointDateQuery } from "@query/kpis/isCheckPointDate/IsCheckPointDateQuery";
 import IsCheckPointDateRequest from "../request/kpis/IsCheckPointDateRequest";
-import { BigNumber } from "ethers";
 
 interface IKpisInPort {
   getLatestKpiData(request: GetLatestKpiDataRequest): Promise<{ value: string; exists: boolean }>;
@@ -26,12 +25,7 @@ class KpisInPort implements IKpisInPort {
     ValidatedRequest.handleValidation("GetLatestKpiDataRequest", request);
 
     const response = await this.queryBus.execute(
-      new GetLatestKpiDataQuery(
-        request.securityId,
-        BigNumber.from(request.from),
-        BigNumber.from(request.to),
-        request.kpi,
-      ),
+      new GetLatestKpiDataQuery(request.securityId, BigInt(request.from), BigInt(request.to), request.kpi),
     );
     return { value: response.value, exists: response.exists };
   }
@@ -49,7 +43,7 @@ class KpisInPort implements IKpisInPort {
     ValidatedRequest.handleValidation("IsCheckPointDateRequest", request);
 
     const result = await this.queryBus.execute(
-      new IsCheckPointDateQuery(request.securityId, BigNumber.from(request.date), request.project),
+      new IsCheckPointDateQuery(request.securityId, BigInt(request.date), request.project),
     );
     return result.isCheckPoint;
   }

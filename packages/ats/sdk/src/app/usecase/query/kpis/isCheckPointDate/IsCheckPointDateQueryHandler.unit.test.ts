@@ -8,7 +8,6 @@ import ContractService from "@service/contract/ContractService";
 import { IsCheckPointDateQueryHandler } from "./IsCheckPointDateQueryHandler";
 import { IsCheckPointDateQuery, IsCheckPointDateQueryResponse } from "./IsCheckPointDateQuery";
 import { IsCheckPointDateQueryError } from "./error/IsCheckPointDateQueryError";
-import { BigNumber } from "ethers";
 
 describe("IsCheckPointDateQueryHandler", () => {
   let handler: IsCheckPointDateQueryHandler;
@@ -18,7 +17,7 @@ describe("IsCheckPointDateQueryHandler", () => {
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const projectEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const errorMsg = ErrorMsgFixture.create().msg;
-  const testDate = BigNumber.from(1234567890);
+  const testDate = BigInt(1234567890);
   const testProject = "project-123";
 
   beforeEach(() => {

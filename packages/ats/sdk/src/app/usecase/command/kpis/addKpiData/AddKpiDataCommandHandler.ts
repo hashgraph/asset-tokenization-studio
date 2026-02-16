@@ -9,7 +9,7 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import { AddKpiDataCommandError } from "./error/AddKpiDataCommandError";
 
 @CommandHandler(AddKpiDataCommand)
-export class AddKpiDataCommandHandler implements ICommandHandler<AddKpiDataCommand, AddKpiDataCommandResponse> {
+export class AddKpiDataCommandHandler implements ICommandHandler<AddKpiDataCommand> {
   constructor(
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,

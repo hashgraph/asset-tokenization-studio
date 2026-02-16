@@ -5,7 +5,6 @@ import { QueryBus } from "@core/query/QueryBus";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import { ValidationError } from "@core/validation/ValidationError";
 import LogService from "@service/log/LogService";
-import { BigNumber } from "ethers";
 import GetLatestKpiDataRequest from "../request/kpis/GetLatestKpiDataRequest";
 import GetMinDateRequest from "../request/kpis/GetMinDateRequest";
 import IsCheckPointDateRequest from "../request/kpis/IsCheckPointDateRequest";
@@ -74,8 +73,8 @@ describe("Kpis", () => {
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetLatestKpiDataQuery(
           getLatestKpiDataRequest.securityId,
-          BigNumber.from(getLatestKpiDataRequest.from),
-          BigNumber.from(getLatestKpiDataRequest.to),
+          BigInt(getLatestKpiDataRequest.from),
+          BigInt(getLatestKpiDataRequest.to),
           getLatestKpiDataRequest.kpi,
         ),
       );
@@ -93,8 +92,8 @@ describe("Kpis", () => {
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetLatestKpiDataQuery(
           getLatestKpiDataRequest.securityId,
-          BigNumber.from(getLatestKpiDataRequest.from),
-          BigNumber.from(getLatestKpiDataRequest.to),
+          BigInt(getLatestKpiDataRequest.from),
+          BigInt(getLatestKpiDataRequest.to),
           getLatestKpiDataRequest.kpi,
         ),
       );
@@ -180,7 +179,7 @@ describe("Kpis", () => {
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new IsCheckPointDateQuery(
           isCheckPointDateRequest.securityId,
-          BigNumber.from(isCheckPointDateRequest.date),
+          BigInt(isCheckPointDateRequest.date),
           isCheckPointDateRequest.project,
         ),
       );
@@ -198,7 +197,7 @@ describe("Kpis", () => {
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new IsCheckPointDateQuery(
           isCheckPointDateRequest.securityId,
-          BigNumber.from(isCheckPointDateRequest.date),
+          BigInt(isCheckPointDateRequest.date),
           isCheckPointDateRequest.project,
         ),
       );

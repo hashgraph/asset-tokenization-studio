@@ -24,7 +24,7 @@ export class IsCheckPointDateQueryHandler implements IQueryHandler<IsCheckPointD
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
       const projectEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(project);
-      const res = await this.queryAdapter.isCheckPointDate(securityEvmAddress, date, projectEvmAddress);
+      const res = await this.queryAdapter.isCheckPointDate(securityEvmAddress, Number(date), projectEvmAddress);
 
       return new IsCheckPointDateQueryResponse(res);
     } catch (error) {
