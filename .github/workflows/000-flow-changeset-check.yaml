@@ -12,6 +12,10 @@ on:
       - labeled # checks for bypass labels (no-changeset, docs-only, hotfix, chore)
       - unlabeled
 
+defaults:
+  run:
+    shell: bash
+
 permissions:
   contents: read
   pull-requests: read
@@ -19,7 +23,8 @@ permissions:
 jobs:
   check-changeset:
     name: Validate Changeset Required
-    runs-on: token-studio-linux-large
+    runs-on: token-studio-linux-medium
+    timeout-minutes: 5
 
     steps:
       - name: Harden Runner
@@ -28,7 +33,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 0
           # Ensure we have the head branch for comparison
