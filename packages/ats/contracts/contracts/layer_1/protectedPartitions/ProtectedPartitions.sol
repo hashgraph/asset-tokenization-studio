@@ -10,7 +10,7 @@ abstract contract ProtectedPartitions is IProtectedPartitions, Internals {
     function initialize_ProtectedPartitions(
         bool _protectPartitions
     ) external override onlyUninitialized(_isProtectedPartitionInitialized()) returns (bool success_) {
-        _initialize_ProtectedPartitions(_protectPartitions);
+        success_ = _initialize_ProtectedPartitions(_protectPartitions);
     }
 
     function protectPartitions()
