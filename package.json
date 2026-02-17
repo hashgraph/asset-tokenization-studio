@@ -199,7 +199,8 @@
     "rimraf": "^6.0.1",
     "solhint": "^3.3.7",
     "solhint-plugin-prettier": "^0.1.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "typescript-eslint": "8.19.0"
   },
   "lint-staged": {
     "*.sol": ["node check-license.js", "npm run lint:staged:sol --", "npm run format:staged --"],
