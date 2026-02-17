@@ -196,11 +196,15 @@
     "lint-staged": "^15.2.11",
     "prettier": "^3.5.3",
     "prettier-plugin-solidity": "^1.4.2",
-    "rimraf": "^6.0.1",
+    "rimraf": "6.0.1",
     "solhint": "^3.3.7",
     "solhint-plugin-prettier": "^0.1.0",
+    "text-decoder": "1.2.3",
     "typescript": "^5.8.2",
-    "typescript-eslint": "8.19.0"
+    "typescript-eslint": "8.19.0",
+    "webpack-sources": "3.3.3",
+    "@aws-sdk/client-kms": "3.901.0",
+    "@aws-sdk/util-endpoints": "3.901.0"
   },
   "lint-staged": {
     "*.sol": ["node check-license.js", "npm run lint:staged:sol --", "npm run format:staged --"],
