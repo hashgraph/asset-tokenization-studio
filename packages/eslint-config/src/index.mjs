@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettier from "eslint-plugin-prettier";
+import prettierConfig from "eslint-config-prettier";
 import unusedImports from "eslint-plugin-unused-imports";
 import globals from "globals";
 
@@ -23,12 +24,12 @@ export const baseIgnores = {
     "**/.idea/**",
     "**/fixtures/**",
     "**/__mocks__/**",
+    "**/node_modules/**/*.js",
     "**/*.config.{js,cjs,mjs}",
     "**/jest.config.*",
     "**/hardhat.config.ts",
     "**/commitlint.config.ts",
-    "**/*.js",
-    "**/*d.ts",
+    "**/*.d.ts",
     "**/tmp/**",
     "**/example/**",
   ],
@@ -68,7 +69,6 @@ export const baseRules = {
       },
     ],
     "unused-imports/no-unused-imports": "error",
-    "@typescript-eslint/no-var-requires": "off",
     "prettier/prettier": [
       "error",
       {
@@ -83,5 +83,5 @@ export const baseRules = {
  * Includes: ignores, typescript-eslint recommended, and base rules.
  */
 export default function createBaseConfig() {
-  return [baseIgnores, ...tseslint.configs.recommended, baseRules];
+  return [baseIgnores, ...tseslint.configs.recommended, baseRules, prettierConfig];
 }
