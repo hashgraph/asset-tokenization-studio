@@ -37,10 +37,12 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
     }
 
     function _adjustTotalSupply(uint256 factor) internal override {
+        _migrateTotalSupplyIfNeeded();
         _erc20Storage().totalSupply *= factor;
     }
 
     function _adjustTotalBalanceFor(uint256 abaf, address account) internal override {
+        _migrateBalanceIfNeeded(account);
         uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
         uint256 oldBalance = _erc20Storage().balances[account];
         uint256 newBalance = oldBalance * factor;
