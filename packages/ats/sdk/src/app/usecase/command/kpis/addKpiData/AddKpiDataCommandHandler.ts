@@ -29,8 +29,7 @@ export class AddKpiDataCommandHandler implements ICommandHandler<AddKpiDataComma
 
       return new AddKpiDataCommandResponse(result.id!);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new AddKpiDataCommandError(errorMessage);
+      throw new AddKpiDataCommandError(error as Error);
     }
   }
 }
