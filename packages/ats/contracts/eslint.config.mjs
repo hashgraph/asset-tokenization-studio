@@ -5,9 +5,15 @@ import mochaPreset from "@hashgraph/eslint-config/mocha";
 export default [
   ...createBaseConfig(),
 
+  // Global ignores for generated files
+  {
+    ignores: ["typechain-types/**/*", "build/**/*"],
+  },
+
   // All TS files run in Node (Hardhat)
   {
     files: ["**/*.ts"],
+    ignores: ["typechain-types/**/*", "build/**/*"],
     ...nodePreset,
   },
 
@@ -17,7 +23,7 @@ export default [
   // Non-test source files: enforce no unused expressions
   {
     files: ["**/*.ts"],
-    ignores: ["**/*.test.ts", "**/*.spec.ts", "test/**/*"],
+    ignores: ["**/*.test.ts", "**/*.spec.ts", "test/**/*", "typechain-types/**/*", "build/**/*"],
     rules: {
       "@typescript-eslint/no-unused-expressions": "error",
     },
