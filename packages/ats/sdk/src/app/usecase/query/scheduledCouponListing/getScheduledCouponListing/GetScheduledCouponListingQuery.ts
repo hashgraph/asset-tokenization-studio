@@ -4,7 +4,7 @@ import { Query } from "@core/query/Query";
 import { QueryResponse } from "@core/query/QueryResponse";
 
 export class GetScheduledCouponListingQueryResponse implements QueryResponse {
-  constructor(public readonly scheduledCouponListing: any) {}
+  constructor(public readonly scheduledCouponListing: { id: number; date: string; amount: string }) {}
 }
 
 export class GetScheduledCouponListingQuery extends Query<GetScheduledCouponListingQueryResponse> {

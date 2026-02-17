@@ -685,13 +685,9 @@ class BondInPort implements IBondInPort {
 
   @LogError
   async addKpiData(request: AddKpiDataRequest): Promise<{ transactionId: string }> {
-    // Validación manual básica
-    if (!request.securityId || !request.date || !request.value || !request.project) {
-      throw new Error("Missing required fields in AddKpiDataRequest");
-    }
-
+    ValidatedRequest.handleValidation(AddKpiDataRequest.name, request);
     const response = await this.commandBus.execute(
-      new AddKpiDataCommand(request.securityId, request.date, request.value, request.project.toString()),
+      new AddKpiDataCommand(request.securityId, request.date, request.value, request.project),
     );
     return { transactionId: response.transactionId };
   }

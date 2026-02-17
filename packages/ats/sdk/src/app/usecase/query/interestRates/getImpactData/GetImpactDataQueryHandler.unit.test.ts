@@ -15,6 +15,9 @@ describe("GetImpactDataQueryHandler", () => {
   let mockAccountService: jest.Mocked<AccountService>;
 
   beforeEach(() => {
+    // Clear the container to avoid dependency issues
+    container.clearInstances();
+
     mockQueryAdapter = {
       getImpactData: jest.fn(),
     } as any;

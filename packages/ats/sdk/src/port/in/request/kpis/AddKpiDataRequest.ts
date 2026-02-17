@@ -1,25 +1,34 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { IsNotEmpty, IsString, IsNumber } from "class-validator";
-import EvmAddress from "@domain/context/contract/EvmAddress";
+import ValidatedRequest from "@core/validation/ValidatedArgs";
+import FormatValidation from "../FormatValidation";
 
-export class AddKpiDataRequest {
-  @IsNotEmpty()
-  @IsString()
-  securityId!: string;
+export class AddKpiDataRequest extends ValidatedRequest<AddKpiDataRequest> {
+  securityId: string;
+  date: number;
+  value: string;
+  project: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  date!: number;
-
-  @IsNotEmpty()
-  @IsString()
-  value!: string;
-
-  @IsNotEmpty()
-  project!: EvmAddress;
-
-  constructor(data: Partial<AddKpiDataRequest>) {
-    Object.assign(this, data);
+  constructor({
+    securityId,
+    date,
+    value,
+    project,
+  }: {
+    securityId: string;
+    date: number;
+    value: string;
+    project: string;
+  }) {
+    super({
+      securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
+      date: FormatValidation.checkNumber(),
+      value: FormatValidation.checkString({ emptyCheck: true }),
+      project: FormatValidation.checkEvmAddressFormat(),
+    });
+    this.securityId = securityId;
+    this.date = date;
+    this.value = value;
+    this.project = project;
   }
 }

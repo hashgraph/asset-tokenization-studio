@@ -30,7 +30,6 @@ import NetworkService from "@service/network/NetworkService";
 import SecurityViewModel from "@port/in/response/SecurityViewModel";
 import Injectable from "@core/injectable/Injectable";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
-import EvmAddress from "@domain/context/contract/EvmAddress";
 import {
   CastRegulationSubType,
   CastRegulationType,
@@ -380,7 +379,7 @@ describe("🧪 Bond test", () => {
       securityId: bond.evmDiamondAddress!.toString(),
       date: Math.floor(Date.now() / 1000),
       value: "1000",
-      project: new EvmAddress("0x0000000000000000000000000000000000000001"),
+      project: "0x0000000000000000000000000000000000000001",
     });
 
     const result = await Bond.addKpiData(request);

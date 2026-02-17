@@ -17,12 +17,12 @@ describe("IsCheckPointDateQueryHandler", () => {
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const projectEvmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const errorMsg = ErrorMsgFixture.create().msg;
-  const testDate = BigInt(1234567890);
+  const testDate = 1234567890;
   const testProject = "project-123";
 
   beforeEach(() => {
     handler = new IsCheckPointDateQueryHandler(queryAdapterServiceMock, contractServiceMock);
-    query = new IsCheckPointDateQuery("security-123", testDate, testProject);
+    query = new IsCheckPointDateQuery("security-123", BigInt(testDate), testProject);
   });
 
   afterEach(() => {
