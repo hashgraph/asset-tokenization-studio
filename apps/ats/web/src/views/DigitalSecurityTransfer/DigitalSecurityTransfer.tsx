@@ -35,7 +35,7 @@ export const DigitalSecurityTransfer = () => {
   const { t: TButton } = useTranslation("security", {
     keyPrefix: "transfer.button",
   });
-  const { id = "" } = useParams();
+  const { id = "" } = useParams<{ id: string }>();
   const { details } = useSecurityStore();
   const { address: walletAddress } = useWalletStore();
 
