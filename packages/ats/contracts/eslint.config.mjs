@@ -1,24 +1,25 @@
-/**
- * ESLint configuration for ATS Contracts package
- * Extends root configuration with Hardhat/Mocha-specific overrides
- * @see https://eslint.org/docs/latest/use/configure/configuration-files
- */
-import rootConfig from "../../../eslint.config.mjs";
-import globals from "globals";
+import createBaseConfig from "@hashgraph/eslint-config";
+import nodePreset from "@hashgraph/eslint-config/node";
+import mochaPreset from "@hashgraph/eslint-config/mocha";
 
 export default [
-  ...rootConfig,
+  ...createBaseConfig(),
 
-  // Hardhat/Mocha test files - add test globals and relax rules
+  // All TS files run in Node (Hardhat)
   {
-    files: ["test/**/*.ts", "**/*.test.ts", "**/*.spec.ts"],
-    languageOptions: {
-      globals: {
-        ...globals.mocha, // describe, it, before, after, beforeEach, afterEach
-      },
-    },
+    files: ["**/*.ts"],
+    ...nodePreset,
+  },
+
+  // Mocha/Chai test overlay
+  mochaPreset,
+
+  // Non-test source files: enforce no unused expressions
+  {
+    files: ["**/*.ts"],
+    ignores: ["**/*.test.ts", "**/*.spec.ts", "test/**/*"],
     rules: {
-      "@typescript-eslint/no-unused-expressions": "off", // Chai assertions use expressions
+      "@typescript-eslint/no-unused-expressions": "error",
     },
   },
 ];

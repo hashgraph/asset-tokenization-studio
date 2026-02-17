@@ -11,8 +11,8 @@
     "setup": "npm install",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint \"{src,test}/**/*.ts\" --cache",
-    "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -33,6 +33,7 @@
     "rxjs": "7.8"
   },
   "devDependencies": {
+    "@hashgraph/eslint-config": "*",
     "@nestjs/testing": "10.3.3",
     "@types/node": "20.11.24",
     "typescript": "5.3.3"

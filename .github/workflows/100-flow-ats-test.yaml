@@ -63,6 +63,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint ATS packages
+        run: npm run ats:lint:js
+
       - name: Build ATS packages
         run: npm run ats:build
 

@@ -154,6 +154,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@hashgraph/eslint-config": "*",
     "@hashgraph/sdk": "2.64.5",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",

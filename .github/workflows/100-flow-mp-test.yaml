@@ -66,6 +66,9 @@ jobs:
       - name: Install NestJS CLI globally
         run: npm install -g @nestjs/cli
 
+      - name: Lint Mass Payout packages
+        run: npm run mass-payout:lint
+
       - name: Build mass-payout
         run: npm run mass-payout:build:ci
 
