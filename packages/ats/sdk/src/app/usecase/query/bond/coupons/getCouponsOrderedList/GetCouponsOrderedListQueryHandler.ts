@@ -24,7 +24,6 @@ export class GetCouponsOrderedListQueryHandler implements IQueryHandler<GetCoupo
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
-      // Obtener los coupon IDs ordenados usando el QueryAdapter
       const couponIds = await this.queryAdapter.getCouponsOrderedList(securityEvmAddress, pageIndex, pageLength);
 
       return new GetCouponsOrderedListQueryResponse(couponIds);

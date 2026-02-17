@@ -7,7 +7,7 @@ import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import ContractService from "@service/contract/ContractService";
 import { GetCouponFromOrderedListAtQueryError } from "./error/GetCouponFromOrderedListAtQueryError";
 import {
-  GetCouponFromOrderedListAtQuery as GetCouponFromOrderedListAtQuery,
+  GetCouponFromOrderedListAtQuery,
   GetCouponFromOrderedListAtQueryResponse,
 } from "./GetCouponFromOrderedListAtQuery";
 import EvmAddress from "@domain/context/contract/EvmAddress";
