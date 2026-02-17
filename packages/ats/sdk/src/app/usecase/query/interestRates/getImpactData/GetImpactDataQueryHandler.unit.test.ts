@@ -4,7 +4,6 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import AccountService from "@service/account/AccountService";
 import "reflect-metadata";
-import { container } from "tsyringe";
 import GetImpactDataQueryError from "./error/GetImpactDataQueryError";
 import { GetImpactDataQuery, GetImpactDataQueryResponse } from "./GetImpactDataQuery";
 import { GetImpactDataQueryHandler } from "./GetImpactDataQueryHandler";
@@ -15,9 +14,6 @@ describe("GetImpactDataQueryHandler", () => {
   let mockAccountService: jest.Mocked<AccountService>;
 
   beforeEach(() => {
-    // Clear the container to avoid dependency issues
-    container.clearInstances();
-
     mockQueryAdapter = {
       getImpactData: jest.fn(),
     } as any;
@@ -26,10 +22,8 @@ describe("GetImpactDataQueryHandler", () => {
       getAccountEvmAddress: jest.fn(),
     } as any;
 
-    container.registerInstance(RPCQueryAdapter, mockQueryAdapter);
-    container.registerInstance(AccountService, mockAccountService);
-
-    handler = container.resolve(GetImpactDataQueryHandler);
+    // Instantiate handler directly with mocks to avoid container issues
+    handler = new GetImpactDataQueryHandler(mockQueryAdapter, mockAccountService);
   });
 
   it("should return impact data successfully", async () => {
