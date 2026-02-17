@@ -10,11 +10,13 @@ This PR introduces a storage migration that moves `totalSupply` and `balances` f
 
 - **New Storage Structure**: Added `totalSupply` and `balances` fields to ERC20Storage struct in ERC20StorageWrapper1
 - **Lazy Migration**: Implemented `_migrateTotalSupplyIfNeeded()` and `_migrateBalanceIfNeeded()` functions that automatically migrate values from deprecated storage on first access
+- **Migration Triggers**: `_adjustTotalSupply` and `_adjustTotalBalanceFor` call `_migrateTotalSupplyIfNeeded` and `_migrateBalanceIfNeeded` respectively, ensuring migration is triggered during balance adjustment operations
 - **Backward Compatibility**: View functions prioritize legacy storage values, falling back to new storage when legacy is empty
 - **Deprecated Fields**: Renamed `_totalSupply_` to `DEPRECATED_totalSupply` and `_balances_` to `DEPRECATED_balances` in ERC1410BasicStorage to indicate deprecation
 - **Event Emission**: Simplified Transfer event emission by replacing internal `_emitTransferEvent` wrapper with direct `emit Transfer` statements
 - **New Helper Methods**: Added `_increaseBalance`, `_reduceBalance`, `_increaseTotalSupply`, `_reduceTotalSupply`, and `_adjustTotalBalanceFor` functions
 - **Migration Test Contract**: Added MigrationFacetTest for testing the migration scenarios
+- **Integration Tests**: Added `adjustBalances` integration tests verifying that `adjustBalances` migrates `totalSupply` eagerly and that per-account balance migration is triggered lazily on the next token interaction
 
 **Benefits:**
 
