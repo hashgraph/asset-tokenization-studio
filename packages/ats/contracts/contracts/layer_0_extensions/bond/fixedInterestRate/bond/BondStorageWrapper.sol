@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
 import { InternalsFixedInterestRate } from "../Internals.sol";
 import { Common } from "contracts/layer_0/common/Common.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
+import { BondInternals } from "contracts/layer_0/bond/BondInternals.sol";
 import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
 
 abstract contract BondStorageWrapperFixedInterestRate is InternalsFixedInterestRate, Common {
@@ -12,7 +12,12 @@ abstract contract BondStorageWrapperFixedInterestRate is InternalsFixedInterestR
 
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
-    ) internal virtual override(Internals, BondStorageWrapper) returns (bytes32 corporateActionId_, uint256 couponID_) {
+    )
+        internal
+        virtual
+        override(BondInternals, BondStorageWrapper)
+        returns (bytes32 corporateActionId_, uint256 couponID_)
+    {
         if (
             _newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING ||
             _newCoupon.rate != 0 ||

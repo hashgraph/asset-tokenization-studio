@@ -6,7 +6,7 @@ import { LowLevelCall } from "contracts/layer_0/common/libraries/LowLevelCall.so
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "contracts/layer_0/common/libraries/DecimalsLib.sol";
 import { InternalsKpiLinkedInterestRate } from "../Internals.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
+import { BondInternals } from "contracts/layer_0/bond/BondInternals.sol";
 import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";
 import { KpisStorageWrapper } from "../../KpisStorageWrapper.sol";
@@ -22,13 +22,18 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
 
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
-    ) internal virtual override(Internals, BondStorageWrapper) returns (bytes32 corporateActionId_, uint256 couponID_) {
+    )
+        internal
+        virtual
+        override(BondInternals, BondStorageWrapper)
+        returns (bytes32 corporateActionId_, uint256 couponID_)
+    {
         _checkCoupon(_newCoupon, InterestRateIsKpiLinked.selector, "");
 
         return super._setCoupon(_newCoupon);
     }
 
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, KpisStorageWrapper) {
+    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(BondInternals, KpisStorageWrapper) {
         super._addToCouponsOrderedList(_couponID);
         _setKpiLinkedInterestRate(_couponID);
     }
@@ -47,7 +52,7 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
         internal
         view
         virtual
-        override(Internals, BondStorageWrapper)
+        override(BondInternals, BondStorageWrapper)
         returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
     {
         return _getCouponAdjustedAt(_couponID, _calculateKpiLinkedInterestRate, _blockTimestamp());
