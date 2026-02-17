@@ -14,12 +14,12 @@ import {
   Kyc,
   SsiManagement,
   TimeTravelFacet as TimeTravel,
+  type MigrationFacetTest,
 } from "@contract-types";
 import { grantRoleAndPauseToken } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, dateToUnixTimestamp } from "@scripts";
-import { deployEquityTokenFixture, MAX_UINT256 } from "@test";
-import { executeRbac } from "@test";
+import { ATS_ROLES, dateToUnixTimestamp, EQUITY_CONFIG_ID } from "@scripts";
+import { deployEquityTokenFixture, MAX_UINT256, executeRbac } from "@test";
 
 const amount = 1;
 const balanceOf_B_Original = [20 * amount, 200 * amount];
@@ -178,5 +178,143 @@ describe("Adjust Balances Tests", () => {
 
     expect(tasks_count_Before).to.be.equal(2);
     expect(tasks_count_After).to.be.equal(0);
+  });
+
+  describe("Migration Tests", () => {
+    let migrationFacet: MigrationFacetTest;
+
+    async function deploySecurityFixtureMultiPartitionWithMigration() {
+      const base = await deployEquityTokenFixture({
+        equityDataParams: {
+          securityData: {
+            isMultiPartition: true,
+          },
+        },
+        useLoadFixture: false,
+      });
+
+      const { blr, deployer, diamond: baseDiamond } = base;
+
+      // Deploy MigrationFacetTest
+      const migrationFacetFactory = await ethers.getContractFactory("MigrationFacetTest", deployer);
+      const migrationFacetContract = await migrationFacetFactory.deploy();
+      await migrationFacetContract.waitForDeployment();
+      const migrationFacetAddress = await migrationFacetContract.getAddress();
+
+      // Get the resolver key directly from the contract
+      const migrationResolverKey = await migrationFacetContract.getStaticResolverKey();
+
+      // Register MigrationFacetTest with the BLR
+      await blr.registerBusinessLogics([
+        {
+          businessLogicKey: migrationResolverKey,
+          businessLogicAddress: migrationFacetAddress,
+        },
+      ]);
+
+      // Get the BLR's latest global version after registering MigrationFacetTest
+      const latestBLRVersion = Number(await blr.getLatestVersion());
+
+      // Get current facet IDs from the diamond to build the new configuration version
+      const diamondFacet = await ethers.getContractAt("DiamondFacet", baseDiamond.target);
+      const existingFacetIds = await diamondFacet.getFacetIds();
+
+      // All facets use latestBLRVersion (mirrors the scripts' createBatchConfiguration approach)
+      const allFacetIds = [...existingFacetIds, migrationResolverKey];
+      const facetConfigs = allFacetIds.map((id: string) => ({ id, version: latestBLRVersion }));
+
+      // Use batched createBatchConfiguration to avoid gas limit issues (same as scripts use batch of 20)
+      const BATCH_SIZE = 20;
+      for (let i = 0; i < facetConfigs.length; i += BATCH_SIZE) {
+        const batch = facetConfigs.slice(i, i + BATCH_SIZE);
+        const isLastBatch = i + BATCH_SIZE >= facetConfigs.length;
+        await blr.createBatchConfiguration(EQUITY_CONFIG_ID, batch, isLastBatch);
+      }
+
+      // Dynamically get the new config version and upgrade the diamond
+      const newConfigVersion = Number(await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID));
+      await diamondFacet.connect(deployer).updateConfigVersion(newConfigVersion);
+
+      // Set up standard roles
+      await executeRbac(base.accessControlFacet, [
+        { role: ATS_ROLES._PAUSER_ROLE, members: [base.user1.address] },
+        { role: ATS_ROLES._KYC_ROLE, members: [base.user1.address] },
+        { role: ATS_ROLES._SSI_MANAGER_ROLE, members: [base.deployer.address] },
+      ]);
+
+      return {
+        ...base,
+        migrationFacet: (await ethers.getContractAt("MigrationFacetTest", baseDiamond.target)) as MigrationFacetTest,
+        adjustBalancesFacet: (await ethers.getContractAt(
+          "AdjustBalancesFacet",
+          baseDiamond.target,
+        )) as AdjustBalancesFacet,
+        erc1410Facet: (await ethers.getContractAt("IERC1410", baseDiamond.target)) as IERC1410,
+        kycFacet: (await ethers.getContractAt("Kyc", baseDiamond.target)) as Kyc,
+        ssiManagementFacet: (await ethers.getContractAt("SsiManagement", baseDiamond.target)) as SsiManagement,
+        accessControlFacet: (await ethers.getContractAt("AccessControl", baseDiamond.target)) as AccessControl,
+      };
+    }
+
+    beforeEach(async () => {
+      const result = await loadFixture(deploySecurityFixtureMultiPartitionWithMigration);
+      diamond = result.diamond;
+      signer_A = result.deployer;
+      signer_B = result.user1;
+      signer_C = result.user2;
+      migrationFacet = result.migrationFacet;
+      adjustBalancesFacet = result.adjustBalancesFacet;
+      erc1410Facet = result.erc1410Facet;
+      kycFacet = result.kycFacet;
+      ssiManagementFacet = result.ssiManagementFacet;
+      accessControlFacet = result.accessControlFacet;
+    });
+
+    it("GIVEN non-migrated totalSupply and balance WHEN adjustBalances is called THEN totalSupply migrates and balance migrates on next interaction", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_A.address);
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+
+      await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
+      await kycFacet.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, 0, MAX_UINT256, signer_A.address);
+
+      const legacyTotalSupply = 1000 * amount;
+      const legacyBalance_B = 200 * amount;
+      const newIssuanceAmount = 50 * amount;
+
+      // Set up legacy state using MigrationFacetTest (simulates pre-migration storage)
+      await migrationFacet.setLegacyTotalSupply(legacyTotalSupply);
+      await migrationFacet.setLegacyBalance(signer_B.address, legacyBalance_B);
+
+      // Verify legacy state is set and new storage is empty before adjustBalances
+      expect(await migrationFacet.getLegacyTotalSupply()).to.equal(legacyTotalSupply);
+      expect(await migrationFacet.getLegacyBalance(signer_B.address)).to.equal(legacyBalance_B);
+      expect(await migrationFacet.getNewTotalSupply()).to.equal(0n);
+      expect(await migrationFacet.getNewBalance(signer_B.address)).to.equal(0n);
+
+      // Call adjustBalances - triggers _adjustTotalSupply which calls _migrateTotalSupplyIfNeeded
+      await adjustBalancesFacet.connect(signer_A).adjustBalances(1, 0);
+
+      // Verify totalSupply has been migrated from legacy to new storage
+      expect(await migrationFacet.getLegacyTotalSupply()).to.equal(0n);
+      expect(await migrationFacet.getNewTotalSupply()).to.equal(BigInt(legacyTotalSupply));
+
+      // Balance migration is lazy - signer_B's legacy balance is not migrated yet
+      expect(await migrationFacet.getLegacyBalance(signer_B.address)).to.equal(legacyBalance_B);
+
+      // Trigger lazy balance migration by issuing tokens to signer_B
+      // issueByPartition calls _increaseBalance which calls _migrateBalanceIfNeeded
+      await erc1410Facet.connect(signer_A).issueByPartition({
+        partition: _PARTITION_ID_2,
+        tokenHolder: signer_B.address,
+        value: newIssuanceAmount,
+        data: "0x",
+      });
+
+      // Verify balance has been migrated and new tokens added on top
+      expect(await migrationFacet.getLegacyBalance(signer_B.address)).to.equal(0n);
+      expect(await migrationFacet.getNewBalance(signer_B.address)).to.equal(
+        BigInt(legacyBalance_B) + BigInt(newIssuanceAmount),
+      );
+    });
   });
 });
