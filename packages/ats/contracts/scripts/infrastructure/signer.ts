@@ -24,7 +24,7 @@
  * @module infrastructure/signer
  */
 
-import { Wallet, JsonRpcProvider, Signer } from "ethers";
+import { Wallet, JsonRpcProvider, NonceManager, Signer } from "ethers";
 import { getNetworkConfig, getPrivateKey } from "./config";
 import { error } from "./utils/logging";
 
@@ -80,9 +80,11 @@ export async function createNetworkSigner(network: string, keyIndex: number = 0)
     process.exit(1);
   }
 
-  // Create provider and signer
+  // Create provider and signer with NonceManager to prevent nonce caching
+  // issues when deploying multiple contracts via JSON-RPC
   const provider = new JsonRpcProvider(networkConfig.jsonRpcUrl);
-  const signer = new Wallet(privateKey, provider);
+  const wallet = new Wallet(privateKey, provider);
+  const signer = new NonceManager(wallet);
   const address = await signer.getAddress();
 
   return { signer, address };
