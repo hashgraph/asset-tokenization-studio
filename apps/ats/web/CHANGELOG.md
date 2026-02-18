@@ -1,5 +1,14 @@
 # @hashgraph/asset-tokenization-dapp
 
+## 4.2.0
+
+### Patch Changes
+
+- 9f22ba7: Fix select all roles in edit roles page
+- Updated dependencies [c5b2a50]
+- Updated dependencies [2a26b41]
+  - @hashgraph/asset-tokenization-sdk@4.2.0
+
 ## 4.1.1
 
 ### Patch Changes
