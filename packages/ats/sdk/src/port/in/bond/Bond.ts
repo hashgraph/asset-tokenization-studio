@@ -108,6 +108,9 @@ interface IBondInPort {
   getProceedRecipientData(request: GetProceedRecipientDataRequest): Promise<{ payload: string }>;
   getProceedRecipientsCount(request: GetProceedRecipientsCountRequest): Promise<{ payload: number }>;
   getProceedRecipients(request: GetProceedRecipientsRequest): Promise<{ payload: string[] }>;
+  createKpiLinkedRate(
+    req: CreateBondKpiLinkedRateRequest,
+  ): Promise<{ security: SecurityViewModel; transactionId: string }>;
 }
 
 class BondInPort implements IBondInPort {
