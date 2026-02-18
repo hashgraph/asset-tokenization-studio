@@ -47,7 +47,7 @@ export async function deployLifeCycleCashFlowContracts({
     new DeployContractCommand({
       name: "ProxyAdmin",
       signer,
-      args: [signer.getAddress()],
+      args: [await signer.getAddress()],
     }),
   );
 
@@ -86,13 +86,13 @@ export async function deployLifeCycleCashFlowContracts({
 export async function deployContract({ name, signer, args }: DeployContractCommand): Promise<DeployContractResult> {
   const contractFactory = await ethers.getContractFactory(name, signer);
   const contract = await contractFactory.deploy(...args);
-  const receipt = contract.deployTransaction.wait();
+  const receipt = await contract.deploymentTransaction().wait();
 
   return new DeployContractResult({
     name,
     contract,
-    address: contract.address,
-    receipt: await receipt,
+    address: await contract.getAddress(),
+    receipt,
   });
 }
 
@@ -100,9 +100,8 @@ export async function deployPrecompiledMock() {
   const PrecompiledMockContract = await ethers.getContractFactory("PrecompiledMock");
 
   const deployed = await PrecompiledMockContract.deploy();
-  await deployed.deployed();
 
-  const runtimeBytecode = await ethers.provider.getCode(deployed.address);
+  const runtimeBytecode = await ethers.provider.getCode(await deployed.getAddress());
   await ethers.provider.send("hardhat_setCode", [HEDERA_PRECOMPILED_ADDRESS, runtimeBytecode]);
   const mockPrecompiled = await ethers.getContractAt("PrecompiledMock", HEDERA_PRECOMPILED_ADDRESS);
 }
