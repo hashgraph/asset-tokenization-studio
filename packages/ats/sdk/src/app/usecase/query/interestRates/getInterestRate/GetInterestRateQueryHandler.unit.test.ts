@@ -7,7 +7,7 @@ import { GetInterestRateQuery, GetInterestRateQueryResponse } from "./GetInteres
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import AccountService from "@service/account/AccountService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import GetInterestRateQueryError from "./error/GetInterestRateQueryError";
+import { GetInterestRateQueryError } from "./error/GetInterestRateQueryError";
 
 describe("GetInterestRateQueryHandler", () => {
   let handler: GetInterestRateQueryHandler;

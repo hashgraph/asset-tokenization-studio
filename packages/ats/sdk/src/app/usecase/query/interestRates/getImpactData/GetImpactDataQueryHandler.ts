@@ -7,7 +7,7 @@ import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import { GetImpactDataQuery, GetImpactDataQueryResponse } from "./GetImpactDataQuery";
 import AccountService from "@service/account/AccountService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import GetImpactDataQueryError from "./error/GetImpactDataQueryError";
+import { GetImpactDataQueryError } from "./error/GetImpactDataQueryError";
 
 @QueryHandler(GetImpactDataQuery)
 export class GetImpactDataQueryHandler implements IQueryHandler<GetImpactDataQuery> {

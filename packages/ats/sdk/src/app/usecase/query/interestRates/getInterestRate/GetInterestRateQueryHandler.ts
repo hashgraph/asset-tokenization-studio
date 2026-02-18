@@ -7,7 +7,7 @@ import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import { GetInterestRateQuery, GetInterestRateQueryResponse } from "./GetInterestRateQuery";
 import AccountService from "@service/account/AccountService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import GetInterestRateQueryError from "./error/GetInterestRateQueryError";
+import { GetInterestRateQueryError } from "./error/GetInterestRateQueryError";
 
 @QueryHandler(GetInterestRateQuery)
 export class GetInterestRateQueryHandler implements IQueryHandler<GetInterestRateQuery> {

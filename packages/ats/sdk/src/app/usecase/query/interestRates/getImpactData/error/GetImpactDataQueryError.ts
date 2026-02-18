@@ -3,7 +3,7 @@
 import { QueryError } from "@query/error/QueryError";
 import BaseError from "@core/error/BaseError";
 
-export default class GetImpactDataQueryError extends QueryError {
+export class GetImpactDataQueryError extends QueryError {
   constructor(error: Error) {
     const msg = `An error occurred while querying impact data: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);

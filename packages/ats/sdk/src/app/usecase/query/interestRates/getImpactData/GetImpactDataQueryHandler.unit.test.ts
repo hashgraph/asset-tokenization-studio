@@ -4,7 +4,7 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import AccountService from "@service/account/AccountService";
 import "reflect-metadata";
-import GetImpactDataQueryError from "./error/GetImpactDataQueryError";
+import { GetImpactDataQueryError } from "./error/GetImpactDataQueryError";
 import { GetImpactDataQuery, GetImpactDataQueryResponse } from "./GetImpactDataQuery";
 import { GetImpactDataQueryHandler } from "./GetImpactDataQueryHandler";
 

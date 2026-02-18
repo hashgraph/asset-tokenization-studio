@@ -10,7 +10,7 @@ import {
 } from "./ScheduledCouponListingCountQuery";
 import AccountService from "@service/account/AccountService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import ScheduledCouponListingCountQueryError from "./error/ScheduledCouponListingCountQueryError";
+import { ScheduledCouponListingCountQueryError } from "./error/ScheduledCouponListingCountQueryError";
 
 @QueryHandler(ScheduledCouponListingCountQuery)
 export class ScheduledCouponListingCountQueryHandler implements IQueryHandler<ScheduledCouponListingCountQuery> {

@@ -10,7 +10,7 @@ import {
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import AccountService from "@service/account/AccountService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import ScheduledCouponListingCountQueryError from "./error/ScheduledCouponListingCountQueryError";
+import { ScheduledCouponListingCountQueryError } from "./error/ScheduledCouponListingCountQueryError";
 
 describe("ScheduledCouponListingCountQueryHandler", () => {
   let handler: ScheduledCouponListingCountQueryHandler;
