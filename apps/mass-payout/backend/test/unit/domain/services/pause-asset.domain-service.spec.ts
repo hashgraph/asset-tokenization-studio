@@ -10,7 +10,7 @@ import { createMock } from "@golevelup/ts-jest"
 import { Test, TestingModule } from "@nestjs/testing"
 import { fakeHederaAddress } from "@test/shared/utils"
 
-describe.skip(PauseAssetDomainService.name, () => {
+describe(PauseAssetDomainService.name, () => {
   let pauseAssetDomainService: PauseAssetDomainService
   const assetRepositoryMock = createMock<AssetRepository>()
   const onChainLifeCycleCashFlowServiceMock = createMock<LifeCycleCashFlowPort>()
