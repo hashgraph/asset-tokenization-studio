@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "4.1.1",
+  "version": "4.2.0",
   "repository": "https://github.com/hashgraph/asset-tokenization-studio",
   "type": "commonjs",
   "main": "./build/typechain-types/index.js",
