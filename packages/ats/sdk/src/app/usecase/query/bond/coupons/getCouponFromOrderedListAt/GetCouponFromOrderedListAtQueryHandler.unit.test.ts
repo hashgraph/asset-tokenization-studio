@@ -4,7 +4,6 @@ import { ErrorCode } from "@core/error/BaseError";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import { createMock } from "@golevelup/ts-jest";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
-import ContractService from "@service/contract/ContractService";
 import { GetCouponFromOrderedListAtQueryFixture } from "@test/fixtures/bond/BondFixture";
 import { ErrorMsgFixture, EvmAddressPropsFixture } from "@test/fixtures/shared/DataFixture";
 import { GetCouponFromOrderedListAtQueryError } from "./error/GetCouponFromOrderedListAtQueryError";
@@ -13,19 +12,20 @@ import {
   GetCouponFromOrderedListAtQueryResponse,
 } from "./GetCouponFromOrderedListAtQuery";
 import { GetCouponFromOrderedListAtQueryHandler } from "./GetCouponFromOrderedListAtQueryHandler";
+import AccountService from "@service/account/AccountService";
 
 describe("GetCouponFromOrderedListAtQueryHandler", () => {
   let handler: GetCouponFromOrderedListAtQueryHandler;
   let query: GetCouponFromOrderedListAtQuery;
 
   const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
-  const contractServiceMock = createMock<ContractService>();
+  const accountServiceMock = createMock<AccountService>();
 
   const evmAddress = new EvmAddress(EvmAddressPropsFixture.create().value);
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new GetCouponFromOrderedListAtQueryHandler(queryAdapterServiceMock, contractServiceMock);
+    handler = new GetCouponFromOrderedListAtQueryHandler(queryAdapterServiceMock, accountServiceMock);
     query = GetCouponFromOrderedListAtQueryFixture.create();
   });
 
@@ -37,7 +37,7 @@ describe("GetCouponFromOrderedListAtQueryHandler", () => {
     it("throws GetCouponFromOrderedListAtQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
-      contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
+      accountServiceMock.getAccountEvmAddress.mockRejectedValue(fakeError);
 
       const resultPromise = handler.execute(query);
 
@@ -52,7 +52,7 @@ describe("GetCouponFromOrderedListAtQueryHandler", () => {
     });
 
     it("should successfully get coupon holders", async () => {
-      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(evmAddress);
       queryAdapterServiceMock.getCouponFromOrderedListAt.mockResolvedValue(1);
 
       const result = await handler.execute(query);
@@ -60,9 +60,9 @@ describe("GetCouponFromOrderedListAtQueryHandler", () => {
       expect(result).toBeInstanceOf(GetCouponFromOrderedListAtQueryResponse);
       expect(result.couponId).toStrictEqual(1);
 
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(queryAdapterServiceMock.getCouponFromOrderedListAt).toHaveBeenCalledTimes(1);
-      expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
+      expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(query.securityId);
       expect(queryAdapterServiceMock.getCouponFromOrderedListAt).toHaveBeenCalledWith(evmAddress, query.pos);
     });
   });
