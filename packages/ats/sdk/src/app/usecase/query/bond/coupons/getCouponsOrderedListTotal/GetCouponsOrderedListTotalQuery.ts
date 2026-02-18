@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Query } from "@core/query/Query";
-import { CommandResponse } from "@core/command/CommandResponse";
+import { QueryResponse } from "@core/query/QueryResponse";
 
-export class GetCouponsOrderedListTotalQueryResponse implements CommandResponse {
+export class GetCouponsOrderedListTotalQueryResponse implements QueryResponse {
   constructor(public readonly payload: number) {}
 }
 
