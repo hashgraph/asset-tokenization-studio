@@ -27,7 +27,6 @@ export class GetCouponsOrderedListTotalQueryHandler implements IQueryHandler<Get
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
-      // Obtener el total de coupons usando el QueryAdapter
       const total = await this.queryAdapter.getCouponsOrderedListTotal(securityEvmAddress);
 
       return new GetCouponsOrderedListTotalQueryResponse(total);
