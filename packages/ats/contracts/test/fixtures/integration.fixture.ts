@@ -87,3 +87,118 @@ export async function registerCommonFacetsFixture() {
     facetsWithKeys,
   };
 }
+
+/**
+ * BLR + ERC20Facet registered for testing SelectorAlreadyRegistered error.
+ *
+ * Provides a fixture for testing duplicate selector detection:
+ * - BLR with proxy
+ * - AccessControlFacet, KycFacet, PauseFacet (common facets)
+ * - ERC20Facet (has transfer.selector = 0xa9059cbb)
+ *
+ * Use this fixture together with DuplicateSelectorFacetTest to verify that
+ * the SelectorAlreadyRegistered error is thrown when two facets share the same selector.
+ */
+export async function registerERC20FacetFixture() {
+  const base = await registerCommonFacetsFixture();
+  const { deployer, blr, facetAddresses } = base;
+
+  // Deploy ERC20Facet
+  const erc20Factory = await ethers.getContractFactory("ERC20Facet", deployer);
+  const erc20Result = await deployContract(erc20Factory, {
+    confirmations: 0,
+    verifyDeployment: false,
+  });
+  const erc20FacetAddress = erc20Result.address!;
+
+  // Get resolver key for ERC20Facet
+  const erc20FacetDef = atsRegistry.getFacetDefinition("ERC20Facet");
+  if (!erc20FacetDef?.resolverKey?.value) {
+    throw new Error("No resolver key found for ERC20Facet");
+  }
+
+  // Register ERC20Facet in BLR
+  await registerFacets(blr, {
+    facets: [
+      {
+        name: "ERC20Facet",
+        address: erc20FacetAddress,
+        resolverKey: erc20FacetDef.resolverKey.value,
+      },
+    ],
+  });
+
+  return {
+    ...base,
+    facetAddresses: {
+      ...facetAddresses,
+      ERC20Facet: erc20FacetAddress,
+    },
+    erc20FacetAddress,
+    erc20ResolverKey: erc20FacetDef.resolverKey.value,
+  };
+}
+
+/**
+ * BLR + Common facets + MigrationFacetTest registered.
+ *
+ * Provides a fixture for testing ERC20 storage migration:
+ * - BLR with proxy
+ * - Common facets (AccessControl, Kyc, Pause)
+ * - MigrationFacetTest with legacy balance/totalSupply setters
+ *
+ * Use this fixture when you need to:
+ * 1. Set up legacy ERC1410 storage with balances and totalSupply
+ * 2. Trigger migration via transfer operations
+ * 3. Verify legacy storage is cleared and new storage has values
+ */
+export async function registerMigrationFacetFixture() {
+  const base = await registerCommonFacetsFixture();
+  const { deployer, blr, facetAddresses } = base;
+
+  // Deploy MigrationFacetTest
+  const factory = await ethers.getContractFactory("MigrationFacetTest", deployer);
+  const result = await deployContract(factory, {
+    confirmations: 0,
+    verifyDeployment: false,
+  });
+  const migrationFacetAddress = result.address!;
+
+  // Prepare facet data with resolver key
+  const facetDef = atsRegistry.getFacetDefinition("MigrationFacetTest");
+  if (!facetDef?.resolverKey?.value) {
+    throw new Error("No resolver key found for MigrationFacetTest");
+  }
+  const migrationFacetWithKey = {
+    name: "MigrationFacetTest",
+    address: migrationFacetAddress,
+    resolverKey: facetDef.resolverKey.value,
+  };
+
+  // Register MigrationFacetTest in BLR
+  await registerFacets(blr, {
+    facets: [migrationFacetWithKey],
+  });
+
+  // Create a configuration that includes MigrationFacetTest
+  // Use a unique config ID for migration tests
+  const MIGRATION_TEST_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000055";
+  const facetConfigs = [
+    ...Object.entries(facetAddresses).map(([name]) => {
+      const def = atsRegistry.getFacetDefinition(name);
+      return { id: def!.resolverKey!.value, version: 1 };
+    }),
+    { id: facetDef.resolverKey.value, version: 1 },
+  ];
+  await blr.createConfiguration(MIGRATION_TEST_CONFIG_ID, facetConfigs);
+
+  return {
+    ...base,
+    facetAddresses: {
+      ...facetAddresses,
+      MigrationFacetTest: migrationFacetAddress,
+    },
+    migrationFacet: factory.attach(migrationFacetAddress) as any,
+    migrationConfigId: MIGRATION_TEST_CONFIG_ID,
+  };
+}

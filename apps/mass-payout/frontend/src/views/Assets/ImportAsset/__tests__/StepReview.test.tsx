@@ -37,7 +37,7 @@ const TestWrapper = ({
     assetId: "0.0.123456",
     assetName: "Test Asset",
     assetSymbol: "SYM",
-    assetType: "BOND",
+    assetType: "BOND_VARIABLE_RATE",
   },
 }: {
   defaultValues?: ImportAssetFormValues;
@@ -118,7 +118,7 @@ describe("StepReview Component", () => {
         assetId: "0.0.123-456",
         assetName: "Asset @#$% Name",
         assetSymbol: "SPEC",
-        assetType: "BOND",
+        assetType: "BOND_VARIABLE_RATE",
       };
 
       render(<TestWrapper defaultValues={specialValues} />);

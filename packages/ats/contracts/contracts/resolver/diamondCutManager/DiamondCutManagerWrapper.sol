@@ -413,6 +413,10 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         for (uint256 index; index < length; ) {
             bytes4 selector = selectors[index];
             bytes32 configVersionSelectorHash = _buildHashSelector(_configurationId, _version, selector);
+            require(
+                _dcms.facetAddress[configVersionSelectorHash] == address(0),
+                SelectorAlreadyRegistered(_configurationId, _version, _facetId, selector)
+            );
             _dcms.facetAddress[configVersionSelectorHash] = selectorAddress;
             _dcms.selectorToFacetId[configVersionSelectorHash] = _facetId;
             unchecked {

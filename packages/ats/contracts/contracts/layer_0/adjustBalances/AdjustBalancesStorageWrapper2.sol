@@ -5,7 +5,6 @@ import { ClearingStorageWrapper2 } from "../clearing/ClearingStorageWrapper2.sol
 import {
     IAdjustBalancesStorageWrapper
 } from "../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol";
-import { IClearing } from "../../layer_1/interfaces/clearing/IClearing.sol";
 
 abstract contract AdjustBalancesStorageWrapper2 is IAdjustBalancesStorageWrapper, ClearingStorageWrapper2 {
     function _adjustBalances(uint256 _factor, uint8 _decimals) internal override {

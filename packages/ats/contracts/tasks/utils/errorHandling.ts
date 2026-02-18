@@ -54,7 +54,7 @@ export const validateAddress = (
     throw new Error(`${paramName} cannot be zero address`);
   }
 
-  if (address !== ADDRESS_ZERO && !hre.ethers.utils.isAddress(address)) {
+  if (address !== ADDRESS_ZERO && !hre.ethers.isAddress(address)) {
     throw new Error(`Invalid address format for ${paramName}: ${address}`);
   }
 };

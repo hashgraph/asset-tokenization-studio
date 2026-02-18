@@ -2,12 +2,7 @@
 
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-// For Ethers v5, EventFragment helps us with typing if we need it.
-// You can import it from 'ethers/lib/utils' or '@ethersproject/abi' depending on your setup.
-// If hre.ethers is already v5, you don't need this explicit import for EventFragment
-// unless you want stricter typing.
-import { FunctionFragment } from "@ethersproject/abi"; // Or 'ethers/lib/utils'
-import { id } from "ethers/lib/utils";
+import { FunctionFragment, id } from "ethers";
 
 task("list-events-v5", "Shows event names and selectors (topic hash) for Ethers v5").setAction(
   async (taskArgs, hre: HardhatRuntimeEnvironment) => {
@@ -34,7 +29,7 @@ task("list-events-v5", "Shows event names and selectors (topic hash) for Ethers 
         }
 
         // In Ethers v5, we create the Interface instance like this:
-        const contractInterface = new hre.ethers.utils.Interface(artifact.abi);
+        const contractInterface = new hre.ethers.Interface(artifact.abi);
 
         const eventsData = [];
 
@@ -115,7 +110,7 @@ task("list-functions-v5", "Shows function names and selectors (topic hash) for E
         }
 
         // In Ethers v5, we create the Interface instance like this:
-        const contractInterface = new hre.ethers.utils.Interface(artifact.abi);
+        const contractInterface = new hre.ethers.Interface(artifact.abi);
 
         const eventsData = [];
 

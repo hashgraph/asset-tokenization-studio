@@ -1,20 +1,13 @@
 name: "000: [FLOW] PR Formatting"
 on:
   pull_request_target:
+    # This covers: new PRs, title edits, new commits, and assignee changes - everything the workflow actually validates
     types:
       - assigned
       - unassigned
-      - labeled
-      - unlabeled
       - opened
       - reopened
       - edited
-      - converted_to_draft
-      - ready_for_review
-      - review_requested
-      - review_request_removed
-      - locked
-      - unlocked
       - synchronize
 
 defaults:
@@ -28,6 +21,7 @@ jobs:
   title-check:
     name: Title Check
     runs-on: token-studio-linux-medium
+    timeout-minutes: 5
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
@@ -42,6 +36,7 @@ jobs:
   assignee-check:
     name: Assignee Check
     runs-on: token-studio-linux-medium
+    timeout-minutes: 5
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
@@ -49,7 +44,11 @@ jobs:
           egress-policy: audit
 
       - name: Check Assignee
-        if: ${{ github.event.pull_request.assignees == null || github.event.pull_request.assignees[0] == null }}
+        env:
+          ASSIGNEES: ${{ toJSON(github.event.pull_request.assignees) }}
         run: |
-          echo "Assignee is not set. Failing the workflow."
-          exit 1
+          if [[ "${ASSIGNEES}" == "[]" ]] || [[ "${ASSIGNEES}" == "null" ]]; then
+            echo "❌ Assignee is not set. At least one assignee is required."
+            exit 1
+          fi
+          echo "✅ Assignees configured."

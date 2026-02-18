@@ -83,17 +83,17 @@ export async function deployBondFixedRateTokenFixture({
   );
 
   // Connect commonly used facets to diamond
-  const accessControlFacet = AccessControlFacet__factory.connect(diamond.address, deployer);
-  const pauseFacet = PauseFacet__factory.connect(diamond.address, deployer);
-  const kycFacet = KycFacet__factory.connect(diamond.address, deployer);
-  const controlListFacet = ControlListFacet__factory.connect(diamond.address, deployer);
+  const accessControlFacet = AccessControlFacet__factory.connect(diamond.target as string, deployer);
+  const pauseFacet = PauseFacet__factory.connect(diamond.target as string, deployer);
+  const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
+  const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
 
   return {
     ...infrastructure,
 
     // Token
     diamond,
-    tokenAddress: diamond.address,
+    tokenAddress: diamond.target as string,
 
     // Connected facets (most commonly used)
     accessControlFacet,

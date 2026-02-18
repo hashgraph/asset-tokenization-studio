@@ -122,7 +122,7 @@ contract Factory is IFactory, Common {
         checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(_bondData, _factoryRegulationData);
+        bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
 
         emit BondDeployed(_msgSender(), bondAddress_, _bondData, _factoryRegulationData);
     }
@@ -140,7 +140,11 @@ contract Factory is IFactory, Common {
         )
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(_bondFixedRateData.bondData, _bondFixedRateData.factoryRegulationData);
+        bondAddress_ = _deployBond(
+            _bondFixedRateData.bondData,
+            _bondFixedRateData.factoryRegulationData,
+            SecurityType.BondFixedRate
+        );
 
         IFixedRate(bondAddress_).initialize_FixedRate(_bondFixedRateData.fixedRateData);
 
@@ -162,7 +166,11 @@ contract Factory is IFactory, Common {
         checkImpactData(_bondKpiLinkedRateData.impactData)
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(_bondKpiLinkedRateData.bondData, _bondKpiLinkedRateData.factoryRegulationData);
+        bondAddress_ = _deployBond(
+            _bondKpiLinkedRateData.bondData,
+            _bondKpiLinkedRateData.factoryRegulationData,
+            SecurityType.BondKpiLinkedRate
+        );
 
         IKpiLinkedRate(bondAddress_).initialize_KpiLinkedRate(
             _bondKpiLinkedRateData.interestRate,
@@ -187,7 +195,8 @@ contract Factory is IFactory, Common {
     {
         bondAddress_ = _deployBond(
             _bondSustainabilityPerformanceTargetRateData.bondData,
-            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData
+            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData,
+            SecurityType.BondSPTRate
         );
 
         ISustainabilityPerformanceTargetRate(bondAddress_).initialize_SustainabilityPerformanceTargetRate(
@@ -212,9 +221,10 @@ contract Factory is IFactory, Common {
 
     function _deployBond(
         BondData calldata _bondData,
-        FactoryRegulationData calldata _factoryRegulationData
+        FactoryRegulationData calldata _factoryRegulationData,
+        SecurityType _securityType
     ) internal returns (address bondAddress_) {
-        bondAddress_ = _deploySecurity(_bondData.security, SecurityType.Bond);
+        bondAddress_ = _deploySecurity(_bondData.security, _securityType);
 
         IBondUSA(bondAddress_)._initialize_bondUSA(
             _bondData.bondDetails,

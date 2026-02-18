@@ -36,10 +36,12 @@ import {
   type DeploymentOutputType,
   formatCheckpointStatus,
   getStepName,
+  getTotalSteps,
   toDeployBlrResult,
   toConfigurationData,
   convertCheckpointFacets,
   isSuccess,
+  resolveCheckpointForResume,
 } from "@scripts/infrastructure";
 import {
   atsRegistry,
@@ -55,12 +57,7 @@ import {
   IStaticFunctionSelectors__factory,
   ProxyAdmin__factory,
 } from "@contract-types";
-
-/**
- * Complete deployment output structure.
- * Re-exported from infrastructure for backward compatibility.
- */
-export type DeploymentOutput = DeploymentOutputType;
+import { shouldFailAtStep, createTestFailureMessage } from "../infrastructure/testing/failureInjection";
 
 /**
  * Options for complete system deployment.
@@ -140,7 +137,7 @@ export async function deploySystemWithNewBlr(
   signer: Signer,
   network: string,
   options: DeploySystemWithNewBlrOptions = {},
-): Promise<DeploymentOutput> {
+): Promise<DeploymentOutputType> {
   // Get network-specific deployment configuration
   const networkConfig = getDeploymentConfig(network);
 
@@ -162,6 +159,7 @@ export async function deploySystemWithNewBlr(
 
   const startTime = Date.now();
   const deployer = await signer.getAddress();
+  const totalSteps = getTotalSteps("newBlr");
 
   info("🌟 ATS Complete System Deployment");
   info("═".repeat(60));
@@ -194,18 +192,12 @@ export async function deploySystemWithNewBlr(
       info(`✅ Loaded checkpoint from ${checkpoint.startTime}`);
       info(formatCheckpointStatus(checkpoint));
     } else if (autoResume) {
-      // Auto-detect incomplete deployments
-      const incompleteCheckpoints = await checkpointManager.findCheckpoints(network, "in-progress");
-
-      if (incompleteCheckpoints.length > 0) {
-        const latestCheckpoint = incompleteCheckpoints[0];
-        info(`\n🔍 Found incomplete deployment: ${latestCheckpoint.checkpointId}`);
-        info(formatCheckpointStatus(latestCheckpoint));
-
-        // In TTY mode, this would prompt user. In CI, auto-resume.
-        // For now, we'll auto-resume (proper prompt implementation would use readline or similar)
+      const resolved = await resolveCheckpointForResume(checkpointManager, network, "newBlr");
+      if (resolved) {
+        info(`\n🔍 Found resumable deployment: ${resolved.checkpointId}`);
+        info(formatCheckpointStatus(resolved));
         info("🔄 Resuming from checkpoint...");
-        checkpoint = latestCheckpoint;
+        checkpoint = resolved;
       }
     }
   }
@@ -240,19 +232,19 @@ export async function deploySystemWithNewBlr(
     let proxyAdmin: Awaited<ReturnType<typeof deployProxyAdmin>>;
 
     if (checkpoint.steps.proxyAdmin && checkpoint.currentStep >= 0) {
-      info("\n✓ Step 1/7: ProxyAdmin already deployed (resuming)");
+      info(`\n✓ Step 1/${totalSteps}: ProxyAdmin already deployed (resuming)`);
       // Reconstruct ProxyAdmin from checkpoint - need to reconnect to contract
       proxyAdmin = ProxyAdmin__factory.connect(checkpoint.steps.proxyAdmin.address, signer);
-      info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
+      info(`✅ ProxyAdmin: ${proxyAdmin.target as string}`);
     } else {
-      info("\n📋 Step 1/7: Deploying ProxyAdmin...");
+      info(`\n📋 Step 1/${totalSteps}: Deploying ProxyAdmin...`);
       proxyAdmin = await deployProxyAdmin(signer);
 
-      info(`✅ ProxyAdmin: ${proxyAdmin.address}`);
+      info(`✅ ProxyAdmin: ${proxyAdmin.target as string}`);
 
       // Save checkpoint (ProxyAdmin doesn't have contractId property)
       checkpoint.steps.proxyAdmin = {
-        address: proxyAdmin.address,
+        address: proxyAdmin.target as string,
         txHash: "", // ProxyAdmin doesn't return tx hash currently
         deployedAt: new Date().toISOString(),
       };
@@ -260,17 +252,22 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("proxyAdmin")) {
+      throw new Error(createTestFailureMessage("step", "proxyAdmin"));
+    }
+
     // Step 1: Deploy BusinessLogicResolver
     let blrResult: Awaited<ReturnType<typeof deployBlr>>;
 
     if (checkpoint.steps.blr && checkpoint.currentStep >= 1) {
-      info("\n✓ Step 2/7: BLR already deployed (resuming)");
+      info(`\n✓ Step 2/${totalSteps}: BLR already deployed (resuming)`);
       // Use converter to reconstruct full DeployBlrResult from checkpoint
       blrResult = toDeployBlrResult(checkpoint.steps.blr, checkpoint.steps.proxyAdmin?.address);
       info(`✅ BLR Implementation: ${blrResult.implementationAddress}`);
       info(`✅ BLR Proxy: ${blrResult.blrAddress}`);
     } else {
-      info("\n🔷 Step 2/7: Deploying BusinessLogicResolver...");
+      info(`\n🔷 Step 2/${totalSteps}: Deploying BusinessLogicResolver...`);
       blrResult = await deployBlr(signer, {
         existingProxyAdmin: proxyAdmin,
       });
@@ -295,11 +292,29 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("blr")) {
+      throw new Error(createTestFailureMessage("step", "blr"));
+    }
+
     // Step 2: Deploy all facets (with incremental checkpoint saves)
     let facetsResult: Awaited<ReturnType<typeof deployFacets>>;
 
-    if (checkpoint.steps.facets && checkpoint.currentStep >= 2) {
-      info("\n✓ Step 3/7: All facets already deployed (resuming)");
+    // Determine expected facet count for complete deployment check
+    let expectedFacets = atsRegistry.getAllFacets();
+    if (!useTimeTravel) {
+      expectedFacets = expectedFacets.filter((f) => f.name !== "TimeTravelFacet");
+    }
+    const expectedFacetCount = expectedFacets.length;
+
+    // Check if ALL facets are deployed (not just if some facets exist)
+    // This fixes the partial resume bug where checkpoint.steps.facets could have
+    // partial deployment (e.g., 50 facets) but code would skip to "all deployed"
+    const allFacetsDeployed =
+      checkpoint.steps.facets && checkpoint.steps.facets.size >= expectedFacetCount && checkpoint.currentStep >= 2;
+
+    if (allFacetsDeployed && checkpoint.steps.facets) {
+      info(`\n✓ Step 3/${totalSteps}: All facets already deployed (resuming)`);
       // Use converter to reconstruct facetsResult with proper DeploymentResult types
       facetsResult = {
         success: true,
@@ -309,7 +324,7 @@ export async function deploySystemWithNewBlr(
       };
       info(`✅ Loaded ${facetsResult.deployed.size} facets from checkpoint`);
     } else {
-      info("\n📦 Step 3/7: Deploying all facets...");
+      info(`\n📦 Step 3/${totalSteps}: Deploying all facets...`);
       let allFacets = atsRegistry.getAllFacets();
       info(`   Found ${allFacets.length} facets in registry`);
 
@@ -354,11 +369,8 @@ export async function deploySystemWithNewBlr(
           verifyDeployment,
         });
 
-        if (!facetsResult.success) {
-          throw new Error("Facet deployment had failures");
-        }
-
-        // Save checkpoint after EACH facet deployment
+        // Always save deployed facets to checkpoint (even if some failed)
+        // This enables resume from partial deployment
         facetsResult.deployed.forEach((deploymentResult, facetName) => {
           checkpoint.steps.facets!.set(facetName, {
             address: deploymentResult.address!,
@@ -370,11 +382,34 @@ export async function deploySystemWithNewBlr(
           totalGasUsed += parseInt(deploymentResult.gasUsed?.toString() || "0");
         });
 
-        // Save checkpoint with all deployed facets
+        // Save checkpoint with deployed facets before checking for failures
         checkpoint.currentStep = 2;
         await checkpointManager.saveCheckpoint(checkpoint);
 
-        info(`✅ Deployed ${facetsResult.deployed.size} facets successfully`);
+        // Now check for failures - checkpoint already saved with partial progress
+        if (!facetsResult.success) {
+          const failedNames = Array.from(facetsResult.failed.keys()).join(", ");
+          throw new Error(`Facet deployment had failures: ${failedNames}`);
+        }
+
+        // Merge checkpoint facets with newly deployed facets for complete result
+        // This ensures the final facetsResult contains ALL deployed facets (both
+        // from checkpoint and from this deployment batch)
+        const checkpointFacets = checkpoint.steps.facets ? convertCheckpointFacets(checkpoint.steps.facets) : new Map();
+        const mergedDeployed = new Map(checkpointFacets);
+        facetsResult.deployed.forEach((result, name) => {
+          mergedDeployed.set(name, result);
+        });
+
+        const newlyDeployedCount = facetsResult.deployed.size;
+        facetsResult = {
+          success: true,
+          deployed: mergedDeployed,
+          failed: new Map(),
+          skipped: new Map(),
+        };
+
+        info(`✅ Deployed ${newlyDeployedCount} new facets (${mergedDeployed.size} total)`);
       } else {
         info("   All facets already deployed from previous checkpoint");
         // Use converter to reconstruct existing facets from checkpoint
@@ -387,40 +422,41 @@ export async function deploySystemWithNewBlr(
       }
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("facets")) {
+      throw new Error(createTestFailureMessage("step", "facets"));
+    }
+
     // Step 3: Register facets in BLR
     // Get BLR contract instance
     const blrContract = BusinessLogicResolver__factory.connect(blrResult.blrAddress, signer);
 
     if (checkpoint.steps.facetsRegistered && checkpoint.currentStep >= 3) {
-      info("\n✓ Step 4/7: Facets already registered in BLR (resuming)");
+      info(`\n✓ Step 4/${totalSteps}: Facets already registered in BLR (resuming)`);
     } else {
-      info("\n📝 Step 4/7: Registering facets in BLR...");
+      info(`\n📝 Step 4/${totalSteps}: Registering facets in BLR...`);
 
-      // Prepare facets with resolver keys from registry
-      const facetsToRegister = await Promise.all(
-        Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
-          if (!deploymentResult.address) {
-            throw new Error(`No address for facet: ${facetName}`);
-          }
+      // Prepare facets with resolver keys from registry (synchronous - no RPC calls needed)
+      const facetsToRegister = Array.from(facetsResult.deployed.entries()).map(([facetName, deploymentResult]) => {
+        if (!deploymentResult.address) {
+          throw new Error(`No address for facet: ${facetName}`);
+        }
 
-          // Strip "TimeTravel" suffix to get canonical name
-          const baseName = facetName.replace(/TimeTravel$/, "");
-          // deploymentResult.address
-          const staticSelector = IStaticFunctionSelectors__factory.connect(deploymentResult.address, signer);
-          const resolverKey = await staticSelector.getStaticResolverKey();
-          // Look up resolver key from registry
+        // Strip "TimeTravel" suffix to get canonical name
+        const baseName = facetName.replace(/TimeTravel$/, "");
 
-          if (!resolverKey) {
-            throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
-          }
+        // Look up resolver key from registry
+        const definition = atsRegistry.getFacetDefinition(baseName);
+        if (!definition || !definition.resolverKey?.value) {
+          throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
+        }
 
-          return {
-            name: facetName,
-            address: deploymentResult.address,
-            resolverKey: resolverKey,
-          };
-        }),
-      );
+        return {
+          name: facetName,
+          address: deploymentResult.address,
+          resolverKey: definition.resolverKey.value,
+        };
+      });
 
       const registerResult = await registerFacets(blrContract, {
         facets: facetsToRegister,
@@ -443,6 +479,11 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("register")) {
+      throw new Error(createTestFailureMessage("step", "register"));
+    }
+
     // Build facetAddresses map for configuration creation
     const facetAddresses: Record<string, string> = {};
     facetsResult.deployed.forEach((deploymentResult, facetName) => {
@@ -455,7 +496,7 @@ export async function deploySystemWithNewBlr(
     let equityConfig: Awaited<ReturnType<typeof createEquityConfiguration>>;
 
     if (checkpoint.steps.configurations?.equity && checkpoint.currentStep >= 4) {
-      info("\n✓ Step 5/7: Equity configuration already created (resuming)");
+      info(`\n✓ Step 5/${totalSteps}: Equity configuration already created (resuming)`);
       const equityConfigData = checkpoint.steps.configurations.equity;
       info(`✅ Equity Config ID: ${equityConfigData.configId}`);
       info(`✅ Equity Version: ${equityConfigData.version}`);
@@ -464,7 +505,7 @@ export async function deploySystemWithNewBlr(
       // Use converter to reconstruct full ConfigurationData from checkpoint
       equityConfig = toConfigurationData(equityConfigData);
     } else {
-      info("\n💼 Step 5/7: Creating Equity configuration...");
+      info(`\n💼 Step 5/${totalSteps}: Creating Equity configuration...`);
 
       equityConfig = await createEquityConfiguration(
         blrContract,
@@ -497,11 +538,16 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("equity")) {
+      throw new Error(createTestFailureMessage("step", "equity"));
+    }
+
     // Step 5: Create Bond configuration
     let bondConfig: Awaited<ReturnType<typeof createBondConfiguration>>;
 
     if (checkpoint.steps.configurations?.bond && checkpoint.currentStep >= 5) {
-      info("\n✓ Step 6/7: Bond configuration already created (resuming)");
+      info(`\n✓ Step 6/${totalSteps}: Bond configuration already created (resuming)`);
       const bondConfigData = checkpoint.steps.configurations.bond;
       info(`✅ Bond Config ID: ${bondConfigData.configId}`);
       info(`✅ Bond Version: ${bondConfigData.version}`);
@@ -510,7 +556,7 @@ export async function deploySystemWithNewBlr(
       // Use converter to reconstruct full ConfigurationData from checkpoint
       bondConfig = toConfigurationData(bondConfigData);
     } else {
-      info("\n🏦 Step 6/7: Creating Bond configuration...");
+      info(`\n🏦 Step 6/${totalSteps}: Creating Bond configuration...`);
 
       bondConfig = await createBondConfiguration(
         blrContract,
@@ -540,11 +586,16 @@ export async function deploySystemWithNewBlr(
       await checkpointManager.saveCheckpoint(checkpoint);
     }
 
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("bond")) {
+      throw new Error(createTestFailureMessage("step", "bond"));
+    }
+
     // Step 6: Create Bond Fixed Rate configuration
     let bondFixedRateConfig: Awaited<ReturnType<typeof createBondFixedRateConfiguration>>;
 
-    if (checkpoint.steps.configurations?.bondFixedRate && checkpoint.currentStep >= 5) {
-      info("\n✓ Step 6/7: Bond FixedRate configuration already created (resuming)");
+    if (checkpoint.steps.configurations?.bondFixedRate && checkpoint.currentStep >= 6) {
+      info(`\n✓ Step 7/${totalSteps}: Bond FixedRate configuration already created (resuming)`);
       const bondFixedRateConfigData = checkpoint.steps.configurations.bondFixedRate;
       info(`✅ Bond FixedRate Config ID: ${bondFixedRateConfigData.configId}`);
       info(`✅ Bond FixedRate Version: ${bondFixedRateConfigData.version}`);
@@ -553,7 +604,7 @@ export async function deploySystemWithNewBlr(
       // Use converter to reconstruct full ConfigurationData from checkpoint
       bondFixedRateConfig = toConfigurationData(bondFixedRateConfigData);
     } else {
-      info("\n🏦 Step 6/7: Creating Bond FixedRate FixedRateconfiguration...");
+      info(`\n🏦 Step 7/${totalSteps}: Creating Bond FixedRate configuration...`);
 
       bondFixedRateConfig = await createBondFixedRateConfiguration(
         blrContract,
@@ -581,15 +632,20 @@ export async function deploySystemWithNewBlr(
         facetCount: bondFixedRateConfig.data.facetKeys.length,
         txHash: "", // createBondFixedRateConfiguration doesn't return tx hash currently
       };
-      checkpoint.currentStep = 5;
+      checkpoint.currentStep = 6;
       await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("bondFixedRate")) {
+      throw new Error(createTestFailureMessage("step", "bondFixedRate"));
     }
 
     // Step 7: Create Bond KpiLinked Rate configuration
     let bondKpiLinkedRateConfig: Awaited<ReturnType<typeof createBondKpiLinkedRateConfiguration>>;
 
-    if (checkpoint.steps.configurations?.bondKpiLinkedRate && checkpoint.currentStep >= 5) {
-      info("\n✓ Step 7/8: Bond KpiLinkedRate configuration already created (resuming)");
+    if (checkpoint.steps.configurations?.bondKpiLinkedRate && checkpoint.currentStep >= 7) {
+      info(`\n✓ Step 8/${totalSteps}: Bond KpiLinkedRate configuration already created (resuming)`);
       const bondKpiLinkedRateConfigData = checkpoint.steps.configurations.bondKpiLinkedRate;
       info(`✅ Bond KpiLinkedRate Config ID: ${bondKpiLinkedRateConfigData.configId}`);
       info(`✅ Bond KpiLinkedRate Version: ${bondKpiLinkedRateConfigData.version}`);
@@ -598,7 +654,7 @@ export async function deploySystemWithNewBlr(
       // Use converter to reconstruct full ConfigurationData from checkpoint
       bondKpiLinkedRateConfig = toConfigurationData(bondKpiLinkedRateConfigData);
     } else {
-      info("\n🏦 Step 6/7: Creating Bond KpiLinkedRate KpiLinkedRateconfiguration...");
+      info(`\n🏦 Step 8/${totalSteps}: Creating Bond KpiLinkedRate configuration...`);
 
       bondKpiLinkedRateConfig = await createBondKpiLinkedRateConfiguration(
         blrContract,
@@ -626,8 +682,13 @@ export async function deploySystemWithNewBlr(
         facetCount: bondKpiLinkedRateConfig.data.facetKeys.length,
         txHash: "", // createBondKpiLinkedRateConfiguration doesn't return tx hash currently
       };
-      checkpoint.currentStep = 6;
+      checkpoint.currentStep = 7;
       await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("bondKpiLinkedRate")) {
+      throw new Error(createTestFailureMessage("step", "bondKpiLinkedRate"));
     }
 
     // Step 8: Create Bond Sustainability Performance Target Rate configuration
@@ -635,8 +696,10 @@ export async function deploySystemWithNewBlr(
       ReturnType<typeof createBondSustainabilityPerformanceTargetRateConfiguration>
     >;
 
-    if (checkpoint.steps.configurations?.bondSustainabilityPerformanceTargetRate && checkpoint.currentStep >= 6) {
-      info("\n✓ Step 8/9: Bond Sustainability Performance Target Rate configuration already created (resuming)");
+    if (checkpoint.steps.configurations?.bondSustainabilityPerformanceTargetRate && checkpoint.currentStep >= 8) {
+      info(
+        `\n✓ Step 9/${totalSteps}: Bond Sustainability Performance Target Rate configuration already created (resuming)`,
+      );
       const bondSustainabilityPerformanceTargetRateConfigData =
         checkpoint.steps.configurations.bondSustainabilityPerformanceTargetRate;
       info(
@@ -654,7 +717,7 @@ export async function deploySystemWithNewBlr(
         bondSustainabilityPerformanceTargetRateConfigData,
       );
     } else {
-      info("\n🏦 Step 8/9: Creating Bond Sustainability Performance Target Rate configuration...");
+      info(`\n🏦 Step 9/${totalSteps}: Creating Bond Sustainability Performance Target Rate configuration...`);
 
       bondSustainabilityPerformanceTargetRateConfig = await createBondSustainabilityPerformanceTargetRateConfiguration(
         blrContract,
@@ -688,17 +751,22 @@ export async function deploySystemWithNewBlr(
         facetCount: bondSustainabilityPerformanceTargetRateConfig.data.facetKeys.length,
         txHash: "", // createBondSustainabilityPerformanceTargetRateConfiguration doesn't return tx hash currently
       };
-      checkpoint.currentStep = 7;
+      checkpoint.currentStep = 8;
       await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("bondSustainabilityPerformanceTargetRate")) {
+      throw new Error(createTestFailureMessage("step", "bondSustainabilityPerformanceTargetRate"));
     }
 
     // Step 8: Deploy Factory
     let factoryResult: Awaited<ReturnType<typeof deployFactory>>;
 
-    if (checkpoint.steps.factory && checkpoint.currentStep >= 7) {
-      info("\n✓ Step 8/8: Factory already deployed (resuming)");
+    if (checkpoint.steps.factory && checkpoint.currentStep >= 9) {
+      info(`\n✓ Step 10/${totalSteps}: Factory already deployed (resuming)`);
       // Reconstruct DeployFactoryResult from checkpoint (with placeholder proxyResult)
-      const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || proxyAdmin.address;
+      const proxyAdminAddr = checkpoint.steps.proxyAdmin?.address || (proxyAdmin.target as string);
       factoryResult = {
         success: true,
         proxyResult: {
@@ -718,7 +786,7 @@ export async function deploySystemWithNewBlr(
       info(`✅ Factory Implementation: ${checkpoint.steps.factory.implementation}`);
       info(`✅ Factory Proxy: ${checkpoint.steps.factory.proxy}`);
     } else {
-      info("\n🏭 Step 7/7: Deploying Factory...");
+      info(`\n🏭 Step 10/${totalSteps}: Deploying Factory...`);
       factoryResult = await deployFactory(signer, {
         existingProxyAdmin: proxyAdmin,
       });
@@ -739,8 +807,13 @@ export async function deploySystemWithNewBlr(
         txHash: "", // deployFactory doesn't return tx hash currently
         deployedAt: new Date().toISOString(),
       };
-      checkpoint.currentStep = 6;
+      checkpoint.currentStep = 9;
       await checkpointManager.saveCheckpoint(checkpoint);
+    }
+
+    // Testing hook: Step-level failure injection for checkpoint testing
+    if (shouldFailAtStep("factory")) {
+      throw new Error(createTestFailureMessage("step", "factory"));
     }
 
     // Get Hedera Contract IDs if on Hedera network
@@ -748,15 +821,15 @@ export async function deploySystemWithNewBlr(
       return network.toLowerCase().includes("hedera") ? await fetchHederaContractId(network, address) : undefined;
     };
 
-    const output: DeploymentOutput = {
+    const output: DeploymentOutputType = {
       network,
       timestamp: new Date().toISOString(),
       deployer,
 
       infrastructure: {
         proxyAdmin: {
-          address: proxyAdmin.address,
-          contractId: await getContractId(proxyAdmin.address),
+          address: proxyAdmin.target as string,
+          contractId: await getContractId(proxyAdmin.target as string),
         },
         blr: {
           implementation: blrResult.implementationAddress,
@@ -965,10 +1038,12 @@ export async function deploySystemWithNewBlr(
     logError("\n❌ Deployment failed:", errorMessage);
 
     // Mark checkpoint as failed
+    // Note: currentStep tracks the last COMPLETED step, so the failed step is currentStep + 1
+    const failedStep = checkpoint.currentStep + 1;
     checkpoint.status = "failed";
     checkpoint.failure = {
-      step: checkpoint.currentStep,
-      stepName: getStepName(checkpoint.currentStep, "newBlr"),
+      step: failedStep,
+      stepName: getStepName(failedStep, "newBlr"),
       error: errorMessage,
       timestamp: new Date().toISOString(),
       stackTrace,

@@ -11,7 +11,6 @@ import { LocksIdQueryFixture } from "@test/fixtures/lock/LockFixture";
 import { LocksIdQueryHandler } from "./LocksIdQueryHandler";
 import { LocksIdQuery, LocksIdQueryResponse } from "./LocksIdQuery";
 import { LocksIdQueryError } from "./error/LocksIdQueryError";
-import { BigNumber } from "ethers";
 
 describe("LocksIdQueryHandler", () => {
   let handler: LocksIdQueryHandler;
@@ -53,13 +52,13 @@ describe("LocksIdQueryHandler", () => {
     it("should successfully get locks id", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
-      queryAdapterServiceMock.getLocksId.mockResolvedValueOnce([BigNumber.from(1)]);
+      queryAdapterServiceMock.getLocksId.mockResolvedValueOnce([BigInt(1)]);
 
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(LocksIdQueryResponse);
 
-      expect(result.payload).toStrictEqual([BigNumber.from(1)]);
+      expect(result.payload).toStrictEqual([BigInt(1)]);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
