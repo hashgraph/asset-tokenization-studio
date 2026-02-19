@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IFactory } from "../interfaces/factory/IFactory.sol";
-import { ResolverProxy } from "../resolver/resolverProxy/ResolverProxy.sol";
-import { IResolverProxy } from "../interfaces/resolver/resolverProxy/IResolverProxy.sol";
-import { _DEFAULT_ADMIN_ROLE } from "../layer_1/constants/roles.sol";
-import { IControlList } from "../layer_1/interfaces/controlList/IControlList.sol";
-import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
-import { IERC20Votes } from "../layer_1/interfaces/ERC1400/IERC20Votes.sol";
-import { IERC1644 } from "../layer_1/interfaces/ERC1400/IERC1644.sol";
-import { IERC1410 } from "../layer_1/interfaces/ERC1400/IERC1410.sol";
-import { ICap } from "../layer_1/interfaces/cap/ICap.sol";
-import { IERC1594 } from "../layer_1/interfaces/ERC1400/IERC1594.sol";
-import { IClearingActions } from "../layer_1/interfaces/clearing/IClearingActions.sol";
-import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
+import { IFactory } from "./IFactory.sol";
+import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
+import { IResolverProxy } from "../infrastructure/interfaces/IResolverProxy.sol";
+import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
+import { IControlList } from "../facets/features/interfaces/controlList/IControlList.sol";
+import { IERC20 } from "../facets/features/interfaces/ERC1400/IERC20.sol";
+import { IERC20Votes } from "../facets/features/interfaces/ERC1400/IERC20Votes.sol";
+import { IERC1644 } from "../facets/features/interfaces/ERC1400/IERC1644.sol";
+import { IERC1410 } from "../facets/features/interfaces/ERC1400/IERC1410.sol";
+import { ICap } from "../facets/features/interfaces/cap/ICap.sol";
+import { IERC1594 } from "../facets/features/interfaces/ERC1400/IERC1594.sol";
+import { IClearingActions } from "../facets/features/interfaces/clearing/IClearingActions.sol";
+import { IBusinessLogicResolver } from "../infrastructure/interfaces/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
     buildRegulationData,
@@ -21,27 +21,31 @@ import {
     RegulationType,
     RegulationSubType,
     checkRegulationTypeAndSubType
-} from "../layer_3/constants/regulation.sol";
-import { IEquityUSA } from "../layer_3/interfaces/IEquityUSA.sol";
-import { IBondUSA } from "../layer_3/interfaces/IBondUSA.sol";
-import { IProceedRecipients } from "../layer_2/interfaces/proceedRecipients/IProceedRecipients.sol";
-import { IProtectedPartitions } from "../layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol";
-import { IExternalPauseManagement } from "../layer_1/interfaces/externalPauses/IExternalPauseManagement.sol";
+} from "../facets/regulation/constants/regulation.sol";
+import { IEquityUSA } from "../facets/regulation/interfaces/IEquityUSA.sol";
+import { IBondUSA } from "../facets/regulation/interfaces/IBondUSA.sol";
+import { IProceedRecipients } from "../facets/assetCapabilities/interfaces/proceedRecipients/IProceedRecipients.sol";
+import { IProtectedPartitions } from "../facets/features/interfaces/protectedPartitions/IProtectedPartitions.sol";
+import { IExternalPauseManagement } from "../facets/features/interfaces/externalPauses/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
-} from "../layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol";
-import { IExternalKycListManagement } from "../layer_1/interfaces/externalKycLists/IExternalKycListManagement.sol";
-import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
-import { IERC3643 } from "../layer_1/interfaces/ERC3643/IERC3643.sol";
+} from "../facets/features/interfaces/externalControlLists/IExternalControlListManagement.sol";
+import {
+    IExternalKycListManagement
+} from "../facets/features/interfaces/externalKycLists/IExternalKycListManagement.sol";
+import { IKyc } from "../facets/features/interfaces/kyc/IKyc.sol";
+import { IERC3643 } from "../facets/features/interfaces/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
-import { IFixedRate } from "../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
-import { Common } from "../layer_0/common/Common.sol";
-// prettier-ignore
-// solhint-disable-next-line max-line-length
-import { ISustainabilityPerformanceTargetRate } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { IFixedRate } from "../facets/assetCapabilities/interfaces/interestRates/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../facets/assetCapabilities/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { Context } from "@openzeppelin/contracts/utils/Context.sol";
+// solhint-disable max-line-length
+import {
+    ISustainabilityPerformanceTargetRate
+} from "../facets/assetCapabilities/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+// solhint-enable max-line-length
 
-contract Factory is IFactory, Common {
+contract Factory is IFactory, Context {
     modifier checkResolver(IBusinessLogicResolver resolver) {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
@@ -86,6 +90,25 @@ contract Factory is IFactory, Common {
 
     modifier checkRegulation(RegulationType _regulationType, RegulationSubType _regulationSubType) {
         checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
+        _;
+    }
+
+    modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
+        if (
+            _newInterestRate.minRate > _newInterestRate.baseRate || _newInterestRate.baseRate > _newInterestRate.maxRate
+        ) {
+            revert IKpiLinkedRate.WrongInterestRateValues(_newInterestRate);
+        }
+        _;
+    }
+
+    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
+        if (
+            _newImpactData.maxDeviationFloor > _newImpactData.baseLine ||
+            _newImpactData.baseLine > _newImpactData.maxDeviationCap
+        ) {
+            revert IKpiLinkedRate.WrongImpactDataValues(_newImpactData);
+        }
         _;
     }
 

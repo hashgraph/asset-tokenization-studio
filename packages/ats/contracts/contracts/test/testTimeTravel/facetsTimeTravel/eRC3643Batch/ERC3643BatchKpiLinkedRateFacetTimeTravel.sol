@@ -5,16 +5,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ERC3643BatchKpiLinkedRateFacet
-} from "../../../../layer_1/ERC3643/kpiLinkedRate/ERC3643BatchKpiLinkedRateFacet.sol";
+} from "../../../../facets/features/ERC3643/kpiLinkedRate/ERC3643BatchKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
 contract ERC3643BatchKpiLinkedRateFacetTimeTravel is ERC3643BatchKpiLinkedRateFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
     }
 }

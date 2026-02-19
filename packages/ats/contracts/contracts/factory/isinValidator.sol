@@ -9,7 +9,7 @@ import {
     _ASCII_9,
     _ASCII_7,
     _ASCII_0
-} from "../layer_1/constants/values.sol";
+} from "../constants/values.sol";
 
 error WrongISIN(string isin);
 error WrongISINChecksum(string isin);

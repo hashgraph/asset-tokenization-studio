@@ -1,11 +1,11 @@
-import { type Pause, type AccessControl } from "@contract-types";
+import { type IPause, type IAccessControl } from "@contract-types";
 import { expect } from "chai";
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
 export async function grantRoleAndPauseToken(
-  accessControlFacet: AccessControl,
-  pauseFacet: Pause,
+  accessControlFacet: IAccessControl,
+  pauseFacet: IPause,
   role: string,
   signerAccessControl: Signer,
   signerPause: Signer,

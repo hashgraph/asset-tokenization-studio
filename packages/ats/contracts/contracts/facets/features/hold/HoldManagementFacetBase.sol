@@ -1,0 +1,126 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IHoldManagement } from "../interfaces/hold/IHoldManagement.sol";
+import { IStaticFunctionSelectors } from "../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
+import { IClearing } from "../interfaces/clearing/IClearing.sol";
+import { Hold, ProtectedHold } from "../interfaces/hold/IHold.sol";
+import { ThirdPartyType } from "../types/ThirdPartyType.sol";
+import { LibPause } from "../../../lib/core/LibPause.sol";
+import { LibAccess } from "../../../lib/core/LibAccess.sol";
+import { LibCompliance } from "../../../lib/core/LibCompliance.sol";
+import { LibProtectedPartitions } from "../../../lib/core/LibProtectedPartitions.sol";
+import { LibClearing } from "../../../lib/domain/LibClearing.sol";
+import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
+import { LibERC1644 } from "../../../lib/domain/LibERC1644.sol";
+import { LibHoldOps } from "../../../lib/orchestrator/LibHoldOps.sol";
+import { _CONTROLLER_ROLE } from "../../../constants/roles.sol";
+
+abstract contract HoldManagementFacetBase is IHoldManagement, IStaticFunctionSelectors {
+    function operatorCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external override returns (bool success_, uint256 holdId_) {
+        LibPause.requireNotPaused();
+        if (LibClearing.isClearingActivated()) revert IClearing.ClearingIsActivated();
+        LibERC1410.requireValidAddress(_from);
+        LibERC1410.requireValidAddress(_hold.escrow);
+        LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
+        LibERC1410.checkOperator(_partition, msg.sender, _from);
+        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
+        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        LibCompliance.requireNotRecovered(msg.sender);
+        LibCompliance.requireNotRecovered(_hold.to);
+        LibCompliance.requireNotRecovered(_from);
+
+        (success_, holdId_) = LibHoldOps.createHoldByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData,
+            ThirdPartyType.OPERATOR
+        );
+
+        emit OperatorHeldByPartition(msg.sender, _from, _partition, holdId_, _hold, _operatorData);
+    }
+
+    function controllerCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external override returns (bool success_, uint256 holdId_) {
+        LibPause.requireNotPaused();
+        LibERC1410.requireValidAddress(_from);
+        LibERC1410.requireValidAddress(_hold.escrow);
+        LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
+        LibAccess.checkRole(_CONTROLLER_ROLE, msg.sender);
+        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
+        LibERC1644.checkControllable();
+
+        (success_, holdId_) = LibHoldOps.createHoldByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData,
+            ThirdPartyType.CONTROLLER
+        );
+
+        emit ControllerHeldByPartition(msg.sender, _from, _partition, holdId_, _hold, _operatorData);
+    }
+
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    ) external override returns (bool success_, uint256 holdId_) {
+        LibPause.requireNotPaused();
+        if (LibClearing.isClearingActivated()) revert IClearing.ClearingIsActivated();
+        LibERC1410.requireValidAddress(_from);
+        LibERC1410.requireValidAddress(_protectedHold.hold.escrow);
+        LibCompliance.requireNotRecovered(_from);
+        LibCompliance.requireNotRecovered(_protectedHold.hold.to);
+        LibAccess.checkRole(LibProtectedPartitions.protectedPartitionsRole(_partition), msg.sender);
+        LibHoldOps.checkValidExpirationTimestamp(_protectedHold.hold.expirationTimestamp, _getBlockTimestamp());
+        LibProtectedPartitions.requireProtectedPartitions();
+
+        (success_, holdId_) = LibHoldOps.protectedCreateHoldByPartition(
+            _partition,
+            _from,
+            _protectedHold,
+            _signature,
+            _getBlockTimestamp()
+        );
+
+        emit ProtectedHeldByPartition(msg.sender, _from, _partition, holdId_, _protectedHold.hold, "");
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════════════
+    // STATIC SELECTORS
+    // ════════════════════════════════════════════════════════════════════════════════════
+
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_[selectorIndex++] = this.operatorCreateHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.controllerCreateHoldByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.protectedCreateHoldByPartition.selector;
+    }
+
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IHoldManagement).interfaceId;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════════════
+    // INTERNAL VIRTUAL
+    // ════════════════════════════════════════════════════════════════════════════════════
+
+    function _getBlockTimestamp() internal view virtual returns (uint256) {
+        return block.timestamp;
+    }
+}

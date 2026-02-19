@@ -1,0 +1,164 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IClearingRedeem } from "../interfaces/clearing/IClearingRedeem.sol";
+import { IStaticFunctionSelectors } from "../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
+import { IClearing } from "../interfaces/clearing/IClearing.sol";
+import { ThirdPartyType } from "../types/ThirdPartyType.sol";
+import { LibPause } from "../../../lib/core/LibPause.sol";
+import { LibCompliance } from "../../../lib/core/LibCompliance.sol";
+import { LibProtectedPartitions } from "../../../lib/core/LibProtectedPartitions.sol";
+import { LibAccess } from "../../../lib/core/LibAccess.sol";
+import { LibClearing } from "../../../lib/domain/LibClearing.sol";
+import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
+import { LibClearingOps } from "../../../lib/orchestrator/LibClearingOps.sol";
+
+abstract contract ClearingRedeemFacetBase is IClearingRedeem, IStaticFunctionSelectors {
+    function clearingRedeemByPartition(
+        ClearingOperation calldata _clearingOperation,
+        uint256 _amount
+    ) external override returns (bool success_, uint256 clearingId_) {
+        LibPause.requireNotPaused();
+        LibCompliance.requireNotRecovered(msg.sender);
+        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperation.partition);
+        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        LibClearingOps.checkValidExpirationTimestamp(_clearingOperation.expirationTimestamp, _getBlockTimestamp());
+        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+
+        (success_, clearingId_) = LibClearingOps.clearingRedeemCreation(
+            _clearingOperation,
+            _amount,
+            msg.sender,
+            "",
+            ThirdPartyType.NULL
+        );
+    }
+
+    function clearingRedeemFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount
+    ) external override returns (bool success_, uint256 clearingId_) {
+        LibPause.requireNotPaused();
+        LibCompliance.requireNotRecovered(_clearingOperationFrom.from);
+        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
+        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        LibClearingOps.checkValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _getBlockTimestamp()
+        );
+        LibCompliance.requireNotRecovered(msg.sender);
+        LibERC1410.requireValidAddress(_clearingOperationFrom.from);
+        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+
+        (success_, clearingId_) = LibClearingOps.clearingRedeemCreation(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.AUTHORIZED
+        );
+
+        LibClearingOps.decreaseAllowedBalanceForClearing(
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ClearingOperationType.Redeem,
+            _clearingOperationFrom.from,
+            _amount
+        );
+    }
+
+    function operatorClearingRedeemByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount
+    ) external override returns (bool success_, uint256 clearingId_) {
+        LibPause.requireNotPaused();
+        LibCompliance.requireNotRecovered(_clearingOperationFrom.from);
+        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
+        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        LibClearingOps.checkValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _getBlockTimestamp()
+        );
+        LibERC1410.requireValidAddress(_clearingOperationFrom.from);
+        LibCompliance.requireNotRecovered(msg.sender);
+        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        LibERC1410.checkOperator(
+            _clearingOperationFrom.clearingOperation.partition,
+            msg.sender,
+            _clearingOperationFrom.from
+        );
+
+        (success_, clearingId_) = LibClearingOps.clearingRedeemCreation(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.OPERATOR
+        );
+    }
+
+    function protectedClearingRedeemByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        bytes calldata _signature
+    ) external override returns (bool success_, uint256 clearingId_) {
+        LibPause.requireNotPaused();
+        LibProtectedPartitions.requireProtectedPartitions();
+        LibERC1410.requireValidAddress(_protectedClearingOperation.from);
+        LibClearingOps.checkValidExpirationTimestamp(
+            _protectedClearingOperation.clearingOperation.expirationTimestamp,
+            _getBlockTimestamp()
+        );
+        LibAccess.checkRole(
+            LibProtectedPartitions.protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition),
+            msg.sender
+        );
+        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        LibCompliance.requireNotRecovered(_protectedClearingOperation.from);
+
+        (success_, clearingId_) = LibClearingOps.protectedClearingRedeemByPartition(
+            _protectedClearingOperation,
+            _amount,
+            _signature,
+            _getBlockTimestamp()
+        );
+    }
+
+    function getClearingRedeemForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId
+    ) external view override returns (ClearingRedeemData memory clearingRedeemData_) {
+        return
+            LibClearingOps.getClearingRedeemForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _clearingId,
+                _getBlockTimestamp()
+            );
+    }
+
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_[selectorIndex++] = this.clearingRedeemByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.clearingRedeemFromByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.operatorClearingRedeemByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.protectedClearingRedeemByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getClearingRedeemForByPartition.selector;
+    }
+
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearingRedeem).interfaceId;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════════════
+    // INTERNAL VIRTUAL
+    // ════════════════════════════════════════════════════════════════════════════════════
+
+    function _getBlockTimestamp() internal view virtual returns (uint256) {
+        return block.timestamp;
+    }
+}

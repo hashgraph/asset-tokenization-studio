@@ -3,19 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ProtectedPartitionsKpiLinkedRateFacet
-} from "contracts/layer_1/protectedPartitions/kpiLinkedRate/ProtectedPartitionsKpiLinkedRateFacet.sol";
+} from "../../../../facets/features/protectedPartitions/kpiLinkedRate/ProtectedPartitionsKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "contracts/layer_0/context/LocalContext.sol";
 
+// solhint-disable-next-line no-empty-blocks
 contract ProtectedPartitionsKpiLinkedRateFacetTimeTravel is
     ProtectedPartitionsKpiLinkedRateFacet,
     TimeTravelStorageWrapper
-{
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+{}

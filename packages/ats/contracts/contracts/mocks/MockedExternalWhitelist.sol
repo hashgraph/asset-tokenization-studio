@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalControlList } from "../layer_1/interfaces/externalControlLists/IExternalControlList.sol";
+import { IExternalControlList } from "../facets/features/interfaces/externalControlLists/IExternalControlList.sol";
 
 contract MockedWhitelist is IExternalControlList {
     mapping(address => bool) private _whitelist;

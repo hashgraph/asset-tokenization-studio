@@ -1,23 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
-// Contract copy-pasted form OZ and extended
-
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
 import {
     ERC20PermitSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_1/ERC1400/ERC20Permit/sustainabilityPerformanceTargetRate/ERC20PermitSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/features/ERC1400/ERC20Permit/sustainabilityPerformanceTargetRate/ERC20PermitSustainabilityPerformanceTargetRateFacet.sol";
+// solhint-enable max-line-length
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
+// solhint-disable-next-line no-empty-blocks
 contract ERC20PermitSustainabilityPerformanceTargetRateFacetTimeTravel is
     ERC20PermitSustainabilityPerformanceTargetRateFacet,
     TimeTravelStorageWrapper
-{
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+{}

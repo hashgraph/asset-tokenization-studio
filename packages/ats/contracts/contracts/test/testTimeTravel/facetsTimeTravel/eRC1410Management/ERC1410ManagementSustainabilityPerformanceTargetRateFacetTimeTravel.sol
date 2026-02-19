@@ -3,21 +3,19 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
 import {
     ERC1410ManagementSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_1/ERC1400/ERC1410/sustainabilityPerformanceTargetRate/ERC1410ManagementSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/features/ERC1400/ERC1410/sustainabilityPerformanceTargetRate/ERC1410ManagementSustainabilityPerformanceTargetRateFacet.sol";
+// solhint-enable max-line-length
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
+// solhint-disable-next-line no-empty-blocks
 contract ERC1410ManagementSustainabilityPerformanceTargetRateFacetTimeTravel is
     ERC1410ManagementSustainabilityPerformanceTargetRateFacet,
     TimeTravelStorageWrapper
 {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
     }
 }

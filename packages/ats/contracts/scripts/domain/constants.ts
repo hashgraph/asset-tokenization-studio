@@ -107,14 +107,14 @@ export type AtsTaskHash = (typeof ATS_TASK)[AtsTaskType];
 /**
  * Regulation enums matching Solidity definitions.
  *
- * These enums match contracts/layer_3/constants/regulation.sol and provide
+ * These enums match contracts/facets/regulation/constants/regulation.sol and provide
  * TypeScript-friendly enum types for ATS regulatory compliance configuration.
  */
 
 /**
  * Regulation type for ATS security tokens.
  *
- * Maps to contracts/layer_3/constants/regulation.sol
+ * Maps to contracts/facets/regulation/constants/regulation.sol
  */
 export enum RegulationType {
   NONE = 0,
@@ -125,7 +125,7 @@ export enum RegulationType {
 /**
  * Regulation sub-type for ATS security tokens.
  *
- * Maps to contracts/layer_3/constants/regulation.sol
+ * Maps to contracts/facets/regulation/constants/regulation.sol
  */
 export enum RegulationSubType {
   NONE = 0,

@@ -3,16 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     AccessControlKpiLinkedRateFacet
-} from "../../../../layer_1/accessControl/kpiLinkedRate/AccessControlKpiLinkedRateFacet.sol";
+} from "../../../../facets/features/accessControl/kpiLinkedRate/AccessControlKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
-contract AccessControlKpiLinkedRateFacetTimeTravel is AccessControlKpiLinkedRateFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+// solhint-disable-next-line no-empty-blocks
+contract AccessControlKpiLinkedRateFacetTimeTravel is AccessControlKpiLinkedRateFacet, TimeTravelStorageWrapper {}

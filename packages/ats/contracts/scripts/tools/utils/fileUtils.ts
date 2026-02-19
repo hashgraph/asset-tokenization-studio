@@ -97,7 +97,7 @@ export function getRelativePath(fullPath: string, baseDir: string): string {
 
 /**
  * Get directory name from path level.
- * Example: 'contracts/facets/layer_1/AccessControl.sol' with level 2 returns 'layer_1'
+ * Example: 'contracts/facets/layer_1/AccessControl.sol' with level 2 returns 'features'
  *
  * @param filePath - File path
  * @param level - Directory level (0 = filename, 1 = parent dir, etc.)

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { TimeTravelStorageWrapper } from "./TimeTravelStorageWrapper.sol";
-import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { IStaticFunctionSelectors } from "../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
 import { ITimeTravel } from "../interfaces/ITimeTravel.sol";
 import { _TIME_TRAVEL_RESOLVER_KEY } from "../constants/resolverKeys.sol";
 

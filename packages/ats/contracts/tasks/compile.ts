@@ -67,7 +67,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     { original: "IResolverProxy" },
     { original: "IStaticFunctionSelectors" },
     {
-      original: "contracts/layer_1/interfaces/ERC1400/IERC20.sol:IERC20",
+      original: "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
       removeImports: false,
     },
     // Coupon Interest Rates interfaces
@@ -87,10 +87,10 @@ task("erc3643-clone-interfaces", async (_, hre) => {
   }));
 
   const constants = [
-    { src: "layer_3/constants/regulation", dst: "regulation" },
-    { src: "layer_1/constants/roles", dst: "roles" },
+    { src: "regulation/constants/regulation", dst: "regulation" },
+    { src: "constants/roles", dst: "roles" },
     {
-      src: "layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon",
+      src: "assetCapabilities/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon",
       dst: "IScheduledTasksCommon",
     },
   ];

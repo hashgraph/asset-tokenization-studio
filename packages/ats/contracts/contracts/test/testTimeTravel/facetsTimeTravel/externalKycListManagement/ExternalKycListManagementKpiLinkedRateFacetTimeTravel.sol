@@ -3,19 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ExternalKycListManagementKpiLinkedRateFacet
-} from "contracts/layer_1/externalKycLists/kpiLinkedRate/ExternalKycListManagementKpiLinkedRateFacet.sol";
+} from "../../../../facets/features/externalKycLists/kpiLinkedRate/ExternalKycListManagementKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "contracts/layer_0/context/LocalContext.sol";
 
+// solhint-disable-next-line no-empty-blocks
 contract ExternalKycListManagementKpiLinkedRateFacetTimeTravel is
     ExternalKycListManagementKpiLinkedRateFacet,
     TimeTravelStorageWrapper
-{
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+{}

@@ -30,7 +30,7 @@ export const DEFAULT_CONFIG: Required<Omit<RegistryConfig, "mockContractPaths">>
   artifactPath: "./artifacts/contracts",
   includePaths: ["**/*.sol"],
   excludePaths: ["**/test/**", "**/tests/**", "**/mocks/**", "**/mock/**", "**/*.t.sol", "**/*.s.sol"],
-  resolverKeyPaths: ["**/constants/resolverKeys.sol", "**/layer_*/constants/resolverKeys.sol"],
+  resolverKeyPaths: ["**/constants/resolverKeys/*.sol", "**/constants/resolverKeys.sol"],
   rolesPaths: ["**/constants/roles.sol", "**/interfaces/roles.sol"],
   includeStorageWrappers: true,
   includeTimeTravel: true,

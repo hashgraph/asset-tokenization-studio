@@ -3,16 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     TransferAndLockKpiLinkedRateFacet
-} from "../../../../layer_3/transferAndLock/kpiLinkedRate/TransferAndLockKpiLinkedRateFacet.sol";
+} from "../../../../facets/regulation/transferAndLock/kpiLinkedRate/TransferAndLockKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
+// solhint-disable-next-line no-empty-blocks
 contract TransferAndLockKpiLinkedRateFacetTimeTravel is TransferAndLockKpiLinkedRateFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
+    function _getBlockTimestamp() internal view override returns (uint256) {
+        return _timestamp == 0 ? block.timestamp : _timestamp;
     }
 }

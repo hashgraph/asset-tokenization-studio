@@ -50,8 +50,5 @@ module.exports = {
 
     // Time-related rules (disabled as commonly needed in DeFi)
     "not-rely-on-time": "off",
-
-    // Disable verbose documentation warnings to focus on code quality
-    "use-natspec": "off",
   },
 };

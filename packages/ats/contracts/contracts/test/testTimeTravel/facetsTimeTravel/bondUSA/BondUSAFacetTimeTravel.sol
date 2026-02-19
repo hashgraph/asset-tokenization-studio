@@ -1,16 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BondUSAFacet } from "contracts/layer_3/bondUSA/variableRate/BondUSAFacet.sol";
+import { BondUSAFacet } from "../../../../facets/regulation/bondUSA/variableRate/BondUSAFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
 contract BondUSAFacetTimeTravel is BondUSAFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
+    function _getBlockTimestamp() internal view override returns (uint256) {
+        return _timestamp == 0 ? block.timestamp : _timestamp;
     }
 }

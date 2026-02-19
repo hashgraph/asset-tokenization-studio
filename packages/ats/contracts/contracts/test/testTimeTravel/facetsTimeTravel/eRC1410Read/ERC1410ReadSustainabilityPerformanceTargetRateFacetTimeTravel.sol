@@ -1,23 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
-// Contract copy-pasted form OZ and extended
-
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
 import {
     ERC1410ReadSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_1/ERC1400/ERC1410/sustainabilityPerformanceTargetRate/ERC1410ReadSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/features/ERC1400/ERC1410/sustainabilityPerformanceTargetRate/ERC1410ReadSustainabilityPerformanceTargetRateFacet.sol";
+// solhint-enable max-line-length
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
+// solhint-disable-next-line no-empty-blocks
 contract ERC1410ReadSustainabilityPerformanceTargetRateFacetTimeTravel is
     ERC1410ReadSustainabilityPerformanceTargetRateFacet,
     TimeTravelStorageWrapper
 {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
     }
 }

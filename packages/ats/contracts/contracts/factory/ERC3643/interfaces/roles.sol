@@ -44,6 +44,9 @@ bytes32 constant _PROTECTED_PARTITIONS_PARTICIPANT_ROLE = 0xdaba153046c65d49da6a
 // keccak256('security.token.standard.role.wildcard');
 bytes32 constant _WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46;
 
+// keccak256('security.token.standard.role.agent');
+bytes32 constant _AGENT_ROLE = 0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6;
+
 // keccak256('security.token.standard.role.ssi.manager');
 bytes32 constant _SSI_MANAGER_ROLE = 0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0;
 
@@ -71,11 +74,20 @@ bytes32 constant _INTERNAL_KYC_MANAGER_ROLE = 0x3916c5c9e68488134c2ee70660332559
 // keccak256('security.token.standard.role.freeze.manager');
 bytes32 constant _FREEZE_MANAGER_ROLE = 0xd0e5294c1fc630933e135c5b668c5d577576754d33964d700bbbcdbfd7e1361b;
 
-// keccak256('security.token.standard.role.agent');
-bytes32 constant _AGENT_ROLE = 0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6;
-
 // keccak256('security.token.standard.role.trex.owner');
 bytes32 constant _TREX_OWNER_ROLE = 0x03ce2fdc316501dd97f5219e6ad908a3238f1e90f910aa17b627f801a6aafab7;
 
 // keccak256('security.token.standard.role.maturity.redeemer');
 bytes32 constant _MATURITY_REDEEMER_ROLE = 0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c;
+
+// keccak256('security.token.standard.role.adjustmentBalance');
+bytes32 constant _ADJUSTMENT_BALANCE_ROLE = 0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9;
+
+// keccak256('security.token.standard.role.proceedRecipient');
+bytes32 constant _PROCEED_RECIPIENT_MANAGER_ROLE = 0xebc53fe99fea28c7aa9476a714959af5b931f34a8a8734365ec63113198d512f;
+
+// keccak256('security.token.standard.role.interestRateManager');
+bytes32 constant _INTEREST_RATE_MANAGER_ROLE = 0xa174f099c94c902831d8b8a07810700505da86a76ea0bcb7629884ef26cf682e;
+
+// keccak256('security.token.standard.role.kpiManager');
+bytes32 constant _KPI_MANAGER_ROLE = 0x441e549cc2c88d01fa80bd9e7b40412d3106214149223501aa25d4fa23bf306d;

@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   BusinessLogicResolver,
   IFactory,
-  type AccessControl,
+  type IAccessControl,
   type ControlList,
   type ERC1644,
   type ERC20,
@@ -43,7 +43,7 @@ describe("Factory Tests", () => {
 
   let factory: IFactory;
   let businessLogicResolver: BusinessLogicResolver;
-  let accessControlFacet: AccessControl;
+  let accessControlFacet: IAccessControl;
   let controlListFacet: ControlList;
   let erc1644Facet: ERC1644;
   let erc20Facet: ERC20;
@@ -78,13 +78,16 @@ describe("Factory Tests", () => {
     }
   }
   async function readFacets(equityAddress: string) {
-    accessControlFacet = await ethers.getContractAt("AccessControl", equityAddress);
+    accessControlFacet = await ethers.getContractAt("IAccessControl", equityAddress);
 
-    controlListFacet = await ethers.getContractAt("ControlList", equityAddress);
+    controlListFacet = await ethers.getContractAt("IControlList", equityAddress);
 
-    erc1644Facet = await ethers.getContractAt("ERC1644", equityAddress);
+    erc1644Facet = await ethers.getContractAt("IERC1644", equityAddress);
 
-    erc20Facet = await ethers.getContractAt("ERC20", equityAddress);
+    erc20Facet = await ethers.getContractAt(
+      "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
+      equityAddress,
+    );
   }
 
   beforeEach(async () => {
@@ -623,7 +626,7 @@ describe("Factory Tests", () => {
       expect(metadata.info.isin).to.be.equal(equityData.security.erc20MetadataInfo.isin);
       expect(metadata.securityType).to.be.equal(SecurityType.EQUITY);
 
-      const equityFacet = await ethers.getContractAt("Equity", equityAddress);
+      const equityFacet = await ethers.getContractAt("IEquityUSA", equityAddress);
 
       const equityMetadata = await equityFacet.getEquityDetails();
       expect(equityMetadata.votingRight).to.equal(equityData.equityDetails.votingRight);
@@ -638,7 +641,7 @@ describe("Factory Tests", () => {
       expect(equityMetadata.nominalValue).to.equal(equityData.equityDetails.nominalValue);
       expect(equityMetadata.nominalValueDecimals).to.equal(equityData.equityDetails.nominalValueDecimals);
 
-      const capFacet = await ethers.getContractAt("Cap", equityAddress);
+      const capFacet = await ethers.getContractAt("ICap", equityAddress);
 
       const maxSupply = await capFacet.getMaxSupply();
       expect(maxSupply).to.equal(equityData.security.maxSupply);
@@ -788,11 +791,11 @@ describe("Factory Tests", () => {
       expect(metadata.info.isin).to.be.equal(bondData.security.erc20MetadataInfo.isin);
       expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
 
-      const capFacet = await ethers.getContractAt("Cap", bondAddress);
+      const capFacet = await ethers.getContractAt("ICap", bondAddress);
       const maxSupply = await capFacet.getMaxSupply();
       expect(maxSupply).to.equal(bondData.security.maxSupply);
 
-      const bondFacet = await ethers.getContractAt("BondRead", bondAddress);
+      const bondFacet = await ethers.getContractAt("IBondRead", bondAddress);
       const bondDetails = await bondFacet.getBondDetails();
       expect(bondDetails.currency).to.be.deep.equal(bondData.bondDetails.currency);
       expect(bondDetails.nominalValue).to.be.deep.equal(bondData.bondDetails.nominalValue);
@@ -1012,7 +1015,7 @@ describe("Factory Tests", () => {
       const bondAddress = deployedBondEvent!.args!.bondAddress;
 
       // Verify fixed rate was set
-      const fixedRateFacet = await ethers.getContractAt("FixedRate", bondAddress);
+      const fixedRateFacet = await ethers.getContractAt("IFixedRate", bondAddress);
       const [rate, decimals] = await fixedRateFacet.getRate();
       expect(rate).to.equal(bondFixedRateData.fixedRateData.rate);
       expect(decimals).to.equal(bondFixedRateData.fixedRateData.rateDecimals);
@@ -1177,7 +1180,7 @@ describe("Factory Tests", () => {
       const bondAddress = deployedBondEvent!.args!.bondAddress;
 
       // Verify KPI linked rate was set
-      const kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRate", bondAddress);
+      const kpiLinkedRateFacet = await ethers.getContractAt("IKpiLinkedRate", bondAddress);
       const interestRate = await kpiLinkedRateFacet.getInterestRate();
       expect(interestRate.maxRate).to.equal(bondKpiLinkedRateData.interestRate.maxRate);
       expect(interestRate.baseRate).to.equal(bondKpiLinkedRateData.interestRate.baseRate);
@@ -1562,7 +1565,7 @@ describe("Factory Tests", () => {
       const bondAddress = deployedBondEvent!.args!.bondAddress;
 
       // Verify sustainability rate was set
-      const sustainabilityRateFacet = await ethers.getContractAt("SustainabilityPerformanceTargetRate", bondAddress);
+      const sustainabilityRateFacet = await ethers.getContractAt("ISustainabilityPerformanceTargetRate", bondAddress);
       const interestRate = await sustainabilityRateFacet.getInterestRate();
       expect(interestRate.baseRate).to.equal(bondSustainabilityData.interestRate.baseRate);
       expect(interestRate.startRate).to.equal(bondSustainabilityData.interestRate.startRate);

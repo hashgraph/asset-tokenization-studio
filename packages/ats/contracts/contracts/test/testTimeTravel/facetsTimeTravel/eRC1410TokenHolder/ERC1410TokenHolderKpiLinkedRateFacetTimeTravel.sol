@@ -5,19 +5,15 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ERC1410TokenHolderKpiLinkedRateFacet
-} from "../../../../layer_1/ERC1400/ERC1410/kpiLinkedRate/ERC1410TokenHolderKpiLinkedRateFacet.sol";
+} from "../../../../facets/features/ERC1400/ERC1410/kpiLinkedRate/ERC1410TokenHolderKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
+// solhint-disable-next-line no-empty-blocks
 contract ERC1410TokenHolderKpiLinkedRateFacetTimeTravel is
     ERC1410TokenHolderKpiLinkedRateFacet,
     TimeTravelStorageWrapper
 {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
     }
 }

@@ -138,7 +138,7 @@ describe("ResolverProxy Tests", () => {
       await ethers.getContractFactory("ResolverProxy")
     ).deploy(resolver.target, CONFIG_ID, 1, []);
 
-    const accessControl = await ethers.getContractAt("AccessControl", resolverProxy.target);
+    const accessControl = await ethers.getContractAt("IAccessControl", resolverProxy.target);
     const diamondLoupe = await ethers.getContractAt("DiamondFacet", resolverProxy.target);
 
     const GRANT_ROLE_SIGNATURE = "0x2f2ff15d";

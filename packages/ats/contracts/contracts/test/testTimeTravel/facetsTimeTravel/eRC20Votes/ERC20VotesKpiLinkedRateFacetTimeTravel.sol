@@ -5,16 +5,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ERC20VotesKpiLinkedRateFacet
-} from "../../../../layer_1/ERC1400/ERC20Votes/kpiLinkedRate/ERC20VotesKpiLinkedRateFacet.sol";
+} from "../../../../facets/features/ERC1400/ERC20Votes/kpiLinkedRate/ERC20VotesKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
+// solhint-disable-next-line no-empty-blocks
 contract ERC20VotesKpiLinkedRateFacetTimeTravel is ERC20VotesKpiLinkedRateFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
     }
 }

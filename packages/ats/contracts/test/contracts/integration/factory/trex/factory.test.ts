@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { BusinessLogicResolver, TREXFactoryAts, ITREXFactory, AccessControl, ERC20, IFactory } from "@contract-types";
+import { BusinessLogicResolver, TREXFactoryAts, ITREXFactory, IAccessControl, ERC20, IFactory } from "@contract-types";
 
 import { deployFullSuiteFixture } from "./fixtures/deploy-full-suite.fixture";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -28,14 +28,14 @@ describe("TREX Factory Tests", () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let trexDeployment: any;
 
-  let accessControlFacet: AccessControl;
+  let accessControlFacet: IAccessControl;
   let erc20Facet: ERC20;
   let factory: IFactory;
 
   async function setFacets(diamond: string) {
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond);
+    accessControlFacet = await ethers.getContractAt("IAccessControl", diamond);
 
-    erc20Facet = await ethers.getContractAt("ERC20", diamond);
+    erc20Facet = await ethers.getContractAt("contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20", diamond);
   }
   async function deployAtsFactoryFixture() {
     const base = await deployAtsInfrastructureFixture();

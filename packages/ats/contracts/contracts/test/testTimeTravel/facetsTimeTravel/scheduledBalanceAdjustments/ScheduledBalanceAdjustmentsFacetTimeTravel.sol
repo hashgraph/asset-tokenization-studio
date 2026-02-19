@@ -1,18 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
 import {
     ScheduledBalanceAdjustmentsFacet
-} from "../../../../layer_2/scheduledTasks/scheduledBalanceAdjustments/standard/ScheduledBalanceAdjustmentsFacet.sol";
+} from "../../../../facets/assetCapabilities/scheduledTasks/scheduledBalanceAdjustments/standard/ScheduledBalanceAdjustmentsFacet.sol";
+// solhint-enable max-line-length
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
-contract ScheduledBalanceAdjustmentsFacetTimeTravel is ScheduledBalanceAdjustmentsFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+// solhint-disable-next-line no-empty-blocks
+contract ScheduledBalanceAdjustmentsFacetTimeTravel is ScheduledBalanceAdjustmentsFacet, TimeTravelStorageWrapper {}

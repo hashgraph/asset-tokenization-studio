@@ -1,21 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
 import {
-    ScheduledCrossOrderedTasksKpiLinkedRateFacet
-} from "../../../../layer_2/scheduledTasks/scheduledCrossOrderedTasks/kpiLinkedRate/ScheduledCrossOrderedTasksKpiLinkedRateFacet.sol";
+    ScheduledCrossOrderedTasksKpiLinkedRateFacet as K
+} from "../../../../facets/assetCapabilities/scheduledTasks/scheduledCrossOrderedTasks/kpiLinkedRate/ScheduledCrossOrderedTasksKpiLinkedRateFacet.sol";
+// solhint-enable max-line-length
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
-contract ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel is
-    ScheduledCrossOrderedTasksKpiLinkedRateFacet,
-    TimeTravelStorageWrapper
-{
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
+// solhint-disable-next-line no-empty-blocks
+contract ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel is K, TimeTravelStorageWrapper {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
     }
 }

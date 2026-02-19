@@ -2,15 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 import {
     AdjustBalancesKpiLinkedRateFacet
-} from "../../../../layer_2/adjustBalances/kpiLinkedRate/AdjustBalancesKpiLinkedRateFacet.sol";
+} from "../../../../facets/assetCapabilities/adjustBalances/kpiLinkedRate/AdjustBalancesKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
-contract AdjustBalancesKpiLinkedRateFacetTimeTravel is AdjustBalancesKpiLinkedRateFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+// solhint-disable-next-line no-empty-blocks
+contract AdjustBalancesKpiLinkedRateFacetTimeTravel is AdjustBalancesKpiLinkedRateFacet, TimeTravelStorageWrapper {}

@@ -7,7 +7,7 @@ import {
   type ResolverProxy,
   type BondUSAKpiLinkedRateFacet,
   type ScheduledCouponListing,
-  type AccessControl,
+  type IAccessControl,
   type ScheduledCrossOrderedTasks,
   type TimeTravelFacet,
 } from "@contract-types";
@@ -25,7 +25,7 @@ describe("Scheduled Coupon Listing Tests", () => {
   let bondFacet: BondUSAKpiLinkedRateFacet;
   let scheduledCouponListingFacet: ScheduledCouponListing;
   let scheduledTasksFacet: ScheduledCrossOrderedTasks;
-  let accessControlFacet: AccessControl;
+  let accessControlFacet: IAccessControl;
   let timeTravelFacet: TimeTravelFacet;
 
   let startingDate = 0;
@@ -53,10 +53,10 @@ describe("Scheduled Coupon Listing Tests", () => {
     [, , signer_C] = await ethers.getSigners();
     account_C = signer_C.address;
 
-    accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
+    accessControlFacet = await ethers.getContractAt("IAccessControl", diamond.target);
     bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
     scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target);
+    scheduledTasksFacet = await ethers.getContractAt("IScheduledCrossOrderedTasks", diamond.target);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
 
     await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, account_C);

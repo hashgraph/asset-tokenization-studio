@@ -1,19 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
+
+// solhint-disable max-line-length
 import {
     AdjustBalancesSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_2/adjustBalances/sustainabilityPerformanceTargetRate/AdjustBalancesSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/assetCapabilities/adjustBalances/sustainabilityPerformanceTargetRate/AdjustBalancesSustainabilityPerformanceTargetRateFacet.sol";
+// solhint-enable max-line-length
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
+// solhint-disable-next-line no-empty-blocks
 contract AdjustBalancesSustainabilityPerformanceTargetRateFacetTimeTravel is
     AdjustBalancesSustainabilityPerformanceTargetRateFacet,
     TimeTravelStorageWrapper
-{
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+{}

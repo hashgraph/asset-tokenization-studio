@@ -194,9 +194,9 @@ describe("atsRegistry - Registry Helper Functions", () => {
 
   describe("Storage wrapper registry helpers", () => {
     it("getStorageWrapperDefinition should return a valid wrapper definition", () => {
-      const wrapper = getStorageWrapperDefinition("AccessControlStorageWrapper");
+      const wrapper = getStorageWrapperDefinition("IAccessControlStorageWrapper");
       expect(wrapper).to.not.be.undefined;
-      expect(wrapper!.name).to.equal("AccessControlStorageWrapper");
+      expect(wrapper!.name).to.equal("IAccessControlStorageWrapper");
     });
 
     it("getStorageWrapperDefinition should return undefined for non-existent wrapper", () => {
@@ -211,7 +211,7 @@ describe("atsRegistry - Registry Helper Functions", () => {
     });
 
     it("hasStorageWrapper should return true for existing wrapper", () => {
-      expect(hasStorageWrapper("AccessControlStorageWrapper")).to.be.true;
+      expect(hasStorageWrapper("IAccessControlStorageWrapper")).to.be.true;
     });
 
     it("hasStorageWrapper should return false for non-existent wrapper", () => {
