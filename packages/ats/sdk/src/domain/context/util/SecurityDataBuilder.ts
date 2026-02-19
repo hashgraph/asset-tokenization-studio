@@ -1,17 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BondDetails } from "../bond/BondDetails";
+import { BondFixedRateDetails } from "../bond/BondFixedRateDetails";
+import { BondKpiLinkedRateDetails } from "../bond/BondKpiLinkedRateDetails";
+import { ImpactData } from "../bond/ImpactData";
+import { InterestRate } from "../bond/InterestRate";
+import EvmAddress from "../contract/EvmAddress";
 import { CastDividendType } from "../equity/DividendType";
 import { EquityDetails } from "../equity/EquityDetails";
 import { BondDetailsData } from "../factory/BondDetailsData";
+import { BondFixedRateDetailsData } from "../factory/BondFixedRateDetailsData";
+import { BondKpiLinkedRateDetailsData } from "../factory/BondKpiLinkedRateDetailsData";
 import { EquityDetailsData } from "../factory/EquityDetailsData";
 import { FactoryRegulationData } from "../factory/FactorySecurityToken";
 import { Rbac } from "../factory/Rbac";
-import { CastRegulationType, CastRegulationSubType } from "../factory/RegulationType";
+import { CastRegulationSubType, CastRegulationType } from "../factory/RegulationType";
 import { SecurityData } from "../factory/SecurityData";
-import { SecurityRole } from "../security/SecurityRole";
 import { Security } from "../security/Security";
-import EvmAddress from "../contract/EvmAddress";
+import { SecurityRole } from "../security/SecurityRole";
 
 export class SecurityDataBuilder {
   static buildSecurityData(
@@ -92,6 +98,53 @@ export class SecurityDataBuilder {
       bondInfo.nominalValueDecimals,
       bondInfo.startingDate.toString(),
       bondInfo.maturityDate.toString(),
+    );
+  }
+
+  static buildBondFixedRateDetails(bondInfo: BondFixedRateDetails): BondFixedRateDetailsData {
+    return new BondFixedRateDetailsData(
+      bondInfo.currency,
+      bondInfo.nominalValue.toString(),
+      bondInfo.nominalValueDecimals,
+      bondInfo.startingDate.toString(),
+      bondInfo.maturityDate.toString(),
+      bondInfo.rate,
+      bondInfo.rateDecimals,
+    );
+  }
+
+  static buildBondKpiLinkedRateDetails(bondInfo: BondKpiLinkedRateDetails): BondKpiLinkedRateDetailsData {
+    return new BondKpiLinkedRateDetailsData(
+      bondInfo.currency,
+      bondInfo.nominalValue.toString(),
+      bondInfo.nominalValueDecimals,
+      bondInfo.startingDate.toString(),
+      bondInfo.maturityDate.toString(),
+      this.buildInterestRateData(bondInfo.interestRate),
+      this.buildImpactData(bondInfo.impactData),
+    );
+  }
+
+  static buildInterestRateData(interestRate: InterestRate): InterestRate {
+    return new InterestRate(
+      interestRate.maxRate,
+      interestRate.baseRate,
+      interestRate.minRate,
+      interestRate.startPeriod,
+      interestRate.startRate,
+      interestRate.missedPenalty,
+      interestRate.reportPeriod,
+      interestRate.rateDecimals,
+    );
+  }
+
+  static buildImpactData(impactData: ImpactData): ImpactData {
+    return new ImpactData(
+      impactData.maxDeviationCap,
+      impactData.baseLine,
+      impactData.maxDeviationFloor,
+      impactData.impactDataDecimals,
+      impactData.adjustmentPrecision,
     );
   }
 }
