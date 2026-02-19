@@ -9,7 +9,7 @@ import {
   KpiLinkedRateFacetTimeTravel,
   BondUSAReadKpiLinkedRateFacetTimeTravel,
   TimeTravelFacet,
-  ERC1594KpiLinkedRateFacetTimeTravel,
+  ERC1594FacetTimeTravel,
   ProceedRecipientsKpiLinkedRateFacetTimeTravel,
   KpisKpiLinkedRateFacetTimeTravel,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
@@ -58,7 +58,7 @@ describe("Bond KpiLinked Rate Tests", () => {
   let bondReadFacet: BondUSAReadKpiLinkedRateFacetTimeTravel;
   let kpiLinkedRateFacet: KpiLinkedRateFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
-  let erc1594Facet: ERC1594KpiLinkedRateFacetTimeTravel;
+  let erc1594Facet: ERC1594FacetTimeTravel;
   let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
   let kpisFacet: KpisKpiLinkedRateFacetTimeTravel;
   let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel;
@@ -110,9 +110,9 @@ describe("Bond KpiLinked Rate Tests", () => {
       diamond.target,
       signer_A,
     );
-    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.target, signer_A);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadKpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
     kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
-    erc1594Facet = await ethers.getContractAt("ERC1594KpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
+    erc1594Facet = await ethers.getContractAt("ERC1594FacetTimeTravel", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsKpiLinkedRateFacetTimeTravel",

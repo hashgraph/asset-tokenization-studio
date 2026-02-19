@@ -35,66 +35,66 @@ import { BusinessLogicResolver } from "@contract-types";
  */
 const BOND_KPI_LINKED_RATE_FACETS = [
   // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
-  "AccessControlKpiLinkedRateFacet",
-  "CapKpiLinkedRateFacet",
-  "ControlListKpiLinkedRateFacet",
-  "CorporateActionsKpiLinkedRateFacet",
+  "AccessControlFacet",
+  "CapFacet",
+  "ControlListFacet",
+  "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-  "ERC20KpiLinkedRateFacet",
-  "FreezeKpiLinkedRateFacet",
-  "KycKpiLinkedRateFacet",
-  "PauseKpiLinkedRateFacet",
-  "SnapshotsKpiLinkedRateFacet",
-  "TotalBalanceKpiLinkedRateFacet",
+  "ERC20Facet",
+  "FreezeFacet",
+  "KycFacet",
+  "PauseFacet",
+  "SnapshotsFacet",
+  "TotalBalanceFacet",
 
   // ERC Standards
-  "ERC1410IssuerKpiLinkedRateFacet",
-  "ERC1410ManagementKpiLinkedRateFacet",
-  "ERC1410ReadKpiLinkedRateFacet",
-  "ERC1410TokenHolderKpiLinkedRateFacet",
-  "ERC1594KpiLinkedRateFacet",
-  "ERC1643KpiLinkedRateFacet",
-  "ERC1644KpiLinkedRateFacet",
-  "ERC20PermitKpiLinkedRateFacet",
-  "NoncesKpiLinkedRateFacet",
-  "ERC20VotesKpiLinkedRateFacet",
-  "ERC3643BatchKpiLinkedRateFacet",
-  "ERC3643ManagementKpiLinkedRateFacet",
-  "ERC3643OperationsKpiLinkedRateFacet",
-  "ERC3643ReadKpiLinkedRateFacet",
+  "ERC1410IssuerFacet",
+  "ERC1410ManagementFacet",
+  "ERC1410ReadFacet",
+  "ERC1410TokenHolderFacet",
+  "ERC1594Facet",
+  "ERC1643Facet",
+  "ERC1644Facet",
+  "ERC20PermitFacet",
+  "NoncesFacet",
+  "ERC20VotesFacet",
+  "ERC3643BatchFacet",
+  "ERC3643ManagementFacet",
+  "ERC3643OperationsFacet",
+  "ERC3643ReadFacet",
 
   // Clearing & Settlement
-  "ClearingActionsKpiLinkedRateFacet",
-  "ClearingHoldCreationKpiLinkedRateFacet",
-  "ClearingReadKpiLinkedRateFacet",
-  "ClearingRedeemKpiLinkedRateFacet",
-  "ClearingTransferKpiLinkedRateFacet",
-  "HoldManagementKpiLinkedRateFacet",
-  "HoldReadKpiLinkedRateFacet",
-  "HoldTokenHolderKpiLinkedRateFacet",
+  "ClearingActionsFacet",
+  "ClearingHoldCreationFacet",
+  "ClearingReadFacet",
+  "ClearingRedeemFacet",
+  "ClearingTransferFacet",
+  "HoldManagementFacet",
+  "HoldReadFacet",
+  "HoldTokenHolderFacet",
 
   // External Management
-  "ExternalControlListManagementKpiLinkedRateFacet",
-  "ExternalKycListManagementKpiLinkedRateFacet",
-  "ExternalPauseManagementKpiLinkedRateFacet",
+  "ExternalControlListManagementFacet",
+  "ExternalKycListManagementFacet",
+  "ExternalPauseManagementFacet",
 
   // Advanced Features
-  "AdjustBalancesKpiLinkedRateFacet",
-  "LockKpiLinkedRateFacet",
-  "ProceedRecipientsKpiLinkedRateFacet",
-  "ProtectedPartitionsKpiLinkedRateFacet",
-  "ScheduledBalanceAdjustmentsKpiLinkedRateFacet",
-  "ScheduledCrossOrderedTasksKpiLinkedRateFacet",
-  "ScheduledCouponListingKpiLinkedRateFacet",
-  "ScheduledSnapshotsKpiLinkedRateFacet",
-  "SsiManagementKpiLinkedRateFacet",
-  "TransferAndLockKpiLinkedRateFacet",
+  "AdjustBalancesFacet",
+  "LockFacet",
+  "ProceedRecipientsKpiLinkedRateFacet", // rate-specific: triggers scheduled tasks
+  "ProtectedPartitionsFacet",
+  "ScheduledBalanceAdjustmentsFacet",
+  "ScheduledCrossOrderedTasksKpiLinkedRateFacet", // rate-specific: _onCouponListed override
+  "ScheduledCouponListingFacet",
+  "ScheduledSnapshotsFacet",
+  "SsiManagementFacet",
+  "TransferAndLockFacet",
 
-  //Interest Rate
+  // Interest Rate (rate-specific - keep variant names)
   "KpiLinkedRateFacet",
   "KpisKpiLinkedRateFacet",
 
-  // Jurisdiction-Specific
+  // Jurisdiction-Specific (write facet and read facet are both rate-specific)
   "BondUSAKpiLinkedRateFacet",
   "BondUSAReadKpiLinkedRateFacet",
 ] as const;

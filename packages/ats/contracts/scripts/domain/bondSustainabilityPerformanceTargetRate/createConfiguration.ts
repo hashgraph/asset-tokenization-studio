@@ -35,66 +35,66 @@ import { BusinessLogicResolver } from "@contract-types";
  */
 const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_FACETS = [
   // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
-  "AccessControlSustainabilityPerformanceTargetRateFacet",
-  "CapSustainabilityPerformanceTargetRateFacet",
-  "ControlListSustainabilityPerformanceTargetRateFacet",
-  "CorporateActionsSustainabilityPerformanceTargetRateFacet",
+  "AccessControlFacet",
+  "CapFacet",
+  "ControlListFacet",
+  "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-  "ERC20SustainabilityPerformanceTargetRateFacet",
-  "FreezeSustainabilityPerformanceTargetRateFacet",
-  "KycSustainabilityPerformanceTargetRateFacet",
-  "PauseSustainabilityPerformanceTargetRateFacet",
-  "SnapshotsSustainabilityPerformanceTargetRateFacet",
-  "TotalBalanceSustainabilityPerformanceTargetRateFacet",
+  "ERC20Facet",
+  "FreezeFacet",
+  "KycFacet",
+  "PauseFacet",
+  "SnapshotsFacet",
+  "TotalBalanceFacet",
 
   // ERC Standards
-  "ERC1410IssuerSustainabilityPerformanceTargetRateFacet",
-  "ERC1410ManagementSustainabilityPerformanceTargetRateFacet",
-  "ERC1410ReadSustainabilityPerformanceTargetRateFacet",
-  "ERC1410TokenHolderSustainabilityPerformanceTargetRateFacet",
-  "ERC1594SustainabilityPerformanceTargetRateFacet",
-  "ERC1643SustainabilityPerformanceTargetRateFacet",
-  "ERC1644SustainabilityPerformanceTargetRateFacet",
-  "ERC20PermitSustainabilityPerformanceTargetRateFacet",
-  "NoncesSustainabilityPerformanceTargetRateFacet",
-  "ERC20VotesSustainabilityPerformanceTargetRateFacet",
-  "ERC3643BatchSustainabilityPerformanceTargetRateFacet",
-  "ERC3643ManagementSustainabilityPerformanceTargetRateFacet",
-  "ERC3643OperationsSustainabilityPerformanceTargetRateFacet",
-  "ERC3643ReadSustainabilityPerformanceTargetRateFacet",
+  "ERC1410IssuerFacet",
+  "ERC1410ManagementFacet",
+  "ERC1410ReadFacet",
+  "ERC1410TokenHolderFacet",
+  "ERC1594Facet",
+  "ERC1643Facet",
+  "ERC1644Facet",
+  "ERC20PermitFacet",
+  "NoncesFacet",
+  "ERC20VotesFacet",
+  "ERC3643BatchFacet",
+  "ERC3643ManagementFacet",
+  "ERC3643OperationsFacet",
+  "ERC3643ReadFacet",
 
   // Clearing & Settlement
-  "ClearingActionsSustainabilityPerformanceTargetRateFacet",
-  "ClearingHoldCreationSustainabilityPerformanceTargetRateFacet",
-  "ClearingReadSustainabilityPerformanceTargetRateFacet",
-  "ClearingRedeemSustainabilityPerformanceTargetRateFacet",
-  "ClearingTransferSustainabilityPerformanceTargetRateFacet",
-  "HoldManagementSustainabilityPerformanceTargetRateFacet",
-  "HoldReadSustainabilityPerformanceTargetRateFacet",
-  "HoldTokenHolderSustainabilityPerformanceTargetRateFacet",
+  "ClearingActionsFacet",
+  "ClearingHoldCreationFacet",
+  "ClearingReadFacet",
+  "ClearingRedeemFacet",
+  "ClearingTransferFacet",
+  "HoldManagementFacet",
+  "HoldReadFacet",
+  "HoldTokenHolderFacet",
 
   // External Management
-  "ExternalControlListManagementSustainabilityPerformanceTargetRateFacet",
-  "ExternalKycListManagementSustainabilityPerformanceTargetRateFacet",
-  "ExternalPauseManagementSustainabilityPerformanceTargetRateFacet",
+  "ExternalControlListManagementFacet",
+  "ExternalKycListManagementFacet",
+  "ExternalPauseManagementFacet",
 
   // Advanced Features
-  "AdjustBalancesSustainabilityPerformanceTargetRateFacet",
-  "LockSustainabilityPerformanceTargetRateFacet",
-  "ProceedRecipientsSustainabilityPerformanceTargetRateFacet",
-  "ProtectedPartitionsSustainabilityPerformanceTargetRateFacet",
-  "ScheduledBalanceAdjustmentsSustainabilityPerformanceTargetRateFacet",
-  "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet",
-  "ScheduledCouponListingSustainabilityPerformanceTargetRateFacet",
-  "ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet",
-  "SsiManagementSustainabilityPerformanceTargetRateFacet",
-  "TransferAndLockSustainabilityPerformanceTargetRateFacet",
+  "AdjustBalancesFacet",
+  "LockFacet",
+  "ProceedRecipientsSustainabilityPerformanceTargetRateFacet", // rate-specific: triggers scheduled tasks
+  "ProtectedPartitionsFacet",
+  "ScheduledBalanceAdjustmentsFacet",
+  "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet", // rate-specific: _onCouponListed override
+  "ScheduledCouponListingFacet",
+  "ScheduledSnapshotsFacet",
+  "SsiManagementFacet",
+  "TransferAndLockFacet",
 
-  //Interest Rate
+  // Interest Rate (rate-specific - keep variant names)
   "SustainabilityPerformanceTargetRateFacet",
   "KpisSustainabilityPerformanceTargetRateFacet",
 
-  // Jurisdiction-Specific
+  // Jurisdiction-Specific (write facet and read facet are both rate-specific)
   "BondUSASustainabilityPerformanceTargetRateFacet",
   "BondUSAReadSustainabilityPerformanceTargetRateFacet",
 ] as const;
