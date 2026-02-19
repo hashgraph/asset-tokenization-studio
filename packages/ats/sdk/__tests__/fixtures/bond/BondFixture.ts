@@ -1,59 +1,60 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
 import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
-import { createFixture } from "../config";
-import { TIME_PERIODS_S } from "@core/Constants";
-import ContractId from "@domain/context/contract/ContractId";
-import { ContractIdPropFixture, HederaIdPropsFixture, PartitionIdFixture } from "../shared/DataFixture";
-import { SecurityPropsFixture } from "../shared/SecurityFixture";
+import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
+import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
+import { FullRedeemAtMaturityCommand } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand";
+import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
 import { UpdateMaturityDateCommand } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommand";
+import { TIME_PERIODS_S } from "@core/Constants";
 import { BondDetails } from "@domain/context/bond/BondDetails";
-import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
-import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
-import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
-import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
-import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
-import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
-import { HederaId } from "@domain/context/shared/HederaId";
-import CreateBondRequest from "@port/in/request/bond/CreateBondRequest";
+import { Coupon } from "@domain/context/bond/Coupon";
+import { CastRateStatus, RateStatus } from "@domain/context/bond/RateStatus";
+import ContractId from "@domain/context/contract/ContractId";
 import {
   CastRegulationSubType,
   CastRegulationType,
   RegulationSubType,
   RegulationType,
 } from "@domain/context/factory/RegulationType";
+import { HederaId } from "@domain/context/shared/HederaId";
 import { faker } from "@faker-js/faker/.";
-import GetBondDetailsRequest from "@port/in/request/bond/GetBondDetailsRequest";
-import SetCouponRequest from "@port/in/request/bond/SetCouponRequest";
-import GetCouponForRequest from "@port/in/request/bond/GetCouponForRequest";
-import GetPrincipalForRequest from "@port/in/request/bond/GetPrincipalForRequest";
-import GetCouponRequest from "@port/in/request/bond/GetCouponRequest";
-import GetAllCouponsRequest from "@port/in/request/bond/GetAllCouponsRequest";
-import UpdateMaturityDateRequest from "@port/in/request/bond/UpdateMaturityDateRequest";
-import BigDecimal from "@domain/context/shared/BigDecimal";
-
-import { Coupon } from "@domain/context/bond/Coupon";
-import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
-import RedeemAtMaturityByPartitionRequest from "@port/in/request/bond/RedeemAtMaturityByPartitionRequest";
-import { FullRedeemAtMaturityCommand } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand";
+import AddProceedRecipientRequest from "@port/in/request/bond/AddProceedRecipientRequest";
+import CreateBondRequest from "@port/in/request/bond/CreateBondRequest";
 import FullRedeemAtMaturityRequest from "@port/in/request/bond/FullRedeemAtMaturityRequest";
+import GetAllCouponsRequest from "@port/in/request/bond/GetAllCouponsRequest";
+import GetBondDetailsRequest from "@port/in/request/bond/GetBondDetailsRequest";
+import GetCouponForRequest from "@port/in/request/bond/GetCouponForRequest";
+import GetCouponHoldersRequest from "@port/in/request/bond/GetCouponHoldersRequest";
+import GetCouponRequest from "@port/in/request/bond/GetCouponRequest";
+import GetCouponsOrderedListRequest from "@port/in/request/bond/GetCouponsOrderedListRequest";
+import GetPrincipalForRequest from "@port/in/request/bond/GetPrincipalForRequest";
+import GetTotalCouponHoldersRequest from "@port/in/request/bond/GetTotalCouponHoldersRequest";
+import UpdateMaturityDateRequest from "@port/in/request/bond/UpdateMaturityDateRequest";
+
+import RedeemAtMaturityByPartitionRequest from "@port/in/request/bond/RedeemAtMaturityByPartitionRequest";
+import RemoveProceedRecipientRequest from "@port/in/request/bond/RemoveProceedRecipientRequest";
+import SetCouponRequest from "@port/in/request/bond/SetCouponRequest";
+import UpdateProceedRecipientDataRequest from "@port/in/request/bond/UpdateProceedRecipientDataRequest";
+import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
+import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
+import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
+import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
+import { GetCouponFromOrderedListAtQuery } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQuery";
 import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery";
 import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
-import GetCouponHoldersRequest from "@port/in/request/bond/GetCouponHoldersRequest";
-import GetTotalCouponHoldersRequest from "@port/in/request/bond/GetTotalCouponHoldersRequest";
-import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
+import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
+import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
 import {
   CreateTrexSuiteBondRequest,
+  GetProceedRecipientDataRequest,
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
-  GetProceedRecipientDataRequest,
   IsProceedRecipientRequest,
 } from "src";
-import AddProceedRecipientRequest from "@port/in/request/bond/AddProceedRecipientRequest";
-import RemoveProceedRecipientRequest from "@port/in/request/bond/RemoveProceedRecipientRequest";
-import UpdateProceedRecipientDataRequest from "@port/in/request/bond/UpdateProceedRecipientDataRequest";
-import { CastRateStatus, RateStatus } from "@domain/context/bond/RateStatus";
+import { createFixture } from "../config";
+import { ContractIdPropFixture, HederaIdPropsFixture, PartitionIdFixture } from "../shared/DataFixture";
+import { SecurityPropsFixture } from "../shared/SecurityFixture";
 
 export const SetCouponCommandFixture = createFixture<SetCouponCommand>((command) => {
   command.address.as(() => HederaIdPropsFixture.create().value);
@@ -186,6 +187,11 @@ export const GetTotalCouponHoldersQueryFixture = createFixture<GetTotalCouponHol
   query.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
 });
 
+export const GetCouponFromOrderedListAtQueryFixture = createFixture<GetCouponFromOrderedListAtQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.pos.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
 export const CouponFixture = createFixture<Coupon>((props) => {
   props.recordTimeStamp.faker((faker) => faker.date.past().getTime().toString());
   props.executionTimeStamp.faker((faker) => faker.date.past().getTime().toString());
@@ -306,6 +312,12 @@ export const GetCouponRequestFixture = createFixture<GetCouponRequest>((request)
 
 export const GetAllCouponsRequestFixture = createFixture<GetAllCouponsRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const GetCouponsOrderedListRequestFixture = createFixture<GetCouponsOrderedListRequest>((request) => {
+  request.securityId.as(() => HederaIdPropsFixture.create().value);
+  request.pageIndex.as(() => faker.number.int({ min: 0, max: 10 }));
+  request.pageLength.as(() => faker.number.int({ min: 1, max: 50 }));
 });
 
 export const UpdateMaturityDateRequestFixture = createFixture<UpdateMaturityDateRequest>((request) => {
