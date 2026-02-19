@@ -97,7 +97,8 @@ jobs:
   # ==========================================================================
   hardhat-deployment:
     name: Deploy to Hardhat Network
-    needs: [build]
+    needs:
+      - build
     runs-on: token-studio-linux-large
     timeout-minutes: 15
     env:
@@ -209,7 +210,8 @@ jobs:
   # ==========================================================================
   solo-deployment:
     name: Deploy to Hiero Solo Network
-    needs: [build]
+    needs:
+      - build
     runs-on: token-studio-linux-large
     timeout-minutes: 30
     env:
