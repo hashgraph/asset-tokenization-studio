@@ -29,7 +29,7 @@ export class GetNounceQueryHandler implements IQueryHandler<GetNounceQuery> {
       const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
       const res = await this.queryAdapter.getNonceFor(securityEvmAddress, targetEvmAddress);
-      return new GetNounceQueryResponse(res.toNumber());
+      return new GetNounceQueryResponse(Number(res));
     } catch (error) {
       throw new GetNounceQueryError(error as Error);
     }

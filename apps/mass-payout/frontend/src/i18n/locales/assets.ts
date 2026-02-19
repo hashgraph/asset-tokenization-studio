@@ -32,7 +32,10 @@ const assetsTranslation = {
     searchPlaceholder: "Search assets name, ID...",
     options: {
       allTypes: "All types",
-      bond: "Bond",
+      bondVariableRate: "Bond Variable Rate",
+      bondFixedRate: "Bond Fixed Rate",
+      bondKpiLinkedRate: "Bond KPI Linked Rate",
+      bondSptRate: "Bond SPT Rate",
       equity: "Equity",
     },
     distributionTypeOptions: {

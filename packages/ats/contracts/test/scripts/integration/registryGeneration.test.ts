@@ -18,7 +18,8 @@ import * as path from "path";
 import * as fs from "fs";
 
 // Standalone registry generator (faster, no TypeChain dependencies)
-import { generateRegistryPipeline, DEFAULT_CONFIG, configureLogger, LogLevel, type RegistryConfig } from "@scripts";
+import { generateRegistryPipeline, DEFAULT_CONFIG, type RegistryConfig } from "@scripts";
+import { silenceScriptLogging } from "@test";
 
 // Exported building blocks
 import { detectLayer, detectCategory, generateDescription } from "@scripts";
@@ -38,9 +39,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
   const contractsPath = path.join(__dirname, "../../../contracts");
   const artifactPath = path.join(__dirname, "../../../artifacts/contracts");
 
-  before(() => {
-    configureLogger({ level: LogLevel.SILENT });
-  });
+  before(silenceScriptLogging);
 
   describe("generateRegistryPipeline", () => {
     it("should generate registry with default configuration", async () => {

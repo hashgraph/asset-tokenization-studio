@@ -12,22 +12,22 @@ export function dateToUnixTimestamp(dateString: string): number {
 
 /**
  * Generate standardized filename-safe timestamp in ISO format.
- * Format: YYYY-MM-DDTHH-MM-SS
+ * Format: YYYY-MM-DDTHH-MM-SS-sss
  *
  * Replaces colons and periods from ISO timestamp to create filesystem-compatible
  * timestamp while preserving ISO structure with T separator for better readability
- * and standards compliance.
+ * and standards compliance. Includes milliseconds for uniqueness.
  *
- * @returns Timestamp string (e.g., "2025-12-17T11-07-26")
+ * @returns Timestamp string (e.g., "2025-12-17T11-07-26-123")
  *
  * @example
  * ```typescript
  * const timestamp = generateTimestamp();
- * // Returns: "2025-12-17T11-07-26"
+ * // Returns: "2025-12-17T11-07-26-123"
  * const filename = `deployment-${timestamp}.json`;
- * // Results in: "deployment-2025-12-17T11-07-26.json"
+ * // Results in: "deployment-2025-12-17T11-07-26-123.json"
  * ```
  */
 export function generateTimestamp(): string {
-  return new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+  return new Date().toISOString().replace(/[:.]/g, "-").slice(0, -1);
 }

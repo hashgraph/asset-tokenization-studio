@@ -91,7 +91,7 @@ describe("🧪 Kyc tests", () => {
   let equity: SecurityViewModel;
 
   const url = "http://127.0.0.1:7546";
-  const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
+  const customHttpProvider = new ethers.JsonRpcProvider(url);
 
   beforeAll(async () => {
     try {

@@ -9,7 +9,7 @@
  * @module core/operations/registerFacets
  */
 
-import { Overrides } from "ethers";
+import { Overrides, Provider } from "ethers";
 import { BusinessLogicResolver } from "@contract-types";
 import {
   DEFAULT_TRANSACTION_TIMEOUT,
@@ -132,7 +132,7 @@ export async function registerFacets(
   const { facets, overrides = {}, verify = true } = options;
 
   // Get BLR address from contract instance
-  const blrAddress = blr.address;
+  const blrAddress = await blr.getAddress();
 
   const registered: string[] = [];
   const failed: string[] = [];
@@ -141,14 +141,13 @@ export async function registerFacets(
     section(`Registering Facets in BLR`);
 
     // Get provider from BLR contract
-    if (!blr.provider) {
+    const provider = blr.runner?.provider as Provider | undefined;
+    if (!provider) {
       throw new Error(
         "BusinessLogicResolver must be connected to a signer with a provider. " +
           "Use BusinessLogicResolver__factory.connect(address, signer) where signer has a provider.",
       );
     }
-
-    const provider = blr.provider;
 
     // Validate BLR address
     validateAddress(blrAddress, "BusinessLogicResolver address");
@@ -229,9 +228,9 @@ export async function registerFacets(
       info(`Registration transaction sent: ${tx.hash}`);
 
       const receipt = await waitForTransaction(tx, 1, DEFAULT_TRANSACTION_TIMEOUT);
-      transactionHashes.push(receipt.transactionHash);
+      transactionHashes.push(receipt.hash);
       blockNumbers.push(receipt.blockNumber);
-      transactionGas.push(receipt.gasUsed.toNumber());
+      transactionGas.push(Number(receipt.gasUsed));
 
       const gasUsed = formatGasUsage(receipt, tx.gasLimit);
       debug(gasUsed);

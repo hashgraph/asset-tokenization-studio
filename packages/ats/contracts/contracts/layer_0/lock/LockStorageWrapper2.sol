@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { AdjustBalancesStorageWrapper2 } from "../adjustBalances/AdjustBalancesStorageWrapper2.sol";
 import { ILock } from "../../layer_1/interfaces/lock/ILock.sol";
+import { IERC20StorageWrapper } from "../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 
 abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -32,6 +33,9 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         lockStorage.lockIdsByAccountAndPartition[_tokenHolder][_partition].add(lockId_);
         lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][_partition] += _amount;
         lockStorage.totalLockedAmountByAccount[_tokenHolder] += _amount;
+
+        emit TransferByPartition(_partition, _msgSender(), _tokenHolder, address(0), _amount, "", "");
+        emit IERC20StorageWrapper.Transfer(_tokenHolder, address(0), _amount);
 
         success_ = true;
     }
@@ -64,6 +68,9 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         } else {
             _increaseBalanceByPartition(_tokenHolder, lockAmount, _partition);
         }
+
+        emit TransferByPartition(_partition, _msgSender(), address(0), _tokenHolder, lockAmount, "", "");
+        emit IERC20StorageWrapper.Transfer(address(0), _tokenHolder, lockAmount);
 
         success_ = true;
     }

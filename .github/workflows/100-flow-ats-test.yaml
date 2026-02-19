@@ -1,0 +1,79 @@
+name: "100: [FLOW] ATS Tests"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "packages/ats/**"
+      - "apps/ats/**"
+      - "package.json"
+      - ".github/workflows/*ats*.yaml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+  test-ats:
+    name: testing
+    runs-on: token-studio-linux-large
+    timeout-minutes: 45
+    env:
+      NODE_OPTIONS: "--max-old-space-size=32768"
+      CONTRACT_SIZER_RUN_ON_COMPILE: "false"
+      REPORT_GAS: "false"
+      CLIENT_PRIVATE_KEY_ECDSA_1: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_1 }}
+      CLIENT_PUBLIC_KEY_ECDSA_1: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_1 }}
+      CLIENT_ACCOUNT_ID_ECDSA_1: "0.0.1328"
+      CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT: "0x97C50bb12E1C6284cF2855cdba95c5D60AEE44CF"
+      CLIENT_EVM_ADDRESS_ECDSA_1: "0x0000000000000000000000000000000000000530"
+      CLIENT_PRIVATE_KEY_ECDSA_2: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}
+      CLIENT_PUBLIC_KEY_ECDSA_2: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
+      CLIENT_ACCOUNT_ID_ECDSA_2: "0.0.2168740"
+      CLIENT_EVM_ADDRESS_ECDSA_2: "0x00000000000000000000000000000000002117A4"
+      FACTORY_ADDRESS: "0.0.5480051"
+      RESOLVER_ADDRESS: "0.0.5479997"
+      FIREBLOCKS_HEDERA_ACCOUNT_ID: "0.0.2168740"
+      FIREBLOCKS_HEDERA_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
+      DFNS_HEDERA_ACCOUNT_ID: "0.0.2168740"
+      DFNS_WALLET_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
+      AWS_KMS_HEDERA_ACCOUNT_ID: "0.0.4394946"
+      AWS_KMS_HEDERA_PUBLIC_KEY: "302d300706052b8104000a03220003ee815bb9b5e53f5dbe7264a77e586127dfcb75da8c1246f5aa6ededdb13e6c21"
+      REACT_APP_MIRROR_NODE: "https://testnet.mirrornode.hedera.com/api/v1/"
+      REACT_APP_RPC_NODE: "https://testnet.hashio.io/api"
+      REACT_APP_RESOLVER: "0.0.5479997"
+      REACT_APP_FACTORY: "0.0.5480051"
+      REACT_APP_SHOW_DISCLAIMER: "true"
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build ATS packages
+        run: npm run ats:build
+
+      - name: Run ATS tests
+        run: npm run ats:test:ci
+
+      - name: Upload coverage report
+        if: ${{ !cancelled() && always() }}
+        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v5.4.0

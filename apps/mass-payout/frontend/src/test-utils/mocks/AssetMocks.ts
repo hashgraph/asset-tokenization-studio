@@ -43,7 +43,7 @@ export const mockAssets: Asset[] = [
   {
     id: "0.0.456789",
     name: "Bond Asset",
-    type: AssetType.BOND,
+    type: AssetType.BOND_VARIABLE_RATE,
     hederaTokenAddress: "0.0.789012",
     evmTokenAddress: "0x9876543210fedcba9876543210fedcba98765432",
     lifeCycleCashFlowHederaAddress: "0.0.210987",

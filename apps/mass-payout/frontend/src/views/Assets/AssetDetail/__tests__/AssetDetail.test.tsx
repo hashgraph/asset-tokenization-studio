@@ -241,7 +241,7 @@ describe("AssetDetail Component", () => {
   describe("Asset data integration", () => {
     test("should handle different asset types", () => {
       const bondAsset = createMockAsset({
-        type: AssetType.BOND,
+        type: AssetType.BOND_VARIABLE_RATE,
         name: "Bond Asset",
         symbol: "BOND",
       });

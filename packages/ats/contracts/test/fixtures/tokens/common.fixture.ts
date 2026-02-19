@@ -11,22 +11,22 @@ import {
 } from "@scripts";
 import { FactoryRegulationDataParams, Rbac, SecurityDataParams } from "@scripts/domain";
 import { AccessControlFacet, BusinessLogicResolver } from "@contract-types";
-import { ethers } from "hardhat";
+import { MaxUint256, encodeBytes32String, parseUnits, ZeroAddress } from "ethers";
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 
-export const MAX_UINT256 = ethers.constants.MaxUint256;
+export const MAX_UINT256 = MaxUint256;
 
 export const TEST_PARTITIONS = {
-  DEFAULT: ethers.utils.formatBytes32String("default"),
-  PARTITION_1: ethers.utils.formatBytes32String("partition1"),
-  PARTITION_2: ethers.utils.formatBytes32String("partition2"),
-  PARTITION_3: ethers.utils.formatBytes32String("partition3"),
+  DEFAULT: encodeBytes32String("default"),
+  PARTITION_1: encodeBytes32String("partition1"),
+  PARTITION_2: encodeBytes32String("partition2"),
+  PARTITION_3: encodeBytes32String("partition3"),
 } as const;
 
 export const TEST_AMOUNTS = {
-  SMALL: ethers.utils.parseUnits("100", 6),
-  MEDIUM: ethers.utils.parseUnits("1000", 6),
-  LARGE: ethers.utils.parseUnits("10000", 6),
+  SMALL: parseUnits("100", 6),
+  MEDIUM: parseUnits("1000", 6),
+  LARGE: parseUnits("10000", 6),
 } as const;
 
 export async function executeRbac(accessControlFacet: AccessControlFacet, rbac: Rbac[]) {
@@ -47,7 +47,7 @@ export const DEFAULT_SECURITY_PARAMS = {
   isControllable: true,
   arePartitionsProtected: false,
   isMultiPartition: false,
-  maxSupply: ethers.constants.MaxUint256,
+  maxSupply: MaxUint256,
   name: "TEST_Security",
   symbol: "TEST",
   decimals: 6,
@@ -57,8 +57,8 @@ export const DEFAULT_SECURITY_PARAMS = {
   externalControlLists: [],
   externalKycLists: [],
   erc20VotesActivated: false,
-  compliance: ethers.constants.AddressZero,
-  identityRegistry: ethers.constants.AddressZero,
+  compliance: ZeroAddress,
+  identityRegistry: ZeroAddress,
   rbacs: [],
 };
 
@@ -69,7 +69,7 @@ export function getSecurityData(
   return {
     arePartitionsProtected: params?.arePartitionsProtected ?? DEFAULT_SECURITY_PARAMS.arePartitionsProtected,
     isMultiPartition: params?.isMultiPartition ?? DEFAULT_SECURITY_PARAMS.isMultiPartition,
-    resolver: blr.address,
+    resolver: blr.target as string,
     rbacs: (params?.rbacs as Rbac[]) ?? DEFAULT_SECURITY_PARAMS.rbacs,
     isControllable: params?.isControllable ?? DEFAULT_SECURITY_PARAMS.isControllable,
     isWhiteList: params?.isWhiteList ?? DEFAULT_SECURITY_PARAMS.isWhiteList,

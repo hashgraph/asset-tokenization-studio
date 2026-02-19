@@ -6,7 +6,7 @@
  * @module tools/utils/solidityUtils
  */
 
-import { utils } from "ethers";
+import { keccak256, toUtf8Bytes } from "ethers";
 import { MethodDefinition, EventDefinition, ErrorDefinition } from "../../infrastructure/types";
 
 /**
@@ -1248,7 +1248,7 @@ function extractTypeFromParam(param: string): string | null {
  * ```
  */
 export function calculateSelector(signature: string): string {
-  const hash = utils.keccak256(utils.toUtf8Bytes(signature));
+  const hash = keccak256(toUtf8Bytes(signature));
   return hash.substring(0, 10); // '0x' + 8 hex chars = 4 bytes
 }
 
@@ -1326,7 +1326,7 @@ export function extractFunctionSignature(source: string, methodName: string): st
  * ```
  */
 export function calculateTopic0(signature: string): string {
-  return utils.keccak256(utils.toUtf8Bytes(signature));
+  return keccak256(toUtf8Bytes(signature));
 }
 
 /**

@@ -1,0 +1,248 @@
+name: "300: [FLOW] ATS Publish"
+
+on:
+  # Manual trigger with dry-run option
+  workflow_dispatch:
+    inputs:
+      dry-run-enabled:
+        description: "Run npm publish with dry-run flag"
+        required: false
+        type: boolean
+        default: false
+
+  # Tag push trigger - simpler and automatic (no need to create GitHub release)
+  push:
+    tags:
+      - "v*-ats"
+      - "v*-ATS"
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  prepare-contracts:
+    name: Prepare ATS Contracts
+    runs-on: token-studio-linux-large
+    timeout-minutes: 15
+    # Only run if manual trigger OR tag push (already filtered by v*-ats pattern)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
+    outputs:
+      artifact-name: ${{ steps.prepare-package-data.outputs.artifact-name }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+
+      - name: Setup JQ
+        uses: dcarbone/install-jq-action@b7ef57d46ece78760b4019dbc4080a1ba2a40b45 # v3.2.0
+        with:
+          version: 1.7
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build ATS Contracts
+        run: npm run ats:contracts:build
+
+      - name: Package ATS Contracts
+        id: prepare-package-data
+        run: |
+          echo "::group::Set Artifact Name"
+            VERSION=$(jq -r '.version' './package.json')
+            PKG_NAME="hashgraph-asset-tokenization-contracts-${VERSION}.tgz"
+          echo "::endgroup::"
+
+          echo "::group::Build Package"
+            echo "Building package: ${PKG_NAME}"
+            if ! npm pack; then
+              echo "❌ Failed to build package: ${PKG_NAME}"
+              echo "📋 Package info:" && cat package.json | jq '.name, .version'
+              exit 1
+            fi
+            echo "Verify package ${PKG_NAME} created successfully."
+            ls -lh ${PKG_NAME}
+          echo "::endgroup::"
+
+          echo "artifact-name=${PKG_NAME}" >> "${GITHUB_OUTPUT}"
+        working-directory: packages/ats/contracts
+
+      - name: Upload NPM Package Artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ats-contracts-package
+          path: ./packages/ats/contracts/${{ steps.prepare-package-data.outputs.artifact-name }}
+          if-no-files-found: error
+
+  prepare-sdk:
+    name: Prepare ATS SDK
+    runs-on: token-studio-linux-large
+    timeout-minutes: 15
+    # Only run if manual trigger OR tag push (already filtered by v*-ats pattern)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
+    # needs: contracts  # Commented out for parallel execution
+    outputs:
+      artifact-name: ${{ steps.prepare-package-data.outputs.artifact-name }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+
+      - name: Setup JQ
+        uses: dcarbone/install-jq-action@b7ef57d46ece78760b4019dbc4080a1ba2a40b45 # v3.2.0
+        with:
+          version: 1.7
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build ATS Contracts and SDK
+        run: |
+          npm run ats:contracts:build
+          npm run ats:sdk:build
+
+      - name: Package ATS SDK
+        id: prepare-package-data
+        run: |
+          echo "::group::Set Artifact Name"
+            VERSION=$(jq -r '.version' './package.json')
+            PKG_NAME="hashgraph-asset-tokenization-sdk-${VERSION}.tgz"
+          echo "::endgroup::"
+
+          echo "::group::Build Package"
+            echo "Building package: ${PKG_NAME}"
+            if ! npm pack; then
+              echo "❌ Failed to build package: ${PKG_NAME}"
+              echo "📋 Package info:" && cat package.json | jq '.name, .version'
+              exit 1
+            fi
+            echo "Verify package ${PKG_NAME} created successfully."
+            ls -lh ${PKG_NAME}
+          echo "::endgroup::"
+
+          echo "artifact-name=${PKG_NAME}" >> "${GITHUB_OUTPUT}"
+        working-directory: packages/ats/sdk
+
+      - name: Upload NPM Package Artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ats-sdk-package
+          path: ./packages/ats/sdk/${{ steps.prepare-package-data.outputs.artifact-name }}
+          if-no-files-found: error
+
+  publish-npm-packages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs:
+      - prepare-contracts
+      - prepare-sdk
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: "1"
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install NPM latest
+        run: npm install -g npm@11.7.0
+
+      - name: Download ATS Contracts Package Artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: ats-contracts-package
+
+      - name: Download ATS SDK Package Artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: ats-sdk-package
+
+      - name: Publish npm packages
+        run: |
+          echo "::group::Set publish parameters"
+            PUBLISH_ARGS="--access=public"
+            if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then
+              PUBLISH_ARGS="${PUBLISH_ARGS} --dry-run"
+            fi
+            echo "::endgroup::"
+
+          echo "::group::Publish ATS SDK Package ${{ needs.prepare-sdk.outputs.artifact-name }} with args: ${PUBLISH_ARGS}"
+            if ! npm publish ./${{ needs.prepare-sdk.outputs.artifact-name }} ${PUBLISH_ARGS}; then
+                echo "❌ Failed to publish ATS SDK package: ${{ needs.prepare-sdk.outputs.artifact-name }}"
+                exit 1
+            fi
+          echo "::endgroup::"
+
+          echo "::group::Publish ATS Contracts Package ${{ needs.prepare-contracts.outputs.artifact-name }} with args: ${PUBLISH_ARGS}"
+            if ! npm publish ./${{ needs.prepare-contracts.outputs.artifact-name }} ${PUBLISH_ARGS}; then
+                echo "❌ Failed to publish ATS Contracts package: ${{ needs.prepare-contracts.outputs.artifact-name }}"
+                exit 1
+            fi
+          echo "::endgroup::"
+
+  # Summary job to report results
+  summary:
+    name: Publish Summary
+    runs-on: token-studio-linux-large
+    timeout-minutes: 5
+    needs:
+      - prepare-contracts
+      - prepare-sdk
+      - publish-npm-packages
+    if: ${{ always() }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Report Results
+        run: |
+          echo "## ATS Publish Results" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Step | Status |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| --- | --- |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Package Contracts | ${{ needs.prepare-contracts.result }} |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Package SDK | ${{ needs.prepare-sdk.result }} |" >> "${GITHUB_STEP_SUMMARY}"
+          echo "| Publish NPM Packages | ${{ needs.publish-npm-packages.result }} |" >> "${GITHUB_STEP_SUMMARY}"
+
+          if [[ "${{ inputs.dry-run-enabled }}" == "true" ]]; then
+            echo "" >> "${GITHUB_STEP_SUMMARY}"
+            echo "🔍 **DRY RUN MODE** - No packages were actually published" >> "${GITHUB_STEP_SUMMARY}"
+          fi

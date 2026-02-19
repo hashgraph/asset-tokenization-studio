@@ -48,7 +48,7 @@ describe(UpdateAssetDomainService.name, () => {
       const maturityDate = faker.date.future()
       const existingAsset = Asset.create(
         oldName,
-        AssetType.BOND,
+        AssetType.BOND_VARIABLE_RATE,
         hederaTokenAddress,
         evmTokenAddress,
         symbol,
@@ -93,7 +93,7 @@ describe(UpdateAssetDomainService.name, () => {
       const maturityDate1 = faker.date.future()
       const existingAsset = Asset.create(
         oldName,
-        AssetType.BOND,
+        AssetType.BOND_VARIABLE_RATE,
         hederaTokenAddress,
         evmTokenAddress,
         symbol1,
@@ -103,7 +103,7 @@ describe(UpdateAssetDomainService.name, () => {
       const maturityDate2 = faker.date.future()
       const otherAsset = Asset.create(
         newName,
-        AssetType.BOND,
+        AssetType.BOND_VARIABLE_RATE,
         fakeHederaAddress(),
         faker.finance.ethereumAddress(),
         symbol2,
