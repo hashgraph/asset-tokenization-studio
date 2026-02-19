@@ -36,9 +36,10 @@ import { QUERY_HANDLERS_ACCOUNT } from "./account/InjectableAccount";
 import { QUERY_HANDLERS_OPERATOR } from "./operator/InjectableOperator";
 import { COMMAND_HANDLERS_TREX_FACTORY, QUERY_HANDLERS_TREX_FACTORY } from "./trexFactory/InjectableTrexFactory";
 import {
-  QUERY_HANDLERS_PROCEED_RECIPIENT,
   COMMAND_HANDLERS_PROCEED_RECIPIENT,
+  QUERY_HANDLERS_PROCEED_RECIPIENT,
 } from "./proceedRecipient/ProceedRecipientInjectable";
+import { COMMAND_HANDLERS_KPI, QUERY_HANDLERS_KPI } from "./kpis/InjectableKpis";
 
 export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_AGENT,
@@ -68,6 +69,7 @@ export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_BALANCE,
   ...COMMAND_HANDLERS_TREX_FACTORY,
   ...COMMAND_HANDLERS_PROCEED_RECIPIENT,
+  ...COMMAND_HANDLERS_KPI,
 ];
 
 export const QUERY_HANDLERS = [
@@ -97,6 +99,7 @@ export const QUERY_HANDLERS = [
   ...QUERY_HANDLERS_SNAPSHOT,
   ...QUERY_HANDLERS_TREX_FACTORY,
   ...QUERY_HANDLERS_PROCEED_RECIPIENT,
+  ...QUERY_HANDLERS_KPI,
 ];
 
 export const TRANSACTION_HANDLER = [
