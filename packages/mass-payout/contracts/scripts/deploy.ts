@@ -65,11 +65,9 @@ export async function deployLifeCycleCashFlowContracts({
 
   console.log(`${name} Proxy deployed at ${proxyContractResult.address}`);
 
-  let lifeCycleCashFlow = await ethers.getContractAt(name, proxyContractResult.address);
+  const lifeCycleCashFlow = (await ethers.getContractAt(name, proxyContractResult.address)).connect(signer);
 
-  lifeCycleCashFlow = lifeCycleCashFlow.connect(signer);
-
-  const tx = await lifeCycleCashFlow.initialize(...(args as [string, string, []]));
+  const tx = await lifeCycleCashFlow.getFunction("initialize")(...(args as [string, string, []]));
   const receipt = await tx.wait(); // wait for execution & revert to be caught
   console.log(`${name} initialize function was successfully executed`);
 
@@ -86,7 +84,7 @@ export async function deployLifeCycleCashFlowContracts({
 export async function deployContract({ name, signer, args }: DeployContractCommand): Promise<DeployContractResult> {
   const contractFactory = await ethers.getContractFactory(name, signer);
   const contract = await contractFactory.deploy(...args);
-  const receipt = await contract.deploymentTransaction().wait();
+  const receipt = await contract.deploymentTransaction()!.wait();
 
   return new DeployContractResult({
     name,

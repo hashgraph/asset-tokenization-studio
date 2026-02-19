@@ -1,8 +1,8 @@
 {
-  "name": "@hashgraph/mass-payout-contracts",
+  "name": "@mass-payout/contracts",
   "main": "build/typechain-types/index.js",
   "types": "build/typechain-types/index.d.ts",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Scheduler Payment Distribution Contracts",
   "author": "",
   "private": true,
@@ -19,36 +19,35 @@
     "clean:deps": "rimraf node_modules",
     "size": "npx hardhat size-contracts",
     "test": "npx hardhat test",
-    "test:coverage": "npx hardhat coverage --solcoverjs .solcover.js",
+    "test:coverage": "npx hardhat coverage",
     "lint:sol": "solhint \"contracts/**/*.sol\"",
     "lint:sol:fix": "solhint \"contracts/**/*.sol\" --fix",
     "slither:analysis": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --solc-remaps @=node_modules/@\"",
     "slither:storageLayout": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print variable-order --solc-remaps @=node_modules/@\"",
     "slither:inheritance": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print inheritance --solc-remaps @=node_modules/@\"",
-    "slither:summary": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print human-summary --solc-remaps @=node_modules/@\"",
-    "doc": "npx hardhat dodoc"
+    "slither:summary": "docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v \"$(pwd)\":\"/home/ethsec/contracts\" -w \"/home/ethsec/contracts\" -u 0:0 trailofbits/eth-security-toolbox /bin/sh -c \"solc-select install 0.8.18  && solc-select use 0.8.18  && slither . --print human-summary --solc-remaps @=node_modules/@\""
   },
   "dependencies": {
     "bn.js": "5.2.1"
   },
   "devDependencies": {
-    "@hiero-ledger/sdk": "2.79.0",
+    "@hashgraph/sdk": "2.64.5",
     "@hashgraph/smart-contracts": "github:hashgraph/hedera-smart-contracts#v0.10.1",
-    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
-    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "1.0.6",
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomiclabs/hardhat-ethers": "2.2.3",
     "@nomiclabs/hardhat-etherscan": "3.1.8",
-    "@openzeppelin/contracts": "^5.3.0",
+    "@openzeppelin/contracts": "^4.9.6",
     "@openzeppelin/contracts-upgradeable": "^4.9.6",
     "@openzeppelin/hardhat-upgrades": "^1.28.0",
-    "@primitivefi/hardhat-dodoc": "^0.2.3",
     "@terminal3/ecdsa_vc": "0.1.21",
-    "@typechain/ethers-v6": "^0.5.0",
+    "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "^6.1.2",
     "@types/mocha": "10.0.10",
     "chai": "^4.4.0",
     "chai-as-promised": "^7.1.1",
     "dotenv": "^16.0.3",
-    "ethers": "^6.15.0",
+    "ethers": "^5.8.0",
     "hardhat": "^2.22.19",
     "hardhat-abi-exporter": "^2.11.0",
     "hardhat-contract-sizer": "^2.10.0",
@@ -57,17 +56,12 @@
     "solhint": "^3.3.7",
     "solhint-plugin-prettier": "^0.1.0",
     "solidity-coverage": "^0.8.16",
-    "tsconfig-paths": "^4.2.0",
     "typechain": "8.3.2"
   },
   "overrides": {
-    "@typechain/ethers-v5": "^11.1.2",
     "ws": "^8.15.0"
   },
   "engines": {
     "node": ">=22.16.0"
-  },
-  "resolutions": {
-    "ethers": "^5.8.0"
   }
 }

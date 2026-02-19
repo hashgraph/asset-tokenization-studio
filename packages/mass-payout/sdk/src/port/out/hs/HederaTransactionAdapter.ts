@@ -34,7 +34,6 @@ import {
   ContractCreateTransaction,
   ContractExecuteTransaction,
 } from "@hiero-ledger/sdk";
-import { Interface } from "ethers/lib/utils.js";
 import TransactionAdapter from "../TransactionAdapter";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 import NetworkService from "@app/services/network/NetworkService";
@@ -46,7 +45,7 @@ import Account from "@domain/account/Account";
 import EvmAddress from "@domain/contract/EvmAddress";
 import BigDecimal from "@domain/shared/BigDecimal";
 import RbacPort from "./types/RbacPort";
-import { ethers, BaseContract, ContractTransaction } from "ethers";
+import { AbiCoder, Interface, BaseContract } from "ethers";
 import {
   LifeCycleCashFlow__factory,
   ProxyAdmin__factory,
@@ -69,18 +68,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     super();
   }
 
-  private async executeWithArgs<
-    C extends BaseContract,
-    F extends {
-      [K in keyof C]: C[K] extends (...args: any[]) => Promise<ContractTransaction> ? K : never;
-    }[keyof C] &
-      string,
-  >(
+  private async executeWithArgs<C extends BaseContract>(
     contractInstance: C,
-    functionName: F,
+    functionName: string,
     contractId: ContractId | string,
     gas: number,
-    args: Parameters<C[F] extends (...args: infer P) => any ? (...args: P) => any : never>,
+    args: any[],
   ): Promise<TransactionResponse<any, Error>> {
     const encodedHex = contractInstance.interface.encodeFunctionData(functionName, args as any);
     const encoded = new Uint8Array(Buffer.from(encodedHex.slice(2), "hex"));
@@ -122,6 +115,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     if (jsonRpcRelays) this.jsonRpcRelays = jsonRpcRelays;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected getSignerOrProvider(): any {
+    return this.signer;
+  }
+
   importAsset(asset: EvmAddress, paymentToken: EvmAddress): Promise<EvmAddress> {
     throw new Error("Method not implemented.");
   }
@@ -143,7 +141,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       : ProxyAdmin__factory.bytecode;
 
     const initialOwnerEvmAddress = this.getAccount().evmAddress;
-    const abiCoder = new ethers.utils.AbiCoder();
+    const abiCoder = new AbiCoder();
     const constructorParamsProxyAdminHex = abiCoder.encode(["address"], [initialOwnerEvmAddress]);
 
     const fullBytecodeProxyAdminHex = "0x" + proxyAdminBytecodeHex + constructorParamsProxyAdminHex.slice(2);
@@ -164,7 +162,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const proxyBytecode = Uint8Array.from(Buffer.from(proxyBytecodeHex, "hex"));
 
-    const iface = new ethers.utils.Interface(LifeCycleCashFlow__factory.abi);
+    const iface = new Interface(LifeCycleCashFlow__factory.abi);
     const callDataHex = iface.encodeFunctionData("initialize", [asset.value, paymentToken.value.slice(2), rbac]);
     const callDataBytes = Uint8Array.from(Buffer.from(callDataHex.slice(2), "hex"));
 
@@ -261,7 +259,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     this.logger.log(`Executing distribution on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
-      new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
+      LifeCycleCashFlow__factory.connect(lifeCycleCashFlow.toString(), this.getSignerOrProvider()),
       "executeDistribution",
       lifeCycleCashFlowId,
       EXECUTE_DISTRIBUTION_GAS,
@@ -279,7 +277,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     this.logger.log(`Executing distribution by addresses on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
-      new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
+      LifeCycleCashFlow__factory.connect(lifeCycleCashFlow.toString(), this.getSignerOrProvider()),
       "executeDistributionByAddresses",
       lifeCycleCashFlowId,
       EXECUTE_DISTRIBUTION_BY_ADDRESSES_GAS,
@@ -297,7 +295,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     this.logger.log(`Executing bond cash out on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
-      new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
+      LifeCycleCashFlow__factory.connect(lifeCycleCashFlow.toString(), this.getSignerOrProvider()),
       "executeBondCashOut",
       lifeCycleCashFlowId,
       EXECUTE_BOND_CASHOUT_GAS,
@@ -314,7 +312,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     this.logger.log(`Executing bond cash out by addresses on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
-      new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
+      LifeCycleCashFlow__factory.connect(lifeCycleCashFlow.toString(), this.getSignerOrProvider()),
       "executeBondCashOutByAddresses",
       lifeCycleCashFlowId,
       EXECUTE_BOND_CASHOUT_BY_ADDRESSES_GAS,
@@ -334,7 +332,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     this.logger.log(`Executing amount snapshot on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
-      new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
+      LifeCycleCashFlow__factory.connect(lifeCycleCashFlow.toString(), this.getSignerOrProvider()),
       "executeAmountSnapshot",
       lifeCycleCashFlowId,
       EXECUTE_AMOUNT_SNAPSHOT_GAS,
@@ -354,7 +352,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     this.logger.log(`Executing percentage snapshot on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
-      new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
+      LifeCycleCashFlow__factory.connect(lifeCycleCashFlow.toString(), this.getSignerOrProvider()),
       "executePercentageSnapshot",
       lifeCycleCashFlowId,
       EXECUTE_PERCENTAGE_SNAPSHOT_GAS,
@@ -373,7 +371,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     this.logger.log(`Executing amount snapshot by addresses on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
-      new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
+      LifeCycleCashFlow__factory.connect(lifeCycleCashFlow.toString(), this.getSignerOrProvider()),
       "executeAmountSnapshotByAddresses",
       lifeCycleCashFlowId,
       EXECUTE_AMOUNT_SNAPSHOT_BY_ADDRESSES_GAS,
@@ -392,7 +390,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     this.logger.log(`Executing percentage snapshot by addresses on address ${lifeCycleCashFlow.toString()}`);
 
     return this.executeWithArgs(
-      new LifeCycleCashFlow__factory().attach(lifeCycleCashFlow.toString()),
+      LifeCycleCashFlow__factory.connect(lifeCycleCashFlow.toString(), this.getSignerOrProvider()),
       "executePercentageSnapshotByAddresses",
       lifeCycleCashFlowId,
       EXECUTE_PERCENTAGE_SNAPSHOT_BY_ADDRESSES_GAS,
