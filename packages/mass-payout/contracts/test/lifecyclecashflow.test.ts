@@ -434,7 +434,7 @@ describe("Security operations", () => {
 
           await expect(lifeCycleCashFlow.executeDistribution(await asset_A.getAddress(), 1, 1, 1))
             .to.emit(lifeCycleCashFlow, "DistributionExecuted")
-            .withArgs(1, 1, 1, [await signer_B.getAddress()], [], []);
+            .withArgs(1, 1, 1, [await signer_B.getAddress()], [ZeroAddress], [0]);
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("0", 0));
         });
@@ -617,7 +617,7 @@ describe("Security operations", () => {
 
           await expect(lifeCycleCashFlow.executeDistribution(await asset_A.getAddress(), 1, 1, 1))
             .to.emit(lifeCycleCashFlow, "DistributionExecuted")
-            .withArgs(1, 1, 1, [await signer_B.getAddress()], [], []);
+            .withArgs(1, 1, 1, [await signer_B.getAddress()], [ZeroAddress], [0]);
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits(amountToBePaid, 0));
         });
