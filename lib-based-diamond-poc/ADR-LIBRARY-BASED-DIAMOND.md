@@ -16,16 +16,16 @@
 
 ## TL;DR
 
-| Question | Answer |
-|----------|--------|
-| **What's the problem?** | 1,456-line `Internals.sol` monster (created to support bond variant generation) on top of a Common layer chain (the original circular dependency workaround) |
-| **What's the solution?** | Replace with focused libraries (40-80 lines each) |
-| **Does bytecode change?** | No—within 0.5% (compiler optimizes both identically) |
-| **Does gas change?** | No—zero difference |
-| **Lines of code saved?** | ~1,456 (virtual declarations eliminated) |
-| **Migration effort?** | ~12 weeks, 152 facets |
-| **Can we rollback?** | Yes—old/new facets coexist, instant `diamondCut` switch |
-| **Recommendation?** | ✅ Approve with phased rollout |
+| Question                  | Answer                                                                                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **What's the problem?**   | 1,456-line `Internals.sol` monster (created to support bond variant generation) on top of a Common layer chain (the original circular dependency workaround) |
+| **What's the solution?**  | Replace with focused libraries (40-80 lines each)                                                                                                            |
+| **Does bytecode change?** | No—within 0.5% (compiler optimizes both identically)                                                                                                         |
+| **Does gas change?**      | No—zero difference                                                                                                                                           |
+| **Lines of code saved?**  | ~1,456 (virtual declarations eliminated)                                                                                                                     |
+| **Migration effort?**     | ~12 weeks, 152 facets                                                                                                                                        |
+| **Can we rollback?**      | Yes—old/new facets coexist, instant `diamondCut` switch                                                                                                      |
+| **Recommendation?**       | ✅ Approve with phased rollout                                                                                                                               |
 
 ---
 
@@ -47,6 +47,7 @@
 9. [Rollback Procedures](#9-rollback-procedures)
 10. [Decision](#10-decision)
 11. [Appendix](#11-appendix)
+    - 11.4 [Technical Review Summary (Alberto)](#114-technical-review-summary-alberto-molina) ← NEW
 
 ---
 
@@ -64,18 +65,19 @@ Neither layer was an intentional architectural design — both are workarounds f
 
 ### 1.2 Problems with Current State
 
-| Problem | Impact |
-|---------|--------|
-| 1,456 lines in one file | Hard to navigate, find implementations |
-| Every facet inherits everything | Can't tell what a facet actually uses |
-| Virtual + override required | 2,912 duplicate function signatures |
-| Hidden dependencies | Audit difficulty, bug traceability |
-| Two layers of workarounds | Common chain + Internals monster stacked |
-| Circular deps "solved" not "fixed" | Root cause still exists |
+| Problem                            | Impact                                   |
+| ---------------------------------- | ---------------------------------------- |
+| 1,456 lines in one file            | Hard to navigate, find implementations   |
+| Every facet inherits everything    | Can't tell what a facet actually uses    |
+| Virtual + override required        | 2,912 duplicate function signatures      |
+| Hidden dependencies                | Audit difficulty, bug traceability       |
+| Two layers of workarounds          | Common chain + Internals monster stacked |
+| Circular deps "solved" not "fixed" | Root cause still exists                  |
 
 ### 1.3 Proposed Solution
 
 Migrate to **library-based architecture** where:
+
 - Focused libraries (40-80 lines) replace monolithic Internals
 - Facets import only the libraries they need
 - Explicit dependencies visible in import statements
@@ -83,28 +85,28 @@ Migrate to **library-based architecture** where:
 
 ### 1.4 What Changes vs What Stays the Same
 
-| Changes | Stays the Same |
-|---------|----------------|
-| Code organization (inheritance → imports) | Bytecode size |
-| Function syntax (`_foo()` → `LibX.foo()`) | Gas costs |
-| Dependency visibility (hidden → explicit) | Storage layout |
-| Boilerplate (~1,456 lines removed) | External interfaces |
-| | Runtime behavior |
-| | Diamond proxy logic |
+| Changes                                   | Stays the Same      |
+| ----------------------------------------- | ------------------- |
+| Code organization (inheritance → imports) | Bytecode size       |
+| Function syntax (`_foo()` → `LibX.foo()`) | Gas costs           |
+| Dependency visibility (hidden → explicit) | Storage layout      |
+| Boilerplate (~1,456 lines removed)        | External interfaces |
+|                                           | Runtime behavior    |
+|                                           | Diamond proxy logic |
 
 ---
 
 ## 2. Glossary
 
-| Term | Definition |
-|------|------------|
-| **Diamond Pattern** | EIP-2535 standard allowing unlimited contract size via modular facets sharing storage |
-| **Facet** | A contract containing a subset of Diamond functionality, deployed once and referenced by proxy |
-| **Diamond Storage** | Pattern accessing storage via deterministic slots (`keccak256`) instead of state variables |
-| **Internals.sol** | Current 1,456-line abstract contract declaring all internal virtual functions |
-| **Virtual** | Solidity keyword marking a function as overridable by child contracts |
-| **Override** | Solidity keyword indicating a function overrides a parent's virtual function |
-| **Internal Library** | Library with `internal` functions that get inlined (copied) into calling code at compile time |
+| Term                 | Definition                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| **Diamond Pattern**  | EIP-2535 standard allowing unlimited contract size via modular facets sharing storage          |
+| **Facet**            | A contract containing a subset of Diamond functionality, deployed once and referenced by proxy |
+| **Diamond Storage**  | Pattern accessing storage via deterministic slots (`keccak256`) instead of state variables     |
+| **Internals.sol**    | Current 1,456-line abstract contract declaring all internal virtual functions                  |
+| **Virtual**          | Solidity keyword marking a function as overridable by child contracts                          |
+| **Override**         | Solidity keyword indicating a function overrides a parent's virtual function                   |
+| **Internal Library** | Library with `internal` functions that get inlined (copied) into calling code at compile time  |
 
 ---
 
@@ -117,11 +119,15 @@ When ATS began, the architecture vision was elegant: small, focused contracts, e
 ```solidity
 // The dream: Clean, single-responsibility contracts
 abstract contract PauseInternal {
-    function _pause() internal { /* only pause logic */ }
+  function _pause() internal {
+    /* only pause logic */
+  }
 }
 
 abstract contract AccessInternal {
-    function _checkRole() internal { /* only access logic */ }
+  function _checkRole() internal {
+    /* only access logic */
+  }
 }
 ```
 
@@ -145,14 +151,24 @@ The first solution was clever: **serialize all storage wrappers into one long in
 
 ```solidity
 // The Common chain: all storage wrappers in one linear path
-abstract contract Common is SecurityStorageWrapper { /* 3 modifier overrides */ }
-abstract contract SecurityStorageWrapper is EquityStorageWrapper { /* security storage */ }
-abstract contract EquityStorageWrapper is BondStorageWrapper { /* equity storage */ }
-abstract contract BondStorageWrapper is ERC20PermitStorageWrapper { /* bond storage */ }
+abstract contract Common is SecurityStorageWrapper {
+  /* 3 modifier overrides */
+}
+abstract contract SecurityStorageWrapper is EquityStorageWrapper {
+  /* security storage */
+}
+abstract contract EquityStorageWrapper is BondStorageWrapper {
+  /* equity storage */
+}
+abstract contract BondStorageWrapper is ERC20PermitStorageWrapper {
+  /* bond storage */
+}
 // ... chain continues through all storage domains ...
 
 // Every facet inherits Common → gets access to ALL storage operations
-contract PauseFacet is PauseFacetBase, Common { /* ... */ }
+contract PauseFacet is PauseFacetBase, Common {
+  /* ... */
+}
 ```
 
 **It works.** By serializing all storage into one chain, circular deps disappear — there's only one linear path. But it had its own problems:
@@ -180,16 +196,18 @@ The solution: put ALL virtual function declarations in ONE contract:
 ```solidity
 // Internals.sol — 1,456 virtual declarations
 abstract contract Internals is Modifiers {
-    function _pause() internal virtual;
-    function _checkRole() internal virtual;
-    function _transfer() internal virtual;
-    function _setCoupon() internal virtual;
-    // ... 1,452 more ...
+  function _pause() internal virtual;
+  function _checkRole() internal virtual;
+  function _transfer() internal virtual;
+  function _setCoupon() internal virtual;
+  // ... 1,452 more ...
 }
 
 // Variant-specific overrides
 abstract contract InternalsFixedInterestRate is ModifiersFixedInterestRate, Internals {
-    function _setCoupon() internal override { /* fixed-rate specific */ }
+  function _setCoupon() internal override {
+    /* fixed-rate specific */
+  }
 }
 ```
 
@@ -198,6 +216,7 @@ Now the system carries **two layers of workarounds**: the Common chain (for stor
 ### 3.5 Chapter 5: Today
 
 We live with:
+
 - **The Common chain:** `Common → SecurityStorageWrapper → Equity → Bond → ...` serializing all storage
 - **3 variant Common bridges:** Empty contracts for diamond inheritance resolution
 - **1 monster file:** `layer_0/Internals.sol` (1,456 virtual declarations)
@@ -218,12 +237,16 @@ Libraries don't create structural dependencies. When you write `import "./LibB.s
 // This COMPILES because imports only need signatures
 import "./LibB.sol";
 library LibA {
-    function doA() internal { LibB.doB(); }
+  function doA() internal {
+    LibB.doB();
+  }
 }
 
 import "./LibA.sol";
 library LibB {
-    function doB() internal { LibA.doA(); }  // Circular? No problem!
+  function doB() internal {
+    LibA.doA();
+  } // Circular? No problem!
 }
 ```
 
@@ -349,18 +372,18 @@ One of the strongest properties of the library-based approach is that it natural
 
 **Why layering matters:**
 
-The layers create a mental model for developers. When you see a facet importing `LibScheduledTasks`, you know it's using an orchestrator — and if you need the detail, you open that library and see *its* imports in turn. This is **progressive disclosure**: understand the system at the level of abstraction you need, without being forced to absorb all 1,456 lines at once.
+The layers create a mental model for developers. When you see a facet importing `LibScheduledTasks`, you know it's using an orchestrator — and if you need the detail, you open that library and see _its_ imports in turn. This is **progressive disclosure**: understand the system at the level of abstraction you need, without being forced to absorb all 1,456 lines at once.
 
 With the old Internals monster, there are no layers. Everything is flat. `_pause()` sits next to `_calculateKpiLinkedRate()` sits next to `_transferByPartition()`. A developer's only navigation tool is Ctrl+F.
 
 **Layer discipline:**
 
-| Layer | Rule | Enforced by |
-|-------|------|-------------|
-| Layer 0 (Leaf) | No `import "./Lib*.sol"` — only storage accessors | Code review, grep |
-| Layer 1 (Domain) | May import other domain libs for natural interactions | Import list visibility |
-| Layer 2 (Orchestrator) | Coordinates domain libs, no direct storage writes | Convention |
-| Layer 3 (Facet) | Wires libraries together, no business logic | Code review |
+| Layer                  | Rule                                                  | Enforced by            |
+| ---------------------- | ----------------------------------------------------- | ---------------------- |
+| Layer 0 (Leaf)         | No `import "./Lib*.sol"` — only storage accessors     | Code review, grep      |
+| Layer 1 (Domain)       | May import other domain libs for natural interactions | Import list visibility |
+| Layer 2 (Orchestrator) | Coordinates domain libs, no direct storage writes     | Convention             |
+| Layer 3 (Facet)        | Wires libraries together, no business logic           | Code review            |
 
 **Anti-pattern to watch for:** If someone creates a library that imports 8+ other libraries, it's becoming a new Internals monster. The import list is the canary — keep it short.
 
@@ -375,23 +398,26 @@ With the old Internals monster, there are no layers. Everything is flat. `_pause
 
 // File 1: Internals.sol (declaration only)
 abstract contract Internals {
-    function _setPause(bool _paused) internal virtual;  // Just signature
+  function _setPause(bool _paused) internal virtual; // Just signature
 }
 
 // File 2: PauseStorageWrapper.sol (implementation)
 abstract contract PauseStorageWrapper {
-    function _setPause(bool _paused) internal override {  // DUPLICATE signature
-        _pauseStorage().paused = _paused;
-        emit TokenPaused(msg.sender);
-    }
+  function _setPause(bool _paused) internal override {
+    // DUPLICATE signature
+    _pauseStorage().paused = _paused;
+    emit TokenPaused(msg.sender);
+  }
 }
 
 // File 3: PauseFacet.sol
-contract PauseFacet is Internals {  // Inherits ALL 1,456 functions
-    function pause() external {
-        _checkRole(PAUSER_ROLE);
-        _setPause(true);
-    }
+contract PauseFacet is
+  Internals // Inherits ALL 1,456 functions
+{
+  function pause() external {
+    _checkRole(PAUSER_ROLE);
+    _setPause(true);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -400,21 +426,23 @@ contract PauseFacet is Internals {  // Inherits ALL 1,456 functions
 
 // File 1: LibPause.sol (implementation only - no separate declaration!)
 library LibPause {
-    function setPause(bool _paused) internal {  // NO virtual, NO override
-        pauseStorage().paused = _paused;
-        emit TokenPaused(msg.sender);
-    }
+  function setPause(bool _paused) internal {
+    // NO virtual, NO override
+    pauseStorage().paused = _paused;
+    emit TokenPaused(msg.sender);
+  }
 }
 
 // File 2: PauseFacet.sol
-import "./lib/LibPause.sol";   // Only imports what it needs
+import "./lib/LibPause.sol"; // Only imports what it needs
 import "./lib/LibAccess.sol";
 
-contract PauseFacet {  // NO inheritance
-    function pause() external {
-        LibAccess.checkRole(PAUSER_ROLE);
-        LibPause.setPause(true);
-    }
+contract PauseFacet {
+  // NO inheritance
+  function pause() external {
+    LibAccess.checkRole(PAUSER_ROLE);
+    LibPause.setPause(true);
+  }
 }
 ```
 
@@ -424,13 +452,13 @@ contract PauseFacet {  // NO inheritance
 
 ### 5.1 Line Count Analysis
 
-| Metric | Inheritance | Libraries | Change |
-|--------|-------------|-----------|--------|
-| Virtual declarations in Internals.sol | 1,456 | 0 | **-1,456** |
-| `override` keywords in storage wrappers | 156+ | 0 | **-156** |
-| Function signature duplications | ~1,456 | 0 | **Eliminated** |
-| Import lines (152 facets × 4 avg) | 152 | ~608 | +456 |
-| **Net line change** | — | — | **~1,000 fewer** |
+| Metric                                  | Inheritance | Libraries | Change           |
+| --------------------------------------- | ----------- | --------- | ---------------- |
+| Virtual declarations in Internals.sol   | 1,456       | 0         | **-1,456**       |
+| `override` keywords in storage wrappers | 156+        | 0         | **-156**         |
+| Function signature duplications         | ~1,456      | 0         | **Eliminated**   |
+| Import lines (152 facets × 4 avg)       | 152         | ~608      | +456             |
+| **Net line change**                     | —           | —         | **~1,000 fewer** |
 
 ### 5.2 Bytecode Comparison
 
@@ -455,13 +483,13 @@ contract PauseFacet {  // NO inheritance
 
 ### 5.3 Gas Comparison
 
-| Operation | Inheritance | Libraries | Difference |
-|-----------|-------------|-----------|------------|
-| Internal function call | Inlined | Inlined | 0 |
-| Storage read (`pauseStorage().paused`) | Same slot | Same slot | 0 |
-| Storage write | Same slot | Same slot | 0 |
-| Event emission | Same event | Same event | 0 |
-| **Total** | — | — | **Zero difference** |
+| Operation                              | Inheritance | Libraries  | Difference          |
+| -------------------------------------- | ----------- | ---------- | ------------------- |
+| Internal function call                 | Inlined     | Inlined    | 0                   |
+| Storage read (`pauseStorage().paused`) | Same slot   | Same slot  | 0                   |
+| Storage write                          | Same slot   | Same slot  | 0                   |
+| Event emission                         | Same event  | Same event | 0                   |
+| **Total**                              | —           | —          | **Zero difference** |
 
 ### 5.4 Storage Access Verification
 
@@ -470,12 +498,12 @@ Both architectures use identical storage access:
 ```solidity
 // BEFORE (Internals.sol)
 function _authorizeOperator(address _operator) internal override {
-    erc1410Storage().operators[msg.sender][_operator] = true;
+  erc1410Storage().operators[msg.sender][_operator] = true;
 }
 
 // AFTER (LibERC1410Operator.sol)
 function authorizeOperator(address operator) internal {
-    erc1410Storage().operators[msg.sender][operator] = true;  // IDENTICAL
+  erc1410Storage().operators[msg.sender][operator] = true; // IDENTICAL
 }
 ```
 
@@ -492,14 +520,16 @@ function authorizeOperator(address operator) internal {
 ```solidity
 // Storage defined at FILE level (not in library)
 function pauseStorage() pure returns (PauseStorage storage s) {
-    assembly { s.slot := keccak256("diamond.storage.pause") }
+  assembly {
+    s.slot := keccak256("diamond.storage.pause")
+  }
 }
 
 // Library uses the accessor
 library LibPause {
-    function pause() internal {
-        pauseStorage().paused = true;  // Works perfectly
-    }
+  function pause() internal {
+    pauseStorage().paused = true; // Works perfectly
+  }
 }
 ```
 
@@ -535,10 +565,10 @@ library LibPause {
 
 **A:** True for "where is X defined?" But libraries answer different questions faster:
 
-| Question | Inheritance | Libraries |
-|----------|-------------|-----------|
-| Where is `_pause()`? | Ctrl+F (5 sec) | Open LibPause.sol |
-| What can TokenFacet do? | Read all code | Read 4 imports |
+| Question                             | Inheritance            | Libraries                 |
+| ------------------------------------ | ---------------------- | ------------------------- |
+| Where is `_pause()`?                 | Ctrl+F (5 sec)         | Open LibPause.sol         |
+| What can TokenFacet do?              | Read all code          | Read 4 imports            |
 | If I change `_pause()`, what breaks? | Everything inherits it | `grep "import.*LibPause"` |
 
 ---
@@ -553,26 +583,26 @@ library LibPause {
 
 **A:** No — libraries do the opposite. Here's why.
 
-The confusion comes from seeing that libraries *can* call each other freely, including circularly. That sounds like it could lead to a tangled mess. But the critical insight is: **the current Internals.sol is already the ultimate spaghetti** — it's just *hidden* spaghetti. Every facet can call any of 1,456 functions. The dependency graph is a fully-connected mesh, invisible from the source code. You only discover it by reading every line.
+The confusion comes from seeing that libraries _can_ call each other freely, including circularly. That sounds like it could lead to a tangled mess. But the critical insight is: **the current Internals.sol is already the ultimate spaghetti** — it's just _hidden_ spaghetti. Every facet can call any of 1,456 functions. The dependency graph is a fully-connected mesh, invisible from the source code. You only discover it by reading every line.
 
 With libraries, the spaghetti **becomes visible**. And visible spaghetti is spaghetti you can fix.
 
 Consider what actually enforces domain isolation in each approach:
 
-**Old (inheritance):** Nothing structural. `OldCouponPaymentFacet` inherits `OldInternals`, which means a developer *could* call `_grantRole()` or `_pause()` or `_issueByPartition()` from inside the coupon payment logic. The compiler won't stop them. Code review might catch it — might not. There's no structural boundary, only convention and discipline.
+**Old (inheritance):** Nothing structural. `OldCouponPaymentFacet` inherits `OldInternals`, which means a developer _could_ call `_grantRole()` or `_pause()` or `_issueByPartition()` from inside the coupon payment logic. The compiler won't stop them. Code review might catch it — might not. There's no structural boundary, only convention and discipline.
 
-**New (libraries):** The import list is the boundary. If `NewCouponPaymentFacet` doesn't import `LibERC1410`, it literally *cannot* call `LibERC1410.issueByPartition()`. The compiler enforces it. Want to know if a facet can mint tokens? Check the imports. If `LibERC1410` isn't there, the answer is no. Instantly, structurally, enforced.
+**New (libraries):** The import list is the boundary. If `NewCouponPaymentFacet` doesn't import `LibERC1410`, it literally _cannot_ call `LibERC1410.issueByPartition()`. The compiler enforces it. Want to know if a facet can mint tokens? Check the imports. If `LibERC1410` isn't there, the answer is no. Instantly, structurally, enforced.
 
 The library layering described in Section 4.3 further strengthens this: leaf libraries (Pause, Access, Compliance, CorporateActions) → domain libraries (ABAF, ERC1410, Snapshots, Bond) → orchestrator libraries (ScheduledTasks, InterestRate) → facets. Each layer has clear rules about what it can import. A leaf library importing an orchestrator would be an obvious red flag in code review.
 
-**One thing to watch for:** library sprawl. If someone creates a `LibEverything` that imports all 10 libraries, you're back to the monster. But that's a code review concern, not an architectural one. The *structure* guides you toward small, focused libraries. The *inheritance* structure guides you toward one giant abstract contract.
+**One thing to watch for:** library sprawl. If someone creates a `LibEverything` that imports all 10 libraries, you're back to the monster. But that's a code review concern, not an architectural one. The _structure_ guides you toward small, focused libraries. The _inheritance_ structure guides you toward one giant abstract contract.
 
-| | Inheritance (Old) | Libraries (New) |
-|---|---|---|
-| **Can facet call unrelated domain logic?** | Yes — inherits everything | No — compiler rejects missing imports |
-| **How to check what a facet can do?** | Read all inherited code | Read the import list |
-| **Is domain isolation enforced?** | By convention only | By compiler (missing import = compile error) |
-| **Blast radius of a change** | All 152 facets (all inherit Internals) | Only files that import the changed library |
+|                                            | Inheritance (Old)                      | Libraries (New)                              |
+| ------------------------------------------ | -------------------------------------- | -------------------------------------------- |
+| **Can facet call unrelated domain logic?** | Yes — inherits everything              | No — compiler rejects missing imports        |
+| **How to check what a facet can do?**      | Read all inherited code                | Read the import list                         |
+| **Is domain isolation enforced?**          | By convention only                     | By compiler (missing import = compile error) |
+| **Blast radius of a change**               | All 152 facets (all inherit Internals) | Only files that import the changed library   |
 
 ---
 
@@ -580,7 +610,7 @@ The library layering described in Section 4.3 further strengthens this: leaf lib
 
 **A:** Partially, but with a fundamental wall that libraries solve.
 
-You *could* restructure the inheritance to use small, focused abstract contracts instead of one monster:
+You _could_ restructure the inheritance to use small, focused abstract contracts instead of one monster:
 
 ```solidity
 abstract contract PauseInternal {
@@ -598,11 +628,11 @@ This works fine... until you hit the circular dependency:
 
 ```solidity
 abstract contract ERC1410Internal is ABAFInternal, SnapshotsInternal {
-    // needs ABAF for adjusted balances, Snapshots for transfer updates
+  // needs ABAF for adjusted balances, Snapshots for transfer updates
 }
 abstract contract SnapshotsInternal is ERC1410Internal {
-    // needs ERC1410 for holder list and balances
-    // ❌ CIRCULAR: ERC1410Internal → SnapshotsInternal → ERC1410Internal
+  // needs ERC1410 for holder list and balances
+  // ❌ CIRCULAR: ERC1410Internal → SnapshotsInternal → ERC1410Internal
 }
 ```
 
@@ -610,15 +640,15 @@ This **will not compile**. Solidity's C3 linearization algorithm rejects circula
 
 **The workarounds all have problems:**
 
-| Workaround | What it does | Why it fails |
-|---|---|---|
-| **Virtual functions with late binding** | Put circular functions as `virtual` in a shared base, override later | This IS what Internals.sol already does — you'd rebuild the monster with extra steps |
-| **Interface-based decoupling** | Have `ERC1410Internal` call through an `ISnapshotUpdater` interface | Inside a Diamond proxy, all facets share storage via `delegatecall` — you can't do interface-based dispatch between internals without external calls, which means cross-facet calls with broken `msg.sender` context |
-| **Hook pattern** | `ERC1410Internal` defines `_afterTransfer()` that `SnapshotsInternal` overrides | Works for one-way notifications but fails when the dependency is bidirectional (ABAF needs to *read* raw balances, ERC1410 needs to *read* current ABAF — that's not a hook, it's a genuine bidirectional data dependency) |
+| Workaround                              | What it does                                                                    | Why it fails                                                                                                                                                                                                               |
+| --------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Virtual functions with late binding** | Put circular functions as `virtual` in a shared base, override later            | This IS what Internals.sol already does — you'd rebuild the monster with extra steps                                                                                                                                       |
+| **Interface-based decoupling**          | Have `ERC1410Internal` call through an `ISnapshotUpdater` interface             | Inside a Diamond proxy, all facets share storage via `delegatecall` — you can't do interface-based dispatch between internals without external calls, which means cross-facet calls with broken `msg.sender` context       |
+| **Hook pattern**                        | `ERC1410Internal` defines `_afterTransfer()` that `SnapshotsInternal` overrides | Works for one-way notifications but fails when the dependency is bidirectional (ABAF needs to _read_ raw balances, ERC1410 needs to _read_ current ABAF — that's not a hook, it's a genuine bidirectional data dependency) |
 
-Libraries solve this because they aren't in the inheritance graph at all. They're compiled as inline code. When the compiler sees `LibABAF.syncBalanceAdjustments()`, it doesn't need `LibABAF` to be "above" or "below" `LibERC1410` in any hierarchy. It just needs the function signature to exist. The function body gets inlined into the calling contract's bytecode. Circular *calls* work because the resolution happens at link-time, not at inheritance-time.
+Libraries solve this because they aren't in the inheritance graph at all. They're compiled as inline code. When the compiler sees `LibABAF.syncBalanceAdjustments()`, it doesn't need `LibABAF` to be "above" or "below" `LibERC1410` in any hierarchy. It just needs the function signature to exist. The function body gets inlined into the calling contract's bytecode. Circular _calls_ work because the resolution happens at link-time, not at inheritance-time.
 
-**Bottom line:** You could get *partway* there with better-structured inheritance (smaller abstract contracts, clearer hierarchy), but you'd still hit a wall at every circular dependency point. And in this system — with ABAF ↔ ERC1410 ↔ Snapshots ↔ ERC1410 — that wall appears in the most critical, most complex part of the codebase. Libraries are the only approach that resolves this structurally rather than by collapsing everything into one file.
+**Bottom line:** You could get _partway_ there with better-structured inheritance (smaller abstract contracts, clearer hierarchy), but you'd still hit a wall at every circular dependency point. And in this system — with ABAF ↔ ERC1410 ↔ Snapshots ↔ ERC1410 — that wall appears in the most critical, most complex part of the codebase. Libraries are the only approach that resolves this structurally rather than by collapsing everything into one file.
 
 ---
 
@@ -626,22 +656,22 @@ Libraries solve this because they aren't in the inheritance graph at all. They'r
 
 **A:** How? As Q7 demonstrates, the options are limited:
 
-| Option | Result |
-|--------|--------|
-| Split into smaller internals | Circular inheritance returns |
-| Improve the Common chain | Still couples unrelated domains, still needs empty bridge contracts |
-| Keep one big organized file | Still 1,456 lines, still hidden deps |
-| Migrate to libraries | Root cause solved — both Common chain AND Internals monster eliminated |
+| Option                       | Result                                                                 |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| Split into smaller internals | Circular inheritance returns                                           |
+| Improve the Common chain     | Still couples unrelated domains, still needs empty bridge contracts    |
+| Keep one big organized file  | Still 1,456 lines, still hidden deps                                   |
+| Migrate to libraries         | Root cause solved — both Common chain AND Internals monster eliminated |
 
 ---
 
 ### Q9: "Was the Common layer a good solution? What can we learn from it?"
 
-**A:** The Common layer was a genuinely clever hack — and understanding *why* it worked (and where it broke down) clarifies why libraries are the right next step.
+**A:** The Common layer was a genuinely clever hack — and understanding _why_ it worked (and where it broke down) clarifies why libraries are the right next step.
 
 **What the Common layer got right:**
 
-The core insight was pragmatic and smart: if you can't have a *graph* of storage wrappers (because graphs can be circular and Solidity rejects circular inheritance), **flatten the graph into a single chain**. One linear path means zero circular deps, because linearity can't be circular. The team shipped. The system worked. That matters.
+The core insight was pragmatic and smart: if you can't have a _graph_ of storage wrappers (because graphs can be circular and Solidity rejects circular inheritance), **flatten the graph into a single chain**. One linear path means zero circular deps, because linearity can't be circular. The team shipped. The system worked. That matters.
 
 **What the Common layer got wrong — serializing a graph into a chain:**
 
@@ -651,7 +681,7 @@ The real dependency relationships between domains are a graph: Security needs Ac
 Common → SecurityStorageWrapper → EquityStorageWrapper → BondStorageWrapper → ...
 ```
 
-That ordering is *arbitrary*. There's no domain reason why `SecurityStorageWrapper` should inherit from `EquityStorageWrapper`. They're unrelated domains. But the chain forces the coupling — changing one can cascade to the other. This is an **information-destroying operation**: the real structure (a graph with independent nodes) is lost when serialized into a chain.
+That ordering is _arbitrary_. There's no domain reason why `SecurityStorageWrapper` should inherit from `EquityStorageWrapper`. They're unrelated domains. But the chain forces the coupling — changing one can cascade to the other. This is an **information-destroying operation**: the real structure (a graph with independent nodes) is lost when serialized into a chain.
 
 **The empty bridge contracts are the tell:**
 
@@ -661,26 +691,26 @@ When you see:
 abstract contract CommonFixedInterestRate is BondStorageWrapperFixedInterestRate {}
 ```
 
-...a contract with *literally zero code* in its body — you're looking at a contract that exists purely to satisfy the compiler. It does nothing for the developer reading the code, nothing for domain understanding, nothing for auditing. It's ceremony. When a system needs increasing amounts of ceremony to add new features, the architecture is working *against* you rather than *for* you.
+...a contract with _literally zero code_ in its body — you're looking at a contract that exists purely to satisfy the compiler. It does nothing for the developer reading the code, nothing for domain understanding, nothing for auditing. It's ceremony. When a system needs increasing amounts of ceremony to add new features, the architecture is working _against_ you rather than _for_ you.
 
 **Common solved the symptom, not the disease:**
 
-The circular dependency still *conceptually* exists — ERC1410 and ABAF genuinely need each other, and no amount of chain serialization changes that fact. Common hides this by making everything available through one path. The dependency is still there; it's just invisible in source code. This is arguably worse than having it be explicit, because an auditor can't see the real dependency structure.
+The circular dependency still _conceptually_ exists — ERC1410 and ABAF genuinely need each other, and no amount of chain serialization changes that fact. Common hides this by making everything available through one path. The dependency is still there; it's just invisible in source code. This is arguably worse than having it be explicit, because an auditor can't see the real dependency structure.
 
 **The proof: Internals.sol had to be layered on top:**
 
-When bond variants arrived and the system needed virtual function dispatch across variants, Common couldn't help — it handles storage access, not behavior customization. So `Internals.sol` was added as a *second* workaround on top of the *first* workaround. Two layers of architectural compromise stacked together, each making the other harder to reason about.
+When bond variants arrived and the system needed virtual function dispatch across variants, Common couldn't help — it handles storage access, not behavior customization. So `Internals.sol` was added as a _second_ workaround on top of the _first_ workaround. Two layers of architectural compromise stacked together, each making the other harder to reason about.
 
 **What libraries give you that Common never could:**
 
-Libraries model the **actual dependency graph**. When `LibERC1410` imports `LibABAF` and `LibSnapshots`, and `LibSnapshots` imports `LibERC1410` back, you're looking at the *real* relationships between these domains. Nothing is serialized, nothing is hidden, nothing is arbitrary. The circular dependency isn't swept under a rug — it's expressed, compiled, and working.
+Libraries model the **actual dependency graph**. When `LibERC1410` imports `LibABAF` and `LibSnapshots`, and `LibSnapshots` imports `LibERC1410` back, you're looking at the _real_ relationships between these domains. Nothing is serialized, nothing is hidden, nothing is arbitrary. The circular dependency isn't swept under a rug — it's expressed, compiled, and working.
 
 ```
 Common layer:  Graph → serialized into chain → information lost → ceremony added
 Libraries:     Graph → expressed directly     → information preserved → no ceremony
 ```
 
-**The takeaway:** The Common layer was the right call *at the time* — it was pragmatic, it shipped, and it kept the project moving. But it was always a workaround, and each new feature (bond variants, more storage domains) made the workaround more expensive. Libraries resolve the root cause, eliminating both the Common chain and the Internals monster in one move.
+**The takeaway:** The Common layer was the right call _at the time_ — it was pragmatic, it shipped, and it kept the project moving. But it was always a workaround, and each new feature (bond variants, more storage domains) made the workaround more expensive. Libraries resolve the root cause, eliminating both the Common chain and the Internals monster in one move.
 
 ---
 
@@ -719,6 +749,7 @@ _getTotalBalanceForAdjustedAt(account, timestamp)
 **To understand what this function actually computes, you must read 6 files.** The `super.` calls create a hidden chain where the composition is invisible from any single file. In each file, you see `super._getTotalBalanceForAdjustedAt() + myDomainAmount` — but which `super`? You need to mentally trace the C3 linearization to know the order.
 
 Each domain helper (`_balanceOfAdjustedAt`, `_getHeldAmountForAdjustedAt`, etc.) internally calls:
+
 ```solidity
 uint256 factor = _calculateFactor(_getAbafAdjustedAt(timestamp), _getLabaf(account));
 return rawAmount * factor;
@@ -730,42 +761,38 @@ This means the function also crosses into the ABAF/Snapshots domain for every si
 
 ```solidity
 library LibTotalBalance {
+  function getTotalBalanceForAdjustedAt(address account, uint256 timestamp) internal view returns (uint256) {
+    // ════════════════════════════════════════════════════
+    // THE ENTIRE COMPOSITION IS VISIBLE IN ONE PLACE
+    // ════════════════════════════════════════════════════
 
-    function getTotalBalanceForAdjustedAt(
-        address account,
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        // ════════════════════════════════════════════════════
-        // THE ENTIRE COMPOSITION IS VISIBLE IN ONE PLACE
-        // ════════════════════════════════════════════════════
+    // Get the ABAF factor at the requested timestamp
+    uint256 abafAtTime = LibABAF.getAbafAt(timestamp);
+    uint256 labaf = LibABAF.getLabaf(account);
+    uint256 factor = LibABAF.calculateFactor(abafAtTime, labaf);
 
-        // Get the ABAF factor at the requested timestamp
-        uint256 abafAtTime = LibABAF.getAbafAt(timestamp);
-        uint256 labaf = LibABAF.getLabaf(account);
-        uint256 factor = LibABAF.calculateFactor(abafAtTime, labaf);
+    // Aggregate ALL balance types — each call goes to ONE focused library
+    uint256 total = 0;
+    total += LibERC1410.rawBalanceOf(account) * factor; // regular balance
+    total += LibHold.getHeldAmount(account) * factor; // held amounts
+    total += LibClearing.getClearedAmount(account) * factor; // cleared amounts
+    total += LibLock.getLockedAmount(account) * factor; // locked amounts
+    total += LibFrozen.getFrozenAmount(account) * factor; // frozen amounts
 
-        // Aggregate ALL balance types — each call goes to ONE focused library
-        uint256 total = 0;
-        total += LibERC1410.rawBalanceOf(account) * factor;       // regular balance
-        total += LibHold.getHeldAmount(account) * factor;          // held amounts
-        total += LibClearing.getClearedAmount(account) * factor;   // cleared amounts
-        total += LibLock.getLockedAmount(account) * factor;        // locked amounts
-        total += LibFrozen.getFrozenAmount(account) * factor;      // frozen amounts
-
-        return total / (10 ** LibABAF.getDecimals());
-    }
+    return total / (10 ** LibABAF.getDecimals());
+  }
 }
 ```
 
 **What changed:**
 
-| Aspect | Inheritance (`super.` chain) | Libraries (explicit composition) |
-|--------|-----|-----|
-| **Where is the composition logic?** | Scattered across 6 files | ONE function, ~15 lines |
-| **Can you see all domains involved?** | No — must trace C3 linearization | Yes — read the import list and function body |
+| Aspect                                                | Inheritance (`super.` chain)                                                             | Libraries (explicit composition)                                      |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Where is the composition logic?**                   | Scattered across 6 files                                                                 | ONE function, ~15 lines                                               |
+| **Can you see all domains involved?**                 | No — must trace C3 linearization                                                         | Yes — read the import list and function body                          |
 | **Adding a new balance type** (e.g., pledged amounts) | Insert a new contract into the inheritance chain, hope the `super.` ordering still works | Add one line: `total += LibPledge.getPledgedAmount(account) * factor` |
-| **ABAF factor calculated how many times?** | 5 times (once per domain — each calls `_calculateFactor` independently) | 1 time (calculated once, reused for all domains) |
-| **Auditing "is this correct?"** | Read 6 files, mentally reconstruct the chain | Read 1 function |
+| **ABAF factor calculated how many times?**            | 5 times (once per domain — each calls `_calculateFactor` independently)                  | 1 time (calculated once, reused for all domains)                      |
+| **Auditing "is this correct?"**                       | Read 6 files, mentally reconstruct the chain                                             | Read 1 function                                                       |
 
 **The complex example coverage:**
 
@@ -788,24 +815,26 @@ These libraries demonstrate the circular call pattern (`LibERC1410 ↔ LibSnapsh
 
 ### 7.1 Risk Matrix
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Migration introduces bugs | Medium | High | Incremental migration, full test coverage |
-| Team unfamiliar with pattern | Low | Medium | Documentation, examples, pair programming |
-| Migration takes longer than expected | Medium | Medium | Phased approach, parallel operation |
-| Stakeholder resistance | Low | Low | This ADR with concrete evidence |
-| Performance regression | Very Low | High | Bytecode comparison proves no change |
-| Storage incompatibility | Very Low | Critical | Same Diamond Storage pattern used |
+| Risk                                 | Probability | Impact   | Mitigation                                |
+| ------------------------------------ | ----------- | -------- | ----------------------------------------- |
+| Migration introduces bugs            | Medium      | High     | Incremental migration, full test coverage |
+| Team unfamiliar with pattern         | Low         | Medium   | Documentation, examples, pair programming |
+| Migration takes longer than expected | Medium      | Medium   | Phased approach, parallel operation       |
+| Stakeholder resistance               | Low         | Low      | This ADR with concrete evidence           |
+| Performance regression               | Very Low    | High     | Bytecode comparison proves no change      |
+| Storage incompatibility              | Very Low    | Critical | Same Diamond Storage pattern used         |
 
 ### 7.2 Risk Mitigations
 
 **Bug introduction:**
+
 - Migrate one facet at a time
 - Full test suite must pass before switching
 - Old and new facets coexist during transition
 - Instant rollback via `diamondCut`
 
 **Team learning curve:**
+
 - Create comprehensive style guide
 - Pair programming during initial migrations
 - Code review requirements for library changes
@@ -848,23 +877,23 @@ PHASE 4: CLEANUP (Weeks 11-12)
 
 ### 8.2 Effort Estimate
 
-| Phase | Duration | Team Size | Effort |
-|-------|----------|-----------|--------|
-| Foundation | 2 weeks | 1 dev | 2 person-weeks |
-| Pilot | 2 weeks | 2 devs | 4 person-weeks |
-| Full Migration | 6 weeks | 2-3 devs | 12-18 person-weeks |
-| Cleanup | 2 weeks | 1 dev | 2 person-weeks |
-| **Total** | **12 weeks** | — | **20-26 person-weeks** |
+| Phase          | Duration     | Team Size | Effort                 |
+| -------------- | ------------ | --------- | ---------------------- |
+| Foundation     | 2 weeks      | 1 dev     | 2 person-weeks         |
+| Pilot          | 2 weeks      | 2 devs    | 4 person-weeks         |
+| Full Migration | 6 weeks      | 2-3 devs  | 12-18 person-weeks     |
+| Cleanup        | 2 weeks      | 1 dev     | 2 person-weeks         |
+| **Total**      | **12 weeks** | —         | **20-26 person-weeks** |
 
 ### 8.3 Success Criteria
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Bytecode size | Within 1% | Compile and compare |
-| Gas costs | Identical | Test suite gas reports |
-| Test coverage | 100% of migrated | Coverage tools |
-| Compilation time | Equal or better | CI metrics |
-| Team approval | Majority after pilot | Survey |
+| Metric           | Target               | Measurement            |
+| ---------------- | -------------------- | ---------------------- |
+| Bytecode size    | Within 1%            | Compile and compare    |
+| Gas costs        | Identical            | Test suite gas reports |
+| Test coverage    | 100% of migrated     | Coverage tools         |
+| Compilation time | Equal or better      | CI metrics             |
+| Team approval    | Majority after pilot | Survey                 |
 
 ---
 
@@ -920,23 +949,23 @@ If systemic issue discovered:
 
 ### 10.2 Decision Summary
 
-| Criteria | Assessment |
-|----------|------------|
-| Technical feasibility | ✅ Proven via PoC |
-| Performance impact | ✅ Zero (same bytecode/gas) |
-| Code quality improvement | ✅ Significant (~1,000 fewer lines, explicit deps) |
-| Risk level | ⚠️ Medium (mitigated by incremental approach) |
-| Effort required | ⚠️ Moderate (20-26 person-weeks) |
-| Long-term maintainability | ✅ Significantly improved |
+| Criteria                  | Assessment                                         |
+| ------------------------- | -------------------------------------------------- |
+| Technical feasibility     | ✅ Proven via PoC                                  |
+| Performance impact        | ✅ Zero (same bytecode/gas)                        |
+| Code quality improvement  | ✅ Significant (~1,000 fewer lines, explicit deps) |
+| Risk level                | ⚠️ Medium (mitigated by incremental approach)      |
+| Effort required           | ⚠️ Moderate (20-26 person-weeks)                   |
+| Long-term maintainability | ✅ Significantly improved                          |
 
 ### 10.3 Approval Chain
 
-| Role | Decision | Date |
-|------|----------|------|
-| Authors | Proposed | 2026-02-06 |
+| Role                         | Decision | Date       |
+| ---------------------------- | -------- | ---------- |
+| Authors                      | Proposed | 2026-02-06 |
 | Technical Reviewer (Alberto) | Reviewed | 2026-02-06 |
-| Development Team | Pending | TBD |
-| Tech Lead | Pending | TBD |
+| Development Team             | Pending  | TBD        |
+| Tech Lead                    | Pending  | TBD        |
 
 ---
 
@@ -999,16 +1028,44 @@ The **complex-example** directory demonstrates the library layering architecture
 - [Solidity Libraries Documentation](https://docs.soliditylang.org/en/latest/contracts.html#libraries)
 - [Diamond Storage Pattern](https://dev.to/mudgen/how-diamond-storage-works-90e)
 
+### 11.4 Technical Review Summary (Alberto Molina)
+
+The following is Alberto's technical review summary, originally added to the Confluence version on 2026-02-06.
+
+**Comparison of the two approaches:**
+
+We are comparing 2 solutions that both aim to solve the circular dependency issue:
+
+- **Linear inheritance** where for each facet we have:
+  - Virtual storage wrapper (all virtual SWs are linearly inherited in "Internals.sol")
+  - Virtual modifiers (all virtual modifiers are linearly inherited in "Modifiers.sol")
+  - Storage wrapper (implements all virtuals and modifiers associated to the facet)
+  - Facet contract (inherits a single "Common.sol" where all asset functionality exists)
+
+- **Library approach** where for each facet we have:
+  - A SW contract that defines the facet's storage struct
+  - A Library that implements all the facet functionality and imports all the libraries it needs
+  - Facet contract (imports all the libraries it needs)
+
+**Open points (Alberto) — now resolved:**
+
+1. _"How would a method such as `_getTotalBalanceForAdjustedAt` work with libraries?"_
+   — **Answered in [Q10](#q10-how-would-a-complex-cross-domain-function-like-_gettotalbalanceforadjustedat-work-with-libraries)**: The 6-layer `super.` chain becomes one 15-line explicit composition in `LibTotalBalance`.
+
+2. _"How does the compiler handle the circular dependency between library methods?"_
+   — **Answered in [Q2](#q2-wont-circular-imports-fail) and [Q3](#q3-wont-circular-function-calls-cause-infinite-loops)**: `import` only requires function signatures (not full structure), so circular imports compile. Circular function calls work as mutual recursion with base cases. Proven in `lib-based-diamond-poc/contracts/circular-test/`.
+
 ### 11.3 Version History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-02-06 | Miguel | Initial draft |
-| 2.0 | 2026-02-06 | Miguel | Added TL;DR, glossary, visual diagrams, FAQ, estimates |
-| 3.0 | 2026-02-06 | Miguel | Added risk matrix, rollback procedures, decision summary, polish |
-| 4.0 | 2026-02-07 | Miguel | Added Library Layering Architecture (§4.3), FAQ Q6 (spaghetti code / domain isolation analysis), FAQ Q7 (why inheritance can't achieve the same), complex example reference, updated appendix |
-| 5.0 | 2026-02-09 | Miguel | Corrected historical narrative: Common layer was the original circular dependency workaround, Internals.sol was added later for bond variant generation. Updated §1.1, §3, Q7, Q8 to reflect accurate evolution. Added Q9 (Common layer retrospective analysis). |
-| 5.1 | 2026-02-09 | Miguel | Added Q10: Real-world case study of `_getTotalBalanceForAdjustedAt` — how a 6-layer `super.` chain becomes one 15-line explicit composition with libraries. |
+| Version | Date       | Author | Changes                                                                                                                                                                                                                                                          |
+| ------- | ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2026-02-06 | Miguel | Initial draft                                                                                                                                                                                                                                                    |
+| 2.0     | 2026-02-06 | Miguel | Added TL;DR, glossary, visual diagrams, FAQ, estimates                                                                                                                                                                                                           |
+| 3.0     | 2026-02-06 | Miguel | Added risk matrix, rollback procedures, decision summary, polish                                                                                                                                                                                                 |
+| 4.0     | 2026-02-07 | Miguel | Added Library Layering Architecture (§4.3), FAQ Q6 (spaghetti code / domain isolation analysis), FAQ Q7 (why inheritance can't achieve the same), complex example reference, updated appendix                                                                    |
+| 5.0     | 2026-02-09 | Miguel | Corrected historical narrative: Common layer was the original circular dependency workaround, Internals.sol was added later for bond variant generation. Updated §1.1, §3, Q7, Q8 to reflect accurate evolution. Added Q9 (Common layer retrospective analysis). |
+| 5.1     | 2026-02-09 | Miguel | Added Q10: Real-world case study of `_getTotalBalanceForAdjustedAt` — how a 6-layer `super.` chain becomes one 15-line explicit composition with libraries.                                                                                                      |
+| 5.2     | 2026-02-09 | Miguel | Merged Alberto's technical review summary from Confluence (§11.4). Open points now cross-referenced to Q2/Q3 and Q10.                                                                                                                                            |
 
 ---
 
