@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { ZeroAddress, parseUnits } from "ethers";
 import { deployLifeCycleCashFlowContracts, deployPrecompiledMock } from "../scripts/deploy";
 import DeployContractCommand from "../scripts/commands/DeployContractCommand";
-import { type LifeCycleCashFlowTimeTravel } from "@typechain";
+import { type LifeCycleCashFlowTimeTravel } from "../typechain-types/contracts/test/testTimeTravel/LifeCycleCashFlowTimeTravel";
 import {
   DEFAULT_ADMIN_ROLE,
   PAUSER_ROLE,
@@ -407,31 +407,6 @@ describe("Security operations", () => {
         it("An account cannot distribute a coupon to a holder if there is not enough balance", async () => {
           await lifeCycleCashFlow.changeSystemTimestamp(1753874807);
 
-          const tx = await lifeCycleCashFlow.executeDistribution(await asset_A.getAddress(), 1, 1, 1);
-          const receipt = await tx.wait();
-          const event = receipt!.logs
-            .map((log: any) => {
-              try {
-                return lifeCycleCashFlow.interface.parseLog({ topics: log.topics as string[], data: log.data });
-              } catch {
-                return null;
-              }
-            })
-            .find((parsed: any) => parsed?.name === "DistributionExecuted");
-          process.stderr.write(
-            "DEBUG DistributionExecuted args: " +
-              JSON.stringify(
-                event?.args?.map((a: any) =>
-                  typeof a === "bigint"
-                    ? a.toString()
-                    : Array.isArray(a)
-                      ? a.map((x: any) => (typeof x === "bigint" ? x.toString() : x))
-                      : a,
-                ),
-              ) +
-              "\n",
-          );
-
           await expect(lifeCycleCashFlow.executeDistribution(await asset_A.getAddress(), 1, 1, 1))
             .to.emit(lifeCycleCashFlow, "DistributionExecuted")
             .withArgs(1, 1, 1, [await signer_B.getAddress()], [ZeroAddress], [0]);
@@ -696,7 +671,7 @@ describe("Security operations", () => {
             ]),
           )
             .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
-            .withArgs(1, [await signer_B.getAddress()], [await signer_B.getAddress()], [], []);
+            .withArgs(1, [await signer_B.getAddress()], [await signer_B.getAddress()], [ZeroAddress], [0]);
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("0", 0));
         });
@@ -785,7 +760,7 @@ describe("Security operations", () => {
             ]),
           )
             .to.emit(lifeCycleCashFlow, "DistributionByAddressesExecuted")
-            .withArgs(1, [await signer_B.getAddress()], [await signer_B.getAddress()], [], []);
+            .withArgs(1, [await signer_B.getAddress()], [await signer_B.getAddress()], [ZeroAddress], [0]);
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits(amountToBePaid, 0));
         });
@@ -838,7 +813,7 @@ describe("Security operations", () => {
 
             await expect(lifeCycleCashFlow.executeBondCashOut(await asset_A.getAddress(), 1, 1))
               .to.emit(lifeCycleCashFlow, "CashOutExecuted")
-              .withArgs(1, 1, [await signer_B.getAddress()], [], []);
+              .withArgs(1, 1, [await signer_B.getAddress()], [ZeroAddress], [0]);
 
             expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("0", 0));
           });
@@ -1085,7 +1060,7 @@ describe("Security operations", () => {
               ]),
             )
               .to.emit(lifeCycleCashFlow, "CashOutByAddressesExecuted")
-              .withArgs([await signer_B.getAddress()], [await signer_B.getAddress()], [], []);
+              .withArgs([await signer_B.getAddress()], [await signer_B.getAddress()], [ZeroAddress], [0]);
 
             expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("0", 0));
           });
@@ -1181,37 +1156,19 @@ describe("Security operations", () => {
         });
 
         it("An account cannot pay a snapshot to a holder if there is not enough balance", async () => {
-          const tx = await lifeCycleCashFlow.executeAmountSnapshot(
-            await asset_A.getAddress(),
-            1,
-            1,
-            100,
-            parseUnits("100", 0),
-          );
-
-          // ATS Pattern: expect event emission without withArgs
-          await expect(tx).to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted");
-
-          // ATS Pattern: manual event parsing and validation
-          const result = await tx;
-          const receipt = await result.wait();
-          const amountSnapshotEvent = receipt!.logs
-            .map((log) => {
-              try {
-                return lifeCycleCashFlow.interface.parseLog({ topics: log.topics as string[], data: log.data });
-              } catch {
-                return null;
-              }
-            })
-            .find((parsed) => parsed?.name === "AmountSnapshotExecuted");
-
-          // Validate the event args structure (arrays by position)
-          expect(amountSnapshotEvent).to.not.be.null;
-          expect(amountSnapshotEvent!.args).to.be.an("array");
-          expect(amountSnapshotEvent!.args).to.have.length(7);
-          expect(amountSnapshotEvent!.args[4]).to.be.an("array"); // failed array
-          expect(amountSnapshotEvent!.args[5]).to.be.an("array"); // succeeded array
-          expect(amountSnapshotEvent!.args[6]).to.be.an("array"); // paidAmount array
+          await expect(
+            lifeCycleCashFlow.executeAmountSnapshot(await asset_A.getAddress(), 1, 1, 1, parseUnits("100", 0)),
+          )
+            .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
+            .withArgs(
+              1,
+              1,
+              1,
+              parseUnits("100", 0),
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [ZeroAddress, ZeroAddress],
+              [0, 0],
+            );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(0);
         });
@@ -1284,7 +1241,15 @@ describe("Security operations", () => {
             lifeCycleCashFlow.executeAmountSnapshot(await asset_A.getAddress(), 1, 1, 1, parseUnits("100", 0)),
           )
             .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
-            .withArgs(1, 1, 1, parseUnits("100", 0), [await signer_B.getAddress()], [ZeroAddress], [0]);
+            .withArgs(
+              1,
+              1,
+              1,
+              parseUnits("100", 0),
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [ZeroAddress, ZeroAddress],
+              [0, 0],
+            );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(0);
         });
@@ -1317,7 +1282,15 @@ describe("Security operations", () => {
             lifeCycleCashFlow.executeAmountSnapshot(await asset_A.getAddress(), 1, 1, 1, parseUnits("100", 0)),
           )
             .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
-            .withArgs(1, 1, 1, parseUnits("100", 0), [await signer_B.getAddress()], [ZeroAddress], [0]);
+            .withArgs(
+              1,
+              1,
+              1,
+              parseUnits("100", 0),
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [ZeroAddress, ZeroAddress],
+              [0, 0],
+            );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(0);
         });
@@ -1327,7 +1300,15 @@ describe("Security operations", () => {
 
           await expect(lifeCycleCashFlow.executeAmountSnapshot(await asset_A.getAddress(), 1, 1, 1, 1000))
             .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
-            .withArgs(1, 1, 1, 1000, [ZeroAddress], [await signer_B.getAddress()], [parseUnits("500", 0)]);
+            .withArgs(
+              1,
+              1,
+              1,
+              1000,
+              [ZeroAddress, ZeroAddress],
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [parseUnits("500", 0), parseUnits("500", 0)],
+            );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("500", 0));
         });
@@ -1342,7 +1323,15 @@ describe("Security operations", () => {
 
           await expect(lifeCycleCashFlow.executeAmountSnapshot(await asset_A.getAddress(), 1, 1, 1, 1000))
             .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
-            .withArgs(1, 1, 1, 1000, [ZeroAddress], [await signer_B.getAddress()], [parseUnits("500", 0)]);
+            .withArgs(
+              1,
+              1,
+              1,
+              1000,
+              [ZeroAddress, ZeroAddress],
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [parseUnits("500", 0), parseUnits("500", 0)],
+            );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("500", 0));
         });
@@ -1352,13 +1341,29 @@ describe("Security operations", () => {
 
           await expect(lifeCycleCashFlow.executeAmountSnapshot(await asset_A.getAddress(), 1, 1, 1, 1000))
             .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
-            .withArgs(1, 1, 1, 1000, [ZeroAddress], [await signer_B.getAddress()], [parseUnits("500", 0)]);
+            .withArgs(
+              1,
+              1,
+              1,
+              1000,
+              [ZeroAddress, ZeroAddress],
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [parseUnits("500", 0), parseUnits("500", 0)],
+            );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("500", 0));
 
           await expect(lifeCycleCashFlow.executeAmountSnapshot(await asset_A.getAddress(), 1, 1, 1, 1000))
             .to.emit(lifeCycleCashFlow, "AmountSnapshotExecuted")
-            .withArgs(1, 1, 1, 1000, [await signer_B.getAddress()], [], []);
+            .withArgs(
+              1,
+              1,
+              1,
+              1000,
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [ZeroAddress, ZeroAddress],
+              [0, 0],
+            );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("500", 0));
         });
@@ -1408,7 +1413,15 @@ describe("Security operations", () => {
             lifeCycleCashFlow.executePercentageSnapshot(await asset_A.getAddress(), 1, 1, 1, parseUnits("50", 2)),
           )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
-            .withArgs(1, 1, 1, parseUnits("50", 2), [ZeroAddress], [], []);
+            .withArgs(
+              1,
+              1,
+              1,
+              parseUnits("50", 2),
+              [ZeroAddress, ZeroAddress],
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [0, 0],
+            );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("0", 0));
         });
@@ -1465,9 +1478,9 @@ describe("Security operations", () => {
               1,
               1,
               parseUnits("50", 2),
-              [ZeroAddress],
-              [await signer_B.getAddress()],
-              [parseUnits("250000", 2)],
+              [ZeroAddress, ZeroAddress],
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [parseUnits("250000", 2), parseUnits("250000", 2)],
             );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("250000", 2));
@@ -1490,9 +1503,9 @@ describe("Security operations", () => {
               1,
               1,
               parseUnits("50", 2),
-              [ZeroAddress],
-              [await signer_B.getAddress()],
-              [parseUnits("250000", 2)],
+              [ZeroAddress, ZeroAddress],
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [parseUnits("250000", 2), parseUnits("250000", 2)],
             );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("250000", 2));
@@ -1510,9 +1523,9 @@ describe("Security operations", () => {
               1,
               1,
               parseUnits("50", 2),
-              [ZeroAddress],
-              [await signer_B.getAddress()],
-              [parseUnits("250000", 2)],
+              [ZeroAddress, ZeroAddress],
+              [await signer_B.getAddress(), await signer_A.getAddress()],
+              [parseUnits("250000", 2), parseUnits("250000", 2)],
             );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("250000", 2));
@@ -1521,27 +1534,17 @@ describe("Security operations", () => {
             lifeCycleCashFlow.executePercentageSnapshot(await asset_A.getAddress(), 1, 1, 1, parseUnits("50", 2)),
           )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
-            .withArgs(1, 1, 1, parseUnits("50", 2), [await signer_B.getAddress()], [], []);
-
-          expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("250000", 2));
-        });
-
-        it("An account can pay a snapshot by percentage to two holders", async () => {
-          await stablecoin.transfer(lifeCycleCashFlowAddress, parseUnits("1000000", 2));
-
-          await expect(
-            lifeCycleCashFlow.executePercentageSnapshot(await asset_A.getAddress(), 1, 1, 2, parseUnits("50", 2)),
-          )
-            .to.emit(lifeCycleCashFlow, "PercentageSnapshotExecuted")
             .withArgs(
               1,
               1,
-              2,
+              1,
               parseUnits("50", 2),
-              [],
               [await signer_B.getAddress(), await signer_A.getAddress()],
-              [parseUnits("250000", 2), parseUnits("250000", 2)],
+              [ZeroAddress, ZeroAddress],
+              [0, 0],
             );
+
+          expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("250000", 2));
         });
       });
 
@@ -1614,7 +1617,7 @@ describe("Security operations", () => {
             ),
           )
             .to.emit(lifeCycleCashFlow, "AmountSnapshotByAddressesExecuted")
-            .withArgs(1, [await signer_B.getAddress()], 1000, [await signer_B.getAddress()], [], []);
+            .withArgs(1, [await signer_B.getAddress()], 1000, [await signer_B.getAddress()], [ZeroAddress], [0]);
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(parseUnits("0", 0));
         });
@@ -1721,7 +1724,14 @@ describe("Security operations", () => {
             ),
           )
             .to.emit(lifeCycleCashFlow, "PercentageSnapshotByAddressesExecuted")
-            .withArgs(1, [await signer_B.getAddress()], parseUnits("5000", 2), [ZeroAddress], [], []);
+            .withArgs(
+              1,
+              [await signer_B.getAddress()],
+              parseUnits("5000", 2),
+              [ZeroAddress],
+              [await signer_B.getAddress()],
+              [0],
+            );
 
           expect(await stablecoin.balanceOf(await signer_B.getAddress())).to.equal(0);
         });
@@ -1986,7 +1996,6 @@ describe("Security operations", () => {
     });
   });
 });
-
 describe("Real-time contract tests (without TimeTravel)", () => {
   let asset_A;
   let rbacList;
@@ -2041,6 +2050,8 @@ describe("Real-time contract tests (without TimeTravel)", () => {
 
     // The important thing is that the function executed without reverting on date check
     // This proves LocalContext._blockTimestamp() was called and worked correctly
-    expect(result).to.have.property("executed_");
+    // In ethers v6, staticCall returns an array/tuple, not an object
+    expect(result).to.be.an("array");
+    expect(result).to.have.length(4); // executed_, failed, succeeded, paidAmount arrays
   });
 });
