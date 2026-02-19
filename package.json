@@ -21,7 +21,7 @@
   "scripts": {
     "setup": "npm run ats:setup && npm run mass-payout:setup",
     "lint": "npm run lint:js && npm run lint:sol",
-    "lint:js": "eslint . --cache",
+    "lint:js": "eslint .",
     "lint:sol": "solhint --config solhint.config.js 'contracts/**/*.sol'",
     "lint:fix": "eslint . --fix && npm run format",
     "format": "prettier --write '*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' 'packages/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml,sol}' 'apps/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' '.github/**/*.{js,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
