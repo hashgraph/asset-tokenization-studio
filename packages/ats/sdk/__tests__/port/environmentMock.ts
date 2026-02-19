@@ -635,6 +635,34 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return coupons.length;
   });
 
+  singletonInstance.getCouponsOrderedList = jest.fn(
+    async (address: EvmAddress, pageIndex?: number, pageLength?: number) => {
+      const allCoupons = coupons.map((_, index) => index + 1); // Return 1-based coupon IDs
+
+      // If pagination parameters are provided, return paginated result
+      if (pageIndex !== undefined && pageLength !== undefined) {
+        const start = pageIndex * pageLength;
+        const end = start + pageLength;
+        return allCoupons.slice(start, end);
+      }
+
+      // Otherwise return all coupons
+      return allCoupons;
+    },
+  );
+
+  singletonInstance.getCouponsOrderedListTotal = jest.fn(async (address: EvmAddress) => {
+    return coupons.length;
+  });
+
+  singletonInstance.getCouponFromOrderedListAt = jest.fn(async (address: EvmAddress, pos: number) => {
+    if (pos >= coupons.length || pos < 0) {
+      // Return a default value instead of throwing error for tests
+      return pos + 1;
+    }
+    return pos + 1;
+  });
+
   singletonInstance.getAccountSecurityRelationship = jest.fn(async (address: EvmAddress, target: EvmAddress) => {});
 
   singletonInstance.isPaused = jest.fn(async (address: EvmAddress) => {
@@ -2053,6 +2081,15 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     } as TransactionResponse;
   });
 
+  singletonInstance.addKpiData = jest.fn(
+    async (security: EvmAddress, date: number, value: string, project: EvmAddress) => {
+      return {
+        status: "success",
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
   };
@@ -2124,6 +2161,15 @@ jest.mock("@port/out/hs/HederaTransactionAdapter", () => {
   singletonInstance.setupDisconnectEventHandler = jest.fn(async () => {
     return true;
   });
+
+  singletonInstance.addKpiData = jest.fn(
+    async (security: EvmAddress, date: number, value: string, project: EvmAddress) => {
+      return {
+        status: "success",
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
 
   return {
     HederaTransactionAdapter: jest.fn(() => singletonInstance),
