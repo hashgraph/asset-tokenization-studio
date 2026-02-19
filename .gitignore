@@ -137,3 +137,6 @@ asset-tokenization-studio.iml
 .kiro/
 .claude/
 CLAUDE.md
+
+# Migration reference copy
+reference-contracts/
