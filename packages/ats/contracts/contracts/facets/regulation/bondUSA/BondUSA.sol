@@ -20,6 +20,7 @@ import { LibKyc } from "../../../lib/core/LibKyc.sol";
 import { LibCompliance } from "../../../lib/core/LibCompliance.sol";
 import { LibCorporateActions } from "../../../lib/core/LibCorporateActions.sol";
 import { IClearing } from "../../features/interfaces/clearing/IClearing.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract BondUSA is IBond, IBondUSA {
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -96,7 +97,7 @@ abstract contract BondUSA is IBond, IBondUSA {
                     balance,
                     "",
                     "",
-                    _getBlockTimestamp()
+                    LibTimeTravel.getBlockTimestamp()
                 );
             }
         }
@@ -106,7 +107,15 @@ abstract contract BondUSA is IBond, IBondUSA {
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
         _validateRedeemAtMaturity(_tokenHolder);
 
-        LibTokenTransfer.redeemByPartition(_partition, _tokenHolder, msg.sender, _amount, "", "", _getBlockTimestamp());
+        LibTokenTransfer.redeemByPartition(
+            _partition,
+            _tokenHolder,
+            msg.sender,
+            _amount,
+            "",
+            "",
+            LibTimeTravel.getBlockTimestamp()
+        );
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -121,7 +130,7 @@ abstract contract BondUSA is IBond, IBondUSA {
         if (LibClearing.isClearingActivated()) revert IClearing.ClearingIsActivated();
         LibKyc.requireValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
         LibCompliance.requireNotRecovered(_tokenHolder);
-        _requireAfterCurrentMaturityDate(_getBlockTimestamp());
+        _requireAfterCurrentMaturityDate(LibTimeTravel.getBlockTimestamp());
     }
 
     function _validateBondInitData(IBondRead.BondDetailsData calldata _bondDetailsData) internal view {
@@ -136,7 +145,7 @@ abstract contract BondUSA is IBond, IBondUSA {
     }
 
     function _requireValidTimestamp(uint256 _timestamp) internal view {
-        if (_timestamp <= _getBlockTimestamp()) {
+        if (_timestamp <= LibTimeTravel.getBlockTimestamp()) {
             revert WrongTimestamp(_timestamp);
         }
     }
@@ -147,9 +156,5 @@ abstract contract BondUSA is IBond, IBondUSA {
 
     function _isBondInitialized() internal view returns (bool) {
         return LibBond.isBondInitialized();
-    }
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

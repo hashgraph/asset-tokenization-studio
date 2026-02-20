@@ -11,7 +11,7 @@ import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../constants/stora
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { IExternalControlList } from "../../facets/features/interfaces/IExternalControlList.sol";
-import { IControlListBase } from "../../facets/features/interfaces/IControlList.sol";
+import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
 
 /// @title LibControlList — Control list (whitelist/blacklist) library
 /// @notice Centralized control list functionality extracted from ControlListStorageWrapper.sol

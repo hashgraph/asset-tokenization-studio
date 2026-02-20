@@ -13,6 +13,7 @@ import { LibABAF } from "../../../lib/domain/LibABAF.sol";
 import { LibLock } from "../../../lib/domain/LibLock.sol";
 import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
 import { LibTokenTransfer } from "../../../lib/orchestrator/LibTokenTransfer.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract TransferAndLock is ITransferAndLock {
     function transferAndLockByPartition(
@@ -35,7 +36,7 @@ abstract contract TransferAndLock is ITransferAndLock {
             _data,
             msg.sender,
             "",
-            _getBlockTimestamp()
+            LibTimeTravel.getBlockTimestamp()
         );
 
         (success_, lockId_) = _lockByPartition(_partition, _amount, _to, _expirationTimestamp);
@@ -62,7 +63,7 @@ abstract contract TransferAndLock is ITransferAndLock {
             _data,
             msg.sender,
             "",
-            _getBlockTimestamp()
+            LibTimeTravel.getBlockTimestamp()
         );
 
         (success_, lockId_) = _lockByPartition(_DEFAULT_PARTITION, _amount, _to, _expirationTimestamp);
@@ -103,12 +104,8 @@ abstract contract TransferAndLock is ITransferAndLock {
     }
 
     function _checkValidExpirationTimestamp(uint256 _expirationTimestamp) internal view {
-        if (_expirationTimestamp <= _getBlockTimestamp()) {
+        if (_expirationTimestamp <= LibTimeTravel.getBlockTimestamp()) {
             revert LibLock.WrongExpirationTimestamp();
         }
-    }
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

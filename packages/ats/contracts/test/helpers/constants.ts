@@ -514,24 +514,6 @@ export const TEST_STANDARD_CONTRACTS = {
 } as const;
 
 // ============================================================================
-// Time Travel Variants
-// ============================================================================
-
-/**
- * TimeTravel variant names for testing.
- */
-export const TEST_TIME_TRAVEL_VARIANTS = {
-  /** AccessControlFacet TimeTravel variant */
-  ACCESS_CONTROL: "AccessControlFacetTimeTravel",
-
-  /** PauseFacet TimeTravel variant */
-  PAUSE: "PauseFacetTimeTravel",
-
-  /** Generic TimeTravel suffix */
-  SUFFIX: "TimeTravel",
-} as const;
-
-// ============================================================================
 // Generic Facet Names (for mock tests)
 // ============================================================================
 

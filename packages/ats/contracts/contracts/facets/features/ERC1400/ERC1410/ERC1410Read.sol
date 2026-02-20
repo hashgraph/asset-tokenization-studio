@@ -7,6 +7,7 @@ import { IERC1410Read } from "../../interfaces/ERC1400/IERC1410Read.sol";
 import { LibABAF } from "../../../../lib/domain/LibABAF.sol";
 import { LibERC1410 } from "../../../../lib/domain/LibERC1410.sol";
 import { LibERC1594 } from "../../../../lib/domain/LibERC1594.sol";
+import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract ERC1410Read is IERC1410Read {
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -14,7 +15,7 @@ abstract contract ERC1410Read is IERC1410Read {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function balanceOf(address _tokenHolder) external view returns (uint256) {
-        return LibABAF.balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp());
+        return LibABAF.balanceOfAdjustedAt(_tokenHolder, LibTimeTravel.getBlockTimestamp());
     }
 
     function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256) {
@@ -22,15 +23,15 @@ abstract contract ERC1410Read is IERC1410Read {
     }
 
     function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256) {
-        return LibABAF.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
+        return LibABAF.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, LibTimeTravel.getBlockTimestamp());
     }
 
     function totalSupply() external view returns (uint256) {
-        return LibABAF.totalSupplyAdjustedAt(_getBlockTimestamp());
+        return LibABAF.totalSupplyAdjustedAt(LibTimeTravel.getBlockTimestamp());
     }
 
     function totalSupplyByPartition(bytes32 _partition) external view returns (uint256) {
-        return LibABAF.totalSupplyByPartitionAdjustedAt(_partition, _getBlockTimestamp());
+        return LibABAF.totalSupplyByPartitionAdjustedAt(_partition, LibTimeTravel.getBlockTimestamp());
     }
 
     function partitionsOf(address _tokenHolder) external view returns (bytes32[] memory) {
@@ -55,7 +56,7 @@ abstract contract ERC1410Read is IERC1410Read {
             _to,
             _partition,
             _value,
-            _getBlockTimestamp()
+            LibTimeTravel.getBlockTimestamp()
         );
         return (status, statusCode, reason);
     }
@@ -72,7 +73,7 @@ abstract contract ERC1410Read is IERC1410Read {
             _from,
             _partition,
             _value,
-            _getBlockTimestamp()
+            LibTimeTravel.getBlockTimestamp()
         );
         return (status, code, reason);
     }
@@ -91,13 +92,5 @@ abstract contract ERC1410Read is IERC1410Read {
         address _tokenHolder
     ) public view returns (bool) {
         return LibERC1410.isOperatorForPartition(_partition, _operator, _tokenHolder);
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════════
-    // INTERNAL VIEW FUNCTIONS
-    // ═══════════════════════════════════════════════════════════════════════════════
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

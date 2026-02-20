@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Issuer } from "../../interfaces/ERC1400/IERC1410Issuer.sol";
-import { IControlListBase } from "../../interfaces/IControlList.sol";
+import { IControlListBase } from "../../interfaces/controlList/IControlListBase.sol";
 import { IssueData } from "../../interfaces/ERC1400/IERC1410.sol";
 import { LibPause } from "../../../../lib/core/LibPause.sol";
 import { LibCap } from "../../../../lib/core/LibCap.sol";
@@ -11,6 +11,7 @@ import { LibCompliance } from "../../../../lib/core/LibCompliance.sol";
 import { LibERC1410 } from "../../../../lib/domain/LibERC1410.sol";
 import { LibERC1594 } from "../../../../lib/domain/LibERC1594.sol";
 import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
+import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 import { _ISSUER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 
 abstract contract ERC1410Issuer is IERC1410Issuer, IControlListBase {
@@ -32,10 +33,6 @@ abstract contract ERC1410Issuer is IERC1410Issuer, IControlListBase {
             LibAccess.checkAnyRole(roles, msg.sender);
             LibCompliance.requireNotRecovered(msg.sender);
         }
-        LibTokenTransfer.issueByPartition(_issueData, _getBlockTimestamp());
-    }
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
+        LibTokenTransfer.issueByPartition(_issueData, LibTimeTravel.getBlockTimestamp());
     }
 }

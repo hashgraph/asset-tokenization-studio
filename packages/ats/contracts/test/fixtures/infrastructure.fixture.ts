@@ -25,7 +25,7 @@ import type { IFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-type
  *
  * Deploys: ProxyAdmin, BLR, Factory, all Facets, Equity & Bond configurations
  *
- * @param useTimeTravel - Use TimeTravel facet variants (default: true for tests)
+ * @param useTimeTravel - Include TimeTravelFacet for time manipulation in tests (default: true)
  * @returns Complete deployment output + test utilities including separated equity/bond facet addresses
  */
 export async function deployAtsInfrastructureFixture(

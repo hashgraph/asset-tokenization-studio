@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
 import { ControlList } from "./ControlList.sol";
-import { IControlList } from "../interfaces/IControlList.sol";
+import { IControlList } from "../interfaces/controlList/IControlList.sol";
 import { _CONTROL_LIST_RESOLVER_KEY } from "../../../constants/resolverKeys/features.sol";
 
 /**

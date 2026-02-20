@@ -6,7 +6,7 @@
  * Orchestrates the deployment of the entire Asset Tokenization Studio infrastructure:
  * - ProxyAdmin for upgrade management
  * - BusinessLogicResolver (BLR) with proxy
- * - All facets (46 total, with optional TimeTravel variants)
+ * - All facets (46 total, with optional TimeTravelFacet inclusion)
  * - Facet registration in BLR
  * - Equity and Bond configurations
  * - Factory contract with proxy
@@ -63,7 +63,7 @@ import { shouldFailAtStep, createTestFailureMessage } from "../infrastructure/te
  * Options for complete system deployment.
  */
 export interface DeploySystemWithNewBlrOptions extends ResumeOptions {
-  /** Whether to use TimeTravel variants for facets */
+  /** Whether to include TimeTravelFacet in deployment */
   useTimeTravel?: boolean;
 
   /** Whether to save deployment output to file */
@@ -345,8 +345,8 @@ export async function deploySystemWithNewBlr(
           throw new Error(`No factory found for facet: ${facet.name}`);
         }
 
-        // Get factory (regular or TimeTravel variant based on useTimeTravel flag)
-        const factory = facet.factory(signer, useTimeTravel);
+        // Get factory
+        const factory = facet.factory(signer);
         // Use the actual contract name from the factory
         const contractName = factory.constructor.name.replace("__factory", "");
 

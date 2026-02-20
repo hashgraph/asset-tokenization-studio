@@ -4,11 +4,11 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
-  ProceedRecipientsKpiLinkedRateFacetTimeTravel,
+  ProceedRecipientsKpiLinkedRateFacet,
   ResolverProxy,
   IAccessControl,
-  BondUSAKpiLinkedRateFacetTimeTravel,
-  ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
+  BondUSAKpiLinkedRateFacet,
+  ScheduledCrossOrderedTasksKpiLinkedRateFacet,
   TimeTravelFacet,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
@@ -23,10 +23,10 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   let signer_A: HardhatEthersSigner;
 
   let diamond: ResolverProxy;
-  let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
+  let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacet;
   let accessControlFacet: IAccessControl;
-  let bondKpiLinkedRateFacet: BondUSAKpiLinkedRateFacetTimeTravel;
-  let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel;
+  let bondKpiLinkedRateFacet: BondUSAKpiLinkedRateFacet;
+  let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacet;
   let timeTravelFacet: TimeTravelFacet;
 
   let couponData = {
@@ -47,18 +47,14 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
     signer_A = base.deployer;
 
     proceedRecipientsFacet = await ethers.getContractAt(
-      "ProceedRecipientsKpiLinkedRateFacetTimeTravel",
+      "ProceedRecipientsKpiLinkedRateFacet",
       diamond.target,
       signer_A,
     );
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    bondKpiLinkedRateFacet = await ethers.getContractAt(
-      "BondUSAKpiLinkedRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
+    bondKpiLinkedRateFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacet", diamond.target, signer_A);
     scheduledTasksFacet = await ethers.getContractAt(
-      "ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel",
+      "ScheduledCrossOrderedTasksKpiLinkedRateFacet",
       diamond.target,
       signer_A,
     );

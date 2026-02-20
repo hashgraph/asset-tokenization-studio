@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /**
- * Unit tests for atsRegistry.data.ts factory functions.
+ * Unit tests for atsRegistry.data.ts factory functions and registry helpers.
  *
- * Tests the TimeTravel factory branch which is otherwise untested.
- * This achieves 100% coverage on the atsRegistry.data.ts file by
- * dynamically testing all facets that have TimeTravel variants.
+ * Tests factory branches for all registered facets and validates registry
+ * helper functions for facets, contracts, and storage wrappers.
  *
  * @module test/scripts/unit/domain/atsRegistry.data.test
  */
@@ -29,12 +28,15 @@ import {
   STORAGE_WRAPPER_REGISTRY_COUNT,
   atsRegistry,
 } from "@scripts/domain";
+import { TEST_STANDARD_CONTRACTS, TEST_CONTRACT_NAMES, TEST_FACET_NAMES } from "@test";
+
+/**
+ * Minimum expected facet count after library-based diamond consolidation.
+ * Post-migration registry has ~64 facets (down from ~186 pre-migration).
+ */
+const MIN_EXPECTED_FACETS = 50;
 
 describe("atsRegistry.data - Factory Functions", () => {
-  /**
-   * Get all facet names from the registry that have factory functions.
-   * This ensures comprehensive coverage of all factory branches.
-   */
   const facetNames = Object.keys(FACET_REGISTRY);
 
   // Cache signer to avoid repeated Hardhat network bootstrap (saves ~4+ seconds)
@@ -44,66 +46,20 @@ describe("atsRegistry.data - Factory Functions", () => {
     [signer] = await ethers.getSigners();
   });
 
-  describe("TimeTravel factory branches (comprehensive)", () => {
+  describe("Factory branches (comprehensive)", () => {
     facetNames.forEach((facetName) => {
       const facet = FACET_REGISTRY[facetName as keyof typeof FACET_REGISTRY];
 
-      // Only test facets that have a factory function
       if (typeof facet.factory === "function") {
-        it(`should create TimeTravel factory for ${facetName}`, () => {
+        it(`should create factory for ${facetName}`, () => {
           expect(facet).to.not.be.undefined;
           expect(facet.factory).to.be.a("function");
 
-          // Test TimeTravel factory (useTimeTravel = true)
-          // This exercises the uncovered branch
-          const timeTravelFactory = facet.factory!(signer, true);
-          expect(timeTravelFactory).to.not.be.undefined;
-          expect(timeTravelFactory).to.have.property("deploy");
+          const factory = facet.factory!(signer);
+          expect(factory).to.not.be.undefined;
+          expect(factory).to.have.property("deploy");
         });
       }
-    });
-  });
-
-  describe("Normal factory branches (comprehensive)", () => {
-    facetNames.forEach((facetName) => {
-      const facet = FACET_REGISTRY[facetName as keyof typeof FACET_REGISTRY];
-
-      // Only test facets that have a factory function
-      if (typeof facet.factory === "function") {
-        it(`should create normal factory for ${facetName}`, () => {
-          expect(facet).to.not.be.undefined;
-          expect(facet.factory).to.be.a("function");
-
-          // Test normal factory (useTimeTravel = false)
-          const normalFactory = facet.factory!(signer, false);
-          expect(normalFactory).to.not.be.undefined;
-          expect(normalFactory).to.have.property("deploy");
-        });
-      }
-    });
-  });
-
-  describe("Factory default parameter behavior", () => {
-    it("should default to normal factory when useTimeTravel is omitted", () => {
-      // Find any facet with a factory function
-      const facetWithFactory = facetNames.find((name) => {
-        const facet = FACET_REGISTRY[name as keyof typeof FACET_REGISTRY];
-        return typeof facet.factory === "function";
-      });
-
-      expect(facetWithFactory).to.not.be.undefined;
-
-      const facet = FACET_REGISTRY[facetWithFactory as keyof typeof FACET_REGISTRY];
-
-      // Without second parameter - should use normal factory
-      const defaultFactory = facet.factory!(signer);
-      const normalFactory = facet.factory!(signer, false);
-
-      // Both should be the same type of factory
-      expect(defaultFactory).to.not.be.undefined;
-      expect(normalFactory).to.not.be.undefined;
-      expect(defaultFactory).to.have.property("deploy");
-      expect(normalFactory).to.have.property("deploy");
     });
   });
 
@@ -114,8 +70,7 @@ describe("atsRegistry.data - Factory Functions", () => {
         return typeof facet.factory === "function";
       });
 
-      // Verify we have a significant number of facets (adjust as registry grows)
-      expect(facetsWithFactory.length).to.be.greaterThan(150);
+      expect(facetsWithFactory.length).to.be.greaterThan(MIN_EXPECTED_FACETS);
     });
 
     it("should have matching facet names in factory entries", () => {
@@ -134,29 +89,29 @@ describe("atsRegistry.data - Factory Functions", () => {
 describe("atsRegistry - Registry Helper Functions", () => {
   describe("Facet registry helpers", () => {
     it("getFacetDefinition should return a valid facet definition", () => {
-      const facet = getFacetDefinition("AccessControlFacet");
+      const facet = getFacetDefinition(TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET);
       expect(facet).to.not.be.undefined;
-      expect(facet!.name).to.equal("AccessControlFacet");
+      expect(facet!.name).to.equal(TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET);
       expect(facet!.methods).to.be.an("array");
     });
 
     it("getFacetDefinition should return undefined for non-existent facet", () => {
-      const facet = getFacetDefinition("NonExistentFacet");
+      const facet = getFacetDefinition(TEST_FACET_NAMES.NON_EXISTENT);
       expect(facet).to.be.undefined;
     });
 
     it("getAllFacets should return all facets", () => {
       const facets = getAllFacets();
       expect(facets).to.be.an("array");
-      expect(facets.length).to.be.greaterThan(100);
+      expect(facets.length).to.be.greaterThan(MIN_EXPECTED_FACETS);
     });
 
     it("hasFacet should return true for existing facet", () => {
-      expect(hasFacet("AccessControlFacet")).to.be.true;
+      expect(hasFacet(TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET)).to.be.true;
     });
 
     it("hasFacet should return false for non-existent facet", () => {
-      expect(hasFacet("NonExistentFacet")).to.be.false;
+      expect(hasFacet(TEST_FACET_NAMES.NON_EXISTENT)).to.be.false;
     });
 
     it("FACET_REGISTRY_COUNT should match actual count", () => {
@@ -167,13 +122,13 @@ describe("atsRegistry - Registry Helper Functions", () => {
 
   describe("Contract registry helpers", () => {
     it("getContractDefinition should return a valid contract definition", () => {
-      const contract = getContractDefinition("BusinessLogicResolver");
+      const contract = getContractDefinition(TEST_CONTRACT_NAMES.BLR);
       expect(contract).to.not.be.undefined;
-      expect(contract!.name).to.equal("BusinessLogicResolver");
+      expect(contract!.name).to.equal(TEST_CONTRACT_NAMES.BLR);
     });
 
     it("getContractDefinition should return undefined for non-existent contract", () => {
-      const contract = getContractDefinition("NonExistentContract");
+      const contract = getContractDefinition(TEST_CONTRACT_NAMES.NON_EXISTENT);
       expect(contract).to.be.undefined;
     });
 
@@ -184,38 +139,37 @@ describe("atsRegistry - Registry Helper Functions", () => {
     });
 
     it("hasContract should return true for existing contract", () => {
-      expect(hasContract("BusinessLogicResolver")).to.be.true;
+      expect(hasContract(TEST_CONTRACT_NAMES.BLR)).to.be.true;
     });
 
     it("hasContract should return false for non-existent contract", () => {
-      expect(hasContract("NonExistentContract")).to.be.false;
+      expect(hasContract(TEST_CONTRACT_NAMES.NON_EXISTENT)).to.be.false;
     });
   });
 
   describe("Storage wrapper registry helpers", () => {
-    it("getStorageWrapperDefinition should return a valid wrapper definition", () => {
+    it("getStorageWrapperDefinition should return undefined (storage wrappers removed in migration)", () => {
       const wrapper = getStorageWrapperDefinition("IAccessControlStorageWrapper");
-      expect(wrapper).to.not.be.undefined;
-      expect(wrapper!.name).to.equal("IAccessControlStorageWrapper");
-    });
-
-    it("getStorageWrapperDefinition should return undefined for non-existent wrapper", () => {
-      const wrapper = getStorageWrapperDefinition("NonExistentWrapper");
       expect(wrapper).to.be.undefined;
     });
 
-    it("getAllStorageWrappers should return all wrappers", () => {
-      const wrappers = getAllStorageWrappers();
-      expect(wrappers).to.be.an("array");
-      expect(wrappers.length).to.be.greaterThan(0);
+    it("getStorageWrapperDefinition should return undefined for non-existent wrapper", () => {
+      const wrapper = getStorageWrapperDefinition(TEST_FACET_NAMES.NON_EXISTENT);
+      expect(wrapper).to.be.undefined;
     });
 
-    it("hasStorageWrapper should return true for existing wrapper", () => {
-      expect(hasStorageWrapper("IAccessControlStorageWrapper")).to.be.true;
+    it("getAllStorageWrappers should return empty array (storage wrappers removed in migration)", () => {
+      const wrappers = getAllStorageWrappers();
+      expect(wrappers).to.be.an("array");
+      expect(wrappers.length).to.equal(0);
+    });
+
+    it("hasStorageWrapper should return false (storage wrappers removed in migration)", () => {
+      expect(hasStorageWrapper("IAccessControlStorageWrapper")).to.be.false;
     });
 
     it("hasStorageWrapper should return false for non-existent wrapper", () => {
-      expect(hasStorageWrapper("NonExistentWrapper")).to.be.false;
+      expect(hasStorageWrapper(TEST_FACET_NAMES.NON_EXISTENT)).to.be.false;
     });
 
     it("STORAGE_WRAPPER_REGISTRY_COUNT should match actual count", () => {
@@ -227,7 +181,7 @@ describe("atsRegistry - Registry Helper Functions", () => {
   describe("atsRegistry provider object", () => {
     it("should have getFacetDefinition method", () => {
       expect(atsRegistry.getFacetDefinition).to.be.a("function");
-      const facet = atsRegistry.getFacetDefinition("AccessControlFacet");
+      const facet = atsRegistry.getFacetDefinition(TEST_STANDARD_CONTRACTS.ACCESS_CONTROL_FACET);
       expect(facet).to.not.be.undefined;
     });
 
@@ -235,7 +189,7 @@ describe("atsRegistry - Registry Helper Functions", () => {
       expect(atsRegistry.getAllFacets).to.be.a("function");
       const facets = atsRegistry.getAllFacets();
       expect(facets).to.be.an("array");
-      expect(facets.length).to.be.greaterThan(100);
+      expect(facets.length).to.be.greaterThan(MIN_EXPECTED_FACETS);
     });
   });
 
@@ -252,9 +206,9 @@ describe("atsRegistry - Registry Helper Functions", () => {
   });
 
   describe("STORAGE_WRAPPER_REGISTRY constant", () => {
-    it("should have defined storage wrappers", () => {
+    it("should be an empty object (storage wrappers removed in migration)", () => {
       expect(STORAGE_WRAPPER_REGISTRY).to.be.an("object");
-      expect(Object.keys(STORAGE_WRAPPER_REGISTRY).length).to.be.greaterThan(0);
+      expect(Object.keys(STORAGE_WRAPPER_REGISTRY).length).to.equal(0);
     });
   });
 });

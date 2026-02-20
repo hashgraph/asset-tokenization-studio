@@ -19,6 +19,7 @@ import { LibLock } from "../../../lib/domain/LibLock.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibTokenTransfer } from "../../../lib/orchestrator/LibTokenTransfer.sol";
 import { LibResolverProxy } from "../../../infrastructure/proxy/LibResolverProxy.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract ERC3643Management is IERC3643Management {
     error AlreadyInitialized();
@@ -92,7 +93,7 @@ abstract contract ERC3643Management is IERC3643Management {
         if (!_canRecover(_lostWallet)) revert CannotRecoverWallet();
         LibERC1410.checkWithoutMultiPartition();
 
-        uint256 timestamp = _getBlockTimestamp();
+        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
         uint256 frozenBalance = LibFreeze.getFrozenAmountAdjustedAt(_lostWallet, timestamp);
 
         if (frozenBalance > 0) {
@@ -117,10 +118,6 @@ abstract contract ERC3643Management is IERC3643Management {
 
         emit RecoverySuccess(_lostWallet, _newWallet, _investorOnchainID);
         success_ = true;
-    }
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 
     // ════════════════════════════════════════════════════════════════════════════════════

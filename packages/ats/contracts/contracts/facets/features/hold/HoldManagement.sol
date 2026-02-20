@@ -13,6 +13,7 @@ import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibERC1644 } from "../../../lib/domain/LibERC1644.sol";
 import { LibHoldOps } from "../../../lib/orchestrator/LibHoldOps.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 import { _CONTROLLER_ROLE } from "../../../constants/roles.sol";
 
 abstract contract HoldManagement is IHoldManagement {
@@ -28,7 +29,7 @@ abstract contract HoldManagement is IHoldManagement {
         LibERC1410.requireValidAddress(_hold.escrow);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
         LibERC1410.checkOperator(_partition, msg.sender, _from);
-        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
+        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, LibTimeTravel.getBlockTimestamp());
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
         LibCompliance.requireNotRecovered(msg.sender);
         LibCompliance.requireNotRecovered(_hold.to);
@@ -56,7 +57,7 @@ abstract contract HoldManagement is IHoldManagement {
         LibERC1410.requireValidAddress(_hold.escrow);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
         LibAccess.checkRole(_CONTROLLER_ROLE, msg.sender);
-        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
+        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, LibTimeTravel.getBlockTimestamp());
         LibERC1644.checkControllable();
 
         (success_, holdId_) = LibHoldOps.createHoldByPartition(
@@ -83,7 +84,10 @@ abstract contract HoldManagement is IHoldManagement {
         LibCompliance.requireNotRecovered(_from);
         LibCompliance.requireNotRecovered(_protectedHold.hold.to);
         LibAccess.checkRole(LibProtectedPartitions.protectedPartitionsRole(_partition), msg.sender);
-        LibHoldOps.checkValidExpirationTimestamp(_protectedHold.hold.expirationTimestamp, _getBlockTimestamp());
+        LibHoldOps.checkValidExpirationTimestamp(
+            _protectedHold.hold.expirationTimestamp,
+            LibTimeTravel.getBlockTimestamp()
+        );
         LibProtectedPartitions.requireProtectedPartitions();
 
         (success_, holdId_) = LibHoldOps.protectedCreateHoldByPartition(
@@ -91,17 +95,9 @@ abstract contract HoldManagement is IHoldManagement {
             _from,
             _protectedHold,
             _signature,
-            _getBlockTimestamp()
+            LibTimeTravel.getBlockTimestamp()
         );
 
         emit ProtectedHeldByPartition(msg.sender, _from, _partition, holdId_, _protectedHold.hold, "");
-    }
-
-    // ════════════════════════════════════════════════════════════════════════════════════
-    // INTERNAL VIRTUAL
-    // ════════════════════════════════════════════════════════════════════════════════════
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

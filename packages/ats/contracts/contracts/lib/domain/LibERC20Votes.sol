@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { LibCheckpoints } from "../../infrastructure/lib/LibCheckpoints.sol";
 import { ERC20VotesStorage, erc20VotesStorage } from "../../storage/TokenStorage.sol";
 import { IERC20Votes } from "../../facets/features/interfaces/ERC1400/IERC20Votes.sol";
+import { LibTimeTravel } from "../../test/timeTravel/LibTimeTravel.sol";
 
 /// @title LibERC20Votes
 /// @notice Leaf library for ERC20Votes delegation and checkpoint functionality
@@ -14,10 +15,6 @@ library LibERC20Votes {
     // ═══════════════════════════════════════════════════════════════════════════════
     // STATE VARIABLES
     // ═══════════════════════════════════════════════════════════════════════════════
-
-    /// @notice Well-known storage slot for block number override (used by TimeTravel in tests).
-    ///         In production, this slot is always 0 so block.number is used.
-    bytes32 private constant _BLOCK_NUMBER_OVERRIDE_SLOT = keccak256("io.builders.ats.testing.blocknumber.override");
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // EVENTS
@@ -77,13 +74,15 @@ library LibERC20Votes {
         uint256 pos = votes.abafCheckpoints.length;
 
         if (pos != 0)
-            if (votes.abafCheckpoints[pos - 1].from == _blockNumber()) {
+            if (votes.abafCheckpoints[pos - 1].from == LibTimeTravel.getBlockNumber()) {
                 if (votes.abafCheckpoints[pos - 1].value != currentAbaf)
-                    revert IERC20Votes.AbafChangeForBlockForbidden(_blockNumber());
+                    revert IERC20Votes.AbafChangeForBlockForbidden(LibTimeTravel.getBlockNumber());
                 return;
             }
 
-        votes.abafCheckpoints.push(LibCheckpoints.Checkpoint({ from: _blockNumber(), value: currentAbaf }));
+        votes.abafCheckpoints.push(
+            LibCheckpoints.Checkpoint({ from: LibTimeTravel.getBlockNumber(), value: currentAbaf })
+        );
     }
 
     /// @notice Sets delegate and emits DelegateChanged event
@@ -156,13 +155,6 @@ library LibERC20Votes {
         return erc20VotesStorage().initialized;
     }
 
-    /// @notice Gets the current (or overridden) block number
-    /// @dev Exposes _blockNumber() for use by FacetBases (e.g., clock() function)
-    /// @return The current block number
-    function getBlockNumber() internal view returns (uint256) {
-        return _blockNumber();
-    }
-
     /// @notice Internal delegation logic
     /// @param delegator The account performing the delegation
     /// @param delegatee The account to delegate to
@@ -205,13 +197,13 @@ library LibERC20Votes {
         unchecked {
             LibCheckpoints.Checkpoint memory oldCkpt = pos == 0 ? LibCheckpoints.Checkpoint(0, 0) : ckpts[pos - 1];
 
-            oldWeight = oldCkpt.value * _calculateFactorBetween(oldCkpt.from, _blockNumber());
+            oldWeight = oldCkpt.value * _calculateFactorBetween(oldCkpt.from, LibTimeTravel.getBlockNumber());
             newWeight = op(oldWeight, delta);
 
-            if (pos > 0 && oldCkpt.from == _blockNumber()) {
+            if (pos > 0 && oldCkpt.from == LibTimeTravel.getBlockNumber()) {
                 ckpts[pos - 1].value = newWeight;
             } else {
-                ckpts.push(LibCheckpoints.Checkpoint({ from: _blockNumber(), value: newWeight }));
+                ckpts.push(LibCheckpoints.Checkpoint({ from: LibTimeTravel.getBlockNumber(), value: newWeight }));
             }
         }
     }
@@ -224,7 +216,7 @@ library LibERC20Votes {
     /// @param account The account to query
     /// @return The current voting power
     function _getVotes(address account) private view returns (uint256) {
-        return _getVotesAdjustedAt(_blockNumber(), erc20VotesStorage().checkpoints[account]);
+        return _getVotesAdjustedAt(LibTimeTravel.getBlockNumber(), erc20VotesStorage().checkpoints[account]);
     }
 
     /// @notice Gets the voting power at a past block
@@ -232,7 +224,7 @@ library LibERC20Votes {
     /// @param timepoint The block number to query
     /// @return The voting power at the specified block
     function _getPastVotes(address account, uint256 timepoint) private view returns (uint256) {
-        uint256 currentBlock = _blockNumber();
+        uint256 currentBlock = LibTimeTravel.getBlockNumber();
         if (timepoint >= currentBlock) revert IERC20Votes.ERC20VotesFutureLookup(timepoint, currentBlock);
         return _getVotesAdjustedAt(timepoint, erc20VotesStorage().checkpoints[account]);
     }
@@ -241,7 +233,7 @@ library LibERC20Votes {
     /// @param timepoint The block number to query
     /// @return The total voting power at the specified block
     function _getPastTotalSupply(uint256 timepoint) private view returns (uint256) {
-        uint256 currentBlock = _blockNumber();
+        uint256 currentBlock = LibTimeTravel.getBlockNumber();
         if (timepoint >= currentBlock) revert IERC20Votes.ERC20VotesFutureLookup(timepoint, currentBlock);
         return _getVotesAdjustedAt(timepoint, erc20VotesStorage().totalSupplyCheckpoints);
     }
@@ -271,21 +263,6 @@ library LibERC20Votes {
         if (abafAtBlockFrom == 0) return 1;
 
         return abafAtBlockTo / abafAtBlockFrom;
-    }
-
-    /// @notice Gets the current block number, with optional test override
-    /// @dev Reads from a well-known storage slot. In production, the slot is 0 and
-    ///      block.number is returned. In tests, TimeTravel writes to this slot to
-    ///      override the block number for checkpoint operations.
-    /// @return The current (or overridden) block number
-    function _blockNumber() private view returns (uint256) {
-        uint256 override_;
-        bytes32 slot = _BLOCK_NUMBER_OVERRIDE_SLOT;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            override_ := sload(slot)
-        }
-        return override_ == 0 ? block.number : override_;
     }
 
     /// @notice Adds two numbers

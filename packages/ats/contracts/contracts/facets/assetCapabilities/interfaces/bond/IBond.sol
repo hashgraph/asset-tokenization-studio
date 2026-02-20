@@ -12,6 +12,12 @@ interface IBond {
      */
     event CouponSet(bytes32 corporateActionId, uint256 couponId, address indexed operator, IBondRead.Coupon coupon);
 
+    event MaturityDateUpdated(
+        address indexed bondId,
+        uint256 indexed maturityDate,
+        uint256 indexed previousMaturityDate
+    );
+
     /**
      * @notice Coupon creation failed due to an internal failure.
      */
@@ -21,12 +27,6 @@ interface IBond {
      * @notice Provided maturity date is invalid (e.g. in the past or before issuance).
      */
     error BondMaturityDateWrong();
-
-    event MaturityDateUpdated(
-        address indexed bondId,
-        uint256 indexed maturityDate,
-        uint256 indexed previousMaturityDate
-    );
 
     /**
      * @notice Redeems all bonds at maturity from a token holder (all partitions considered)

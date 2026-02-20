@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1644, IERC1644Base } from "../../interfaces/ERC1400/IERC1644.sol";
-import { IControlListBase } from "../../interfaces/IControlList.sol";
+import { IERC1644 } from "../../interfaces/ERC1400/IERC1644.sol";
+import { IERC1644Base } from "../../interfaces/ERC1400/IERC1644Base.sol";
+import { IControlListBase } from "../../interfaces/controlList/IControlListBase.sol";
 import { LibPause } from "../../../../lib/core/LibPause.sol";
 import { LibAccess } from "../../../../lib/core/LibAccess.sol";
 import { LibERC1410 } from "../../../../lib/domain/LibERC1410.sol";
 import { LibERC1644 } from "../../../../lib/domain/LibERC1644.sol";
 import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
+import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 
 abstract contract ERC1644 is IERC1644, IControlListBase {
@@ -35,7 +37,7 @@ abstract contract ERC1644 is IERC1644, IControlListBase {
             roles[1] = _AGENT_ROLE;
             LibAccess.checkAnyRole(roles, msg.sender);
         }
-        LibTokenTransfer.transfer(_from, _to, _value, _getBlockTimestamp());
+        LibTokenTransfer.transfer(_from, _to, _value, LibTimeTravel.getBlockTimestamp());
         emit IERC1644Base.ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
     }
 
@@ -54,7 +56,7 @@ abstract contract ERC1644 is IERC1644, IControlListBase {
             roles[1] = _AGENT_ROLE;
             LibAccess.checkAnyRole(roles, msg.sender);
         }
-        LibTokenTransfer.burn(_tokenHolder, _value, _getBlockTimestamp());
+        LibTokenTransfer.burn(_tokenHolder, _value, LibTimeTravel.getBlockTimestamp());
         emit IERC1644Base.ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 
@@ -66,9 +68,5 @@ abstract contract ERC1644 is IERC1644, IControlListBase {
 
     function isControllable() external view override returns (bool) {
         return LibERC1644.isControllable();
-    }
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

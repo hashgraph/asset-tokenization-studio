@@ -13,6 +13,7 @@ import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibERC1594 } from "../../../lib/domain/LibERC1594.sol";
 import { LibHold } from "../../../lib/domain/LibHold.sol";
 import { LibHoldOps } from "../../../lib/orchestrator/LibHoldOps.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract HoldTokenHolder is IHoldTokenHolder {
     function createHoldByPartition(
@@ -24,7 +25,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibCompliance.requireNotRecovered(msg.sender);
         LibCompliance.requireNotRecovered(_hold.to);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
-        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
+        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, LibTimeTravel.getBlockTimestamp());
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
         if (LibClearing.isClearingActivated()) revert IClearing.ClearingIsActivated();
 
@@ -44,7 +45,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibERC1410.requireValidAddress(_from);
         LibERC1410.requireValidAddress(_hold.escrow);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
-        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
+        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, LibTimeTravel.getBlockTimestamp());
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
         LibCompliance.requireNotRecovered(msg.sender);
         LibCompliance.requireNotRecovered(_hold.to);
@@ -74,7 +75,12 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibERC1594.checkCompliance(msg.sender, address(0), _to, false);
         LibHold.validateHoldId(_holdIdentifier);
 
-        (success_, partition_) = LibHoldOps.executeHoldByPartition(_holdIdentifier, _to, _amount, _getBlockTimestamp());
+        (success_, partition_) = LibHoldOps.executeHoldByPartition(
+            _holdIdentifier,
+            _to,
+            _amount,
+            LibTimeTravel.getBlockTimestamp()
+        );
 
         emit HoldByPartitionExecuted(
             _holdIdentifier.tokenHolder,
@@ -93,7 +99,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibERC1410.checkDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
         LibHold.validateHoldId(_holdIdentifier);
 
-        success_ = LibHoldOps.releaseHoldByPartition(_holdIdentifier, _amount, _getBlockTimestamp());
+        success_ = LibHoldOps.releaseHoldByPartition(_holdIdentifier, _amount, LibTimeTravel.getBlockTimestamp());
 
         emit HoldByPartitionReleased(
             _holdIdentifier.tokenHolder,
@@ -109,7 +115,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibHold.validateHoldId(_holdIdentifier);
 
         uint256 amount;
-        (success_, amount) = LibHoldOps.reclaimHoldByPartition(_holdIdentifier, _getBlockTimestamp());
+        (success_, amount) = LibHoldOps.reclaimHoldByPartition(_holdIdentifier, LibTimeTravel.getBlockTimestamp());
 
         emit HoldByPartitionReclaimed(
             msg.sender,
@@ -118,13 +124,5 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
             _holdIdentifier.holdId,
             amount
         );
-    }
-
-    // ════════════════════════════════════════════════════════════════════════════════════
-    // INTERNAL VIRTUAL
-    // ════════════════════════════════════════════════════════════════════════════════════
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

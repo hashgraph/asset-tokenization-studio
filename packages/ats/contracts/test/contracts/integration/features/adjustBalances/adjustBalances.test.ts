@@ -79,7 +79,7 @@ describe("Adjust Balances Tests", () => {
 
     equityFacet = await ethers.getContractAt("IEquityUSA", diamond.target);
 
-    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacetTimeTravel", diamond.target);
+    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacet", diamond.target);
 
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
 

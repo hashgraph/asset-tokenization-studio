@@ -24,11 +24,6 @@ import {
   deployBlr,
   deployProxyAdmin,
   deployFacets,
-  getTimeTravelVariant,
-  hasTimeTravelVariant,
-  resolveContractName,
-  getBaseContractName,
-  isTimeTravelVariant,
   validateAddress,
   validateBytes32,
 } from "@scripts/infrastructure";
@@ -50,7 +45,6 @@ import { TEST_SIZES, BLR_VERSIONS, silenceScriptLogging } from "@test";
 import {
   ProxyAdmin__factory,
   AccessControlFacet__factory,
-  AccessControlFacetTimeTravel__factory,
   BusinessLogicResolver__factory,
   KycFacet__factory,
   Factory__factory,
@@ -66,44 +60,6 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
 
   beforeEach(async () => {
     [deployer, user] = await ethers.getSigners();
-  });
-
-  describe("Utilities - Naming", () => {
-    it("should generate TimeTravel variant names correctly", () => {
-      expect(getTimeTravelVariant("AccessControlFacet")).to.equal("AccessControlFacetTimeTravel");
-      expect(getTimeTravelVariant("KycFacet")).to.equal("KycFacetTimeTravel");
-      expect(getTimeTravelVariant("ERC20Facet")).to.equal("ERC20FacetTimeTravel");
-    });
-
-    it("should detect TimeTravel variant availability from registry", () => {
-      expect(hasTimeTravelVariant("AccessControlFacet")).to.be.true;
-      expect(hasTimeTravelVariant("KycFacet")).to.be.true;
-      expect(hasTimeTravelVariant("PauseFacet")).to.be.true;
-    });
-
-    it("should resolve contract names based on useTimeTravel flag", () => {
-      // Standard mode
-      expect(resolveContractName("AccessControlFacet", false)).to.equal("AccessControlFacet");
-
-      // TimeTravel mode with variant available
-      expect(resolveContractName("AccessControlFacet", true)).to.equal("AccessControlFacetTimeTravel");
-
-      // TimeTravel mode but no variant (should return base name)
-      expect(resolveContractName("ProxyAdmin", true)).to.equal("ProxyAdmin");
-    });
-
-    it("should extract base contract name from TimeTravel variant", () => {
-      expect(getBaseContractName("AccessControlFacetTimeTravel")).to.equal("AccessControlFacet");
-      expect(getBaseContractName("KycFacetTimeTravel")).to.equal("KycFacet");
-      expect(getBaseContractName("AccessControlFacet")).to.equal("AccessControlFacet");
-    });
-
-    it("should detect if contract name is TimeTravel variant", () => {
-      expect(isTimeTravelVariant("AccessControlFacetTimeTravel")).to.be.true;
-      expect(isTimeTravelVariant("KycFacetTimeTravel")).to.be.true;
-      expect(isTimeTravelVariant("AccessControlFacet")).to.be.false;
-      expect(isTimeTravelVariant("ProxyAdmin")).to.be.false;
-    });
   });
 
   describe("Utilities - Validation", () => {
@@ -188,15 +144,6 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
       expect(result.blockNumber).to.be.greaterThan(0);
       expect(result.gasUsed).to.be.greaterThan(0);
       expect(result.error).to.not.exist;
-    });
-
-    it("should deploy TimeTravel variant when specified", async () => {
-      const factory = new AccessControlFacetTimeTravel__factory(deployer);
-      const result = await deployContract(factory, {});
-
-      expect(result.success).to.be.true;
-      expect(result.contract).to.exist;
-      expect(result.address).to.match(/^0x[a-fA-F0-9]{40}$/);
     });
 
     it("should deploy regular facet successfully", async () => {
@@ -463,47 +410,6 @@ describe("Phase 1 Deployment System - Integration Tests", () => {
         existingProxyAdmin: proxyAdminResult.contract as unknown as ProxyAdmin,
       });
       expect(factoryResult.proxyAddress).to.match(/^0x[a-fA-F0-9]{40}$/);
-    });
-
-    it("should handle TimeTravel deployment workflow", async () => {
-      // Deploy all facets in TimeTravel mode
-      const facets = [
-        {
-          name: "AccessControlFacet",
-          factory: new AccessControlFacetTimeTravel__factory(deployer),
-        },
-        { name: "KycFacet", factory: new KycFacet__factory(deployer) }, // Note: KycFacet doesn't have TimeTravel variant
-      ];
-      const facetResults: Record<string, string> = {};
-
-      for (const { name, factory } of facets) {
-        const result = await deployContract(factory, {});
-        expect(result.success).to.be.true;
-        facetResults[name] = result.address!;
-      }
-
-      // Deploy BLR
-      const blrImplementationFactory = new BusinessLogicResolver__factory(deployer);
-      const blrResult = await deployProxy(deployer, {
-        implementationFactory: blrImplementationFactory,
-      });
-
-      // Initialize BLR
-      const blr = BusinessLogicResolver__factory.connect(blrResult.proxyAddress, deployer);
-      await blr.initialize_BusinessLogicResolver();
-
-      // Register TimeTravel facets (using base names as keys)
-      const facetsWithKeys = facets.map(({ name }) => ({
-        name,
-        address: facetResults[name],
-        resolverKey: atsRegistry.getFacetDefinition(name)!.resolverKey!.value,
-      }));
-      const registerResult = await registerFacets(blr, {
-        facets: facetsWithKeys,
-      });
-
-      expect(registerResult.success).to.be.true;
-      expect(registerResult.registered.length).to.equal(TEST_SIZES.DUAL);
     });
   });
 

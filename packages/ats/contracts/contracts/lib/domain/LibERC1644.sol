@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1644Storage, erc1644Storage } from "../../storage/TokenStorage.sol";
-import { IERC1644Base } from "../../facets/features/interfaces/ERC1400/IERC1644.sol";
+import { IERC1644Base } from "../../facets/features/interfaces/ERC1400/IERC1644Base.sol";
 
 /// @title LibERC1644
 /// @notice Library for ERC1644 controller feature management

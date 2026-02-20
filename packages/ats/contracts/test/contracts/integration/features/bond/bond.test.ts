@@ -146,8 +146,8 @@ describe("Bond Tests", () => {
       },
     ]);
 
-    bondFacet = await ethers.getContractAt("BondUSAFacetTimeTravel", diamond.target, signer_A);
-    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.target, signer_A);
+    bondFacet = await ethers.getContractAt("BondUSAFacet", diamond.target, signer_A);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target, signer_A);
 
     accessControlFacet = await ethers.getContractAt("IAccessControl", diamond.target, signer_A);
     pauseFacet = await ethers.getContractAt("IPause", diamond.target, signer_A);

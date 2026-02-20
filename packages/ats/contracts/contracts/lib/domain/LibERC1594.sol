@@ -9,7 +9,7 @@ import { IKyc } from "../../facets/features/interfaces/IKyc.sol";
 import { IPause } from "../../facets/features/interfaces/IPause.sol";
 import { IERC1410 } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
 import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
-import { IControlListBase } from "../../facets/features/interfaces/IControlList.sol";
+import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
 import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";

@@ -23,6 +23,7 @@ import { LibPause } from "../../../../lib/core/LibPause.sol";
 import { LibAccess } from "../../../../lib/core/LibAccess.sol";
 import { LibCorporateActions } from "../../../../lib/core/LibCorporateActions.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../../../constants/roles.sol";
+import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 
 contract BondUSASustainabilityPerformanceTargetRateFacet is BondUSA, IStaticFunctionSelectors {
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -69,7 +70,7 @@ contract BondUSASustainabilityPerformanceTargetRateFacet is BondUSA, IStaticFunc
             return registeredCoupon_;
         }
 
-        if (registeredCoupon_.coupon.fixingDate > _getBlockTimestamp()) {
+        if (registeredCoupon_.coupon.fixingDate > LibTimeTravel.getBlockTimestamp()) {
             return registeredCoupon_;
         }
 
@@ -169,7 +170,7 @@ contract BondUSASustainabilityPerformanceTargetRateFacet is BondUSA, IStaticFunc
     /// @param _couponID Current coupon ID (to find the previous one)
     /// @return fixingDate_ The previous coupon's fixing date, or 0 if no previous coupon
     function _getPreviousFixingDate(uint256 _couponID) internal view returns (uint256 fixingDate_) {
-        uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, _getBlockTimestamp());
+        uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, LibTimeTravel.getBlockTimestamp());
 
         if (previousCouponId == 0) {
             return 0;

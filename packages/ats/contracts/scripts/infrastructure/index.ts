@@ -258,13 +258,7 @@ export type { VerificationOptions, VerificationResult } from "./utils/verificati
 export { info, success, error, warn, section, debug, table, configureLogger, LogLevel } from "./utils/logging";
 export type { LoggerConfig } from "./utils/logging";
 
-export {
-  resolveContractName,
-  getTimeTravelVariant,
-  hasTimeTravelVariant,
-  getBaseContractName,
-  isTimeTravelVariant,
-} from "./utils/naming";
+export { isTimeTravelFacet } from "./utils/naming";
 
 export { fetchHederaContractId, getMirrorNodeUrl, isHederaNetwork } from "./utils/hedera";
 

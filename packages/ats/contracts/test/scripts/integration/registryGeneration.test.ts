@@ -24,8 +24,6 @@ import { silenceScriptLogging } from "@test";
 // Exported building blocks
 import { detectLayer, detectCategory, generateDescription } from "@scripts";
 
-import { pairTimeTravelVariants } from "@scripts";
-
 // Mock artifact data for test contracts
 const mockArtifactData = {
   contractName: "MockContract",
@@ -80,7 +78,6 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
         contractsPath,
         artifactPath,
         includeStorageWrappers: false,
-        includeTimeTravel: false,
         facetsOnly: true,
         logLevel: "SILENT",
       };
@@ -92,9 +89,6 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
 
       // When includeStorageWrappers=false, storage wrappers should be 0
       expect(result.stats.totalStorageWrappers).to.equal(0);
-
-      // When includeTimeTravel=false, withTimeTravel should be 0
-      expect(result.stats.withTimeTravel).to.equal(0);
     }).timeout(30000);
 
     it("should allow custom resolver key paths", async () => {
@@ -102,7 +96,7 @@ describe("Registry Generation Pipeline - Integration Tests", () => {
         {
           contractsPath,
           artifactPath,
-          resolverKeyPaths: ["**/constants/resolverKeys.sol"],
+          resolverKeyPaths: ["**/constants/resolverKeys/*.sol"],
           logLevel: "SILENT",
         },
         false,
@@ -245,45 +239,12 @@ contract MyContract {}
       const description = generateDescription(source, "MyContract");
       expect(description).to.equal("This is a test contract");
     });
-
-    it("should export pairTimeTravelVariants function", () => {
-      const baseFacets = [
-        {
-          filePath: "/path/AccessControl.sol",
-          relativePath: "AccessControl.sol",
-          directory: "/path",
-          fileName: "AccessControl",
-          contractNames: ["AccessControlFacet"],
-          primaryContract: "AccessControlFacet",
-          source: "",
-          artifactData: mockArtifactData,
-        },
-      ];
-
-      const timeTravelFacets = [
-        {
-          filePath: "/path/AccessControlTimeTravel.sol",
-          relativePath: "AccessControlTimeTravel.sol",
-          directory: "/path",
-          fileName: "AccessControlTimeTravel",
-          contractNames: ["AccessControlFacetTimeTravel"],
-          primaryContract: "AccessControlFacetTimeTravel",
-          source: "",
-          artifactData: mockArtifactData,
-        },
-      ];
-
-      const pairs = pairTimeTravelVariants(baseFacets, timeTravelFacets);
-      expect(pairs.size).to.equal(1);
-      expect(pairs.get("AccessControlFacet")).to.not.be.null;
-    });
   });
 
   describe("DEFAULT_CONFIG", () => {
     it("should have sensible defaults", () => {
       expect(DEFAULT_CONFIG.contractsPath).to.equal("./contracts");
       expect(DEFAULT_CONFIG.includeStorageWrappers).to.be.true;
-      expect(DEFAULT_CONFIG.includeTimeTravel).to.be.true;
       expect(DEFAULT_CONFIG.extractNatspec).to.be.true;
       expect(DEFAULT_CONFIG.logLevel).to.equal("INFO");
       expect(DEFAULT_CONFIG.facetsOnly).to.be.false;

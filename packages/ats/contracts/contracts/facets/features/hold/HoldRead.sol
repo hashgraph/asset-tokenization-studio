@@ -6,17 +6,23 @@ import { HoldIdentifier } from "../interfaces/hold/IHold.sol";
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";
 import { LibHold } from "../../../lib/domain/LibHold.sol";
 import { LibHoldOps } from "../../../lib/orchestrator/LibHoldOps.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract HoldRead is IHoldRead {
     function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return LibHoldOps.getHeldAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
+        return LibHoldOps.getHeldAmountForAdjustedAt(_tokenHolder, LibTimeTravel.getBlockTimestamp());
     }
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return LibHoldOps.getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
+        return
+            LibHoldOps.getHeldAmountForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                LibTimeTravel.getBlockTimestamp()
+            );
     }
 
     function getHoldCountForByPartition(
@@ -51,20 +57,12 @@ abstract contract HoldRead is IHoldRead {
             ThirdPartyType thirdPartyType_
         )
     {
-        return LibHoldOps.getHoldForByPartitionAdjustedAt(_holdIdentifier, _getBlockTimestamp());
+        return LibHoldOps.getHoldForByPartitionAdjustedAt(_holdIdentifier, LibTimeTravel.getBlockTimestamp());
     }
 
     function getHoldThirdParty(
         HoldIdentifier calldata _holdIdentifier
     ) external view override returns (address thirdParty_) {
         thirdParty_ = LibHold.getHoldThirdParty(_holdIdentifier);
-    }
-
-    // ════════════════════════════════════════════════════════════════════════════════════
-    // INTERNAL VIRTUAL
-    // ════════════════════════════════════════════════════════════════════════════════════
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

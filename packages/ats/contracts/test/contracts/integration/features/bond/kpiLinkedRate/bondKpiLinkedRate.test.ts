@@ -5,14 +5,14 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   ResolverProxy,
-  BondUSAKpiLinkedRateFacetTimeTravel,
-  KpiLinkedRateFacetTimeTravel,
-  BondUSAReadKpiLinkedRateFacetTimeTravel,
+  BondUSAKpiLinkedRateFacet,
+  KpiLinkedRateFacet,
+  BondUSAReadKpiLinkedRateFacet,
   TimeTravelFacet,
-  ERC1594FacetTimeTravel,
-  ProceedRecipientsKpiLinkedRateFacetTimeTravel,
-  KpisKpiLinkedRateFacetTimeTravel,
-  ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
+  ERC1594Facet,
+  ProceedRecipientsKpiLinkedRateFacet,
+  KpisKpiLinkedRateFacet,
+  ScheduledCrossOrderedTasksKpiLinkedRateFacet,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
@@ -54,14 +54,14 @@ describe("Bond KpiLinked Rate Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let bondKpiLinkedRateFacet: BondUSAKpiLinkedRateFacetTimeTravel;
-  let bondReadFacet: BondUSAReadKpiLinkedRateFacetTimeTravel;
-  let kpiLinkedRateFacet: KpiLinkedRateFacetTimeTravel;
+  let bondKpiLinkedRateFacet: BondUSAKpiLinkedRateFacet;
+  let bondReadFacet: BondUSAReadKpiLinkedRateFacet;
+  let kpiLinkedRateFacet: KpiLinkedRateFacet;
   let timeTravelFacet: TimeTravelFacet;
-  let erc1594Facet: ERC1594FacetTimeTravel;
-  let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
-  let kpisFacet: KpisKpiLinkedRateFacetTimeTravel;
-  let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel;
+  let erc1594Facet: ERC1594Facet;
+  let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacet;
+  let kpisFacet: KpisKpiLinkedRateFacet;
+  let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacet;
 
   let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
@@ -105,23 +105,19 @@ describe("Bond KpiLinked Rate Tests", () => {
       },
     ]);
 
-    bondKpiLinkedRateFacet = await ethers.getContractAt(
-      "BondUSAKpiLinkedRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
-    bondReadFacet = await ethers.getContractAt("BondUSAReadKpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
-    kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
-    erc1594Facet = await ethers.getContractAt("ERC1594FacetTimeTravel", diamond.target, signer_A);
+    bondKpiLinkedRateFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacet", diamond.target, signer_A);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadKpiLinkedRateFacet", diamond.target, signer_A);
+    kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRateFacet", diamond.target, signer_A);
+    erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
     proceedRecipientsFacet = await ethers.getContractAt(
-      "ProceedRecipientsKpiLinkedRateFacetTimeTravel",
+      "ProceedRecipientsKpiLinkedRateFacet",
       diamond.target,
       signer_A,
     );
-    kpisFacet = await ethers.getContractAt("KpisKpiLinkedRateFacetTimeTravel", diamond.target, signer_A);
+    kpisFacet = await ethers.getContractAt("KpisKpiLinkedRateFacet", diamond.target, signer_A);
     scheduledTasksFacet = await ethers.getContractAt(
-      "ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel",
+      "ScheduledCrossOrderedTasksKpiLinkedRateFacet",
       diamond.target,
       signer_A,
     );

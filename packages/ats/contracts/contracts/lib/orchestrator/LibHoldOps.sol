@@ -24,7 +24,7 @@ import { LibERC1410 } from "../domain/LibERC1410.sol";
 import { LibSnapshots } from "../domain/LibSnapshots.sol";
 import { LibERC20 } from "../domain/LibERC20.sol";
 import { LibControlList } from "../../lib/core/LibControlList.sol";
-import { IControlListBase } from "../../facets/features/interfaces/IControlList.sol";
+import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
 import { LibNonce } from "../../lib/core/LibNonce.sol";
 import { LibProtectedPartitions } from "../../lib/core/LibProtectedPartitions.sol";
 import { LibResolverProxy } from "../../infrastructure/proxy/LibResolverProxy.sol";

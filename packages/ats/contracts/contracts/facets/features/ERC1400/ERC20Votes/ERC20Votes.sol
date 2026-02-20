@@ -2,9 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20Votes } from "../../interfaces/ERC1400/IERC20Votes.sol";
-import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
-import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
-import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { LibCheckpoints } from "../../../../infrastructure/lib/LibCheckpoints.sol";
 // solhint-disable max-line-length
@@ -16,6 +13,7 @@ import { LibPause } from "../../../../lib/core/LibPause.sol";
 import { LibERC20Votes } from "../../../../lib/domain/LibERC20Votes.sol";
 import { LibABAF } from "../../../../lib/domain/LibABAF.sol";
 import { LibTotalBalance } from "../../../../lib/orchestrator/LibTotalBalance.sol";
+import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract ERC20Votes is IERC20Votes {
     error AlreadyInitialized();
@@ -39,19 +37,22 @@ abstract contract ERC20Votes is IERC20Votes {
         IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
         LibERC20Votes.takeAbafCheckpoint(LibABAF.getAbaf());
 
-        uint256 delegatorBalance = LibTotalBalance.getTotalBalanceForAdjustedAt(msg.sender, _getBlockTimestamp());
+        uint256 delegatorBalance = LibTotalBalance.getTotalBalanceForAdjustedAt(
+            msg.sender,
+            LibTimeTravel.getBlockTimestamp()
+        );
 
         LibERC20Votes.delegateAndEmit(msg.sender, _delegatee, currentDelegate);
         LibERC20Votes.moveVotingPower(currentDelegate, _delegatee, delegatorBalance);
     }
 
     function clock() external view override returns (uint48) {
-        return SafeCast.toUint48(LibERC20Votes.getBlockNumber());
+        return SafeCast.toUint48(LibTimeTravel.getBlockNumber());
     }
 
     // solhint-disable-next-line func-name-mixedcase
     function CLOCK_MODE() external view override returns (string memory) {
-        if (SafeCast.toUint48(LibERC20Votes.getBlockNumber()) != LibERC20Votes.getBlockNumber()) {
+        if (SafeCast.toUint48(LibTimeTravel.getBlockNumber()) != LibTimeTravel.getBlockNumber()) {
             revert BrokenClockMode();
         }
         return "mode=blocknumber&from=default";
@@ -86,9 +87,5 @@ abstract contract ERC20Votes is IERC20Votes {
 
     function isActivated() external view returns (bool) {
         return LibERC20Votes.isActivated();
-    }
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

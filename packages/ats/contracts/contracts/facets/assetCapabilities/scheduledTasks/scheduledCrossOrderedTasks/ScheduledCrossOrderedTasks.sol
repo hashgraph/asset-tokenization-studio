@@ -23,6 +23,7 @@ import {
     SNAPSHOT_RESULT_ID,
     COUPON_LISTING_RESULT_ID
 } from "../../../../constants/values.sol";
+import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
     // ════════════════════════════════════════════════════════════════════════════════════
@@ -55,12 +56,8 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
     }
 
     // ════════════════════════════════════════════════════════════════════════════════════
-    // INTERNAL VIEW FUNCTIONS
+    // INTERNAL HOOKS & HELPERS
     // ════════════════════════════════════════════════════════════════════════════════════
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
-    }
 
     /// @dev Hook called after a coupon is added to the ordered list during trigger.
     ///      Override in KPI-linked/sustainability variants to calculate and store the coupon rate.
@@ -76,7 +73,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
         if (count == 0) return 0;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
-        uint256 timestamp = _getBlockTimestamp();
+        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
@@ -109,7 +106,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
         if (count == 0) return;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
-        uint256 timestamp = _getBlockTimestamp();
+        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
@@ -136,7 +133,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
         if (count == 0) return;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
-        uint256 timestamp = _getBlockTimestamp();
+        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
@@ -172,7 +169,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
         if (count == 0) return;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
-        uint256 timestamp = _getBlockTimestamp();
+        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;

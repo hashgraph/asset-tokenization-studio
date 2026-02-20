@@ -160,7 +160,7 @@ export interface FacetDefinition {
   errors?: ErrorDefinition[];
 
   /** TypeChain factory constructor function for creating contract instances */
-  factory?: (signer: Signer, useTimeTravel?: boolean) => ContractFactory;
+  factory?: (signer: Signer) => ContractFactory;
 }
 
 /**

@@ -18,9 +18,6 @@ struct CorporateActionDataStorage {
 }
 
 interface ICorporateActions {
-    error WrongIndexForAction(uint256 index, bytes32 actionType);
-    error WrongDates(uint256 firstDate, uint256 secondDate);
-
     /**
      * @dev Emitted when a corporate action gets added
      *
@@ -38,6 +35,8 @@ interface ICorporateActions {
         bytes data
     );
 
+    error WrongIndexForAction(uint256 index, bytes32 actionType);
+    error WrongDates(uint256 firstDate, uint256 secondDate);
     error DuplicatedCorporateAction(bytes32 actionType, bytes data);
 
     function addCorporateAction(

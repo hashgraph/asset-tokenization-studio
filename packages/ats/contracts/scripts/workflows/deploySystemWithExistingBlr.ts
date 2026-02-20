@@ -163,7 +163,7 @@ export interface DeploymentWithExistingBlrOutput {
  * Options for deploying with existing BLR.
  */
 export interface DeploySystemWithExistingBlrOptions extends ResumeOptions {
-  /** Whether to use TimeTravel variants for facets */
+  /** Whether to include TimeTravelFacet in deployment */
   useTimeTravel?: boolean;
 
   /** Whether to save deployment output to file */
@@ -443,7 +443,7 @@ export async function deploySystemWithExistingBlr(
             throw new Error(`No factory found for facet: ${facet.name}`);
           }
 
-          const factory = facet.factory(signer, useTimeTravel);
+          const factory = facet.factory(signer);
           const contractName = factory.constructor.name.replace("__factory", "");
 
           // Skip if already deployed

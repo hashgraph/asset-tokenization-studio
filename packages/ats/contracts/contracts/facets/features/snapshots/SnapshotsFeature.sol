@@ -16,6 +16,7 @@ import { LibLock } from "../../../lib/domain/LibLock.sol";
 import { LibHold } from "../../../lib/domain/LibHold.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibFreeze } from "../../../lib/domain/LibFreeze.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 import { snapshotStorage, SnapshotStorage } from "../../../storage/AssetStorage.sol";
 import { _SNAPSHOT_ROLE } from "../../../constants/roles.sol";
 
@@ -48,7 +49,7 @@ abstract contract SnapshotsFeature is ISnapshots {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
             snapshotStorage().accountBalanceSnapshots[_tokenHolder],
-            LibABAF.balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp())
+            LibABAF.balanceOfAdjustedAt(_tokenHolder, LibTimeTravel.getBlockTimestamp())
         );
     }
 
@@ -87,7 +88,7 @@ abstract contract SnapshotsFeature is ISnapshots {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
             snapshotStorage().accountPartitionBalanceSnapshots[_tokenHolder][_partition],
-            LibABAF.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp())
+            LibABAF.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, LibTimeTravel.getBlockTimestamp())
         );
     }
 
@@ -215,10 +216,6 @@ abstract contract SnapshotsFeature is ISnapshots {
     // INTERNAL VIEW FUNCTIONS
     // ════════════════════════════════════════════════════════════════════════════════════
 
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
-    }
-
     // ════════════════════════════════════════════════════════════════════════════════════
     // PRIVATE HELPER FUNCTIONS
     // ════════════════════════════════════════════════════════════════════════════════════
@@ -232,7 +229,7 @@ abstract contract SnapshotsFeature is ISnapshots {
         if (snapshotted) return value;
 
         uint256 abafAtSnap = _queryAbafAt(snapshotId);
-        uint256 abaf = LibABAF.getAbafAdjustedAt(_getBlockTimestamp());
+        uint256 abaf = LibABAF.getAbafAdjustedAt(LibTimeTravel.getBlockTimestamp());
 
         if (abafAtSnap == abaf) return currentBalanceAdjusted;
 

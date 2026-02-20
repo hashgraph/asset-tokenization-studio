@@ -54,7 +54,7 @@ describe("Scheduled Coupon Listing Tests", () => {
     account_C = signer_C.address;
 
     accessControlFacet = await ethers.getContractAt("IAccessControl", diamond.target);
-    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
+    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacet", diamond.target);
     scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
     scheduledTasksFacet = await ethers.getContractAt("IScheduledCrossOrderedTasks", diamond.target);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);

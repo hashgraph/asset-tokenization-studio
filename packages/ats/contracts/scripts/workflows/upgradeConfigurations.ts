@@ -121,7 +121,7 @@ export interface UpgradeConfigurationsOptions extends ResumeOptions {
   /** Address of existing BLR proxy (required) */
   blrAddress: string;
 
-  /** Whether to use TimeTravel variants for facets (default: false) */
+  /** Whether to include TimeTravelFacet in deployment (default: false) */
   useTimeTravel?: boolean;
 
   /** Which configurations to create: 'equity', 'bond', or 'both' (default: 'both') */
@@ -355,7 +355,7 @@ async function validateAndInitialize(
 /**
  * Phase 2: Deploy all facets.
  *
- * Deploys all facet contracts (48 without TimeTravel, 49 with TimeTravel variants).
+ * Deploys all facet contracts (48 without TimeTravelFacet, 49 with TimeTravelFacet).
  * Skips facets that were already deployed in previous checkpoint runs.
  *
  * @param ctx - Upgrade phase context
@@ -399,7 +399,7 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
       throw new Error(`No factory found for facet: ${facet.name}`);
     }
 
-    const factory = facet.factory(signer, useTimeTravel);
+    const factory = facet.factory(signer);
     const contractName = factory.constructor.name.replace("__factory", "");
 
     // Skip if already deployed
@@ -979,7 +979,7 @@ async function buildOutput(
  *
  * Executes the upgrade workflow:
  * 1. Validate BLR address exists
- * 2. Deploy all facets (48-49 total depending on TimeTravel mode)
+ * 2. Deploy all facets (48-49 total depending on TimeTravelFacet inclusion)
  * 3. Register facets in BLR (creates new version)
  * 4. Create new Equity and/or Bond configuration versions
  * 5. Optionally update ResolverProxy tokens to new version

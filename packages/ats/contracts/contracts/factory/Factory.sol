@@ -5,7 +5,7 @@ import { IFactory } from "./IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/interfaces/IResolverProxy.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
-import { IControlList } from "../facets/features/interfaces/IControlList.sol";
+import { IControlList } from "../facets/features/interfaces/controlList/IControlList.sol";
 import { IERC20 } from "../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IERC20Votes } from "../facets/features/interfaces/ERC1400/IERC20Votes.sol";
 import { IERC1644 } from "../facets/features/interfaces/ERC1400/IERC1644.sol";

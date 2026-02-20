@@ -13,6 +13,7 @@ import { LibFreeze } from "../../../lib/domain/LibFreeze.sol";
 import { LibABAF } from "../../../lib/domain/LibABAF.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 
@@ -135,7 +136,7 @@ abstract contract Freeze is IFreeze {
     // ════════════════════════════════════════════════════════════════════════════════════
 
     function getFrozenTokens(address _userAddress) external view override returns (uint256) {
-        return LibFreeze.getFrozenAmountAdjustedAt(_userAddress, _getBlockTimestamp());
+        return LibFreeze.getFrozenAmountAdjustedAt(_userAddress, LibTimeTravel.getBlockTimestamp());
     }
 
     // ════════════════════════════════════════════════════════════════════════════════════
@@ -191,8 +192,4 @@ abstract contract Freeze is IFreeze {
     // ════════════════════════════════════════════════════════════════════════════════════
     // INTERNAL VIEW FUNCTIONS
     // ════════════════════════════════════════════════════════════════════════════════════
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
-    }
 }

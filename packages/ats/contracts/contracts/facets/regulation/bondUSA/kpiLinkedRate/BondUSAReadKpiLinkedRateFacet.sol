@@ -13,6 +13,7 @@ import { LibProceedRecipients } from "../../../../lib/domain/LibProceedRecipient
 import { KpiLinkedRateDataStorage } from "../../../../storage/ScheduledStorage.sol";
 import { LibCorporateActions } from "../../../../lib/core/LibCorporateActions.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../../constants/values.sol";
+import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 
 contract BondUSAReadKpiLinkedRateFacet is BondUSARead, IStaticFunctionSelectors {
     function getCoupon(
@@ -31,7 +32,7 @@ contract BondUSAReadKpiLinkedRateFacet is BondUSARead, IStaticFunctionSelectors 
             return registeredCoupon_;
         }
 
-        if (registeredCoupon_.coupon.fixingDate > _getBlockTimestamp()) {
+        if (registeredCoupon_.coupon.fixingDate > LibTimeTravel.getBlockTimestamp()) {
             return registeredCoupon_;
         }
 
@@ -130,7 +131,7 @@ contract BondUSAReadKpiLinkedRateFacet is BondUSARead, IStaticFunctionSelectors 
     /// @return rate_ The previous coupon rate
     /// @return rateDecimals_ The previous coupon rate decimals
     function _getPreviousCouponRate(uint256 _couponID) internal view returns (uint256 rate_, uint8 rateDecimals_) {
-        uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, _getBlockTimestamp());
+        uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, LibTimeTravel.getBlockTimestamp());
 
         if (previousCouponId == 0) {
             return (0, 0);

@@ -27,6 +27,7 @@ import { LibScheduledTasks } from "../../../lib/domain/LibScheduledTasks.sol";
 import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibTotalBalance } from "../../../lib/orchestrator/LibTotalBalance.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
     error AlreadyInitialized();
@@ -383,7 +384,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
     ) internal view returns (address[] memory holders_) {
         IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
 
-        if (registeredDividend.dividend.recordDate >= _getBlockTimestamp()) return new address[](0);
+        if (registeredDividend.dividend.recordDate >= LibTimeTravel.getBlockTimestamp()) return new address[](0);
 
         if (registeredDividend.snapshotId != 0)
             return LibSnapshots.tokenHoldersAt(registeredDividend.snapshotId, _pageIndex, _pageLength);
@@ -436,7 +437,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
     ) internal view returns (address[] memory holders_) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
-        if (registeredVoting.voting.recordDate >= _getBlockTimestamp()) return new address[](0);
+        if (registeredVoting.voting.recordDate >= LibTimeTravel.getBlockTimestamp()) return new address[](0);
 
         if (registeredVoting.snapshotId != 0)
             return LibSnapshots.tokenHoldersAt(registeredVoting.snapshotId, _pageIndex, _pageLength);
@@ -447,7 +448,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
     function _getTotalVotingHolders(uint256 _voteID) internal view returns (uint256) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
-        if (registeredVoting.voting.recordDate >= _getBlockTimestamp()) return 0;
+        if (registeredVoting.voting.recordDate >= LibTimeTravel.getBlockTimestamp()) return 0;
 
         if (registeredVoting.snapshotId != 0) return LibSnapshots.totalTokenHoldersAt(registeredVoting.snapshotId);
 
@@ -477,7 +478,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
         uint256 _snapshotId,
         address _account
     ) internal view returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
-        if (_date < _getBlockTimestamp()) {
+        if (_date < LibTimeTravel.getBlockTimestamp()) {
             dateReached_ = true;
 
             balance_ = (_snapshotId != 0)
@@ -485,7 +486,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
                 : LibTotalBalance.getTotalBalanceForAdjustedAt(_account, _date);
 
             decimals_ = (_snapshotId != 0)
-                ? LibSnapshots.decimalsAtSnapshot(_snapshotId, _getBlockTimestamp())
+                ? LibSnapshots.decimalsAtSnapshot(_snapshotId, LibTimeTravel.getBlockTimestamp())
                 : _decimalsAdjustedAt(_date);
         }
     }
@@ -495,7 +496,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
     }
 
     function _checkTimestamp(uint256 _timestamp) internal view {
-        if (_timestamp <= _getBlockTimestamp()) {
+        if (_timestamp <= LibTimeTravel.getBlockTimestamp()) {
             revert WrongTimestamp(_timestamp);
         }
     }
@@ -506,14 +507,10 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
         }
     }
 
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
-    }
-
     function _getTotalDividendHolders(uint256 _dividendID) internal view returns (uint256) {
         IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
 
-        if (registeredDividend.dividend.recordDate >= _getBlockTimestamp()) return 0;
+        if (registeredDividend.dividend.recordDate >= LibTimeTravel.getBlockTimestamp()) return 0;
 
         if (registeredDividend.snapshotId != 0) return LibSnapshots.totalTokenHoldersAt(registeredDividend.snapshotId);
 

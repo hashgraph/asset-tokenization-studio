@@ -176,5 +176,5 @@ export {
   extractSolidityVersion,
   implementsInterface,
   extractInheritance,
-  // Note: isTimeTravelVariant already exported from infrastructure/utils/naming
+  // Note: isTimeTravelVariant defined locally in solidityUtils (not related to naming.ts)
 } from "./tools/utils/solidityUtils";

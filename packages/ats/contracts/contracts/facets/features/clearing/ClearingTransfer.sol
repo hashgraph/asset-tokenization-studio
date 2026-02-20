@@ -11,6 +11,7 @@ import { LibAccess } from "../../../lib/core/LibAccess.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibClearingOps } from "../../../lib/orchestrator/LibClearingOps.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract ClearingTransfer is IClearingTransfer {
     function clearingTransferByPartition(
@@ -21,7 +22,10 @@ abstract contract ClearingTransfer is IClearingTransfer {
         LibPause.requireNotPaused();
         LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
-        LibClearingOps.checkValidExpirationTimestamp(_clearingOperation.expirationTimestamp, _getBlockTimestamp());
+        LibClearingOps.checkValidExpirationTimestamp(
+            _clearingOperation.expirationTimestamp,
+            LibTimeTravel.getBlockTimestamp()
+        );
         LibERC1410.requireValidAddress(_to);
         LibCompliance.requireNotRecovered(msg.sender);
         LibCompliance.requireNotRecovered(_to);
@@ -47,7 +51,7 @@ abstract contract ClearingTransfer is IClearingTransfer {
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
         LibClearingOps.checkValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            _getBlockTimestamp()
+            LibTimeTravel.getBlockTimestamp()
         );
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
         LibERC1410.requireValidAddress(_clearingOperationFrom.from);
@@ -84,7 +88,7 @@ abstract contract ClearingTransfer is IClearingTransfer {
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
         LibClearingOps.checkValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            _getBlockTimestamp()
+            LibTimeTravel.getBlockTimestamp()
         );
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
         LibERC1410.requireValidAddress(_clearingOperationFrom.from);
@@ -122,7 +126,7 @@ abstract contract ClearingTransfer is IClearingTransfer {
         LibCompliance.requireNotRecovered(_to);
         LibClearingOps.checkValidExpirationTimestamp(
             _protectedClearingOperation.clearingOperation.expirationTimestamp,
-            _getBlockTimestamp()
+            LibTimeTravel.getBlockTimestamp()
         );
         LibAccess.checkRole(
             LibProtectedPartitions.protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition),
@@ -135,7 +139,7 @@ abstract contract ClearingTransfer is IClearingTransfer {
             _amount,
             _to,
             _signature,
-            _getBlockTimestamp()
+            LibTimeTravel.getBlockTimestamp()
         );
     }
 
@@ -149,15 +153,7 @@ abstract contract ClearingTransfer is IClearingTransfer {
                 _partition,
                 _tokenHolder,
                 _clearingId,
-                _getBlockTimestamp()
+                LibTimeTravel.getBlockTimestamp()
             );
-    }
-
-    // ════════════════════════════════════════════════════════════════════════════════════
-    // INTERNAL VIRTUAL
-    // ════════════════════════════════════════════════════════════════════════════════════
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

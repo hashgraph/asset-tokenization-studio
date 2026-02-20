@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IControlList } from "../interfaces/IControlList.sol";
+import { IControlList } from "../interfaces/controlList/IControlList.sol";
 import { LibControlList } from "../../../lib/core/LibControlList.sol";
 import { LibAccess } from "../../../lib/core/LibAccess.sol";
 import { LibPause } from "../../../lib/core/LibPause.sol";

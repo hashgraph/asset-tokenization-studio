@@ -7,6 +7,7 @@ import { LibAccess } from "../../../../lib/core/LibAccess.sol";
 import { LibKpis } from "../../../../lib/domain/LibKpis.sol";
 import { LibBond } from "../../../../lib/domain/LibBond.sol";
 import { _KPI_MANAGER_ROLE } from "../../../../constants/roles.sol";
+import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 
 /// @title Kpis
 /// @notice Diamond facet for managing KPI data with library-based pattern
@@ -16,7 +17,7 @@ abstract contract Kpis is IKpis {
         LibPause.requireNotPaused();
 
         // Inline isValidDate modifier logic
-        uint256 timestamp = _getBlockTimestamp();
+        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
         uint256 minDate = _getMinDateAdjusted(timestamp);
         if (_date <= minDate || _date > timestamp) {
             revert InvalidDate(_date, minDate, timestamp);
@@ -38,7 +39,7 @@ abstract contract Kpis is IKpis {
     }
 
     function getMinDate() external view override returns (uint256 minDate_) {
-        return _getMinDateAdjusted(_getBlockTimestamp());
+        return _getMinDateAdjusted(LibTimeTravel.getBlockTimestamp());
     }
 
     function isCheckPointDate(uint256 _date, address _project) external view override returns (bool exists_) {
@@ -46,12 +47,8 @@ abstract contract Kpis is IKpis {
     }
 
     // ════════════════════════════════════════════════════════════════════════════════════
-    // INTERNAL — Time travel support
+    // INTERNAL HELPERS
     // ════════════════════════════════════════════════════════════════════════════════════
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
-    }
 
     /// @notice Gets the adjusted minimum date considering the last coupon fixing date
     /// @param _timestamp The timestamp to use for determining pending coupon listings

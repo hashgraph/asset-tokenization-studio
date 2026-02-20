@@ -4,17 +4,23 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearingRead } from "../interfaces/clearing/IClearingRead.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibClearingOps } from "../../../lib/orchestrator/LibClearingOps.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract ClearingRead is IClearingRead {
     function getClearedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return LibClearingOps.getClearedAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
+        return LibClearingOps.getClearedAmountForAdjustedAt(_tokenHolder, LibTimeTravel.getBlockTimestamp());
     }
 
     function getClearedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return LibClearingOps.getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
+        return
+            LibClearingOps.getClearedAmountForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                LibTimeTravel.getBlockTimestamp()
+            );
     }
 
     function getClearingCountForByPartition(
@@ -42,13 +48,5 @@ abstract contract ClearingRead is IClearingRead {
         uint256 _clearingId
     ) external view override returns (address thirdParty_) {
         thirdParty_ = LibClearing.getClearingThirdParty(_partition, _tokenHolder, _clearingOpeartionType, _clearingId);
-    }
-
-    // ════════════════════════════════════════════════════════════════════════════════════
-    // INTERNAL VIRTUAL
-    // ════════════════════════════════════════════════════════════════════════════════════
-
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
     }
 }

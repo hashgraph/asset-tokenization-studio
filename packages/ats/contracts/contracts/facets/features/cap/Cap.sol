@@ -7,6 +7,7 @@ import { LibAccess } from "../../../lib/core/LibAccess.sol";
 import { LibCap } from "../../../lib/core/LibCap.sol";
 import { LibABAF } from "../../../lib/domain/LibABAF.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
+import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 import { _CAP_ROLE } from "../../../constants/roles.sol";
 import { MAX_UINT256 } from "../../../constants/values.sol";
 
@@ -68,7 +69,7 @@ abstract contract Cap is ICap {
 
     function getMaxSupply() external view override returns (uint256 maxSupply_) {
         uint256 rawMaxSupply = LibCap.getMaxSupply();
-        (uint256 pendingAbaf, ) = LibABAF.getPendingAbafAt(_getBlockTimestamp());
+        (uint256 pendingAbaf, ) = LibABAF.getPendingAbafAt(LibTimeTravel.getBlockTimestamp());
 
         uint256 limit = type(uint256).max / pendingAbaf;
         if (rawMaxSupply > limit) {
@@ -81,7 +82,7 @@ abstract contract Cap is ICap {
     function getMaxSupplyByPartition(bytes32 _partition) external view override returns (uint256 maxSupply_) {
         uint256 rawMaxSupply = LibCap.getMaxSupplyByPartition(_partition);
         uint256 factor = LibABAF.calculateFactor(
-            LibABAF.getAbafAdjustedAt(_getBlockTimestamp()),
+            LibABAF.getAbafAdjustedAt(LibTimeTravel.getBlockTimestamp()),
             LibABAF.getLabafByPartition(_partition)
         );
 
@@ -97,14 +98,10 @@ abstract contract Cap is ICap {
     // INTERNAL VIEW FUNCTIONS
     // ════════════════════════════════════════════════════════════════════════════════════
 
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return block.timestamp;
-    }
-
     /// @dev Get pending-ABAF-adjusted total supply (global uses pendingAbaf only)
     function _getAdjustedTotalSupply() internal view returns (uint256) {
         uint256 rawTotalSupply = LibERC1410.totalSupply();
-        (uint256 pendingAbaf, ) = LibABAF.getPendingAbafAt(_getBlockTimestamp());
+        (uint256 pendingAbaf, ) = LibABAF.getPendingAbafAt(LibTimeTravel.getBlockTimestamp());
         return rawTotalSupply * pendingAbaf;
     }
 
@@ -112,7 +109,7 @@ abstract contract Cap is ICap {
     function _getAdjustedTotalSupplyByPartition(bytes32 _partition) internal view returns (uint256) {
         uint256 rawTotalSupply = LibERC1410.totalSupplyByPartition(_partition);
         uint256 factor = LibABAF.calculateFactor(
-            LibABAF.getAbafAdjustedAt(_getBlockTimestamp()),
+            LibABAF.getAbafAdjustedAt(LibTimeTravel.getBlockTimestamp()),
             LibABAF.getLabafByPartition(_partition)
         );
         return rawTotalSupply * factor;
@@ -121,7 +118,7 @@ abstract contract Cap is ICap {
     /// @dev Get pending-ABAF-adjusted global max supply
     function _getAdjustedMaxSupply() private view returns (uint256) {
         uint256 rawMaxSupply = LibCap.getMaxSupply();
-        (uint256 pendingAbaf, ) = LibABAF.getPendingAbafAt(_getBlockTimestamp());
+        (uint256 pendingAbaf, ) = LibABAF.getPendingAbafAt(LibTimeTravel.getBlockTimestamp());
 
         uint256 limit = MAX_UINT256 / pendingAbaf;
         if (rawMaxSupply > limit) {

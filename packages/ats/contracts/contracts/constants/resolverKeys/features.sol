@@ -143,3 +143,6 @@ bytes32 constant _NONCES_RESOLVER_KEY = 0xb235fd4aa74228c048d55d58514cd3393ef934
 
 // keccak256("security.token.standard.totalBalance.resolverKey");
 bytes32 constant _TOTAL_BALANCE_RESOLVER_KEY = 0xd1873ecc41f0658d1ac1c9bf3fe6a4da2071b04edc7f7d3b4520d029c3ce64d5;
+
+// keccak256("security.token.standard.timeTravel.resolverKey")
+bytes32 constant _TIME_TRAVEL_RESOLVER_KEY = 0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8;

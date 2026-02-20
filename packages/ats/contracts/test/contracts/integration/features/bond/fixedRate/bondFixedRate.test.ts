@@ -47,8 +47,8 @@ describe("Bond Fixed Rate Tests", () => {
       },
     ]);
 
-    bondFixedRateFacet = await ethers.getContractAt("BondUSAFixedRateFacetTimeTravel", diamond.target, signer_A);
-    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.target, signer_A);
+    bondFixedRateFacet = await ethers.getContractAt("BondUSAFixedRateFacet", diamond.target, signer_A);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target, signer_A);
     fixedRateFacet = await ethers.getContractAt("IFixedRate", diamond.target, signer_A);
   }
 
