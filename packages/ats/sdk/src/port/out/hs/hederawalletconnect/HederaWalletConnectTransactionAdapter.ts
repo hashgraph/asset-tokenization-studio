@@ -1,31 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { singleton } from "tsyringe";
-import {
-  AccountId,
-  LedgerId,
-  Signer,
-  Transaction,
-  TransactionResponse as HTransactionResponse,
-  TransactionResponseJSON,
-} from "@hiero-ledger/sdk";
+import { AccountId, ContractExecuteTransaction, Transaction } from "@hiero-ledger/sdk";
 import { NetworkName } from "@hiero-ledger/sdk/lib/client/Client";
-import {
-  base64StringToSignatureMap,
-  DAppConnector,
-  HederaChainId,
-  SignAndExecuteTransactionParams,
-  SignTransactionParams,
-  transactionBodyToBase64String,
-  transactionToBase64String,
-  transactionToTransactionBody,
-} from "@hashgraph/hedera-wallet-connect";
-import { SignClientTypes } from "@walletconnect/types";
 import { HederaTransactionAdapter } from "../HederaTransactionAdapter";
-import { HederaTransactionResponseAdapter } from "../HederaTransactionResponseAdapter";
 import { SigningError } from "@port/out/error/SigningError";
 import { InitializationData } from "@port/out/TransactionAdapter";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
+import { RPCTransactionResponseAdapter } from "@port/out/rpc/RPCTransactionResponseAdapter";
 import { WalletEvents, WalletPairedEvent } from "@service/event/WalletEvent";
 import LogService from "@service/log/LogService";
 import EventService from "@service/event/EventService";
@@ -35,31 +17,51 @@ import Injectable from "@core/injectable/Injectable";
 import Hex from "@core/Hex";
 import Account from "@domain/context/account/Account";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
-import { Environment, mainnet, previewnet, testnet } from "@domain/context/network/Environment";
+import { Environment, testnet } from "@domain/context/network/Environment";
 import { SupportedWallets } from "@domain/context/network/Wallet";
 import HWCSettings from "@core/settings/walletConnect/HWCSettings";
 import { NotInitialized } from "./error/NotInitialized";
 import { AccountNotSet } from "./error/AccountNotSet";
 import { NoSettings } from "./error/NoSettings";
-import { UnsupportedNetwork } from "@domain/context/network/error/UnsupportedNetwork";
-import { NoSigners } from "./error/NoSigners";
-import { AccountNotRetrievedFromSigners } from "./error/AccountNotRetrievedFromSigners";
 import { AccountNotFound } from "../error/AccountNotFound";
 import { ConsensusNodesNotSet } from "./error/ConsensusNodesNotSet";
 import { SignatureNotFound } from "./error/SignatureNotFound";
+import { TransactionType } from "@port/out/TransactionResponseEnums";
+import { ethers } from "ethers";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// Lazy imports for browser-only HWC v2 dependencies
+let HederaAdapter: any;
+let HederaChainDefinition: any;
+let hederaNamespace: any;
+let HederaProvider: any;
+let base64StringToSignatureMap: any;
+let createAppKit: any;
+
+if (typeof window !== "undefined") {
+  const hwc = require("@hashgraph/hedera-wallet-connect");
+  HederaAdapter = hwc.HederaAdapter;
+  HederaChainDefinition = hwc.HederaChainDefinition;
+  hederaNamespace = hwc.hederaNamespace;
+  HederaProvider = hwc.HederaProvider;
+  base64StringToSignatureMap = hwc.base64StringToSignatureMap;
+
+  const appkit = require("@reown/appkit");
+  createAppKit = appkit.createAppKit;
+}
 
 @singleton()
-/**
- * Represents a transaction adapter for Hedera Wallet Connect.
- */
 export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdapter {
   public account: Account;
-  public signer: Signer;
   protected network: Environment;
-  protected dAppConnector: DAppConnector | undefined;
   protected projectId: string;
-  protected dappMetadata: SignClientTypes.Metadata;
-  private chainId: HederaChainId;
+  protected dappMetadata: { name: string; description: string; url: string; icons: string[] };
+
+  // HWC v2 properties
+  protected hederaAdapter: any;
+  protected appKit: any;
+  protected hederaProvider: any;
 
   constructor(
     @lazyInject(EventService)
@@ -77,168 +79,366 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       url: "",
       icons: [],
     };
-    this.setupDisconnectEventHandler();
   }
 
-  private setupDisconnectEventHandler(): boolean {
-    if (this.dAppConnector?.walletConnectClient) {
-      const client = this.dAppConnector.walletConnectClient;
-      client.on("session_delete", this.handleDisconnect.bind(this));
-    }
-    return true;
-  }
-
-  private handleDisconnect(): boolean {
-    this.stop();
-    this.eventService.emit(WalletEvents.walletDisconnect, {
-      wallet: SupportedWallets.HWALLETCONNECT,
-    });
-    return true;
-  }
-
-  /**
-   * Initializes the Hedera Wallet Connect Transaction Adapter.
-   *
-   * @param network - Optional parameter specifying the network name.
-   * @returns A promise that resolves to the current network name.
-   */
   public async init(network?: NetworkName): Promise<string> {
     LogService.logInfo("Initializing with network:", network);
     const currentNetwork = network ?? this.networkService.environment;
-    LogService.logTrace("Current network set to:", currentNetwork);
 
-    const eventData = {
+    this.eventService.emit(WalletEvents.walletInit, {
       initData: {
         account: this.account,
         pairing: "",
         topic: "",
       },
       wallet: SupportedWallets.HWALLETCONNECT,
-    };
-    LogService.logTrace("Emitting walletInit event with data:", eventData);
-    this.eventService.emit(WalletEvents.walletInit, eventData);
-    LogService.logInfo("✅ Hedera Wallet Connect Handler Initialized");
+    });
+    LogService.logInfo("Hedera WalletConnect v2 handler initialized");
     return currentNetwork;
   }
 
   public async register(hwcSettings: HWCSettings): Promise<InitializationData> {
-    LogService.logInfo("Registering Hedera WalletConnect...");
+    LogService.logInfo("Registering Hedera WalletConnect v2...");
     Injectable.registerTransactionHandler(this);
-    LogService.logTrace("Hedera WalletConnect registered as handler");
-
-    this.chainId = this.getChainId(this.networkService.environment);
-    LogService.logTrace("Chain ID set to:", this.chainId);
 
     if (!hwcSettings) {
       LogService.logError("Error: Hedera WalletConnect settings not set");
       throw new NoSettings();
     }
-    this.projectId = hwcSettings.projectId ?? "";
-    LogService.logTrace("Project ID set to:", this.projectId);
 
-    LogService.logTrace("Hedera WalletConnect settings:", hwcSettings);
+    this.projectId = hwcSettings.projectId ?? "";
     this.dappMetadata = {
       name: hwcSettings.dappName ?? "",
       description: hwcSettings.dappDescription ?? "",
       url: hwcSettings.dappURL ?? "",
       icons: [],
     };
-    LogService.logTrace("DApp metadata set to:", this.dappMetadata);
 
     await this.connectWalletConnect();
 
-    LogService.logInfo("Register method completed. Returning account information.");
+    LogService.logInfo("Register completed. Returning account information.");
     return { account: this.getAccount() };
   }
 
-  private getChainId(network: Environment): (typeof HederaChainId)[keyof typeof HederaChainId] {
-    LogService.logInfo("Getting Chain ID for network:", network);
-    switch (network) {
-      case testnet:
-        LogService.logTrace("Network is testnet. Returning Testnet Chain ID.");
-        return HederaChainId.Testnet;
-      case previewnet:
-        LogService.logTrace("Network is previewnet. Returning Previewnet Chain ID.");
-        return HederaChainId.Previewnet;
-      case mainnet:
-        LogService.logTrace("Network is mainnet. Returning Mainnet Chain ID.");
-        return HederaChainId.Mainnet;
-      default:
-        LogService.logError("Error: Invalid network name:", network);
-        throw new UnsupportedNetwork();
-    }
-  }
-
   public async connectWalletConnect(network?: string): Promise<string> {
-    LogService.logInfo("Connecting to WalletConnect with network:", network);
+    LogService.logInfo("Connecting to WalletConnect v2 with network:", network);
     const currentNetwork = network ?? this.networkService.environment;
-    LogService.logTrace("Current network set to:", currentNetwork);
 
-    if (this.dAppConnector) {
-      LogService.logTrace("Existing dAppConnector detected. Calling stop() to clean up.");
+    if (this.hederaProvider) {
+      LogService.logTrace("Existing provider detected. Stopping...");
       await this.stop();
     }
 
+    await this.initAdaptersAndProvider(currentNetwork);
+    await this.openPairingModal();
+    await this.resolveAndCacheAccount(currentNetwork);
+    this.subscribe();
+
+    LogService.logInfo("connectWalletConnect completed.");
+    return currentNetwork;
+  }
+
+  public async stop(): Promise<boolean> {
     try {
-      this.dAppConnector = new DAppConnector(this.dappMetadata, LedgerId.fromString(currentNetwork), this.projectId);
-      LogService.logTrace("DAppConnector initialized:", this.dAppConnector);
-      await this.dAppConnector.init({ logger: "debug" });
-      LogService.logTrace(`✅ HWC Initialized with network: ${currentNetwork} and projectId: ${this.projectId}`);
-      this.setupDisconnectEventHandler();
+      await this.hederaProvider?.disconnect();
+      await this.appKit?.disconnect();
+      this.hederaAdapter = undefined;
+      this.appKit = undefined;
+      this.hederaProvider = undefined;
+
+      this.eventService.emit(WalletEvents.walletDisconnect, {
+        wallet: SupportedWallets.HWALLETCONNECT,
+      });
+      LogService.logInfo("Hedera WalletConnect v2 stopped successfully");
+      return true;
     } catch (error) {
-      LogService.logError("Error initializing HWC:", error);
-      LogService.logError(
-        `❌ Error initializing HWC with network: ${currentNetwork} and projectId: ${this.projectId}`,
-        error,
+      const msg = (error as Error)?.message ?? String(error);
+      if (msg.includes("No active session") || msg.includes("No matching key")) {
+        LogService.logInfo("No active WalletConnect session found");
+      } else {
+        LogService.logError(`Error stopping Hedera WalletConnect: ${msg}`);
+      }
+      return false;
+    }
+  }
+
+  public async restart(network: NetworkName): Promise<void> {
+    await this.stop();
+    await this.init(network);
+  }
+
+  public async signAndSendTransaction(
+    transaction: Transaction,
+    _transactionType?: TransactionType,
+    _functionName?: string,
+    _abi?: object[],
+  ): Promise<TransactionResponse> {
+    LogService.logInfo("[HWC v2] Signing and sending transaction...");
+    this.ensureInitialized();
+
+    // Route EVM sessions through eth_sendTransaction for contract calls
+    if (this.isEvmSession() && transaction instanceof ContractExecuteTransaction) {
+      return this.signAndSendTransactionViaEvm(transaction);
+    }
+
+    try {
+      this.ensureFrozen(transaction);
+
+      const transactionBytes = transaction.toBytes();
+      const transactionBase64 = Buffer.from(transactionBytes).toString("base64");
+
+      const chainRef = this.isTestnet() ? "hedera:testnet" : "hedera:mainnet";
+
+      const params = {
+        transactionList: transactionBase64,
+        signerAccountId: `${chainRef}:${this.account.id.toString()}`,
+      };
+
+      LogService.logTrace(`[HWC v2] Sending transaction for signing: ${JSON.stringify(params)}`);
+
+      const result = await this.hederaProvider.request(
+        {
+          method: "hedera_signAndExecuteTransaction",
+          params,
+        },
+        chainRef as any,
       );
-      return currentNetwork;
+
+      LogService.logInfo("[HWC v2] Transaction signed and sent successfully");
+      LogService.logTrace(`[HWC v2] Result: ${JSON.stringify(result)}`);
+
+      const txResponse = result as any;
+      return new TransactionResponse(
+        txResponse?.transactionId || txResponse?.result?.transactionId || "",
+        txResponse,
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        LogService.logError(error.stack);
+      }
+      throw new SigningError(error instanceof Object ? JSON.stringify(error, null, 2) : error);
+    }
+  }
+
+  async sign(message: string | Transaction): Promise<string> {
+    LogService.logInfo("[HWC v2] Signing transaction...");
+    this.ensureInitialized();
+
+    if (!(message instanceof Transaction)) {
+      throw new SigningError("Hedera WalletConnect must sign a transaction not a string");
     }
 
-    LogService.logTrace("🔗 Pairing with Hedera WalletConnect...");
-    LogService.logTrace("Opening Hedera WalletConnect modal...");
-    LogService.logTrace("DAppConnector state before opening modal:", this.dAppConnector);
-
-    await this.dAppConnector.openModal();
-
-    LogService.logTrace("WalletConnect modal opened. Retrieving signers...");
-    const walletConnectSigners = this.dAppConnector.signers;
-    LogService.logInfo("Signers retrieved:", walletConnectSigners);
-
-    if (!walletConnectSigners) {
-      LogService.logError("Error: No signers retrieved from WalletConnect.");
-      throw new NoSigners();
+    if (!this.networkService.consensusNodes || this.networkService.consensusNodes.length === 0) {
+      throw new ConsensusNodesNotSet();
     }
 
-    const accountId = walletConnectSigners[0].getAccountId().toString();
-    LogService.logInfo("Account ID retrieved from signers:", accountId);
+    try {
+      this.ensureFrozen(message);
 
-    if (!accountId) {
-      LogService.logError("Error: No account ID retrieved from signers.");
-      throw new AccountNotRetrievedFromSigners();
+      const bodyBytes = message._signedTransactions.get(0).bodyBytes;
+      if (!bodyBytes) {
+        throw new Error("No body bytes found in frozen transaction");
+      }
+      const transactionBodyBase64 = Buffer.from(bodyBytes).toString("base64");
+
+      const chainRef = this.isTestnet() ? "hedera:testnet" : "hedera:mainnet";
+
+      const params = {
+        transactionBody: transactionBodyBase64,
+        signerAccountId: `${chainRef}:${this.account.id.toString()}`,
+      };
+
+      LogService.logTrace(`[HWC v2] Signing tx for account: ${this.account.id.toString()}`);
+
+      const signResult = await this.hederaProvider.request(
+        {
+          method: "hedera_signTransaction",
+          params,
+        },
+        chainRef as any,
+      );
+
+      LogService.logInfo("[HWC v2] Transaction signed successfully");
+      LogService.logTrace(`Signature result: ${JSON.stringify(signResult)}`);
+
+      const resultAny = signResult as any;
+      const base64SigMap = resultAny?.signatureMap;
+
+      if (!base64SigMap || typeof base64SigMap !== "string") {
+        throw new SignatureNotFound("No signatureMap returned from WalletConnect sign");
+      }
+
+      const signatureMap = base64StringToSignatureMap(base64SigMap);
+
+      if (!signatureMap.sigPair || signatureMap.sigPair.length === 0) {
+        throw new SignatureNotFound();
+      }
+
+      const firstPair = signatureMap.sigPair[0];
+      const signature = firstPair.ed25519 || firstPair.ECDSASecp256k1 || firstPair.ECDSA_384;
+
+      if (!signature) {
+        throw new SignatureNotFound(JSON.stringify(firstPair, null, 2));
+      }
+
+      const hexSignature = Hex.fromUint8Array(
+        signature instanceof Uint8Array ? signature : new Uint8Array(signature),
+      );
+      LogService.logTrace(`Final hex signature: ${hexSignature}`);
+      return hexSignature;
+    } catch (error) {
+      throw new SigningError(JSON.stringify(error, null, 2));
     }
+  }
 
-    const accountMirror = await this.mirrorNodeAdapter.getAccountInfo(accountId);
-    LogService.logTrace("Account info retrieved from Mirror Node:", accountMirror);
+  getAccount(): Account {
+    return this.account;
+  }
 
-    if (!accountMirror) {
-      LogService.logError("Error: No account info retrieved from Mirror Node.");
+  // ===== Private helpers =====
+
+  private async initAdaptersAndProvider(currentNetwork: string): Promise<void> {
+    const isTest = currentNetwork === testnet;
+
+    const nativeNetworks = isTest
+      ? [HederaChainDefinition.Native.Testnet, HederaChainDefinition.Native.Mainnet]
+      : [HederaChainDefinition.Native.Mainnet, HederaChainDefinition.Native.Testnet];
+
+    const evmNetworks = isTest
+      ? [HederaChainDefinition.EVM.Testnet, HederaChainDefinition.EVM.Mainnet]
+      : [HederaChainDefinition.EVM.Mainnet, HederaChainDefinition.EVM.Testnet];
+
+    this.hederaAdapter = new HederaAdapter({
+      projectId: this.projectId,
+      networks: nativeNetworks,
+      namespace: hederaNamespace,
+    });
+
+    const eip155HederaAdapter = new HederaAdapter({
+      projectId: this.projectId,
+      networks: evmNetworks,
+      namespace: "eip155",
+    });
+
+    const eip155Chains = isTest ? ["eip155:296", "eip155:295"] : ["eip155:295", "eip155:296"];
+    const hederaChains = isTest ? ["hedera:testnet", "hedera:mainnet"] : ["hedera:mainnet", "hedera:testnet"];
+
+    const rpcUrl =
+      this.networkService.rpcNode?.baseUrl ||
+      (isTest ? "https://testnet.hashio.io/api" : "https://mainnet.hashio.io/api");
+
+    const providerOpts = {
+      projectId: this.projectId,
+      metadata: this.dappMetadata,
+      logger: "error" as const,
+      optionalNamespaces: {
+        hedera: {
+          methods: [
+            "hedera_getNodeAddresses",
+            "hedera_executeTransaction",
+            "hedera_signMessage",
+            "hedera_signAndExecuteQuery",
+            "hedera_signAndExecuteTransaction",
+            "hedera_signTransaction",
+          ],
+          chains: hederaChains,
+          events: ["chainChanged", "accountsChanged"],
+        },
+        eip155: {
+          methods: [
+            "eth_sendTransaction",
+            "eth_signTransaction",
+            "eth_sign",
+            "personal_sign",
+            "eth_signTypedData",
+            "eth_signTypedData_v4",
+            "eth_accounts",
+            "eth_chainId",
+          ],
+          chains: eip155Chains,
+          events: ["chainChanged", "accountsChanged"],
+          rpcMap: {
+            "eip155:296": isTest ? rpcUrl : "https://testnet.hashio.io/api",
+            "eip155:295": isTest ? "https://mainnet.hashio.io/api" : rpcUrl,
+          },
+        },
+      },
+    };
+
+    this.hederaProvider = await HederaProvider.init(providerOpts);
+
+    this.appKit = createAppKit({
+      adapters: [this.hederaAdapter, eip155HederaAdapter],
+      universalProvider: this.hederaProvider,
+      projectId: this.projectId,
+      metadata: this.dappMetadata,
+      networks: [
+        HederaChainDefinition.Native.Testnet,
+        HederaChainDefinition.Native.Mainnet,
+        HederaChainDefinition.EVM.Testnet,
+        HederaChainDefinition.EVM.Mainnet,
+      ],
+      features: {
+        analytics: true,
+        socials: false,
+        swaps: false,
+        onramp: false,
+        email: false,
+      },
+    });
+
+    LogService.logInfo(`[HWC v2] Initialized with network ${currentNetwork}`);
+  }
+
+  private async openPairingModal(): Promise<void> {
+    if (!this.appKit) throw new NotInitialized();
+
+    await this.appKit.open();
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        unsubscribe();
+        reject(new Error("Connection timeout (5 min)"));
+      }, 300000);
+
+      const unsubscribe = this.appKit.subscribeState((state: any) => {
+        if (state.open === false) {
+          clearTimeout(timeout);
+          unsubscribe();
+          resolve();
+        }
+      });
+    });
+
+    // Let provider settle after modal close
+    await new Promise((r) => setTimeout(r, 300));
+  }
+
+  private async resolveAndCacheAccount(currentNetwork: string): Promise<void> {
+    if (!this.hederaProvider) throw new NotInitialized();
+
+    const hederaAccount = this.hederaProvider.getAccountAddresses()[0];
+    if (!hederaAccount) {
       throw new AccountNotFound();
     }
 
-    this.signer = this.dAppConnector.getSigner(AccountId.fromString(accountId) as any) as any;
-    LogService.logTrace("Signer set to:", this.signer);
+    LogService.logInfo(`[HWC v2] Provided account: ${hederaAccount}`);
+
+    const accountMirror = await this.mirrorNodeAdapter.getAccountInfo(hederaAccount);
+
+    if (!accountMirror) {
+      throw new AccountNotFound();
+    }
 
     this.account = new Account({
-      id: accountId,
+      id: accountMirror.id?.toString() ?? hederaAccount,
       publicKey: accountMirror.publicKey,
       evmAddress: accountMirror.evmAddress,
     });
-    LogService.logTrace("Account object created:", this.account);
 
     this.network = this.networkService.environment;
-    LogService.logTrace("Network set to:", this.network);
 
-    LogService.logInfo(`✅ Hedera WalletConnect paired with account: ${accountId}`);
+    LogService.logInfo(`[HWC v2] Paired with account: ${this.account.id.toString()}`);
+
     const eventData: WalletPairedEvent = {
       wallet: SupportedWallets.HWALLETCONNECT,
       data: {
@@ -252,169 +452,122 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
         factoryId: this.networkService.configuration ? this.networkService.configuration.factoryAddress : "",
       },
     };
-    LogService.logTrace("Emitting walletPaired event with data:", eventData);
     this.eventService.emit(WalletEvents.walletPaired, eventData);
-
-    LogService.logInfo("connectWalletConnect method completed.");
-    return currentNetwork;
   }
 
-  /**
-   * Stops the Hedera WalletConnect connection.
-   * @returns A promise that resolves to a boolean indicating whether the stop operation was successful.
-   */
-  public async stop(): Promise<boolean> {
-    try {
-      if (this.dAppConnector) {
-        await this.dAppConnector.disconnectAll();
-      }
-      this.dAppConnector = undefined;
-      LogService.logInfo(`🛑 🏁 Hedera WalletConnect stopped successfully`);
-      this.eventService.emit(WalletEvents.walletDisconnect, {
-        wallet: SupportedWallets.HWALLETCONNECT,
+  private subscribe(): void {
+    if (!this.hederaProvider) {
+      LogService.logInfo("[HWC v2] Not initialized; cannot subscribe to events");
+      return;
+    }
+
+    this.hederaProvider.on("session_delete", async () => {
+      await this.stop();
+    });
+
+    this.hederaProvider.on("session_update", async (event: unknown) => {
+      LogService.logInfo(`[HWC v2] Session updated: ${JSON.stringify(event)}`);
+    });
+
+    this.hederaProvider.on("disconnect", async () => {
+      await this.stop();
+    });
+
+    if (this.appKit) {
+      this.appKit.subscribeState((state: unknown) => {
+        LogService.logTrace(`[HWC v2] AppKit state: ${JSON.stringify(state)}`);
       });
-      return Promise.resolve(true);
-    } catch (error) {
-      if (
-        (error as Error).message.includes("No active session") ||
-        (error as Error).message.includes("No matching key")
-      ) {
-        LogService.logInfo(`🔍 No active session found for Hedera WalletConnect`);
-      } else {
-        LogService.logError(`❌ Error stopping Hedera WalletConnect: ${(error as Error).message}`);
-      }
-      return Promise.resolve(false);
     }
   }
 
   /**
-   * Restarts the transaction adapter with the specified network.
-   * @param network The network name to initialize the adapter with.
-   * @returns A promise that resolves when the adapter has been restarted.
+   * Route a ContractExecuteTransaction through eth_sendTransaction for EVM-only sessions.
+   * Extracts the contract ID and encoded function data from the transaction.
    */
-  public async restart(network: NetworkName): Promise<void> {
-    await this.stop();
-    await this.init(network);
-  }
-
-  public async signAndSendTransaction(transaction: Transaction): Promise<TransactionResponse> {
-    LogService.logInfo(`🔏 Signing and sending transaction from HWC...`);
-    if (!this.dAppConnector) {
-      throw new NotInitialized();
-    }
-    if (!this.account) {
+  private async signAndSendTransactionViaEvm(
+    transaction: ContractExecuteTransaction,
+  ): Promise<TransactionResponse> {
+    if (!this.account.evmAddress) {
       throw new AccountNotSet();
     }
-    if (!this.signer || !this.dAppConnector.signers || this.dAppConnector.signers.length === 0) {
-      throw new NoSigners();
+
+    // Extract contract ID and resolve to EVM address
+    const contractId = (transaction as any)._contractId?.toString();
+    if (!contractId) {
+      throw new SigningError("ContractExecuteTransaction has no contractId");
     }
 
-    try {
-      if (!transaction.isFrozen()) {
-        LogService.logTrace(`🔒 Tx not frozen, freezing transaction...`);
-        transaction._freezeWithAccountId(AccountId.fromString(this.account.id.toString()));
-      }
-      const params: SignAndExecuteTransactionParams = {
-        transactionList: transactionToBase64String(transaction as any),
-        signerAccountId: `${this.chainId}:${this.account.id.toString()}`,
-      };
-      LogService.logTrace(`🖋️ [HWC] Signing tx with params: ${JSON.stringify(params, null, 2)}`);
+    let toAddress = contractId;
+    if (contractId.match(/^0\.0\.\d+$/)) {
+      const contractInfo = await this.mirrorNodeAdapter.getContractInfo(contractId);
+      toAddress = contractInfo.evmAddress;
+    }
 
-      const transactionResponseRaw = await this.dAppConnector?.signAndExecuteTransaction(params);
+    // Extract the encoded function parameters
+    const functionParams = (transaction as any)._functionParameters;
+    const data = functionParams ? "0x" + Buffer.from(functionParams).toString("hex") : "0x";
+    const gas = (transaction as any)._gas?.toNumber?.() ?? (transaction as any)._gas ?? 300000;
 
-      LogService.logInfo(`✅ Transaction signed and sent successfully!`);
-      LogService.logTrace(`Transaction response RAW: ${JSON.stringify(transactionResponseRaw, null, 2)}`);
-      const transactionResponse = HTransactionResponse.fromJSON(
-        transactionResponseRaw as unknown as TransactionResponseJSON,
-      );
+    const chainRef = this.currentEvmChainRef();
 
-      LogService.logTrace(`Transaction response: ${JSON.stringify(transactionResponse, null, 2)}`);
+    const txParams: Record<string, string> = {
+      from: this.account.evmAddress,
+      to: toAddress.startsWith("0x") ? toAddress : `0x${toAddress}`,
+      data,
+      gas: ethers.toBeHex(gas),
+    };
 
-      return await HederaTransactionResponseAdapter.manageResponse(
-        this.networkService.environment,
-        this.signer,
-        transactionResponse,
-      );
-    } catch (error) {
-      if (error instanceof Error) {
-        LogService.logError(error.stack);
-      }
-      throw new SigningError(error instanceof Object ? JSON.stringify(error, null, 2) : error);
+    const payableAmount = (transaction as any)._payableAmount;
+    if (payableAmount) {
+      txParams.value = ethers.toBeHex(payableAmount);
+    }
+
+    LogService.logTrace(`[HWC v2 EVM] Sending eth_sendTransaction: ${JSON.stringify(txParams)}`);
+
+    const txHash = await this.hederaProvider.request(
+      { method: "eth_sendTransaction", params: [txParams] },
+      chainRef,
+    );
+
+    const provider = this.rpcProvider();
+    const receipt = await provider.waitForTransaction(txHash as string);
+
+    const responsePayload = {
+      hash: txHash,
+      wait: () => Promise.resolve(receipt),
+    } as any;
+
+    return RPCTransactionResponseAdapter.manageResponse(responsePayload, this.networkService.environment);
+  }
+
+  private ensureInitialized(): void {
+    if (!this.hederaProvider) throw new NotInitialized();
+    if (!this.account) throw new AccountNotSet();
+  }
+
+  private ensureFrozen(tx: Transaction): void {
+    if (!tx.isFrozen()) {
+      tx._freezeWithAccountId(AccountId.fromString(this.account.id.toString()));
     }
   }
 
-  getAccount(): Account {
-    return this.account;
+  private isTestnet(): boolean {
+    return this.networkService.environment === testnet;
   }
 
-  /**
-   * Signs a transaction using Hedera WalletConnect.
-   * @param message - The transaction to sign.
-   * @returns A promise that resolves to the hexadecimal signature of the signed transaction.
-   * @throws Error if Hedera WalletConnect is not initialized, account is not set, no signers found,
-   * the message is not an instance of Transaction, or consensus nodes are not set for the environment.
-   * @throws SigningError if an error occurs during the signing process.
-   */
-  async sign(message: string | Transaction): Promise<string> {
-    LogService.logInfo("🔏 Signing transaction from HWC...");
-    if (!this.dAppConnector) {
-      throw new NotInitialized();
-    }
-    if (!this.account) {
-      throw new AccountNotSet();
-    }
-    if (!this.signer || !this.dAppConnector.signers || this.dAppConnector.signers.length === 0) {
-      throw new NoSigners();
-    }
-    if (!(message instanceof Transaction))
-      throw new SigningError("❌ Hedera WalletConnect must sign a transaction not a string");
-    if (!this.networkService.consensusNodes || this.networkService.consensusNodes.length == 0) {
-      throw new ConsensusNodesNotSet();
-    }
+  private isEvmSession(): boolean {
+    return !this.hederaProvider?.session?.namespaces?.hedera;
+  }
 
-    try {
-      if (!message.isFrozen()) {
-        LogService.logTrace(`🔒 Tx not frozen, freezing transaction...`);
-        message._freezeWithAccountId(AccountId.fromString(this.account.id.toString()));
-      }
+  private evmChainId(): "295" | "296" {
+    return this.isTestnet() ? "296" : "295";
+  }
 
-      const params: SignTransactionParams = {
-        transactionBody: transactionBodyToBase64String(
-          transactionToTransactionBody(
-            message as any,
-            AccountId.fromString(this.networkService.consensusNodes[0]) as any,
-          ),
-        ),
-        signerAccountId: `${this.chainId}:${this.account.id.toString()}`,
-      };
+  private currentEvmChainRef(): `eip155:${string}` {
+    return `eip155:${this.evmChainId()}`;
+  }
 
-      LogService.logTrace(`🖋️ [HWC] Signing tx with params: ${JSON.stringify(params, null, 2)}`);
-      const signResult = await this.dAppConnector.signTransaction(params);
-      LogService.logInfo(`✅ Transaction signed successfully!`);
-      LogService.logTrace(`Signature result: ${JSON.stringify(signResult, null, 2)}`);
-      const decodedSignatureMap = base64StringToSignatureMap(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (signResult as any).signatureMap,
-      );
-      LogService.logTrace(`Decoded signature map: ${JSON.stringify(decodedSignatureMap, null, 2)}`);
-
-      const signaturesLength = decodedSignatureMap.sigPair.length;
-      if (signaturesLength === 0) {
-        throw new SignatureNotFound();
-      }
-      const firstSignature =
-        decodedSignatureMap.sigPair[0].ed25519 ||
-        decodedSignatureMap.sigPair[0].ECDSASecp256k1 ||
-        decodedSignatureMap.sigPair[0].ECDSA_384;
-      if (!firstSignature) {
-        throw new SignatureNotFound(JSON.stringify(firstSignature, null, 2));
-      }
-
-      const hexSignature = Hex.fromUint8Array(firstSignature);
-      LogService.logTrace(`Final hexadecimal signature: ${JSON.stringify(hexSignature, null, 2)}`);
-      return hexSignature;
-    } catch (error) {
-      throw new SigningError(JSON.stringify(error, null, 2));
-    }
+  private rpcProvider(): ethers.JsonRpcProvider {
+    return new ethers.JsonRpcProvider(this.networkService.rpcNode?.baseUrl);
   }
 }
