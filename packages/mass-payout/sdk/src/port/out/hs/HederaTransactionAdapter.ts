@@ -159,8 +159,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       ? TransparentUpgradeableProxy__factory.bytecode.slice(2)
       : TransparentUpgradeableProxy__factory.bytecode;
 
-    const proxyBytecode = Uint8Array.from(Buffer.from(proxyBytecodeHex, "hex"));
-
     const iface = new Interface(LifeCycleCashFlow__factory.abi);
     const callDataHex = iface.encodeFunctionData("initialize", [asset.value, paymentToken.value.slice(2), rbac]);
 
