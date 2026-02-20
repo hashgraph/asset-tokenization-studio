@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-20T12:21:51.238Z
+ * Generated: 2026-02-20T15:02:03.034Z
  * Facets: 64
  * Infrastructure: 2
  *
@@ -279,7 +279,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_FIXED_RATE_RESOLVER_KEY",
       value: "0xd55d8787d23b78e70dada1ade45b8758f5c027e2cddf3556606c07d388ce159a",
     },
-    inheritance: ["BondUSA", "IStaticFunctionSelectors"],
+    inheritance: ["BondUSAFixedRate", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -337,7 +337,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x99c145ff21354eb7b25cb096873143fa3d3aba98457b96bcd13f1d1f2b9bf28c",
     },
-    inheritance: ["BondUSA", "IStaticFunctionSelectors"],
+    inheritance: ["BondUSAKpiLinkedRate", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -491,7 +491,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_KPI_LINKED_READ_RESOLVER_KEY",
       value: "0xcced91a2a03bf45bd62730a7f4703ee2d762f8ebccff315c7145258265f73249",
     },
-    inheritance: ["BondUSARead", "IStaticFunctionSelectors"],
+    inheritance: ["BondUSAReadKpiLinkedRate", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getBondDetails",
@@ -581,7 +581,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY",
       value: "0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504",
     },
-    inheritance: ["BondUSARead", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getBondDetails",
@@ -671,7 +670,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
       value: "0x8048a878c656dcf3886e69ad27a9272a4fb9499299ab5f0e1b6c99ac3b1130f8",
     },
-    inheritance: ["BondUSA", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -706,29 +704,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function updateMaturityDate(uint256 _newMaturityDate) returns (bool success_)",
         selector: "0xc7a6ca35",
       },
-    ],
-    events: [
-      {
-        name: "CouponSet",
-        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
-        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
-      },
-      {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
-      },
-    ],
-    errors: [
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
-      { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
-      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
-      {
-        name: "InterestRateIsSustainabilityPerformanceTarget",
-        signature: "InterestRateIsSustainabilityPerformanceTarget()",
-        selector: "0x15a15b0a",
-      },
-      { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
     factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
   },
@@ -1350,7 +1325,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_EQUITY_RESOLVER_KEY",
       value: "0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810",
     },
-    inheritance: ["IEquityUSA", "IStaticFunctionSelectors"],
+    inheritance: ["EquityUSA", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "_initialize_equityUSA",
@@ -3578,7 +3553,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_CROSS_ORDERED_TASKS_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x04d20e52e58dbadedfcf6c373a826fc5f7c665fd6caf67c8a65a9e777a8b70ec",
     },
-    inheritance: ["ScheduledCrossOrderedTasks", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getScheduledCrossOrderedTasks",

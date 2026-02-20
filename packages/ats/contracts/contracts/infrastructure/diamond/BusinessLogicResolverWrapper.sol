@@ -4,11 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
 import { LibPagination } from "../lib/LibPagination.sol";
 import { EnumerableSetBytes4 } from "../lib/EnumerableSetBytes4.sol";
-import { IBusinessLogicResolverWrapper } from "../interfaces/IBusinessLogicResolverWrapper.sol";
-import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
 import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
-abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
+abstract contract BusinessLogicResolverWrapper {
     struct BusinessLogicResolverDataStorage {
         uint256 latestVersion;
         // list of facetIds
@@ -195,7 +193,7 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
 
     function _checkValidVersion(uint256 _version) private view {
         if (_version == 0 || _version > _businessLogicResolverStorage().latestVersion)
-            revert BusinessLogicVersionDoesNotExist(_version);
+            revert IBusinessLogicResolver.BusinessLogicVersionDoesNotExist(_version);
     }
 
     function _checkValidKeys(
@@ -208,14 +206,14 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
         uint256 innerIndex;
         for (uint256 index; index < length; ) {
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
-            if (uint256(currentKey) == 0) revert ZeroKeyNotValidForBusinessLogic();
+            if (uint256(currentKey) == 0) revert IBusinessLogicResolver.ZeroKeyNotValidForBusinessLogic();
 
             unchecked {
                 innerIndex = index + 1;
             }
             for (; innerIndex < length; ) {
                 if (currentKey == _businessLogicsRegistryDatas[innerIndex].businessLogicKey)
-                    revert BusinessLogicKeyDuplicated(currentKey);
+                    revert IBusinessLogicResolver.BusinessLogicKeyDuplicated(currentKey);
                 unchecked {
                     ++innerIndex;
                 }
