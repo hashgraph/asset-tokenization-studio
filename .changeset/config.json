@@ -9,7 +9,7 @@
       "@hashgraph/asset-tokenization-dapp"
     ],
     [
-      "@hashgraph/mass-payout-contracts",
+      "@mass-payout/contracts",
       "@hashgraph/mass-payout-sdk",
       "@hashgraph/mass-payout-backend",
       "@hashgraph/mass-payout-frontend"
