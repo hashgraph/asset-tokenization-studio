@@ -1,0 +1,359 @@
+name: "100: [FLOW] ATS Deployment Test"
+
+on:
+  pull_request:
+    paths:
+      - "packages/ats/contracts/**"
+      - ".github/workflows/100-flow-ats-deployment-test.yaml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deployment-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================================================
+  # Job 0: Build contracts (shared by all deployment jobs)
+  # ==========================================================================
+  # Installs dependencies and builds contracts once, then caches both
+  # node_modules and build artifacts for downstream deployment jobs.
+  #
+  # Cache strategy:
+  #   - Dependencies: keyed on package-lock.json hash (skip npm ci on hit)
+  #   - Build artifacts: keyed on Solidity source + config hash (skip build on hit)
+  #   - Downstream jobs use actions/cache/restore (read-only)
+  # ==========================================================================
+  build:
+    name: Build Contracts
+    runs-on: token-studio-linux-large
+    timeout-minutes: 10
+    env:
+      NODE_OPTIONS: "--max-old-space-size=32768"
+      CONTRACT_SIZER_RUN_ON_COMPILE: "false"
+      REPORT_GAS: "false"
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+
+      - name: Restore dependencies from cache
+        id: deps-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+            */*/*/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Restore build artifacts from cache
+        id: build-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            packages/ats/contracts/artifacts
+            packages/ats/contracts/build
+            packages/ats/contracts/typechain-types
+            packages/ats/contracts/cache
+          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
+
+      - name: Build contracts
+        if: steps.build-cache.outputs.cache-hit != 'true'
+        run: npm run ats:contracts:build
+
+  # ==========================================================================
+  # Job 1: Deploy ATS system to a persistent Hardhat node
+  # ==========================================================================
+  # Runs the real CLI deployment pipeline (npx tsx scripts/cli/deploySystemWithNewBlr.ts)
+  # against a Hardhat JSON-RPC node on port 8545.
+  #
+  # Env var flow:
+  #   NETWORK=local -> requireNetworkSigner() -> createNetworkSigner("local")
+  #     -> getNetworkConfig("local") returns { jsonRpcUrl: "http://127.0.0.1:8545" }
+  #     -> getPrivateKey("local", 0) reads LOCAL_PRIVATE_KEY_0
+  #     -> new Wallet(privateKey, new JsonRpcProvider(jsonRpcUrl))
+  # ==========================================================================
+  hardhat-deployment:
+    name: Deploy to Hardhat Network
+    needs:
+      - build
+    runs-on: token-studio-linux-large
+    timeout-minutes: 15
+    env:
+      NODE_OPTIONS: "--max-old-space-size=32768"
+      CONTRACT_SIZER_RUN_ON_COMPILE: "false"
+      REPORT_GAS: "false"
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+
+      - name: Restore dependencies from cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+            */*/*/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Restore build artifacts from cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            packages/ats/contracts/artifacts
+            packages/ats/contracts/build
+            packages/ats/contracts/typechain-types
+            packages/ats/contracts/cache
+          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Start Hardhat node
+        working-directory: packages/ats/contracts
+        run: |
+          npx hardhat node &
+          echo "Hardhat node started in background (PID: $!)"
+
+      - name: Wait for Hardhat node
+        run: |
+          echo "Waiting for Hardhat JSON-RPC on port 8545..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8545 -X POST \
+              -H "Content-Type: application/json" \
+              -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+              > /dev/null 2>&1; then
+              echo "Hardhat node is ready"
+              exit 0
+            fi
+            echo "  Attempt $i/30 - waiting..."
+            sleep 1
+          done
+          echo "::error::Hardhat node failed to start within 30 seconds"
+          exit 1
+
+      - name: Deploy ATS system
+        working-directory: packages/ats/contracts
+        env:
+          # NETWORK=local -> Configuration.endpoints.local.jsonRpc defaults to http://127.0.0.1:8545
+          NETWORK: local
+          # Hardhat Account #0 well-known private key (10,000 ETH pre-funded)
+          LOCAL_PRIVATE_KEY_0: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        run: npx tsx scripts/cli/deploySystemWithNewBlr.ts
+
+      - name: Verify deployment output
+        working-directory: packages/ats/contracts
+        run: |
+          echo "Checking deployment output files..."
+          if ls deployments/local/*.json 1> /dev/null 2>&1; then
+            echo "Deployment output files found:"
+            ls -la deployments/local/
+          else
+            echo "::warning::No deployment output files found (non-fatal)"
+          fi
+
+  # ==========================================================================
+  # Job 2: Deploy ATS system to a Hiero Solo network
+  # ==========================================================================
+  # Runs the same CLI deployment pipeline against a real Hedera network
+  # deployed locally via Hiero Solo (Kubernetes-based consensus node +
+  # JSON-RPC relay via hiero-solo-action).
+  #
+  # This catches Hedera-specific issues that Hardhat misses:
+  #   - Gas estimation with real HBAR-based gas
+  #   - Transaction confirmation delays
+  #   - Hedera EVM differences
+  #   - Contract ID resolution (0.0.XXXX)
+  #
+  # Uses the official hiero-solo-action GitHub Action to provision the network.
+  # Gracefully skips if Docker is not available on the runner (Solo needs
+  # Docker for Kubernetes via kind).
+  #
+  # Env var flow:
+  #   NETWORK=hedera-local -> requireNetworkSigner() -> createNetworkSigner("hedera-local")
+  #     -> getNetworkConfig("hedera-local") returns { jsonRpcUrl: "http://127.0.0.1:7546" }
+  #     -> getPrivateKey("hedera-local", 0) reads HEDERA_LOCAL_PRIVATE_KEY_0
+  #     -> new Wallet(privateKey, new JsonRpcProvider(jsonRpcUrl))
+  # ==========================================================================
+  solo-deployment:
+    name: Deploy to Hiero Solo Network
+    needs:
+      - build
+    runs-on: token-studio-linux-large
+    timeout-minutes: 30
+    env:
+      NODE_OPTIONS: "--max-old-space-size=32768"
+      CONTRACT_SIZER_RUN_ON_COMPILE: "false"
+      REPORT_GAS: "false"
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.20.0
+
+      - name: Check Docker availability
+        id: docker-check
+        run: |
+          if docker info > /dev/null 2>&1; then
+            echo "available=true" >> "${GITHUB_OUTPUT}"
+            echo "Docker is available"
+            docker --version
+          else
+            echo "available=false" >> "${GITHUB_OUTPUT}"
+            echo "::warning::Docker not available - skipping Solo deployment test"
+          fi
+
+      - name: Restore dependencies from cache
+        if: steps.docker-check.outputs.available == 'true'
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+            */*/*/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-deps-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Restore build artifacts from cache
+        if: steps.docker-check.outputs.available == 'true'
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            packages/ats/contracts/artifacts
+            packages/ats/contracts/build
+            packages/ats/contracts/typechain-types
+            packages/ats/contracts/cache
+          key: ${{ runner.os }}-contracts-build-${{ hashFiles('packages/ats/contracts/contracts/**/*.sol', 'packages/ats/contracts/hardhat.config.ts', 'package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Setup Hiero Solo Network
+        id: solo
+        if: steps.docker-check.outputs.available == 'true'
+        uses: hiero-ledger/hiero-solo-action@fbca3e7a99ce9aa8a250563a81187abe115e0dad # v0.16.0
+        with:
+          installRelay: true
+          installMirrorNode: true
+          hbarAmount: 10000000
+
+      - name: Register ECDSA deployer with EVM alias
+        id: extract-key
+        if: steps.docker-check.outputs.available == 'true' && steps.solo.outcome == 'success'
+        env:
+          DER_KEY: ${{ steps.solo.outputs.ecdsaPrivateKey }}
+          DEPLOYMENT: ${{ steps.solo.outputs.deployment }}
+        run: |
+          # Solo outputs DER-encoded ECDSA secp256k1 key.
+          # The raw 32-byte private key is the last 64 hex characters.
+          RAW_KEY="0x${DER_KEY: -64}"
+          echo "key=${RAW_KEY}" >> "${GITHUB_OUTPUT}"
+
+          # Derive EVM address for relay readiness check
+          EVM_ADDR=$(node -e "const{Wallet}=require('ethers');console.log(new Wallet('${RAW_KEY}').address)")
+          echo "address=${EVM_ADDR}" >> "${GITHUB_OUTPUT}"
+          echo "Deployer EVM address: ${EVM_ADDR}"
+
+          # Solo's action creates ECDSA accounts WITHOUT an EVM alias.
+          # The JSON-RPC relay needs the alias to resolve EVM addresses.
+          # Create a new funded account with the same key but with --set-alias,
+          # which registers the ECDSA-derived EVM address on the Hedera network.
+          echo "Creating aliased account via Solo CLI..."
+          solo ledger account create \
+            --ecdsa-private-key "${DER_KEY}" \
+            --set-alias \
+            --hbar-amount 10000000 \
+            --deployment "${DEPLOYMENT}" \
+            --dev
+
+      - name: Wait for EVM alias indexing
+        if: steps.docker-check.outputs.available == 'true' && steps.solo.outcome == 'success'
+        env:
+          EVM_ADDR: ${{ steps.extract-key.outputs.address }}
+        run: |
+          echo "Waiting for relay to recognize ${EVM_ADDR}..."
+          for i in $(seq 1 60); do
+            RESULT=$(curl -sf http://localhost:7546 -X POST \
+              -H "Content-Type: application/json" \
+              -d "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"${EVM_ADDR}\",\"latest\"],\"id\":1}" \
+              2>/dev/null || echo '{}')
+
+            # Check for non-zero balance (alias active + funded)
+            CHECK=$(echo "${RESULT}" | node -e "
+              const d = require('fs').readFileSync('/dev/stdin','utf8');
+              try { const r = JSON.parse(d).result;
+                console.log(r && r !== '0x0' && r !== '0x' ? 'ready' : 'waiting');
+              } catch(e) { console.log('error'); }
+            ")
+
+            if [[ "${CHECK}" == "ready" ]]; then
+              echo "Relay recognizes account with balance (attempt ${i})"
+              echo "Balance response: ${RESULT}"
+              exit 0
+            fi
+            echo "  Attempt ${i}/60 - status: ${CHECK}"
+            sleep 5
+          done
+          echo "::error::Relay cannot resolve ${EVM_ADDR} after 5 minutes"
+          exit 1
+
+      - name: Deploy ATS system to Hiero Solo
+        if: steps.docker-check.outputs.available == 'true' && steps.solo.outcome == 'success'
+        working-directory: packages/ats/contracts
+        env:
+          NETWORK: hedera-local
+          HEDERA_LOCAL_PRIVATE_KEY_0: ${{ steps.extract-key.outputs.key }}
+        run: npx tsx scripts/cli/deploySystemWithNewBlr.ts
+
+      - name: Verify deployment output
+        if: success() && steps.docker-check.outputs.available == 'true'
+        working-directory: packages/ats/contracts
+        run: |
+          echo "Checking deployment output files..."
+          if ls deployments/hedera-local/*.json 1> /dev/null 2>&1; then
+            echo "Deployment output files found:"
+            ls -la deployments/hedera-local/
+          else
+            echo "::warning::No deployment output files found (non-fatal)"
+          fi

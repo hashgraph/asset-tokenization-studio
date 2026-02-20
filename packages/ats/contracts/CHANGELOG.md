@@ -1,5 +1,100 @@
 # @hashgraph/asset-tokenization-contracts
 
+## 4.2.0
+
+### Minor Changes
+
+- c5b2a50: Add support for multiple bond types (Variable Rate, Fixed Rate, KPI Linked, SPT)
+
+  This release introduces comprehensive support for multiple bond asset types across the Asset Tokenization Studio:
+
+  **Breaking Changes:**
+  - Refactored Solidity contracts to check for Equity type instead of Bond type, as Bond is no longer a single type but a family of types (Variable Rate, Fixed Rate, KPI Linked Rate, SPT Rate)
+  - Updated asset type filtering logic to use enum values (BOND_VARIABLE_RATE, BOND_FIXED_RATE, BOND_KPI_LINKED_RATE, BOND_SPT_RATE, EQUITY) instead of display strings
+
+  **Contract Changes:**
+  - Updated LifeCycleCashFlowStorageWrapper.sol to invert AssetType checks: now validates if asset is Equity (special case) with bond types as the default behavior
+  - Added comprehensive test coverage for all bond types in lifecycle cash flow tests
+
+  **SDK Changes:**
+  - Extended asset type system to support four distinct bond types plus equity
+  - Maintained backward compatibility for existing integrations
+
+  This is a **minor** version bump as it adds new functionality (multiple bond types) while maintaining backward compatibility through the enum-based approach.
+
+- a942765: Migrate totalSupply and balances to ERC20 storage with lazy migration strategy
+
+  This PR introduces a storage migration that moves `totalSupply` and `balances` from the legacy ERC1410BasicStorage to the new ERC20Storage, enabling better separation of concerns and improved gas efficiency.
+
+  **Key Changes:**
+  - **New Storage Structure**: Added `totalSupply` and `balances` fields to ERC20Storage struct in ERC20StorageWrapper1
+  - **Lazy Migration**: Implemented `_migrateTotalSupplyIfNeeded()` and `_migrateBalanceIfNeeded()` functions that automatically migrate values from deprecated storage on first access
+  - **Migration Triggers**: `_adjustTotalSupply` and `_adjustTotalBalanceFor` call `_migrateTotalSupplyIfNeeded` and `_migrateBalanceIfNeeded` respectively, ensuring migration is triggered during balance adjustment operations
+  - **Backward Compatibility**: View functions prioritize legacy storage values, falling back to new storage when legacy is empty
+  - **Deprecated Fields**: Renamed `_totalSupply_` to `DEPRECATED_totalSupply` and `_balances_` to `DEPRECATED_balances` in ERC1410BasicStorage to indicate deprecation
+  - **Event Emission**: Simplified Transfer event emission by replacing internal `_emitTransferEvent` wrapper with direct `emit Transfer` statements
+  - **New Helper Methods**: Added `_increaseBalance`, `_reduceBalance`, `_increaseTotalSupply`, `_reduceTotalSupply`, and `_adjustTotalBalanceFor` functions
+  - **Migration Test Contract**: Added MigrationFacetTest for testing the migration scenarios
+  - **Integration Tests**: Added `adjustBalances` integration tests verifying that `adjustBalances` migrates `totalSupply` eagerly and that per-account balance migration is triggered lazily on the next token interaction
+
+  **Benefits:**
+  - Cleaner storage architecture with ERC20-specific data in ERC20Storage
+  - Automatic, transparent migration with no disruption to existing tokens
+  - Small gas savings from simplified event emission (~50-70 gas per transfer operation)
+
+- 2a26b41: Migrate from ether 5 to ether 6
+
+### Patch Changes
+
+- 35fde1c: Improve test infrastructure and coverage for contracts scripts:
+  - Reorganize test suite into unit/integration categories
+  - Add comprehensive unit tests for registry generator, checkpoint manager, and deployment utilities
+  - Refactor registry generator into modular architecture (cache/, core/, utils/)
+  - Standardize CLI utilities and improve error handling
+  - Fix changeset-check workflow to use dynamic base branch instead of hardcoded develop
+
+- 33e8046: Enhance checkpoint system with step tracking, retry utilities, and CLI management
+  - Centralize deployment/checkpoint path management and step definitions
+  - Add retry utility with exponential backoff for transient network failures
+  - Implement checkpoint schema versioning with migration support
+  - Add checkpoint management CLI (list/show/delete/cleanup/reset)
+  - Add failure injection testing module for reproducible recovery testing
+  - Comprehensive test coverage and documentation for checkpoint system
+
+- 04e7366: Add CI deployment testing workflow and harden CI pipeline
+  - Add GitHub Actions workflow for automated deployment testing (Hardhat + Hiero Solo)
+  - Extract shared build job with dependency/artifact caching to eliminate duplication
+  - Migrate deployment workflow to Hiero Solo with standardized naming convention
+  - Upgrade actions/checkout v4.2.2 → v5.0.0 across all workflows
+  - Pin actions/cache to v4.2.3 with SHA, add timeout-minutes and concurrency controls
+  - Add defaults.run.shell: bash and codecov version annotation
+  - Fix facet registration: replace 195 parallel RPC calls with synchronous registry lookups
+  - Wrap signer with NonceManager to prevent nonce caching issues during deployment
+  - Fix ethers v6 API in diamondCutManager test (keccak256, contract address accessor)
+  - Add selector conflict validation test (SelectorAlreadyRegistered error)
+  - Add timing output and type-safe error handling to registry generation task
+
+- c81bab9: Cleanup and standardize GitHub Actions workflows:
+  - Adopt Hiero naming convention: `ddd-xxxx-<name>.yaml` with `ddd: [XXXX] <Name>` workflow names
+  - Standardize bash syntax: `[[ ]]` double brackets, `==` comparisons, `${VAR}` braces
+  - Fix `$GITHUB_OUTPUT` quoting inconsistencies in publish workflows
+  - Fix `if: always()` to `if: ${{ always() }}` expression syntax
+  - Remove unnecessary PR formatting triggers that wasted CI runner minutes
+  - Fix assignee check for security (expression injection prevention)
+  - Delete obsolete backup workflow files (fully commented-out dead code)
+  - Update cross-references in README.md, ci-cd-workflows.md, and CLAUDE.md
+
+- e378e82: - Rename test/contracts/unit to test/contracts/integration to accurately reflect test type
+  - Add Mocha rootHooks and globalSetup.ts to silence script logger globally during tests
+  - Fix logging.test.ts and hedera.test.ts to prevent logger state leakage between suites
+- ad45d49: Fix checkpoint ID format documentation and update step counts in JSDoc comments
+- fe7032f: Refactor integration test helpers to reduce boilerplate and eliminate magic numbers:
+  - Add centralized test constants (TEST_DELAYS, TEST_OPTIONS.CONFIRMATIONS_INSTANT, EIP1967_SLOTS, TEST_GAS_LIMITS, TEST_INIT_VALUES)
+  - Create reusable test helpers (silenceScriptLogging, createCheckpointCleanupHooks)
+  - Standardize import organization across all integration tests
+  - Reclassify atsRegistry.data.test.ts from integration to unit directory
+  - Reduce test code duplication (~100 lines eliminated)
+
 ## 4.1.1
 
 ### Patch Changes
