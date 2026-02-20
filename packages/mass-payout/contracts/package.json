@@ -1,5 +1,5 @@
 {
-  "name": "@mass-payout/contracts",
+  "name": "@hashgraph/mass-payout-contracts",
   "main": "build/typechain-types/index.js",
   "types": "build/typechain-types/index.d.ts",
   "version": "1.0.0",

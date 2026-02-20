@@ -1,5 +1,5 @@
 ---
-"@mass-payout/contracts": minor
+"@hashgraph/mass-payout-contracts": minor
 "@hashgraph/mass-payout-sdk": minor
 ---
 
