@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { bondStorage, BondDataStorage } from "../../storage/AssetStorage.sol";
 import { IBondRead } from "../../facets/assetCapabilities/interfaces/bond/IBondRead.sol";
-import { IBondStorageWrapper } from "../../facets/assetCapabilities/interfaces/bond/IBondStorageWrapper.sol";
+import { IBond } from "../../facets/assetCapabilities/interfaces/bond/IBond.sol";
 import { COUPON_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } from "../../constants/values.sol";
 import { COUPON_LISTING_TASK_TYPE } from "../../constants/values.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
@@ -69,7 +69,7 @@ library LibBond {
 
         initCoupon(corporateActionId_, _coupon);
 
-        emit IBondStorageWrapper.CouponSet(corporateActionId_, couponID_, msg.sender, _coupon);
+        emit IBond.CouponSet(corporateActionId_, couponID_, msg.sender, _coupon);
 
         return (corporateActionId_, couponID_);
     }
@@ -79,7 +79,7 @@ library LibBond {
     /// @param _coupon The coupon data
     function initCoupon(bytes32 _actionId, IBondRead.Coupon memory _coupon) internal {
         if (_actionId == bytes32(0)) {
-            revert IBondStorageWrapper.CouponCreationFailed();
+            revert IBond.CouponCreationFailed();
         }
 
         LibScheduledTasks.addScheduledCrossOrderedTask(_coupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));

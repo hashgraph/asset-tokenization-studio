@@ -10,10 +10,8 @@ import {
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
-import { IExternalControlList } from "../../facets/features/interfaces/externalControlLists/IExternalControlList.sol";
-import {
-    IControlListStorageWrapper
-} from "../../facets/features/interfaces/controlList/IControlListStorageWrapper.sol";
+import { IExternalControlList } from "../../facets/features/interfaces/IExternalControlList.sol";
+import { IControlListBase } from "../../facets/features/interfaces/IControlList.sol";
 
 /// @title LibControlList — Control list (whitelist/blacklist) library
 /// @notice Centralized control list functionality extracted from ControlListStorageWrapper.sol
@@ -58,7 +56,7 @@ library LibControlList {
 
     function requireListedAllowed(address account) internal view {
         if (!isAbleToAccess(account)) {
-            revert IControlListStorageWrapper.AccountIsBlocked(account);
+            revert IControlListBase.AccountIsBlocked(account);
         }
     }
 

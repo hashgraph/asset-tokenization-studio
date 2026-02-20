@@ -2,8 +2,61 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing } from "./IClearing.sol";
+import { ThirdPartyType } from "../../types/ThirdPartyType.sol";
 
 interface IClearingRedeem is IClearing {
+    struct ClearingRedeemData {
+        uint256 amount;
+        uint256 expirationTimestamp;
+        bytes data;
+        bytes operatorData;
+        ThirdPartyType operatorType;
+    }
+
+    event ClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedRedeemFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedOperatorRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ProtectedClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
     /**
      * @notice Creates a redeem clearing operation for a partition
      *

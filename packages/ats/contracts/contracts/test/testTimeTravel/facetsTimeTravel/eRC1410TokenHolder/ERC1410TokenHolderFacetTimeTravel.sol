@@ -3,9 +3,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    ERC1410TokenHolderFacet
-} from "../../../../facets/features/ERC1400/ERC1410/standard/ERC1410TokenHolderFacet.sol";
+import { ERC1410TokenHolderFacet } from "../../../../facets/features/ERC1400/ERC1410/ERC1410TokenHolderFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
 // solhint-disable-next-line no-empty-blocks

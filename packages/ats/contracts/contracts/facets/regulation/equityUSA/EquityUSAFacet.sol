@@ -27,7 +27,6 @@ import { LibScheduledTasks } from "../../../lib/domain/LibScheduledTasks.sol";
 import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibTotalBalance } from "../../../lib/orchestrator/LibTotalBalance.sol";
-import { IEquityStorageWrapper } from "../../assetCapabilities/interfaces/equity/IEquityStorageWrapper.sol";
 
 contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
     error AlreadyInitialized();
@@ -68,7 +67,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
         (corporateActionID, dividendID_) = LibCorporateActions.addCorporateAction(DIVIDEND_CORPORATE_ACTION_TYPE, data);
         _initDividend(corporateActionID, data);
 
-        emit IEquityStorageWrapper.DividendSet(
+        emit IEquity.DividendSet(
             corporateActionID,
             dividendID_,
             msg.sender,
@@ -96,13 +95,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
         );
         _initVotingRights(corporateActionID, data);
 
-        emit IEquityStorageWrapper.VotingSet(
-            corporateActionID,
-            voteID_,
-            msg.sender,
-            _newVoting.recordDate,
-            _newVoting.data
-        );
+        emit IEquity.VotingSet(corporateActionID, voteID_, msg.sender, _newVoting.recordDate, _newVoting.data);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -125,7 +118,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
         );
         _initBalanceAdjustment(corporateActionID, data);
 
-        emit IEquityStorageWrapper.ScheduledBalanceAdjustmentSet(
+        emit IEquity.ScheduledBalanceAdjustmentSet(
             corporateActionID,
             balanceAdjustmentID_,
             msg.sender,
@@ -291,7 +284,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
 
     function _initDividend(bytes32 _actionId, bytes memory _data) internal {
         if (_actionId == bytes32(0)) {
-            revert IEquityStorageWrapper.DividendCreationFailed();
+            revert IEquity.DividendCreationFailed();
         }
 
         IEquity.Dividend memory newDividend = abi.decode(_data, (IEquity.Dividend));
@@ -302,7 +295,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
 
     function _initVotingRights(bytes32 _actionId, bytes memory _data) internal {
         if (_actionId == bytes32(0)) {
-            revert IEquityStorageWrapper.VotingRightsCreationFailed();
+            revert IEquity.VotingRightsCreationFailed();
         }
 
         IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
@@ -313,7 +306,7 @@ contract EquityUSAFacet is IEquityUSA, IStaticFunctionSelectors {
 
     function _initBalanceAdjustment(bytes32 _actionId, bytes memory _data) internal {
         if (_actionId == bytes32(0)) {
-            revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
+            revert IEquity.BalanceAdjustmentCreationFailed();
         }
 
         IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi.decode(

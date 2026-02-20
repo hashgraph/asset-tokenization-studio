@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 import { lockStorage, LockDataStorage } from "../../storage/AssetStorage.sol";
-import { ILock } from "../../facets/features/interfaces/lock/ILock.sol";
+import { ILock } from "../../facets/features/interfaces/ILock.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { LibABAF } from "./LibABAF.sol";
 

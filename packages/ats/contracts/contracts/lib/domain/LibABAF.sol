@@ -11,9 +11,7 @@ import {
     ScheduledTasksDataStorage
 } from "../../facets/assetCapabilities/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
-import {
-    IAdjustBalancesStorageWrapper
-} from "../../facets/assetCapabilities/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol";
+import { IAdjustBalances } from "../../facets/assetCapabilities/interfaces/adjustBalances/IAdjustBalances.sol";
 import { LibScheduledTasksStorage } from "./LibScheduledTasksStorage.sol";
 import { IEquity } from "../../facets/assetCapabilities/interfaces/equity/IEquity.sol";
 import { LibCorporateActions } from "../core/LibCorporateActions.sol";
@@ -390,7 +388,7 @@ library LibABAF {
     }
 
     function checkFactor(uint256 factor) internal pure {
-        if (factor == 0) revert IAdjustBalancesStorageWrapper.FactorIsZero();
+        if (factor == 0) revert IAdjustBalances.FactorIsZero();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

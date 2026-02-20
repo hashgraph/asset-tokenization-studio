@@ -4,9 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { CorporateActionDataStorage, corporateActionsStorage } from "../../storage/AssetStorage.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    ICorporateActionsStorageWrapper
-} from "../../facets/features/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
+import { ICorporateActions } from "../../facets/features/interfaces/ICorporateActions.sol";
 
 /// @title LibCorporateActions — Corporate actions management library
 /// @notice Centralized corporate actions functionality extracted from CorporateActionsStorageWrapper.sol
@@ -161,14 +159,14 @@ library LibCorporateActions {
     /// @dev Validates that an index corresponds to a specific action type
     function validateMatchingActionType(bytes32 actionType, uint256 index) internal view {
         if (getCorporateActionCountByType(actionType) <= index) {
-            revert ICorporateActionsStorageWrapper.WrongIndexForAction(index, actionType);
+            revert ICorporateActions.WrongIndexForAction(index, actionType);
         }
     }
 
     /// @dev Validates that dates are in correct order
     function validateDates(uint256 firstDate, uint256 secondDate) internal pure {
         if (secondDate < firstDate) {
-            revert ICorporateActionsStorageWrapper.WrongDates(firstDate, secondDate);
+            revert ICorporateActions.WrongDates(firstDate, secondDate);
         }
     }
 }

@@ -28,16 +28,13 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 import { IClearing } from "../facets/features/interfaces/clearing/IClearing.sol";
-import { ILock } from "../facets/features/interfaces/lock/ILock.sol";
+import { IClearingTransfer } from "../facets/features/interfaces/clearing/IClearingTransfer.sol";
+import { IClearingRedeem } from "../facets/features/interfaces/clearing/IClearingRedeem.sol";
+import { IClearingHoldCreation } from "../facets/features/interfaces/clearing/IClearingHoldCreation.sol";
+import { ILock } from "../facets/features/interfaces/ILock.sol";
 import { HoldDataStorage } from "../facets/features/interfaces/hold/IHold.sol";
-import {
-    CorporateActionDataStorage
-} from "../facets/features/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
-import {
-    Snapshots,
-    SnapshotsAddress,
-    PartitionSnapshots
-} from "../facets/features/interfaces/snapshots/ISnapshots.sol";
+import { CorporateActionDataStorage } from "../facets/features/interfaces/ICorporateActions.sol";
+import { Snapshots, SnapshotsAddress, PartitionSnapshots } from "../facets/features/interfaces/ISnapshots.sol";
 import { ISecurity } from "../facets/regulation/interfaces/ISecurity.sol";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -132,8 +129,21 @@ struct LockDataStorage {
 /// @dev Hold data storage (re-exported from interface for consistency)
 // struct HoldDataStorage is already defined in IHold interface
 
-/// @dev Clearing data storage (re-exported from interface for consistency)
-// struct ClearingDataStorage is already defined in IClearing interface
+// solhint-disable max-line-length
+/// @dev Clearing data storage
+struct ClearingDataStorage {
+    bool initialized;
+    bool activated;
+    mapping(address => uint256) totalClearedAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
+    mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => uint256))) nextClearingIdByAccountPartitionAndType;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTransfer.ClearingTransferData))) clearingTransferByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IClearingRedeem.ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IClearingHoldCreation.ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
+}
+// solhint-enable max-line-length
 
 /// @dev Cap data storage
 struct CapDataStorage {
@@ -213,7 +223,7 @@ function holdStorage() pure returns (HoldDataStorage storage hold_) {
 }
 
 /// @dev Access clearing storage
-function clearingStorage() pure returns (IClearing.ClearingDataStorage storage clearing_) {
+function clearingStorage() pure returns (ClearingDataStorage storage clearing_) {
     bytes32 pos = _CLEARING_STORAGE_POSITION;
     // solhint-disable-next-line no-inline-assembly
     assembly {

@@ -3,7 +3,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC3643OperationsFacet } from "../../../../facets/features/ERC3643/standard/ERC3643OperationsFacet.sol";
+import { ERC3643OperationsFacet } from "../../../../facets/features/ERC3643/ERC3643OperationsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
 contract ERC3643OperationsFacetTimeTravel is ERC3643OperationsFacet, TimeTravelStorageWrapper {

@@ -2,8 +2,66 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing } from "./IClearing.sol";
+import { ThirdPartyType } from "../../types/ThirdPartyType.sol";
 
 interface IClearingTransfer is IClearing {
+    struct ClearingTransferData {
+        uint256 amount;
+        uint256 expirationTimestamp;
+        address destination;
+        bytes data;
+        bytes operatorData;
+        ThirdPartyType operatorType;
+    }
+
+    event ClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedTransferFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedOperatorTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ProtectedClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
     /**
      * @notice Creates a transfer clearing operation for a partition
      *

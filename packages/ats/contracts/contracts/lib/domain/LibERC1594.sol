@@ -5,13 +5,11 @@ import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/v
 import { ERC1594Storage, erc1594Storage } from "../../storage/TokenStorage.sol";
 import { erc20Storage } from "../../storage/TokenStorage.sol";
 import { erc3643Storage } from "../../storage/ExternalStorage.sol";
-import { IKyc } from "../../facets/features/interfaces/kyc/IKyc.sol";
-import { IPauseStorageWrapper } from "../../facets/features/interfaces/pause/IPauseStorageWrapper.sol";
-import { IERC1410StorageWrapper } from "../../facets/features/interfaces/ERC1400/IERC1410StorageWrapper.sol";
-import { IERC20StorageWrapper } from "../../facets/features/interfaces/ERC1400/IERC20StorageWrapper.sol";
-import {
-    IControlListStorageWrapper
-} from "../../facets/features/interfaces/controlList/IControlListStorageWrapper.sol";
+import { IKyc } from "../../facets/features/interfaces/IKyc.sol";
+import { IPause } from "../../facets/features/interfaces/IPause.sol";
+import { IERC1410 } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
+import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
+import { IControlListBase } from "../../facets/features/interfaces/IControlList.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
 import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
@@ -122,7 +120,7 @@ library LibERC1594 {
             return (
                 false,
                 Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                IControlListStorageWrapper.AccountIsBlocked.selector,
+                IControlListBase.AccountIsBlocked.selector,
                 EMPTY_BYTES
             );
         }
@@ -217,7 +215,7 @@ library LibERC1594 {
 
     function _genericChecks() private view returns (bool, bytes1, bytes32, bytes memory) {
         if (LibPause.isPaused()) {
-            return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector, EMPTY_BYTES);
+            return (false, Eip1066.PAUSED, IPause.TokenIsPaused.selector, EMPTY_BYTES);
         }
 
         if (LibClearing.isClearingActivated()) {
@@ -241,7 +239,7 @@ library LibERC1594 {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IControlListStorageWrapper.AccountIsBlocked.selector,
+                    IControlListBase.AccountIsBlocked.selector,
                     abi.encode(_sender)
                 );
             }
@@ -281,7 +279,7 @@ library LibERC1594 {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
-                    IControlListStorageWrapper.AccountIsBlocked.selector,
+                    IControlListBase.AccountIsBlocked.selector,
                     abi.encode(_from)
                 );
             }
@@ -292,12 +290,7 @@ library LibERC1594 {
             }
 
             if (!LibControlList.isAbleToAccess(_to)) {
-                return (
-                    false,
-                    Eip1066.DISALLOWED_OR_STOP,
-                    IControlListStorageWrapper.AccountIsBlocked.selector,
-                    abi.encode(_to)
-                );
+                return (false, Eip1066.DISALLOWED_OR_STOP, IControlListBase.AccountIsBlocked.selector, abi.encode(_to));
             }
         }
 
@@ -381,7 +374,7 @@ library LibERC1594 {
                 return (
                     false,
                     Eip1066.INSUFFICIENT_FUNDS,
-                    IERC20StorageWrapper.InsufficientAllowance.selector,
+                    IERC20.InsufficientAllowance.selector,
                     abi.encode(_sender, _from, currentAllowance, _value, _DEFAULT_PARTITION)
                 );
             }
@@ -391,7 +384,7 @@ library LibERC1594 {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
-                IERC1410StorageWrapper.InvalidPartition.selector,
+                IERC1410.InvalidPartition.selector,
                 abi.encode(_from, _partition)
             );
         }
@@ -401,7 +394,7 @@ library LibERC1594 {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
-                IERC1410StorageWrapper.InsufficientBalance.selector,
+                IERC1410.InsufficientBalance.selector,
                 abi.encode(_from, currentPartitionBalance, _value, _partition)
             );
         }

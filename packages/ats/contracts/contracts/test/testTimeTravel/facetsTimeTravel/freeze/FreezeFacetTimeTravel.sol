@@ -3,7 +3,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { FreezeFacet } from "../../../../facets/features/freeze/standard/FreezeFacet.sol";
+import { FreezeFacet } from "../../../../facets/features/freeze/FreezeFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
 // solhint-disable-next-line no-empty-blocks

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ssiManagementStorage } from "../../storage/CoreStorage.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
-import { ISsiManagement } from "../../facets/features/interfaces/ssi/ISsiManagement.sol";
+import { ISsiManagement } from "../../facets/features/interfaces/ISsiManagement.sol";
 
 /// @title LibSSI — Self-Sovereign Identity (SSI) management library
 /// @notice Centralized SSI/issuer functionality extracted from SsiManagementStorageWrapper.sol

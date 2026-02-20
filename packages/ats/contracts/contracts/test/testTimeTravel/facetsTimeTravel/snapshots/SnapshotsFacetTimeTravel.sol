@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { SnapshotsFacet } from "../../../../facets/features/snapshots/standard/SnapshotsFacet.sol";
+import { SnapshotsFacet } from "../../../../facets/features/snapshots/SnapshotsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
 // solhint-disable-next-line no-empty-blocks

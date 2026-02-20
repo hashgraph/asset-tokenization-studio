@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { OperatorTransferData } from "../../../features/interfaces/ERC1400/IERC1410.sol";
-import { IProtectedPartitionsStorageWrapper } from "../protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitions } from "../../interfaces/IProtectedPartitions.sol";
 
 /**
  * @title IERC1410Management
@@ -74,7 +74,7 @@ interface IERC1410Management {
         address _from,
         address _to,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+        IProtectedPartitions.ProtectionData calldata _protectionData
     ) external returns (bytes32);
 
     /**
@@ -85,6 +85,6 @@ interface IERC1410Management {
         bytes32 _partition,
         address _from,
         uint256 _amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
+        IProtectedPartitions.ProtectionData calldata _protectionData
     ) external;
 }

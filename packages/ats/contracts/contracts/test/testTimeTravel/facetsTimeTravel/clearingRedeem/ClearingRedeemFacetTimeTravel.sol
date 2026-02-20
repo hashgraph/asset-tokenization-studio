@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ClearingRedeemFacet } from "../../../../facets/features/clearing/standard/ClearingRedeemFacet.sol";
+import { ClearingRedeemFacet } from "../../../../facets/features/clearing/ClearingRedeemFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
 contract ClearingRedeemFacetTimeTravel is ClearingRedeemFacet, TimeTravelStorageWrapper {

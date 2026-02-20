@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1644Storage, erc1644Storage } from "../../storage/TokenStorage.sol";
-import { IERC1644StorageWrapper } from "../../facets/features/interfaces/ERC1400/IERC1644StorageWrapper.sol";
+import { IERC1644Base } from "../../facets/features/interfaces/ERC1400/IERC1644.sol";
 
 /// @title LibERC1644
 /// @notice Library for ERC1644 controller feature management
@@ -18,7 +18,7 @@ library LibERC1644 {
 
     function finalizeControllable() internal {
         erc1644Storage().isControllable = false;
-        emit IERC1644StorageWrapper.FinalizedControllerFeature(msg.sender);
+        emit IERC1644Base.FinalizedControllerFeature(msg.sender);
     }
 
     function isControllable() internal view returns (bool) {
@@ -26,7 +26,7 @@ library LibERC1644 {
     }
 
     function checkControllable() internal view {
-        if (!isControllable()) revert IERC1644StorageWrapper.TokenIsNotControllable();
+        if (!isControllable()) revert IERC1644Base.TokenIsNotControllable();
     }
 
     function isInitialized() internal view returns (bool) {

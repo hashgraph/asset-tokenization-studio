@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable max-line-length
 import {
     ScheduledCrossOrderedTasksFacet
-} from "../../../../facets/assetCapabilities/scheduledTasks/scheduledCrossOrderedTasks/standard/ScheduledCrossOrderedTasksFacet.sol";
+} from "../../../../facets/assetCapabilities/scheduledTasks/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 

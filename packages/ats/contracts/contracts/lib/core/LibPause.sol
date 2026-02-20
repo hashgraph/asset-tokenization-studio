@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ExternalListDataStorage, pauseStorage, externalListStorage } from "../../storage/CoreStorage.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IExternalPause } from "../../facets/features/interfaces/externalPauses/IExternalPause.sol";
-import { IPauseStorageWrapper } from "../../facets/features/interfaces/pause/IPauseStorageWrapper.sol";
+import { IExternalPause } from "../../facets/features/interfaces/IExternalPause.sol";
+import { IPause } from "../../facets/features/interfaces/IPause.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /// @title LibPause — Pause control library
@@ -16,13 +16,13 @@ library LibPause {
     /// @dev Sets paused state to true and emits TokenPaused event
     function pause() internal {
         pauseStorage().paused = true;
-        emit IPauseStorageWrapper.TokenPaused(msg.sender);
+        emit IPause.TokenPaused(msg.sender);
     }
 
     /// @dev Sets paused state to false and emits TokenUnpaused event
     function unpause() internal {
         pauseStorage().paused = false;
-        emit IPauseStorageWrapper.TokenUnpaused(msg.sender);
+        emit IPause.TokenUnpaused(msg.sender);
     }
 
     /// @dev Returns true if token is paused (either directly or via external pause)
@@ -33,14 +33,14 @@ library LibPause {
     /// @dev Reverts if token is paused
     function requireNotPaused() internal view {
         if (isPaused()) {
-            revert IPauseStorageWrapper.TokenIsPaused();
+            revert IPause.TokenIsPaused();
         }
     }
 
     /// @dev Reverts if token is not paused
     function requirePaused() internal view {
         if (!isPaused()) {
-            revert IPauseStorageWrapper.TokenIsUnpaused();
+            revert IPause.TokenIsUnpaused();
         }
     }
 

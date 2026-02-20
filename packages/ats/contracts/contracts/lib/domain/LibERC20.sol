@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC20Storage, erc20Storage } from "../../storage/TokenStorage.sol";
 import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
-import { IERC20StorageWrapper } from "../../facets/features/interfaces/ERC1400/IERC20StorageWrapper.sol";
+import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IFactory } from "../../factory/IFactory.sol";
 
 /// @title LibERC20
@@ -63,7 +63,7 @@ library LibERC20 {
     /// @param amount The new allowance amount
     function setAllowance(address owner, address spender, uint256 amount) internal {
         erc20Storage().allowed[owner][spender] = amount;
-        emit IERC20StorageWrapper.Approval(owner, spender, amount);
+        emit IERC20.Approval(owner, spender, amount);
     }
 
     /// @notice Increase the allowance from owner to spender
@@ -74,7 +74,7 @@ library LibERC20 {
         ERC20Storage storage s = erc20Storage();
         uint256 newAllowance = s.allowed[owner][spender] + addedValue;
         s.allowed[owner][spender] = newAllowance;
-        emit IERC20StorageWrapper.Approval(owner, spender, newAllowance);
+        emit IERC20.Approval(owner, spender, newAllowance);
     }
 
     /// @notice Decrease the allowance from owner to spender
@@ -98,7 +98,7 @@ library LibERC20 {
         ERC20Storage storage s = erc20Storage();
         uint256 currentAllowance = s.allowed[owner][spender];
         if (currentAllowance < amount) {
-            revert IERC20StorageWrapper.InsufficientAllowance(spender, owner);
+            revert IERC20.InsufficientAllowance(spender, owner);
         }
         s.allowed[owner][spender] = currentAllowance - amount;
         return s.allowed[owner][spender];

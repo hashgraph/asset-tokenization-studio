@@ -6,7 +6,7 @@ import { ThirdPartyType } from "../../types/ThirdPartyType.sol";
 import { IHoldRead } from "./IHoldRead.sol";
 import { IHoldTokenHolder } from "./IHoldTokenHolder.sol";
 import { IHoldManagement } from "./IHoldManagement.sol";
-import { IAccessControl } from "../accessControl/IAccessControl.sol";
+import { IAccessControl } from "../IAccessControl.sol";
 import { IClearing } from "../clearing/IClearing.sol";
 import { IERC1410 } from "../ERC1400/IERC1410.sol";
 

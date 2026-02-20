@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ExternalControlListManagementFacet
-} from "../../../../facets/features/externalControlLists/standard/ExternalControlListManagementFacet.sol";
+} from "../../../../facets/features/externalControlLists/ExternalControlListManagementFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
 // solhint-disable-next-line no-empty-blocks

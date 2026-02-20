@@ -24,9 +24,7 @@ import { LibERC1410 } from "../domain/LibERC1410.sol";
 import { LibSnapshots } from "../domain/LibSnapshots.sol";
 import { LibERC20 } from "../domain/LibERC20.sol";
 import { LibControlList } from "../../lib/core/LibControlList.sol";
-import {
-    IControlListStorageWrapper
-} from "../../facets/features/interfaces/controlList/IControlListStorageWrapper.sol";
+import { IControlListBase } from "../../facets/features/interfaces/IControlList.sol";
 import { LibNonce } from "../../lib/core/LibNonce.sol";
 import { LibProtectedPartitions } from "../../lib/core/LibProtectedPartitions.sol";
 import { LibResolverProxy } from "../../infrastructure/proxy/LibResolverProxy.sol";
@@ -382,7 +380,7 @@ library LibHoldOps {
         // Validate execution-specific conditions
         if (_operation == OperationType.Execute) {
             if (!LibControlList.isAbleToAccess(_holdIdentifier.tokenHolder)) {
-                revert IControlListStorageWrapper.AccountIsBlocked(_holdIdentifier.tokenHolder);
+                revert IControlListBase.AccountIsBlocked(_holdIdentifier.tokenHolder);
             }
             if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
                 revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);

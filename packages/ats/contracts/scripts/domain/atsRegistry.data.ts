@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-19T13:20:34.706Z
+ * Generated: 2026-02-20T08:49:22.199Z
  * Facets: 64
  * Infrastructure: 2
  *
@@ -158,7 +158,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ACCESS_CONTROL_RESOLVER_KEY",
       value: "0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6",
     },
-    inheritance: ["AccessControlFacetBase"],
+    inheritance: ["AccessControl", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "applyRoles",
@@ -210,6 +210,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "RoleAdminChanged",
+        signature: "RoleAdminChanged(bytes32,bytes32,bytes32)",
+        topic0: "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff",
+      },
+      {
         name: "RoleGranted",
         signature: "RoleGranted(address,address,bytes32)",
         topic0: "0x03b5d550f3da9dfe316fa35cbecc4cee6d2febeaeee1432f30504bd9ce3780a8",
@@ -232,10 +237,17 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccountAssignedToRole", signature: "AccountAssignedToRole(bytes32,address)", selector: "0xa6006e94" },
+      { name: "AccountHasNoRole", signature: "AccountHasNoRole(address,bytes32)", selector: "0xa1180aad" },
+      { name: "AccountHasNoRoles", signature: "AccountHasNoRoles(address,bytes32[])", selector: "0x90e55392" },
       {
         name: "AccountNotAssignedToRole",
         signature: "AccountNotAssignedToRole(bytes32,address)",
         selector: "0x3ad9a7ae",
+      },
+      {
+        name: "RolesAndActivesLengthMismatch",
+        signature: "RolesAndActivesLengthMismatch(uint256,uint256)",
+        selector: "0x365ff1a4",
       },
       { name: "RolesNotApplied", signature: "RolesNotApplied(bytes32[],bool[],address)", selector: "0xaa4b6234" },
     ],
@@ -249,7 +261,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BALANCE_ADJUSTMENTS_RESOLVER_KEY",
       value: "0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8",
     },
-    inheritance: ["AdjustBalancesFacetBase"],
+    inheritance: ["AdjustBalances", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "adjustBalances",
@@ -257,6 +269,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe2d77e44",
       },
     ],
+    events: [
+      {
+        name: "AdjustmentBalanceSet",
+        signature: "AdjustmentBalanceSet(address,uint256,uint8)",
+        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
+      },
+    ],
+    errors: [{ name: "FactorIsZero", signature: "FactorIsZero()", selector: "0x936e9b6d" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new AdjustBalancesFacetTimeTravel__factory(signer) : new AdjustBalancesFacet__factory(signer),
   },
@@ -267,7 +287,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_VARIABLE_RATE_RESOLVER_KEY",
       value: "0xe6594ee8f54f346ab25268fdc7955031a6b06102355e1446353d89ab1d593de3",
     },
-    inheritance: ["BondUSAFacetBase"],
+    inheritance: ["BondUSA", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -299,6 +319,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "CouponSet",
+        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
+        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
+      },
+      {
         name: "MaturityDateUpdated",
         signature: "MaturityDateUpdated(address,uint256,uint256)",
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
@@ -307,6 +332,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
+      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -319,7 +345,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_FIXED_RATE_RESOLVER_KEY",
       value: "0xd55d8787d23b78e70dada1ade45b8758f5c027e2cddf3556606c07d388ce159a",
     },
-    inheritance: ["BondUSAFacetBase"],
+    inheritance: ["BondUSA", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -351,6 +377,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "CouponSet",
+        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
+        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
+      },
+      {
         name: "MaturityDateUpdated",
         signature: "MaturityDateUpdated(address,uint256,uint256)",
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
@@ -359,6 +390,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
+      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
@@ -372,7 +404,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x99c145ff21354eb7b25cb096873143fa3d3aba98457b96bcd13f1d1f2b9bf28c",
     },
-    inheritance: ["BondUSAFacetBase"],
+    inheritance: ["BondUSA", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -410,6 +442,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "CouponSet",
+        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
+        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
+      },
+      {
         name: "MaturityDateUpdated",
         signature: "MaturityDateUpdated(address,uint256,uint256)",
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
@@ -418,6 +455,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
+      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
@@ -433,7 +471,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_VARIABLE_READ_RESOLVER_KEY",
       value: "0x624866e79d4c0a78a8dc32cbce49563cdf86eba627bd05a9821dbaa1674ac231",
     },
-    inheritance: ["BondUSAReadFacetBase"],
+    inheritance: ["BondUSARead", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getBondDetails",
@@ -524,7 +562,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_KPI_LINKED_READ_RESOLVER_KEY",
       value: "0xcced91a2a03bf45bd62730a7f4703ee2d762f8ebccff315c7145258265f73249",
     },
-    inheritance: ["BondUSAReadFacetBase"],
+    inheritance: ["BondUSARead", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getBondDetails",
@@ -617,7 +655,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY",
       value: "0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504",
     },
-    inheritance: ["BondUSAReadFacetBase"],
+    inheritance: ["BondUSARead", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getBondDetails",
@@ -710,7 +748,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
       value: "0x8048a878c656dcf3886e69ad27a9272a4fb9499299ab5f0e1b6c99ac3b1130f8",
     },
-    inheritance: ["BondUSAFacetBase"],
+    inheritance: ["BondUSA", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "_initialize_bondUSA",
@@ -748,6 +786,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "CouponSet",
+        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
+        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
+      },
+      {
         name: "MaturityDateUpdated",
         signature: "MaturityDateUpdated(address,uint256,uint256)",
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
@@ -756,6 +799,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
+      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
       {
         name: "InterestRateIsSustainabilityPerformanceTarget",
         signature: "InterestRateIsSustainabilityPerformanceTarget()",
@@ -775,7 +819,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CAP_RESOLVER_KEY",
       value: "0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b",
     },
-    inheritance: ["CapFacetBase"],
+    inheritance: ["Cap", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getMaxSupply",
@@ -803,7 +847,39 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b69647",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    events: [
+      {
+        name: "MaxSupplyByPartitionSet",
+        signature: "MaxSupplyByPartitionSet(address,bytes32,uint256,uint256)",
+        topic0: "0x9c0c8826170fa45c79bf64a2913df8ccc3e77407aba502d85946253332a4d749",
+      },
+      {
+        name: "MaxSupplySet",
+        signature: "MaxSupplySet(address,uint256,uint256)",
+        topic0: "0xccc3b7560f9d81f26c619129ba9fa74ded9a6edb555a04655baaeca673e0a809",
+      },
+    ],
+    errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      { name: "MaxSupplyReached", signature: "MaxSupplyReached(uint256)", selector: "0xf9f84915" },
+      {
+        name: "MaxSupplyReachedForPartition",
+        signature: "MaxSupplyReachedForPartition(bytes32,uint256)",
+        selector: "0x57c004a9",
+      },
+      {
+        name: "NewMaxSupplyByPartitionTooHigh",
+        signature: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
+        selector: "0x21aa64a7",
+      },
+      { name: "NewMaxSupplyCannotBeZero", signature: "NewMaxSupplyCannotBeZero()", selector: "0x76f138fb" },
+      {
+        name: "NewMaxSupplyForPartitionTooLow",
+        signature: "NewMaxSupplyForPartitionTooLow(bytes32,uint256,uint256)",
+        selector: "0x820c68a8",
+      },
+      { name: "NewMaxSupplyTooLow", signature: "NewMaxSupplyTooLow(uint256,uint256)", selector: "0x98c2b03b" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new CapFacetTimeTravel__factory(signer) : new CapFacet__factory(signer),
   },
@@ -814,7 +890,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_ACTIONS_RESOLVER_KEY",
       value: "0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74",
     },
-    inheritance: ["ClearingActionsFacetBase"],
+    inheritance: ["ClearingActions", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "activateClearing",
@@ -893,7 +969,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_HOLDCREATION_RESOLVER_KEY",
       value: "0x44f99a141c434fac20d69e7511932ee344d5b37b61851976c83a5df4ca468152",
     },
-    inheritance: ["ClearingHoldCreationFacetBase"],
+    inheritance: ["ClearingHoldCreation", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "clearingCreateHoldByPartition",
@@ -926,6 +1002,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9b646ab9",
       },
     ],
+    events: [
+      {
+        name: "ClearedHoldByPartition",
+        signature: "ClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0xecba87eb6d871a001547362d9a9bb69ae25dd165858d73fe5cc600a705f3f3a0",
+      },
+      {
+        name: "ClearedHoldFromByPartition",
+        signature: "ClearedHoldFromByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0xc8f249767e17c28ab7d211bf631a717a0ee7f840405af4618f625a7659bf7f63",
+      },
+      {
+        name: "ClearedOperatorHoldByPartition",
+        signature: "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0xa9683588d7eb6dd41a2a62f56bd396a439f9e506ac7ca2efa031bcc5f99b4651",
+      },
+      {
+        name: "ProtectedClearedHoldByPartition",
+        signature: "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0x7fd4d7541b7da42375ec1b3f05c454acb77234a17c2f4349c102add4bc61e306",
+      },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ClearingHoldCreationFacetTimeTravel__factory(signer)
@@ -938,7 +1036,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_READ_RESOLVER_KEY",
       value: "0xebb2e29bdf4edaf4ca66a3f9b7735087f9d0474d56d856e53c94ef00596c0b1e",
     },
-    inheritance: ["ClearingReadFacetBase"],
+    inheritance: ["ClearingRead", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getClearedAmountFor",
@@ -980,7 +1078,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_REDEEM_RESOLVER_KEY",
       value: "0xb341e7aa749da43976c189209de51ccdf838af9f964cd27340b914d5b2aeba97",
     },
-    inheritance: ["ClearingRedeemFacetBase"],
+    inheritance: ["ClearingRedeem", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "clearingRedeemByPartition",
@@ -1013,6 +1111,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x498f1f65",
       },
     ],
+    events: [
+      {
+        name: "ClearedOperatorRedeemByPartition",
+        signature: "ClearedOperatorRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0xfec64ec403134db0b1e479976a765b3e364f24c765f7c73ce9bf4b31e13ed3c8",
+      },
+      {
+        name: "ClearedRedeemByPartition",
+        signature: "ClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x7aaaa46250ad330b8cea62db34f608101d55300f94dd9b5ddbe83142bb51dc5f",
+      },
+      {
+        name: "ClearedRedeemFromByPartition",
+        signature: "ClearedRedeemFromByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x376e6c31cfecec25cc3fede988557cb98dee3c5ffa5976b48a0b614b84c45d79",
+      },
+      {
+        name: "ProtectedClearedRedeemByPartition",
+        signature: "ProtectedClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0xdd233f03eaed8aec1fe549f12e218c32dc2e73b3d5777bdeb33afa43e2fa2230",
+      },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingRedeemFacetTimeTravel__factory(signer) : new ClearingRedeemFacet__factory(signer),
   },
@@ -1023,7 +1143,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CLEARING_TRANSFER_RESOLVER_KEY",
       value: "0x7399d03db62430bec60ca2c3eacf98b1b7e2253f17593ef7a226d759442e0928",
     },
-    inheritance: ["ClearingTransferFacetBase"],
+    inheritance: ["ClearingTransfer", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "clearingTransferByPartition",
@@ -1056,17 +1176,43 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1f4eef27",
       },
     ],
+    events: [
+      {
+        name: "ClearedOperatorTransferByPartition",
+        signature:
+          "ClearedOperatorTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x8d9578064c4e2cadfe39cab8d79866d9e1c16956b958c6cbaedcec51f80d234a",
+      },
+      {
+        name: "ClearedTransferByPartition",
+        signature: "ClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x3d9505d4e04c873230c8ad112ce725e8338ab4fa6c98a7699ea41d4d63c2758f",
+      },
+      {
+        name: "ClearedTransferFromByPartition",
+        signature:
+          "ClearedTransferFromByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x374f3552ea6ef855812358112ab8344010038fd2d56b9f47a1d9cb0320c275a2",
+      },
+      {
+        name: "ProtectedClearedTransferByPartition",
+        signature:
+          "ProtectedClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
+        topic0: "0x8aea721bf4270b3b07d0974586b57ecd35862ae7a8b733530161d941489283f1",
+      },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ClearingTransferFacetTimeTravel__factory(signer) : new ClearingTransferFacet__factory(signer),
   },
 
   ControlListFacet: {
     name: "ControlListFacet",
+    description: "Diamond facet for control list management with static function selectors",
     resolverKey: {
       name: "_CONTROL_LIST_RESOLVER_KEY",
       value: "0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c",
     },
-    inheritance: ["ControlListFacetBase"],
+    inheritance: ["ControlList", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addToControlList",
@@ -1107,6 +1253,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "ABI",
+        signature: "ABI(address,address)",
+        topic0: "0x2fb2b8e42c6c761db4acc2bd01671a544c18be8b46d331086eb497254cb17ddb",
+      },
+      {
         name: "AddedToControlList",
         signature: "AddedToControlList(address,address)",
         topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
@@ -1116,11 +1267,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "RemovedFromControlList(address,address)",
         topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
       },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [
       { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -1133,7 +1286,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_CORPORATE_ACTIONS_RESOLVER_KEY",
       value: "0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077",
     },
-    inheritance: ["CorporateActionsFacetBase"],
+    inheritance: ["CorporateActions", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "actionContentHashExists",
@@ -1189,6 +1342,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "DuplicatedCorporateAction(bytes32,bytes)",
         selector: "0x3266e9e3",
       },
+      { name: "WrongDates", signature: "WrongDates(uint256,uint256)", selector: "0x1c94559c" },
+      { name: "WrongIndexForAction", signature: "WrongIndexForAction(uint256,bytes32)", selector: "0xd3924f4e" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new CorporateActionsFacetTimeTravel__factory(signer) : new CorporateActionsFacet__factory(signer),
@@ -1445,7 +1600,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1410_ISSUER_RESOLVER_KEY",
       value: "0x6e82b75f32c9647cc00b4c3eabbef5a82677f3e91d5d196eb4dd6a0365941344",
     },
-    inheritance: ["ERC1410IssuerFacetBase"],
+    inheritance: ["ERC1410Issuer", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "issueByPartition",
@@ -1454,7 +1609,30 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x18180262",
       },
     ],
-    errors: [{ name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" }],
+    events: [
+      {
+        name: "ABI",
+        signature: "ABI(address,address)",
+        topic0: "0x2fb2b8e42c6c761db4acc2bd01671a544c18be8b46d331086eb497254cb17ddb",
+      },
+      {
+        name: "AddedToControlList",
+        signature: "AddedToControlList(address,address)",
+        topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
+      },
+      {
+        name: "RemovedFromControlList",
+        signature: "RemovedFromControlList(address,address)",
+        topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
+      },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+    ],
+    errors: [
+      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
+      { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
+      { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1410IssuerFacetTimeTravel__factory(signer) : new ERC1410IssuerFacet__factory(signer),
   },
@@ -1465,7 +1643,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1410_MANAGEMENT_RESOLVER_KEY",
       value: "0x232f8686795d3f197681faf0d8db05655e759f62d709d56b97e5d9cfff29dbf5",
     },
-    inheritance: ["ERC1410ManagementFacetBase"],
+    inheritance: ["ERC1410Management", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "controllerRedeemByPartition",
@@ -1509,7 +1687,47 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b5ef4a",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    events: [
+      {
+        name: "ABI",
+        signature: "ABI(address,address)",
+        topic0: "0x2fb2b8e42c6c761db4acc2bd01671a544c18be8b46d331086eb497254cb17ddb",
+      },
+      {
+        name: "AddedToControlList",
+        signature: "AddedToControlList(address,address)",
+        topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
+      },
+      {
+        name: "ControllerRedemption",
+        signature: "ControllerRedemption(address,address,uint256,bytes,bytes)",
+        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
+      },
+      {
+        name: "ControllerTransfer",
+        signature: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
+        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
+      },
+      {
+        name: "FinalizedControllerFeature",
+        signature: "FinalizedControllerFeature(address)",
+        topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
+      },
+      {
+        name: "RemovedFromControlList",
+        signature: "RemovedFromControlList(address,address)",
+        topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
+      },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+    ],
+    errors: [
+      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
+      { name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" },
+      { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410ManagementFacetTimeTravel__factory(signer)
@@ -1522,7 +1740,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1410_READ_RESOLVER_KEY",
       value: "0x5eb2734b83ea80c3eb63463a6192b30ab2526cb7a073f0abfda1a404c92ae497",
     },
-    inheritance: ["ERC1410ReadFacetBase"],
+    inheritance: ["ERC1410Read", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "balanceOf",
@@ -1589,7 +1807,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1410_TOKEN_HOLDER_RESOLVER_KEY",
       value: "0x0466bf860d23f1ecbc25f364735e0dc3830d236f09182599831730ddd2792caa",
     },
-    inheritance: ["ERC1410TokenHolderFacetBase"],
+    inheritance: ["ERC1410TokenHolder", "IStaticFunctionSelectors"],
     methods: [
       { name: "authorizeOperator", signature: "function authorizeOperator(address _operator)", selector: "0x959b8c3f" },
       {
@@ -1620,6 +1838,30 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x6afb79db",
       },
     ],
+    events: [
+      {
+        name: "ABI",
+        signature: "ABI(address,address)",
+        topic0: "0x2fb2b8e42c6c761db4acc2bd01671a544c18be8b46d331086eb497254cb17ddb",
+      },
+      {
+        name: "AddedToControlList",
+        signature: "AddedToControlList(address,address)",
+        topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
+      },
+      {
+        name: "RemovedFromControlList",
+        signature: "RemovedFromControlList(address,address)",
+        topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
+      },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+    ],
+    errors: [
+      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
+      { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
+      { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ERC1410TokenHolderFacetTimeTravel__factory(signer)
@@ -1632,7 +1874,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1594_RESOLVER_KEY",
       value: "0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f",
     },
-    inheritance: ["ERC1594FacetBase"],
+    inheritance: ["ERC1594", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "canTransfer",
@@ -1669,8 +1911,66 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x2535f762",
       },
     ],
+    events: [
+      {
+        name: "ABI",
+        signature: "ABI(address,address)",
+        topic0: "0x2fb2b8e42c6c761db4acc2bd01671a544c18be8b46d331086eb497254cb17ddb",
+      },
+      {
+        name: "AddedToControlList",
+        signature: "AddedToControlList(address,address)",
+        topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
+      },
+      {
+        name: "ControllerRedemption",
+        signature: "ControllerRedemption(address,address,uint256,bytes,bytes)",
+        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
+      },
+      {
+        name: "ControllerTransfer",
+        signature: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
+        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
+      },
+      {
+        name: "FinalizedControllerFeature",
+        signature: "FinalizedControllerFeature(address)",
+        topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
+      },
+      {
+        name: "Issued",
+        signature: "Issued(address,address,uint256,bytes)",
+        topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
+      },
+      {
+        name: "Redeemed",
+        signature: "Redeemed(address,address,uint256,bytes)",
+        topic0: "0xb7d0d6b60740753e9f16692a2f479472a1385aec2420fa43225b02f2ffa1afe7",
+      },
+      {
+        name: "RemovedFromControlList",
+        signature: "RemovedFromControlList(address,address)",
+        topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
+      },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+      {
+        name: "TransferFromWithData",
+        signature: "TransferFromWithData(address,address,address,uint256,bytes)",
+        topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
+      },
+      {
+        name: "TransferWithData",
+        signature: "TransferWithData(address,address,uint256,bytes)",
+        topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
+      },
+    ],
     errors: [
+      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
+      { name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" },
+      { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
       { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -1683,7 +1983,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1643_RESOLVER_KEY",
       value: "0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625",
     },
-    inheritance: ["ERC1643FacetBase"],
+    inheritance: ["ERC1643", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getAllDocuments",
@@ -1730,7 +2030,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC1644_RESOLVER_KEY",
       value: "0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d",
     },
-    inheritance: ["ERC1644FacetBase"],
+    inheritance: ["ERC1644", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "controllerRedeem",
@@ -1751,7 +2051,47 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    events: [
+      {
+        name: "ABI",
+        signature: "ABI(address,address)",
+        topic0: "0x2fb2b8e42c6c761db4acc2bd01671a544c18be8b46d331086eb497254cb17ddb",
+      },
+      {
+        name: "AddedToControlList",
+        signature: "AddedToControlList(address,address)",
+        topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
+      },
+      {
+        name: "ControllerRedemption",
+        signature: "ControllerRedemption(address,address,uint256,bytes,bytes)",
+        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
+      },
+      {
+        name: "ControllerTransfer",
+        signature: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
+        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
+      },
+      {
+        name: "FinalizedControllerFeature",
+        signature: "FinalizedControllerFeature(address)",
+        topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
+      },
+      {
+        name: "RemovedFromControlList",
+        signature: "RemovedFromControlList(address,address)",
+        topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
+      },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+    ],
+    errors: [
+      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
+      { name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" },
+      { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC1644FacetTimeTravel__factory(signer) : new ERC1644Facet__factory(signer),
   },
@@ -1762,7 +2102,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC20_RESOLVER_KEY",
       value: "0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5",
     },
-    inheritance: ["ERC20FacetBase"],
+    inheritance: ["ERC20", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "allowance",
@@ -1817,15 +2157,47 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "ABI",
+        signature: "ABI(address,address)",
+        topic0: "0x2fb2b8e42c6c761db4acc2bd01671a544c18be8b46d331086eb497254cb17ddb",
+      },
+      {
+        name: "AddedToControlList",
+        signature: "AddedToControlList(address,address)",
+        topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
+      },
+      {
+        name: "Approval",
+        signature: "Approval(address,address,uint256)",
+        topic0: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+      },
+      {
         name: "indicating",
         signature: "indicating(address,uint256)",
         topic0: "0x46bcf81f2ddc9f000abc20dea52d3061e6deb0c928ad04616fd2bee32e475440",
+      },
+      {
+        name: "RemovedFromControlList",
+        signature: "RemovedFromControlList(address,address)",
+        topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
+      },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+      {
+        name: "Transfer",
+        signature: "Transfer(address,address,uint256)",
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
       },
     ],
     errors: [
       { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
+      { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
+      { name: "SpenderWithZeroAddress", signature: "SpenderWithZeroAddress()", selector: "0x80e32d8f" },
+      { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
       { name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" },
+      { name: "ZeroOwnerAddress", signature: "ZeroOwnerAddress()", selector: "0x42cad957" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new ERC20FacetTimeTravel__factory(signer) : new ERC20Facet__factory(signer),
@@ -1837,7 +2209,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC20PERMIT_RESOLVER_KEY",
       value: "0xef05f0313623d32145212ed45620c8b2c8c294b3d6955cf26f3d1b0569fbc1fa",
     },
-    inheritance: ["ERC20PermitFacetBase"],
+    inheritance: ["ERC20Permit", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "DOMAIN_SEPARATOR",
@@ -1865,7 +2237,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC20VOTES_RESOLVER_KEY",
       value: "0x5cbfbaa435e19a43530a00ac685c9b5252862a94af2053667ded44642a0d9f4c",
     },
-    inheritance: ["ERC20VotesFacetBase"],
+    inheritance: ["ERC20Votes", "IStaticFunctionSelectors"],
     methods: [
       { name: "CLOCK_MODE", signature: "function CLOCK_MODE() view returns (string)", selector: "0x4bf5d7e9" },
       {
@@ -1927,7 +2299,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC3643_BATCH_RESOLVER_KEY",
       value: "0x00332311d9f0c311b31b87399043a90feb10341fcbb4d7f4ed6e3c0072a3c392",
     },
-    inheritance: ["ERC3643BatchFacetBase"],
+    inheritance: ["ERC3643Batch", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "batchBurn",
@@ -1960,7 +2332,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC3643_MANAGEMENT_RESOLVER_KEY",
       value: "0xae7b7d0da6ac02e802a8d85aa821dd5cb84e8448836471680f744f64b678a073",
     },
-    inheritance: ["ERC3643ManagementFacetBase"],
+    inheritance: ["ERC3643Management", "IStaticFunctionSelectors"],
     methods: [
       { name: "addAgent", signature: "function addAgent(address _agent)", selector: "0x84e79842" },
       {
@@ -2044,7 +2416,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC3643_OPERATIONS_RESOLVER_KEY",
       value: "0xe30b6b8e9e62fb8f017c940c7ffac12709f7ef6ae90beac5570fab25c7384e9c",
     },
-    inheritance: ["ERC3643OperationsFacetBase"],
+    inheritance: ["ERC3643Operations", "IStaticFunctionSelectors"],
     methods: [
       { name: "burn", signature: "function burn(address _userAddress, uint256 _amount)", selector: "0x9dc29fac" },
       {
@@ -2066,7 +2438,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_ERC3643_READ_RESOLVER_KEY",
       value: "0x7743c4e9ff26ef34c3c482d2c12dabe076035eb44bf1c736722f04c33c20ef6a",
     },
-    inheritance: ["ERC3643ReadFacetBase"],
+    inheritance: ["ERC3643Read", "IStaticFunctionSelectors"],
     methods: [
       { name: "compliance", signature: "function compliance() view returns (address)", selector: "0x6290865d" },
       {
@@ -2093,7 +2465,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_EXTERNAL_CONTROL_LIST_RESOLVER_KEY",
       value: "0x490196911bc65200514fb4568861a36670854901dffa91bc27577664fdace575",
     },
-    inheritance: ["ExternalControlListManagementFacetBase"],
+    inheritance: ["ExternalControlListManagement", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addExternalControlList",
@@ -2173,7 +2545,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_EXTERNAL_KYC_LIST_RESOLVER_KEY",
       value: "0x32f05e55195d945105aff8ac4b041d4680824578bd72c6a34e4aa906a59237f1",
     },
-    inheritance: ["ExternalKycListManagementFacetBase"],
+    inheritance: ["ExternalKycListManagement", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addExternalKycList",
@@ -2257,7 +2629,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_EXTERNAL_PAUSE_RESOLVER_KEY",
       value: "0x158025f9e40c5d145e7915a14d5e97459728d98c715d8329359e305df737ee3c",
     },
-    inheritance: ["ExternalPauseManagementFacetBase"],
+    inheritance: ["ExternalPauseManagement", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addExternalPause",
@@ -2372,7 +2744,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_FREEZE_RESOLVER_KEY",
       value: "0x49f765e7155d979a148049c2a0ebed5e028b11799061897a255f99314f0bd3f1",
     },
-    inheritance: ["FreezeFacetBase"],
+    inheritance: ["Freeze", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "batchFreezePartialTokens",
@@ -2442,7 +2814,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_HOLD_RESOLVER_KEY",
       value: "0x6c7216c5c52bc8f5019fc2fb333eb5e518e647fd82c807ed7c2a1fe4a03a3860",
     },
-    inheritance: ["HoldManagementFacetBase"],
+    inheritance: ["HoldManagement", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "controllerCreateHoldByPartition",
@@ -2490,7 +2862,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_HOLD_READ_RESOLVER_KEY",
       value: "0xd8a2714462c01975a075ccd4be2588934afd8074afef746fac089b757b803851",
     },
-    inheritance: ["HoldReadFacetBase"],
+    inheritance: ["HoldRead", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getHeldAmountFor",
@@ -2538,7 +2910,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_HOLD_TOKEN_HOLDER_RESOLVER_KEY",
       value: "0x87b17a3ce9a86872f21469d26f005543a22ef5729998559f4ad433d5c4253f3e",
     },
-    inheritance: ["HoldTokenHolderFacetBase"],
+    inheritance: ["HoldTokenHolder", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "createHoldByPartition",
@@ -2669,7 +3041,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x9a05806c3d9c062dfa7983f282dccc0397cb5d4ebf19b80ad4b5586c1d8c6cc6",
     },
-    inheritance: ["KpisFacetBase"],
+    inheritance: ["Kpis", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addKpiData",
@@ -2717,7 +3089,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
       value: "0xb668a0e99ee4bce486604d5a7097a4e5d837d1736e0cf43b190b56d0adea78b9",
     },
-    inheritance: ["KpisFacetBase"],
+    inheritance: ["Kpis", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addKpiData",
@@ -2765,7 +3137,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_KYC_RESOLVER_KEY",
       value: "0xf516a0f6b4726244ae916c590cd26c2b593d7d448e46e43714fb9f9435c46e32",
     },
-    inheritance: ["KycFacetBase"],
+    inheritance: ["Kyc", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "activateInternalKyc",
@@ -2856,7 +3228,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_LOCK_RESOLVER_KEY",
       value: "0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9",
     },
-    inheritance: ["LockFacetBase"],
+    inheritance: ["Lock", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getLockCountFor",
@@ -2951,7 +3323,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_NONCES_RESOLVER_KEY",
       value: "0xb235fd4aa74228c048d55d58514cd3393ef934423864ef7ddca6d302041c2bd1",
     },
-    inheritance: ["NoncesFacetBase"],
+    inheritance: ["Nonces", "IStaticFunctionSelectors"],
     methods: [
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
     ],
@@ -2965,11 +3337,27 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_PAUSE_RESOLVER_KEY",
       value: "0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c",
     },
-    inheritance: ["PauseFacetBase"],
+    inheritance: ["Pause", "IStaticFunctionSelectors"],
     methods: [
       { name: "isPaused", signature: "function isPaused() view returns (bool)", selector: "0xb187bd26" },
       { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
       { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
+    ],
+    events: [
+      {
+        name: "TokenPaused",
+        signature: "TokenPaused(address)",
+        topic0: "0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d",
+      },
+      {
+        name: "TokenUnpaused",
+        signature: "TokenUnpaused(address)",
+        topic0: "0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf",
+      },
+    ],
+    errors: [
+      { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
+      { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
     ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new PauseFacetTimeTravel__factory(signer) : new PauseFacet__factory(signer),
@@ -2981,7 +3369,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_PROCEED_RECIPIENTS_RESOLVER_KEY",
       value: "0x87f4b676bf89cd24a01a78fd8e7fb2102c2f6d034be73d16402f7297e0ae625b",
     },
-    inheritance: ["ProceedRecipientsFacetBase"],
+    inheritance: ["ProceedRecipients", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addProceedRecipient",
@@ -3064,7 +3452,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_PROCEED_RECIPIENTS_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0xe2f3e1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9e8",
     },
-    inheritance: ["ProceedRecipientsFacetBase"],
+    inheritance: ["ProceedRecipients", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addProceedRecipient",
@@ -3147,7 +3535,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
       value: "0xf3e4f2e1d9c8b7a6e5f4d3c2b1a9e8f7d6c5b4a3e2f1d9c8b7a6e5f4d3c2b1a9",
     },
-    inheritance: ["ProceedRecipientsFacetBase"],
+    inheritance: ["ProceedRecipients", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addProceedRecipient",
@@ -3230,7 +3618,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_PROTECTED_PARTITIONS_RESOLVER_KEY",
       value: "0x6d65d2938c05a4d952aff0845c1baa5bea04d4544db74f8b3b26004d1d58d58f",
     },
-    inheritance: ["ProtectedPartitionsFacetBase"],
+    inheritance: ["ProtectedPartitions", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "arePartitionsProtected",
@@ -3258,7 +3646,38 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1277b323",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    events: [
+      {
+        name: "PartitionsProtected",
+        signature: "PartitionsProtected(address)",
+        topic0: "0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff",
+      },
+      {
+        name: "PartitionsUnProtected",
+        signature: "PartitionsUnProtected(address)",
+        topic0: "0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525",
+      },
+      {
+        name: "ProtectedRedeemFrom",
+        signature: "ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)",
+        topic0: "0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b",
+      },
+      {
+        name: "ProtectedTransferFrom",
+        signature: "ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)",
+        topic0: "0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c",
+      },
+    ],
+    errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        selector: "0x55347310",
+      },
+      { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
+      { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new ProtectedPartitionsFacetTimeTravel__factory(signer)
@@ -3271,7 +3690,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY",
       value: "0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0",
     },
-    inheritance: ["ScheduledBalanceAdjustmentsFacetBase"],
+    inheritance: ["ScheduledBalanceAdjustments", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getScheduledBalanceAdjustments",
@@ -3297,7 +3716,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_COUPON_LISTING_RESOLVER_KEY",
       value: "0x6cc7645ae5bcd122875ce8bd150bd28dda6374546c4c2421e5ae4fdeedb3ab30",
     },
-    inheritance: ["ScheduledCouponListingFacetBase"],
+    inheritance: ["ScheduledCouponListing", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getScheduledCouponListing",
@@ -3323,7 +3742,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_TASKS_RESOLVER_KEY",
       value: "0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08",
     },
-    inheritance: ["ScheduledCrossOrderedTasksFacetBase"],
+    inheritance: ["ScheduledCrossOrderedTasks", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getScheduledCrossOrderedTasks",
@@ -3359,7 +3778,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_CROSS_ORDERED_TASKS_KPI_LINKED_RATE_RESOLVER_KEY",
       value: "0x04d20e52e58dbadedfcf6c373a826fc5f7c665fd6caf67c8a65a9e777a8b70ec",
     },
-    inheritance: ["ScheduledCrossOrderedTasksFacetBase"],
+    inheritance: ["ScheduledCrossOrderedTasks", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getScheduledCrossOrderedTasks",
@@ -3395,7 +3814,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_CROSS_ORDERED_TASKS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
       value: "0x23d3302e505d889e80b20005bf316ccd7cbbd3c547a7305d600e8f0d9bc73267",
     },
-    inheritance: ["ScheduledCrossOrderedTasksFacetBase"],
     methods: [
       {
         name: "getScheduledCrossOrderedTasks",
@@ -3431,7 +3849,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SCHEDULED_SNAPSHOTS_RESOLVER_KEY",
       value: "0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793",
     },
-    inheritance: ["ScheduledSnapshotsFacetBase"],
+    inheritance: ["ScheduledSnapshots", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getScheduledSnapshots",
@@ -3464,7 +3882,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SNAPSHOTS_RESOLVER_KEY",
       value: "0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf",
     },
-    inheritance: ["SnapshotsFacetBase"],
+    inheritance: ["SnapshotsFeature", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "balanceOfAtSnapshot",
@@ -3565,6 +3983,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9657ddb9",
       },
     ],
+    events: [
+      {
+        name: "SnapshotTaken",
+        signature: "SnapshotTaken(address,uint256)",
+        topic0: "0xd252178ed4aae4bc61be5bc8161b97bca1aae7b7fbde4523d5f4498cfca42763",
+      },
+      {
+        name: "SnapshotTriggered",
+        signature: "SnapshotTriggered(uint256)",
+        topic0: "0x0eec0abde2b179159e265a3659aa23e6c815e932b49ed19684a9717c1db37c8f",
+      },
+    ],
+    errors: [
+      { name: "SnapshotIdDoesNotExists", signature: "SnapshotIdDoesNotExists(uint256)", selector: "0x8e81eb83" },
+      { name: "SnapshotIdNull", signature: "SnapshotIdNull()", selector: "0xf128004d" },
+    ],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel ? new SnapshotsFacetTimeTravel__factory(signer) : new SnapshotsFacet__factory(signer),
   },
@@ -3575,7 +4009,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_SSI_RESOLVER_KEY",
       value: "0x77c35dccfcdc80370e925aae86871ef8bc71db0b8e082c073cda906e89bb610e",
     },
-    inheritance: ["SsiManagementFacetBase"],
+    inheritance: ["SsiManagement", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "addIssuer",
@@ -3765,7 +4199,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_TOTAL_BALANCE_RESOLVER_KEY",
       value: "0xd1873ecc41f0658d1ac1c9bf3fe6a4da2071b04edc7f7d3b4520d029c3ce64d5",
     },
-    inheritance: ["TotalBalanceFacetBase"],
+    inheritance: ["TotalBalance", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "getTotalBalanceFor",
@@ -3789,7 +4223,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_TRANSFER_AND_LOCK_RESOLVER_KEY",
       value: "0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08",
     },
-    inheritance: ["TransferAndLockFacetBase"],
+    inheritance: ["TransferAndLock", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "transferAndLock",
@@ -4112,432 +4546,6 @@ export const TOTAL_INFRASTRUCTURE_CONTRACTS = 2 as const;
  * They are abstract contracts inherited by facets, not deployed directly.
  */
 export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> = {
-  IAccessControlStorageWrapper: {
-    name: "IAccessControlStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "RoleAdminChanged",
-        signature: "RoleAdminChanged(bytes32,bytes32,bytes32)",
-        topic0: "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff",
-      },
-    ],
-    errors: [
-      { name: "AccountHasNoRole", signature: "AccountHasNoRole(address,bytes32)", selector: "0xa1180aad" },
-      { name: "AccountHasNoRoles", signature: "AccountHasNoRoles(address,bytes32[])", selector: "0x90e55392" },
-      {
-        name: "RolesAndActivesLengthMismatch",
-        signature: "RolesAndActivesLengthMismatch(uint256,uint256)",
-        selector: "0x365ff1a4",
-      },
-    ],
-  },
-
-  IAdjustBalancesStorageWrapper: {
-    name: "IAdjustBalancesStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "AdjustmentBalanceSet",
-        signature: "AdjustmentBalanceSet(address,uint256,uint8)",
-        topic0: "0x312510931206ef5f91f1ef19e1a01253812b7201fb8b2d5d4afa056cce53e34a",
-      },
-    ],
-    errors: [{ name: "FactorIsZero", signature: "FactorIsZero()", selector: "0x936e9b6d" }],
-  },
-
-  IBondStorageWrapper: {
-    name: "IBondStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "CouponSet",
-        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
-        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
-      },
-    ],
-    errors: [
-      { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
-      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
-    ],
-  },
-
-  ICapStorageWrapper: {
-    name: "ICapStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "MaxSupplyByPartitionSet",
-        signature: "MaxSupplyByPartitionSet(address,bytes32,uint256,uint256)",
-        topic0: "0x9c0c8826170fa45c79bf64a2913df8ccc3e77407aba502d85946253332a4d749",
-      },
-      {
-        name: "MaxSupplySet",
-        signature: "MaxSupplySet(address,uint256,uint256)",
-        topic0: "0xccc3b7560f9d81f26c619129ba9fa74ded9a6edb555a04655baaeca673e0a809",
-      },
-    ],
-    errors: [
-      { name: "MaxSupplyReached", signature: "MaxSupplyReached(uint256)", selector: "0xf9f84915" },
-      {
-        name: "MaxSupplyReachedForPartition",
-        signature: "MaxSupplyReachedForPartition(bytes32,uint256)",
-        selector: "0x57c004a9",
-      },
-      {
-        name: "NewMaxSupplyByPartitionTooHigh",
-        signature: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
-        selector: "0x21aa64a7",
-      },
-      { name: "NewMaxSupplyCannotBeZero", signature: "NewMaxSupplyCannotBeZero()", selector: "0x76f138fb" },
-      {
-        name: "NewMaxSupplyForPartitionTooLow",
-        signature: "NewMaxSupplyForPartitionTooLow(bytes32,uint256,uint256)",
-        selector: "0x820c68a8",
-      },
-      { name: "NewMaxSupplyTooLow", signature: "NewMaxSupplyTooLow(uint256,uint256)", selector: "0x98c2b03b" },
-    ],
-  },
-
-  IClearingStorageWrapper: {
-    name: "IClearingStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "ClearedHoldByPartition",
-        signature: "ClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xecba87eb6d871a001547362d9a9bb69ae25dd165858d73fe5cc600a705f3f3a0",
-      },
-      {
-        name: "ClearedHoldFromByPartition",
-        signature: "ClearedHoldFromByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xc8f249767e17c28ab7d211bf631a717a0ee7f840405af4618f625a7659bf7f63",
-      },
-      {
-        name: "ClearedOperatorHoldByPartition",
-        signature: "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xa9683588d7eb6dd41a2a62f56bd396a439f9e506ac7ca2efa031bcc5f99b4651",
-      },
-      {
-        name: "ClearedOperatorRedeemByPartition",
-        signature: "ClearedOperatorRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0xfec64ec403134db0b1e479976a765b3e364f24c765f7c73ce9bf4b31e13ed3c8",
-      },
-      {
-        name: "ClearedOperatorTransferByPartition",
-        signature:
-          "ClearedOperatorTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x8d9578064c4e2cadfe39cab8d79866d9e1c16956b958c6cbaedcec51f80d234a",
-      },
-      {
-        name: "ClearedRedeemByPartition",
-        signature: "ClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x7aaaa46250ad330b8cea62db34f608101d55300f94dd9b5ddbe83142bb51dc5f",
-      },
-      {
-        name: "ClearedRedeemFromByPartition",
-        signature: "ClearedRedeemFromByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x376e6c31cfecec25cc3fede988557cb98dee3c5ffa5976b48a0b614b84c45d79",
-      },
-      {
-        name: "ClearedTransferByPartition",
-        signature: "ClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x3d9505d4e04c873230c8ad112ce725e8338ab4fa6c98a7699ea41d4d63c2758f",
-      },
-      {
-        name: "ClearedTransferFromByPartition",
-        signature:
-          "ClearedTransferFromByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x374f3552ea6ef855812358112ab8344010038fd2d56b9f47a1d9cb0320c275a2",
-      },
-      {
-        name: "ProtectedClearedHoldByPartition",
-        signature: "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0x7fd4d7541b7da42375ec1b3f05c454acb77234a17c2f4349c102add4bc61e306",
-      },
-      {
-        name: "ProtectedClearedRedeemByPartition",
-        signature: "ProtectedClearedRedeemByPartition(address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0xdd233f03eaed8aec1fe549f12e218c32dc2e73b3d5777bdeb33afa43e2fa2230",
-      },
-      {
-        name: "ProtectedClearedTransferByPartition",
-        signature:
-          "ProtectedClearedTransferByPartition(address,address,address,bytes32,uint256,uint256,uint256,bytes,bytes)",
-        topic0: "0x8aea721bf4270b3b07d0974586b57ecd35862ae7a8b733530161d941489283f1",
-      },
-    ],
-  },
-
-  IControlListStorageWrapper: {
-    name: "IControlListStorageWrapper",
-    methods: [],
-    errors: [{ name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" }],
-  },
-
-  ICorporateActionsStorageWrapper: {
-    name: "ICorporateActionsStorageWrapper",
-    methods: [],
-    errors: [
-      { name: "WrongDates", signature: "WrongDates(uint256,uint256)", selector: "0x1c94559c" },
-      { name: "WrongIndexForAction", signature: "WrongIndexForAction(uint256,bytes32)", selector: "0xd3924f4e" },
-    ],
-  },
-
-  IEquityStorageWrapper: {
-    name: "IEquityStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "DividendSet",
-        signature: "DividendSet(bytes32,uint256,address,uint256,uint256,uint256,uint8)",
-        topic0: "0xc849cd6d345b059ab830e5aa8ab5e38bd118833e14bcdfea70231b0e5c072a12",
-      },
-      {
-        name: "ScheduledBalanceAdjustmentSet",
-        signature: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
-        topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
-      },
-      {
-        name: "VotingSet",
-        signature: "VotingSet(bytes32,uint256,address,uint256,bytes)",
-        topic0: "0x5ca20e6ec9818c8d574ae3452d46ed4c9dc9d8df2ffa263150507c7e9124ac2f",
-      },
-    ],
-    errors: [
-      {
-        name: "BalanceAdjustmentCreationFailed",
-        signature: "BalanceAdjustmentCreationFailed()",
-        selector: "0x0c68e660",
-      },
-      { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
-      { name: "VotingRightsCreationFailed", signature: "VotingRightsCreationFailed()", selector: "0x0cc16600" },
-    ],
-  },
-
-  IERC1410StorageWrapper: {
-    name: "IERC1410StorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "AuthorizedOperator",
-        signature: "AuthorizedOperator(address,address)",
-        topic0: "0xf4caeb2d6ca8932a215a353d0703c326ec2d81fc68170f320eb2ab49e9df61f9",
-      },
-      {
-        name: "AuthorizedOperatorByPartition",
-        signature: "AuthorizedOperatorByPartition(bytes32,address,address)",
-        topic0: "0x3646a897c70797ecc134b0adc32f471b07bf1d6f451133b0384badab531e3fd6",
-      },
-      {
-        name: "IssuedByPartition",
-        signature: "IssuedByPartition(bytes32,address,address,uint256,bytes)",
-        topic0: "0x5af1c8f424b104b6ba4e3c0885f2ed9fef04a9b1ea39cd9ed362432105c0791a",
-      },
-      {
-        name: "RedeemedByPartition",
-        signature: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
-        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
-      },
-      {
-        name: "RevokedOperator",
-        signature: "RevokedOperator(address,address)",
-        topic0: "0x50546e66e5f44d728365dc3908c63bc5cfeeab470722c1677e3073a6ac294aa1",
-      },
-      {
-        name: "RevokedOperatorByPartition",
-        signature: "RevokedOperatorByPartition(bytes32,address,address)",
-        topic0: "0x3b287c4f1bab4df949b33bceacef984f544dc5d5479930d00e4ee8c9d8dd96f2",
-      },
-      {
-        name: "TransferByPartition",
-        signature: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
-        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
-      },
-    ],
-    errors: [
-      {
-        name: "InsufficientBalance",
-        signature: "InsufficientBalance(address,uint256,uint256,bytes32)",
-        selector: "0x5d6824c4",
-      },
-      { name: "InvalidPartition", signature: "InvalidPartition(address,bytes32)", selector: "0xbf84f4ec" },
-      { name: "NotAllowedInMultiPartitionMode", signature: "NotAllowedInMultiPartitionMode()", selector: "0x76d08f88" },
-      {
-        name: "PartitionNotAllowedInSinglePartitionMode",
-        signature: "PartitionNotAllowedInSinglePartitionMode(bytes32)",
-        selector: "0xb96d9539",
-      },
-      { name: "Unauthorized", signature: "Unauthorized(address,address,bytes32)", selector: "0x1e09743f" },
-      { name: "ZeroPartition", signature: "ZeroPartition()", selector: "0x4a6f30c3" },
-      { name: "ZeroValue", signature: "ZeroValue()", selector: "0x7c946ed7" },
-    ],
-  },
-
-  IERC1594StorageWrapper: {
-    name: "IERC1594StorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "Issued",
-        signature: "Issued(address,address,uint256,bytes)",
-        topic0: "0x0e9905d62635f049c2f4e11678ebf9dc3d1f8c4a653e290759b772e47ba00d00",
-      },
-      {
-        name: "Redeemed",
-        signature: "Redeemed(address,address,uint256,bytes)",
-        topic0: "0xb7d0d6b60740753e9f16692a2f479472a1385aec2420fa43225b02f2ffa1afe7",
-      },
-    ],
-  },
-
-  IERC1644StorageWrapper: {
-    name: "IERC1644StorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "ControllerRedemption",
-        signature: "ControllerRedemption(address,address,uint256,bytes,bytes)",
-        topic0: "0x876b7cb47aa150b3a5516188b19ed308752ad4d0ae9a702543353b78163f7589",
-      },
-      {
-        name: "ControllerTransfer",
-        signature: "ControllerTransfer(address,address,address,uint256,bytes,bytes)",
-        topic0: "0x6bf62b4b9c7b768275122bf70d429efc398a056d669b1efdf6c3976346246d7d",
-      },
-      {
-        name: "FinalizedControllerFeature",
-        signature: "FinalizedControllerFeature(address)",
-        topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
-      },
-    ],
-    errors: [{ name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" }],
-  },
-
-  IERC20StorageWrapper: {
-    name: "IERC20StorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "Approval",
-        signature: "Approval(address,address,uint256)",
-        topic0: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
-      },
-      {
-        name: "Transfer",
-        signature: "Transfer(address,address,uint256)",
-        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      },
-    ],
-    errors: [
-      { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
-      { name: "SpenderWithZeroAddress", signature: "SpenderWithZeroAddress()", selector: "0x80e32d8f" },
-      { name: "ZeroOwnerAddress", signature: "ZeroOwnerAddress()", selector: "0x42cad957" },
-    ],
-  },
-
-  IERC3643StorageWrapper: {
-    name: "IERC3643StorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "ComplianceAdded",
-        signature: "ComplianceAdded(address)",
-        topic0: "0x7f3a888862559648ec01d97deb7b5012bff86dc91e654a1de397170db40e35b6",
-      },
-      {
-        name: "is",
-        signature: "is(address)",
-        topic0: "0x1a8030f045b4b86aca291b7682629fa4281d012c81c6751df3fad982d767b3e0",
-      },
-    ],
-    errors: [
-      {
-        name: "InsufficientFrozenBalance",
-        signature: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
-        selector: "0xefafde54",
-      },
-    ],
-  },
-
-  IPauseStorageWrapper: {
-    name: "IPauseStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "TokenPaused",
-        signature: "TokenPaused(address)",
-        topic0: "0xf017c0de579727a3cd3ee18077ee8b4c43bf21892985952d1d5a0d52f983502d",
-      },
-      {
-        name: "TokenUnpaused",
-        signature: "TokenUnpaused(address)",
-        topic0: "0xf38578ed892ce2ce655ca8ae03c73464ad74915a1331a9b4085e637534daeedf",
-      },
-    ],
-    errors: [
-      { name: "TokenIsPaused", signature: "TokenIsPaused()", selector: "0x649815a5" },
-      { name: "TokenIsUnpaused", signature: "TokenIsUnpaused()", selector: "0x72058d69" },
-    ],
-  },
-
-  IProtectedPartitionsStorageWrapper: {
-    name: "IProtectedPartitionsStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "PartitionsProtected",
-        signature: "PartitionsProtected(address)",
-        topic0: "0x990fbe2c0a8b93cc7974d7ab6416266441112d61fa0989af94a79de43dda48ff",
-      },
-      {
-        name: "PartitionsUnProtected",
-        signature: "PartitionsUnProtected(address)",
-        topic0: "0xd556aabec0a33d5b3b9b8c739af1745b14ba2abecc20c3c080fd4ac6143e8525",
-      },
-      {
-        name: "ProtectedRedeemFrom",
-        signature: "ProtectedRedeemFrom(bytes32,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0xac2a7d7fcbf24c034d113f94d7ccf1df23cb94932becc61aa96ab060df6f101b",
-      },
-      {
-        name: "ProtectedTransferFrom",
-        signature: "ProtectedTransferFrom(bytes32,address,address,address,uint256,uint256,uint256,bytes)",
-        topic0: "0x2abbd5300acea8488bc2d0777cfb860f38dee76badd52ff8b36d3dec0f5fdb6c",
-      },
-    ],
-    errors: [
-      {
-        name: "PartitionsAreProtectedAndNoRole",
-        signature: "PartitionsAreProtectedAndNoRole(address,bytes32)",
-        selector: "0x55347310",
-      },
-      { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
-      { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
-    ],
-  },
-
-  ISnapshotsStorageWrapper: {
-    name: "ISnapshotsStorageWrapper",
-    methods: [],
-    events: [
-      {
-        name: "SnapshotTaken",
-        signature: "SnapshotTaken(address,uint256)",
-        topic0: "0xd252178ed4aae4bc61be5bc8161b97bca1aae7b7fbde4523d5f4498cfca42763",
-      },
-      {
-        name: "SnapshotTriggered",
-        signature: "SnapshotTriggered(uint256)",
-        topic0: "0x0eec0abde2b179159e265a3659aa23e6c815e932b49ed19684a9717c1db37c8f",
-      },
-    ],
-    errors: [
-      { name: "SnapshotIdDoesNotExists", signature: "SnapshotIdDoesNotExists(uint256)", selector: "0x8e81eb83" },
-      { name: "SnapshotIdNull", signature: "SnapshotIdNull()", selector: "0xf128004d" },
-    ],
-  },
-
   ITimeTravelStorageWrapper: {
     name: "ITimeTravelStorageWrapper",
     description: "Interface for the TimeTravelStorageWrapper contract",
@@ -4581,7 +4589,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 18 as const;
+export const TOTAL_STORAGE_WRAPPERS = 2 as const;
 
 /**
  * All role identifiers extracted from contracts.

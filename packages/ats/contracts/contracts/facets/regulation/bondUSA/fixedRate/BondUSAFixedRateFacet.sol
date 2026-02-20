@@ -2,8 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _BOND_FIXED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys/assets.sol";
-import { BondUSAFacetBase } from "../BondUSAFacetBase.sol";
+import { BondUSA } from "../BondUSA.sol";
+import { IStaticFunctionSelectors } from "../../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
+import { IBond } from "../../../assetCapabilities/interfaces/bond/IBond.sol";
 import { IBondRead } from "../../../assetCapabilities/interfaces/bond/IBondRead.sol";
+import { IBondUSA } from "../../interfaces/IBondUSA.sol";
 import { LibBond } from "../../../../lib/domain/LibBond.sol";
 import { LibInterestRate } from "../../../../lib/domain/LibInterestRate.sol";
 import { LibPause } from "../../../../lib/core/LibPause.sol";
@@ -11,7 +14,7 @@ import { LibAccess } from "../../../../lib/core/LibAccess.sol";
 import { LibCorporateActions } from "../../../../lib/core/LibCorporateActions.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../../../constants/roles.sol";
 
-contract BondUSAFixedRateFacet is BondUSAFacetBase {
+contract BondUSAFixedRateFacet is BondUSA, IStaticFunctionSelectors {
     // ═══════════════════════════════════════════════════════════════════════════════
     // ERROR DEFINITIONS
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -55,12 +58,29 @@ contract BondUSAFixedRateFacet is BondUSAFacetBase {
         staticResolverKey_ = _BOND_FIXED_RATE_RESOLVER_KEY;
     }
 
+    function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_[selectorIndex++] = this._initialize_bondUSA.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.updateMaturityDate.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.redeemAtMaturityByPartition.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.fullRedeemAtMaturity.selector;
+    }
+
+    function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {
+        staticInterfaceIds_ = new bytes4[](2);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════════
     // PRIVATE STATE-CHANGING FUNCTIONS
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function _setCouponWithModifiedCoupon(IBondRead.Coupon memory _newCoupon) private returns (uint256 couponID_) {
-        // Import the same validation as BondUSAFacetBase (replicate parent logic)
+        // Import the same validation as BondUSA (replicate parent logic)
         LibPause.requireNotPaused();
         LibAccess.checkRole(_CORPORATE_ACTION_ROLE);
         LibCorporateActions.validateDates(_newCoupon.startDate, _newCoupon.endDate);

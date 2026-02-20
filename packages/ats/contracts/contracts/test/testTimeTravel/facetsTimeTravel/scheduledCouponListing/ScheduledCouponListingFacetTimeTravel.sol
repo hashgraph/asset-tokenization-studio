@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable max-line-length
 import {
     ScheduledCouponListingFacet
-} from "../../../../facets/assetCapabilities/scheduledTasks/scheduledCouponListing/standard/ScheduledCouponListingFacet.sol";
+} from "../../../../facets/assetCapabilities/scheduledTasks/scheduledCouponListing/ScheduledCouponListingFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 

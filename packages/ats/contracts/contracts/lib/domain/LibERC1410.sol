@@ -8,7 +8,7 @@ import {
     erc1410BasicStorage,
     erc1410OperatorStorage
 } from "../../storage/TokenStorage.sol";
-import { IERC1410StorageWrapper } from "../../facets/features/interfaces/ERC1400/IERC1410StorageWrapper.sol";
+import { IERC1410 } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
 import { BasicTransferInfo } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { LibABAF } from "./LibABAF.sol";
@@ -55,12 +55,12 @@ library LibERC1410 {
 
     function reduceBalanceByPartition(address _from, uint256 _value, bytes32 _partition) internal {
         if (!validPartition(_partition, _from)) {
-            revert IERC1410StorageWrapper.InvalidPartition(_from, _partition);
+            revert IERC1410.InvalidPartition(_from, _partition);
         }
 
         uint256 fromBalance = balanceOfByPartition(_partition, _from);
         if (fromBalance < _value) {
-            revert IERC1410StorageWrapper.InsufficientBalance(_from, fromBalance, _value, _partition);
+            revert IERC1410.InsufficientBalance(_from, fromBalance, _value, _partition);
         }
 
         ERC1410BasicStorage storage s = erc1410BasicStorage();
@@ -77,7 +77,7 @@ library LibERC1410 {
 
     function increaseBalanceByPartition(address _to, uint256 _value, bytes32 _partition) internal {
         if (!validPartition(_partition, _to)) {
-            revert IERC1410StorageWrapper.InvalidPartition(_to, _partition);
+            revert IERC1410.InvalidPartition(_to, _partition);
         }
 
         ERC1410BasicStorage storage s = erc1410BasicStorage();
@@ -247,7 +247,7 @@ library LibERC1410 {
 
     function checkOperator(bytes32 _partition, address _operator, address _from) internal view {
         if (!isAuthorized(_partition, _operator, _from)) {
-            revert IERC1410StorageWrapper.Unauthorized(_operator, _from, _partition);
+            revert IERC1410.Unauthorized(_operator, _from, _partition);
         }
     }
 
@@ -333,12 +333,12 @@ library LibERC1410 {
 
     function checkDefaultPartitionWithSinglePartition(bytes32 _partition) internal view {
         if (!isMultiPartition() && _partition != _DEFAULT_PARTITION) {
-            revert IERC1410StorageWrapper.PartitionNotAllowedInSinglePartitionMode(_partition);
+            revert IERC1410.PartitionNotAllowedInSinglePartitionMode(_partition);
         }
     }
 
     function checkWithoutMultiPartition() internal view {
-        if (isMultiPartition()) revert IERC1410StorageWrapper.NotAllowedInMultiPartitionMode();
+        if (isMultiPartition()) revert IERC1410.NotAllowedInMultiPartitionMode();
     }
 
     function requireValidAddress(address account) internal pure {

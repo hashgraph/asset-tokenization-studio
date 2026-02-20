@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
 import { IDiamondLoupe } from "../interfaces/IDiamondLoupe.sol";
-import { IAccessControl } from "../../facets/features/interfaces/accessControl/IAccessControl.sol";
-import { IPause } from "../../facets/features/interfaces/pause/IPause.sol";
+import { IAccessControl } from "../../facets/features/interfaces/IAccessControl.sol";
+import { IPause } from "../../facets/features/interfaces/IPause.sol";
 import { _PAUSER_ROLE } from "../../constants/roles.sol";
 import { LibAccess } from "../../lib/core/LibAccess.sol";
 import { LibPause } from "../../lib/core/LibPause.sol";

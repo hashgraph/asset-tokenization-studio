@@ -4,9 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ProtectedPartitionsDataStorage, protectedPartitionsStorage } from "../../storage/CoreStorage.sol";
 import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { LibAccess } from "./LibAccess.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../facets/features/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitions } from "../../facets/features/interfaces/IProtectedPartitions.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
 import { Hold, ProtectedHold } from "../../facets/features/interfaces/hold/IHold.sol";
 import {
@@ -43,13 +41,13 @@ library LibProtectedPartitions {
 
     function checkUnProtectedPartitionsOrWildCardRole() internal view {
         if (arePartitionsProtected() && !LibAccess.hasRole(_WILD_CARD_ROLE, msg.sender)) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
+            revert IProtectedPartitions.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
         }
     }
 
     function requireProtectedPartitions() internal view {
         if (!arePartitionsProtected()) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreUnProtected();
+            revert IProtectedPartitions.PartitionsAreUnProtected();
         }
     }
 
@@ -62,7 +60,7 @@ library LibProtectedPartitions {
         address from,
         address to,
         uint256 amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata protectionData,
+        IProtectedPartitions.ProtectionData calldata protectionData,
         string memory tokenName,
         uint256 resolverProxyVersion,
         uint256 chainId,
@@ -81,7 +79,7 @@ library LibProtectedPartitions {
                 tokenAddress
             )
         ) {
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
         }
     }
 
@@ -90,7 +88,7 @@ library LibProtectedPartitions {
         address from,
         address to,
         uint256 amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata protectionData,
+        IProtectedPartitions.ProtectionData calldata protectionData,
         string memory tokenName,
         uint256 resolverProxyVersion,
         uint256 chainId,
@@ -120,7 +118,7 @@ library LibProtectedPartitions {
         bytes32 partition,
         address from,
         uint256 amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata protectionData,
+        IProtectedPartitions.ProtectionData calldata protectionData,
         string memory tokenName,
         uint256 resolverProxyVersion,
         uint256 chainId,
@@ -138,7 +136,7 @@ library LibProtectedPartitions {
                 tokenAddress
             )
         ) {
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
         }
     }
 
@@ -146,7 +144,7 @@ library LibProtectedPartitions {
         bytes32 partition,
         address from,
         uint256 amount,
-        IProtectedPartitionsStorageWrapper.ProtectionData calldata protectionData,
+        IProtectedPartitions.ProtectionData calldata protectionData,
         string memory tokenName,
         uint256 resolverProxyVersion,
         uint256 chainId,
@@ -193,7 +191,7 @@ library LibProtectedPartitions {
                 tokenAddress
             )
         ) {
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
         }
     }
 
@@ -241,7 +239,7 @@ library LibProtectedPartitions {
                 tokenAddress
             )
         ) {
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
         }
     }
 
@@ -290,7 +288,7 @@ library LibProtectedPartitions {
                 tokenAddress
             )
         ) {
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
         }
     }
 
@@ -338,7 +336,7 @@ library LibProtectedPartitions {
                 tokenAddress
             )
         ) {
-            revert IProtectedPartitionsStorageWrapper.WrongSignature();
+            revert IProtectedPartitions.WrongSignature();
         }
     }
 

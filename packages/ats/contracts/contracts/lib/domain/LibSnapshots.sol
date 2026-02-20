@@ -11,8 +11,8 @@ import {
     SnapshotsAddress,
     PartitionSnapshots,
     ListOfPartitions
-} from "../../facets/features/interfaces/snapshots/ISnapshots.sol";
-import { ISnapshotsStorageWrapper } from "../../facets/features/interfaces/snapshots/ISnapshotsStorageWrapper.sol";
+} from "../../facets/features/interfaces/ISnapshots.sol";
+import { ISnapshots } from "../../facets/features/interfaces/ISnapshots.sol";
 import { LibABAF } from "./LibABAF.sol";
 import { LibERC1410 } from "./LibERC1410.sol";
 import { LibLock } from "./LibLock.sol";
@@ -223,7 +223,7 @@ library LibSnapshots {
     function snapshot() internal returns (uint256) {
         snapshotStorage().currentSnapshotId.increment();
         uint256 currentId = getCurrentSnapshotId();
-        emit ISnapshotsStorageWrapper.SnapshotTriggered(currentId);
+        emit ISnapshots.SnapshotTriggered(currentId);
         return currentId;
     }
 
@@ -273,10 +273,10 @@ library LibSnapshots {
     /// @return index The index in the array (only valid if found is true)
     function indexFor(uint256 snapshotId, uint256[] storage ids) internal view returns (bool found, uint256 index) {
         if (snapshotId == 0) {
-            revert ISnapshotsStorageWrapper.SnapshotIdNull();
+            revert ISnapshots.SnapshotIdNull();
         }
         if (snapshotId > getCurrentSnapshotId()) {
-            revert ISnapshotsStorageWrapper.SnapshotIdDoesNotExists(snapshotId);
+            revert ISnapshots.SnapshotIdDoesNotExists(snapshotId);
         }
 
         index = ids.findUpperBound(snapshotId);

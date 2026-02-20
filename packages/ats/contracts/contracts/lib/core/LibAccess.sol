@@ -4,9 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { RoleDataStorage, rolesStorage } from "../../storage/CoreStorage.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    IAccessControlStorageWrapper
-} from "../../facets/features/interfaces/accessControl/IAccessControlStorageWrapper.sol";
+import { IAccessControl } from "../../facets/features/interfaces/IAccessControl.sol";
 
 /// @title LibAccess
 /// @notice Leaf library for role-based access control functionality
@@ -99,7 +97,7 @@ library LibAccess {
     /// @dev Reverts with AccountHasNoRole if account doesn't have the role
     function checkRole(bytes32 role, address account) internal view {
         if (!hasRole(role, account)) {
-            revert IAccessControlStorageWrapper.AccountHasNoRole(account, role);
+            revert IAccessControl.AccountHasNoRole(account, role);
         }
     }
 
@@ -129,7 +127,7 @@ library LibAccess {
     /// @dev Reverts with AccountHasNoRoles if account doesn't have any of the roles
     function checkAnyRole(bytes32[] memory roles, address account) internal view {
         if (!hasAnyRole(roles, account)) {
-            revert IAccessControlStorageWrapper.AccountHasNoRoles(account, roles);
+            revert IAccessControl.AccountHasNoRoles(account, roles);
         }
     }
 
@@ -190,7 +188,7 @@ library LibAccess {
     /// @dev Reverts with RolesAndActivesLengthMismatch if lengths differ
     function checkSameRolesAndActivesLength(uint256 rolesLength, uint256 activesLength) internal pure {
         if (rolesLength != activesLength) {
-            revert IAccessControlStorageWrapper.RolesAndActivesLengthMismatch(rolesLength, activesLength);
+            revert IAccessControl.RolesAndActivesLengthMismatch(rolesLength, activesLength);
         }
     }
 }

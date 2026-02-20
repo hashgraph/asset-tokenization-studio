@@ -5,12 +5,12 @@ import { IFactory } from "./IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/interfaces/IResolverProxy.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
-import { IControlList } from "../facets/features/interfaces/controlList/IControlList.sol";
+import { IControlList } from "../facets/features/interfaces/IControlList.sol";
 import { IERC20 } from "../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IERC20Votes } from "../facets/features/interfaces/ERC1400/IERC20Votes.sol";
 import { IERC1644 } from "../facets/features/interfaces/ERC1400/IERC1644.sol";
 import { IERC1410 } from "../facets/features/interfaces/ERC1400/IERC1410.sol";
-import { ICap } from "../facets/features/interfaces/cap/ICap.sol";
+import { ICap } from "../facets/features/interfaces/ICap.sol";
 import { IERC1594 } from "../facets/features/interfaces/ERC1400/IERC1594.sol";
 import { IClearingActions } from "../facets/features/interfaces/clearing/IClearingActions.sol";
 import { IBusinessLogicResolver } from "../infrastructure/interfaces/IBusinessLogicResolver.sol";
@@ -25,15 +25,11 @@ import {
 import { IEquityUSA } from "../facets/regulation/interfaces/IEquityUSA.sol";
 import { IBondUSA } from "../facets/regulation/interfaces/IBondUSA.sol";
 import { IProceedRecipients } from "../facets/assetCapabilities/interfaces/proceedRecipients/IProceedRecipients.sol";
-import { IProtectedPartitions } from "../facets/features/interfaces/protectedPartitions/IProtectedPartitions.sol";
-import { IExternalPauseManagement } from "../facets/features/interfaces/externalPauses/IExternalPauseManagement.sol";
-import {
-    IExternalControlListManagement
-} from "../facets/features/interfaces/externalControlLists/IExternalControlListManagement.sol";
-import {
-    IExternalKycListManagement
-} from "../facets/features/interfaces/externalKycLists/IExternalKycListManagement.sol";
-import { IKyc } from "../facets/features/interfaces/kyc/IKyc.sol";
+import { IProtectedPartitions } from "../facets/features/interfaces/IProtectedPartitions.sol";
+import { IExternalPauseManagement } from "../facets/features/interfaces/IExternalPauseManagement.sol";
+import { IExternalControlListManagement } from "../facets/features/interfaces/IExternalControlListManagement.sol";
+import { IExternalKycListManagement } from "../facets/features/interfaces/IExternalKycListManagement.sol";
+import { IKyc } from "../facets/features/interfaces/IKyc.sol";
 import { IERC3643 } from "../facets/features/interfaces/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/assetCapabilities/interfaces/interestRates/fixedRate/IFixedRate.sol";

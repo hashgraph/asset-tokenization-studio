@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { erc3643Storage } from "../../storage/ExternalStorage.sol";
 import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
-import { IERC3643StorageWrapper } from "../../facets/features/interfaces/ERC3643/IERC3643StorageWrapper.sol";
+import { IERC3643 } from "../../facets/features/interfaces/ERC3643/IERC3643.sol";
 import { LibABAF } from "./LibABAF.sol";
 
 /// @title LibFreeze
@@ -131,7 +131,7 @@ library LibFreeze {
     function checkUnfreezeAmount(bytes32 partition, address account, uint256 amount) internal view {
         uint256 frozenAmount = getFrozenAmountByPartitionAdjustedAt(partition, account, block.timestamp);
         if (frozenAmount < amount) {
-            revert IERC3643StorageWrapper.InsufficientFrozenBalance(account, amount, frozenAmount, partition);
+            revert IERC3643.InsufficientFrozenBalance(account, amount, frozenAmount, partition);
         }
     }
 }

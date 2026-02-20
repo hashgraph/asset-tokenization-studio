@@ -1,0 +1,68 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+interface IProtectedPartitions {
+    struct ProtectionData {
+        uint256 deadline;
+        uint256 nounce;
+        bytes signature;
+    }
+
+    event PartitionsProtected(address indexed operator);
+
+    event PartitionsUnProtected(address indexed operator);
+
+    event ProtectedTransferFrom(
+        bytes32 indexed partition,
+        address indexed operator,
+        address indexed from,
+        address to,
+        uint256 value,
+        uint256 deadline,
+        uint256 nounce,
+        bytes signature
+    );
+
+    event ProtectedRedeemFrom(
+        bytes32 indexed partition,
+        address indexed operator,
+        address indexed from,
+        uint256 value,
+        uint256 deadline,
+        uint256 nounce,
+        bytes signature
+    );
+
+    error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+    error PartitionsAreUnProtected();
+    error WrongSignature();
+
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
+
+    /**
+     * @notice Activates the protected partitions mode
+     * @dev Disables the ability to freely transfer tokens unless the sender has the requited role for the partition
+     */
+    function protectPartitions() external returns (bool success_);
+
+    /**
+     * @notice Deactivates the protected partitions mode
+     * @dev Enables the ability to freely transfer tokens
+     */
+    function unprotectPartitions() external returns (bool success_);
+
+    /**
+     * @notice Returns whether the protected partitions mode is active
+     * @dev If true, transfers are restricted to accounts having the required role for the partition
+     * @return bool true if the protected partitions mode is active, false otherwise
+     */
+    function arePartitionsProtected() external view returns (bool);
+
+    /**
+     * @notice Calculates the role required to transfer tokens from a given partition
+     * @param _partition The partition to calculate the role for
+     * @return roleForPartition_ The role required to transfer tokens from the given partition
+     */
+    function calculateRoleForPartition(bytes32 _partition) external pure returns (bytes32 roleForPartition_);
+}

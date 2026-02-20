@@ -3,10 +3,16 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC20StorageWrapper } from "./IERC20StorageWrapper.sol";
 import { IFactory } from "../../../../factory/IFactory.sol";
 
-interface IERC20 is IERC20StorageWrapper {
+interface IERC20 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    error ZeroOwnerAddress();
+    error InsufficientAllowance(address spender, address from);
+    error SpenderWithZeroAddress();
+
     struct ERC20MetadataInfo {
         string name;
         string symbol;

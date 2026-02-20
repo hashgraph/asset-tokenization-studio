@@ -22,7 +22,7 @@ import { _CONTROL_LIST_STORAGE_POSITION } from "../constants/storagePositions.so
 import { _KYC_STORAGE_POSITION } from "../constants/storagePositions.sol";
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IKyc } from "../facets/features/interfaces/kyc/IKyc.sol";
+import { IKyc } from "../facets/features/interfaces/IKyc.sol";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // STORAGE STRUCTS

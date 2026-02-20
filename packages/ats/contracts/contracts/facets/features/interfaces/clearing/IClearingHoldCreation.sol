@@ -3,8 +3,65 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Hold } from "../hold/IHold.sol";
 import { IClearing } from "./IClearing.sol";
+import { ThirdPartyType } from "../../types/ThirdPartyType.sol";
 
 interface IClearingHoldCreation is IClearing {
+    struct ClearingHoldCreationData {
+        uint256 amount;
+        uint256 expirationTimestamp;
+        bytes data;
+        address holdEscrow;
+        uint256 holdExpirationTimestamp;
+        address holdTo;
+        bytes holdData;
+        bytes operatorData;
+        ThirdPartyType operatorType;
+    }
+
+    event ClearedHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedHoldFromByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedOperatorHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ProtectedClearedHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        Hold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
     /**
      * @notice Creates a hold for a clearing operation by partition
      *

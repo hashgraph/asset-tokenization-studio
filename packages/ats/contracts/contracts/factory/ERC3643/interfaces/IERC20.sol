@@ -6,6 +6,13 @@ pragma solidity ^0.8.17;
 import { TRexIFactory as IFactory } from "./IFactory.sol";
 
 interface TRexIERC20 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    error ZeroOwnerAddress();
+    error InsufficientAllowance(address spender, address from);
+    error SpenderWithZeroAddress();
+
     struct ERC20MetadataInfo {
         string name;
         string symbol;

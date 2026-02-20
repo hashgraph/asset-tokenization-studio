@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalPause } from "../facets/features/interfaces/externalPauses/IExternalPause.sol";
+import { IExternalPause } from "../facets/features/interfaces/IExternalPause.sol";
 
 contract MockedExternalPause is IExternalPause {
     bool private _paused;
