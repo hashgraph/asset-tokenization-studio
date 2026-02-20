@@ -45,7 +45,7 @@ import Account from "@domain/account/Account";
 import EvmAddress from "@domain/contract/EvmAddress";
 import BigDecimal from "@domain/shared/BigDecimal";
 import RbacPort from "./types/RbacPort";
-import { AbiCoder, Interface, BaseContract } from "ethers";
+import { AbiCoder, Interface, BaseContract, ContractRunner } from "ethers";
 import {
   LifeCycleCashFlow__factory,
   ProxyAdmin__factory,
@@ -115,9 +115,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     if (jsonRpcRelays) this.jsonRpcRelays = jsonRpcRelays;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected getSignerOrProvider(): any {
-    return this.signer;
+  protected getSignerOrProvider(): ContractRunner {
+    return this.signer as unknown as ContractRunner;
   }
 
   importAsset(asset: EvmAddress, paymentToken: EvmAddress): Promise<EvmAddress> {
@@ -164,7 +163,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const iface = new Interface(LifeCycleCashFlow__factory.abi);
     const callDataHex = iface.encodeFunctionData("initialize", [asset.value, paymentToken.value.slice(2), rbac]);
-    const callDataBytes = Uint8Array.from(Buffer.from(callDataHex.slice(2), "hex"));
 
     const constructorParamsProxyHex = abiCoder.encode(
       ["address", "address", "bytes"],
