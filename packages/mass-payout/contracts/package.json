@@ -29,7 +29,7 @@
     "doc": "npx hardhat dodoc"
   },
   "dependencies": {
-    "bn.js": "5.2.1"
+    "bn.js": "5.2.3"
   },
   "devDependencies": {
     "@hiero-ledger/sdk": "2.79.0",
