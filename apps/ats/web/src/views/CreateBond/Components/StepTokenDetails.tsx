@@ -18,6 +18,8 @@ import { ICreateBondFormValues } from "../ICreateBondFormValues";
 import { CancelButton } from "../../../components/CancelButton";
 import { NextStepButton } from "./NextStepButton";
 import { FormStepContainer } from "../../../components/FormStepContainer";
+import { FillWithExampleButton } from "../../CreateSecurityCommons/FillWithExampleButton";
+import { getMockBondFormData } from "../utils/mockBondData";
 
 export const StepTokenDetails = () => {
   const { t } = useTranslation("security", { keyPrefix: "createBond" });
@@ -33,9 +35,10 @@ export const StepTokenDetails = () => {
       <Stack gap={2}>
         <Text textStyle="HeadingMediumLG">{t("stepTokenDetails.title")}</Text>
         <Text textStyle="BodyTextRegularMD">{t("stepTokenDetails.subtitle")}</Text>
-        <Text textStyle="ElementsRegularSM" mt={6}>
-          {t("stepTokenDetails.mandatoryFields")}
-        </Text>
+        <HStack w="full" justify="space-between" align="center" mb={4}>
+          <Text textStyle="ElementsRegularSM">{t("stepTokenDetails.mandatoryFields")}</Text>
+          <FillWithExampleButton getMockData={getMockBondFormData} translationKey="createBond.fillWithExample" />
+        </HStack>
       </Stack>
       <InfoDivider title={t("stepTokenDetails.generalInformation")} type="main" />
       <Stack w="full">
