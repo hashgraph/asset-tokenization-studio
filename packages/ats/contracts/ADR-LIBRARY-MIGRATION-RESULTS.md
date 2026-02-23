@@ -73,16 +73,18 @@ The library-based diamond migration replaced deep inheritance chains in ATS face
 
 ### Contract Sizes (Top Facets)
 
-| Facet                     | Before (KB)                 | After (KB) | Delta |
-| ------------------------- | --------------------------- | ---------- | ----- |
-| BondUSAKpiLinkedRateFacet | 16.918                      | 20.292     | +3.4  |
-| BondUSAFixedRateFacet     | 16.878                      | 16.988     | +0.1  |
-| BondUSAFacet (standard)   | 16.688                      | 16.804     | +0.1  |
-| ERC1410ManagementFacet    | — (was ERC1410Facet 12.625) | 20.654     | split |
-| EquityUSAFacet            | 10.447                      | 16.642     | +6.2  |
-| ERC1594Facet              | 7.654                       | 19.969     | +12.3 |
+| Facet                     | Before (KiB) | After (KiB) | Delta  |
+| ------------------------- | ------------ | ----------- | ------ |
+| ERC1594Facet              | 20.105       | 19.969      | −0.136 |
+| ERC1410ManagementFacet    | 20.963       | 20.654      | −0.309 |
+| EquityUSAFacet            | 17.598       | 16.642      | −0.956 |
+| BondUSAKpiLinkedRateFacet | 16.918       | 20.292      | +3.374 |
+| BondUSAFixedRateFacet     | 16.878       | 16.988      | +0.110 |
+| BondUSAFacet (standard)   | 16.688       | 16.804      | +0.116 |
 
-**Note**: Bytecode size increases are expected. The old architecture relied on virtual function dispatch through Internals.sol — the compiler only included the final override. With libraries, each facet includes inlined library code directly. **No facets exceed the 24KB EIP-170 limit.**
+All values measured with identical compiler settings (Solidity 0.8.28, cancun EVM, optimizer runs=100). Most facets show negligible size changes (< 0.3 KiB). BondUSAKpiLinkedRateFacet is the only significant increase (+3.4 KiB) due to KPI rate calculation restructuring. **No facets exceed the 24KB EIP-170 limit.**
+
+> **Compiler version correction (2026-02-23)**: The original `MIGRATION_BASELINE.md` measured sizes with Solidity 0.8.17/london (the old iobuilders configuration), showing much smaller values (e.g., ERC1594: 7.654, EquityUSA: 10.447). The table above has been corrected to use 0.8.28/cancun for the "Before" column — the same compiler used for "After" — to enable a fair apples-to-apples comparison. The apparent +12 KiB increases previously attributed to "library inlining" were entirely caused by the compiler version difference. See `ADR-FACET-CONSOLIDATION-RESULTS.md` for the full analysis.
 
 ---
 
@@ -505,7 +507,7 @@ contracts/
 
 | Disadvantage                    | Detail                                                                                                                                |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Bytecode size increase**      | Some facets grew significantly (ERC1594: +12KB) due to library inlining                                                               |
+| **BondUSAKpiLinkedRate growth** | +3.4 KiB from rate calculation logic restructuring (all other facets < 0.5 KiB delta)                                                 |
 | **IERC20 artifact ambiguity**   | OpenZeppelin's IERC20 conflicts with ours; requires fully qualified names in tests                                                    |
 | **ABI error declarations**      | Facets must explicitly inherit error interfaces for `revertedWithCustomError` to work in tests                                        |
 | **Library function signatures** | Time-dependent functions need explicit `_currentTimestamp` parameter (cannot use `block.timestamp` in view context through libraries) |

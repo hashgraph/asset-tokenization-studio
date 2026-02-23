@@ -57,10 +57,19 @@
 
 ## Contract Bytecode Sizes (Top Facets)
 
-Largest facets by deployed bytecode (KB):
+Largest facets by deployed bytecode (KiB). Measured from `reference-contracts/` artifacts compiled with Solidity 0.8.28, cancun EVM, optimizer runs=100.
 
 | Facet                             | Deploy Size | Runtime Size |
 | --------------------------------- | ----------- | ------------ |
+| ERC1410ManagementFacet            | 20.963      | 20.990       |
+| ClearingActionsFacet              | 20.597      | 20.624       |
+| ERC1594Facet                      | 20.105      | 20.133       |
+| ERC20Facet                        | 19.407      | 19.435       |
+| HoldTokenHolderFacet              | 18.654      | 18.682       |
+| ERC3643BatchFacet                 | 18.137      | 18.164       |
+| ERC1410TokenHolderFacet           | 17.618      | 17.646       |
+| EquityUSAFacet                    | 17.598      | 17.625       |
+| ERC3643ManagementFacet            | 17.086      | 17.113       |
 | BondUSAKpiLinkedRateFacet         | 16.918      | 16.945       |
 | BondUSASustainabilityPTRFacet     | 16.918      | 16.945       |
 | BondUSAFixedRateFacet             | 16.878      | 16.905       |
@@ -68,15 +77,13 @@ Largest facets by deployed bytecode (KB):
 | BondUSAReadKpiLinkedRateFacet     | 13.731      | 13.759       |
 | BondUSAReadSustainabilityPTRFacet | 13.167      | 13.194       |
 | TransferAndLockFacet              | 13.062      | 13.089       |
-| ERC1410Facet                      | 12.625      | 12.652       |
 | BondUSAReadFacet                  | 10.928      | 10.955       |
-| EquityUSAFacet                    | 10.447      | 10.474       |
-| SecurityFacet                     | 8.764       | 8.791        |
-| ERC1594Facet                      | 7.654       | 7.681        |
 | TREXFactoryAts                    | 6.044       | 6.365        |
 | AccessControlFacet                | 5.063       | 5.091        |
 
 **24KB limit**: No facets exceed the EIP-170 contract size limit.
+
+> **Note (2026-02-23)**: This table was corrected to use Solidity 0.8.28/cancun values (matching the current project compiler). The original baseline (2026-02-10) used Solidity 0.8.17/london, which produced misleadingly smaller sizes for facets with deep inheritance chains (e.g., ERC1594: 7.654 KiB at 0.8.17 vs 20.105 KiB at 0.8.28, same source code). The corrected values enable accurate comparison with post-migration measurements.
 
 ---
 
