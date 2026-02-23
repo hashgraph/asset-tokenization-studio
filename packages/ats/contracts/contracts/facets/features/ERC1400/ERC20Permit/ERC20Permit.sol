@@ -6,7 +6,7 @@ import { IERC20 } from "../../interfaces/ERC1400/IERC20.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ERC20PERMIT_TYPEHASH } from "../../../../constants/values.sol";
-import { getDomainHash } from "../../../../lib/core/ERC712.sol";
+import { LibERC712 } from "../../../../lib/core/LibERC712.sol";
 import { LibPause } from "../../../../lib/core/LibPause.sol";
 import { LibControlList } from "../../../../lib/core/LibControlList.sol";
 import { LibCompliance } from "../../../../lib/core/LibCompliance.sol";
@@ -83,7 +83,7 @@ abstract contract ERC20Permit is IERC20Permit {
 
     function _domainSeparator() private view returns (bytes32) {
         return
-            getDomainHash(
+            LibERC712.getDomainHash(
                 LibERC20.getName(),
                 Strings.toString(LibResolverProxy.getVersion()),
                 block.chainid,

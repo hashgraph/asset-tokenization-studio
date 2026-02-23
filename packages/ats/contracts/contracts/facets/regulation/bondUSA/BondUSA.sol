@@ -5,7 +5,7 @@ import { IBondUSA } from "../interfaces/IBondUSA.sol";
 import { IBond } from "../../assetCapabilities/interfaces/bond/IBond.sol";
 import { IBondRead } from "../../assetCapabilities/interfaces/bond/IBondRead.sol";
 import { IKyc } from "../../features/interfaces/IKyc.sol";
-import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
+import { RegulationData, AdditionalSecurityData } from "../../../lib/domain/LibRegulation.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
 
 import { LibBond } from "../../../lib/domain/LibBond.sol";

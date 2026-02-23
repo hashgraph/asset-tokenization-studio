@@ -16,12 +16,11 @@ import { IClearingActions } from "../facets/features/interfaces/clearing/ICleari
 import { IBusinessLogicResolver } from "../infrastructure/interfaces/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
-    buildRegulationData,
     RegulationData,
     RegulationType,
     RegulationSubType,
-    checkRegulationTypeAndSubType
-} from "../facets/regulation/constants/regulation.sol";
+    LibRegulation
+} from "../lib/domain/LibRegulation.sol";
 import { IEquityUSA } from "../facets/regulation/interfaces/IEquityUSA.sol";
 import { IBondUSA } from "../facets/regulation/interfaces/IBondUSA.sol";
 import { IProceedRecipients } from "../facets/assetCapabilities/interfaces/proceedRecipients/IProceedRecipients.sol";
@@ -85,7 +84,7 @@ contract Factory is IFactory, Context {
     }
 
     modifier checkRegulation(RegulationType _regulationType, RegulationSubType _regulationSubType) {
-        checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
+        LibRegulation.checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
         _;
     }
 
@@ -123,7 +122,10 @@ contract Factory is IFactory, Context {
 
         IEquityUSA(equityAddress_)._initialize_equityUSA(
             _equityData.equityDetails,
-            buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
+            LibRegulation.buildRegulationData(
+                _factoryRegulationData.regulationType,
+                _factoryRegulationData.regulationSubType
+            ),
             _factoryRegulationData.additionalSecurityData
         );
 
@@ -235,7 +237,7 @@ contract Factory is IFactory, Context {
         RegulationType _regulationType,
         RegulationSubType _regulationSubType
     ) external pure override returns (RegulationData memory regulationData_) {
-        regulationData_ = buildRegulationData(_regulationType, _regulationSubType);
+        regulationData_ = LibRegulation.buildRegulationData(_regulationType, _regulationSubType);
     }
 
     function _deployBond(
@@ -247,7 +249,10 @@ contract Factory is IFactory, Context {
 
         IBondUSA(bondAddress_)._initialize_bondUSA(
             _bondData.bondDetails,
-            buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
+            LibRegulation.buildRegulationData(
+                _factoryRegulationData.regulationType,
+                _factoryRegulationData.regulationSubType
+            ),
             _factoryRegulationData.additionalSecurityData
         );
 

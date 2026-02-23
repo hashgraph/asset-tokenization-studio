@@ -34,7 +34,7 @@
 
 ## 1. Executive Summary
 
-The Asset Tokenization Studio contracts evolved across three architectural stages, from 777 Solidity files with 55+ contract inheritance chains to 306 files with clean 2-level abstract-base patterns — while maintaining full backward compatibility and passing every test.
+The Asset Tokenization Studio contracts evolved across three architectural stages, from 777 Solidity files with 55+ contract inheritance chains to 307 files with clean 2-level abstract-base patterns — while maintaining full backward compatibility and passing every test.
 
 ### The Three Stages
 
@@ -42,15 +42,15 @@ The Asset Tokenization Studio contracts evolved across three architectural stage
 | ---------------- | ---------------------- | ---------- | ---------------------- | ------ | ----------------------------------------------------------- |
 | **Original**     | Deep inheritance chain | 777        | ~196 (4 variants each) | 34,297 | Internals.sol with 543 virtual functions                    |
 | **1st Refactor** | Library + FacetBase    | 641        | 195 (4 variants each)  | 34,273 | 37 libraries replaced inheritance chain                     |
-| **2nd Refactor** | Abstract-base          | 306        | 63 (1 copy each)       | 29,865 | Variants deleted, FacetBases eliminated, TimeTravel unified |
+| **2nd Refactor** | Abstract-base          | 307        | 63 (1 copy each)       | 29,869 | Variants deleted, FacetBases eliminated, TimeTravel unified |
 
 ### Cumulative Impact
 
 | Metric              | Change    | Numbers                      |
 | ------------------- | --------- | ---------------------------- |
-| Total .sol files    | −61%      | 777 → 306 (−471 files)       |
+| Total .sol files    | −61%      | 777 → 307 (−470 files)       |
 | Production facets   | −68%      | ~196 → 63 (−133 facets)      |
-| Total LOC           | −13%      | 34,297 → 29,865 (−4,432 LOC) |
+| Total LOC           | −13%      | 34,297 → 29,869 (−4,428 LOC) |
 | Inheritance depth   | −96%      | 55+ contracts → 2 levels     |
 | Virtual functions   | −100%     | 543 → 0                      |
 | TimeTravel variants | −99%      | 196 → 1 facet                |
@@ -64,15 +64,15 @@ The Asset Tokenization Studio contracts evolved across three architectural stage
 
 | Metric                          | Before (1st Refactor) | After (2nd Refactor) | Delta             |
 | ------------------------------- | --------------------- | -------------------- | ----------------- |
-| Total .sol files                | 641                   | 306                  | −335 (−52%)       |
+| Total .sol files                | 641                   | 307                  | −334 (−52%)       |
 | Production facets               | 195                   | 63                   | −132 (−68%)       |
 | FacetBase files                 | 48                    | 0                    | −48 (eliminated)  |
 | Abstract base contracts         | 0                     | 56                   | +56 (new pattern) |
 | TimeTravel variant files        | 196                   | 4                    | −192 (unified)    |
 | `standard/` directories         | 33                    | 0                    | −33 (eliminated)  |
-| Interface files (under facets/) | 86                    | 72                   | −14 (flattened)   |
+| Interface files (under facets/) | 86                    | 73                   | −13 (flattened)   |
 | Test .sol files                 | 202                   | 6                    | −196              |
-| Total LOC                       | 34,273                | 29,865               | −4,408 (−13%)     |
+| Total LOC                       | 34,273                | 29,869               | −4,404 (−13%)     |
 | Clean compile time              | 1m 23s                | **22.5s**            | **−73%**          |
 | Test execution time             | 1m 17s                | **47s**              | **−39%**          |
 | Tests passing                   | 1,257                 | 1,257                | Unchanged         |
@@ -86,11 +86,11 @@ The Asset Tokenization Studio contracts evolved across three architectural stage
 
 | Metric                            | Original   | 1st Refactor | 2nd Refactor |
 | --------------------------------- | ---------- | ------------ | ------------ |
-| **Total Solidity files**          | **777**    | **641**      | **306**      |
-| Production .sol (excl test/mocks) | ~575       | 429          | 290          |
+| **Total Solidity files**          | **777**    | **641**      | **307**      |
+| Production .sol (excl test/mocks) | ~575       | 429          | 291          |
 | Test .sol files                   | ~200       | 202          | 6            |
 | Mock .sol files                   | ~10        | 10           | 10           |
-| **Total Solidity LOC**            | **34,297** | **34,273**   | **29,865**   |
+| **Total Solidity LOC**            | **34,297** | **34,273**   | **29,869**   |
 
 ### File Type Breakdown
 
@@ -100,12 +100,12 @@ The Asset Tokenization Studio contracts evolved across three architectural stage
 | FacetBase files                 | 0         | 48           | 0            |
 | Abstract base contracts         | 0         | 0            | 56           |
 | StorageWrapper files            | 57        | 0            | 0            |
-| Library files (lib/)            | 0         | 37           | 37           |
+| Library files (lib/)            | 0         | 37           | 38           |
 | Infrastructure files            | —         | 25           | 24           |
 | Constants files                 | scattered | 7            | 7            |
 | Storage files                   | —         | 5            | 5            |
 | Factory files                   | ~25       | 25           | 25           |
-| Interface files (under facets/) | scattered | 86           | 72           |
+| Interface files (under facets/) | scattered | 86           | 73           |
 | TimeTravel variant files        | ~196+     | 196          | 4            |
 | `standard/` directories         | many      | 33           | 0            |
 
@@ -121,11 +121,11 @@ The Asset Tokenization Studio contracts evolved across three architectural stage
 
 | Area                 | 1st Refactor LOC | 2nd Refactor LOC | Delta  |
 | -------------------- | ---------------- | ---------------- | ------ |
-| facets/ (total)      | 14,307           | 12,885           | −1,422 |
-| — features/          | 10,194           | 8,797            | −1,397 |
+| facets/ (total)      | 14,307           | 12,686           | −1,621 |
+| — features/          | 10,194           | 8,805            | −1,389 |
 | — assetCapabilities/ | 2,019            | 1,892            | −127   |
-| — regulation/        | 2,094            | 2,196            | +102   |
-| lib/                 | 8,853            | 8,818            | −35    |
+| — regulation/        | 2,094            | 1,989            | −105   |
+| lib/                 | 8,853            | 9,021            | +168   |
 | infrastructure/      | 2,684            | 2,665            | −19    |
 | test/                | 2,933            | 315              | −2,618 |
 | mocks/               | 524              | 524              | 0      |
@@ -360,7 +360,7 @@ The 2nd refactor was completed in 4 commits over 2 days (2026-02-19 to 2026-02-2
 | After commit 1         | 377        | 63     | 48         | 64          | 30,427 |
 | After commit 2         | 361        | 63     | 0          | 64          | 30,575 |
 | After commit 3         | 299        | 63     | 0          | 4           | 29,820 |
-| After commit 4 (final) | 306        | 63     | 0          | 4           | 29,865 |
+| After commit 4 (final) | 307        | 63     | 0          | 4           | 29,869 |
 
 ### Commit 1: `466e2cec6` — Variant Consolidation
 
@@ -459,7 +459,7 @@ Applied the abstract-base pattern to the remaining rate-specific facets — the 
 
 **Infrastructure cleanup**: Deleted `IBusinessLogicResolverWrapper.sol`, moved error declarations to `IBusinessLogicResolver.sol`.
 
-**Impact**: 299 → 306 files (+7 new abstract bases), 29,820 → 29,865 LOC (+45 — restructuring)
+**Impact**: 299 → 307 files (+8 new abstract bases + IERC712), 29,820 → 29,869 LOC (+49 — restructuring)
 
 ---
 
@@ -703,8 +703,8 @@ facets/regulation/interfaces/         # 4 files
 
 | Metric                  | 1st Refactor         | 2nd Refactor             | Change         |
 | ----------------------- | -------------------- | ------------------------ | -------------- |
-| Total interface files   | 86                   | 72                       | −14            |
-| Feature interfaces      | 65 (in 21 subdirs)   | 54 (19 flat + 5 subdirs) | −11, flattened |
+| Total interface files   | 86                   | 73                       | −13            |
+| Feature interfaces      | 65 (in 21 subdirs)   | 55 (20 flat + 5 subdirs) | −10, flattened |
 | Asset interfaces        | 17                   | 14                       | −3             |
 | Regulation interfaces   | 4                    | 4                        | unchanged      |
 | `StorageWrapper` suffix | On every file        | Eliminated               | Cleaner naming |
@@ -791,8 +791,8 @@ Still preserved 4x variant duplication and per-facet TimeTravel pattern.
 | Eliminated all 48 FacetBases                             | —                                                           |
 | Unified TimeTravel (196 variants → 1 facet)              | —                                                           |
 | Flattened interfaces (86 → 72, no StorageWrapper suffix) | —                                                           |
-| 52% fewer files (641 → 306)                              | —                                                           |
-| 13% LOC reduction (34,273 → 29,865)                      | —                                                           |
+| 52% fewer files (641 → 307)                              | —                                                           |
+| 13% LOC reduction (34,273 → 29,869)                      | —                                                           |
 | Cleaner naming (business logic focus)                    | —                                                           |
 | Zero behavioral changes                                  | —                                                           |
 
@@ -802,8 +802,8 @@ Assessment: The 2nd refactor was purely additive improvement. Every metric impro
 
 | Dimension              | Original            | 1st Refactor        | 2nd Refactor            |
 | ---------------------- | ------------------- | ------------------- | ----------------------- |
-| **Files**              | 777                 | 641 (−17%)          | 306 (−52%)              |
-| **LOC**                | 34,297              | 34,273 (−0.07%)     | 29,865 (−13%)           |
+| **Files**              | 777                 | 641 (−17%)          | 307 (−52%)              |
+| **LOC**                | 34,297              | 34,273 (−0.07%)     | 29,869 (−13%)           |
 | **Facets**             | ~196                | 195 (~same)         | 63 (−68%)               |
 | **Inheritance**        | 55+ deep            | 2 levels            | 2 levels                |
 | **Duplication**        | 4x per facet        | 4x per facet        | 1x (rate-agnostic)      |
@@ -961,10 +961,10 @@ Deployment gas follows a U-curve: lowest at `runs=200`, then **increasing** at h
 
 ## 12. Final Directory Structure
 
-### Complete Layout (306 .sol files)
+### Complete Layout (307 .sol files)
 
 ```
-contracts/                                # 306 .sol files total
+contracts/                                # 307 .sol files total
 ├── facets/                               # ALL diamond entry points
 │   ├── features/                         #   38 facets, 19+35 interfaces, 1 types file
 │   │   ├── ERC1400/                      #     10 facets: ERC1410 (4), ERC1594, ERC1643, ERC1644, ERC20, ERC20Permit, ERC20Votes
@@ -987,7 +987,7 @@ contracts/                                # 306 .sol files total
 │   │   ├── snapshots/                    #     1 facet + 1 abstract
 │   │   ├── ssi/                          #     1 facet + 1 abstract
 │   │   ├── totalBalance/                 #     1 facet + 1 abstract
-│   │   ├── interfaces/                   #     54 files (19 flat + 35 in 5 subdirs)
+│   │   ├── interfaces/                   #     55 files (20 flat + 35 in 5 subdirs)
 │   │   └── types/                        #     1 file (ThirdPartyType.sol)
 │   ├── assetCapabilities/                #   15 facets, 14 interfaces
 │   │   ├── adjustBalances/               #     1 facet + 1 abstract
@@ -1000,11 +1000,10 @@ contracts/                                # 306 .sol files total
 │       ├── bondUSA/                      #     7 facets + 7 abstracts (variable, fixed, kpiLinked, SPT + reads)
 │       ├── equityUSA/                    #     1 facet + 1 abstract
 │       ├── transferAndLock/              #     1 facet + 1 abstract
-│       ├── constants/                    #     1 file (regulation.sol)
 │       └── interfaces/                   #     4 files
-├── lib/                   (37 files)     # Shared libraries
-│   ├── core/              (12 files)     #   Generic: LibAccess, LibPause, LibCap, LibControlList, etc.
-│   ├── domain/            (21 files)     #   Asset-specific: LibBond, LibERC1410, LibABAF, etc.
+├── lib/                   (38 files)     # Shared libraries
+│   ├── core/              (12 files)     #   Generic: LibAccess, LibPause, LibCap, LibControlList, LibERC712, etc.
+│   ├── domain/            (22 files)     #   Asset-specific: LibBond, LibERC1410, LibABAF, LibRegulation, etc.
 │   └── orchestrator/       (4 files)     #   Cross-domain: LibTokenTransfer, LibClearingOps, etc.
 ├── infrastructure/        (24 files)     # Diamond proxy, BLR, utilities (zero domain imports)
 │   ├── diamond/            (4 files)     #   BLR, DiamondCutManager, wrappers
@@ -1036,11 +1035,11 @@ contracts/                                # 306 .sol files total
 
 | Area                    | Facets | Abstract Bases                    | Interfaces |
 | ----------------------- | ------ | --------------------------------- | ---------- |
-| features/               | 38     | 38                                | 54         |
+| features/               | 38     | 38                                | 55         |
 | assetCapabilities/      | 15     | 15                                | 14         |
 | regulation/             | 9      | 9                                 | 4          |
 | test/ (TimeTravelFacet) | 1      | —                                 | —          |
-| **Total**               | **63** | **56** (+ 6 not needing abstract) | **72**     |
+| **Total**               | **63** | **56** (+ 6 not needing abstract) | **73**     |
 
 > Note: Some facets (like ERC1410IssuerFacet) don't have a separate abstract base because the parent abstract serves multiple facets in the same feature family.
 
@@ -1048,7 +1047,7 @@ contracts/                                # 306 .sol files total
 
 ## 13. Conclusion
 
-The ATS contracts evolved across two major refactors from 777 files with 55-contract inheritance chains to 306 files with a clean 2-level abstract-base pattern.
+The ATS contracts evolved across two major refactors from 777 files with 55-contract inheritance chains to 307 files with a clean 2-level abstract-base pattern.
 
 ### Stage-by-Stage Summary
 
@@ -1056,15 +1055,15 @@ The ATS contracts evolved across two major refactors from 777 files with 55-cont
 | ---------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
 | **Original**     | Business logic buried in 55-contract chain, 543 virtual functions, 4x forced duplication | —                                                                            | 777 files, ~196 facets                                |
 | **1st Refactor** | Replace inheritance with libraries                                                       | 37 libraries + 48 FacetBases, delete StorageWrappers                         | 641 files, 195 facets, compile 1m 23s (−37%)          |
-| **2nd Refactor** | Eliminate forced duplication, unify patterns                                             | Delete variants, abstract-base pattern, unify TimeTravel, flatten interfaces | 306 files, 63 facets, compile 22.5s (−83% cumulative) |
+| **2nd Refactor** | Eliminate forced duplication, unify patterns                                             | Delete variants, abstract-base pattern, unify TimeTravel, flatten interfaces | 307 files, 63 facets, compile 22.5s (−83% cumulative) |
 
 ### Key Numbers
 
 | Metric              | Original | 1st Refactor | 2nd Refactor | Cumulative      |
 | ------------------- | -------- | ------------ | ------------ | --------------- |
-| .sol files          | 777      | 641          | 306          | −471 (−61%)     |
+| .sol files          | 777      | 641          | 307          | −470 (−61%)     |
 | Production facets   | ~196     | 195          | 63           | −133 (−68%)     |
-| LOC                 | 34,297   | 34,273       | 29,865       | −4,432 (−13%)   |
+| LOC                 | 34,297   | 34,273       | 29,869       | −4,428 (−13%)   |
 | Inheritance depth   | 55+      | 2            | 2            | −96%            |
 | Virtual functions   | 543      | 0            | 0            | −100%           |
 | TimeTravel variants | ~196+    | 196          | 1            | −99%            |

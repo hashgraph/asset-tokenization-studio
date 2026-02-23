@@ -6,7 +6,7 @@ import { TRexIBusinessLogicResolver as IBusinessLogicResolver } from "./IBusines
 import { TRexIERC20 as IERC20 } from "./IERC20.sol";
 import { TRexIBondRead as IBondRead } from "./IBondRead.sol";
 import { TRexIEquity as IEquity } from "./IEquity.sol";
-import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./regulation.sol";
+import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubType } from "./LibRegulation.sol";
 import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
 import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 // solhint-disable max-line-length

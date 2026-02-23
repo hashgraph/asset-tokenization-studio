@@ -16,7 +16,7 @@ import { ICompliance } from "../../facets/features/interfaces/ERC3643/IComplianc
 import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { LibLowLevelCall } from "../../infrastructure/lib/LibLowLevelCall.sol";
-import { checkNounceAndDeadline } from "../core/ERC712.sol";
+import { LibERC712 } from "../core/LibERC712.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibHold } from "../domain/LibHold.sol";
 import { LibABAF } from "../domain/LibABAF.sol";
@@ -89,7 +89,7 @@ library LibHoldOps {
         uint256 _blockTimestamp
     ) internal returns (bool success_, uint256 holdId_) {
         // Verify nonce and deadline
-        checkNounceAndDeadline(
+        LibERC712.checkNounceAndDeadline(
             _protectedHold.nonce,
             _from,
             LibNonce.getNonceFor(_from),

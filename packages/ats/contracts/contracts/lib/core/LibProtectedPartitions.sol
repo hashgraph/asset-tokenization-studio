@@ -7,15 +7,7 @@ import { LibAccess } from "./LibAccess.sol";
 import { IProtectedPartitions } from "../../facets/features/interfaces/IProtectedPartitions.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
 import { Hold, ProtectedHold } from "../../facets/features/interfaces/hold/IHold.sol";
-import {
-    getMessageHashTransfer,
-    getMessageHashRedeem,
-    getMessageHashCreateHold,
-    getMessageHashClearingTransfer,
-    getMessageHashClearingCreateHold,
-    getMessageHashClearingRedeem,
-    verify
-} from "./ERC712.sol";
+import { LibERC712 } from "./LibERC712.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 /// @title LibProtectedPartitions — Protected partitions and signature verification library
@@ -94,7 +86,7 @@ library LibProtectedPartitions {
         uint256 chainId,
         address tokenAddress
     ) internal pure returns (bool) {
-        bytes32 functionHash = getMessageHashTransfer(
+        bytes32 functionHash = LibERC712.getMessageHashTransfer(
             partition,
             from,
             to,
@@ -103,7 +95,7 @@ library LibProtectedPartitions {
             protectionData.nounce
         );
         return
-            verify(
+            LibERC712.verify(
                 from,
                 functionHash,
                 protectionData.signature,
@@ -150,7 +142,7 @@ library LibProtectedPartitions {
         uint256 chainId,
         address tokenAddress
     ) internal pure returns (bool) {
-        bytes32 functionHash = getMessageHashRedeem(
+        bytes32 functionHash = LibERC712.getMessageHashRedeem(
             partition,
             from,
             amount,
@@ -158,7 +150,7 @@ library LibProtectedPartitions {
             protectionData.nounce
         );
         return
-            verify(
+            LibERC712.verify(
                 from,
                 functionHash,
                 protectionData.signature,
@@ -205,10 +197,10 @@ library LibProtectedPartitions {
         uint256 chainId,
         address tokenAddress
     ) internal pure returns (bool) {
-        bytes32 functionHash = getMessageHashCreateHold(partition, from, protectedHold);
+        bytes32 functionHash = LibERC712.getMessageHashCreateHold(partition, from, protectedHold);
 
         return
-            verify(
+            LibERC712.verify(
                 from,
                 functionHash,
                 signature,
@@ -252,10 +244,10 @@ library LibProtectedPartitions {
         uint256 chainId,
         address tokenAddress
     ) internal pure returns (bool) {
-        bytes32 functionHash = getMessageHashClearingCreateHold(protectedClearingOperation, hold);
+        bytes32 functionHash = LibERC712.getMessageHashClearingCreateHold(protectedClearingOperation, hold);
 
         return
-            verify(
+            LibERC712.verify(
                 protectedClearingOperation.from,
                 functionHash,
                 signature,
@@ -302,10 +294,10 @@ library LibProtectedPartitions {
         uint256 chainId,
         address tokenAddress
     ) internal pure returns (bool) {
-        bytes32 functionHash = getMessageHashClearingTransfer(protectedClearingOperation, to, amount);
+        bytes32 functionHash = LibERC712.getMessageHashClearingTransfer(protectedClearingOperation, to, amount);
 
         return
-            verify(
+            LibERC712.verify(
                 protectedClearingOperation.from,
                 functionHash,
                 signature,
@@ -349,10 +341,10 @@ library LibProtectedPartitions {
         uint256 chainId,
         address tokenAddress
     ) internal pure returns (bool) {
-        bytes32 functionHash = getMessageHashClearingRedeem(protectedClearingOperation, amount);
+        bytes32 functionHash = LibERC712.getMessageHashClearingRedeem(protectedClearingOperation, amount);
 
         return
-            verify(
+            LibERC712.verify(
                 protectedClearingOperation.from,
                 functionHash,
                 signature,

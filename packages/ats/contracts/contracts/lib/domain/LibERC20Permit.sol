@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable ordering
 
 import { ERC20PermitStorage, erc20PermitStorage } from "../../storage/TokenStorage.sol";
-import { getDomainHash } from "../core/ERC712.sol";
+import { LibERC712 } from "../core/LibERC712.sol";
 
 /// @title LibERC20Permit
 /// @notice Library for ERC20 Permit (EIP-2612) storage management
@@ -63,7 +63,7 @@ library LibERC20Permit {
         uint256 chainId,
         address contractAddress
     ) internal pure returns (bytes32) {
-        return getDomainHash(contractName, contractVersion, chainId, contractAddress);
+        return LibERC712.getDomainHash(contractName, contractVersion, chainId, contractAddress);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

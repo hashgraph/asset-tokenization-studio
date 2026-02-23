@@ -15,7 +15,7 @@ import {
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE
 } from "../../../constants/values.sol";
-import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
+import { RegulationData, AdditionalSecurityData } from "../../../lib/domain/LibRegulation.sol";
 import { LibEquity } from "../../../lib/domain/LibEquity.sol";
 import { LibSecurity } from "../../../lib/domain/LibSecurity.sol";
 import { LibPause } from "../../../lib/core/LibPause.sol";

@@ -11,7 +11,7 @@ import {
     RegulationData,
     RegulationType,
     RegulationSubType
-} from "../facets/regulation/constants/regulation.sol";
+} from "../lib/domain/LibRegulation.sol";
 import { IFixedRate } from "../facets/assetCapabilities/interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/assetCapabilities/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 // solhint-disable max-line-length

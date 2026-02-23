@@ -13,7 +13,7 @@ import { ICompliance } from "../../facets/features/interfaces/ERC3643/IComplianc
 import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { LibLowLevelCall } from "../../infrastructure/lib/LibLowLevelCall.sol";
-import { checkNounceAndDeadline } from "../core/ERC712.sol";
+import { LibERC712 } from "../core/LibERC712.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibClearing } from "../domain/LibClearing.sol";
 import { LibABAF } from "../domain/LibABAF.sol";
@@ -215,7 +215,7 @@ library LibClearingOps {
         bytes calldata _signature,
         uint256 _blockTimestamp
     ) internal returns (bool success_, uint256 clearingId_) {
-        checkNounceAndDeadline(
+        LibERC712.checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
             LibNonce.getNonceFor(_protectedClearingOperation.from),
@@ -249,7 +249,7 @@ library LibClearingOps {
         bytes calldata _signature,
         uint256 _blockTimestamp
     ) internal returns (bool success_, uint256 clearingId_) {
-        checkNounceAndDeadline(
+        LibERC712.checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
             LibNonce.getNonceFor(_protectedClearingOperation.from),
@@ -281,7 +281,7 @@ library LibClearingOps {
         bytes calldata _signature,
         uint256 _blockTimestamp
     ) internal returns (bool success_, uint256 clearingId_) {
-        checkNounceAndDeadline(
+        LibERC712.checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
             LibNonce.getNonceFor(_protectedClearingOperation.from),

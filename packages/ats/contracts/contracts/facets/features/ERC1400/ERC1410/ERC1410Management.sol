@@ -17,7 +17,7 @@ import { LibResolverProxy } from "../../../../infrastructure/proxy/LibResolverPr
 import { LibERC20 } from "../../../../lib/domain/LibERC20.sol";
 import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
 import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
-import { checkNounceAndDeadline } from "../../../../lib/core/ERC712.sol";
+import { LibERC712 } from "../../../../lib/core/LibERC712.sol";
 import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 
 abstract contract ERC1410Management is IERC1410Management, IControlListBase, IERC1644Base {
@@ -157,7 +157,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             _amount,
             LibTimeTravel.getBlockTimestamp()
         );
-        checkNounceAndDeadline(
+        LibERC712.checkNounceAndDeadline(
             _protectionData.nounce,
             _from,
             LibNonce.getNonceFor(_from),
@@ -203,7 +203,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             _amount,
             LibTimeTravel.getBlockTimestamp()
         );
-        checkNounceAndDeadline(
+        LibERC712.checkNounceAndDeadline(
             _protectionData.nounce,
             _from,
             LibNonce.getNonceFor(_from),
