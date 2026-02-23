@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.17;
 
-import { TRexIDiamondLoupe as IDiamondLoupe } from "./IDiamondLoupe.sol";
+import {TRexIDiamondLoupe as IDiamondLoupe} from "./IDiamondLoupe.sol";
 
 /**
  * @title Resolver Proxy Manager

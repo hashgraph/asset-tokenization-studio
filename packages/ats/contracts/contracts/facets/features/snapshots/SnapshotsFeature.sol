@@ -17,7 +17,6 @@ import { LibHold } from "../../../lib/domain/LibHold.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibFreeze } from "../../../lib/domain/LibFreeze.sol";
 import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
-import { snapshotStorage, SnapshotStorage } from "../../../storage/AssetStorage.sol";
 import { _SNAPSHOT_ROLE } from "../../../constants/roles.sol";
 
 abstract contract SnapshotsFeature is ISnapshots {
@@ -38,7 +37,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     // ════════════════════════════════════════════════════════════════════════════════════
 
     function decimalsAtSnapshot(uint256 _snapshotID) external view override returns (uint8 decimals_) {
-        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(_snapshotID, snapshotStorage().decimals);
+        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(_snapshotID, LibSnapshots.getDecimalsSnapshots());
         decimals_ = snapshotted ? uint8(value) : LibERC20.getDecimals();
     }
 
@@ -48,7 +47,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountBalanceSnapshots[_tokenHolder],
+            LibSnapshots.getAccountBalanceSnapshots(_tokenHolder),
             LibABAF.balanceOfAdjustedAt(_tokenHolder, LibTimeTravel.getBlockTimestamp())
         );
     }
@@ -64,13 +63,12 @@ abstract contract SnapshotsFeature is ISnapshots {
         uint256 size = end > start ? (end > total ? total - start : end - start) : 0;
 
         holders_ = new address[](size);
-        SnapshotStorage storage ss = snapshotStorage();
 
         for (uint256 i = 0; i < holders_.length; i++) {
             uint256 index = i + 1;
             (bool snapshotted, address value) = LibSnapshots.addressValueAt(
                 _snapshotID,
-                ss.tokenHoldersSnapshots[index]
+                LibSnapshots.getTokenHolderSnapshots(index)
             );
             holders_[i] = snapshotted ? value : LibERC1410.getTokenHolder(index);
         }
@@ -87,7 +85,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountPartitionBalanceSnapshots[_tokenHolder][_partition],
+            LibSnapshots.getAccountPartitionBalanceSnapshots(_tokenHolder, _partition),
             LibABAF.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, LibTimeTravel.getBlockTimestamp())
         );
     }
@@ -96,7 +94,7 @@ abstract contract SnapshotsFeature is ISnapshots {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (bytes32[] memory) {
-        PartitionSnapshots storage partitionSnapshots = snapshotStorage().accountPartitionMetadata[_tokenHolder];
+        PartitionSnapshots storage partitionSnapshots = LibSnapshots.getAccountPartitionMetadata(_tokenHolder);
         (bool found, uint256 index) = LibSnapshots.indexFor(_snapshotID, partitionSnapshots.ids);
         if (!found) {
             return LibERC1410.partitionsOf(_tokenHolder);
@@ -105,7 +103,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     }
 
     function totalSupplyAtSnapshot(uint256 _snapshotID) external view override returns (uint256 totalSupply_) {
-        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(_snapshotID, snapshotStorage().totalSupplySnapshots);
+        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(_snapshotID, LibSnapshots.getTotalSupplySnapshots());
         totalSupply_ = snapshotted ? value : LibERC1410.totalSupply();
     }
 
@@ -115,7 +113,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 totalSupply_) {
         totalSupply_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().totalSupplyByPartitionSnapshots[_partition],
+            LibSnapshots.getTotalSupplyByPartitionSnapshots(_partition),
             LibERC1410.totalSupplyByPartition(_partition)
         );
     }
@@ -126,7 +124,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountLockedBalanceSnapshots[_tokenHolder],
+            LibSnapshots.getAccountLockedBalanceSnapshots(_tokenHolder),
             LibLock.getLockedAmountFor(_tokenHolder)
         );
     }
@@ -138,7 +136,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountPartitionLockedBalanceSnapshots[_tokenHolder][_partition],
+            LibSnapshots.getAccountPartitionLockedBalanceSnapshots(_tokenHolder, _partition),
             LibLock.getLockedAmountForByPartition(_partition, _tokenHolder)
         );
     }
@@ -149,7 +147,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountHeldBalanceSnapshots[_tokenHolder],
+            LibSnapshots.getAccountHeldBalanceSnapshots(_tokenHolder),
             LibHold.getHeldAmountFor(_tokenHolder)
         );
     }
@@ -161,7 +159,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountPartitionHeldBalanceSnapshots[_tokenHolder][_partition],
+            LibSnapshots.getAccountPartitionHeldBalanceSnapshots(_tokenHolder, _partition),
             LibHold.getHeldAmountForByPartition(_partition, _tokenHolder)
         );
     }
@@ -172,7 +170,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountClearedBalanceSnapshots[_tokenHolder],
+            LibSnapshots.getAccountClearedBalanceSnapshots(_tokenHolder),
             LibClearing.getClearedAmount(_tokenHolder)
         );
     }
@@ -184,7 +182,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountPartitionClearedBalanceSnapshots[_tokenHolder][_partition],
+            LibSnapshots.getAccountPartitionClearedBalanceSnapshots(_tokenHolder, _partition),
             LibClearing.getClearedAmountByPartition(_partition, _tokenHolder)
         );
     }
@@ -195,7 +193,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountFrozenBalanceSnapshots[_tokenHolder],
+            LibSnapshots.getAccountFrozenBalanceSnapshots(_tokenHolder),
             LibFreeze.getFrozenTokens(_tokenHolder)
         );
     }
@@ -207,7 +205,7 @@ abstract contract SnapshotsFeature is ISnapshots {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            snapshotStorage().accountPartitionFrozenBalanceSnapshots[_tokenHolder][_partition],
+            LibSnapshots.getAccountPartitionFrozenBalanceSnapshots(_tokenHolder, _partition),
             LibFreeze.getFrozenTokensByPartition(_tokenHolder, _partition)
         );
     }
@@ -238,14 +236,14 @@ abstract contract SnapshotsFeature is ISnapshots {
     }
 
     function _queryAbafAt(uint256 snapshotId) private view returns (uint256) {
-        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(snapshotId, snapshotStorage().abafSnapshots);
+        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(snapshotId, LibSnapshots.getAbafSnapshots());
         return snapshotted ? LibABAF.zeroToOne(value) : LibABAF.getAbaf();
     }
 
     function _queryTotalHolders(uint256 snapshotId) private view returns (uint256) {
         (bool snapshotted, uint256 value) = LibSnapshots.valueAt(
             snapshotId,
-            snapshotStorage().totalTokenHoldersSnapshots
+            LibSnapshots.getTotalTokenHoldersSnapshots()
         );
         return snapshotted ? value : LibERC1410.getTotalTokenHolders();
     }

@@ -12,7 +12,6 @@ import { LibBond } from "../../../../lib/domain/LibBond.sol";
 import { LibInterestRate } from "../../../../lib/domain/LibInterestRate.sol";
 import { LibKpis } from "../../../../lib/domain/LibKpis.sol";
 import { LibProceedRecipients } from "../../../../lib/domain/LibProceedRecipients.sol";
-import { SustainabilityPerformanceTargetRateDataStorage } from "../../../../storage/ScheduledStorage.sol";
 import { LibCorporateActions } from "../../../../lib/core/LibCorporateActions.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../../constants/values.sol";
 import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
@@ -59,12 +58,12 @@ abstract contract BondUSAReadSustainabilityPerformanceTargetRate is BondUSARead 
         uint256 _couponID,
         IBondRead.Coupon memory _coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
-        // Get SPT rate storage reference
-        SustainabilityPerformanceTargetRateDataStorage storage sptRateStorage = LibInterestRate.getSustainabilityRate();
+        // Get SPT rate configuration
+        ISustainabilityPerformanceTargetRate.InterestRate memory sptInterestRate = LibInterestRate.getSustainabilityInterestRate();
 
         // Check if we're before the start period
-        if (_coupon.fixingDate < sptRateStorage.startPeriod) {
-            return (sptRateStorage.startRate, sptRateStorage.rateDecimals);
+        if (_coupon.fixingDate < sptInterestRate.startPeriod) {
+            return (sptInterestRate.startRate, sptInterestRate.rateDecimals);
         }
 
         // Get the base rate and decimals

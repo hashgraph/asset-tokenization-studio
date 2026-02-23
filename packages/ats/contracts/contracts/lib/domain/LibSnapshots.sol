@@ -444,4 +444,108 @@ library LibSnapshots {
             return ids[ids.length - 1];
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // STORAGE ACCESSORS FOR FACETS (Encapsulated storage access)
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// @notice Get decimals snapshot storage (for passing to valueAt)
+    function getDecimalsSnapshots() internal view returns (Snapshots storage) {
+        return snapshotStorage().decimals;
+    }
+
+    /// @notice Get account balance snapshots storage (for passing to valueAt)
+    function getAccountBalanceSnapshots(address _tokenHolder) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountBalanceSnapshots[_tokenHolder];
+    }
+
+    /// @notice Get account partition balance snapshots storage
+    function getAccountPartitionBalanceSnapshots(
+        address _tokenHolder,
+        bytes32 _partition
+    ) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountPartitionBalanceSnapshots[_tokenHolder][_partition];
+    }
+
+    /// @notice Get account partition metadata (for partitions list at snapshot)
+    function getAccountPartitionMetadata(address _tokenHolder) internal view returns (PartitionSnapshots storage) {
+        return snapshotStorage().accountPartitionMetadata[_tokenHolder];
+    }
+
+    /// @notice Get total supply snapshots storage
+    function getTotalSupplySnapshots() internal view returns (Snapshots storage) {
+        return snapshotStorage().totalSupplySnapshots;
+    }
+
+    /// @notice Get total supply by partition snapshots storage
+    function getTotalSupplyByPartitionSnapshots(bytes32 _partition) internal view returns (Snapshots storage) {
+        return snapshotStorage().totalSupplyByPartitionSnapshots[_partition];
+    }
+
+    /// @notice Get account locked balance snapshots storage
+    function getAccountLockedBalanceSnapshots(address _tokenHolder) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountLockedBalanceSnapshots[_tokenHolder];
+    }
+
+    /// @notice Get account partition locked balance snapshots storage
+    function getAccountPartitionLockedBalanceSnapshots(
+        address _tokenHolder,
+        bytes32 _partition
+    ) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountPartitionLockedBalanceSnapshots[_tokenHolder][_partition];
+    }
+
+    /// @notice Get account held balance snapshots storage
+    function getAccountHeldBalanceSnapshots(address _tokenHolder) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountHeldBalanceSnapshots[_tokenHolder];
+    }
+
+    /// @notice Get account partition held balance snapshots storage
+    function getAccountPartitionHeldBalanceSnapshots(
+        address _tokenHolder,
+        bytes32 _partition
+    ) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountPartitionHeldBalanceSnapshots[_tokenHolder][_partition];
+    }
+
+    /// @notice Get account cleared balance snapshots storage
+    function getAccountClearedBalanceSnapshots(address _tokenHolder) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountClearedBalanceSnapshots[_tokenHolder];
+    }
+
+    /// @notice Get account partition cleared balance snapshots storage
+    function getAccountPartitionClearedBalanceSnapshots(
+        address _tokenHolder,
+        bytes32 _partition
+    ) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountPartitionClearedBalanceSnapshots[_tokenHolder][_partition];
+    }
+
+    /// @notice Get account frozen balance snapshots storage
+    function getAccountFrozenBalanceSnapshots(address _tokenHolder) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountFrozenBalanceSnapshots[_tokenHolder];
+    }
+
+    /// @notice Get account partition frozen balance snapshots storage
+    function getAccountPartitionFrozenBalanceSnapshots(
+        address _tokenHolder,
+        bytes32 _partition
+    ) internal view returns (Snapshots storage) {
+        return snapshotStorage().accountPartitionFrozenBalanceSnapshots[_tokenHolder][_partition];
+    }
+
+    /// @notice Get token holders snapshots storage at index
+    function getTokenHolderSnapshots(uint256 _index) internal view returns (SnapshotsAddress storage) {
+        return snapshotStorage().tokenHoldersSnapshots[_index];
+    }
+
+    /// @notice Get ABAF snapshots storage
+    function getAbafSnapshots() internal view returns (Snapshots storage) {
+        return snapshotStorage().abafSnapshots;
+    }
+
+    /// @notice Get total token holders snapshots storage
+    function getTotalTokenHoldersSnapshots() internal view returns (Snapshots storage) {
+        return snapshotStorage().totalTokenHoldersSnapshots;
+    }
 }

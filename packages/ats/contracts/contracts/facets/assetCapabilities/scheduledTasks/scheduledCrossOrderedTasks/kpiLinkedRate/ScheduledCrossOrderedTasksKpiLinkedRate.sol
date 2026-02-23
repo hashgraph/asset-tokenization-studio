@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledCrossOrderedTasks } from "../ScheduledCrossOrderedTasks.sol";
 import { IBondRead } from "../../../interfaces/bond/IBondRead.sol";
+import { IKpiLinkedRate } from "../../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { LibBond } from "../../../../../lib/domain/LibBond.sol";
 import { LibInterestRate } from "../../../../../lib/domain/LibInterestRate.sol";
 import { LibKpis } from "../../../../../lib/domain/LibKpis.sol";
 import { LibProceedRecipients } from "../../../../../lib/domain/LibProceedRecipients.sol";
-import { KpiLinkedRateDataStorage } from "../../../../../storage/ScheduledStorage.sol";
 
 abstract contract ScheduledCrossOrderedTasksKpiLinkedRate is ScheduledCrossOrderedTasks {
     /// @notice Calculate and store the KPI-linked interest rate when a coupon is listed
@@ -19,10 +19,10 @@ abstract contract ScheduledCrossOrderedTasksKpiLinkedRate is ScheduledCrossOrder
         if (coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return;
         if (coupon.fixingDate > _timestamp) return;
 
-        KpiLinkedRateDataStorage storage kpiRateStorage = LibInterestRate.getKpiLinkedRate();
+        IKpiLinkedRate.InterestRate memory kpiInterestRate = LibInterestRate.getKpiLinkedInterestRate();
 
-        if (coupon.fixingDate < kpiRateStorage.startPeriod) {
-            LibBond.updateCouponRate(_couponID, coupon, kpiRateStorage.startRate, kpiRateStorage.rateDecimals);
+        if (coupon.fixingDate < kpiInterestRate.startPeriod) {
+            LibBond.updateCouponRate(_couponID, coupon, kpiInterestRate.startRate, kpiInterestRate.rateDecimals);
             return;
         }
 
@@ -36,7 +36,7 @@ abstract contract ScheduledCrossOrderedTasksKpiLinkedRate is ScheduledCrossOrder
 
         for (uint256 i = 0; i < projects.length; ) {
             (uint256 value, bool exists) = LibKpis.getLatestKpiData(
-                coupon.fixingDate - kpiRateStorage.reportPeriod,
+                coupon.fixingDate - kpiInterestRate.reportPeriod,
                 coupon.fixingDate,
                 projects[i]
             );

@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSARead } from "../BondUSARead.sol";
 import { IBondRead } from "../../../assetCapabilities/interfaces/bond/IBondRead.sol";
+import { IKpiLinkedRate } from "../../../assetCapabilities/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { LibBond } from "../../../../lib/domain/LibBond.sol";
 import { LibInterestRate } from "../../../../lib/domain/LibInterestRate.sol";
 import { LibKpis } from "../../../../lib/domain/LibKpis.sol";
 import { LibProceedRecipients } from "../../../../lib/domain/LibProceedRecipients.sol";
-import { KpiLinkedRateDataStorage } from "../../../../storage/ScheduledStorage.sol";
 import { LibCorporateActions } from "../../../../lib/core/LibCorporateActions.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../../constants/values.sol";
 import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
@@ -55,10 +55,10 @@ abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
         IBondRead.Coupon memory _coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
         // Check if we're before the start period
-        KpiLinkedRateDataStorage storage kpiLinkedRateStorage = LibInterestRate.getKpiLinkedRate();
+        IKpiLinkedRate.InterestRate memory kpiInterestRate = LibInterestRate.getKpiLinkedInterestRate();
 
-        if (_coupon.fixingDate < kpiLinkedRateStorage.startPeriod) {
-            return (kpiLinkedRateStorage.startRate, kpiLinkedRateStorage.rateDecimals);
+        if (_coupon.fixingDate < kpiInterestRate.startPeriod) {
+            return (kpiInterestRate.startRate, kpiInterestRate.rateDecimals);
         }
 
         // Aggregate KPI data from all proceed recipients
@@ -71,7 +71,7 @@ abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
 
         for (uint256 index = 0; index < projects.length; ) {
             (uint256 value, bool exists) = LibKpis.getLatestKpiData(
-                _coupon.fixingDate - kpiLinkedRateStorage.reportPeriod,
+                _coupon.fixingDate - kpiInterestRate.reportPeriod,
                 _coupon.fixingDate,
                 projects[index]
             );

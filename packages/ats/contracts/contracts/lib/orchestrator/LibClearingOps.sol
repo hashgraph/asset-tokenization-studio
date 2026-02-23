@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { clearingStorage, ClearingDataStorage } from "../../storage/AssetStorage.sol";
-import { erc3643Storage } from "../../storage/ExternalStorage.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
 import { IClearingActions } from "../../facets/features/interfaces/clearing/IClearingActions.sol";
 import { IClearingTransfer } from "../../facets/features/interfaces/clearing/IClearingTransfer.sol";
@@ -26,6 +24,7 @@ import { LibProtectedPartitions } from "../../lib/core/LibProtectedPartitions.so
 import { LibResolverProxy } from "../../infrastructure/proxy/LibResolverProxy.sol";
 import { Hold } from "../../facets/features/interfaces/hold/IHold.sol";
 import { LibHoldOps } from "./LibHoldOps.sol";
+import { LibCompliance } from "../core/LibCompliance.sol";
 
 library LibClearingOps {
     using LibLowLevelCall for address;
@@ -44,16 +43,12 @@ library LibClearingOps {
         IClearing.ClearingOperationType _operationType
     ) internal returns (uint256 clearingId_) {
         bytes32 partition = _clearingOperation.partition;
-        ClearingDataStorage storage cs = clearingStorage();
-        unchecked {
-            clearingId_ = ++cs.nextClearingIdByAccountPartitionAndType[_from][partition][_operationType];
-        }
+        clearingId_ = LibClearing.getAndIncrementNextClearingId(_from, partition, _operationType);
         beforeClearingOperation(
             buildClearingOperationIdentifier(_from, partition, clearingId_, _operationType),
             address(0)
         );
         LibERC1410.reduceBalanceByPartition(_from, _amount, partition);
-        LibClearing.setClearingIdByPartitionAndType(cs, _from, partition, clearingId_, _operationType);
         LibClearing.increaseClearedAmounts(_from, partition, _amount);
     }
 
@@ -73,16 +68,19 @@ library LibClearingOps {
             _amount,
             IClearing.ClearingOperationType.Transfer
         );
-        clearingStorage().clearingTransferByAccountPartitionAndId[_from][_clearingOperation.partition][
-            clearingId_
-        ] = IClearingTransfer.ClearingTransferData({
-            amount: _amount,
-            expirationTimestamp: expirationTimestamp,
-            destination: _to,
-            data: data,
-            operatorData: _operatorData,
-            operatorType: _thirdPartyType
-        });
+        LibClearing.setClearingTransferDataStruct(
+            _from,
+            _clearingOperation.partition,
+            clearingId_,
+            IClearingTransfer.ClearingTransferData({
+                amount: _amount,
+                expirationTimestamp: expirationTimestamp,
+                destination: _to,
+                data: data,
+                operatorData: _operatorData,
+                operatorType: _thirdPartyType
+            })
+        );
         _emitClearedTransferEvent(
             _from,
             _to,
@@ -110,15 +108,18 @@ library LibClearingOps {
             _amount,
             IClearing.ClearingOperationType.Redeem
         );
-        clearingStorage().clearingRedeemByAccountPartitionAndId[_from][_clearingOperation.partition][
-            clearingId_
-        ] = IClearingRedeem.ClearingRedeemData({
-            amount: _amount,
-            expirationTimestamp: _clearingOperation.expirationTimestamp,
-            data: _clearingOperation.data,
-            operatorData: _operatorData,
-            operatorType: _thirdPartyType
-        });
+        LibClearing.setClearingRedeemDataStruct(
+            _from,
+            _clearingOperation.partition,
+            clearingId_,
+            IClearingRedeem.ClearingRedeemData({
+                amount: _amount,
+                expirationTimestamp: _clearingOperation.expirationTimestamp,
+                data: _clearingOperation.data,
+                operatorData: _operatorData,
+                operatorType: _thirdPartyType
+            })
+        );
         _emitClearedRedeemEvent(
             _from,
             _clearingOperation.partition,
@@ -146,19 +147,22 @@ library LibClearingOps {
             IClearing.ClearingOperationType.HoldCreation
         );
         bytes32 partition = _clearingOperation.partition;
-        clearingStorage().clearingHoldCreationByAccountPartitionAndId[_from][partition][
-            clearingId_
-        ] = IClearingHoldCreation.ClearingHoldCreationData({
-            amount: _hold.amount,
-            expirationTimestamp: _clearingOperation.expirationTimestamp,
-            data: _clearingOperation.data,
-            holdEscrow: _hold.escrow,
-            holdExpirationTimestamp: _hold.expirationTimestamp,
-            holdTo: _hold.to,
-            holdData: _hold.data,
-            operatorData: _operatorData,
-            operatorType: _thirdPartyType
-        });
+        LibClearing.setClearingHoldCreationDataStruct(
+            _from,
+            partition,
+            clearingId_,
+            IClearingHoldCreation.ClearingHoldCreationData({
+                amount: _hold.amount,
+                expirationTimestamp: _clearingOperation.expirationTimestamp,
+                data: _clearingOperation.data,
+                holdEscrow: _hold.escrow,
+                holdExpirationTimestamp: _hold.expirationTimestamp,
+                holdTo: _hold.to,
+                holdData: _hold.data,
+                operatorData: _operatorData,
+                operatorType: _thirdPartyType
+            })
+        );
         _emitClearedHoldByPartitionEvent(
             _from,
             _clearingOperation.partition,
@@ -364,12 +368,11 @@ library LibClearingOps {
         uint256 labaf = LibABAF.getTotalClearedLabaf(_tokenHolder);
         uint256 labafByPartition = LibABAF.getTotalClearedLabafByPartition(_partition, _tokenHolder);
         if (abaf_ != labaf) {
-            clearingStorage().totalClearedAmountByAccount[_tokenHolder] *= LibABAF.calculateFactor(abaf_, labaf);
+            LibClearing.updateTotalClearedAmountByAccount(_tokenHolder, LibABAF.calculateFactor(abaf_, labaf));
             LibABAF.setTotalClearedLabaf(_tokenHolder, abaf_);
         }
         if (abaf_ != labafByPartition) {
-            clearingStorage().totalClearedAmountByAccountAndPartition[_tokenHolder][_partition] *= LibABAF
-                .calculateFactor(abaf_, labafByPartition);
+            LibClearing.updateTotalClearedAmountByAccountAndPartition(_tokenHolder, _partition, LibABAF.calculateFactor(abaf_, labafByPartition));
             LibABAF.setTotalClearedLabafByPartition(_partition, _tokenHolder, abaf_);
         }
     }
@@ -393,31 +396,43 @@ library LibClearingOps {
     }
 
     function removeClearing(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier) internal {
-        ClearingDataStorage storage cs = clearingStorage();
         uint256 amount = _getClearingAmount(_clearingOperationIdentifier);
-        cs.totalClearedAmountByAccount[_clearingOperationIdentifier.tokenHolder] -= amount;
-        cs.totalClearedAmountByAccountAndPartition[_clearingOperationIdentifier.tokenHolder][
-            _clearingOperationIdentifier.partition
-        ] -= amount;
-        cs
-        .clearingIdsByAccountAndPartitionAndTypes[_clearingOperationIdentifier.tokenHolder][
-            _clearingOperationIdentifier.partition
-        ][_clearingOperationIdentifier.clearingOperationType].remove(_clearingOperationIdentifier.clearingId);
-        delete cs.clearingThirdPartyByAccountPartitionTypeAndId[_clearingOperationIdentifier.tokenHolder][
-            _clearingOperationIdentifier.partition
-        ][_clearingOperationIdentifier.clearingOperationType][_clearingOperationIdentifier.clearingId];
-        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer)
-            delete cs.clearingTransferByAccountPartitionAndId[_clearingOperationIdentifier.tokenHolder][
-                _clearingOperationIdentifier.partition
-            ][_clearingOperationIdentifier.clearingId];
-        else if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem)
-            delete cs.clearingRedeemByAccountPartitionAndId[_clearingOperationIdentifier.tokenHolder][
-                _clearingOperationIdentifier.partition
-            ][_clearingOperationIdentifier.clearingId];
-        else
-            delete cs.clearingHoldCreationByAccountPartitionAndId[_clearingOperationIdentifier.tokenHolder][
-                _clearingOperationIdentifier.partition
-            ][_clearingOperationIdentifier.clearingId];
+        LibClearing.decreaseTotalClearedAmounts(
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            amount
+        );
+        LibClearing.removeClearingId(
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingOperationType,
+            _clearingOperationIdentifier.clearingId
+        );
+        LibClearing.deleteClearingThirdParty(
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingOperationType,
+            _clearingOperationIdentifier.clearingId
+        );
+        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
+            LibClearing.deleteClearingTransferData(
+                _clearingOperationIdentifier.tokenHolder,
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.clearingId
+            );
+        } else if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
+            LibClearing.deleteClearingRedeemData(
+                _clearingOperationIdentifier.tokenHolder,
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.clearingId
+            );
+        } else {
+            LibClearing.deleteClearingHoldCreationData(
+                _clearingOperationIdentifier.tokenHolder,
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.clearingId
+            );
+        }
         LibABAF.removeLabafClearing(_clearingOperationIdentifier);
     }
 
@@ -623,9 +638,9 @@ library LibClearingOps {
         }
         transferClearingBalance(_partition, destination, ctd.amount);
         if (
-            _tokenHolder != destination && erc3643Storage().compliance != address(0) && _partition == _DEFAULT_PARTITION
+            _tokenHolder != destination && address(LibCompliance.getCompliance()) != address(0) && _partition == _DEFAULT_PARTITION
         ) {
-            (erc3643Storage().compliance).functionCall(
+            address(LibCompliance.getCompliance()).functionCall(
                 abi.encodeWithSelector(ICompliance.transferred.selector, _tokenHolder, destination, ctd.amount),
                 IERC3643Management.ComplianceCallFailed.selector
             );
@@ -914,20 +929,12 @@ library LibClearingOps {
     // ============================================================================
 
     function _getClearingAmount(IClearing.ClearingOperationIdentifier memory id) private view returns (uint256) {
-        ClearingDataStorage storage cs = clearingStorage();
-        if (id.clearingOperationType == IClearing.ClearingOperationType.Transfer)
-            return cs.clearingTransferByAccountPartitionAndId[id.tokenHolder][id.partition][id.clearingId].amount;
-        if (id.clearingOperationType == IClearing.ClearingOperationType.Redeem)
-            return cs.clearingRedeemByAccountPartitionAndId[id.tokenHolder][id.partition][id.clearingId].amount;
-        return cs.clearingHoldCreationByAccountPartitionAndId[id.tokenHolder][id.partition][id.clearingId].amount;
+        (, uint256 amount_, ) = LibClearing.getClearingBasicInfo(id);
+        return amount_;
     }
 
     function _getClearingDestination(IClearing.ClearingOperationIdentifier memory id) private view returns (address) {
-        ClearingDataStorage storage cs = clearingStorage();
-        if (id.clearingOperationType == IClearing.ClearingOperationType.Transfer)
-            return cs.clearingTransferByAccountPartitionAndId[id.tokenHolder][id.partition][id.clearingId].destination;
-        if (id.clearingOperationType == IClearing.ClearingOperationType.HoldCreation)
-            return cs.clearingHoldCreationByAccountPartitionAndId[id.tokenHolder][id.partition][id.clearingId].holdTo;
-        return address(0);
+        (, , address destination_) = LibClearing.getClearingBasicInfo(id);
+        return destination_;
     }
 }

@@ -179,6 +179,20 @@ library LibHold {
         ] = _thirdParty;
     }
 
+    /// @notice Set the third party for a hold by individual parameters
+    /// @param _tokenHolder The token holder address
+    /// @param _partition The partition identifier
+    /// @param _holdId The hold ID
+    /// @param _thirdParty The third party address
+    function setHoldThirdPartyByParams(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _holdId,
+        address _thirdParty
+    ) internal {
+        holdStorage().holdThirdPartyByAccountPartitionAndId[_tokenHolder][_partition][_holdId] = _thirdParty;
+    }
+
     /// @notice Get the third party for a hold
     /// @param _holdIdentifier The hold identifier
     /// @return thirdParty_ The third party address
@@ -186,6 +200,19 @@ library LibHold {
         thirdParty_ = holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
             _holdIdentifier.partition
         ][_holdIdentifier.holdId];
+    }
+
+    /// @notice Get the third party for a hold by individual parameters
+    /// @param _tokenHolder The token holder address
+    /// @param _partition The partition identifier
+    /// @param _holdId The hold ID
+    /// @return thirdParty_ The third party address
+    function getHoldThirdPartyByParams(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _holdId
+    ) internal view returns (address thirdParty_) {
+        thirdParty_ = holdStorage().holdThirdPartyByAccountPartitionAndId[_tokenHolder][_partition][_holdId];
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

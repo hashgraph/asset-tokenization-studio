@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { holdStorage } from "../../storage/AssetStorage.sol";
-import { erc3643Storage } from "../../storage/ExternalStorage.sol";
 import {
     IHold,
     Hold,
@@ -28,6 +26,7 @@ import { IControlListBase } from "../../facets/features/interfaces/controlList/I
 import { LibNonce } from "../../lib/core/LibNonce.sol";
 import { LibProtectedPartitions } from "../../lib/core/LibProtectedPartitions.sol";
 import { LibResolverProxy } from "../../infrastructure/proxy/LibResolverProxy.sol";
+import { LibCompliance } from "../core/LibCompliance.sol";
 
 /// @title LibHoldOps
 /// @notice Orchestration library for hold operations
@@ -231,7 +230,7 @@ library LibHoldOps {
     ) internal {
         address thirdPartyAddress = msg.sender;
         LibERC20.spendAllowance(_from, thirdPartyAddress, _amount);
-        holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = thirdPartyAddress;
+        LibHold.setHoldThirdPartyByParams(_from, _partition, _holdId, thirdPartyAddress);
     }
 
     /// @notice Update total held amount ABAF for token holder
@@ -434,7 +433,7 @@ library LibHoldOps {
 
         // Notify compliance (only for cross-partition transfers in default partition)
         if (_holdIdentifier.tokenHolder != _to && _holdIdentifier.partition == _DEFAULT_PARTITION) {
-            address compliance = erc3643Storage().compliance;
+            address compliance = address(LibCompliance.getCompliance());
             if (compliance != address(0)) {
                 compliance.functionCall(
                     abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
@@ -458,9 +457,7 @@ library LibHoldOps {
             return;
         }
 
-        address thirdParty = holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
-            _holdIdentifier.partition
-        ][_holdIdentifier.holdId];
+        address thirdParty = LibHold.getHoldThirdParty(_holdIdentifier);
 
         LibERC20.increaseAllowance(_holdIdentifier.tokenHolder, thirdParty, _amount);
     }

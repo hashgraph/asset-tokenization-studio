@@ -10,7 +10,6 @@ import { LibBond } from "../../../../../lib/domain/LibBond.sol";
 import { LibInterestRate } from "../../../../../lib/domain/LibInterestRate.sol";
 import { LibKpis } from "../../../../../lib/domain/LibKpis.sol";
 import { LibProceedRecipients } from "../../../../../lib/domain/LibProceedRecipients.sol";
-import { SustainabilityPerformanceTargetRateDataStorage } from "../../../../../storage/ScheduledStorage.sol";
 
 abstract contract ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRate is ScheduledCrossOrderedTasks {
     /// @notice Calculate and store the sustainability rate when a coupon is listed
@@ -22,10 +21,10 @@ abstract contract ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRate 
         if (coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return;
         if (coupon.fixingDate > _timestamp) return;
 
-        SustainabilityPerformanceTargetRateDataStorage storage sptRateStorage = LibInterestRate.getSustainabilityRate();
+        ISustainabilityPerformanceTargetRate.InterestRate memory sptInterestRate = LibInterestRate.getSustainabilityInterestRate();
 
-        if (coupon.fixingDate < sptRateStorage.startPeriod) {
-            LibBond.updateCouponRate(_couponID, coupon, sptRateStorage.startRate, sptRateStorage.rateDecimals);
+        if (coupon.fixingDate < sptInterestRate.startPeriod) {
+            LibBond.updateCouponRate(_couponID, coupon, sptInterestRate.startRate, sptInterestRate.rateDecimals);
             return;
         }
 

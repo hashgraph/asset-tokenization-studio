@@ -213,12 +213,6 @@ library LibInterestRate {
         rateStorage.initialized = true;
     }
 
-    /// @notice Get all sustainability performance target rate configuration data
-    /// @return All sustainability performance target rate storage data
-    function getSustainabilityRate() internal pure returns (SustainabilityPerformanceTargetRateDataStorage storage) {
-        return sustainabilityPerformanceTargetRateStorage();
-    }
-
     /// @notice Check if sustainability performance target rate has been initialized
     /// @return True if sustainability rate is initialized, false otherwise
     function isSustainabilityRateInitialized() internal view returns (bool) {
@@ -340,12 +334,6 @@ library LibInterestRate {
     // ═══════════════════════════════════════════════════════════════════════════════
     // VIEW FUNCTIONS — Data Accessors (grouped at end for function ordering compliance)
     // ═══════════════════════════════════════════════════════════════════════════════
-
-    /// @notice Get all KPI-linked rate configuration data
-    /// @return All KPI linked rate storage data
-    function getKpiLinkedRate() internal pure returns (KpiLinkedRateDataStorage storage) {
-        return kpiLinkedRateStorage();
-    }
 
     /// @notice Check if KPI-linked rate has been initialized
     /// @return True if KPI-linked rate is initialized, false otherwise
