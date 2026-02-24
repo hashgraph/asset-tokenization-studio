@@ -12,7 +12,7 @@ import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibERC1594 } from "../../../lib/domain/LibERC1594.sol";
 import { LibHold } from "../../../lib/domain/LibHold.sol";
-import { LibHoldOps } from "../../../lib/orchestrator/LibHoldOps.sol";
+import { HoldOps } from "../../../lib/orchestrator/HoldOps.sol";
 import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract HoldTokenHolder is IHoldTokenHolder {
@@ -25,11 +25,11 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibCompliance.requireNotRecovered(msg.sender);
         LibCompliance.requireNotRecovered(_hold.to);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
-        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, LibTimeTravel.getBlockTimestamp());
+        HoldOps.checkHoldValidExpirationTimestamp(_hold.expirationTimestamp, LibTimeTravel.getBlockTimestamp());
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
         if (LibClearing.isClearingActivated()) revert IClearing.ClearingIsActivated();
 
-        (success_, holdId_) = LibHoldOps.createHoldByPartition(_partition, msg.sender, _hold, "", ThirdPartyType.NULL);
+        (success_, holdId_) = HoldOps.createHoldByPartition(_partition, msg.sender, _hold, "", ThirdPartyType.NULL);
 
         emit HeldByPartition(msg.sender, msg.sender, _partition, holdId_, _hold, "");
     }
@@ -45,13 +45,13 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibERC1410.requireValidAddress(_from);
         LibERC1410.requireValidAddress(_hold.escrow);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
-        LibHoldOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, LibTimeTravel.getBlockTimestamp());
+        HoldOps.checkHoldValidExpirationTimestamp(_hold.expirationTimestamp, LibTimeTravel.getBlockTimestamp());
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
         LibCompliance.requireNotRecovered(msg.sender);
         LibCompliance.requireNotRecovered(_hold.to);
         LibCompliance.requireNotRecovered(_from);
 
-        (success_, holdId_) = LibHoldOps.createHoldByPartition(
+        (success_, holdId_) = HoldOps.createHoldByPartition(
             _partition,
             _from,
             _hold,
@@ -59,7 +59,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
             ThirdPartyType.AUTHORIZED
         );
 
-        LibHoldOps.decreaseAllowedBalanceForHold(_partition, _from, _hold.amount, holdId_);
+        HoldOps.decreaseAllowedBalanceForHold(_partition, _from, _hold.amount, holdId_);
 
         emit HeldFromByPartition(msg.sender, _from, _partition, holdId_, _hold, _operatorData);
     }
@@ -75,7 +75,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibERC1594.checkCompliance(msg.sender, address(0), _to, false);
         LibHold.validateHoldId(_holdIdentifier);
 
-        (success_, partition_) = LibHoldOps.executeHoldByPartition(
+        (success_, partition_) = HoldOps.executeHoldByPartition(
             _holdIdentifier,
             _to,
             _amount,
@@ -99,7 +99,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibERC1410.checkDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
         LibHold.validateHoldId(_holdIdentifier);
 
-        success_ = LibHoldOps.releaseHoldByPartition(_holdIdentifier, _amount, LibTimeTravel.getBlockTimestamp());
+        success_ = HoldOps.releaseHoldByPartition(_holdIdentifier, _amount, LibTimeTravel.getBlockTimestamp());
 
         emit HoldByPartitionReleased(
             _holdIdentifier.tokenHolder,
@@ -115,7 +115,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         LibHold.validateHoldId(_holdIdentifier);
 
         uint256 amount;
-        (success_, amount) = LibHoldOps.reclaimHoldByPartition(_holdIdentifier, LibTimeTravel.getBlockTimestamp());
+        (success_, amount) = HoldOps.reclaimHoldByPartition(_holdIdentifier, LibTimeTravel.getBlockTimestamp());
 
         emit HoldByPartitionReclaimed(
             msg.sender,

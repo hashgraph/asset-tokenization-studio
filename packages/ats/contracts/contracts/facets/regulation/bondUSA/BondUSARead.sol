@@ -11,7 +11,7 @@ import { LibABAF } from "../../../lib/domain/LibABAF.sol";
 import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibCorporateActions } from "../../../lib/core/LibCorporateActions.sol";
-import { LibTotalBalance } from "../../../lib/orchestrator/LibTotalBalance.sol";
+import { HoldOps } from "../../../lib/orchestrator/HoldOps.sol";
 import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract BondUSARead is IBondRead, ISecurity {
@@ -119,7 +119,7 @@ abstract contract BondUSARead is IBondRead, ISecurity {
             couponFor_.recordDateReached = true;
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
                 ? LibSnapshots.totalBalanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
-                : LibTotalBalance.getTotalBalanceForAdjustedAt(_account, LibTimeTravel.getBlockTimestamp());
+                : HoldOps.getTotalBalanceForAdjustedAt(_account, LibTimeTravel.getBlockTimestamp());
             couponFor_.decimals = (registeredCoupon.snapshotId != 0)
                 ? LibSnapshots.decimalsAtSnapshot(registeredCoupon.snapshotId, LibTimeTravel.getBlockTimestamp())
                 : LibSnapshots.decimalsAdjustedAt(LibTimeTravel.getBlockTimestamp());

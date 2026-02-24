@@ -9,7 +9,7 @@ import { LibERC1410 } from "../../../../lib/domain/LibERC1410.sol";
 import { LibERC1594 } from "../../../../lib/domain/LibERC1594.sol";
 import { LibProtectedPartitions } from "../../../../lib/core/LibProtectedPartitions.sol";
 import { LibABAF } from "../../../../lib/domain/LibABAF.sol";
-import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../../lib/orchestrator/TokenCoreOps.sol";
 import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase {
@@ -29,7 +29,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase {
             LibTimeTravel.getBlockTimestamp()
         );
         return
-            LibTokenTransfer.transferByPartition(
+            TokenCoreOps.transferByPartition(
                 msg.sender,
                 _basicTransferInfo,
                 _partition,
@@ -50,7 +50,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase {
             _value,
             LibTimeTravel.getBlockTimestamp()
         );
-        LibTokenTransfer.redeemByPartition(
+        TokenCoreOps.redeemByPartition(
             _partition,
             msg.sender,
             address(0),

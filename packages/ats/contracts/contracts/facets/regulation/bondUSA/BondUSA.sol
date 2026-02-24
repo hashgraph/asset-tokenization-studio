@@ -10,7 +10,7 @@ import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } f
 
 import { LibBond } from "../../../lib/domain/LibBond.sol";
 import { LibSecurity } from "../../../lib/domain/LibSecurity.sol";
-import { LibTokenTransfer } from "../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../lib/orchestrator/TokenCoreOps.sol";
 import { LibPause } from "../../../lib/core/LibPause.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibControlList } from "../../../lib/core/LibControlList.sol";
@@ -90,7 +90,7 @@ abstract contract BondUSA is IBond, IBondUSA {
             bytes32 partition = partitions[i];
             uint256 balance = LibERC1410.balanceOfByPartition(partition, _tokenHolder);
             if (balance > 0) {
-                LibTokenTransfer.redeemByPartition(
+                TokenCoreOps.redeemByPartition(
                     partition,
                     _tokenHolder,
                     msg.sender,
@@ -107,7 +107,7 @@ abstract contract BondUSA is IBond, IBondUSA {
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
         _validateRedeemAtMaturity(_tokenHolder);
 
-        LibTokenTransfer.redeemByPartition(
+        TokenCoreOps.redeemByPartition(
             _partition,
             _tokenHolder,
             msg.sender,

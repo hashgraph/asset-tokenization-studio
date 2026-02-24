@@ -17,7 +17,7 @@ import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
 import { LibHold } from "../../../lib/domain/LibHold.sol";
 import { LibLock } from "../../../lib/domain/LibLock.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
-import { LibTokenTransfer } from "../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../lib/orchestrator/TokenCoreOps.sol";
 import { LibResolverProxy } from "../../../infrastructure/proxy/LibResolverProxy.sol";
 import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
@@ -102,7 +102,7 @@ abstract contract ERC3643Management is IERC3643Management {
 
         uint256 balance = LibABAF.balanceOfAdjustedAt(_lostWallet, timestamp);
         if (balance + frozenBalance > 0) {
-            LibTokenTransfer.transfer(_lostWallet, _newWallet, balance, timestamp);
+            TokenCoreOps.transfer(_lostWallet, _newWallet, balance, timestamp);
         }
 
         if (frozenBalance > 0) {

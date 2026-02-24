@@ -49,6 +49,9 @@ const config: HardhatUserConfig = {
       chainId: 1337,
       blockGasLimit: 30_000_000,
       hardfork: "cancun",
+      // TokenOrchestrator exceeds EIP-170's 24KB limit (41KB) — spike branch only.
+      // Production solution: split into sub-libraries each under 24KB.
+      allowUnlimitedContractSize: true,
     },
     local: {
       url: Configuration.endpoints.local.jsonRpc,

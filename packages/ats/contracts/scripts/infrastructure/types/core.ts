@@ -160,7 +160,7 @@ export interface FacetDefinition {
   errors?: ErrorDefinition[];
 
   /** TypeChain factory constructor function for creating contract instances */
-  factory?: (signer: Signer) => ContractFactory;
+  factory?: (signer: Signer, libraries?: Record<string, string>) => ContractFactory;
 }
 
 /**

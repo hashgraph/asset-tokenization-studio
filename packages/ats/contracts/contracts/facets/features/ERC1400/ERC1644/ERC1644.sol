@@ -8,7 +8,7 @@ import { LibPause } from "../../../../lib/core/LibPause.sol";
 import { LibAccess } from "../../../../lib/core/LibAccess.sol";
 import { LibERC1410 } from "../../../../lib/domain/LibERC1410.sol";
 import { LibERC1644 } from "../../../../lib/domain/LibERC1644.sol";
-import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../../lib/orchestrator/TokenCoreOps.sol";
 import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 
@@ -37,7 +37,7 @@ abstract contract ERC1644 is IERC1644, IControlListBase {
             roles[1] = _AGENT_ROLE;
             LibAccess.checkAnyRole(roles, msg.sender);
         }
-        LibTokenTransfer.transfer(_from, _to, _value, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.transfer(_from, _to, _value, LibTimeTravel.getBlockTimestamp());
         emit IERC1644Base.ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
     }
 
@@ -56,7 +56,7 @@ abstract contract ERC1644 is IERC1644, IControlListBase {
             roles[1] = _AGENT_ROLE;
             LibAccess.checkAnyRole(roles, msg.sender);
         }
-        LibTokenTransfer.burn(_tokenHolder, _value, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.burn(_tokenHolder, _value, LibTimeTravel.getBlockTimestamp());
         emit IERC1644Base.ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 

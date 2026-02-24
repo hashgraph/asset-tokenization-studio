@@ -5,12 +5,12 @@ import { IHoldRead } from "../interfaces/hold/IHoldRead.sol";
 import { HoldIdentifier } from "../interfaces/hold/IHold.sol";
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";
 import { LibHold } from "../../../lib/domain/LibHold.sol";
-import { LibHoldOps } from "../../../lib/orchestrator/LibHoldOps.sol";
+import { HoldOps } from "../../../lib/orchestrator/HoldOps.sol";
 import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract HoldRead is IHoldRead {
     function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return LibHoldOps.getHeldAmountForAdjustedAt(_tokenHolder, LibTimeTravel.getBlockTimestamp());
+        return HoldOps.getHeldAmountForAdjustedAt(_tokenHolder, LibTimeTravel.getBlockTimestamp());
     }
 
     function getHeldAmountForByPartition(
@@ -18,7 +18,7 @@ abstract contract HoldRead is IHoldRead {
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
         return
-            LibHoldOps.getHeldAmountForByPartitionAdjustedAt(
+            HoldOps.getHeldAmountForByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
                 LibTimeTravel.getBlockTimestamp()
@@ -57,7 +57,7 @@ abstract contract HoldRead is IHoldRead {
             ThirdPartyType thirdPartyType_
         )
     {
-        return LibHoldOps.getHoldForByPartitionAdjustedAt(_holdIdentifier, LibTimeTravel.getBlockTimestamp());
+        return HoldOps.getHoldForByPartitionAdjustedAt(_holdIdentifier, LibTimeTravel.getBlockTimestamp());
     }
 
     function getHoldThirdParty(

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BasicTransferInfo } from "../../../features/interfaces/ERC1400/IERC1410.sol";
+import { BasicTransferInfo } from "./IERC1410Types.sol";
 
 /**
  * @title IERC1410TokenHolder

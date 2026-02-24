@@ -11,7 +11,7 @@ import { LibAccess } from "../../../../lib/core/LibAccess.sol";
 import { LibCap } from "../../../../lib/core/LibCap.sol";
 import { LibCompliance } from "../../../../lib/core/LibCompliance.sol";
 import { LibProtectedPartitions } from "../../../../lib/core/LibProtectedPartitions.sol";
-import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../../lib/orchestrator/TokenCoreOps.sol";
 import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 import { _ISSUER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
@@ -41,7 +41,7 @@ abstract contract ERC1594 is IERC1594, IControlListBase, IERC1644Base {
             _value,
             LibTimeTravel.getBlockTimestamp()
         );
-        LibTokenTransfer.transfer(msg.sender, _to, _value, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.transfer(msg.sender, _to, _value, LibTimeTravel.getBlockTimestamp());
         emit TransferWithData(msg.sender, _to, _value, _data);
     }
 
@@ -59,7 +59,7 @@ abstract contract ERC1594 is IERC1594, IControlListBase, IERC1644Base {
         LibCompliance.requireNotRecovered(msg.sender);
         LibCompliance.requireNotRecovered(_to);
         LibCompliance.requireNotRecovered(_from);
-        LibTokenTransfer.transferFrom(msg.sender, _from, _to, _value, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.transferFrom(msg.sender, _from, _to, _value, LibTimeTravel.getBlockTimestamp());
         emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
     }
 
@@ -75,7 +75,7 @@ abstract contract ERC1594 is IERC1594, IControlListBase, IERC1644Base {
             roles[1] = _AGENT_ROLE;
             LibAccess.checkAnyRole(roles, msg.sender);
         }
-        LibTokenTransfer.mint(_tokenHolder, _value, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.mint(_tokenHolder, _value, LibTimeTravel.getBlockTimestamp());
         emit IERC1594.Issued(msg.sender, _tokenHolder, _value, _data);
     }
 
@@ -89,7 +89,7 @@ abstract contract ERC1594 is IERC1594, IControlListBase, IERC1644Base {
             _value,
             LibTimeTravel.getBlockTimestamp()
         );
-        LibTokenTransfer.burn(msg.sender, _value, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.burn(msg.sender, _value, LibTimeTravel.getBlockTimestamp());
         emit IERC1594.Redeemed(address(0), msg.sender, _value, _data);
     }
 
@@ -105,8 +105,8 @@ abstract contract ERC1594 is IERC1594, IControlListBase, IERC1644Base {
         );
         LibCompliance.requireNotRecovered(msg.sender);
         LibCompliance.requireNotRecovered(_tokenHolder);
-        LibTokenTransfer.decreaseAllowedBalance(_tokenHolder, msg.sender, _value);
-        LibTokenTransfer.burn(_tokenHolder, _value, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.decreaseAllowedBalance(_tokenHolder, msg.sender, _value);
+        TokenCoreOps.burn(_tokenHolder, _value, LibTimeTravel.getBlockTimestamp());
         emit IERC1594.Redeemed(msg.sender, _tokenHolder, _value, _data);
     }
 

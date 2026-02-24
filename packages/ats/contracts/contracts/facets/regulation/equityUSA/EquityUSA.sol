@@ -24,7 +24,7 @@ import { LibCorporateActions } from "../../../lib/core/LibCorporateActions.sol";
 import { LibScheduledTasks } from "../../../lib/domain/LibScheduledTasks.sol";
 import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
-import { LibTotalBalance } from "../../../lib/orchestrator/LibTotalBalance.sol";
+import { HoldOps } from "../../../lib/orchestrator/HoldOps.sol";
 import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract EquityUSA is IEquityUSA {
@@ -437,7 +437,7 @@ abstract contract EquityUSA is IEquityUSA {
 
             balance_ = (_snapshotId != 0)
                 ? LibSnapshots.totalBalanceOfAtSnapshot(_snapshotId, _account)
-                : LibTotalBalance.getTotalBalanceForAdjustedAt(_account, _date);
+                : HoldOps.getTotalBalanceForAdjustedAt(_account, _date);
 
             decimals_ = (_snapshotId != 0)
                 ? LibSnapshots.decimalsAtSnapshot(_snapshotId, LibTimeTravel.getBlockTimestamp())

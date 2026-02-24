@@ -14,7 +14,7 @@ import { LibERC1594 } from "../../../lib/domain/LibERC1594.sol";
 import { LibERC1644 } from "../../../lib/domain/LibERC1644.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibProtectedPartitions } from "../../../lib/core/LibProtectedPartitions.sol";
-import { LibTokenTransfer } from "../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../lib/orchestrator/TokenCoreOps.sol";
 import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 
@@ -33,7 +33,7 @@ abstract contract ERC3643Batch is IERC3643Batch {
             LibERC1594.checkCompliance(msg.sender, address(0), _toList[i], false);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
-            LibTokenTransfer.transfer(msg.sender, _toList[i], _amounts[i], LibTimeTravel.getBlockTimestamp());
+            TokenCoreOps.transfer(msg.sender, _toList[i], _amounts[i], LibTimeTravel.getBlockTimestamp());
         }
     }
 
@@ -54,7 +54,7 @@ abstract contract ERC3643Batch is IERC3643Batch {
             LibAccess.checkAnyRole(roles, msg.sender);
         }
         for (uint256 i = 0; i < _fromList.length; i++) {
-            LibTokenTransfer.transfer(_fromList[i], _toList[i], _amounts[i], LibTimeTravel.getBlockTimestamp());
+            TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i], LibTimeTravel.getBlockTimestamp());
             emit IERC1644Base.ControllerTransfer(msg.sender, _fromList[i], _toList[i], _amounts[i], "", "");
         }
     }
@@ -75,7 +75,7 @@ abstract contract ERC3643Batch is IERC3643Batch {
             LibCap.requireWithinMaxSupply(_amounts[i], LibERC1410.totalSupply());
         }
         for (uint256 i = 0; i < _toList.length; i++) {
-            LibTokenTransfer.mint(_toList[i], _amounts[i], LibTimeTravel.getBlockTimestamp());
+            TokenCoreOps.mint(_toList[i], _amounts[i], LibTimeTravel.getBlockTimestamp());
             emit IERC1594.Issued(msg.sender, _toList[i], _amounts[i], "");
         }
     }
@@ -92,7 +92,7 @@ abstract contract ERC3643Batch is IERC3643Batch {
             LibAccess.checkAnyRole(roles, msg.sender);
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
-            LibTokenTransfer.burn(_userAddresses[i], _amounts[i], LibTimeTravel.getBlockTimestamp());
+            TokenCoreOps.burn(_userAddresses[i], _amounts[i], LibTimeTravel.getBlockTimestamp());
             emit IERC1644Base.ControllerRedemption(msg.sender, _userAddresses[i], _amounts[i], "", "");
         }
     }

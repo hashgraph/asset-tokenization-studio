@@ -56,6 +56,10 @@ import {
   BusinessLogicResolver__factory,
   IStaticFunctionSelectors__factory,
   ProxyAdmin__factory,
+  TokenCoreOps__factory,
+  HoldOps__factory,
+  ClearingOps__factory,
+  ClearingReadOps__factory,
 } from "@contract-types";
 import { shouldFailAtStep, createTestFailureMessage } from "../infrastructure/testing/failureInjection";
 
@@ -338,6 +342,47 @@ export async function deploySystemWithNewBlr(
         checkpoint.steps.facets = new Map();
       }
 
+      // Deploy orchestrator external libraries (linked by token-operation facets)
+      // Order matters: ClearingOps depends on HoldOps and ClearingReadOps
+      info("   Deploying orchestrator libraries...");
+
+      // Deploy TokenCoreOps (no dependencies)
+      const tokenCoreOps = await new TokenCoreOps__factory(signer).deploy();
+      await tokenCoreOps.waitForDeployment();
+      const tokenCoreOpsAddress = await tokenCoreOps.getAddress();
+      info(`   ✅ TokenCoreOps deployed at ${tokenCoreOpsAddress}`);
+
+      // Deploy HoldOps (no dependencies)
+      const holdOps = await new HoldOps__factory(signer).deploy();
+      await holdOps.waitForDeployment();
+      const holdOpsAddress = await holdOps.getAddress();
+      info(`   ✅ HoldOps deployed at ${holdOpsAddress}`);
+
+      // Deploy ClearingReadOps (no dependencies)
+      const clearingReadOps = await new ClearingReadOps__factory(signer).deploy();
+      await clearingReadOps.waitForDeployment();
+      const clearingReadOpsAddress = await clearingReadOps.getAddress();
+      info(`   ✅ ClearingReadOps deployed at ${clearingReadOpsAddress}`);
+
+      // Deploy ClearingOps (depends on HoldOps and ClearingReadOps)
+      const clearingOpsLibraries = {
+        "contracts/lib/orchestrator/HoldOps.sol:HoldOps": holdOpsAddress,
+        "contracts/lib/orchestrator/ClearingReadOps.sol:ClearingReadOps": clearingReadOpsAddress,
+      };
+      const clearingOps = await new ClearingOps__factory(clearingOpsLibraries, signer).deploy();
+      await clearingOps.waitForDeployment();
+      const clearingOpsAddress = await clearingOps.getAddress();
+      info(`   ✅ ClearingOps deployed at ${clearingOpsAddress}`);
+
+      // Map libraries to facets that need them
+      const facetLibraries: Record<string, string> = {
+        "contracts/lib/orchestrator/TokenCoreOps.sol:TokenCoreOps": tokenCoreOpsAddress,
+        "contracts/lib/orchestrator/HoldOps.sol:HoldOps": holdOpsAddress,
+        "contracts/lib/orchestrator/ClearingOps.sol:ClearingOps": clearingOpsAddress,
+        "contracts/lib/orchestrator/ClearingReadOps.sol:ClearingReadOps": clearingReadOpsAddress,
+      };
+      info("   ✅ All orchestrator libraries deployed");
+
       // Create factories from registry
       const facetFactories: Record<string, ContractFactory> = {};
       for (const facet of allFacets) {
@@ -346,7 +391,7 @@ export async function deploySystemWithNewBlr(
         }
 
         // Get factory
-        const factory = facet.factory(signer);
+        const factory = facet.factory(signer, facetLibraries);
         // Use the actual contract name from the factory
         const contractName = factory.constructor.name.replace("__factory", "");
 

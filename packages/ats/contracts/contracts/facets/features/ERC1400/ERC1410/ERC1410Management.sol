@@ -15,7 +15,7 @@ import { LibProtectedPartitions } from "../../../../lib/core/LibProtectedPartiti
 import { LibNonce } from "../../../../lib/core/LibNonce.sol";
 import { LibResolverProxy } from "../../../../infrastructure/proxy/LibResolverProxy.sol";
 import { LibERC20 } from "../../../../lib/domain/LibERC20.sol";
-import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../../lib/orchestrator/TokenCoreOps.sol";
 import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
 import { checkNounceAndDeadline } from "../../../../lib/core/ERC712.sol";
 import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
@@ -47,7 +47,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             LibAccess.checkAnyRole(roles, msg.sender);
         }
         return
-            LibTokenTransfer.transferByPartition(
+            TokenCoreOps.transferByPartition(
                 _from,
                 BasicTransferInfo(_to, _value),
                 _partition,
@@ -74,7 +74,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             roles[1] = _AGENT_ROLE;
             LibAccess.checkAnyRole(roles, msg.sender);
         }
-        LibTokenTransfer.redeemByPartition(
+        TokenCoreOps.redeemByPartition(
             _partition,
             _tokenHolder,
             msg.sender,
@@ -101,7 +101,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             LibTimeTravel.getBlockTimestamp()
         );
         return
-            LibTokenTransfer.transferByPartition(
+            TokenCoreOps.transferByPartition(
                 _operatorTransferData.from,
                 BasicTransferInfo(_operatorTransferData.to, _operatorTransferData.value),
                 _operatorTransferData.partition,
@@ -129,7 +129,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             _value,
             LibTimeTravel.getBlockTimestamp()
         );
-        LibTokenTransfer.redeemByPartition(
+        TokenCoreOps.redeemByPartition(
             _partition,
             _tokenHolder,
             msg.sender,
@@ -177,7 +177,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
         );
         LibNonce.setNonceFor(_protectionData.nounce, _from);
         return
-            LibTokenTransfer.transferByPartition(
+            TokenCoreOps.transferByPartition(
                 _from,
                 BasicTransferInfo(_to, _amount),
                 _partition,
@@ -221,7 +221,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             address(this)
         );
         LibNonce.setNonceFor(_protectionData.nounce, _from);
-        LibTokenTransfer.redeemByPartition(
+        TokenCoreOps.redeemByPartition(
             _partition,
             _from,
             msg.sender,

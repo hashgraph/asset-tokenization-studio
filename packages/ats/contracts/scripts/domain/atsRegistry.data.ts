@@ -270,7 +270,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
-    factory: (signer) => new BondUSAFacet__factory(signer),
+    factory: (signer, libs) => new BondUSAFacet__factory(libs as any, signer),
   },
 
   BondUSAFixedRateFacet: {
@@ -328,7 +328,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
-    factory: (signer) => new BondUSAFixedRateFacet__factory(signer),
+    factory: (signer, libs) => new BondUSAFixedRateFacet__factory(libs as any, signer),
   },
 
   BondUSAKpiLinkedRateFacet: {
@@ -392,7 +392,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
-    factory: (signer) => new BondUSAKpiLinkedRateFacet__factory(signer),
+    factory: (signer, libs) => new BondUSAKpiLinkedRateFacet__factory(libs as any, signer),
   },
 
   BondUSAReadFacet: {
@@ -482,7 +482,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer) => new BondUSAReadFacet__factory(signer),
+    factory: (signer, libs) => new BondUSAReadFacet__factory(libs as any, signer),
   },
 
   BondUSAReadKpiLinkedRateFacet: {
@@ -572,7 +572,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer) => new BondUSAReadKpiLinkedRateFacet__factory(signer),
+    factory: (signer, libs) => new BondUSAReadKpiLinkedRateFacet__factory(libs as any, signer),
   },
 
   BondUSAReadSustainabilityPerformanceTargetRateFacet: {
@@ -661,7 +661,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer) => new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer, libs) => new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(libs as any, signer),
   },
 
   BondUSASustainabilityPerformanceTargetRateFacet: {
@@ -705,7 +705,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xc7a6ca35",
       },
     ],
-    factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer, libs) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(libs as any, signer),
   },
 
   CapFacet: {
@@ -853,7 +853,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer) => new ClearingActionsFacet__factory(signer),
+    factory: (signer, libs) => new ClearingActionsFacet__factory(libs as any, signer),
   },
 
   ClearingHoldCreationFacet: {
@@ -917,7 +917,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x7fd4d7541b7da42375ec1b3f05c454acb77234a17c2f4349c102add4bc61e306",
       },
     ],
-    factory: (signer) => new ClearingHoldCreationFacet__factory(signer),
+    factory: (signer, libs) => new ClearingHoldCreationFacet__factory(libs as any, signer),
   },
 
   ClearingReadFacet: {
@@ -958,7 +958,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcf38dab5",
       },
     ],
-    factory: (signer) => new ClearingReadFacet__factory(signer),
+    factory: (signer, libs) => new ClearingReadFacet__factory(libs as any, signer),
   },
 
   ClearingRedeemFacet: {
@@ -1022,7 +1022,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xdd233f03eaed8aec1fe549f12e218c32dc2e73b3d5777bdeb33afa43e2fa2230",
       },
     ],
-    factory: (signer) => new ClearingRedeemFacet__factory(signer),
+    factory: (signer, libs) => new ClearingRedeemFacet__factory(libs as any, signer),
   },
 
   ClearingTransferFacet: {
@@ -1089,7 +1089,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x8aea721bf4270b3b07d0974586b57ecd35862ae7a8b733530161d941489283f1",
       },
     ],
-    factory: (signer) => new ClearingTransferFacet__factory(signer),
+    factory: (signer, libs) => new ClearingTransferFacet__factory(libs as any, signer),
   },
 
   ControlListFacet: {
@@ -1450,7 +1450,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "WrongIndexForAction", signature: "WrongIndexForAction(uint256,bytes32)", selector: "0xd3924f4e" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
-    factory: (signer) => new EquityUSAFacet__factory(signer),
+    factory: (signer, libs) => new EquityUSAFacet__factory(libs as any, signer),
   },
 
   ERC1410IssuerFacet: {
@@ -1492,7 +1492,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
-    factory: (signer) => new ERC1410IssuerFacet__factory(signer),
+    factory: (signer, libs) => new ERC1410IssuerFacet__factory(libs as any, signer),
   },
 
   ERC1410ManagementFacet: {
@@ -1586,7 +1586,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
-    factory: (signer) => new ERC1410ManagementFacet__factory(signer),
+    factory: (signer, libs) => new ERC1410ManagementFacet__factory(libs as any, signer),
   },
 
   ERC1410ReadFacet: {
@@ -1716,7 +1716,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
-    factory: (signer) => new ERC1410TokenHolderFacet__factory(signer),
+    factory: (signer, libs) => new ERC1410TokenHolderFacet__factory(libs as any, signer),
   },
 
   ERC1594Facet: {
@@ -1824,7 +1824,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
       { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
     ],
-    factory: (signer) => new ERC1594Facet__factory(signer),
+    factory: (signer, libs) => new ERC1594Facet__factory(libs as any, signer),
   },
 
   ERC1643Facet: {
@@ -1925,7 +1925,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
-    factory: (signer) => new ERC1644Facet__factory(signer),
+    factory: (signer, libs) => new ERC1644Facet__factory(libs as any, signer),
   },
 
   ERC20Facet: {
@@ -2031,7 +2031,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" },
       { name: "ZeroOwnerAddress", signature: "ZeroOwnerAddress()", selector: "0x42cad957" },
     ],
-    factory: (signer) => new ERC20Facet__factory(signer),
+    factory: (signer, libs) => new ERC20Facet__factory(libs as any, signer),
   },
 
   ERC20PermitFacet: {
@@ -2119,7 +2119,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "BrokenClockMode", signature: "BrokenClockMode()", selector: "0xb2b9e563" },
       { name: "ERC20VotesFutureLookup", signature: "ERC20VotesFutureLookup(uint256,uint256)", selector: "0x5877b221" },
     ],
-    factory: (signer) => new ERC20VotesFacet__factory(signer),
+    factory: (signer, libs) => new ERC20VotesFacet__factory(libs as any, signer),
   },
 
   ERC3643BatchFacet: {
@@ -2151,7 +2151,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x88d695b2",
       },
     ],
-    factory: (signer) => new ERC3643BatchFacet__factory(signer),
+    factory: (signer, libs) => new ERC3643BatchFacet__factory(libs as any, signer),
   },
 
   ERC3643ManagementFacet: {
@@ -2232,7 +2232,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "InputBoolArrayLengthMismatch", signature: "InputBoolArrayLengthMismatch()", selector: "0x07ac0eb9" },
       { name: "WalletRecovered", signature: "WalletRecovered()", selector: "0xf9f9bcf9" },
     ],
-    factory: (signer) => new ERC3643ManagementFacet__factory(signer),
+    factory: (signer, libs) => new ERC3643ManagementFacet__factory(libs as any, signer),
   },
 
   ERC3643OperationsFacet: {
@@ -2251,7 +2251,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
     ],
-    factory: (signer) => new ERC3643OperationsFacet__factory(signer),
+    factory: (signer, libs) => new ERC3643OperationsFacet__factory(libs as any, signer),
   },
 
   ERC3643ReadFacet: {
@@ -2662,7 +2662,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
       },
     ],
-    factory: (signer) => new HoldManagementFacet__factory(signer),
+    factory: (signer, libs) => new HoldManagementFacet__factory(libs as any, signer),
   },
 
   HoldReadFacet: {
@@ -2709,7 +2709,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xeb89899d",
       },
     ],
-    factory: (signer) => new HoldReadFacet__factory(signer),
+    factory: (signer, libs) => new HoldReadFacet__factory(libs as any, signer),
   },
 
   HoldTokenHolderFacet: {
@@ -2779,7 +2779,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [{ name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" }],
-    factory: (signer) => new HoldTokenHolderFacet__factory(signer),
+    factory: (signer, libs) => new HoldTokenHolderFacet__factory(libs as any, signer),
   },
 
   KpiLinkedRateFacet: {
@@ -3973,7 +3973,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf29416ed",
       },
     ],
-    factory: (signer) => new TotalBalanceFacet__factory(signer),
+    factory: (signer, libs) => new TotalBalanceFacet__factory(libs as any, signer),
   },
 
   TransferAndLockFacet: {
@@ -4004,7 +4004,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    factory: (signer) => new TransferAndLockFacet__factory(signer),
+    factory: (signer, libs) => new TransferAndLockFacet__factory(libs as any, signer),
   },
 };
 

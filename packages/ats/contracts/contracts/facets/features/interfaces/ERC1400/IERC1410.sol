@@ -1,31 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import "./IERC1410Types.sol";
 import { IERC1410Read } from "./IERC1410Read.sol";
 import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";
 import { IERC1410Issuer } from "./IERC1410Issuer.sol";
-
-struct BasicTransferInfo {
-    address to;
-    uint256 value;
-}
-
-struct OperatorTransferData {
-    bytes32 partition;
-    address from;
-    address to;
-    uint256 value;
-    bytes data;
-    bytes operatorData;
-}
-
-struct IssueData {
-    bytes32 partition;
-    address tokenHolder;
-    uint256 value;
-    bytes data;
-}
 
 // solhint-disable no-empty-blocks
 /**

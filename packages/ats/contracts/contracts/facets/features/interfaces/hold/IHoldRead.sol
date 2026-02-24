@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ThirdPartyType } from "../../types/ThirdPartyType.sol";
-import { HoldIdentifier } from "./IHold.sol";
+import { HoldIdentifier } from "./IHoldTypes.sol";
 
 interface IHoldRead {
     /**

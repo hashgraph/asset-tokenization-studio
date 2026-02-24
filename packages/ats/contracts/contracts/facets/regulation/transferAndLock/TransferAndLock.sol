@@ -12,7 +12,7 @@ import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibABAF } from "../../../lib/domain/LibABAF.sol";
 import { LibLock } from "../../../lib/domain/LibLock.sol";
 import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
-import { LibTokenTransfer } from "../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../lib/orchestrator/TokenCoreOps.sol";
 import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 
 abstract contract TransferAndLock is ITransferAndLock {
@@ -29,7 +29,7 @@ abstract contract TransferAndLock is ITransferAndLock {
         _checkValidExpirationTimestamp(_expirationTimestamp);
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
 
-        LibTokenTransfer.transferByPartition(
+        TokenCoreOps.transferByPartition(
             msg.sender,
             BasicTransferInfo(_to, _amount),
             _partition,
@@ -56,7 +56,7 @@ abstract contract TransferAndLock is ITransferAndLock {
         _checkValidExpirationTimestamp(_expirationTimestamp);
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
 
-        LibTokenTransfer.transferByPartition(
+        TokenCoreOps.transferByPartition(
             msg.sender,
             BasicTransferInfo(_to, _amount),
             _DEFAULT_PARTITION,

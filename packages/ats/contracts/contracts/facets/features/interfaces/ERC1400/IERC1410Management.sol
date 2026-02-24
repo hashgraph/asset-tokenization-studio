@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { OperatorTransferData } from "../../../features/interfaces/ERC1400/IERC1410.sol";
+import { OperatorTransferData } from "./IERC1410Types.sol";
 import { IProtectedPartitions } from "../../interfaces/IProtectedPartitions.sol";
 
 /**

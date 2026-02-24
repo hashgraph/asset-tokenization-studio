@@ -10,7 +10,7 @@ import { LibCap } from "../../../lib/core/LibCap.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibERC1594 } from "../../../lib/domain/LibERC1594.sol";
 import { LibERC1644 } from "../../../lib/domain/LibERC1644.sol";
-import { LibTokenTransfer } from "../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../lib/orchestrator/TokenCoreOps.sol";
 import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 
@@ -25,7 +25,7 @@ abstract contract ERC3643Operations is IERC3643Operations {
             roles[1] = _AGENT_ROLE;
             LibAccess.checkAnyRole(roles, msg.sender);
         }
-        LibTokenTransfer.burn(_userAddress, _amount, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.burn(_userAddress, _amount, LibTimeTravel.getBlockTimestamp());
         emit IERC1644Base.ControllerRedemption(msg.sender, _userAddress, _amount, "", "");
     }
 
@@ -41,7 +41,7 @@ abstract contract ERC3643Operations is IERC3643Operations {
             roles[1] = _AGENT_ROLE;
             LibAccess.checkAnyRole(roles, msg.sender);
         }
-        LibTokenTransfer.mint(_to, _amount, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.mint(_to, _amount, LibTimeTravel.getBlockTimestamp());
         emit IERC1594.Issued(msg.sender, _to, _amount, "");
     }
 
@@ -55,7 +55,7 @@ abstract contract ERC3643Operations is IERC3643Operations {
             roles[1] = _AGENT_ROLE;
             LibAccess.checkAnyRole(roles, msg.sender);
         }
-        LibTokenTransfer.transfer(_from, _to, _amount, LibTimeTravel.getBlockTimestamp());
+        TokenCoreOps.transfer(_from, _to, _amount, LibTimeTravel.getBlockTimestamp());
         emit IERC1644Base.ControllerTransfer(msg.sender, _from, _to, _amount, "", "");
         return true;
     }
