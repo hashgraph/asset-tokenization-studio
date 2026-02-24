@@ -2,7 +2,8 @@
 
 import "reflect-metadata";
 import { HederaWalletConnectTransactionAdapter } from "./HederaWalletConnectTransactionAdapter";
-import { AccountId, Transaction, ContractExecuteTransaction } from "@hiero-ledger/sdk";
+import { Transaction } from "@hiero-ledger/sdk";
+import { ethers } from "ethers";
 import EventService from "@service/event/EventService";
 import NetworkService from "@service/network/NetworkService";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
@@ -16,6 +17,7 @@ import { SigningError } from "@port/out/error/SigningError";
 import Account from "@domain/context/account/Account";
 import HWCSettings from "@core/settings/walletConnect/HWCSettings";
 import { testnet, mainnet } from "@domain/context/network/Environment";
+import { TransactionType } from "@port/out/TransactionResponseEnums";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -111,16 +113,16 @@ describe("HederaWalletConnectTransactionAdapter", () => {
     });
   });
 
-  describe("signAndSendTransaction", () => {
+  describe("processTransaction", () => {
     it("should throw NotInitialized if hederaProvider is not set", async () => {
       const tx = new Transaction();
-      await expect(adapter.signAndSendTransaction(tx)).rejects.toThrow(NotInitialized);
+      await expect(adapter.processTransaction(tx, TransactionType.RECEIPT)).rejects.toThrow(NotInitialized);
     });
 
     it("should throw AccountNotSet if account is not set", async () => {
       (adapter as any).hederaProvider = { request: jest.fn() };
       const tx = new Transaction();
-      await expect(adapter.signAndSendTransaction(tx)).rejects.toThrow(AccountNotSet);
+      await expect(adapter.processTransaction(tx, TransactionType.RECEIPT)).rejects.toThrow(AccountNotSet);
     });
 
     it("should freeze transaction and send via hedera_signAndExecuteTransaction", async () => {
@@ -141,7 +143,7 @@ describe("HederaWalletConnectTransactionAdapter", () => {
       // Need to bypass instanceof check since we're mocking
       Object.setPrototypeOf(mockTx, Transaction.prototype);
 
-      const result = await adapter.signAndSendTransaction(mockTx);
+      const result = await adapter.processTransaction(mockTx, TransactionType.RECEIPT);
 
       expect(mockRequest).toHaveBeenCalledWith(
         {
@@ -173,7 +175,7 @@ describe("HederaWalletConnectTransactionAdapter", () => {
       } as unknown as Transaction;
       Object.setPrototypeOf(mockTx, Transaction.prototype);
 
-      await adapter.signAndSendTransaction(mockTx);
+      await adapter.processTransaction(mockTx, TransactionType.RECEIPT);
 
       expect(mockRequest).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -199,7 +201,81 @@ describe("HederaWalletConnectTransactionAdapter", () => {
       } as unknown as Transaction;
       Object.setPrototypeOf(mockTx, Transaction.prototype);
 
-      await expect(adapter.signAndSendTransaction(mockTx)).rejects.toThrow(SigningError);
+      await expect(adapter.processTransaction(mockTx, TransactionType.RECEIPT)).rejects.toThrow(SigningError);
+    });
+  });
+
+  describe("supportsEvmOperations", () => {
+    it("should return true when in EVM session", () => {
+      (adapter as any).hederaProvider = {
+        session: { namespaces: { eip155: {} } },
+      };
+      expect(adapter.supportsEvmOperations()).toBe(true);
+    });
+
+    it("should return false when in native Hedera session", () => {
+      (adapter as any).hederaProvider = {
+        session: { namespaces: { hedera: {}, eip155: {} } },
+      };
+      expect(adapter.supportsEvmOperations()).toBe(false);
+    });
+  });
+
+  describe("executeContractCall (EVM session override)", () => {
+    const mockIface = new ethers.Interface(["function transfer(address,uint256)"]);
+
+    it("should route through eth_sendTransaction when in EVM session", async () => {
+      const mockTxHash = "0xabc123";
+      const mockRequest = jest.fn().mockResolvedValue(mockTxHash);
+      const mockWaitForTransaction = jest.fn().mockResolvedValue({ status: 1 });
+
+      (adapter as any).hederaProvider = {
+        request: mockRequest,
+        session: { namespaces: { eip155: {} } },
+      };
+      adapter.account = new Account({ id: "0.0.456", evmAddress: "0xdeadbeef" });
+      (mockMirrorNodeAdapter as any).getContractInfo = jest.fn().mockResolvedValue({
+        evmAddress: "0x1234567890abcdef",
+      });
+
+      // Spy on the private rpcProvider method to return the mock provider
+      const rpcProviderSpy = jest
+        .spyOn(adapter as any, "rpcProvider")
+        .mockReturnValue({ waitForTransaction: mockWaitForTransaction });
+
+      try {
+        await adapter.executeContractCall(
+          "0.0.100",
+          mockIface,
+          "transfer",
+          ["0x1234567890123456789012345678901234567890", 1000n],
+          300000,
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ method: "eth_sendTransaction" }),
+          "eip155:296",
+        );
+      } finally {
+        rpcProviderSpy.mockRestore();
+      }
+    });
+
+    it("should delegate to super.executeContractCall when in native session", async () => {
+      (adapter as any).hederaProvider = {
+        session: { namespaces: { hedera: {} } },
+        request: jest.fn(),
+      };
+      adapter.account = new Account({ id: "0.0.456", evmAddress: "0xabc" });
+
+      const superSpy = jest
+        .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(adapter)), "executeContractCall")
+        .mockResolvedValue({ id: "mock-response" } as any);
+
+      await adapter.executeContractCall("0.0.100", mockIface, "transfer", ["0xrecipient", 1000n], 300000);
+
+      expect(superSpy).toHaveBeenCalled();
+      superSpy.mockRestore();
     });
   });
 

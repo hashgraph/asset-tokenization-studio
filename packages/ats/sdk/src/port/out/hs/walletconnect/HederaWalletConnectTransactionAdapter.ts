@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { singleton } from "tsyringe";
-import { AccountId, ContractExecuteTransaction, Transaction } from "@hiero-ledger/sdk";
+import { AccountId, Transaction } from "@hiero-ledger/sdk";
 import { NetworkName } from "@hiero-ledger/sdk/lib/client/Client";
-import { HederaTransactionAdapter } from "../HederaTransactionAdapter";
+import { BaseHederaTransactionAdapter } from "../BaseHederaTransactionAdapter";
 import { SigningError } from "@port/out/error/SigningError";
 import { InitializationData } from "@port/out/TransactionAdapter";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
-import { RPCTransactionResponseAdapter } from "@port/out/rpc/RPCTransactionResponseAdapter";
+import { RPCTransactionResponseAdapter } from "@port/out/response/RPCTransactionResponseAdapter";
 import { WalletEvents, WalletPairedEvent } from "@service/event/WalletEvent";
 import LogService from "@service/log/LogService";
 import EventService from "@service/event/EventService";
@@ -52,7 +52,7 @@ if (typeof window !== "undefined") {
 }
 
 @singleton()
-export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdapter {
+export class HederaWalletConnectTransactionAdapter extends BaseHederaTransactionAdapter {
   public account: Account;
   protected network: Environment;
   protected projectId: string;
@@ -131,6 +131,22 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
     await this.initAdaptersAndProvider(currentNetwork);
     await this.openPairingModal();
+
+    // Safety net: if eip155Provider is still null after pairing, it means
+    // patchInitProviders found no Hedera EVM accounts in the approved session —
+    // i.e. MetaMask is connected but has no Hedera EVM chain configured at all.
+    if (this.isEvmSession() && !this.hederaProvider?.eip155Provider) {
+      const accounts: string[] = this.hederaProvider?.session?.namespaces?.eip155?.accounts ?? [];
+      const allChains = [...new Set(accounts.map((acc) => acc.split(":").slice(0, 2).join(":")))];
+      await this.stop();
+      throw new Error(
+        `MetaMask is not connected to a Hedera EVM network` +
+          (allChains.length ? ` (connected on: ${allChains.join(", ")})` : "") +
+          `. Please add Hedera EVM Testnet (chainId 296) or Mainnet (chainId 295) to MetaMask, ` +
+          `switch to it, and try connecting again.`,
+      );
+    }
+
     await this.resolveAndCacheAccount(currentNetwork);
     this.subscribe();
 
@@ -167,19 +183,15 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
     await this.init(network);
   }
 
-  public async signAndSendTransaction(
+  public async processTransaction(
     transaction: Transaction,
-    _transactionType?: TransactionType,
-    _functionName?: string,
-    _abi?: object[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _transactionType: TransactionType,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _startDate?: string,
   ): Promise<TransactionResponse> {
     LogService.logInfo("[HWC v2] Signing and sending transaction...");
     this.ensureInitialized();
-
-    // Route EVM sessions through eth_sendTransaction for contract calls
-    if (this.isEvmSession() && transaction instanceof ContractExecuteTransaction) {
-      return this.signAndSendTransactionViaEvm(transaction);
-    }
 
     try {
       this.ensureFrozen(transaction);
@@ -218,6 +230,77 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       }
       throw new SigningError(error instanceof Object ? JSON.stringify(error, null, 2) : error);
     }
+  }
+
+  public supportsEvmOperations(): boolean {
+    return this.isEvmSession();
+  }
+
+  public async executeContractCall(
+    contractId: string,
+    iface: ethers.Interface,
+    functionName: string,
+    params: unknown[],
+    gasLimit: number,
+    transactionType?: TransactionType,
+    payableAmountHbar?: string,
+    startDate?: string,
+    evmAddress?: string,
+  ): Promise<TransactionResponse> {
+    if (!this.isEvmSession()) {
+      return super.executeContractCall(
+        contractId,
+        iface,
+        functionName,
+        params,
+        gasLimit,
+        transactionType,
+        payableAmountHbar,
+        startDate,
+        evmAddress,
+      );
+    }
+
+    this.ensureInitialized();
+    if (!this.account.evmAddress) throw new AccountNotSet();
+
+    // Resolve contract EVM address
+    let toAddress = evmAddress ?? contractId;
+    if (!toAddress || toAddress.match(/^0\.0\.\d+$/)) {
+      const contractInfo = await this.mirrorNodeAdapter.getContractInfo(contractId);
+      toAddress = contractInfo.evmAddress;
+    }
+
+    const encodedHex = iface.encodeFunctionData(functionName, params as any[]);
+    const chainRef = this.currentEvmChainRef();
+
+    const txParams: Record<string, string> = {
+      from: this.account.evmAddress,
+      to: toAddress.startsWith("0x") ? toAddress : `0x${toAddress}`,
+      data: encodedHex,
+      gas: ethers.toBeHex(gasLimit),
+    };
+
+    if (payableAmountHbar) {
+      txParams.value = ethers.toBeHex(ethers.parseEther(payableAmountHbar));
+    }
+
+    LogService.logTrace(`[HWC v2 EVM] Sending eth_sendTransaction: ${JSON.stringify(txParams)}`);
+
+    const txHash = await this.hederaProvider.request(
+      { method: "eth_sendTransaction", params: [txParams] },
+      chainRef,
+    );
+
+    const provider = this.rpcProvider();
+    const receipt = await provider.waitForTransaction(txHash as string);
+
+    const responsePayload = {
+      hash: txHash,
+      wait: () => Promise.resolve(receipt),
+    } as any;
+
+    return RPCTransactionResponseAdapter.manageResponse(responsePayload, this.networkService.environment);
   }
 
   async sign(message: string | Transaction): Promise<string> {
@@ -354,6 +437,10 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
             "eth_signTypedData_v4",
             "eth_accounts",
             "eth_chainId",
+            // Required so EIP155Provider.switchChain forwards these to MetaMask via
+            // WalletConnect when AppKit's "Switch network" flow is triggered.
+            "wallet_switchEthereumChain",
+            "wallet_addEthereumChain",
           ],
           chains: eip155Chains,
           events: ["chainChanged", "accountsChanged"],
@@ -366,6 +453,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
     };
 
     this.hederaProvider = await HederaProvider.init(providerOpts);
+    this.patchInitProviders();
 
     this.appKit = createAppKit({
       adapters: [this.hederaAdapter, eip155HederaAdapter],
@@ -480,66 +568,6 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
     }
   }
 
-  /**
-   * Route a ContractExecuteTransaction through eth_sendTransaction for EVM-only sessions.
-   * Extracts the contract ID and encoded function data from the transaction.
-   */
-  private async signAndSendTransactionViaEvm(
-    transaction: ContractExecuteTransaction,
-  ): Promise<TransactionResponse> {
-    if (!this.account.evmAddress) {
-      throw new AccountNotSet();
-    }
-
-    // Extract contract ID and resolve to EVM address
-    const contractId = (transaction as any)._contractId?.toString();
-    if (!contractId) {
-      throw new SigningError("ContractExecuteTransaction has no contractId");
-    }
-
-    let toAddress = contractId;
-    if (contractId.match(/^0\.0\.\d+$/)) {
-      const contractInfo = await this.mirrorNodeAdapter.getContractInfo(contractId);
-      toAddress = contractInfo.evmAddress;
-    }
-
-    // Extract the encoded function parameters
-    const functionParams = (transaction as any)._functionParameters;
-    const data = functionParams ? "0x" + Buffer.from(functionParams).toString("hex") : "0x";
-    const gas = (transaction as any)._gas?.toNumber?.() ?? (transaction as any)._gas ?? 300000;
-
-    const chainRef = this.currentEvmChainRef();
-
-    const txParams: Record<string, string> = {
-      from: this.account.evmAddress,
-      to: toAddress.startsWith("0x") ? toAddress : `0x${toAddress}`,
-      data,
-      gas: ethers.toBeHex(gas),
-    };
-
-    const payableAmount = (transaction as any)._payableAmount;
-    if (payableAmount) {
-      txParams.value = ethers.toBeHex(payableAmount);
-    }
-
-    LogService.logTrace(`[HWC v2 EVM] Sending eth_sendTransaction: ${JSON.stringify(txParams)}`);
-
-    const txHash = await this.hederaProvider.request(
-      { method: "eth_sendTransaction", params: [txParams] },
-      chainRef,
-    );
-
-    const provider = this.rpcProvider();
-    const receipt = await provider.waitForTransaction(txHash as string);
-
-    const responsePayload = {
-      hash: txHash,
-      wait: () => Promise.resolve(receipt),
-    } as any;
-
-    return RPCTransactionResponseAdapter.manageResponse(responsePayload, this.networkService.environment);
-  }
-
   private ensureInitialized(): void {
     if (!this.hederaProvider) throw new NotInitialized();
     if (!this.account) throw new AccountNotSet();
@@ -569,5 +597,56 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
 
   private rpcProvider(): ethers.JsonRpcProvider {
     return new ethers.JsonRpcProvider(this.networkService.rpcNode?.baseUrl);
+  }
+
+  /**
+   * Patches `hederaProvider.initProviders` so that when MetaMask includes many
+   * non-Hedera chains in its approved WalletConnect session (e.g. Ethereum mainnet,
+   * Polygon, Base, …), the `EIP155Provider` constructor only sees the Hedera EVM
+   * chains (chainIds 295 / 296).
+   *
+   * Background: `EIP155Provider.createHttpProvider` throws "No RPC url provided for
+   * chainId: X" for any chain that is not in `HederaChainDefinition.EVM` and has no
+   * entry in `rpcMap`. MetaMask v11+ includes ALL configured networks in the approved
+   * session, so the plain `rpcMap: { "eip155:296": …, "eip155:295": … }` is not
+   * enough. By filtering the session accounts to only Hedera EVM accounts before
+   * `EIP155Provider` is constructed, we avoid the throw and allow `eip155Provider` to
+   * be set correctly.
+   *
+   * The session accounts are restored immediately after the call so the rest of the
+   * app continues to see the full account list.
+   */
+  private patchInitProviders(): void {
+    if (!this.hederaProvider) return;
+
+    const provider = this.hederaProvider;
+    const hederaEvmChains = new Set(["eip155:295", "eip155:296"]);
+    const orig = provider.initProviders.bind(provider);
+
+    provider.initProviders = function (this: any) {
+      const sessionEip155 = this.session?.namespaces?.eip155;
+
+      if (!sessionEip155?.accounts?.length) {
+        return orig();
+      }
+
+      const original = sessionEip155.accounts as string[];
+      const hederaOnly = original.filter((acc) => {
+        const [ns, chainId] = acc.split(":");
+        return hederaEvmChains.has(`${ns}:${chainId}`);
+      });
+
+      if (hederaOnly.length === 0) {
+        // No Hedera EVM accounts — let the original run so the error surfaces normally.
+        return orig();
+      }
+
+      sessionEip155.accounts = hederaOnly;
+      try {
+        return orig();
+      } finally {
+        sessionEip155.accounts = original; // always restore the full list
+      }
+    };
   }
 }
