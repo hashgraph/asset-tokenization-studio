@@ -26,6 +26,7 @@ import {
     HoldData,
     OperationType
 } from "../../facets/features/interfaces/hold/IHold.sol";
+import { IHoldTokenHolder } from "../../facets/features/interfaces/hold/IHoldTokenHolder.sol";
 import { ThirdPartyType } from "../../facets/features/types/ThirdPartyType.sol";
 import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
 
@@ -470,22 +471,22 @@ library HoldOps {
                 revert IControlListBase.AccountIsBlocked(_holdIdentifier.tokenHolder);
             }
             if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
-                revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
+                revert IHoldTokenHolder.InvalidDestinationAddress(holdData.hold.to, _to);
             }
         }
 
         // Check expiration and escrow for non-reclaim operations
         if (_operation != OperationType.Reclaim) {
             if (LibHold.isHoldExpired(holdData.hold, _blockTimestamp)) {
-                revert IHold.HoldExpirationReached();
+                revert IHoldTokenHolder.HoldExpirationReached();
             }
             if (!LibHold.isEscrow(holdData.hold, msg.sender)) {
-                revert IHold.IsNotEscrow();
+                revert IHoldTokenHolder.IsNotEscrow();
             }
         } else if (_operation == OperationType.Reclaim) {
             // Reclaim requires hold to be expired
             if (!LibHold.isHoldExpired(holdData.hold, _blockTimestamp)) {
-                revert IHold.HoldExpirationNotReached();
+                revert IHoldTokenHolder.HoldExpirationNotReached();
             }
         }
 

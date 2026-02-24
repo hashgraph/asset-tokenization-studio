@@ -12,6 +12,7 @@ import {
     HoldIdentifier,
     IHold
 } from "../../facets/features/interfaces/hold/IHold.sol";
+import { IHoldTokenHolder } from "../../facets/features/interfaces/hold/IHoldTokenHolder.sol";
 import { holdStorage } from "../../storage/AssetStorage.sol";
 import { ThirdPartyType } from "../../facets/features/types/ThirdPartyType.sol";
 
@@ -341,13 +342,13 @@ library LibHold {
     /// @notice Validate a hold ID and revert if invalid
     /// @param _holdIdentifier The hold identifier
     function validateHoldId(HoldIdentifier calldata _holdIdentifier) internal view {
-        if (!isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
+        if (!isHoldIdValid(_holdIdentifier)) revert IHoldTokenHolder.WrongHoldId();
     }
 
     /// @notice Check if hold amount is sufficient
     /// @param _amount The amount to check
     /// @param _holdData The hold data
     function checkHoldAmount(uint256 _amount, HoldData memory _holdData) internal pure {
-        if (_amount > _holdData.hold.amount) revert IHold.InsufficientHoldBalance(_holdData.hold.amount, _amount);
+        if (_amount > _holdData.hold.amount) revert IHoldTokenHolder.InsufficientHoldBalance(_holdData.hold.amount, _amount);
     }
 }

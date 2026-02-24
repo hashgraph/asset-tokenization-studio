@@ -41,6 +41,7 @@ interface IClearing {
     }
 
     error WrongClearingId();
+    error WrongExpirationTimestamp();
     error ClearingIsDisabled();
     error ClearingIsActivated();
     error ExpirationDateReached();
