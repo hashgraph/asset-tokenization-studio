@@ -17,8 +17,8 @@ import { WalletEvents, WalletPairedEvent } from "@service/event/WalletEvent";
 import Injectable from "@core/injectable/Injectable";
 import { TransactionType } from "@port/out/TransactionResponseEnums";
 import Hex from "@core/Hex";
-import { HederaTransactionAdapter } from "@port/out/hs/HederaTransactionAdapter";
-import { HTSTransactionResponseAdapter } from "../HTSTransactionResponseAdapter";
+import { BaseHederaTransactionAdapter } from "@port/out/hs/BaseHederaTransactionAdapter";
+import { HTSTransactionResponseAdapter } from "@port/out/response/HTSTransactionResponseAdapter";
 import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
 import { HederaId } from "@domain/context/shared/HederaId";
 import FireblocksSettings from "@core/settings/custodialWalletSettings/FireblocksSettings";
@@ -26,7 +26,7 @@ import AWSKMSSettings from "@core/settings/custodialWalletSettings/AWSKMSSetting
 import { PublickKeyNotFound } from "./error/PublickKeyNotFound";
 import { UnsupportedNetwork } from "@domain/context/network/error/UnsupportedNetwork";
 
-export abstract class CustodialTransactionAdapter extends HederaTransactionAdapter {
+export abstract class CustodialTransactionAdapter extends BaseHederaTransactionAdapter {
   protected client: Client;
   protected custodialWalletService: CustodialWalletService;
   public account: Account;
@@ -65,15 +65,13 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
     return await this.custodialWalletService.signTransaction(signatureRequest);
   };
 
-  public signAndSendTransaction = async (
+  public async processTransaction(
     transaction: Transaction,
     transactionType: TransactionType,
-    nameFunction?: string,
-    abi?: object[],
-  ): Promise<TransactionResponse> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _startDate?: string,
+  ): Promise<TransactionResponse> {
     try {
-      LogService.logTrace("Custodial wallet signing and sending transaction:", nameFunction);
-
       const txResponse: HTransactionResponse = await transaction.execute(this.client);
 
       this.logTransaction(txResponse.transactionId.toString(), this.networkService.environment);
@@ -83,14 +81,16 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
         txResponse,
         transactionType,
         this.client,
-        nameFunction,
-        abi,
       );
     } catch (error) {
       LogService.logError(error);
       throw new SigningError(error);
     }
-  };
+  }
+
+  public supportsEvmOperations(): boolean {
+    return false;
+  }
 
   protected createWalletPairedEvent(wallet: SupportedWallets): WalletPairedEvent {
     return {
