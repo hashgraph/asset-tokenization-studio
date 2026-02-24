@@ -18,19 +18,13 @@ export const FillWithExampleButton = ({
   translationKey = "fillWithExample",
 }: FillWithExampleButtonProps) => {
   const { t } = useTranslation("security");
-  const { setValue, trigger } = useFormContext();
+  const { trigger, reset } = useFormContext();
 
   const handleFillWithExample = () => {
     const mockData = getMockData();
 
-    Object.entries(mockData).forEach(([key, value]) => {
-      setValue(key, value, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    });
-
-    trigger();
+    reset(mockData);
+    void trigger();
   };
 
   return (
