@@ -29,7 +29,6 @@ import { CastRegulationSubType, CastRegulationType } from "@domain/context/facto
 import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
 import { DividendFor } from "@domain/context/equity/DividendFor";
 import { VotingFor } from "@domain/context/equity/VotingFor";
-import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
 import { Kyc } from "@domain/context/kyc/Kyc";
 import { KycAccountData } from "@domain/context/kyc/KycAccountData";
 import {
@@ -305,6 +304,11 @@ function createBondMockImplementation(
       RateStatus.PENDING,
     );
     coupons.push(coupon);
+  }
+
+  if (user_account) {
+    const accountEvm = identifiers(user_account.id)[1];
+    grantRole(accountEvm, SecurityRole._KPI_MANAGER_ROLE);
   }
 
   return Promise.resolve({
@@ -2095,8 +2099,8 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
   };
 });
 
-jest.mock("@port/out/hs/hts/custodial/DFNSTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/hts/custodial/DFNSTransactionAdapter.ts");
+jest.mock("@port/out/hs/custodial/DFNSTransactionAdapter", () => {
+  const actual = jest.requireActual("@port/out/hs/custodial/DFNSTransactionAdapter");
 
   const singletonInstance = new actual.DFNSTransactionAdapter();
 
@@ -2104,13 +2108,20 @@ jest.mock("@port/out/hs/hts/custodial/DFNSTransactionAdapter", () => {
     return network;
   });
 
+  singletonInstance.register = jest.fn(async () => {
+    Injectable.registerTransactionHandler(singletonInstance);
+    return {} as InitializationData;
+  });
+
+  singletonInstance.createBond = jest.fn(createBondMockImplementation);
+
   return {
     DFNSTransactionAdapter: jest.fn(() => singletonInstance),
   };
 });
 
-jest.mock("@port/out/hs/hts/custodial/FireblocksTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/hts/custodial/FireblocksTransactionAdapter.ts");
+jest.mock("@port/out/hs/custodial/FireblocksTransactionAdapter", () => {
+  const actual = jest.requireActual("@port/out/hs/custodial/FireblocksTransactionAdapter");
 
   const singletonInstance = new actual.FireblocksTransactionAdapter();
 
@@ -2118,13 +2129,20 @@ jest.mock("@port/out/hs/hts/custodial/FireblocksTransactionAdapter", () => {
     return network;
   });
 
+  singletonInstance.register = jest.fn(async () => {
+    Injectable.registerTransactionHandler(singletonInstance);
+    return {} as InitializationData;
+  });
+
+  singletonInstance.createBond = jest.fn(createBondMockImplementation);
+
   return {
     FireblocksTransactionAdapter: jest.fn(() => singletonInstance),
   };
 });
 
-jest.mock("@port/out/hs/hts/custodial/AWSKMSTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/hts/custodial/AWSKMSTransactionAdapter.ts");
+jest.mock("@port/out/hs/custodial/AWSKMSTransactionAdapter", () => {
+  const actual = jest.requireActual("@port/out/hs/custodial/AWSKMSTransactionAdapter");
 
   const singletonInstance = new actual.AWSKMSTransactionAdapter();
 
@@ -2132,47 +2150,15 @@ jest.mock("@port/out/hs/hts/custodial/AWSKMSTransactionAdapter", () => {
     return network;
   });
 
-  return {
-    AWSKMSTransactionAdapter: jest.fn(() => singletonInstance),
-  };
-});
-
-jest.mock("@port/out/hs/hts/custodial/CustodialTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/hts/custodial/CustodialTransactionAdapter.ts");
-
-  const singletonInstance = new actual.CustodialTransactionAdapter();
-
-  singletonInstance.register = jest.fn(async (settings: DfnsSettings) => {
+  singletonInstance.register = jest.fn(async () => {
     Injectable.registerTransactionHandler(singletonInstance);
     return {} as InitializationData;
   });
-  return {
-    CustodialTransactionAdapter: jest.fn(() => singletonInstance),
-  };
-});
-
-jest.mock("@port/out/hs/HederaTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/HederaTransactionAdapter.ts");
-
-  const singletonInstance = new actual.HederaTransactionAdapter();
 
   singletonInstance.createBond = jest.fn(createBondMockImplementation);
 
-  singletonInstance.setupDisconnectEventHandler = jest.fn(async () => {
-    return true;
-  });
-
-  singletonInstance.addKpiData = jest.fn(
-    async (security: EvmAddress, date: number, value: string, project: EvmAddress) => {
-      return {
-        status: "success",
-        id: transactionId,
-      } as TransactionResponse;
-    },
-  );
-
   return {
-    HederaTransactionAdapter: jest.fn(() => singletonInstance),
+    AWSKMSTransactionAdapter: jest.fn(() => singletonInstance),
   };
 });
 
