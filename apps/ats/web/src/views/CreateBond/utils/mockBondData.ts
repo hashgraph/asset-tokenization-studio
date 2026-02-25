@@ -9,7 +9,7 @@ export const getMockBondFormData = (): Partial<ICreateBondFormValues> => {
   // Starting date: tomorrow (at least 1 day from today as required by CalendarInputController)
   const startingDate = addDays(today, 1);
   // Maturity date: 7 days after starting date
-  const maturityDate = addDays(startingDate, 7);
+  const maturityDate = addDays(startingDate, 61);
 
   const nominalValue = 1000;
   const numberOfUnits = 10000;
@@ -25,7 +25,7 @@ export const getMockBondFormData = (): Partial<ICreateBondFormValues> => {
     isBlocklist: true,
     isApproval: false,
     isClearing: false,
-    internalKycActivated: true,
+    internalKycActivated: false,
 
     // Step 2: Configuration
     currency: "USD",

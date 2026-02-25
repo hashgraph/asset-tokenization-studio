@@ -18,7 +18,7 @@ export const getMockEquityFormData = (): Partial<ICreateEquityFormValues> => {
     isBlocklist: true,
     isApproval: false,
     isClearing: false,
-    internalKycActivated: true,
+    internalKycActivated: false,
 
     // Step 2: Specific details
     currency: "USD",
