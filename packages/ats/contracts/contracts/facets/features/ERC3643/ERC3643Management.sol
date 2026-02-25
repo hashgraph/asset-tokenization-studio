@@ -19,9 +19,9 @@ import { LibLock } from "../../../lib/domain/LibLock.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibTokenTransfer } from "../../../lib/orchestrator/LibTokenTransfer.sol";
 import { LibResolverProxy } from "../../../infrastructure/proxy/LibResolverProxy.sol";
-import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
-abstract contract ERC3643Management is IERC3643Management {
+abstract contract ERC3643Management is IERC3643Management, TimestampProvider {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -93,7 +93,7 @@ abstract contract ERC3643Management is IERC3643Management {
         if (!_canRecover(_lostWallet)) revert CannotRecoverWallet();
         LibERC1410.checkWithoutMultiPartition();
 
-        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
+        uint256 timestamp = _getBlockTimestamp();
         uint256 frozenBalance = LibFreeze.getFrozenAmountAdjustedAt(_lostWallet, timestamp);
 
         if (frozenBalance > 0) {
@@ -102,7 +102,7 @@ abstract contract ERC3643Management is IERC3643Management {
 
         uint256 balance = LibABAF.balanceOfAdjustedAt(_lostWallet, timestamp);
         if (balance + frozenBalance > 0) {
-            LibTokenTransfer.transfer(_lostWallet, _newWallet, balance, timestamp);
+            LibTokenTransfer.transfer(_lostWallet, _newWallet, balance, timestamp, _getBlockNumber());
         }
 
         if (frozenBalance > 0) {

@@ -10,9 +10,9 @@ import { LibERC1594 } from "../../../../lib/domain/LibERC1594.sol";
 import { LibProtectedPartitions } from "../../../../lib/core/LibProtectedPartitions.sol";
 import { LibABAF } from "../../../../lib/domain/LibABAF.sol";
 import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
-import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../../infrastructure/lib/TimestampProvider.sol";
 
-abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase {
+abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase, TimestampProvider {
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,
@@ -26,7 +26,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase {
             _basicTransferInfo.to,
             _partition,
             _basicTransferInfo.value,
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp()
         );
         return
             LibTokenTransfer.transferByPartition(
@@ -36,20 +36,15 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase {
                 _data,
                 address(0),
                 "",
-                LibTimeTravel.getBlockTimestamp()
+                _getBlockTimestamp(),
+                _getBlockNumber()
             );
     }
 
     function redeemByPartition(bytes32 _partition, uint256 _value, bytes calldata _data) external override {
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
-        LibERC1594.checkCanRedeemFromByPartition(
-            msg.sender,
-            msg.sender,
-            _partition,
-            _value,
-            LibTimeTravel.getBlockTimestamp()
-        );
+        LibERC1594.checkCanRedeemFromByPartition(msg.sender, msg.sender, _partition, _value, _getBlockTimestamp());
         LibTokenTransfer.redeemByPartition(
             _partition,
             msg.sender,
@@ -57,7 +52,8 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase {
             _value,
             _data,
             "",
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp(),
+            _getBlockNumber()
         );
     }
 

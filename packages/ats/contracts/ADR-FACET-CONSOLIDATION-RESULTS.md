@@ -6,7 +6,7 @@
 ║  Asset Tokenization Studio (ATS)                                            ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  Status:      COMPLETED                                                     ║
-║  Date:        2026-02-23                                                    ║
+║  Date:        2026-02-25 (updated with TimeTravel separation + coverage)    ║
 ║  Authors:     Miguel Gómez Carpena                                          ║
 ║  Reference:   ADR-LIBRARY-MIGRATION-RESULTS.md (1st refactor results)      ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
@@ -34,29 +34,30 @@
 
 ## 1. Executive Summary
 
-The Asset Tokenization Studio contracts evolved across three architectural stages, from 777 Solidity files with 55+ contract inheritance chains to 307 files with clean 2-level abstract-base patterns — while maintaining full backward compatibility and passing every test.
+The Asset Tokenization Studio contracts evolved across three architectural stages, from 777 Solidity files with 55+ contract inheritance chains to 372 files with clean 2-level abstract-base patterns and proper production/test separation — while maintaining full backward compatibility and passing every test.
 
 ### The Three Stages
 
-| Stage            | Architecture           | Total .sol | Production Facets      | LOC    | Key Achievement                                             |
-| ---------------- | ---------------------- | ---------- | ---------------------- | ------ | ----------------------------------------------------------- |
-| **Original**     | Deep inheritance chain | 777        | ~196 (4 variants each) | 34,297 | Internals.sol with 543 virtual functions                    |
-| **1st Refactor** | Library + FacetBase    | 641        | 195 (4 variants each)  | 34,273 | 37 libraries replaced inheritance chain                     |
-| **2nd Refactor** | Abstract-base          | 307        | 63 (1 copy each)       | 29,869 | Variants deleted, FacetBases eliminated, TimeTravel unified |
+| Stage            | Architecture           | Total .sol | Production Facets      | LOC    | Key Achievement                                                      |
+| ---------------- | ---------------------- | ---------- | ---------------------- | ------ | -------------------------------------------------------------------- |
+| **Original**     | Deep inheritance chain | 777        | ~196 (4 variants each) | 34,297 | Internals.sol with 543 virtual functions                             |
+| **1st Refactor** | Library + FacetBase    | 641        | 195 (4 variants each)  | 34,273 | 37 libraries replaced inheritance chain                              |
+| **2nd Refactor** | Abstract-base          | 372        | 63 (1 copy each)       | 30,734 | Variants deleted, FacetBases eliminated, clean TimeTravel separation |
 
 ### Cumulative Impact
 
 | Metric              | Change    | Numbers                      |
 | ------------------- | --------- | ---------------------------- |
-| Total .sol files    | −61%      | 777 → 307 (−470 files)       |
+| Total .sol files    | −52%      | 777 → 372 (−405 files)       |
 | Production facets   | −68%      | ~196 → 63 (−133 facets)      |
-| Total LOC           | −13%      | 34,297 → 29,869 (−4,428 LOC) |
+| Total LOC           | −10%      | 34,297 → 30,734 (−3,563 LOC) |
 | Inheritance depth   | −96%      | 55+ contracts → 2 levels     |
 | Virtual functions   | −100%     | 543 → 0                      |
-| TimeTravel variants | −99%      | 196 → 1 facet                |
-| Test files (.sol)   | −97%      | 202 → 6 files                |
-| Clean compile       | −83%      | 2m 11s → 22.5s               |
-| Test execution      | −54%      | 1m 42s → 47s                 |
+| TimeTravel variants | Separated | 196 embedded → 63 test-only  |
+| Test files (.sol)   | −65%      | 202 → 70 files               |
+| Clean compile       | −73%      | 2m 11s → 35s                 |
+| Test execution      | −49%      | 1m 42s → 52s                 |
+| Coverage            | —         | 8m 23s                       |
 | Tests passing       | Unchanged | 1,257 contract tests         |
 | External ABI        | Unchanged | 100% backward compatible     |
 
@@ -64,19 +65,20 @@ The Asset Tokenization Studio contracts evolved across three architectural stage
 
 | Metric                          | Before (1st Refactor) | After (2nd Refactor) | Delta             |
 | ------------------------------- | --------------------- | -------------------- | ----------------- |
-| Total .sol files                | 641                   | 307                  | −334 (−52%)       |
+| Total .sol files                | 641                   | 372                  | −269 (−42%)       |
 | Production facets               | 195                   | 63                   | −132 (−68%)       |
+| Production .sol (excl test)     | 429                   | 292                  | −137              |
 | FacetBase files                 | 48                    | 0                    | −48 (eliminated)  |
 | Abstract base contracts         | 0                     | 56                   | +56 (new pattern) |
-| TimeTravel variant files        | 196                   | 4                    | −192 (unified)    |
+| TimeTravel variant files        | 196 (embedded)        | 63 (test-only)       | Separated cleanly |
 | `standard/` directories         | 33                    | 0                    | −33 (eliminated)  |
 | Interface files (under facets/) | 86                    | 73                   | −13 (flattened)   |
-| Test .sol files                 | 202                   | 6                    | −196              |
-| Total LOC                       | 34,273                | 29,869               | −4,404 (−13%)     |
-| Clean compile time              | 1m 23s                | **22.5s**            | **−73%**          |
-| Test execution time             | 1m 17s                | **47s**              | **−39%**          |
+| Test .sol files                 | 202                   | 70                   | −132              |
+| Total LOC                       | 34,273                | 30,734               | −3,539 (−10%)     |
+| Clean compile time              | 1m 23s                | **35s**              | **−58%**          |
+| Test execution time             | 1m 17s                | **52s**              | **−33%**          |
+| Coverage time                   | —                     | **8m 23s**           | —                 |
 | Tests passing                   | 1,257                 | 1,257                | Unchanged         |
-| Git diff (total)                | —                     | 625 files changed    | +7,181 / −19,899  |
 
 ---
 
@@ -86,11 +88,11 @@ The Asset Tokenization Studio contracts evolved across three architectural stage
 
 | Metric                            | Original   | 1st Refactor | 2nd Refactor |
 | --------------------------------- | ---------- | ------------ | ------------ |
-| **Total Solidity files**          | **777**    | **641**      | **307**      |
-| Production .sol (excl test/mocks) | ~575       | 429          | 291          |
-| Test .sol files                   | ~200       | 202          | 6            |
+| **Total Solidity files**          | **777**    | **641**      | **372**      |
+| Production .sol (excl test/mocks) | ~575       | 429          | 292          |
+| Test .sol files                   | ~200       | 202          | 70           |
 | Mock .sol files                   | ~10        | 10           | 10           |
-| **Total Solidity LOC**            | **34,297** | **34,273**   | **29,869**   |
+| **Total Solidity LOC**            | **34,297** | **34,273**   | **30,734**   |
 
 ### File Type Breakdown
 
@@ -101,33 +103,33 @@ The Asset Tokenization Studio contracts evolved across three architectural stage
 | Abstract base contracts         | 0         | 0            | 56           |
 | StorageWrapper files            | 57        | 0            | 0            |
 | Library files (lib/)            | 0         | 37           | 38           |
-| Infrastructure files            | —         | 25           | 24           |
+| Infrastructure files            | —         | 25           | 25           |
 | Constants files                 | scattered | 7            | 7            |
 | Storage files                   | —         | 5            | 5            |
 | Factory files                   | ~25       | 25           | 25           |
 | Interface files (under facets/) | scattered | 86           | 73           |
-| TimeTravel variant files        | ~196+     | 196          | 4            |
+| TimeTravel variant files        | ~196+     | 196          | 68           |
 | `standard/` directories         | many      | 33           | 0            |
 
 ### Architecture Pattern
 
-| Stage            | Pattern                | Inheritance Depth            | Cross-Facet Dependencies                  |
-| ---------------- | ---------------------- | ---------------------------- | ----------------------------------------- |
-| **Original**     | Deep inheritance chain | 55+ contracts                | Via Internals.sol (543 virtual functions) |
-| **1st Refactor** | Library + FacetBase    | 2 levels (Facet → FacetBase) | Via libraries (direct calls)              |
-| **2nd Refactor** | Abstract-base          | 2 levels (Facet → Abstract)  | Via libraries (direct calls)              |
+| Stage            | Pattern                | Inheritance Depth            | Cross-Facet Dependencies                  | Test Separation                           |
+| ---------------- | ---------------------- | ---------------------------- | ----------------------------------------- | ----------------------------------------- |
+| **Original**     | Deep inheritance chain | 55+ contracts                | Via Internals.sol (543 virtual functions) | Per-facet TimeTravel files                |
+| **1st Refactor** | Library + FacetBase    | 2 levels (Facet → FacetBase) | Via libraries (direct calls)              | Per-facet TimeTravel files                |
+| **2nd Refactor** | Abstract-base + mixin  | 2 levels (Facet → Abstract)  | Via libraries (direct calls)              | Clean: TimestampProvider + mixin in test/ |
 
 ### LOC Distribution (1st vs 2nd Refactor)
 
 | Area                 | 1st Refactor LOC | 2nd Refactor LOC | Delta  |
 | -------------------- | ---------------- | ---------------- | ------ |
-| facets/ (total)      | 14,307           | 12,686           | −1,621 |
-| — features/          | 10,194           | 8,805            | −1,389 |
-| — assetCapabilities/ | 2,019            | 1,892            | −127   |
-| — regulation/        | 2,094            | 1,989            | −105   |
-| lib/                 | 8,853            | 9,021            | +168   |
-| infrastructure/      | 2,684            | 2,665            | −19    |
-| test/                | 2,933            | 315              | −2,618 |
+| facets/ (total)      | 14,307           | 12,606           | −1,701 |
+| — features/          | 10,194           | —                | —      |
+| — assetCapabilities/ | 2,019            | —                | —      |
+| — regulation/        | 2,094            | —                | —      |
+| lib/                 | 8,853            | 9,093            | +240   |
+| infrastructure/      | 2,684            | 2,683            | −1     |
+| test/                | 2,933            | 1,180            | −1,753 |
 | mocks/               | 524              | 524              | 0      |
 | constants/           | —                | 984              | —      |
 | storage/             | —                | 860              | —      |
@@ -137,15 +139,16 @@ The Asset Tokenization Studio contracts evolved across three architectural stage
 
 | Metric                                    | Original | 1st Refactor | 2nd Refactor |
 | ----------------------------------------- | -------- | ------------ | ------------ |
-| Clean compile (`hardhat compile --force`) | 2m 11s   | 1m 23s       | **22.5s**    |
-| Contract tests (`hardhat test`)           | 1m 42s   | 1m 17s       | **47s**      |
-| Compiled Solidity files                   | —        | —            | 397          |
-| TypeChain typings generated               | —        | —            | 940          |
+| Clean compile (`hardhat compile --force`) | 2m 11s   | 1m 23s       | **35s**      |
+| Contract tests (`hardhat test`)           | 1m 42s   | 1m 17s       | **52s**      |
+| Coverage (`hardhat coverage`)             | —        | —            | **8m 23s**   |
+| Compiled Solidity files                   | —        | —            | 463          |
+| TypeChain typings generated               | —        | —            | 1,070        |
 
-| Compile Improvement | vs Original               | vs 1st Refactor           |
-| ------------------- | ------------------------- | ------------------------- |
-| Clean compile       | **−83%** (2m 11s → 22.5s) | **−73%** (1m 23s → 22.5s) |
-| Test execution      | **−54%** (1m 42s → 47s)   | **−39%** (1m 17s → 47s)   |
+| Compile Improvement | vs Original             | vs 1st Refactor         |
+| ------------------- | ----------------------- | ----------------------- |
+| Clean compile       | **−73%** (2m 11s → 35s) | **−58%** (1m 23s → 35s) |
+| Test execution      | **−49%** (1m 42s → 52s) | **−33%** (1m 17s → 52s) |
 
 ### Contract Sizes (2nd Refactor — Deployed Bytecode)
 
@@ -350,7 +353,7 @@ Despite the radical internal restructuring, the 1st refactor preserved:
 
 ## 5. Stage 3: Facet Consolidation (2nd Refactor)
 
-The 2nd refactor was completed in 4 commits over 2 days (2026-02-19 to 2026-02-20), each targeting a specific consolidation goal.
+The 2nd refactor was completed in 5 commits over 7 days (2026-02-19 to 2026-02-25), each targeting a specific consolidation goal.
 
 ### Commit-by-Commit Progression
 
@@ -360,7 +363,8 @@ The 2nd refactor was completed in 4 commits over 2 days (2026-02-19 to 2026-02-2
 | After commit 1         | 377        | 63     | 48         | 64          | 30,427 |
 | After commit 2         | 361        | 63     | 0          | 64          | 30,575 |
 | After commit 3         | 299        | 63     | 0          | 4           | 29,820 |
-| After commit 4 (final) | 307        | 63     | 0          | 4           | 29,869 |
+| After commit 4         | 307        | 63     | 0          | 4           | 29,869 |
+| After commit 5 (final) | 372        | 63     | 0          | 68          | 30,734 |
 
 ### Commit 1: `466e2cec6` — Variant Consolidation
 
@@ -460,6 +464,57 @@ Applied the abstract-base pattern to the remaining rate-specific facets — the 
 **Infrastructure cleanup**: Deleted `IBusinessLogicResolverWrapper.sol`, moved error declarations to `IBusinessLogicResolver.sol`.
 
 **Impact**: 299 → 307 files (+8 new abstract bases + IERC712), 29,820 → 29,869 LOC (+49 — restructuring)
+
+### Commit 5: TimeTravel Separation
+
+**Date**: 2026-02-25
+**Goal**: Remove `LibTimeTravel` from production code — restore clean production/test separation.
+
+The initial TimeTravel unification (commit 3) embedded `LibTimeTravel` directly in 34 production abstract bases and `LibERC20Votes`. This meant production bytecode contained test infrastructure (`sload` + conditional per timestamp read) and production code imported from `test/`. This commit fixes that architectural violation.
+
+**Approach: Virtual Function + Mixin Pattern**
+
+```solidity
+// Production: contracts/infrastructure/lib/TimestampProvider.sol
+abstract contract TimestampProvider {
+  function _getBlockTimestamp() internal view virtual returns (uint256) {
+    return block.timestamp;
+  }
+  function _getBlockNumber() internal view virtual returns (uint256) {
+    return block.number;
+  }
+}
+
+// Test-only: contracts/test/timeTravel/TimeTravelProvider.sol
+abstract contract TimeTravelProvider is TimestampProvider {
+  function _getBlockTimestamp() internal view virtual override returns (uint256) {
+    return LibTimeTravel.getBlockTimestamp();
+  }
+  // ...
+}
+
+// Test-only variant: contracts/test/timeTravel/variants/CapFacetTimeTravel.sol
+contract CapFacetTimeTravel is CapFacet, TimeTravelProvider {
+  function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    return TimeTravelProvider._getBlockTimestamp();
+  }
+  // ...
+}
+```
+
+**What changed:**
+
+1. Created `TimestampProvider` (production, 18 LOC) — virtual `_getBlockTimestamp()` / `_getBlockNumber()` returning native values
+2. Created `TimeTravelProvider` (test-only, 19 LOC) — overrides with `LibTimeTravel` storage reads
+3. Migrated 34 abstract bases: replaced `LibTimeTravel.getBlockTimestamp()` → `_getBlockTimestamp()`, added `TimestampProvider` inheritance, removed `LibTimeTravel` import
+4. Migrated `LibERC20Votes` via **parameter injection** (libraries can't use virtual functions) — `currentBlockNumber` passed from calling facets through `LibTokenTransfer`
+5. Created 63 universal TimeTravel variant facets in `test/timeTravel/variants/` (one per production facet, C3 linearization mixin)
+6. Updated deployment scripts: registry generator emits `timeTravelFactory`, workflows select variant factories when `useTimeTravel=true`, configuration scripts use universal `name + "TimeTravel"` mapping
+7. Inlined storage slot constants into `LibTimeTravel.sol`, removed from `storagePositions.sol`
+
+**Universal TimeTravel variant design**: ALL 63 facets get a variant (not just the 38 that use timestamps). This simplifies deployment (no filtering list) and is future-proof. Of the 63 variants, 38 require explicit C3 override resolution, 25 have empty body.
+
+**Impact**: 307 → 372 files (+65 test-only files), 29,869 → 30,734 LOC (+865 test LOC). **Zero production imports from test/**. Compile time 25s → 35s (+10s from 65 additional files). Test time 49s → 52s. Coverage unchanged at 8m 23s.
 
 ---
 
@@ -620,34 +675,62 @@ function _getBlockTimestamp() internal view override returns (uint256) {
 
 196 files containing identical override logic. The test/ directory alone was 202 files, 2,933 LOC.
 
-### 2nd Refactor: 4 TimeTravel Files
+### 2nd Refactor: TimestampProvider + Mixin Pattern (68 TimeTravel Files)
 
-Single `LibTimeTravel` library eliminates all overrides:
+The 2nd refactor restores clean production/test separation using a **virtual function + mixin pattern**:
+
+**Production** — `TimestampProvider` provides virtual methods returning native `block.timestamp`/`block.number`:
 
 ```solidity
-library LibTimeTravel {
-  function getBlockTimestamp() internal view returns (uint256) {
-    TimeTravelStorage storage tts = _getStorage();
-    return tts.timestamp != 0 ? tts.timestamp : block.timestamp;
+abstract contract TimestampProvider {
+  function _getBlockTimestamp() internal view virtual returns (uint256) {
+    return block.timestamp;
   }
 }
 ```
 
-Any facet needing time-based logic uses `LibTimeTravel.getBlockTimestamp()` directly — no virtual method, no override, no per-facet variant.
+**Test-only** — `TimeTravelProvider` overrides with `LibTimeTravel` storage reads:
 
-**Final TimeTravel architecture (4 files, 315 LOC):**
+```solidity
+abstract contract TimeTravelProvider is TimestampProvider {
+  function _getBlockTimestamp() internal view virtual override returns (uint256) {
+    return LibTimeTravel.getBlockTimestamp();
+  }
+}
+```
 
+**Per-facet variants** — C3 linearization mixin (63 files in `test/timeTravel/variants/`):
+
+```solidity
+contract CapFacetTimeTravel is CapFacet, TimeTravelProvider {
+  function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    return TimeTravelProvider._getBlockTimestamp();
+  }
+}
+```
+
+Production facets inherit `TimestampProvider` and call `_getBlockTimestamp()` — returning `block.timestamp` directly with zero overhead. TimeTravel variants exist exclusively in `test/` and are only deployed when `useTimeTravel=true`.
+
+**Final TimeTravel architecture (68 files, 1,180 LOC in test/):**
+
+- `TimeTravelProvider.sol` — test-only mixin overriding `TimestampProvider`
 - `TimeTravel.sol` — abstract contract with time manipulation methods
-- `LibTimeTravel.sol` — library reading/writing timestamp storage
+- `LibTimeTravel.sol` — library reading/writing timestamp storage (slots inlined as private constants)
 - `TimeTravelFacet.sol` — concrete Diamond wrapper (~30 lines)
-- `ITimeTravel.sol` — consolidated interface (merged from `ITimeTravelStorageWrapper`)
+- `ITimeTravel.sol` — consolidated interface
+- `variants/` — 63 per-facet TimeTravel variant files (~10 lines each)
 
-| Metric                         | Original            | 1st Refactor        | 2nd Refactor                             |
-| ------------------------------ | ------------------- | ------------------- | ---------------------------------------- |
-| TimeTravel files               | ~196+               | 196                 | 4                                        |
-| test/ directory LOC            | —                   | 2,933               | 315                                      |
-| Override pattern               | Virtual function    | Virtual function    | Library call                             |
-| Adding TimeTravel to new facet | Create variant file | Create variant file | Call `LibTimeTravel.getBlockTimestamp()` |
+Production infrastructure (1 file, 18 LOC):
+
+- `infrastructure/lib/TimestampProvider.sol` — virtual `_getBlockTimestamp()` / `_getBlockNumber()`
+
+| Metric                         | Original            | 1st Refactor        | 2nd Refactor                                           |
+| ------------------------------ | ------------------- | ------------------- | ------------------------------------------------------ |
+| TimeTravel files               | ~196+               | 196                 | 68 (5 core + 63 variants)                              |
+| test/ directory LOC            | —                   | 2,933               | 1,180                                                  |
+| Override pattern               | Virtual function    | Virtual function    | TimestampProvider + mixin                              |
+| Production imports from test/  | Yes                 | Yes                 | **None** (clean separation)                            |
+| Adding TimeTravel to new facet | Create variant file | Create variant file | Create ~10-line variant in `test/timeTravel/variants/` |
 
 ---
 
@@ -785,35 +868,37 @@ Still preserved 4x variant duplication and per-facet TimeTravel pattern.
 
 ### 1st Refactor → 2nd Refactor
 
-| Gained                                                   | Lost                                                        |
-| -------------------------------------------------------- | ----------------------------------------------------------- |
-| 68% fewer facets (195 → 63)                              | Can't grep for "all FixedRate variants" (most were deleted) |
-| Eliminated all 48 FacetBases                             | —                                                           |
-| Unified TimeTravel (196 variants → 1 facet)              | —                                                           |
-| Flattened interfaces (86 → 72, no StorageWrapper suffix) | —                                                           |
-| 52% fewer files (641 → 307)                              | —                                                           |
-| 13% LOC reduction (34,273 → 29,869)                      | —                                                           |
-| Cleaner naming (business logic focus)                    | —                                                           |
-| Zero behavioral changes                                  | —                                                           |
+| Gained                                                    | Lost                                                        |
+| --------------------------------------------------------- | ----------------------------------------------------------- |
+| 68% fewer facets (195 → 63)                               | Can't grep for "all FixedRate variants" (most were deleted) |
+| Eliminated all 48 FacetBases                              | +65 test-only TimeTravel variant files                      |
+| Clean TimeTravel separation (196 embedded → 68 test-only) | +10s compile time (35s vs 25s, from 65 extra files)         |
+| Flattened interfaces (86 → 72, no StorageWrapper suffix)  | —                                                           |
+| 42% fewer files (641 → 372)                               | —                                                           |
+| 10% LOC reduction (34,273 → 30,734)                       | —                                                           |
+| Zero production imports from test/                        | —                                                           |
+| Cleaner naming (business logic focus)                     | —                                                           |
+| Zero behavioral changes                                   | —                                                           |
 
-Assessment: The 2nd refactor was purely additive improvement. Every metric improved, nothing of value was lost. The "missing" rate variants were identical copies with no unique code.
+Assessment: The 2nd refactor was purely additive improvement. Every production metric improved, nothing of value was lost. The "missing" rate variants were identical copies with no unique code. TimeTravel variants moved from being embedded in production code to clean test-only files using the TimestampProvider + mixin pattern.
 
 ### Cumulative Assessment
 
-| Dimension              | Original            | 1st Refactor        | 2nd Refactor            |
-| ---------------------- | ------------------- | ------------------- | ----------------------- |
-| **Files**              | 777                 | 641 (−17%)          | 307 (−52%)              |
-| **LOC**                | 34,297              | 34,273 (−0.07%)     | 29,869 (−13%)           |
-| **Facets**             | ~196                | 195 (~same)         | 63 (−68%)               |
-| **Inheritance**        | 55+ deep            | 2 levels            | 2 levels                |
-| **Duplication**        | 4x per facet        | 4x per facet        | 1x (rate-agnostic)      |
-| **TimeTravel**         | ~196+ files         | 196 files           | 4 files                 |
-| **test/ .sol files**   | ~200                | 202                 | 6                       |
-| **Pattern**            | Virtual dispatch    | Library + FacetBase | Library + Abstract-base |
-| **Clean compile**      | 2m 11s              | 1m 23s (−37%)       | **22.5s (−83%)**        |
-| **Test execution**     | 1m 42s              | 1m 17s (−25%)       | **47s (−54%)**          |
-| **Tests**              | 1,257               | 1,257               | 1,257                   |
-| **New feature effort** | 8+ files, chain mod | 5-6 files           | 3 files                 |
+| Dimension              | Original            | 1st Refactor        | 2nd Refactor                    |
+| ---------------------- | ------------------- | ------------------- | ------------------------------- |
+| **Files**              | 777                 | 641 (−17%)          | 372 (−52%)                      |
+| **LOC**                | 34,297              | 34,273 (−0.07%)     | 30,734 (−10%)                   |
+| **Facets**             | ~196                | 195 (~same)         | 63 (−68%)                       |
+| **Inheritance**        | 55+ deep            | 2 levels            | 2 levels                        |
+| **Duplication**        | 4x per facet        | 4x per facet        | 1x (rate-agnostic)              |
+| **TimeTravel**         | ~196+ embedded      | 196 embedded        | 68 test-only (clean separation) |
+| **test/ .sol files**   | ~200                | 202                 | 70                              |
+| **Pattern**            | Virtual dispatch    | Library + FacetBase | Library + Abstract-base + mixin |
+| **Clean compile**      | 2m 11s              | 1m 23s (−37%)       | **35s (−73%)**                  |
+| **Test execution**     | 1m 42s              | 1m 17s (−25%)       | **52s (−49%)**                  |
+| **Coverage**           | —                   | —                   | **8m 23s**                      |
+| **Tests**              | 1,257               | 1,257               | 1,257                           |
+| **New feature effort** | 8+ files, chain mod | 5-6 files           | 3 files + 1 TT variant          |
 
 ---
 
@@ -961,60 +1046,60 @@ Deployment gas follows a U-curve: lowest at `runs=200`, then **increasing** at h
 
 ## 12. Final Directory Structure
 
-### Complete Layout (307 .sol files)
+### Complete Layout (372 .sol files)
 
 ```
-contracts/                                # 307 .sol files total
+contracts/                                # 372 .sol files total
 ├── facets/                               # ALL diamond entry points
 │   ├── features/                         #   38 facets, 19+35 interfaces, 1 types file
 │   │   ├── ERC1400/                      #     10 facets: ERC1410 (4), ERC1594, ERC1643, ERC1644, ERC20, ERC20Permit, ERC20Votes
 │   │   ├── ERC3643/                      #     4 facets: Batch, Management, Operations, Read
 │   │   ├── accessControl/                #     1 facet + 1 abstract
-│   │   ├── cap/                          #     1 facet + 1 abstract
+│   │   ├── cap/                          #     1 facet + 1 abstract (inherits TimestampProvider)
 │   │   ├── clearing/                     #     5 facets + 5 abstracts: Actions, HoldCreation, Read, Redeem, Transfer
 │   │   ├── controlList/                  #     1 facet + 1 abstract
 │   │   ├── corporateActions/             #     1 facet + 1 abstract
 │   │   ├── externalControlLists/         #     1 facet + 1 abstract
 │   │   ├── externalKycLists/             #     1 facet + 1 abstract
 │   │   ├── externalPauses/              #     1 facet + 1 abstract
-│   │   ├── freeze/                       #     1 facet + 1 abstract
+│   │   ├── freeze/                       #     1 facet + 1 abstract (inherits TimestampProvider)
 │   │   ├── hold/                         #     3 facets + 3 abstracts: Management, Read, TokenHolder
 │   │   ├── kyc/                          #     1 facet + 1 abstract
-│   │   ├── lock/                         #     1 facet + 1 abstract
+│   │   ├── lock/                         #     1 facet + 1 abstract (inherits TimestampProvider)
 │   │   ├── nonces/                       #     1 facet + 1 abstract
 │   │   ├── pause/                        #     1 facet + 1 abstract
 │   │   ├── protectedPartitions/          #     1 facet + 1 abstract
-│   │   ├── snapshots/                    #     1 facet + 1 abstract
+│   │   ├── snapshots/                    #     1 facet + 1 abstract (inherits TimestampProvider)
 │   │   ├── ssi/                          #     1 facet + 1 abstract
-│   │   ├── totalBalance/                 #     1 facet + 1 abstract
+│   │   ├── totalBalance/                 #     1 facet + 1 abstract (inherits TimestampProvider)
 │   │   ├── interfaces/                   #     55 files (20 flat + 35 in 5 subdirs)
 │   │   └── types/                        #     1 file (ThirdPartyType.sol)
 │   ├── assetCapabilities/                #   15 facets, 14 interfaces
 │   │   ├── adjustBalances/               #     1 facet + 1 abstract
 │   │   ├── interestRates/                #     3 facets + 3 abstracts (fixedRate, kpiLinked, SPT)
-│   │   ├── kpis/kpiLatest/               #     2 facets + 2 abstracts (kpiLinked, SPT)
+│   │   ├── kpis/kpiLatest/               #     2 facets + 2 abstracts (kpiLinked, SPT — inherit TimestampProvider)
 │   │   ├── proceedRecipients/            #     3 facets + 3 abstracts (standard + kpiLinked, SPT)
 │   │   ├── scheduledTasks/               #     6 facets + 6 abstracts (balanceAdj, couponListing, crossOrdered×3, snapshots)
 │   │   └── interfaces/                   #     14 files in domain-organized subdirs
 │   └── regulation/                       #   9 facets, 4 interfaces
-│       ├── bondUSA/                      #     7 facets + 7 abstracts (variable, fixed, kpiLinked, SPT + reads)
-│       ├── equityUSA/                    #     1 facet + 1 abstract
-│       ├── transferAndLock/              #     1 facet + 1 abstract
+│       ├── bondUSA/                      #     7 facets + 7 abstracts (all inherit TimestampProvider)
+│       ├── equityUSA/                    #     1 facet + 1 abstract (inherits TimestampProvider)
+│       ├── transferAndLock/              #     1 facet + 1 abstract (inherits TimestampProvider)
 │       └── interfaces/                   #     4 files
 ├── lib/                   (38 files)     # Shared libraries
 │   ├── core/              (12 files)     #   Generic: LibAccess, LibPause, LibCap, LibControlList, LibERC712, etc.
-│   ├── domain/            (22 files)     #   Asset-specific: LibBond, LibERC1410, LibABAF, LibRegulation, etc.
+│   ├── domain/            (22 files)     #   Asset-specific: LibBond, LibERC1410, LibABAF, LibERC20Votes, etc.
 │   └── orchestrator/       (4 files)     #   Cross-domain: LibTokenTransfer, LibClearingOps, etc.
-├── infrastructure/        (24 files)     # Diamond proxy, BLR, utilities (zero domain imports)
+├── infrastructure/        (25 files)     # Diamond proxy, BLR, utilities (zero domain imports)
 │   ├── diamond/            (4 files)     #   BLR, DiamondCutManager, wrappers
 │   ├── proxy/              (7 files)     #   ResolverProxy, DiamondCut, DiamondLoupe, DiamondFacet
 │   ├── interfaces/         (7 files)     #   IBusinessLogicResolver, IDiamondCut, etc.
-│   ├── lib/                (6 files)     #   EnumerableSetBytes4, LibCheckpoints, LibPagination, etc.
+│   ├── lib/                (7 files)     #   EnumerableSetBytes4, LibCheckpoints, LibPagination, TimestampProvider, etc.
 │   └── proxies/            (1 file)      #   OZ TransparentUpgradeableProxy import
 ├── constants/              (7 files)     # Roles, storage positions, resolver keys
 │   ├── eip1066.sol
 │   ├── roles.sol                         #   30 access control roles
-│   ├── storagePositions.sol              #   ~41 storage positions
+│   ├── storagePositions.sol              #   ~41 storage positions (test-only slots removed)
 │   ├── values.sol
 │   └── resolverKeys/       (3 files)     #   features.sol, assets.sol, regulation.sol
 ├── storage/                (5 files)     # Unified storage layout definitions
@@ -1025,8 +1110,14 @@ contracts/                                # 307 .sol files total
 │   └── ScheduledStorage.sol              #   Scheduled tasks, coupons, balance adjustments
 ├── factory/               (25 files)     # Token deployment (Factory, TREXFactory, libraries)
 ├── mocks/                 (10 files)     # Test mocks
-└── test/                   (6 files)     # Test contracts
-    ├── timeTravel/         (4 files)     #   TimeTravel.sol, LibTimeTravel.sol, TimeTravelFacet.sol, ITimeTravel.sol
+└── test/                  (70 files)     # Test contracts (zero production imports FROM here)
+    ├── timeTravel/        (68 files)     #   TimeTravel architecture
+    │   ├── TimeTravelProvider.sol        #     Test-only mixin overriding TimestampProvider
+    │   ├── TimeTravel.sol                #     Abstract contract with time manipulation methods
+    │   ├── LibTimeTravel.sol             #     Library reading/writing timestamp storage
+    │   ├── TimeTravelFacet.sol           #     Concrete Diamond wrapper (~30 lines)
+    │   ├── ITimeTravel.sol               #     Consolidated interface
+    │   └── variants/      (63 files)     #     Per-facet TimeTravel variants (C3 mixin pattern)
     ├── compliance/         (1 file)
     └── identity/           (1 file)
 ```
@@ -1047,48 +1138,50 @@ contracts/                                # 307 .sol files total
 
 ## 13. Conclusion
 
-The ATS contracts evolved across two major refactors from 777 files with 55-contract inheritance chains to 307 files with a clean 2-level abstract-base pattern.
+The ATS contracts evolved across two major refactors from 777 files with 55-contract inheritance chains to 372 files with a clean 2-level abstract-base pattern and proper production/test separation.
 
 ### Stage-by-Stage Summary
 
-| Stage            | Problem Addressed                                                                        | Solution                                                                     | Result                                                |
-| ---------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
-| **Original**     | Business logic buried in 55-contract chain, 543 virtual functions, 4x forced duplication | —                                                                            | 777 files, ~196 facets                                |
-| **1st Refactor** | Replace inheritance with libraries                                                       | 37 libraries + 48 FacetBases, delete StorageWrappers                         | 641 files, 195 facets, compile 1m 23s (−37%)          |
-| **2nd Refactor** | Eliminate forced duplication, unify patterns                                             | Delete variants, abstract-base pattern, unify TimeTravel, flatten interfaces | 307 files, 63 facets, compile 22.5s (−83% cumulative) |
+| Stage            | Problem Addressed                                                                        | Solution                                                                                         | Result                                              |
+| ---------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| **Original**     | Business logic buried in 55-contract chain, 543 virtual functions, 4x forced duplication | —                                                                                                | 777 files, ~196 facets                              |
+| **1st Refactor** | Replace inheritance with libraries                                                       | 37 libraries + 48 FacetBases, delete StorageWrappers                                             | 641 files, 195 facets, compile 1m 23s (−37%)        |
+| **2nd Refactor** | Eliminate forced duplication, unify patterns, clean test separation                      | Delete variants, abstract-base pattern, TimestampProvider + mixin TimeTravel, flatten interfaces | 372 files, 63 facets, compile 35s (−73% cumulative) |
 
 ### Key Numbers
 
-| Metric              | Original | 1st Refactor | 2nd Refactor | Cumulative      |
-| ------------------- | -------- | ------------ | ------------ | --------------- |
-| .sol files          | 777      | 641          | 307          | −470 (−61%)     |
-| Production facets   | ~196     | 195          | 63           | −133 (−68%)     |
-| LOC                 | 34,297   | 34,273       | 29,869       | −4,428 (−13%)   |
-| Inheritance depth   | 55+      | 2            | 2            | −96%            |
-| Virtual functions   | 543      | 0            | 0            | −100%           |
-| TimeTravel variants | ~196+    | 196          | 1            | −99%            |
-| Test .sol files     | ~200     | 202          | 6            | −97%            |
-| Clean compile       | 2m 11s   | 1m 23s       | **22.5s**    | −83%            |
-| Test execution      | 1m 42s   | 1m 17s       | **47s**      | −54%            |
-| Tests passing       | 1,257    | 1,257        | 1,257        | Unchanged       |
-| External ABI        | —        | Unchanged    | Unchanged    | 100% compatible |
+| Metric              | Original | 1st Refactor | 2nd Refactor | Cumulative       |
+| ------------------- | -------- | ------------ | ------------ | ---------------- |
+| .sol files          | 777      | 641          | 372          | −405 (−52%)      |
+| Production facets   | ~196     | 195          | 63           | −133 (−68%)      |
+| LOC                 | 34,297   | 34,273       | 30,734       | −3,563 (−10%)    |
+| Inheritance depth   | 55+      | 2            | 2            | −96%             |
+| Virtual functions   | 543      | 0            | 0            | −100%            |
+| TimeTravel variants | ~196+    | 196          | 68           | −65% (separated) |
+| Test .sol files     | ~200     | 202          | 70           | −65%             |
+| Clean compile       | 2m 11s   | 1m 23s       | **35s**      | −73%             |
+| Test execution      | 1m 42s   | 1m 17s       | **52s**      | −49%             |
+| Coverage            | —        | —            | **8m 23s**   | —                |
+| Tests passing       | 1,257    | 1,257        | 1,257        | Unchanged        |
+| External ABI        | —        | Unchanged    | Unchanged    | 100% compatible  |
 
 ### What Makes This Architecture Work
 
 1. **Libraries as the integration layer**: All cross-facet dependencies flow through libraries, not inheritance
 2. **Abstract contracts for business logic**: Clean separation of _what_ (abstract) from _how_ (concrete facet)
 3. **Rate-specific only where needed**: 16 facets have genuinely different code; 47 are shared
-4. **Unified TimeTravel**: One library, one facet, zero per-feature duplication
+4. **Clean TimeTravel separation**: `TimestampProvider` in production, `TimeTravelProvider` mixin in test/ — zero production imports from test/
 5. **Flat interface organization**: `I{Feature}.sol` — no StorageWrapper suffix, logical grouping
 6. **Self-documenting directory structure**: Every name tells you what's inside
 
 ### Adding New Features
 
 ```
-1. lib/domain/Lib{Feature}.sol        — Business logic (library)
-2. facets/features/{dir}/{Feature}.sol — Business logic (abstract contract using libraries)
-3. facets/features/{dir}/{Feature}Facet.sol — Diamond infrastructure (concrete, ~25 lines)
-4. facets/features/interfaces/I{Feature}.sol — External ABI (interface)
+1. lib/domain/Lib{Feature}.sol                            — Business logic (library)
+2. facets/features/{dir}/{Feature}.sol                    — Business logic (abstract, inherits TimestampProvider if time-dependent)
+3. facets/features/{dir}/{Feature}Facet.sol               — Diamond infrastructure (concrete, ~25 lines)
+4. facets/features/interfaces/I{Feature}.sol              — External ABI (interface)
+5. test/timeTravel/variants/{Feature}FacetTimeTravel.sol  — TimeTravel variant (~10 lines, mixin pattern)
 ```
 
 For rate-specific features: extend the abstract base with rate-specific logic. Never duplicate.

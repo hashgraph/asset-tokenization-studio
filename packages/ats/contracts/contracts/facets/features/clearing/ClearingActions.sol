@@ -9,10 +9,10 @@ import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibERC1594 } from "../../../lib/domain/LibERC1594.sol";
 import { LibClearingOps } from "../../../lib/orchestrator/LibClearingOps.sol";
-import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 import { _CLEARING_VALIDATOR_ROLE, _CLEARING_ROLE } from "../../../constants/roles.sol";
 
-abstract contract ClearingActions is IClearingActions {
+abstract contract ClearingActions is IClearingActions, TimestampProvider {
     error AlreadyInitialized();
 
     function initializeClearing(bool _clearingActive) external override {
@@ -44,7 +44,7 @@ abstract contract ClearingActions is IClearingActions {
             revert IClearing.WrongClearingId();
         }
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
-        LibClearingOps.checkExpirationTimestamp(_clearingOperationIdentifier, false, LibTimeTravel.getBlockTimestamp());
+        LibClearingOps.checkExpirationTimestamp(_clearingOperationIdentifier, false, _getBlockTimestamp());
 
         bytes memory operationData;
         (success_, operationData, partition_) = LibClearingOps.approveClearingOperationByPartition(
@@ -71,7 +71,7 @@ abstract contract ClearingActions is IClearingActions {
             revert IClearing.WrongClearingId();
         }
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
-        LibClearingOps.checkExpirationTimestamp(_clearingOperationIdentifier, false, LibTimeTravel.getBlockTimestamp());
+        LibClearingOps.checkExpirationTimestamp(_clearingOperationIdentifier, false, _getBlockTimestamp());
 
         success_ = LibClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
 
@@ -94,7 +94,7 @@ abstract contract ClearingActions is IClearingActions {
         }
         LibERC1594.checkIdentity(_clearingOperationIdentifier.tokenHolder, address(0));
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
-        LibClearingOps.checkExpirationTimestamp(_clearingOperationIdentifier, true, LibTimeTravel.getBlockTimestamp());
+        LibClearingOps.checkExpirationTimestamp(_clearingOperationIdentifier, true, _getBlockTimestamp());
 
         success_ = LibClearingOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
 

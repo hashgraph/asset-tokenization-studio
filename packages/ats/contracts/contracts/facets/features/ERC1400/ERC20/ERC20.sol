@@ -10,11 +10,11 @@ import { LibERC1594 } from "../../../../lib/domain/LibERC1594.sol";
 import { LibCompliance } from "../../../../lib/core/LibCompliance.sol";
 import { LibProtectedPartitions } from "../../../../lib/core/LibProtectedPartitions.sol";
 import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
-import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../../infrastructure/lib/TimestampProvider.sol";
 import { IControlListBase } from "../../interfaces/controlList/IControlListBase.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 
-abstract contract ERC20 is IERC20, IControlListBase {
+abstract contract ERC20 is IERC20, IControlListBase, TimestampProvider {
     error AlreadyInitialized();
     error WrongExpirationTimestamp();
 
@@ -46,9 +46,9 @@ abstract contract ERC20 is IERC20, IControlListBase {
             to,
             _DEFAULT_PARTITION,
             amount,
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp()
         );
-        return LibTokenTransfer.transfer(msg.sender, to, amount, LibTimeTravel.getBlockTimestamp());
+        return LibTokenTransfer.transfer(msg.sender, to, amount, _getBlockTimestamp(), _getBlockNumber());
     }
 
     function transferFrom(address from, address to, uint256 amount) external override returns (bool) {
@@ -60,9 +60,9 @@ abstract contract ERC20 is IERC20, IControlListBase {
             to,
             _DEFAULT_PARTITION,
             amount,
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp()
         );
-        return LibTokenTransfer.transferFrom(msg.sender, from, to, amount, LibTimeTravel.getBlockTimestamp());
+        return LibTokenTransfer.transferFrom(msg.sender, from, to, amount, _getBlockTimestamp(), _getBlockNumber());
     }
 
     function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
@@ -85,7 +85,7 @@ abstract contract ERC20 is IERC20, IControlListBase {
 
     function allowance(address owner, address spender) external view override returns (uint256) {
         uint256 factor = LibABAF.calculateFactor(
-            LibABAF.getAbafAdjustedAt(LibTimeTravel.getBlockTimestamp()),
+            LibABAF.getAbafAdjustedAt(_getBlockTimestamp()),
             LibABAF.getAllowanceLabaf(owner, spender)
         );
         return LibERC20.getAllowance(owner, spender) * factor;
@@ -100,7 +100,7 @@ abstract contract ERC20 is IERC20, IControlListBase {
     }
 
     function decimals() external view returns (uint8) {
-        (, uint8 pendingDecimals) = LibABAF.getPendingAbafAt(LibTimeTravel.getBlockTimestamp());
+        (, uint8 pendingDecimals) = LibABAF.getPendingAbafAt(_getBlockTimestamp());
         return LibERC20.getDecimals() + pendingDecimals;
     }
 
@@ -110,7 +110,7 @@ abstract contract ERC20 is IERC20, IControlListBase {
     }
 
     function getERC20Metadata() external view returns (ERC20Metadata memory) {
-        (, uint8 pendingDecimals) = LibABAF.getPendingAbafAt(LibTimeTravel.getBlockTimestamp());
+        (, uint8 pendingDecimals) = LibABAF.getPendingAbafAt(_getBlockTimestamp());
         ERC20Metadata memory metadata = LibERC20.getMetadata();
         metadata.info.decimals += pendingDecimals;
         return metadata;

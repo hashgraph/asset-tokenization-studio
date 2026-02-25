@@ -9,11 +9,11 @@ import { LibLock } from "../../../lib/domain/LibLock.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
 import { LibABAF } from "../../../lib/domain/LibABAF.sol";
 import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
-import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 import { _LOCKER_ROLE } from "../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 
-abstract contract Lock is ILock {
+abstract contract Lock is ILock, TimestampProvider {
     // ════════════════════════════════════════════════════════════════════════════════════
     // EXTERNAL STATE-CHANGING FUNCTIONS
     // ════════════════════════════════════════════════════════════════════════════════════
@@ -28,7 +28,7 @@ abstract contract Lock is ILock {
         LibCompliance.requireNotRecovered(_tokenHolder);
         LibAccess.checkRole(_LOCKER_ROLE);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
-        if (_expirationTimestamp < LibTimeTravel.getBlockTimestamp()) {
+        if (_expirationTimestamp < _getBlockTimestamp()) {
             revert LibLock.WrongExpirationTimestamp();
         }
 
@@ -46,9 +46,7 @@ abstract contract Lock is ILock {
         if (!LibLock.isLockIdValid(_partition, _tokenHolder, _lockId)) {
             revert LibLock.WrongLockId();
         }
-        if (
-            !LibLock.isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId, LibTimeTravel.getBlockTimestamp())
-        ) {
+        if (!LibLock.isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId, _getBlockTimestamp())) {
             revert LibLock.LockExpirationNotReached();
         }
 
@@ -65,7 +63,7 @@ abstract contract Lock is ILock {
         LibCompliance.requireNotRecovered(_tokenHolder);
         LibAccess.checkRole(_LOCKER_ROLE);
         LibERC1410.checkWithoutMultiPartition();
-        if (_expirationTimestamp < LibTimeTravel.getBlockTimestamp()) {
+        if (_expirationTimestamp < _getBlockTimestamp()) {
             revert LibLock.WrongExpirationTimestamp();
         }
 
@@ -79,14 +77,7 @@ abstract contract Lock is ILock {
         if (!LibLock.isLockIdValid(_DEFAULT_PARTITION, _tokenHolder, _lockId)) {
             revert LibLock.WrongLockId();
         }
-        if (
-            !LibLock.isLockedExpirationTimestamp(
-                _DEFAULT_PARTITION,
-                _tokenHolder,
-                _lockId,
-                LibTimeTravel.getBlockTimestamp()
-            )
-        ) {
+        if (!LibLock.isLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId, _getBlockTimestamp())) {
             revert LibLock.LockExpirationNotReached();
         }
 
@@ -102,8 +93,7 @@ abstract contract Lock is ILock {
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return
-            LibLock.getLockedAmountByPartitionAdjustedAt(_partition, _tokenHolder, LibTimeTravel.getBlockTimestamp());
+        return LibLock.getLockedAmountByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
     }
 
     function getLockCountForByPartition(
@@ -127,22 +117,11 @@ abstract contract Lock is ILock {
         address _tokenHolder,
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        return
-            LibLock.getLockForByPartitionAdjustedAt(
-                _partition,
-                _tokenHolder,
-                _lockId,
-                LibTimeTravel.getBlockTimestamp()
-            );
+        return LibLock.getLockForByPartitionAdjustedAt(_partition, _tokenHolder, _lockId, _getBlockTimestamp());
     }
 
     function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return
-            LibLock.getLockedAmountByPartitionAdjustedAt(
-                _DEFAULT_PARTITION,
-                _tokenHolder,
-                LibTimeTravel.getBlockTimestamp()
-            );
+        return LibLock.getLockedAmountByPartitionAdjustedAt(_DEFAULT_PARTITION, _tokenHolder, _getBlockTimestamp());
     }
 
     function getLockCountFor(address _tokenHolder) external view override returns (uint256 lockCount_) {
@@ -161,13 +140,7 @@ abstract contract Lock is ILock {
         address _tokenHolder,
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        return
-            LibLock.getLockForByPartitionAdjustedAt(
-                _DEFAULT_PARTITION,
-                _tokenHolder,
-                _lockId,
-                LibTimeTravel.getBlockTimestamp()
-            );
+        return LibLock.getLockForByPartitionAdjustedAt(_DEFAULT_PARTITION, _tokenHolder, _lockId, _getBlockTimestamp());
     }
 
     // ════════════════════════════════════════════════════════════════════════════════════

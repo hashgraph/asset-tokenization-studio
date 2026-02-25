@@ -161,6 +161,9 @@ export interface FacetDefinition {
 
   /** TypeChain factory constructor function for creating contract instances */
   factory?: (signer: Signer) => ContractFactory;
+
+  /** TypeChain factory for the TimeTravel variant of this facet (test-only) */
+  timeTravelFactory?: (signer: Signer) => ContractFactory;
 }
 
 /**

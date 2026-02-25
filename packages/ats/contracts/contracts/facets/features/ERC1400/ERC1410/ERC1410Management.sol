@@ -16,11 +16,11 @@ import { LibNonce } from "../../../../lib/core/LibNonce.sol";
 import { LibResolverProxy } from "../../../../infrastructure/proxy/LibResolverProxy.sol";
 import { LibERC20 } from "../../../../lib/domain/LibERC20.sol";
 import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
-import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../../infrastructure/lib/TimestampProvider.sol";
 import { LibERC712 } from "../../../../lib/core/LibERC712.sol";
 import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 
-abstract contract ERC1410Management is IERC1410Management, IControlListBase, IERC1644Base {
+abstract contract ERC1410Management is IERC1410Management, IControlListBase, IERC1644Base, TimestampProvider {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -54,7 +54,8 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
                 _data,
                 msg.sender,
                 _operatorData,
-                LibTimeTravel.getBlockTimestamp()
+                _getBlockTimestamp(),
+                _getBlockNumber()
             );
     }
 
@@ -81,7 +82,8 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             _value,
             _data,
             _operatorData,
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp(),
+            _getBlockNumber()
         );
     }
 
@@ -98,7 +100,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             _operatorTransferData.to,
             _operatorTransferData.partition,
             _operatorTransferData.value,
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp()
         );
         return
             LibTokenTransfer.transferByPartition(
@@ -108,7 +110,8 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
                 _operatorTransferData.data,
                 msg.sender,
                 _operatorTransferData.operatorData,
-                LibTimeTravel.getBlockTimestamp()
+                _getBlockTimestamp(),
+                _getBlockNumber()
             );
     }
 
@@ -122,13 +125,7 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
         LibERC1410.checkOperator(_partition, msg.sender, _tokenHolder);
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
-        LibERC1594.checkCanRedeemFromByPartition(
-            msg.sender,
-            _tokenHolder,
-            _partition,
-            _value,
-            LibTimeTravel.getBlockTimestamp()
-        );
+        LibERC1594.checkCanRedeemFromByPartition(msg.sender, _tokenHolder, _partition, _value, _getBlockTimestamp());
         LibTokenTransfer.redeemByPartition(
             _partition,
             _tokenHolder,
@@ -136,7 +133,8 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             _value,
             _data,
             _operatorData,
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp(),
+            _getBlockNumber()
         );
     }
 
@@ -149,20 +147,13 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
     ) external override returns (bytes32) {
         LibAccess.checkRole(LibProtectedPartitions.protectedPartitionsRole(_partition), msg.sender);
         LibProtectedPartitions.requireProtectedPartitions();
-        LibERC1594.checkCanTransferFromByPartition(
-            msg.sender,
-            _from,
-            _to,
-            _partition,
-            _amount,
-            LibTimeTravel.getBlockTimestamp()
-        );
+        LibERC1594.checkCanTransferFromByPartition(msg.sender, _from, _to, _partition, _amount, _getBlockTimestamp());
         LibERC712.checkNounceAndDeadline(
             _protectionData.nounce,
             _from,
             LibNonce.getNonceFor(_from),
             _protectionData.deadline,
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp()
         );
         LibProtectedPartitions.checkTransferSignature(
             _partition,
@@ -184,7 +175,8 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
                 "",
                 msg.sender,
                 "",
-                LibTimeTravel.getBlockTimestamp()
+                _getBlockTimestamp(),
+                _getBlockNumber()
             );
     }
 
@@ -196,19 +188,13 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
     ) external override {
         LibAccess.checkRole(LibProtectedPartitions.protectedPartitionsRole(_partition), msg.sender);
         LibProtectedPartitions.requireProtectedPartitions();
-        LibERC1594.checkCanRedeemFromByPartition(
-            msg.sender,
-            _from,
-            _partition,
-            _amount,
-            LibTimeTravel.getBlockTimestamp()
-        );
+        LibERC1594.checkCanRedeemFromByPartition(msg.sender, _from, _partition, _amount, _getBlockTimestamp());
         LibERC712.checkNounceAndDeadline(
             _protectionData.nounce,
             _from,
             LibNonce.getNonceFor(_from),
             _protectionData.deadline,
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp()
         );
         LibProtectedPartitions.checkRedeemSignature(
             _partition,
@@ -228,7 +214,8 @@ abstract contract ERC1410Management is IERC1410Management, IControlListBase, IER
             _amount,
             "",
             "",
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp(),
+            _getBlockNumber()
         );
     }
 }

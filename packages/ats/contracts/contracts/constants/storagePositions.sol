@@ -156,13 +156,3 @@ bytes32 constant _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION = 0x93
 
 // keccak256('security.token.standard.security.storage');
 bytes32 constant _SECURITY_STORAGE_POSITION = 0x95205812666aa702c6386778a59ee67a93a9559063c49d34d12e4072e5995379;
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// Test-only storage positions (TimeTravel overrides)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-// keccak256('security.token.standard.test.timetravel.timestamp')
-bytes32 constant _TIMESTAMP_OVERRIDE_SLOT = 0x6dffada92f87e08031a64f3c82fa9d9b647a47b516130bdc52f646d498adc7ef;
-
-// keccak256('security.token.standard.test.timetravel.blocknumber')
-bytes32 constant _BLOCK_NUMBER_OVERRIDE_SLOT = 0xda5cca5277b046f39c27835382b41b07ac714748d81f7c159fdbc36744ce094b;

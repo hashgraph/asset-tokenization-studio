@@ -11,10 +11,10 @@ import { LibCompliance } from "../../../../lib/core/LibCompliance.sol";
 import { LibERC1410 } from "../../../../lib/domain/LibERC1410.sol";
 import { LibERC1594 } from "../../../../lib/domain/LibERC1594.sol";
 import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
-import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../../infrastructure/lib/TimestampProvider.sol";
 import { _ISSUER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 
-abstract contract ERC1410Issuer is IERC1410Issuer, IControlListBase {
+abstract contract ERC1410Issuer is IERC1410Issuer, IControlListBase, TimestampProvider {
     function issueByPartition(IssueData calldata _issueData) external override {
         LibPause.requireNotPaused();
         LibCap.requireWithinMaxSupply(_issueData.value, LibERC1410.totalSupply());
@@ -33,6 +33,6 @@ abstract contract ERC1410Issuer is IERC1410Issuer, IControlListBase {
             LibAccess.checkAnyRole(roles, msg.sender);
             LibCompliance.requireNotRecovered(msg.sender);
         }
-        LibTokenTransfer.issueByPartition(_issueData, LibTimeTravel.getBlockTimestamp());
+        LibTokenTransfer.issueByPartition(_issueData, _getBlockTimestamp(), _getBlockNumber());
     }
 }

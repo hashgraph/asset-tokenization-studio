@@ -339,14 +339,18 @@ export async function deploySystemWithNewBlr(
       }
 
       // Create factories from registry
+      // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
       const facetFactories: Record<string, ContractFactory> = {};
       for (const facet of allFacets) {
-        if (!facet.factory) {
+        // Select factory: TimeTravel variant when available and enabled, else production
+        const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
+
+        if (!selectedFactory) {
           throw new Error(`No factory found for facet: ${facet.name}`);
         }
 
         // Get factory
-        const factory = facet.factory(signer);
+        const factory = selectedFactory(signer);
         // Use the actual contract name from the factory
         const contractName = factory.constructor.name.replace("__factory", "");
 

@@ -393,13 +393,16 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   }
 
   // Create factories from registry
+  // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
   const facetFactories: Record<string, ContractFactory> = {};
   for (const facet of allFacets) {
-    if (!facet.factory) {
+    const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
+
+    if (!selectedFactory) {
       throw new Error(`No factory found for facet: ${facet.name}`);
     }
 
-    const factory = facet.factory(signer);
+    const factory = selectedFactory(signer);
     const contractName = factory.constructor.name.replace("__factory", "");
 
     // Skip if already deployed

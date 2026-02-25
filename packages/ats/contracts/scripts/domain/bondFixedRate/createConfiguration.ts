@@ -154,8 +154,11 @@ export async function createBondFixedRateConfiguration(
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet list based on time travel mode
-  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
-  const facetNames = useTimeTravel ? [...BOND_FIXED_RATE_FACETS, "TimeTravelFacet"] : BOND_FIXED_RATE_FACETS;
+  // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
+  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
+  const facetNames = useTimeTravel
+    ? [...BOND_FIXED_RATE_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
+    : [...BOND_FIXED_RATE_FACETS];
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {

@@ -23,9 +23,9 @@ import {
     SNAPSHOT_RESULT_ID,
     COUPON_LISTING_RESULT_ID
 } from "../../../../constants/values.sol";
-import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../../infrastructure/lib/TimestampProvider.sol";
 
-abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
+abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, TimestampProvider {
     // ════════════════════════════════════════════════════════════════════════════════════
     // EXTERNAL STATE-CHANGING FUNCTIONS
     // ════════════════════════════════════════════════════════════════════════════════════
@@ -73,7 +73,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
         if (count == 0) return 0;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
-        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
+        uint256 timestamp = _getBlockTimestamp();
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
@@ -106,7 +106,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
         if (count == 0) return;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
-        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
+        uint256 timestamp = _getBlockTimestamp();
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
@@ -133,7 +133,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
         if (count == 0) return;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
-        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
+        uint256 timestamp = _getBlockTimestamp();
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
@@ -169,7 +169,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
         if (count == 0) return;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
-        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
+        uint256 timestamp = _getBlockTimestamp();
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;

@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { LibCheckpoints } from "../../infrastructure/lib/LibCheckpoints.sol";
 import { ERC20VotesStorage, erc20VotesStorage } from "../../storage/TokenStorage.sol";
 import { IERC20Votes } from "../../facets/features/interfaces/ERC1400/IERC20Votes.sol";
-import { LibTimeTravel } from "../../test/timeTravel/LibTimeTravel.sol";
 
 /// @title LibERC20Votes
 /// @notice Leaf library for ERC20Votes delegation and checkpoint functionality
@@ -47,42 +46,48 @@ library LibERC20Votes {
     /// @notice Writes a total supply checkpoint (add/subtract)
     /// @param isAdd True for addition, false for subtraction
     /// @param amount The amount to adjust
-    function writeTotalSupplyCheckpoint(bool isAdd, uint256 amount) internal {
-        _writeCheckpoint(erc20VotesStorage().totalSupplyCheckpoints, isAdd ? _add : _subtract, amount);
+    /// @param currentBlockNumber The current block number
+    function writeTotalSupplyCheckpoint(bool isAdd, uint256 amount, uint256 currentBlockNumber) internal {
+        _writeCheckpoint(
+            erc20VotesStorage().totalSupplyCheckpoints,
+            isAdd ? _add : _subtract,
+            amount,
+            currentBlockNumber
+        );
     }
 
     /// @notice Moves voting power between accounts (internal)
     /// @param src The source account
     /// @param dst The destination account
     /// @param amount The amount of voting power to move
-    function moveVotingPower(address src, address dst, uint256 amount) internal {
+    /// @param currentBlockNumber The current block number
+    function moveVotingPower(address src, address dst, uint256 amount, uint256 currentBlockNumber) internal {
         if (src != dst && amount > 0) {
             if (src != address(0)) {
-                _moveVotingPower(src, _subtract, amount);
+                _moveVotingPower(src, _subtract, amount, currentBlockNumber);
             }
 
             if (dst != address(0)) {
-                _moveVotingPower(dst, _add, amount);
+                _moveVotingPower(dst, _add, amount, currentBlockNumber);
             }
         }
     }
 
     /// @notice Records ABAF checkpoint for the current block
     /// @param currentAbaf The current ABAF value
-    function takeAbafCheckpoint(uint256 currentAbaf) internal {
+    /// @param currentBlockNumber The current block number
+    function takeAbafCheckpoint(uint256 currentAbaf, uint256 currentBlockNumber) internal {
         ERC20VotesStorage storage votes = erc20VotesStorage();
         uint256 pos = votes.abafCheckpoints.length;
 
         if (pos != 0)
-            if (votes.abafCheckpoints[pos - 1].from == LibTimeTravel.getBlockNumber()) {
+            if (votes.abafCheckpoints[pos - 1].from == currentBlockNumber) {
                 if (votes.abafCheckpoints[pos - 1].value != currentAbaf)
-                    revert IERC20Votes.AbafChangeForBlockForbidden(LibTimeTravel.getBlockNumber());
+                    revert IERC20Votes.AbafChangeForBlockForbidden(currentBlockNumber);
                 return;
             }
 
-        votes.abafCheckpoints.push(
-            LibCheckpoints.Checkpoint({ from: LibTimeTravel.getBlockNumber(), value: currentAbaf })
-        );
+        votes.abafCheckpoints.push(LibCheckpoints.Checkpoint({ from: currentBlockNumber, value: currentAbaf }));
     }
 
     /// @notice Sets delegate and emits DelegateChanged event
@@ -108,24 +113,31 @@ library LibERC20Votes {
 
     /// @notice Gets the current voting power of an account
     /// @param account The account to query
+    /// @param currentBlockNumber The current block number
     /// @return The current voting power
-    function getVotes(address account) internal view returns (uint256) {
-        return _getVotes(account);
+    function getVotes(address account, uint256 currentBlockNumber) internal view returns (uint256) {
+        return _getVotes(account, currentBlockNumber);
     }
 
     /// @notice Gets the voting power at a past block
     /// @param account The account to query
     /// @param blockNumber The block number to query
+    /// @param currentBlockNumber The current block number
     /// @return The voting power at the specified block
-    function getPastVotes(address account, uint256 blockNumber) internal view returns (uint256) {
-        return _getPastVotes(account, blockNumber);
+    function getPastVotes(
+        address account,
+        uint256 blockNumber,
+        uint256 currentBlockNumber
+    ) internal view returns (uint256) {
+        return _getPastVotes(account, blockNumber, currentBlockNumber);
     }
 
     /// @notice Gets the total voting power at a past block
     /// @param blockNumber The block number to query
+    /// @param currentBlockNumber The current block number
     /// @return The total voting power at the specified block
-    function getPastTotalSupply(uint256 blockNumber) internal view returns (uint256) {
-        return _getPastTotalSupply(blockNumber);
+    function getPastTotalSupply(uint256 blockNumber, uint256 currentBlockNumber) internal view returns (uint256) {
+        return _getPastTotalSupply(blockNumber, currentBlockNumber);
     }
 
     /// @notice Gets a checkpoint for an account at a specific position
@@ -172,12 +184,19 @@ library LibERC20Votes {
     /// @param account The account whose voting power is changing
     /// @param op The operation to apply (addition or subtraction)
     /// @param amount The amount to apply
+    /// @param currentBlockNumber The current block number
     function _moveVotingPower(
         address account,
         function(uint256, uint256) view returns (uint256) op,
-        uint256 amount
+        uint256 amount,
+        uint256 currentBlockNumber
     ) private {
-        (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(erc20VotesStorage().checkpoints[account], op, amount);
+        (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(
+            erc20VotesStorage().checkpoints[account],
+            op,
+            amount,
+            currentBlockNumber
+        );
         emit DelegateVotesChanged(account, oldWeight, newWeight);
     }
 
@@ -185,25 +204,27 @@ library LibERC20Votes {
     /// @param ckpts The checkpoints array
     /// @param op The operation to apply
     /// @param delta The amount to apply
+    /// @param currentBlockNumber The current block number
     /// @return oldWeight The weight before the operation
     /// @return newWeight The weight after the operation
     function _writeCheckpoint(
         LibCheckpoints.Checkpoint[] storage ckpts,
         function(uint256, uint256) view returns (uint256) op,
-        uint256 delta
+        uint256 delta,
+        uint256 currentBlockNumber
     ) private returns (uint256 oldWeight, uint256 newWeight) {
         uint256 pos = ckpts.length;
 
         unchecked {
             LibCheckpoints.Checkpoint memory oldCkpt = pos == 0 ? LibCheckpoints.Checkpoint(0, 0) : ckpts[pos - 1];
 
-            oldWeight = oldCkpt.value * _calculateFactorBetween(oldCkpt.from, LibTimeTravel.getBlockNumber());
+            oldWeight = oldCkpt.value * _calculateFactorBetween(oldCkpt.from, currentBlockNumber);
             newWeight = op(oldWeight, delta);
 
-            if (pos > 0 && oldCkpt.from == LibTimeTravel.getBlockNumber()) {
+            if (pos > 0 && oldCkpt.from == currentBlockNumber) {
                 ckpts[pos - 1].value = newWeight;
             } else {
-                ckpts.push(LibCheckpoints.Checkpoint({ from: LibTimeTravel.getBlockNumber(), value: newWeight }));
+                ckpts.push(LibCheckpoints.Checkpoint({ from: currentBlockNumber, value: newWeight }));
             }
         }
     }
@@ -214,27 +235,32 @@ library LibERC20Votes {
 
     /// @notice Gets the current voting power of an account
     /// @param account The account to query
+    /// @param currentBlockNumber The current block number
     /// @return The current voting power
-    function _getVotes(address account) private view returns (uint256) {
-        return _getVotesAdjustedAt(LibTimeTravel.getBlockNumber(), erc20VotesStorage().checkpoints[account]);
+    function _getVotes(address account, uint256 currentBlockNumber) private view returns (uint256) {
+        return _getVotesAdjustedAt(currentBlockNumber, erc20VotesStorage().checkpoints[account]);
     }
 
     /// @notice Gets the voting power at a past block
     /// @param account The account to query
     /// @param timepoint The block number to query
+    /// @param currentBlockNumber The current block number
     /// @return The voting power at the specified block
-    function _getPastVotes(address account, uint256 timepoint) private view returns (uint256) {
-        uint256 currentBlock = LibTimeTravel.getBlockNumber();
-        if (timepoint >= currentBlock) revert IERC20Votes.ERC20VotesFutureLookup(timepoint, currentBlock);
+    function _getPastVotes(
+        address account,
+        uint256 timepoint,
+        uint256 currentBlockNumber
+    ) private view returns (uint256) {
+        if (timepoint >= currentBlockNumber) revert IERC20Votes.ERC20VotesFutureLookup(timepoint, currentBlockNumber);
         return _getVotesAdjustedAt(timepoint, erc20VotesStorage().checkpoints[account]);
     }
 
     /// @notice Gets the total voting power at a past block
     /// @param timepoint The block number to query
+    /// @param currentBlockNumber The current block number
     /// @return The total voting power at the specified block
-    function _getPastTotalSupply(uint256 timepoint) private view returns (uint256) {
-        uint256 currentBlock = LibTimeTravel.getBlockNumber();
-        if (timepoint >= currentBlock) revert IERC20Votes.ERC20VotesFutureLookup(timepoint, currentBlock);
+    function _getPastTotalSupply(uint256 timepoint, uint256 currentBlockNumber) private view returns (uint256) {
+        if (timepoint >= currentBlockNumber) revert IERC20Votes.ERC20VotesFutureLookup(timepoint, currentBlockNumber);
         return _getVotesAdjustedAt(timepoint, erc20VotesStorage().totalSupplyCheckpoints);
     }
 

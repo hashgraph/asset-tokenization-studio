@@ -139,9 +139,15 @@ function generateHeader(
   const sortedFacetNames = [...facets].map((f) => f.name).sort();
 
   // Generate TypeChain factory imports (Prettier will format)
-  // No TimeTravel variants needed — all facets use LibTimeTravel directly
   const factoryImports: string[] = [];
   for (const name of sortedFacetNames) {
+    factoryImports.push(`${name}__factory`);
+  }
+
+  // Include TimeTravel variant factory imports for facets that have them
+  const facetsWithTimeTravel = facets.filter((f) => f.hasTimeTravel && f.name !== "TimeTravelFacet");
+  const sortedTimeTravelNames = [...facetsWithTimeTravel].map((f) => `${f.name}TimeTravel`).sort();
+  for (const name of sortedTimeTravelNames) {
     factoryImports.push(`${name}__factory`);
   }
 
@@ -230,11 +236,17 @@ function generateFacetEntry(facet: ContractMetadata): string {
 
   const descriptionLine = facet.description ? `\n        description: '${facet.description}',` : "";
 
-  // Add TypeChain factory reference (all facets use base factory — TimeTravel handled by LibTimeTravel)
+  // Add TypeChain factory reference
   const factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(signer),`;
 
+  // Add TimeTravel variant factory if available (not for TimeTravelFacet itself)
+  const timeTravelFactoryLine =
+    facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
+      ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(signer),`
+      : "";
+
   return `    ${facet.name}: {
-        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}
+        name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}${timeTravelFactoryLine}
     }`;
 }
 

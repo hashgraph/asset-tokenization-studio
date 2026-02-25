@@ -7,17 +7,17 @@ import { LibAccess } from "../../../../lib/core/LibAccess.sol";
 import { LibKpis } from "../../../../lib/domain/LibKpis.sol";
 import { LibBond } from "../../../../lib/domain/LibBond.sol";
 import { _KPI_MANAGER_ROLE } from "../../../../constants/roles.sol";
-import { LibTimeTravel } from "../../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../../infrastructure/lib/TimestampProvider.sol";
 
 /// @title Kpis
 /// @notice Diamond facet for managing KPI data with library-based pattern
-abstract contract Kpis is IKpis {
+abstract contract Kpis is IKpis, TimestampProvider {
     function addKpiData(uint256 _date, uint256 _value, address _project) external override {
         LibAccess.checkRole(_KPI_MANAGER_ROLE);
         LibPause.requireNotPaused();
 
         // Inline isValidDate modifier logic
-        uint256 timestamp = LibTimeTravel.getBlockTimestamp();
+        uint256 timestamp = _getBlockTimestamp();
         uint256 minDate = _getMinDateAdjusted(timestamp);
         if (_date <= minDate || _date > timestamp) {
             revert InvalidDate(_date, minDate, timestamp);
@@ -39,7 +39,7 @@ abstract contract Kpis is IKpis {
     }
 
     function getMinDate() external view override returns (uint256 minDate_) {
-        return _getMinDateAdjusted(LibTimeTravel.getBlockTimestamp());
+        return _getMinDateAdjusted(_getBlockTimestamp());
     }
 
     function isCheckPointDate(uint256 _date, address _project) external view override returns (bool exists_) {

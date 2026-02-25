@@ -89,16 +89,16 @@ export function categorizeContracts(contracts: ContractFile[]): CategorizedContr
   for (const contract of contracts) {
     const name = contract.primaryContract;
 
-    // Test/Mock contracts (CHECK FIRST before facets!)
-    // This ensures MockTreasuryFacet goes to test category, not facets
-    if (isTestContract(contract)) {
-      result.test.push(contract);
+    // TimeTravel variants (CHECK FIRST - they live in test/ dir but are NOT test contracts)
+    if (isTimeTravelVariant(name)) {
+      result.timeTravelFacets.push(contract);
       continue;
     }
 
-    // TimeTravel variants
-    if (isTimeTravelVariant(name)) {
-      result.timeTravelFacets.push(contract);
+    // Test/Mock contracts (after TimeTravel check to avoid misclassification)
+    // This ensures MockTreasuryFacet goes to test category, not facets
+    if (isTestContract(contract)) {
+      result.test.push(contract);
       continue;
     }
 

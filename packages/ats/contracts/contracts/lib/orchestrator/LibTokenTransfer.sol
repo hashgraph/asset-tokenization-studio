@@ -36,7 +36,8 @@ library LibTokenTransfer {
         bytes memory _data,
         address _operator,
         bytes memory _operatorData,
-        uint256 _timestamp
+        uint256 _timestamp,
+        uint256 _blockNumber
     ) internal returns (bytes32) {
         beforeTokenTransfer(_partition, _from, _basicTransferInfo.to, _basicTransferInfo.value, _timestamp);
 
@@ -46,13 +47,13 @@ library LibTokenTransfer {
             _notifyCompliance(ICompliance.transferred.selector, _from, _basicTransferInfo.to, _basicTransferInfo.value);
         }
 
-        afterTokenTransfer(_partition, _from, _basicTransferInfo.to, _basicTransferInfo.value);
+        afterTokenTransfer(_partition, _from, _basicTransferInfo.to, _basicTransferInfo.value, _blockNumber);
 
         return _partition;
     }
 
     /// @notice Full issue by partition with all hooks
-    function issueByPartition(IssueData memory _issueData, uint256 _timestamp) internal {
+    function issueByPartition(IssueData memory _issueData, uint256 _timestamp, uint256 _blockNumber) internal {
         _validateParams(_issueData.partition, _issueData.value);
 
         beforeTokenTransfer(_issueData.partition, address(0), _issueData.tokenHolder, _issueData.value, _timestamp);
@@ -69,7 +70,7 @@ library LibTokenTransfer {
             _notifyCompliance(ICompliance.created.selector, _issueData.tokenHolder, address(0), _issueData.value);
         }
 
-        afterTokenTransfer(_issueData.partition, address(0), _issueData.tokenHolder, _issueData.value);
+        afterTokenTransfer(_issueData.partition, address(0), _issueData.tokenHolder, _issueData.value, _blockNumber);
 
         emit IERC1410.IssuedByPartition(
             _issueData.partition,
@@ -88,7 +89,8 @@ library LibTokenTransfer {
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData,
-        uint256 _timestamp
+        uint256 _timestamp,
+        uint256 _blockNumber
     ) internal {
         beforeTokenTransfer(_partition, _from, address(0), _value, _timestamp);
 
@@ -99,7 +101,7 @@ library LibTokenTransfer {
             _notifyCompliance(ICompliance.destroyed.selector, _from, address(0), _value);
         }
 
-        afterTokenTransfer(_partition, _from, address(0), _value);
+        afterTokenTransfer(_partition, _from, address(0), _value, _blockNumber);
 
         emit IERC1410.RedeemedByPartition(_partition, _operator, _from, _value, _data, _operatorData);
     }
@@ -109,21 +111,36 @@ library LibTokenTransfer {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     /// @notice ERC20-style transfer (default partition)
-    function transfer(address _from, address _to, uint256 _value, uint256 _timestamp) internal returns (bool) {
-        transferByPartition(_from, BasicTransferInfo(_to, _value), _DEFAULT_PARTITION, "", address(0), "", _timestamp);
+    function transfer(
+        address _from,
+        address _to,
+        uint256 _value,
+        uint256 _timestamp,
+        uint256 _blockNumber
+    ) internal returns (bool) {
+        transferByPartition(
+            _from,
+            BasicTransferInfo(_to, _value),
+            _DEFAULT_PARTITION,
+            "",
+            address(0),
+            "",
+            _timestamp,
+            _blockNumber
+        );
         emit IERC20.Transfer(_from, _to, _value);
         return true;
     }
 
     /// @notice ERC20-style mint (default partition)
-    function mint(address _to, uint256 _value, uint256 _timestamp) internal {
-        issueByPartition(IssueData(_DEFAULT_PARTITION, _to, _value, ""), _timestamp);
+    function mint(address _to, uint256 _value, uint256 _timestamp, uint256 _blockNumber) internal {
+        issueByPartition(IssueData(_DEFAULT_PARTITION, _to, _value, ""), _timestamp, _blockNumber);
         emit IERC20.Transfer(address(0), _to, _value);
     }
 
     /// @notice ERC20-style burn (default partition)
-    function burn(address _from, uint256 _value, uint256 _timestamp) internal {
-        redeemByPartition(_DEFAULT_PARTITION, _from, address(0), _value, "", "", _timestamp);
+    function burn(address _from, uint256 _value, uint256 _timestamp, uint256 _blockNumber) internal {
+        redeemByPartition(_DEFAULT_PARTITION, _from, address(0), _value, "", "", _timestamp, _blockNumber);
         emit IERC20.Transfer(_from, address(0), _value);
     }
 
@@ -184,10 +201,20 @@ library LibTokenTransfer {
         address _from,
         address _to,
         uint256 _value,
-        uint256 _timestamp
+        uint256 _timestamp,
+        uint256 _blockNumber
     ) internal returns (bool) {
         decreaseAllowedBalance(_from, _spender, _value);
-        transferByPartition(_from, BasicTransferInfo(_to, _value), _DEFAULT_PARTITION, "", _spender, "", _timestamp);
+        transferByPartition(
+            _from,
+            BasicTransferInfo(_to, _value),
+            _DEFAULT_PARTITION,
+            "",
+            _spender,
+            "",
+            _timestamp,
+            _blockNumber
+        );
         emit IERC20.Transfer(_from, _to, _value);
         return true;
     }
@@ -246,17 +273,28 @@ library LibTokenTransfer {
     }
 
     /// @notice Post-transfer hook: ERC20Votes checkpoint updates
-    function afterTokenTransfer(bytes32 /*partition*/, address from, address to, uint256 amount) internal {
+    function afterTokenTransfer(
+        bytes32 /*partition*/,
+        address from,
+        address to,
+        uint256 amount,
+        uint256 blockNumber
+    ) internal {
         if (LibERC20Votes.isActivated()) {
-            LibERC20Votes.takeAbafCheckpoint(LibABAF.getAbaf());
+            LibERC20Votes.takeAbafCheckpoint(LibABAF.getAbaf(), blockNumber);
             if (from == address(0)) {
-                LibERC20Votes.writeTotalSupplyCheckpoint(true, amount);
-                LibERC20Votes.moveVotingPower(address(0), LibERC20Votes.getDelegate(to), amount);
+                LibERC20Votes.writeTotalSupplyCheckpoint(true, amount, blockNumber);
+                LibERC20Votes.moveVotingPower(address(0), LibERC20Votes.getDelegate(to), amount, blockNumber);
             } else if (to == address(0)) {
-                LibERC20Votes.writeTotalSupplyCheckpoint(false, amount);
-                LibERC20Votes.moveVotingPower(LibERC20Votes.getDelegate(from), address(0), amount);
+                LibERC20Votes.writeTotalSupplyCheckpoint(false, amount, blockNumber);
+                LibERC20Votes.moveVotingPower(LibERC20Votes.getDelegate(from), address(0), amount, blockNumber);
             } else {
-                LibERC20Votes.moveVotingPower(LibERC20Votes.getDelegate(from), LibERC20Votes.getDelegate(to), amount);
+                LibERC20Votes.moveVotingPower(
+                    LibERC20Votes.getDelegate(from),
+                    LibERC20Votes.getDelegate(to),
+                    amount,
+                    blockNumber
+                );
             }
         }
     }

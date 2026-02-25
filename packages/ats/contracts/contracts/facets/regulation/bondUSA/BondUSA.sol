@@ -20,9 +20,9 @@ import { LibKyc } from "../../../lib/core/LibKyc.sol";
 import { LibCompliance } from "../../../lib/core/LibCompliance.sol";
 import { LibCorporateActions } from "../../../lib/core/LibCorporateActions.sol";
 import { IClearing } from "../../features/interfaces/clearing/IClearing.sol";
-import { LibTimeTravel } from "../../../test/timeTravel/LibTimeTravel.sol";
+import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
-abstract contract BondUSA is IBond, IBondUSA {
+abstract contract BondUSA is IBond, IBondUSA, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════
     // ERROR DEFINITIONS
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -97,7 +97,8 @@ abstract contract BondUSA is IBond, IBondUSA {
                     balance,
                     "",
                     "",
-                    LibTimeTravel.getBlockTimestamp()
+                    _getBlockTimestamp(),
+                    _getBlockNumber()
                 );
             }
         }
@@ -114,7 +115,8 @@ abstract contract BondUSA is IBond, IBondUSA {
             _amount,
             "",
             "",
-            LibTimeTravel.getBlockTimestamp()
+            _getBlockTimestamp(),
+            _getBlockNumber()
         );
     }
 
@@ -130,7 +132,7 @@ abstract contract BondUSA is IBond, IBondUSA {
         if (LibClearing.isClearingActivated()) revert IClearing.ClearingIsActivated();
         LibKyc.requireValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
         LibCompliance.requireNotRecovered(_tokenHolder);
-        _requireAfterCurrentMaturityDate(LibTimeTravel.getBlockTimestamp());
+        _requireAfterCurrentMaturityDate(_getBlockTimestamp());
     }
 
     function _validateBondInitData(IBondRead.BondDetailsData calldata _bondDetailsData) internal view {
@@ -145,7 +147,7 @@ abstract contract BondUSA is IBond, IBondUSA {
     }
 
     function _requireValidTimestamp(uint256 _timestamp) internal view {
-        if (_timestamp <= LibTimeTravel.getBlockTimestamp()) {
+        if (_timestamp <= _getBlockTimestamp()) {
             revert WrongTimestamp(_timestamp);
         }
     }
