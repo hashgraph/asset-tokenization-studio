@@ -29,6 +29,8 @@
     "bn.js": "5.2.1",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.2",
+    "ethers": "^6.15.0",
+    "joi": "17.12.2",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8"
   },

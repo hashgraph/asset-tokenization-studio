@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { Contract, ContractReceipt } from "ethers";
+import { BaseContract, ContractTransactionReceipt } from "ethers";
 
-export default class DeployContractWithFactoryResult<C extends Contract> {
+export default class DeployContractWithFactoryResult<C extends BaseContract> {
   public readonly address: string;
   public readonly contract: C;
   public readonly proxyAddress?: string;
   public readonly proxyAdminAddress?: string;
-  public readonly receipt?: ContractReceipt;
+  public readonly receipt?: ContractTransactionReceipt;
 
   constructor({
     address,
@@ -20,7 +20,7 @@ export default class DeployContractWithFactoryResult<C extends Contract> {
     contract: C;
     proxyAddress?: string;
     proxyAdminAddress?: string;
-    receipt?: ContractReceipt;
+    receipt?: ContractTransactionReceipt;
   }) {
     this.address = address;
     this.contract = contract;
