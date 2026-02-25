@@ -1,5 +1,43 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 4.2.0
+
+### Minor Changes
+
+- c5b2a50: Add support for multiple bond types (Variable Rate, Fixed Rate, KPI Linked, SPT)
+
+  This release introduces comprehensive support for multiple bond asset types across the Asset Tokenization Studio:
+
+  **Breaking Changes:**
+  - Refactored Solidity contracts to check for Equity type instead of Bond type, as Bond is no longer a single type but a family of types (Variable Rate, Fixed Rate, KPI Linked Rate, SPT Rate)
+  - Updated asset type filtering logic to use enum values (BOND_VARIABLE_RATE, BOND_FIXED_RATE, BOND_KPI_LINKED_RATE, BOND_SPT_RATE, EQUITY) instead of display strings
+
+  **Contract Changes:**
+  - Updated LifeCycleCashFlowStorageWrapper.sol to invert AssetType checks: now validates if asset is Equity (special case) with bond types as the default behavior
+  - Added comprehensive test coverage for all bond types in lifecycle cash flow tests
+
+  **SDK Changes:**
+  - Extended asset type system to support four distinct bond types plus equity
+  - Maintained backward compatibility for existing integrations
+
+  This is a **minor** version bump as it adds new functionality (multiple bond types) while maintaining backward compatibility through the enum-based approach.
+
+- 2a26b41: Migrate from ether 5 to ether 6
+
+### Patch Changes
+
+- Updated dependencies [35fde1c]
+- Updated dependencies [33e8046]
+- Updated dependencies [04e7366]
+- Updated dependencies [c81bab9]
+- Updated dependencies [e378e82]
+- Updated dependencies [ad45d49]
+- Updated dependencies [c5b2a50]
+- Updated dependencies [a942765]
+- Updated dependencies [fe7032f]
+- Updated dependencies [2a26b41]
+  - @hashgraph/asset-tokenization-contracts@4.2.0
+
 ## 4.1.1
 
 ### Patch Changes

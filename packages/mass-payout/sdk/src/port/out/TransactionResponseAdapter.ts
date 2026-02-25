@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethers } from "ethers";
+import { Interface } from "ethers";
 import TransactionResponse from "@domain/transaction/TransactionResponse";
 import { TransactionResponseError } from "./error/TransactionResponseError";
 
@@ -16,11 +16,13 @@ export class TransactionResponseAdapter {
     network: string,
   ): Uint8Array {
     try {
-      const iface = new ethers.utils.Interface(abi);
+      const iface = new Interface(abi);
       const resultHex = "0x".concat(Buffer.from(resultAsBytes).toString("hex"));
       const result = iface.decodeFunctionResult(functionName, resultHex);
 
-      const jsonParsedArray = JSON.parse(JSON.stringify(result));
+      const jsonParsedArray = JSON.parse(
+        JSON.stringify(result, (_key, value) => (typeof value === "bigint" ? value.toString() : value)),
+      );
       return jsonParsedArray;
 
       // eslint-disable-next-line unused-imports/no-unused-vars

@@ -10,6 +10,8 @@ import LogService from "@service/log/LogService";
 import { Security } from "@domain/context/security/Security";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import { BondDetails } from "@domain/context/bond/BondDetails";
+import { BondFixedRateDetails } from "@domain/context/bond/BondFixedRateDetails";
+import { BondKpiLinkedRateDetails } from "@domain/context/bond/BondKpiLinkedRateDetails";
 import { EquityDetails } from "@domain/context/equity/EquityDetails";
 import HWCSettings from "@core/settings/walletConnect/HWCSettings";
 import { ContractId } from "@hiero-ledger/sdk";
@@ -45,6 +47,16 @@ export interface WalletAdapter {
 }
 
 interface ITransactionAdapter {
+  setImpactData(
+    security: EvmAddress,
+    maxDeviationCap: BigDecimal,
+    baseLine: BigDecimal,
+    maxDeviationFloor: BigDecimal,
+    impactDataDecimals: number,
+    adjustmentPrecision: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
   createEquity(
     security: Security,
     equityDetails: EquityDetails,
@@ -60,6 +72,7 @@ interface ITransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
+
   createBond(
     security: Security,
     bondDetails: BondDetails,
@@ -76,6 +89,50 @@ interface ITransactionAdapter {
     proceedRecipients?: EvmAddress[],
     proceedRecipientsData?: string[],
     factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+createBondFixedRate(
+    security: Security,
+    bondFixedRateDetails: BondFixedRateDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  createBondKpiLinkedRate(
+    security: Security,
+    bondKpiLinkedRateDetails: BondKpiLinkedRateDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  addKpiData(
+    security: EvmAddress,
+    date: number,
+    value: string,
+    project: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
   controllerTransfer(
@@ -791,6 +848,15 @@ interface IProceedRecipients {
   ): Promise<TransactionResponse>;
 }
 
+interface IFixedRate {
+  setRate(
+    security: EvmAddress,
+    rate: BigDecimal,
+    rateDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     WalletAdapter,
@@ -814,10 +880,29 @@ export default abstract class TransactionAdapter
     IFreezeAdapter,
     IBatchAdapter,
     IAgent,
-    IProceedRecipients
+    IProceedRecipients,
+    IFixedRate
 {
+  abstract setImpactData(
+    security: EvmAddress,
+    maxDeviationCap: BigDecimal,
+    baseLine: BigDecimal,
+    maxDeviationFloor: BigDecimal,
+    impactDataDecimals: number,
+    adjustmentPrecision: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
   abstract triggerPendingScheduledSnapshots(
     security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract addKpiData(
+    security: EvmAddress,
+    date: number,
+    value: string,
+    project: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
@@ -874,6 +959,40 @@ export default abstract class TransactionAdapter
   abstract createBond(
     security: Security,
     bondDetails: BondDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract createBondFixedRate(
+    security: Security,
+    bondFixedRateDetails: BondFixedRateDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients?: EvmAddress[],
+    proceedRecipientsData?: string[],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  abstract createBondKpiLinkedRate(
+    security: Security,
+    bondKpiLinkedRateDetails: BondKpiLinkedRateDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
     configId: string,
@@ -1622,6 +1741,26 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     proceedRecipient: EvmAddress,
     data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract setRate(
+    security: EvmAddress,
+    rate: BigDecimal,
+    rateDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+
+  abstract setInterestRate(
+    security: EvmAddress,
+    maxRate: BigDecimal,
+    baseRate: BigDecimal,
+    minRate: BigDecimal,
+    startPeriod: BigDecimal,
+    startRate: BigDecimal,
+    missedPenalty: BigDecimal,
+    reportPeriod: BigDecimal,
+    rateDecimals: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }

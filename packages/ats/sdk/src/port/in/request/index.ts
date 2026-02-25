@@ -5,6 +5,7 @@ import RedeemRequest from "./security/operations/redeem/RedeemRequest";
 import ForceRedeemRequest from "./security/operations/redeem/ForceRedeemRequest";
 import CreateEquityRequest from "./equity/CreateEquityRequest";
 import CreateBondRequest from "./bond/CreateBondRequest";
+import CreateBondFixedRateRequest from "./bond/CreateBondFixedRateRequest";
 import RoleRequest from "./security/roles/RoleRequest";
 import ApplyRolesRequest from "./security/roles/ApplyRolesRequest";
 import ValidationResponse from "@core/validation/ValidationResponse";
@@ -25,6 +26,8 @@ import GetVotingRightsRequest from "./equity/GetVotingRightsRequest";
 import GetAllVotingRightsRequest from "./equity/GetAllVotingRightsRequest";
 import GetCouponForRequest from "./bond/GetCouponForRequest";
 import GetCouponRequest from "./bond/GetCouponRequest";
+import GetCouponsOrderedListRequest from "./bond/GetCouponsOrderedListRequest";
+import GetCouponsOrderedListTotalRequest from "./bond/GetCouponsOrderedListTotalRequest";
 import GetAllCouponsRequest from "./bond/GetAllCouponsRequest";
 import GetRoleCountForRequest from "./security/roles/GetRoleCountForRequest";
 import GetRolesForRequest from "./security/roles/GetRolesForRequest";
@@ -196,12 +199,28 @@ import GetProceedRecipientDataRequest from "./bond/GetProceedRecipientDataReques
 import GetProceedRecipientsCountRequest from "./bond/GetProceedRecipientsCountRequest";
 import GetProceedRecipientsRequest from "./bond/GetProceedRecipientsRequest";
 import IsProceedRecipientRequest from "./bond/IsProceedRecipientRequest";
+import GetCouponFromOrderedListAtRequest from "./bond/GetCouponFromOrderedListAtRequest";
 import GetPrincipalForRequest from "./bond/GetPrincipalForRequest";
 import ActionContentHashExistsRequest from "./security/operations/corporateActions/ActionContentHashExistsRequest";
+import SetRateRequest from "@port/in/request/interestRates/SetRateRequest";
+import GetRateRequest from "@port/in/request/interestRates/GetRateRequest";
+import SetInterestRateRequest from "./interestRates/SetInterestRateRequest";
+import GetInterestRateRequest from "@port/in/request/interestRates/GetInterestRateRequest";
+import ScheduledCouponListingCountRequest from "@port/in/request/scheduledTasks/ScheduledCouponListingCountRequest";
+import CreateBondKpiLinkedRateRequest from "./bond/CreateBondKpiLinkedRateRequest";
+import GetLatestKpiDataRequest from "./kpis/GetLatestKpiDataRequest";
+import GetMinDateRequest from "./kpis/GetMinDateRequest";
+import IsCheckPointDateRequest from "./kpis/IsCheckPointDateRequest";
+import { AddKpiDataRequest } from "./kpis/AddKpiDataRequest";
+import GetImpactDataRequest from "./kpiLinkedRate/GetImpactDataRequest";
+import SetImpactDataRequest from "./interestRates/SetImpactDataRequest";
+import GetScheduledCouponListingRequest from "./scheduledTasks/GetScheduledCouponListingRequest";
 
 export {
   CreateEquityRequest,
   CreateBondRequest,
+  CreateBondFixedRateRequest,
+  CreateBondKpiLinkedRateRequest,
   ValidationResponse,
   IssueRequest,
   RedeemRequest,
@@ -223,8 +242,11 @@ export {
   GetVotingRightsRequest,
   GetAllVotingRightsRequest,
   GetCouponForRequest,
+  GetCouponFromOrderedListAtRequest,
   GetPrincipalForRequest,
   GetCouponRequest,
+  GetCouponsOrderedListRequest,
+  GetCouponsOrderedListTotalRequest,
   GetAllCouponsRequest,
   GetRoleCountForRequest,
   GetRolesForRequest,
@@ -397,4 +419,16 @@ export {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
   ActionContentHashExistsRequest,
+  SetRateRequest,
+  SetInterestRateRequest,
+  SetImpactDataRequest,
+  GetRateRequest,
+  GetInterestRateRequest,
+  ScheduledCouponListingCountRequest as ScheduledCouponListingCountRequest,
+  GetLatestKpiDataRequest,
+  GetMinDateRequest,
+  IsCheckPointDateRequest,
+  AddKpiDataRequest,
+  GetImpactDataRequest,
+  GetScheduledCouponListingRequest,
 };

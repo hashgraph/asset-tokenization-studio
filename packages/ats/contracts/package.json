@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "4.1.1",
+  "version": "4.2.0",
   "repository": "https://github.com/hashgraph/asset-tokenization-studio",
   "type": "commonjs",
   "main": "./build/typechain-types/index.js",
@@ -56,7 +56,7 @@
     "lint:fix": "npm run lint:sol:fix; npm run lint:js:fix",
     "lint:sol": "solhint --config solhint.config.js 'contracts/**/*.sol'",
     "lint:sol:fix": "solhint --config solhint.config.js 'contracts/**/*.sol' --fix",
-    "lint:js": "eslint .",
+    "lint:js": "eslint . --cache",
     "lint:js:fix": "eslint . --fix",
     "generate:registry": "npx tsx scripts/tools/registry-generator/index.ts",
     "generate:registry:cached": "npx tsx scripts/tools/registry-generator/index.ts --use-cache",
