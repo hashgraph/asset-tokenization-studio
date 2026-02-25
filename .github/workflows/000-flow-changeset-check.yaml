@@ -77,7 +77,7 @@ jobs:
           echo "Comparing HEAD against base branch: ${BASE_BRANCH}"
 
           NEW_CHANGESETS=$(git diff "${BASE_BRANCH}...HEAD" --name-only --diff-filter=A | grep "^\.changeset/.*\.md$" | grep -v "README.md" || true)
-          NEW_CHANGESET_COUNT=$(echo "${NEW_CHANGESETS}" | grep -c "\.md$" || echo "0")
+          NEW_CHANGESET_COUNT=$(echo "${NEW_CHANGESETS}" | grep -c "\.md$" || true)
 
           echo "Files changed in PR:"
           git diff "${BASE_BRANCH}...HEAD" --name-only --diff-filter=A | head -10
