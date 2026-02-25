@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DelegateContractId, ContractId as HContractId, Long } from "@hiero-ledger/sdk";
-import { proto } from "@hiero-ledger/proto";
+import { proto } from "@hashgraph/proto";
 import InvalidKeyForContract from "./error/InvalidKeyForContract";
 import BaseError from "@core/error/BaseError";
 import CheckStrings from "@core/checks/strings/CheckStrings";
