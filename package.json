@@ -23,9 +23,6 @@
       "i18next-browser-languagedetector": "7.2.0",
       "zustand": "4.5.2",
       "@phosphor-icons/react": "2.1.7"
-    },
-    "@nomicfoundation/hardhat-toolbox": {
-      "@nomicfoundation/hardhat-chai-matchers": "$@nomicfoundation/hardhat-chai-matchers"
     }
   },
   "scripts": {
