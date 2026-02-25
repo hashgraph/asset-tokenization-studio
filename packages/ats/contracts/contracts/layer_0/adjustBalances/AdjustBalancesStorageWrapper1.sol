@@ -54,7 +54,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
 
     function _updateLabafByPartition(bytes32 partition) internal override {
         AdjustBalancesStorage storage adjustBalancesStorage = _adjustBalancesStorage();
-        adjustBalancesStorage.labafByPartition[partition] = adjustBalancesStorage.abaf;
+        adjustBalancesStorage.labafByPartition[partition] = _getAbaf();
     }
 
     function _updateLabafByTokenHolder(uint256 labaf, address tokenHolder) internal override {
