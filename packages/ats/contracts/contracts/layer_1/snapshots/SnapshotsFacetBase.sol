@@ -8,9 +8,10 @@ import { Snapshots } from "./Snapshots.sol";
 abstract contract SnapshotsFacetBase is Snapshots, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](17);
+        staticFunctionSelectors_ = new bytes4[](18);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balancesOfAtSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.totalSupplyAtSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this.balanceOfAtSnapshotByPartition.selector;
         staticFunctionSelectors_[selectorIndex++] = this.partitionsOfAtSnapshot.selector;
