@@ -5,7 +5,6 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import NetworkService from "@app/services/network/NetworkService";
 import { MirrorNodeAdapter } from "@port/out/mirror/MirrorNodeAdapter";
-import { ethers } from "ethers";
 import { LifeCycleCashFlow__factory } from "@hashgraph/mass-payout-contracts";
 import EvmAddress from "@domain/contract/EvmAddress";
 import { EvmAddressPropsFixture } from "../../../../fixture/DataFixture";
@@ -28,6 +27,14 @@ jest.mock("@hashgraph/mass-payout-contracts", () => ({
   },
 }));
 
+jest.mock("ethers", () => {
+  const actual = jest.requireActual("ethers");
+  return {
+    ...actual,
+    JsonRpcProvider: jest.fn().mockImplementation(() => ({})),
+  };
+});
+
 describe("RPCQueryAdapter", () => {
   let service: RPCQueryAdapter;
 
@@ -42,23 +49,21 @@ describe("RPCQueryAdapter", () => {
 
     service = module.get<RPCQueryAdapter>(RPCQueryAdapter);
 
-    jest.spyOn(ethers.providers, "JsonRpcProvider").mockImplementation(() => {
-      return {} as any;
-    });
-
     jest.clearAllMocks();
   });
 
   describe("init", () => {
     it("should initialize provider with default URL", async () => {
+      const { JsonRpcProvider } = require("ethers");
       const env = await service.init();
       expect(env).toBe("testnet");
-      expect(ethers.providers.JsonRpcProvider).toHaveBeenCalledWith("http://127.0.0.1:7546/api");
+      expect(JsonRpcProvider).toHaveBeenCalledWith("http://127.0.0.1:7546/api");
     });
 
     it("should initialize provider with custom URL + apiKey", async () => {
+      const { JsonRpcProvider } = require("ethers");
       await service.init("http://custom.url/", "apikey123");
-      expect(ethers.providers.JsonRpcProvider).toHaveBeenCalledWith("http://custom.url/apikey123");
+      expect(JsonRpcProvider).toHaveBeenCalledWith("http://custom.url/apikey123");
     });
   });
 
