@@ -23,6 +23,9 @@
       "i18next-browser-languagedetector": "7.2.0",
       "zustand": "4.5.2",
       "@phosphor-icons/react": "2.1.7"
+    },
+    "@nomicfoundation/hardhat-toolbox": {
+      "@nomicfoundation/hardhat-chai-matchers": "$@nomicfoundation/hardhat-chai-matchers"
     }
   },
   "scripts": {
@@ -188,11 +191,10 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.6",
+    "ethers": "^6.15.0",
     "@commitlint/cli": "^20.4.1",
     "@commitlint/config-conventional": "^20.4.1",
     "@eslint/js": "^9.24.0",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.1",
