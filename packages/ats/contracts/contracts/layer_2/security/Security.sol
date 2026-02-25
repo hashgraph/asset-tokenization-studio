@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISecurity } from "../interfaces/ISecurity.sol";
+import { ISecurity } from "../interfaces/security/ISecurity.sol";
 import { Internals } from "../../layer_0/Internals.sol";
 
 abstract contract Security is ISecurity, Internals {
