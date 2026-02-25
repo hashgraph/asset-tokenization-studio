@@ -2,7 +2,7 @@
 
 import { HardhatUserConfig } from "hardhat/config";
 import "tsconfig-paths/register";
-import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@typechain/hardhat";
 import "hardhat-contract-sizer";
@@ -85,7 +85,7 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: "./typechain-types",
-    target: "ethers-v5",
+    target: "ethers-v6",
   },
   mocha: {
     timeout: 3_000_000,
