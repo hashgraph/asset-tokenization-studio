@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISnapshots } from "../interfaces/snapshots/ISnapshots.sol";
+import { ISnapshots, HolderBalance } from "../interfaces/snapshots/ISnapshots.sol";
 import { Internals } from "contracts/layer_0/Internals.sol";
 import { _SNAPSHOT_ROLE } from "../constants/roles.sol";
 
@@ -9,10 +9,19 @@ abstract contract Snapshots is ISnapshots, Internals {
     function takeSnapshot() external override onlyUnpaused onlyRole(_SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
         _callTriggerPendingScheduledCrossOrderedTasks();
         snapshotID_ = _takeSnapshot();
+        emit SnapshotTaken(_msgSender(), snapshotID_);
     }
 
     function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_) {
         decimals_ = _decimalsAtSnapshot(_snapshotID);
+    }
+
+    function balancesOfAtSnapshot(
+        uint256 _snapshotID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (HolderBalance[] memory balances_) {
+        balances_ = _balancesOfAtSnapshot(_snapshotID, _pageIndex, _pageLength);
     }
 
     function balanceOfAtSnapshot(
