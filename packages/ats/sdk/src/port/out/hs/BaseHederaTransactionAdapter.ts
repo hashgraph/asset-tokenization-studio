@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
+  ContractCreateTransaction,
   ContractExecuteTransaction,
   Signer,
   Transaction,
@@ -88,6 +89,15 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
   abstract getAccount(): Account;
 
   abstract supportsEvmOperations(): boolean;
+
+  // ===== Concrete deployContract =====
+
+  public async deployContract(bytecodeHex: string, gas: number): Promise<TransactionResponse> {
+    const hex = bytecodeHex.startsWith("0x") ? bytecodeHex.slice(2) : bytecodeHex;
+    const bytecode = Uint8Array.from(Buffer.from(hex, "hex"));
+    const contractCreate = new ContractCreateTransaction().setBytecode(bytecode).setGas(gas);
+    return this.processTransaction(contractCreate, TransactionType.RECEIPT);
+  }
 
   // ===== Concrete executeContractCall =====
 

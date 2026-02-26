@@ -20,6 +20,17 @@ export interface TransactionExecutor {
     startDate?: string,
   ): Promise<TransactionResponse>;
 
+  /**
+   * Deploys a new smart contract from its compiled bytecode.
+   *
+   * Each adapter overrides this to use the signing mechanism it supports:
+   * - Custodial / local-key adapters → ContractCreateTransaction (native Hedera)
+   * - HWC EVM sessions (MetaMask)    → eth_sendTransaction with no `to`
+   * - HWC native Hedera sessions     → FileCreateTransaction + ContractCreateTransaction
+   *   (avoids INVALID_FILE_ID caused by wallet re-encoding inline initcode)
+   */
+  deployContract(bytecodeHex: string, gas: number): Promise<TransactionResponse>;
+
   executeContractCall(
     contractId: string,
     iface: ethers.Interface,

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ContractCreateTransaction, ContractId } from "@hiero-ledger/sdk";
+import { ContractId } from "@hiero-ledger/sdk";
 import {
   ControlListFacet__factory,
   ExternalControlListManagementFacet__factory,
@@ -11,7 +11,6 @@ import { GAS } from "@core/Constants";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
 import LogService from "@service/log/LogService";
-import { TransactionType } from "@port/out/TransactionResponseEnums";
 import { TransactionExecutor } from "../TransactionExecutor";
 
 export class ControlListOperations {
@@ -163,25 +162,11 @@ export class ControlListOperations {
 
   async createExternalBlackListMock(): Promise<TransactionResponse> {
     LogService.logTrace(`Deploying External Control Black List Mock contract`);
-    const bytecodeHex = MockedBlacklist__factory.bytecode.startsWith("0x")
-      ? MockedBlacklist__factory.bytecode.slice(2)
-      : MockedBlacklist__factory.bytecode;
-    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, "hex"));
-    const contractCreate = new ContractCreateTransaction()
-      .setBytecode(bytecode)
-      .setGas(GAS.CREATE_EXTERNAL_BLACK_LIST_MOCK);
-    return this.executor.processTransaction(contractCreate, TransactionType.RECEIPT);
+    return this.executor.deployContract(MockedBlacklist__factory.bytecode, GAS.CREATE_EXTERNAL_BLACK_LIST_MOCK);
   }
 
   async createExternalWhiteListMock(): Promise<TransactionResponse> {
     LogService.logTrace(`Deploying External Control White List Mock contract`);
-    const bytecodeHex = MockedWhitelist__factory.bytecode.startsWith("0x")
-      ? MockedWhitelist__factory.bytecode.slice(2)
-      : MockedWhitelist__factory.bytecode;
-    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, "hex"));
-    const contractCreate = new ContractCreateTransaction()
-      .setBytecode(bytecode)
-      .setGas(GAS.CREATE_EXTERNAL_WHITE_LIST_MOCK);
-    return this.executor.processTransaction(contractCreate, TransactionType.RECEIPT);
+    return this.executor.deployContract(MockedWhitelist__factory.bytecode, GAS.CREATE_EXTERNAL_WHITE_LIST_MOCK);
   }
 }

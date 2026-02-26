@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ContractCreateTransaction, ContractId } from "@hiero-ledger/sdk";
+import { ContractId } from "@hiero-ledger/sdk";
 import { ethers } from "ethers";
 import {
   ExternalPauseManagementFacet__factory,
@@ -10,7 +10,6 @@ import { GAS } from "@core/Constants";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
 import LogService from "@service/log/LogService";
-import { TransactionType } from "@port/out/TransactionResponseEnums";
 import { TransactionExecutor } from "../TransactionExecutor";
 
 export class PauseOperations {
@@ -101,13 +100,6 @@ export class PauseOperations {
 
   async createExternalPauseMock(): Promise<TransactionResponse> {
     LogService.logTrace(`Deploying External Pause Mock contract`);
-    const bytecodeHex = MockedExternalPause__factory.bytecode.startsWith("0x")
-      ? MockedExternalPause__factory.bytecode.slice(2)
-      : MockedExternalPause__factory.bytecode;
-    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, "hex"));
-    const contractCreate = new ContractCreateTransaction()
-      .setBytecode(bytecode)
-      .setGas(GAS.CREATE_EXTERNAL_PAUSE_MOCK);
-    return this.executor.processTransaction(contractCreate, TransactionType.RECEIPT);
+    return this.executor.deployContract(MockedExternalPause__factory.bytecode, GAS.CREATE_EXTERNAL_PAUSE_MOCK);
   }
 }

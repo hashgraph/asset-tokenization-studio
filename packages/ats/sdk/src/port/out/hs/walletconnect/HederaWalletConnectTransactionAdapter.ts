@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { singleton } from "tsyringe";
-import { AccountId, Transaction } from "@hiero-ledger/sdk";
+import { AccountId, ContractCreateTransaction, Transaction, TransactionId } from "@hiero-ledger/sdk";
 import { NetworkName } from "@hiero-ledger/sdk/lib/client/Client";
 import { BaseHederaTransactionAdapter } from "../BaseHederaTransactionAdapter";
 import { SigningError } from "@port/out/error/SigningError";
@@ -301,6 +301,56 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     } as any;
 
     return RPCTransactionResponseAdapter.manageResponse(responsePayload, this.networkService.environment);
+  }
+
+  public async deployContract(bytecodeHex: string, gas: number): Promise<TransactionResponse> {
+    const hex = bytecodeHex.startsWith("0x") ? bytecodeHex.slice(2) : bytecodeHex;
+    const bytecode = Uint8Array.from(Buffer.from(hex, "hex"));
+
+    if (this.isEvmSession()) {
+      // EVM path (MetaMask): standard EVM contract deployment — eth_sendTransaction with no `to`
+      this.ensureInitialized();
+      if (!this.account.evmAddress) throw new AccountNotSet();
+
+      const chainRef = this.currentEvmChainRef();
+      const txParams: Record<string, string> = {
+        from: this.account.evmAddress,
+        data: `0x${hex}`,
+        gas: ethers.toBeHex(gas),
+      };
+
+      LogService.logTrace(`[HWC v2 EVM] Deploying contract via eth_sendTransaction: ${JSON.stringify(txParams)}`);
+
+      const txHash = await this.hederaProvider.request(
+        { method: "eth_sendTransaction", params: [txParams] },
+        chainRef,
+      );
+
+      const provider = this.rpcProvider();
+      const receipt = await provider.waitForTransaction(txHash as string);
+      const responsePayload = { hash: txHash, wait: () => Promise.resolve(receipt) } as any;
+      return RPCTransactionResponseAdapter.manageResponse(responsePayload, this.networkService.environment);
+    }
+
+    // Native Hedera path: ContractCreateTransaction with inline initcode.
+    // We pre-freeze the transaction (set transactionId + nodeAccountId) before sending to the
+    // wallet so that HashPack can sign the existing bodyBytes directly without needing to
+    // re-encode the transaction body. Re-encoding would strip proto field 16 (initcode) from
+    // older wallet proto definitions, causing INVALID_FILE_ID.
+    LogService.logTrace("[HWC v2 Native] Deploying contract — pre-freezing ContractCreate with setBytecode");
+
+    const accountId = AccountId.fromString(this.account.id.toString());
+    // 0.0.3 is a consensus node available on both testnet and mainnet
+    const nodeId = AccountId.fromString("0.0.3");
+
+    const contractCreate = new ContractCreateTransaction()
+      .setBytecode(bytecode)
+      .setGas(gas)
+      .setTransactionId(TransactionId.generate(accountId))
+      .setNodeAccountIds([nodeId])
+      .freeze();
+
+    return this.processTransaction(contractCreate, TransactionType.RECEIPT);
   }
 
   async sign(message: string | Transaction): Promise<string> {
