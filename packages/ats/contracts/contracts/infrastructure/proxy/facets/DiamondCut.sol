@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IDiamondCut } from "../../interfaces/IDiamondCut.sol";
 import { ResolverProxyUnstructured } from "../ResolverProxyUnstructured.sol";
 import { IBusinessLogicResolver } from "../../interfaces/IBusinessLogicResolver.sol";
-import { ResolverProxyStorage, resolverProxyStorage } from "../../../storage/ExternalStorage.sol";
+import { ResolverProxyStorage, resolverProxyStorage } from "../../../storage/ExternalStorageAccessor.sol";
 import { LibAccess } from "../../../lib/core/LibAccess.sol";
 
 bytes32 constant _DEFAULT_ADMIN_ROLE = bytes32(0);

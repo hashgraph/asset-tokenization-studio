@@ -2,12 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { ERC1594Storage, erc1594Storage } from "../../storage/TokenStorage.sol";
-import { erc20Storage } from "../../storage/TokenStorage.sol";
-import { erc3643Storage } from "../../storage/ExternalStorage.sol";
+import { ERC1594Storage, erc1594Storage } from "../../storage/TokenIssuanceStorageAccessor.sol";
 import { IKyc } from "../../facets/features/interfaces/IKyc.sol";
 import { IPause } from "../../facets/features/interfaces/IPause.sol";
-import { IERC1410 } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
 import { IERC1410TokenHolder } from "../../facets/features/interfaces/ERC1400/IERC1410TokenHolder.sol";
 import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
@@ -24,6 +21,7 @@ import { LibCompliance } from "../core/LibCompliance.sol";
 import { LibKyc } from "../core/LibKyc.sol";
 import { LibProtectedPartitions } from "../core/LibProtectedPartitions.sol";
 import { LibABAF } from "./LibABAF.sol";
+import { LibERC20 } from "./LibERC20.sol";
 import { LibERC1410 } from "./LibERC1410.sol";
 import { LibClearing } from "./LibClearing.sol";
 
@@ -233,7 +231,7 @@ library LibERC1594 {
         uint256 _value,
         bool _checkSender
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        IERC3643Management.ERC3643Storage storage s = erc3643Storage();
+        address complianceAddr = address(LibCompliance.getCompliance());
 
         if (_checkSender) {
             if (!LibControlList.isAbleToAccess(_sender)) {
@@ -252,7 +250,7 @@ library LibERC1594 {
                     abi.encode(_sender)
                 );
             }
-            bytes memory complianceResultSender = address(s.compliance).functionStaticCall(
+            bytes memory complianceResultSender = complianceAddr.functionStaticCall(
                 abi.encodeWithSelector(ICompliance.canTransfer.selector, _sender, address(0), 0),
                 IERC3643Management.ComplianceCallFailed.selector
             );
@@ -295,7 +293,7 @@ library LibERC1594 {
             }
         }
 
-        bytes memory complianceResult = address(s.compliance).functionStaticCall(
+        bytes memory complianceResult = complianceAddr.functionStaticCall(
             abi.encodeWithSelector(ICompliance.canTransfer.selector, _from, _to, _value),
             IERC3643Management.ComplianceCallFailed.selector
         );
@@ -316,14 +314,14 @@ library LibERC1594 {
         address _from,
         address _to
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
-        IERC3643Management.ERC3643Storage storage s = erc3643Storage();
+        address identityRegistryAddr = address(LibCompliance.getIdentityRegistry());
 
         if (_from != address(0)) {
             if (!LibKyc.verifyKycStatus(IKyc.KycStatus.GRANTED, _from)) {
                 return (false, Eip1066.DISALLOWED_OR_STOP, IKyc.InvalidKycStatus.selector, abi.encode(_from));
             }
 
-            bytes memory isVerifiedFrom = s.identityRegistry.functionStaticCall(
+            bytes memory isVerifiedFrom = identityRegistryAddr.functionStaticCall(
                 abi.encodeWithSelector(IIdentityRegistry.isVerified.selector, _from),
                 IERC3643Management.IdentityRegistryCallFailed.selector
             );
@@ -343,7 +341,7 @@ library LibERC1594 {
                 return (false, Eip1066.DISALLOWED_OR_STOP, IKyc.InvalidKycStatus.selector, abi.encode(_to));
             }
 
-            bytes memory isVerifiedTo = s.identityRegistry.functionStaticCall(
+            bytes memory isVerifiedTo = identityRegistryAddr.functionStaticCall(
                 abi.encodeWithSelector(IIdentityRegistry.isVerified.selector, _to),
                 IERC3643Management.IdentityRegistryCallFailed.selector
             );
@@ -408,6 +406,6 @@ library LibERC1594 {
             LibABAF.getAbafAdjustedAt(_timestamp),
             LibABAF.getAllowanceLabaf(_owner, _spender)
         );
-        return erc20Storage().allowed[_owner][_spender] * factor;
+        return LibERC20.getAllowance(_owner, _spender) * factor;
     }
 }

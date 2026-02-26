@@ -5,9 +5,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
-import { HoldDataStorage, Hold, HoldData, HoldIdentifier } from "../../facets/features/interfaces/hold/IHoldTypes.sol";
+import { IHoldBase } from "../../facets/features/interfaces/hold/IHoldBase.sol";
 import { IHoldTokenHolder } from "../../facets/features/interfaces/hold/IHoldTokenHolder.sol";
-import { holdStorage } from "../../storage/AssetStorage.sol";
+import { HoldDataStorage, holdStorage } from "../../storage/FinancialOpsStorageAccessor.sol";
 import { ThirdPartyType } from "../../facets/features/types/ThirdPartyType.sol";
 
 /// @title LibHold
@@ -31,7 +31,7 @@ library LibHold {
     function createHold(
         bytes32 _partition,
         address _from,
-        Hold memory _hold,
+        IHoldBase.Hold memory _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) internal returns (uint256 holdId_) {
@@ -39,7 +39,7 @@ library LibHold {
 
         holdId_ = ++s.nextHoldIdByAccountAndPartition[_from][_partition];
 
-        HoldData memory holdData = HoldData(holdId_, _hold, _operatorData, _thirdPartyType);
+        IHoldBase.HoldData memory holdData = IHoldBase.HoldData(holdId_, _hold, _operatorData, _thirdPartyType);
         s.holdsByAccountPartitionAndId[_from][_partition][holdId_] = holdData;
         s.holdIdsByAccountAndPartition[_from][_partition].add(holdId_);
         s.totalHeldAmountByAccountAndPartition[_from][_partition] += _hold.amount;
@@ -51,9 +51,9 @@ library LibHold {
     /// @param _amount The amount to execute
     /// @return holdData_ The updated hold data
     function executeHold(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldBase.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
-    ) internal returns (HoldData memory holdData_) {
+    ) internal returns (IHoldBase.HoldData memory holdData_) {
         holdData_ = decreaseHeldAmount(_holdIdentifier, _amount);
         if (holdData_.hold.amount == 0) {
             removeHold(_holdIdentifier);
@@ -65,9 +65,9 @@ library LibHold {
     /// @param _amount The amount to release
     /// @return holdData_ The updated hold data
     function releaseHold(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldBase.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
-    ) internal returns (HoldData memory holdData_) {
+    ) internal returns (IHoldBase.HoldData memory holdData_) {
         holdData_ = decreaseHeldAmount(_holdIdentifier, _amount);
         if (holdData_.hold.amount == 0) {
             removeHold(_holdIdentifier);
@@ -77,8 +77,8 @@ library LibHold {
     /// @notice Reclaim a hold by partition
     /// @param _holdIdentifier The hold identifier
     /// @return amount_ The reclaimed amount
-    function reclaimHold(HoldIdentifier calldata _holdIdentifier) internal returns (uint256 amount_) {
-        HoldData memory holdData = getHold(_holdIdentifier);
+    function reclaimHold(IHoldBase.HoldIdentifier calldata _holdIdentifier) internal returns (uint256 amount_) {
+        IHoldBase.HoldData memory holdData = getHold(_holdIdentifier);
         amount_ = holdData.hold.amount;
 
         decreaseHeldAmount(_holdIdentifier, amount_);
@@ -94,9 +94,9 @@ library LibHold {
     /// @param _amount The amount to decrease
     /// @return holdData_ The updated hold data
     function decreaseHeldAmount(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldBase.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
-    ) internal returns (HoldData memory holdData_) {
+    ) internal returns (IHoldBase.HoldData memory holdData_) {
         HoldDataStorage storage s = holdStorage();
 
         s.totalHeldAmountByAccount[_holdIdentifier.tokenHolder] -= _amount;
@@ -145,7 +145,7 @@ library LibHold {
 
     /// @notice Remove a hold completely
     /// @param _holdIdentifier The hold identifier
-    function removeHold(HoldIdentifier calldata _holdIdentifier) internal {
+    function removeHold(IHoldBase.HoldIdentifier calldata _holdIdentifier) internal {
         HoldDataStorage storage s = holdStorage();
 
         s.holdIdsByAccountAndPartition[_holdIdentifier.tokenHolder][_holdIdentifier.partition].remove(
@@ -168,7 +168,7 @@ library LibHold {
     /// @notice Set the third party for a hold
     /// @param _holdIdentifier The hold identifier
     /// @param _thirdParty The third party address
-    function setHoldThirdParty(HoldIdentifier calldata _holdIdentifier, address _thirdParty) internal {
+    function setHoldThirdParty(IHoldBase.HoldIdentifier calldata _holdIdentifier, address _thirdParty) internal {
         holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
             _holdIdentifier.holdId
         ] = _thirdParty;
@@ -191,7 +191,9 @@ library LibHold {
     /// @notice Get the third party for a hold
     /// @param _holdIdentifier The hold identifier
     /// @return thirdParty_ The third party address
-    function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) internal view returns (address thirdParty_) {
+    function getHoldThirdParty(
+        IHoldBase.HoldIdentifier calldata _holdIdentifier
+    ) internal view returns (address thirdParty_) {
         thirdParty_ = holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
             _holdIdentifier.partition
         ][_holdIdentifier.holdId];
@@ -217,7 +219,9 @@ library LibHold {
     /// @notice Get hold data by identifier
     /// @param _holdIdentifier The hold identifier
     /// @return holdData_ The hold data
-    function getHold(HoldIdentifier memory _holdIdentifier) internal view returns (HoldData memory holdData_) {
+    function getHold(
+        IHoldBase.HoldIdentifier memory _holdIdentifier
+    ) internal view returns (IHoldBase.HoldData memory holdData_) {
         holdData_ = holdStorage().holdsByAccountPartitionAndId[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
             _holdIdentifier.holdId
         ];
@@ -269,7 +273,7 @@ library LibHold {
     /// @return operatorData_ The operator data
     /// @return thirdPartyType_ The third party type
     function getHoldForByPartition(
-        HoldIdentifier calldata _holdIdentifier
+        IHoldBase.HoldIdentifier calldata _holdIdentifier
     )
         internal
         view
@@ -283,7 +287,7 @@ library LibHold {
             ThirdPartyType thirdPartyType_
         )
     {
-        HoldData memory holdData = getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = getHold(_holdIdentifier);
         return (
             holdData.hold.amount,
             holdData.hold.expirationTimestamp,
@@ -313,7 +317,7 @@ library LibHold {
     /// @notice Check if a hold ID is valid
     /// @param _holdIdentifier The hold identifier
     /// @return isValid_ True if hold ID is valid
-    function isHoldIdValid(HoldIdentifier memory _holdIdentifier) internal view returns (bool isValid_) {
+    function isHoldIdValid(IHoldBase.HoldIdentifier memory _holdIdentifier) internal view returns (bool isValid_) {
         isValid_ = getHold(_holdIdentifier).id != 0;
     }
 
@@ -321,7 +325,10 @@ library LibHold {
     /// @param _hold The hold structure
     /// @param _blockTimestamp The current block timestamp
     /// @return isExpired_ True if hold is expired
-    function isHoldExpired(Hold memory _hold, uint256 _blockTimestamp) internal pure returns (bool isExpired_) {
+    function isHoldExpired(
+        IHoldBase.Hold memory _hold,
+        uint256 _blockTimestamp
+    ) internal pure returns (bool isExpired_) {
         isExpired_ = _blockTimestamp > _hold.expirationTimestamp;
     }
 
@@ -329,20 +336,20 @@ library LibHold {
     /// @param _hold The hold structure
     /// @param _escrow The escrow address to verify
     /// @return isEscrow_ True if address is escrow
-    function isEscrow(Hold memory _hold, address _escrow) internal pure returns (bool isEscrow_) {
+    function isEscrow(IHoldBase.Hold memory _hold, address _escrow) internal pure returns (bool isEscrow_) {
         isEscrow_ = _escrow == _hold.escrow;
     }
 
     /// @notice Validate a hold ID and revert if invalid
     /// @param _holdIdentifier The hold identifier
-    function validateHoldId(HoldIdentifier calldata _holdIdentifier) internal view {
+    function validateHoldId(IHoldBase.HoldIdentifier calldata _holdIdentifier) internal view {
         if (!isHoldIdValid(_holdIdentifier)) revert IHoldTokenHolder.WrongHoldId();
     }
 
     /// @notice Check if hold amount is sufficient
     /// @param _amount The amount to check
     /// @param _holdData The hold data
-    function checkHoldAmount(uint256 _amount, HoldData memory _holdData) internal pure {
+    function checkHoldAmount(uint256 _amount, IHoldBase.HoldData memory _holdData) internal pure {
         if (_amount > _holdData.hold.amount)
             revert IHoldTokenHolder.InsufficientHoldBalance(_holdData.hold.amount, _amount);
     }

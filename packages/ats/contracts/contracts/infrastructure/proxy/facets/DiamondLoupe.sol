@@ -7,7 +7,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ResolverProxyUnstructured } from "../ResolverProxyUnstructured.sol";
 import { IDiamondLoupe } from "../../interfaces/IDiamondLoupe.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import { ResolverProxyStorage, resolverProxyStorage } from "../../../storage/ExternalStorage.sol";
+import { ResolverProxyStorage, resolverProxyStorage } from "../../../storage/ExternalStorageAccessor.sol";
 
 abstract contract DiamondLoupe is IDiamondLoupe, IERC165, ResolverProxyUnstructured {
     function getFacets() external view override returns (Facet[] memory facets_) {

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable ordering
 
-import { ERC20PermitStorage, erc20PermitStorage } from "../../storage/TokenStorage.sol";
+import { ERC20PermitStorage, erc20PermitStorage } from "../../storage/ERC20StorageAccessor.sol";
 import { LibERC712 } from "../core/LibERC712.sol";
 
 /// @title LibERC20Permit

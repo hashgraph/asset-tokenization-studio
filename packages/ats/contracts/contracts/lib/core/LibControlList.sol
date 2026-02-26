@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    ControlListStorage,
-    ExternalListDataStorage,
-    controlListStorage,
-    externalListStorage
-} from "../../storage/CoreStorage.sol";
+import { ControlListStorage, controlListStorage } from "../../storage/ControlListStorageAccessor.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { IExternalControlList } from "../../facets/features/interfaces/IExternalControlList.sol";
 import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
+import { LibExternalLists } from "./LibExternalLists.sol";
 
 /// @title LibControlList — Control list (whitelist/blacklist) library
 /// @notice Centralized control list functionality extracted from ControlListStorageWrapper.sol
@@ -65,13 +61,11 @@ library LibControlList {
     }
 
     function isExternallyAuthorized(address account) internal view returns (bool) {
-        ExternalListDataStorage storage externalControlListStorage = externalListStorage(
-            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
-        );
-        uint256 length = externalControlListStorage.list.length();
+        uint256 length = LibExternalLists.getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
 
         for (uint256 index; index < length; ) {
-            if (!IExternalControlList(externalControlListStorage.list.at(index)).isAuthorized(account)) {
+            address listAddr = LibExternalLists.getExternalListAt(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, index);
+            if (!IExternalControlList(listAddr).isAuthorized(account)) {
                 return false;
             }
             unchecked {

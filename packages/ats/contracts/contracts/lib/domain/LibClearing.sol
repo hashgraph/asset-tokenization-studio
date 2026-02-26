@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { clearingStorage, ClearingDataStorage } from "../../storage/AssetStorage.sol";
+import { clearingStorage, ClearingDataStorage } from "../../storage/FinancialOpsStorageAccessor.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
 import { IClearingTransfer } from "../../facets/features/interfaces/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../../facets/features/interfaces/clearing/IClearingRedeem.sol";

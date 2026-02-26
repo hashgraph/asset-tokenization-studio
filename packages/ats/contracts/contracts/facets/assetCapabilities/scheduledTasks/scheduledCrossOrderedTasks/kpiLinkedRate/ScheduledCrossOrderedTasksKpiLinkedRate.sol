@@ -7,11 +7,8 @@ import { LibBond } from "../../../../../lib/domain/LibBond.sol";
 import { LibInterestRate } from "../../../../../lib/domain/LibInterestRate.sol";
 import { LibKpis } from "../../../../../lib/domain/LibKpis.sol";
 import { LibProceedRecipients } from "../../../../../lib/domain/LibProceedRecipients.sol";
-import { KpiLinkedRateDataStorage } from "../../../../../storage/ScheduledStorage.sol";
 
 abstract contract ScheduledCrossOrderedTasksKpiLinkedRate is ScheduledCrossOrderedTasks {
-    /// @notice Calculate and store the KPI-linked interest rate when a coupon is listed
-    /// @dev Replicates the old _addToCouponsOrderedList override behavior from KPI-linked BondStorageWrapper
     function _onCouponListed(uint256 _couponID, uint256 _timestamp) internal override {
         IBondRead.RegisteredCoupon memory registeredCoupon = LibBond.getCoupon(_couponID);
         IBondRead.Coupon memory coupon = registeredCoupon.coupon;
@@ -19,45 +16,50 @@ abstract contract ScheduledCrossOrderedTasksKpiLinkedRate is ScheduledCrossOrder
         if (coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return;
         if (coupon.fixingDate > _timestamp) return;
 
-        KpiLinkedRateDataStorage storage kpiRateStorage = LibInterestRate.getKpiLinkedRate();
+        (uint256 startPeriod, uint256 startRate, uint8 cfgRateDecimals, uint256 reportPeriod) = LibInterestRate
+            .getKpiLinkedRateConfig();
 
-        if (coupon.fixingDate < kpiRateStorage.startPeriod) {
-            LibBond.updateCouponRate(_couponID, coupon, kpiRateStorage.startRate, kpiRateStorage.rateDecimals);
+        if (coupon.fixingDate < startPeriod) {
+            LibBond.updateCouponRate(_couponID, coupon, startRate, cfgRateDecimals);
             return;
         }
 
         // Aggregate KPI data from all proceed recipients
-        address[] memory projects = LibProceedRecipients.getProceedRecipients(
-            0,
-            LibProceedRecipients.getProceedRecipientsCount()
-        );
-        uint256 impactData = 0;
-        bool reportFound = false;
-
-        for (uint256 i = 0; i < projects.length; ) {
-            (uint256 value, bool exists) = LibKpis.getLatestKpiData(
-                coupon.fixingDate - kpiRateStorage.reportPeriod,
-                coupon.fixingDate,
-                projects[i]
+        uint256 impactData;
+        bool reportFound;
+        {
+            address[] memory projects = LibProceedRecipients.getProceedRecipients(
+                0,
+                LibProceedRecipients.getProceedRecipientsCount()
             );
-            if (exists) {
-                impactData += value;
-                if (!reportFound) reportFound = true;
-            }
-            unchecked {
-                ++i;
+
+            for (uint256 i = 0; i < projects.length; ) {
+                (uint256 value, bool exists) = LibKpis.getLatestKpiData(
+                    coupon.fixingDate - reportPeriod,
+                    coupon.fixingDate,
+                    projects[i]
+                );
+                if (exists) {
+                    impactData += value;
+                    if (!reportFound) reportFound = true;
+                }
+                unchecked {
+                    ++i;
+                }
             }
         }
 
-        // Get previous coupon's stored rate (already SET because coupons are listed in order)
-        uint256 previousRate = 0;
-        uint8 previousRateDecimals = 0;
-        uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, _timestamp);
-        if (previousCouponId != 0) {
-            IBondRead.Coupon memory prevCoupon = LibBond.getCoupon(previousCouponId).coupon;
-            if (prevCoupon.rateStatus == IBondRead.RateCalculationStatus.SET) {
-                previousRate = prevCoupon.rate;
-                previousRateDecimals = prevCoupon.rateDecimals;
+        // Get previous coupon's stored rate
+        uint256 previousRate;
+        uint8 previousRateDecimals;
+        {
+            uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, _timestamp);
+            if (previousCouponId != 0) {
+                IBondRead.Coupon memory prevCoupon = LibBond.getCoupon(previousCouponId).coupon;
+                if (prevCoupon.rateStatus == IBondRead.RateCalculationStatus.SET) {
+                    previousRate = prevCoupon.rate;
+                    previousRateDecimals = prevCoupon.rateDecimals;
+                }
             }
         }
 

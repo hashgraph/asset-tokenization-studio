@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ProtectedPartitionsDataStorage, protectedPartitionsStorage } from "../../storage/CoreStorage.sol";
+import {
+    ProtectedPartitionsDataStorage,
+    protectedPartitionsStorage
+} from "../../storage/ProtectedPartitionsStorageAccessor.sol";
 import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { LibAccess } from "./LibAccess.sol";
 import { IProtectedPartitions } from "../../facets/features/interfaces/IProtectedPartitions.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
-import { Hold, ProtectedHold } from "../../facets/features/interfaces/hold/IHold.sol";
+import { IHoldBase } from "../../facets/features/interfaces/hold/IHoldBase.sol";
 import { LibERC712 } from "./LibERC712.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -164,7 +167,7 @@ library LibProtectedPartitions {
     function checkCreateHoldSignature(
         bytes32 partition,
         address from,
-        ProtectedHold memory protectedHold,
+        IHoldBase.ProtectedHold memory protectedHold,
         bytes calldata signature,
         string memory tokenName,
         uint256 resolverProxyVersion,
@@ -190,7 +193,7 @@ library LibProtectedPartitions {
     function isCreateHoldSignatureValid(
         bytes32 partition,
         address from,
-        ProtectedHold memory protectedHold,
+        IHoldBase.ProtectedHold memory protectedHold,
         bytes calldata signature,
         string memory tokenName,
         uint256 resolverProxyVersion,
@@ -213,7 +216,7 @@ library LibProtectedPartitions {
 
     function checkClearingCreateHoldSignature(
         IClearing.ProtectedClearingOperation memory protectedClearingOperation,
-        Hold memory hold,
+        IHoldBase.Hold memory hold,
         bytes calldata signature,
         string memory tokenName,
         uint256 resolverProxyVersion,
@@ -237,7 +240,7 @@ library LibProtectedPartitions {
 
     function isClearingCreateHoldSignatureValid(
         IClearing.ProtectedClearingOperation memory protectedClearingOperation,
-        Hold memory hold,
+        IHoldBase.Hold memory hold,
         bytes calldata signature,
         string memory tokenName,
         uint256 resolverProxyVersion,

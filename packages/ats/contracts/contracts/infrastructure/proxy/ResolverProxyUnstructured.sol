@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IResolverProxy } from "../interfaces/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
 import { IDiamondLoupe } from "../interfaces/IDiamondLoupe.sol";
-import { ResolverProxyStorage, resolverProxyStorage } from "../../storage/ExternalStorage.sol";
+import { ResolverProxyStorage, resolverProxyStorage } from "../../storage/ExternalStorageAccessor.sol";
 import { LibAccess } from "../../lib/core/LibAccess.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.

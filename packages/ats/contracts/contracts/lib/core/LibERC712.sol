@@ -14,7 +14,7 @@ import {
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH
 } from "../../constants/values.sol";
-import { Hold, ProtectedHold } from "../../facets/features/interfaces/hold/IHold.sol";
+import { IHoldBase } from "../../facets/features/interfaces/hold/IHoldBase.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
 import { IERC712 } from "../../facets/features/interfaces/IERC712.sol";
 
@@ -76,7 +76,7 @@ library LibERC712 {
     function getMessageHashCreateHold(
         bytes32 _partition,
         address _from,
-        ProtectedHold memory _protectedHold
+        IHoldBase.ProtectedHold memory _protectedHold
     ) internal pure returns (bytes32) {
         return
             keccak256(
@@ -138,7 +138,7 @@ library LibERC712 {
 
     function getMessageHashClearingCreateHold(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
-        Hold memory _hold
+        IHoldBase.Hold memory _hold
     ) internal pure returns (bytes32) {
         return
             keccak256(

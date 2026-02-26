@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { LibCheckpoints } from "../../infrastructure/lib/LibCheckpoints.sol";
-import { ERC20VotesStorage, erc20VotesStorage } from "../../storage/TokenStorage.sol";
+import { ERC20VotesStorage, erc20VotesStorage } from "../../storage/ERC20StorageAccessor.sol";
 import { IERC20Votes } from "../../facets/features/interfaces/ERC1400/IERC20Votes.sol";
 
 /// @title LibERC20Votes

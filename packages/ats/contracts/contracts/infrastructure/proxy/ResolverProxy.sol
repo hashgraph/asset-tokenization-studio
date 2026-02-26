@@ -11,7 +11,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ResolverProxyUnstructured } from "./ResolverProxyUnstructured.sol";
 import { IResolverProxy } from "../interfaces/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
-import { resolverProxyStorage } from "../../storage/ExternalStorage.sol";
+import { resolverProxyStorage } from "../../storage/ExternalStorageAccessor.sol";
 
 contract ResolverProxy is ResolverProxyUnstructured {
     constructor(

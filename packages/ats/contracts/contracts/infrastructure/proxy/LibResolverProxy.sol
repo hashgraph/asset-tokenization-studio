@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ResolverProxyStorage, resolverProxyStorage } from "../../storage/ExternalStorage.sol";
+import { ResolverProxyStorage, resolverProxyStorage } from "../../storage/ExternalStorageAccessor.sol";
 import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 

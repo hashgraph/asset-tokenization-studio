@@ -3,8 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable ordering
 
-import { adjustBalancesStorage, capStorage } from "../../storage/AssetStorage.sol";
-import { ERC1410BasicStorage, erc1410BasicStorage, Partition } from "../../storage/TokenStorage.sol";
+import { adjustBalancesStorage } from "../../storage/ABAFStorageAccessor.sol";
+import { LibERC1410 } from "./LibERC1410.sol";
+import { LibCap } from "../core/LibCap.sol";
 import { _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     ScheduledTask,
@@ -89,7 +90,7 @@ library LibABAF {
     }
 
     function getLabafByUserAndPartition(bytes32 partition, address account) internal view returns (uint256) {
-        uint256 partitionsIndex = erc1410BasicStorage().partitionToIndex[account][partition];
+        uint256 partitionsIndex = LibERC1410.getPartitionIndex(account, partition);
         if (partitionsIndex == 0) return 1;
         return _zeroToOne(adjustBalancesStorage().labafUserPartition[account][partitionsIndex - 1]);
     }
@@ -280,27 +281,26 @@ library LibABAF {
 
         uint256 factor = calculateFactor(abaf, labaf);
 
-        erc1410BasicStorage().totalSupplyByPartition[partition] *= factor;
-        capStorage().maxSupplyByPartition[partition] *= factor;
+        LibERC1410.adjustTotalSupplyByPartition(partition, factor);
+        LibCap.adjustMaxSupplyByPartition(partition, factor);
 
         updateLabafByPartition(partition);
     }
 
     function adjustTotalBalanceAndPartitionBalanceFor(bytes32 partition, address account) internal {
         uint256 abaf = getAbaf();
-        ERC1410BasicStorage storage basicStorage = erc1410BasicStorage();
 
         // Adjust partition balance
-        uint256 partitionsIndex = basicStorage.partitionToIndex[account][partition];
+        uint256 partitionsIndex = LibERC1410.getPartitionIndex(account, partition);
         if (partitionsIndex != 0) {
             uint256 partitionFactor = calculateFactorByTokenHolderAndPartitionIndex(abaf, account, partitionsIndex);
-            basicStorage.partitions[account][partitionsIndex - 1].amount *= partitionFactor;
+            LibERC1410.multiplyPartitionAmount(account, partitionsIndex, partitionFactor);
             updateLabafByTokenHolderAndPartitionIndex(abaf, account, partitionsIndex);
         }
 
         // Adjust total balance
         uint256 factor = calculateFactorByAbafAndTokenHolder(abaf, account);
-        basicStorage.balances[account] *= factor;
+        LibERC1410.multiplyBalance(account, factor);
         updateLabafByTokenHolder(abaf, account);
     }
 
@@ -322,7 +322,7 @@ library LibABAF {
     /// @dev Replaces _balanceOfAdjustedAt from ERC1410StandardStorageWrapper
     function balanceOfAdjustedAt(address account, uint256 timestamp) internal view returns (uint256) {
         uint256 factor = calculateFactor(getAbafAdjustedAt(timestamp), getLabafByUser(account));
-        return erc1410BasicStorage().balances[account] * factor;
+        return LibERC1410.balanceOf(account) * factor;
     }
 
     /// @notice Get ABAF-adjusted balance by partition for an account at a timestamp
@@ -333,24 +333,23 @@ library LibABAF {
         uint256 timestamp
     ) internal view returns (uint256) {
         uint256 factor = calculateFactor(getAbafAdjustedAt(timestamp), getLabafByUserAndPartition(partition, account));
-        ERC1410BasicStorage storage s = erc1410BasicStorage();
-        uint256 partitionIndex = s.partitionToIndex[account][partition];
+        uint256 partitionIndex = LibERC1410.getPartitionIndex(account, partition);
         if (partitionIndex == 0) return 0;
-        return s.partitions[account][partitionIndex - 1].amount * factor;
+        return LibERC1410.getPartitionAmount(account, partitionIndex) * factor;
     }
 
     /// @notice Get ABAF-adjusted total supply at a timestamp
     /// @dev Replaces _totalSupplyAdjustedAt from ERC1410StandardStorageWrapper
     function totalSupplyAdjustedAt(uint256 timestamp) internal view returns (uint256) {
         (uint256 pendingABAF, ) = getPendingAbafAt(timestamp);
-        return erc1410BasicStorage().totalSupply * pendingABAF;
+        return LibERC1410.totalSupply() * pendingABAF;
     }
 
     /// @notice Get ABAF-adjusted total supply by partition at a timestamp
     /// @dev Replaces _totalSupplyByPartitionAdjustedAt from ERC1410StandardStorageWrapper
     function totalSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view returns (uint256) {
         uint256 factor = calculateFactor(getAbafAdjustedAt(timestamp), getLabafByPartition(partition));
-        return erc1410BasicStorage().totalSupplyByPartition[partition] * factor;
+        return LibERC1410.totalSupplyByPartition(partition) * factor;
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -369,10 +368,7 @@ library LibABAF {
     /// Must be used instead of LibERC1410.addPartitionTo when ABAF is active
     function addPartitionToWithLabaf(uint256 value, address account, bytes32 partition) internal {
         pushLabafUserPartition(account, getAbaf());
-        ERC1410BasicStorage storage s = erc1410BasicStorage();
-        s.partitions[account].push(Partition(value, partition));
-        s.partitionToIndex[account][partition] = s.partitions[account].length;
-        if (value != 0) s.balances[account] += value;
+        LibERC1410.pushPartition(account, value, partition);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

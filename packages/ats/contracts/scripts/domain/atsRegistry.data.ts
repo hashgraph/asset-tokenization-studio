@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-26T10:47:49.686Z
+ * Generated: 2026-02-26T16:32:46.101Z
  * Facets: 64
  * Infrastructure: 2
  *
@@ -1000,23 +1000,24 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     events: [
       {
         name: "ClearedHoldByPartition",
-        signature: "ClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xecba87eb6d871a001547362d9a9bb69ae25dd165858d73fe5cc600a705f3f3a0",
+        signature: "ClearedHoldByPartition(address,address,bytes32,uint256,IHoldBase.Hold,uint256,bytes,bytes)",
+        topic0: "0x6a50cf053ce2e6b6cc09fdef1e6e9b9d5aa7532a1d070d46424745098dfef4e0",
       },
       {
         name: "ClearedHoldFromByPartition",
-        signature: "ClearedHoldFromByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xc8f249767e17c28ab7d211bf631a717a0ee7f840405af4618f625a7659bf7f63",
+        signature: "ClearedHoldFromByPartition(address,address,bytes32,uint256,IHoldBase.Hold,uint256,bytes,bytes)",
+        topic0: "0x570a7bb52194ae7ea53eb1c3180fa541ff511f085cda4a330e8b3354c4e359b3",
       },
       {
         name: "ClearedOperatorHoldByPartition",
-        signature: "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xa9683588d7eb6dd41a2a62f56bd396a439f9e506ac7ca2efa031bcc5f99b4651",
+        signature: "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,IHoldBase.Hold,uint256,bytes,bytes)",
+        topic0: "0x3e922a25109d244e23ebdaf04002e4198c2cbb86dea13b8a2197322c202fa6a3",
       },
       {
         name: "ProtectedClearedHoldByPartition",
-        signature: "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0x7fd4d7541b7da42375ec1b3f05c454acb77234a17c2f4349c102add4bc61e306",
+        signature:
+          "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,IHoldBase.Hold,uint256,bytes,bytes)",
+        topic0: "0x1f57bde03a9f710a3f650551f402f3160df75e990972f6149fa563223b4be34f",
       },
     ],
     factory: (signer) =>

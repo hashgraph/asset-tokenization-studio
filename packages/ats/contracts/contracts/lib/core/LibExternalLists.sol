@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { externalListStorage } from "../../storage/CoreStorage.sol";
+import { externalListStorage } from "../../storage/ExternalListStorageAccessor.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 
@@ -67,6 +67,10 @@ library LibExternalLists {
         uint256 pageLength
     ) internal view returns (address[] memory) {
         return externalListStorage(position).list.getFromSet(pageIndex, pageLength);
+    }
+
+    function getExternalListAt(bytes32 position, uint256 index) internal view returns (address) {
+        return externalListStorage(position).list.at(index);
     }
 
     function requireValidAddress(address addr) internal pure {

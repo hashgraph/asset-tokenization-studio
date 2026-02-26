@@ -10,7 +10,6 @@ import {
 // solhint-enable max-line-length
 import { LibBond } from "../../../../lib/domain/LibBond.sol";
 import { LibInterestRate } from "../../../../lib/domain/LibInterestRate.sol";
-import { SustainabilityPerformanceTargetRateDataStorage } from "../../../../storage/ScheduledStorage.sol";
 import { LibKpis } from "../../../../lib/domain/LibKpis.sol";
 import { LibProceedRecipients } from "../../../../lib/domain/LibProceedRecipients.sol";
 import { LibPause } from "../../../../lib/core/LibPause.sol";
@@ -88,52 +87,37 @@ abstract contract BondUSASustainabilityPerformanceTargetRate is BondUSA {
         uint256 _couponID,
         IBondRead.Coupon memory _coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
-        // Get SPT rate storage reference
-        SustainabilityPerformanceTargetRateDataStorage storage sptRateStorage = LibInterestRate.getSustainabilityRate();
-
-        // Check if we're before the start period
-        if (_coupon.fixingDate < sptRateStorage.startPeriod) {
-            return (sptRateStorage.startRate, sptRateStorage.rateDecimals);
-        }
-
-        // Get the base rate and decimals
-        (uint256 baseRate, uint8 decimals) = LibInterestRate.getBaseRate();
-
-        // Determine the start of the KPI data period (previous coupon's fixing date or 0)
-        uint256 periodStart = _getPreviousFixingDate(_couponID);
-
-        // Aggregate rate adjustments from all proceed recipients (projects)
-        address[] memory projects = LibProceedRecipients.getProceedRecipients(
-            0,
-            LibProceedRecipients.getProceedRecipientsCount()
-        );
-
-        int256 totalRateAdjustment = 0;
-
-        for (uint256 index = 0; index < projects.length; ) {
-            address project = projects[index];
-
-            // Get the impact data configuration for this project
-            ISustainabilityPerformanceTargetRate.ImpactData memory impactData = LibInterestRate
-                .getSustainabilityImpactData(project);
-
-            // Get the latest KPI data for this project (from previous fixing date to current)
-            (uint256 value, bool exists) = LibKpis.getLatestKpiData(periodStart, _coupon.fixingDate, project);
-
-            // Calculate the rate adjustment for this project
-            int256 adjustment = LibInterestRate.calculateRateAdjustment(impactData, value, exists);
-            totalRateAdjustment += adjustment;
-
-            unchecked {
-                ++index;
+        {
+            (uint256 startPeriod, uint256 startRate, uint8 cfgDecimals) = LibInterestRate.getSustainabilityRateConfig();
+            if (_coupon.fixingDate < startPeriod) {
+                return (startRate, cfgDecimals);
             }
         }
 
-        // Apply adjustments to base rate, ensuring result doesn't go below 0
-        int256 finalRate = int256(baseRate) + totalRateAdjustment;
-        if (finalRate < 0) {
-            finalRate = 0;
+        (uint256 baseRate, uint8 decimals) = LibInterestRate.getBaseRate();
+        uint256 periodStart = _getPreviousFixingDate(_couponID);
+
+        int256 totalRateAdjustment;
+        {
+            address[] memory projects = LibProceedRecipients.getProceedRecipients(
+                0,
+                LibProceedRecipients.getProceedRecipientsCount()
+            );
+
+            for (uint256 index = 0; index < projects.length; ) {
+                address project = projects[index];
+                ISustainabilityPerformanceTargetRate.ImpactData memory impactData = LibInterestRate
+                    .getSustainabilityImpactData(project);
+                (uint256 value, bool exists) = LibKpis.getLatestKpiData(periodStart, _coupon.fixingDate, project);
+                totalRateAdjustment += LibInterestRate.calculateRateAdjustment(impactData, value, exists);
+                unchecked {
+                    ++index;
+                }
+            }
         }
+
+        int256 finalRate = int256(baseRate) + totalRateAdjustment;
+        if (finalRate < 0) finalRate = 0;
 
         return (uint256(finalRate), decimals);
     }

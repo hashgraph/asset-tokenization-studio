@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Hold } from "../hold/IHold.sol";
+import { IHoldBase } from "../hold/IHoldBase.sol";
 import { IClearing } from "./IClearing.sol";
 import { ThirdPartyType } from "../../types/ThirdPartyType.sol";
 
-interface IClearingHoldCreation is IClearing {
+interface IClearingHoldCreation is IClearing, IHoldBase {
     struct ClearingHoldCreationData {
         uint256 amount;
         uint256 expirationTimestamp;
@@ -23,7 +23,7 @@ interface IClearingHoldCreation is IClearing {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        Hold hold,
+        IHoldBase.Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -34,7 +34,7 @@ interface IClearingHoldCreation is IClearing {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        Hold hold,
+        IHoldBase.Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -45,7 +45,7 @@ interface IClearingHoldCreation is IClearing {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        Hold hold,
+        IHoldBase.Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -56,7 +56,7 @@ interface IClearingHoldCreation is IClearing {
         address indexed tokenHolder,
         bytes32 partition,
         uint256 clearingId,
-        Hold hold,
+        IHoldBase.Hold hold,
         uint256 expirationDate,
         bytes data,
         bytes operatorData
@@ -70,7 +70,7 @@ interface IClearingHoldCreation is IClearing {
      */
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
-        Hold calldata _hold
+        IHoldBase.Hold calldata _hold
     ) external returns (bool success_, uint256 clearingId_);
 
     /**
@@ -82,7 +82,7 @@ interface IClearingHoldCreation is IClearing {
      */
     function clearingCreateHoldFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        Hold calldata _hold
+        IHoldBase.Hold calldata _hold
     ) external returns (bool success_, uint256 clearingId_);
 
     /**
@@ -94,7 +94,7 @@ interface IClearingHoldCreation is IClearing {
      */
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
-        Hold calldata _hold
+        IHoldBase.Hold calldata _hold
     ) external returns (bool success_, uint256 clearingId_);
 
     /**
@@ -107,7 +107,7 @@ interface IClearingHoldCreation is IClearing {
      */
     function protectedClearingCreateHoldByPartition(
         ProtectedClearingOperation calldata _protectedClearingOperation,
-        Hold calldata _hold,
+        IHoldBase.Hold calldata _hold,
         bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
 

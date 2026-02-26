@@ -5,12 +5,12 @@ import {
     FixedRateDataStorage,
     KpiLinkedRateDataStorage,
     SustainabilityPerformanceTargetRateDataStorage
-} from "../../storage/ScheduledStorage.sol";
+} from "../../storage/ScheduledStorageAccessor.sol";
 import {
     fixedRateStorage,
     kpiLinkedRateStorage,
     sustainabilityPerformanceTargetRateStorage
-} from "../../storage/ScheduledStorage.sol";
+} from "../../storage/ScheduledStorageAccessor.sol";
 // solhint-disable max-line-length
 import {
     ISustainabilityPerformanceTargetRate
@@ -213,12 +213,6 @@ library LibInterestRate {
         rateStorage.initialized = true;
     }
 
-    /// @notice Get all sustainability performance target rate configuration data
-    /// @return All sustainability performance target rate storage data
-    function getSustainabilityRate() internal pure returns (SustainabilityPerformanceTargetRateDataStorage storage) {
-        return sustainabilityPerformanceTargetRateStorage();
-    }
-
     /// @notice Check if sustainability performance target rate has been initialized
     /// @return True if sustainability rate is initialized, false otherwise
     function isSustainabilityRateInitialized() internal view returns (bool) {
@@ -341,10 +335,24 @@ library LibInterestRate {
     // VIEW FUNCTIONS — Data Accessors (grouped at end for function ordering compliance)
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    /// @notice Get all KPI-linked rate configuration data
-    /// @return All KPI linked rate storage data
-    function getKpiLinkedRate() internal pure returns (KpiLinkedRateDataStorage storage) {
-        return kpiLinkedRateStorage();
+    /// @notice Get KPI-linked rate config as value tuple (encapsulated — no storage pointer)
+    function getKpiLinkedRateConfig()
+        internal
+        view
+        returns (uint256 startPeriod, uint256 startRate, uint8 rateDecimals, uint256 reportPeriod)
+    {
+        KpiLinkedRateDataStorage storage s = kpiLinkedRateStorage();
+        return (s.startPeriod, s.startRate, s.rateDecimals, s.reportPeriod);
+    }
+
+    /// @notice Get sustainability rate config as value tuple (encapsulated — no storage pointer)
+    function getSustainabilityRateConfig()
+        internal
+        view
+        returns (uint256 startPeriod, uint256 startRate, uint8 rateDecimals)
+    {
+        SustainabilityPerformanceTargetRateDataStorage storage s = sustainabilityPerformanceTargetRateStorage();
+        return (s.startPeriod, s.startRate, s.rateDecimals);
     }
 
     /// @notice Check if KPI-linked rate has been initialized

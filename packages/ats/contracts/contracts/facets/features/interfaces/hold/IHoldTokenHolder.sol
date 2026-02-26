@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Hold, HoldIdentifier } from "./IHoldTypes.sol";
+import { IHoldBase } from "./IHoldBase.sol";
 import { IClearing } from "../clearing/IClearing.sol";
 
-interface IHoldTokenHolder is IClearing {
+interface IHoldTokenHolder is IHoldBase, IClearing {
     event HeldByPartition(
         address indexed operator,
         address indexed tokenHolder,

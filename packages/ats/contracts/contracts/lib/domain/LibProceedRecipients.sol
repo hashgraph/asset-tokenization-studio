@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { proceedRecipientsDataStorage } from "../../storage/ExternalStorage.sol";
+import { proceedRecipientsDataStorage } from "../../storage/ExternalStorageAccessor.sol";
 import { _PROCEED_RECIPIENTS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { LibExternalLists } from "../core/LibExternalLists.sol";
 import { IProceedRecipients } from "../../facets/assetCapabilities/interfaces/proceedRecipients/IProceedRecipients.sol";

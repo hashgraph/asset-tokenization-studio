@@ -3,10 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable ordering
 
-import { erc3643Storage } from "../../storage/ExternalStorage.sol";
-import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
 import { IERC3643 } from "../../facets/features/interfaces/ERC3643/IERC3643.sol";
 import { LibABAF } from "./LibABAF.sol";
+import { LibCompliance } from "../core/LibCompliance.sol";
 
 /// @title LibFreeze
 /// @notice Leaf library for freeze/unfreeze token management
@@ -22,9 +21,8 @@ library LibFreeze {
     /// @param account The account to freeze tokens for
     /// @param amount The amount of tokens to freeze
     function freezeTokensByPartition(bytes32 partition, address account, uint256 amount) internal {
-        IERC3643Management.ERC3643Storage storage st = erc3643Storage();
-        st.frozenTokens[account] += amount;
-        st.frozenTokensByPartition[account][partition] += amount;
+        LibCompliance.increaseFrozenAmountFor(account, amount);
+        LibCompliance.increaseFrozenAmountForByPartition(partition, account, amount);
     }
 
     /// @notice Unfreeze tokens by partition for an account
@@ -33,9 +31,8 @@ library LibFreeze {
     /// @param account The account to unfreeze tokens for
     /// @param amount The amount of tokens to unfreeze
     function unfreezeTokensByPartition(bytes32 partition, address account, uint256 amount) internal {
-        IERC3643Management.ERC3643Storage storage st = erc3643Storage();
-        st.frozenTokens[account] -= amount;
-        st.frozenTokensByPartition[account][partition] -= amount;
+        LibCompliance.decreaseFrozenAmountFor(account, amount);
+        LibCompliance.decreaseFrozenAmountForByPartition(partition, account, amount);
     }
 
     /// @notice Update frozen token amounts by factor (for balance adjustments)
@@ -43,7 +40,7 @@ library LibFreeze {
     /// @param account The account to update
     /// @param factor The multiplication factor
     function updateFrozenAmountByFactor(address account, uint256 factor) internal {
-        erc3643Storage().frozenTokens[account] *= factor;
+        LibCompliance.multiplyFrozenAmountFor(account, factor);
     }
 
     /// @notice Update frozen token amounts by partition by factor
@@ -52,7 +49,7 @@ library LibFreeze {
     /// @param account The account to update
     /// @param factor The multiplication factor
     function updateFrozenAmountByPartitionByFactor(bytes32 partition, address account, uint256 factor) internal {
-        erc3643Storage().frozenTokensByPartition[account][partition] *= factor;
+        LibCompliance.multiplyFrozenAmountForByPartition(partition, account, factor);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -63,7 +60,7 @@ library LibFreeze {
     /// @param account The account to check
     /// @return frozenAmount Total frozen tokens
     function getFrozenTokens(address account) internal view returns (uint256 frozenAmount) {
-        return erc3643Storage().frozenTokens[account];
+        return LibCompliance.getFrozenAmountFor(account);
     }
 
     /// @notice Get frozen tokens by partition for an account
@@ -74,7 +71,7 @@ library LibFreeze {
         address account,
         bytes32 partition
     ) internal view returns (uint256 frozenAmount) {
-        return erc3643Storage().frozenTokensByPartition[account][partition];
+        return LibCompliance.getFrozenAmountForByPartition(partition, account);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -85,7 +82,7 @@ library LibFreeze {
     /// @dev Replaces _getFrozenAmountForAdjustedAt from ERC3643StorageWrapper2
     function getFrozenAmountAdjustedAt(address account, uint256 timestamp) internal view returns (uint256) {
         uint256 factor = LibABAF.calculateFactorForFrozenAmountAdjustedAt(account, timestamp);
-        return erc3643Storage().frozenTokens[account] * factor;
+        return LibCompliance.getFrozenAmountFor(account) * factor;
     }
 
     /// @notice Get ABAF-adjusted frozen amount by partition at a timestamp
@@ -99,7 +96,7 @@ library LibFreeze {
             LibABAF.getAbafAdjustedAt(timestamp),
             LibABAF.getTotalFrozenLabafByPartition(partition, account)
         );
-        return erc3643Storage().frozenTokensByPartition[account][partition] * factor;
+        return LibCompliance.getFrozenAmountForByPartition(partition, account) * factor;
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

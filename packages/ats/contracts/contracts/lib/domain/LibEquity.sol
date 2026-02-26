@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { EquityDataStorage, equityStorage } from "../../storage/AssetStorage.sol";
+import { EquityDataStorage, equityStorage } from "../../storage/AssetTypeStorageAccessor.sol";
 import { IEquity } from "../../facets/assetCapabilities/interfaces/equity/IEquity.sol";
 
 // ═══════════════════════════════════════════════════════════════════════════════

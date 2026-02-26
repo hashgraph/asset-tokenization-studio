@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { nonceStorage } from "../../storage/CoreStorage.sol";
+import { nonceStorage } from "../../storage/NonceStorageAccessor.sol";
 
 /// @title LibNonce — Nonce tracking library
 /// @notice Centralized nonce management extracted from NonceStorageWrapper.sol

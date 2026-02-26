@@ -21,13 +21,7 @@ import { LibProtectedPartitions } from "../core/LibProtectedPartitions.sol";
 // Interfaces
 import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
 import { ICompliance } from "../../facets/features/interfaces/ERC3643/ICompliance.sol";
-import {
-    Hold,
-    ProtectedHold,
-    HoldIdentifier,
-    HoldData,
-    OperationType
-} from "../../facets/features/interfaces/hold/IHoldTypes.sol";
+import { IHoldBase } from "../../facets/features/interfaces/hold/IHoldBase.sol";
 import { IHoldTokenHolder } from "../../facets/features/interfaces/hold/IHoldTokenHolder.sol";
 import { ThirdPartyType } from "../../facets/features/types/ThirdPartyType.sol";
 import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
@@ -61,7 +55,7 @@ library HoldOps {
     function createHoldByPartition(
         bytes32 _partition,
         address _from,
-        Hold memory _hold,
+        IHoldBase.Hold memory _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) public returns (bool success_, uint256 holdId_) {
@@ -87,7 +81,7 @@ library HoldOps {
     /// @notice Execute a hold by partition (transfer held amount to recipient)
     /// @dev Returns data for facet to emit event
     function executeHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldBase.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount,
         uint256 _blockTimestamp
@@ -100,11 +94,11 @@ library HoldOps {
         LibSnapshots.updateAccountHeldBalancesSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
 
         // Execute the hold operation
-        _operateHoldByPartition(_holdIdentifier, _to, _amount, OperationType.Execute, _blockTimestamp);
+        _operateHoldByPartition(_holdIdentifier, _to, _amount, IHoldBase.OperationType.Execute, _blockTimestamp);
         partition_ = _holdIdentifier.partition;
 
         // Clean up if hold is now empty
-        HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
         if (holdData.hold.amount == 0) {
             LibABAF.removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
         }
@@ -114,7 +108,7 @@ library HoldOps {
     /// @notice Release a hold by partition (return held amount to token holder)
     /// @dev Returns amount for facet to emit event
     function releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldBase.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount,
         uint256 _blockTimestamp
     ) public returns (bool success_) {
@@ -126,7 +120,7 @@ library HoldOps {
         LibSnapshots.updateAccountHeldBalancesSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
 
         // Get hold data and restore allowance if needed
-        HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
         _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, _amount);
 
         // Release the hold operation
@@ -134,7 +128,7 @@ library HoldOps {
             _holdIdentifier,
             _holdIdentifier.tokenHolder,
             _amount,
-            OperationType.Release,
+            IHoldBase.OperationType.Release,
             _blockTimestamp
         );
 
@@ -149,7 +143,7 @@ library HoldOps {
     /// @notice Reclaim an expired hold by partition (return held amount to token holder)
     /// @dev Returns amount for facet to emit event
     function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldBase.HoldIdentifier calldata _holdIdentifier,
         uint256 _blockTimestamp
     ) public returns (bool success_, uint256 amount_) {
         // Adjust hold balances and update ABAF
@@ -160,7 +154,7 @@ library HoldOps {
         LibSnapshots.updateAccountHeldBalancesSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
 
         // Get hold data and retrieve amount
-        HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
         amount_ = holdData.hold.amount;
         _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, amount_);
 
@@ -169,7 +163,7 @@ library HoldOps {
             _holdIdentifier,
             _holdIdentifier.tokenHolder,
             amount_,
-            OperationType.Reclaim,
+            IHoldBase.OperationType.Reclaim,
             _blockTimestamp
         );
 
@@ -210,7 +204,7 @@ library HoldOps {
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        ProtectedHold memory _protectedHold,
+        IHoldBase.ProtectedHold memory _protectedHold,
         bytes calldata _signature,
         uint256 _blockTimestamp
     ) public returns (bool success_, uint256 holdId_) {
@@ -310,7 +304,7 @@ library HoldOps {
 
     /// @notice Get hold data by partition adjusted at timestamp
     function getHoldForByPartitionAdjustedAt(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldBase.HoldIdentifier calldata _holdIdentifier,
         uint256 _timestamp
     )
         public
@@ -351,7 +345,7 @@ library HoldOps {
     // ==========================================================================
 
     /// @notice Adjust hold balances and update ABAF
-    function _adjustHoldBalances(HoldIdentifier calldata _holdIdentifier, address _to) private {
+    function _adjustHoldBalances(IHoldBase.HoldIdentifier calldata _holdIdentifier, address _to) private {
         // Trigger and sync all ABAF adjustments
         LibABAF.triggerAndSyncAll(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to);
 
@@ -375,16 +369,16 @@ library HoldOps {
 
     /// @notice Execute hold operation (validation and transfer)
     function _operateHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldBase.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount,
-        OperationType _operation,
+        IHoldBase.OperationType _operation,
         uint256 _blockTimestamp
     ) private {
-        HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
 
         // Validate execution-specific conditions
-        if (_operation == OperationType.Execute) {
+        if (_operation == IHoldBase.OperationType.Execute) {
             if (!LibControlList.isAbleToAccess(_holdIdentifier.tokenHolder)) {
                 revert IControlListBase.AccountIsBlocked(_holdIdentifier.tokenHolder);
             }
@@ -394,14 +388,14 @@ library HoldOps {
         }
 
         // Check expiration and escrow for non-reclaim operations
-        if (_operation != OperationType.Reclaim) {
+        if (_operation != IHoldBase.OperationType.Reclaim) {
             if (LibHold.isHoldExpired(holdData.hold, _blockTimestamp)) {
                 revert IHoldTokenHolder.HoldExpirationReached();
             }
             if (!LibHold.isEscrow(holdData.hold, msg.sender)) {
                 revert IHoldTokenHolder.IsNotEscrow();
             }
-        } else if (_operation == OperationType.Reclaim) {
+        } else if (_operation == IHoldBase.OperationType.Reclaim) {
             // Reclaim requires hold to be expired
             if (!LibHold.isHoldExpired(holdData.hold, _blockTimestamp)) {
                 revert IHoldTokenHolder.HoldExpirationNotReached();
@@ -416,12 +410,12 @@ library HoldOps {
     }
 
     /// @notice Transfer held amount from hold to recipient
-    function _transferHold(HoldIdentifier calldata _holdIdentifier, address _to, uint256 _amount) private {
+    function _transferHold(IHoldBase.HoldIdentifier calldata _holdIdentifier, address _to, uint256 _amount) private {
         // Decrease held amount
         LibHold.decreaseHeldAmount(_holdIdentifier, _amount);
 
         // Remove hold if empty
-        HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
         if (holdData.hold.amount == 0) {
             LibHold.removeHold(_holdIdentifier);
         }
@@ -448,7 +442,7 @@ library HoldOps {
     /// @notice Restore allowance for authorized third parties
     function _restoreHoldAllowance(
         ThirdPartyType _thirdPartyType,
-        HoldIdentifier calldata _holdIdentifier,
+        IHoldBase.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) private {
         // Only restore for authorized third parties

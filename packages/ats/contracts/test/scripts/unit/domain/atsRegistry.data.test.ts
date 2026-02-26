@@ -27,6 +27,7 @@ import {
   hasStorageWrapper,
   STORAGE_WRAPPER_REGISTRY_COUNT,
   atsRegistry,
+  deployOrchestratorLibraries,
 } from "@scripts/domain";
 import { TEST_STANDARD_CONTRACTS, TEST_CONTRACT_NAMES, TEST_FACET_NAMES } from "@test";
 
@@ -44,6 +45,7 @@ describe("atsRegistry.data - Factory Functions", () => {
 
   before(async () => {
     [signer] = await ethers.getSigners();
+    await deployOrchestratorLibraries(signer);
   });
 
   describe("Factory branches (comprehensive)", () => {

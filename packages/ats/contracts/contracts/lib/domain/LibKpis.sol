@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KpisDataStorage, kpisDataStorage } from "../../storage/ScheduledStorage.sol";
+import { KpisDataStorage, kpisDataStorage } from "../../storage/ScheduledStorageAccessor.sol";
 import { LibCheckpoints } from "../../infrastructure/lib/LibCheckpoints.sol";
 
 /// @title LibKpis

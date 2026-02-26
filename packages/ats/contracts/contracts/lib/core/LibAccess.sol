@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { RoleDataStorage, rolesStorage } from "../../storage/CoreStorage.sol";
+import { RoleDataStorage, rolesStorage } from "../../storage/RolesStorageAccessor.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IAccessControl } from "../../facets/features/interfaces/IAccessControl.sol";

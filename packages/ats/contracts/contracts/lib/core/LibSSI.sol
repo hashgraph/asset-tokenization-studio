@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ssiManagementStorage } from "../../storage/CoreStorage.sol";
+import { ssiManagementStorage } from "../../storage/SsiStorageAccessor.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { ISsiManagement } from "../../facets/features/interfaces/ISsiManagement.sol";

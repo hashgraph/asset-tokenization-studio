@@ -7,7 +7,7 @@ import {
     Partition,
     erc1410BasicStorage,
     erc1410OperatorStorage
-} from "../../storage/TokenStorage.sol";
+} from "../../storage/ERC1410StorageAccessor.sol";
 import { IERC1410 } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
 import { IERC1410TokenHolder } from "../../facets/features/interfaces/ERC1400/IERC1410TokenHolder.sol";
 import { BasicTransferInfo } from "../../facets/features/interfaces/ERC1400/IERC1410Types.sol";
@@ -223,6 +223,27 @@ library LibERC1410 {
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
+    // LOW-LEVEL PRIMITIVES — state-modifying (for LibABAF balance adjustment)
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    function multiplyBalance(address account, uint256 factor) internal {
+        erc1410BasicStorage().balances[account] *= factor;
+    }
+
+    function multiplyPartitionAmount(address account, uint256 partitionIndex, uint256 factor) internal {
+        erc1410BasicStorage().partitions[account][partitionIndex - 1].amount *= factor;
+    }
+
+    /// @notice Low-level partition push without LABAF tracking
+    /// @dev Only for use by LibABAF.addPartitionToWithLabaf. For normal usage, use addPartitionTo.
+    function pushPartition(address account, uint256 value, bytes32 partition) internal {
+        ERC1410BasicStorage storage s = erc1410BasicStorage();
+        s.partitions[account].push(Partition(value, partition));
+        s.partitionToIndex[account][partition] = s.partitions[account].length;
+        if (value != 0) s.balances[account] += value;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
     // INTERNAL VIEW FUNCTIONS
     // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -340,6 +361,18 @@ library LibERC1410 {
 
     function checkWithoutMultiPartition() internal view {
         if (isMultiPartition()) revert IERC1410.NotAllowedInMultiPartitionMode();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // LOW-LEVEL PRIMITIVES — view/pure (for LibABAF balance adjustment)
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    function getPartitionIndex(address account, bytes32 partition) internal view returns (uint256) {
+        return erc1410BasicStorage().partitionToIndex[account][partition];
+    }
+
+    function getPartitionAmount(address account, uint256 partitionIndex) internal view returns (uint256) {
+        return erc1410BasicStorage().partitions[account][partitionIndex - 1].amount;
     }
 
     function requireValidAddress(address account) internal pure {

@@ -4,8 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import { snapshotStorage, SnapshotStorage } from "../../storage/AssetStorage.sol";
-import { erc1410BasicStorage, erc20Storage } from "../../storage/TokenStorage.sol";
+import { snapshotStorage, SnapshotStorage } from "../../storage/ABAFStorageAccessor.sol";
 import {
     Snapshots,
     SnapshotsAddress,
@@ -14,6 +13,7 @@ import {
 } from "../../facets/features/interfaces/ISnapshots.sol";
 import { ISnapshots } from "../../facets/features/interfaces/ISnapshots.sol";
 import { LibABAF } from "./LibABAF.sol";
+import { LibERC20 } from "./LibERC20.sol";
 import { LibERC1410 } from "./LibERC1410.sol";
 import { LibLock } from "./LibLock.sol";
 import { LibHold } from "./LibHold.sol";
@@ -96,12 +96,12 @@ library LibSnapshots {
 
     /// @notice Updates decimals snapshot
     function updateDecimalsSnapshot() internal {
-        updateSnapshot(snapshotStorage().decimals, erc20Storage().decimals);
+        updateSnapshot(snapshotStorage().decimals, LibERC20.getDecimals());
     }
 
     /// @notice Updates total supply snapshot
     function updateAssetTotalSupplySnapshot() internal {
-        updateSnapshot(snapshotStorage().totalSupplySnapshots, erc1410BasicStorage().totalSupply);
+        updateSnapshot(snapshotStorage().totalSupplySnapshots, LibERC1410.totalSupply());
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -196,11 +196,8 @@ library LibSnapshots {
     /// @dev Replaces _updateTotalSupplySnapshot from SnapshotsStorageWrapper2
     function updateTotalSupplySnapshot(bytes32 partition) internal {
         SnapshotStorage storage ss = snapshotStorage();
-        updateSnapshot(ss.totalSupplySnapshots, erc1410BasicStorage().totalSupply);
-        updateSnapshot(
-            ss.totalSupplyByPartitionSnapshots[partition],
-            erc1410BasicStorage().totalSupplyByPartition[partition]
-        );
+        updateSnapshot(ss.totalSupplySnapshots, LibERC1410.totalSupply());
+        updateSnapshot(ss.totalSupplyByPartitionSnapshots[partition], LibERC1410.totalSupplyByPartition(partition));
     }
 
     /// @notice Update token holder snapshot for a specific account
@@ -384,7 +381,7 @@ library LibSnapshots {
     /// @notice Get decimals adjusted at a timestamp (considering pending balance adjustments)
     function decimalsAdjustedAt(uint256 _timestamp) internal view returns (uint8) {
         (, uint8 pendingDecimals) = LibABAF.getPendingAbafAt(_timestamp);
-        return erc20Storage().decimals + pendingDecimals;
+        return LibERC20.getDecimals() + pendingDecimals;
     }
 
     /// @notice Get token holders at a snapshot (paginated)

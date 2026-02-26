@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { bondStorage, BondDataStorage } from "../../storage/AssetStorage.sol";
+import { bondStorage, BondDataStorage } from "../../storage/AssetTypeStorageAccessor.sol";
 import { IBondRead } from "../../facets/assetCapabilities/interfaces/bond/IBondRead.sol";
 import { IBond } from "../../facets/assetCapabilities/interfaces/bond/IBond.sol";
 import { COUPON_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } from "../../constants/values.sol";

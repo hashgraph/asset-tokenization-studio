@@ -19,11 +19,18 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployContract, registerFacets, registerAdditionalFacets } from "@scripts/infrastructure";
-import { atsRegistry } from "@scripts/domain";
+import { atsRegistry, deployOrchestratorLibraries } from "@scripts/domain";
 import { TEST_SIZES, BLR_VERSIONS, deployBlrFixture, silenceScriptLogging } from "@test";
 
 describe("registerAdditionalFacets - Integration Tests", () => {
   before(silenceScriptLogging);
+
+  let _deployer: Awaited<ReturnType<typeof ethers.getSigners>>[0];
+
+  before(async () => {
+    [_deployer] = await ethers.getSigners();
+    await deployOrchestratorLibraries(_deployer);
+  });
 
   // Fixture that deploys BLR with 3 initial facets registered
   async function setupWithInitialFacets() {
@@ -292,7 +299,10 @@ describe("registerAdditionalFacets - Integration Tests", () => {
 
       const facets: Record<string, string> = {};
       for (const name of facetNames) {
-        const factory = await ethers.getContractFactory(name, deployer);
+        const facetDef = atsRegistry.getFacetDefinition(name);
+        const factory = facetDef?.factory
+          ? facetDef.factory(deployer)
+          : await ethers.getContractFactory(name, deployer);
         const result = await deployContract(factory, {});
         facets[name] = result.address!;
       }
@@ -311,10 +321,10 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       expect(initialCount).to.equal(TEST_SIZES.MEDIUM_BATCH);
 
       // Add 2 more using registerAdditionalFacets
-      const erc1410Factory = await ethers.getContractFactory("ERC1410ReadFacet", deployer);
+      const erc1410Factory = atsRegistry.getFacetDefinition("ERC1410ReadFacet")!.factory!(deployer);
       const erc1410 = await deployContract(erc1410Factory, {});
 
-      const erc1594Factory = await ethers.getContractFactory("ERC1594Facet", deployer);
+      const erc1594Factory = atsRegistry.getFacetDefinition("ERC1594Facet")!.factory!(deployer);
       const erc1594 = await deployContract(erc1594Factory, {});
 
       const newFacetsWithKeys = [

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Hold, ProtectedHold } from "./IHoldTypes.sol";
+import { IHoldBase } from "./IHoldBase.sol";
 
-interface IHoldManagement {
+interface IHoldManagement is IHoldBase {
     event OperatorHeldByPartition(
         address indexed operator,
         address indexed tokenHolder,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { erc3643Storage } from "../../storage/ExternalStorage.sol";
+import { erc3643Storage } from "../../storage/ExternalStorageAccessor.sol";
 import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
 import { ICompliance } from "../../facets/features/interfaces/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/features/interfaces/ERC3643/IIdentityRegistry.sol";
@@ -64,6 +64,16 @@ library LibCompliance {
     /// @dev Decreases the frozen amount for an address in a specific partition
     function decreaseFrozenAmountForByPartition(bytes32 partition, address account, uint256 amount) internal {
         erc3643Storage().frozenTokensByPartition[account][partition] -= amount;
+    }
+
+    /// @dev Multiplies the frozen amount for an address by a factor
+    function multiplyFrozenAmountFor(address account, uint256 factor) internal {
+        erc3643Storage().frozenTokens[account] *= factor;
+    }
+
+    /// @dev Multiplies the frozen amount for an address in a specific partition by a factor
+    function multiplyFrozenAmountForByPartition(bytes32 partition, address account, uint256 factor) internal {
+        erc3643Storage().frozenTokensByPartition[account][partition] *= factor;
     }
 
     /// @dev Marks an address as recovered

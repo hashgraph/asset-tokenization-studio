@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ThirdPartyType } from "../../types/ThirdPartyType.sol";
-import { HoldIdentifier } from "./IHoldTypes.sol";
+import { IHoldBase } from "./IHoldBase.sol";
 
-interface IHoldRead {
+interface IHoldRead is IHoldBase {
     /**
      * @notice Gets the total amount of tokens held for a specific token holder
      * @param _tokenHolder The address of the token holder

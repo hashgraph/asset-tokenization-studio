@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CapDataStorage, capStorage } from "../../storage/AssetStorage.sol";
+import { CapDataStorage, capStorage } from "../../storage/FinancialOpsStorageAccessor.sol";
 import { MAX_UINT256 } from "../../constants/values.sol";
 
 /// @title LibCap — Token cap management library

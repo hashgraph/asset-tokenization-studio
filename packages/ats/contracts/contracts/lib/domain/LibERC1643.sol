@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC1643Storage, IERC1643Document, erc1643Storage } from "../../storage/TokenStorage.sol";
+import { ERC1643Storage, IERC1643Document, erc1643Storage } from "../../storage/TokenIssuanceStorageAccessor.sol";
 import { IERC1643 } from "../../facets/features/interfaces/ERC1400/IERC1643.sol";
 
 /// @title LibERC1643

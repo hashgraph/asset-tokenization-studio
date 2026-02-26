@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KycStorage, kycStorage, ExternalListDataStorage, externalListStorage } from "../../storage/CoreStorage.sol";
+import { KycStorage, kycStorage } from "../../storage/KycStorageAccessor.sol";
 import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKyc } from "../../facets/features/interfaces/IKyc.sol";
 import { IRevocationList } from "../../facets/features/interfaces/IRevocationList.sol";
@@ -9,6 +9,7 @@ import { IExternalKycList } from "../../facets/features/interfaces/IExternalKycL
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { LibSSI } from "./LibSSI.sol";
+import { LibExternalLists } from "./LibExternalLists.sol";
 
 /// @title LibKyc — Know Your Customer (KYC) management library
 /// @notice Centralized KYC functionality including internal and external KYC verification
@@ -115,10 +116,10 @@ library LibKyc {
     }
 
     function isExternallyGranted(address account, IKyc.KycStatus status) internal view returns (bool) {
-        ExternalListDataStorage storage externalKycListStorage = externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION);
-        uint256 length = externalKycListStorage.list.length();
+        uint256 length = LibExternalLists.getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
         for (uint256 index; index < length; ) {
-            if (IExternalKycList(externalKycListStorage.list.at(index)).getKycStatus(account) != status) return false;
+            address listAddr = LibExternalLists.getExternalListAt(_KYC_MANAGEMENT_STORAGE_POSITION, index);
+            if (IExternalKycList(listAddr).getKycStatus(account) != status) return false;
             unchecked {
                 ++index;
             }

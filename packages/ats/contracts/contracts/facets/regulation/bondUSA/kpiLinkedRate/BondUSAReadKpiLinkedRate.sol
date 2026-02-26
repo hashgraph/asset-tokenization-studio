@@ -7,7 +7,6 @@ import { LibBond } from "../../../../lib/domain/LibBond.sol";
 import { LibInterestRate } from "../../../../lib/domain/LibInterestRate.sol";
 import { LibKpis } from "../../../../lib/domain/LibKpis.sol";
 import { LibProceedRecipients } from "../../../../lib/domain/LibProceedRecipients.sol";
-import { KpiLinkedRateDataStorage } from "../../../../storage/ScheduledStorage.sol";
 import { LibCorporateActions } from "../../../../lib/core/LibCorporateActions.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../../constants/values.sol";
 
@@ -54,10 +53,11 @@ abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
         IBondRead.Coupon memory _coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
         // Check if we're before the start period
-        KpiLinkedRateDataStorage storage kpiLinkedRateStorage = LibInterestRate.getKpiLinkedRate();
+        (uint256 startPeriod, uint256 startRate, uint8 rateDecimals, uint256 reportPeriod) = LibInterestRate
+            .getKpiLinkedRateConfig();
 
-        if (_coupon.fixingDate < kpiLinkedRateStorage.startPeriod) {
-            return (kpiLinkedRateStorage.startRate, kpiLinkedRateStorage.rateDecimals);
+        if (_coupon.fixingDate < startPeriod) {
+            return (startRate, rateDecimals);
         }
 
         // Aggregate KPI data from all proceed recipients
@@ -70,7 +70,7 @@ abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
 
         for (uint256 index = 0; index < projects.length; ) {
             (uint256 value, bool exists) = LibKpis.getLatestKpiData(
-                _coupon.fixingDate - kpiLinkedRateStorage.reportPeriod,
+                _coupon.fixingDate - reportPeriod,
                 _coupon.fixingDate,
                 projects[index]
             );

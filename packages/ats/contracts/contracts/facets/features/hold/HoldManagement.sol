@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldManagement } from "../interfaces/hold/IHoldManagement.sol";
 import { IClearing } from "../interfaces/clearing/IClearing.sol";
-import { Hold, ProtectedHold } from "../interfaces/hold/IHold.sol";
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";
 import { LibPause } from "../../../lib/core/LibPause.sol";
 import { LibAccess } from "../../../lib/core/LibAccess.sol";

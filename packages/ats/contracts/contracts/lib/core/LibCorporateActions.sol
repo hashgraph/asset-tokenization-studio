@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CorporateActionDataStorage, corporateActionsStorage } from "../../storage/AssetStorage.sol";
+import { CorporateActionDataStorage, corporateActionsStorage } from "../../storage/ABAFStorageAccessor.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ICorporateActions } from "../../facets/features/interfaces/ICorporateActions.sol";

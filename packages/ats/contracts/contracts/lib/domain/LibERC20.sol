@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC20Storage, erc20Storage } from "../../storage/TokenStorage.sol";
+import { ERC20Storage, erc20Storage } from "../../storage/ERC20StorageAccessor.sol";
 import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IFactory } from "../../factory/IFactory.sol";
