@@ -11,3 +11,5 @@
 export * from "./constants";
 export * from "./checkpointTestHelpers";
 export * from "./testSetup";
+export * from "./globalSetup";
+export * from "./assertions";

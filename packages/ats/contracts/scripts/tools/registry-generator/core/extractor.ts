@@ -88,6 +88,10 @@ export function extractMetadata(
     }
   }
 
+  // A contract is deployable if TypeChain generates a deployment factory:
+  // non-empty bytecode (not just "0x") AND non-empty ABI
+  const isDeployable = contract.artifactData.bytecode !== "0x" && contract.artifactData.abi.length > 0;
+
   return {
     name,
     contractName: name,
@@ -104,6 +108,7 @@ export function extractMetadata(
     inheritance,
     solidityVersion,
     upgradeable,
+    isDeployable,
     description,
   };
 }

@@ -49,7 +49,7 @@ export function extractMethodsFromABI(abi: any[]): MethodDefinition[] {
         methods.push({ name, signature, selector });
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // If ABI parsing fails, return empty array
     // This allows graceful degradation if ABI is malformed
     return [];

@@ -79,3 +79,6 @@ export {
   type TupInfrastructureOnlyFixture,
   type V2ImplementationResult,
 } from "./upgradeTupProxies.fixture";
+
+// Hardhat-dependent test helpers (RBAC, timestamps)
+export { grantRoleAndPauseToken, getDltTimestamp } from "./hardhatHelpers";

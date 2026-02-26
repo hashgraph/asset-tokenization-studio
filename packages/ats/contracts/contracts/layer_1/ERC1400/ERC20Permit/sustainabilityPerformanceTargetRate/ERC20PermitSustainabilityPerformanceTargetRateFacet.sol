@@ -5,7 +5,7 @@ import { ERC20PermitFacetBase } from "../ERC20PermitFacetBase.sol";
 import { _ERC20PERMIT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import { CommonSustainabilityPerformanceTargetInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract ERC20PermitSustainabilityPerformanceTargetRateFacet is
     ERC20PermitFacetBase,

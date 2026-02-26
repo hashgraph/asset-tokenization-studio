@@ -118,6 +118,8 @@ export interface ContractMetadata {
   inheritance: string[];
   solidityVersion: string | null;
   upgradeable: boolean;
+  /** Whether TypeChain generates a deployment factory (non-empty bytecode + non-empty ABI) */
+  isDeployable: boolean;
   description?: string;
 }
 

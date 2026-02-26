@@ -6,14 +6,14 @@ import { _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION } from "../../constants
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from "../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol";
-import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE } from "contracts/layer_0/constants/values.sol";
+import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE } from "../../constants/values.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
 } from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import {
     IScheduledCrossOrderedTasks
-} from "contracts/layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
+} from "../../../layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
 
 abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAdjustmentsStorageWrapper {
     function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes32 _taskType) internal override {

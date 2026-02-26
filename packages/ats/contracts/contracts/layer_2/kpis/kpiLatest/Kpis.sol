@@ -5,7 +5,7 @@ import { IKpis } from "../../interfaces/kpis/kpiLatest/IKpis.sol";
 import { _KPI_MANAGER_ROLE } from "../../constants/roles.sol";
 import {
     InternalsKpiInterestRate
-} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/Internals.sol";
+} from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/Internals.sol";
 
 abstract contract Kpis is IKpis, InternalsKpiInterestRate {
     function addKpiData(

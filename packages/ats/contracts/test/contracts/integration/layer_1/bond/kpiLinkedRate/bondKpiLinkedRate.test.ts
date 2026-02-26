@@ -201,7 +201,7 @@ describe("Bond KpiLinked Rate Tests", () => {
   }
 
   async function checkMinDates(expectedMinDate: string) {
-    let minDate = await kpisFacet.getMinDate();
+    const minDate = await kpisFacet.getMinDate();
     expect(minDate.toString()).to.equal(expectedMinDate);
   }
 
@@ -493,7 +493,7 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN setting two coupons where the second one has a lower fixing date THEN min Date remains unchanged", async () => {
       await setKpiConfiguration(-10);
 
-      let originalFixingDate = couponData.fixingDate;
+      const originalFixingDate = couponData.fixingDate;
 
       await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
