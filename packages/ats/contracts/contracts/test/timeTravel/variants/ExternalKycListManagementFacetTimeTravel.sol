@@ -5,14 +5,13 @@ import {
     ExternalKycListManagementFacet
 } from "../../../facets/features/externalKycLists/ExternalKycListManagementFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
 contract ExternalKycListManagementFacetTimeTravel is ExternalKycListManagementFacet, TimeTravelProvider {
-    function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockTimestamp();
     }
 
-    function _getBlockNumber() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockNumber() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockNumber();
     }
 }

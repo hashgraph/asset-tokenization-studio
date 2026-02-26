@@ -5,13 +5,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
-import {
-    HoldDataStorage,
-    Hold,
-    HoldData,
-    HoldIdentifier,
-    IHold
-} from "../../facets/features/interfaces/hold/IHold.sol";
+import { HoldDataStorage, Hold, HoldData, HoldIdentifier } from "../../facets/features/interfaces/hold/IHoldTypes.sol";
+import { IHoldTokenHolder } from "../../facets/features/interfaces/hold/IHoldTokenHolder.sol";
 import { holdStorage } from "../../storage/AssetStorage.sol";
 import { ThirdPartyType } from "../../facets/features/types/ThirdPartyType.sol";
 
@@ -179,6 +174,20 @@ library LibHold {
         ] = _thirdParty;
     }
 
+    /// @notice Set the third party for a hold by individual parameters
+    /// @param _tokenHolder The token holder address
+    /// @param _partition The partition identifier
+    /// @param _holdId The hold ID
+    /// @param _thirdParty The third party address
+    function setHoldThirdPartyByParams(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _holdId,
+        address _thirdParty
+    ) internal {
+        holdStorage().holdThirdPartyByAccountPartitionAndId[_tokenHolder][_partition][_holdId] = _thirdParty;
+    }
+
     /// @notice Get the third party for a hold
     /// @param _holdIdentifier The hold identifier
     /// @return thirdParty_ The third party address
@@ -186,6 +195,19 @@ library LibHold {
         thirdParty_ = holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
             _holdIdentifier.partition
         ][_holdIdentifier.holdId];
+    }
+
+    /// @notice Get the third party for a hold by individual parameters
+    /// @param _tokenHolder The token holder address
+    /// @param _partition The partition identifier
+    /// @param _holdId The hold ID
+    /// @return thirdParty_ The third party address
+    function getHoldThirdPartyByParams(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _holdId
+    ) internal view returns (address thirdParty_) {
+        thirdParty_ = holdStorage().holdThirdPartyByAccountPartitionAndId[_tokenHolder][_partition][_holdId];
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -314,13 +336,14 @@ library LibHold {
     /// @notice Validate a hold ID and revert if invalid
     /// @param _holdIdentifier The hold identifier
     function validateHoldId(HoldIdentifier calldata _holdIdentifier) internal view {
-        if (!isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
+        if (!isHoldIdValid(_holdIdentifier)) revert IHoldTokenHolder.WrongHoldId();
     }
 
     /// @notice Check if hold amount is sufficient
     /// @param _amount The amount to check
     /// @param _holdData The hold data
     function checkHoldAmount(uint256 _amount, HoldData memory _holdData) internal pure {
-        if (_amount > _holdData.hold.amount) revert IHold.InsufficientHoldBalance(_holdData.hold.amount, _amount);
+        if (_amount > _holdData.hold.amount)
+            revert IHoldTokenHolder.InsufficientHoldBalance(_holdData.hold.amount, _amount);
     }
 }

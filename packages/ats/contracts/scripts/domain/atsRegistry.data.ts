@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-25T12:11:31.443Z
+ * Generated: 2026-02-26T10:47:49.686Z
  * Facets: 64
  * Infrastructure: 2
  *
@@ -147,6 +147,7 @@ import {
   TotalBalanceFacetTimeTravel__factory,
   TransferAndLockFacetTimeTravel__factory,
 } from "@contract-types";
+import { getLibLinks } from "./orchestratorLibraries";
 
 /**
  * Registry of all facet contracts.
@@ -328,6 +329,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "MaturityDateUpdated(address,uint256,uint256)",
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
       },
+      {
+        name: "RedeemedByPartition",
+        signature: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
+      },
     ],
     errors: [
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
@@ -335,8 +341,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
-    factory: (signer) => new BondUSAFacet__factory(signer),
-    timeTravelFactory: (signer) => new BondUSAFacetTimeTravel__factory(signer),
+    factory: (signer) => new BondUSAFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new BondUSAFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BondUSAFixedRateFacet: {
@@ -386,6 +392,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "MaturityDateUpdated(address,uint256,uint256)",
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
       },
+      {
+        name: "RedeemedByPartition",
+        signature: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
+      },
     ],
     errors: [
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
@@ -394,8 +405,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
-    factory: (signer) => new BondUSAFixedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new BondUSAFixedRateFacetTimeTravel__factory(signer),
+    factory: (signer) => new BondUSAFixedRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BondUSAFixedRateFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BondUSAKpiLinkedRateFacet: {
@@ -451,6 +463,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "MaturityDateUpdated(address,uint256,uint256)",
         topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
       },
+      {
+        name: "RedeemedByPartition",
+        signature: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
+      },
     ],
     errors: [
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
@@ -459,8 +476,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
-    factory: (signer) => new BondUSAKpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new BondUSAKpiLinkedRateFacetTimeTravel__factory(signer),
+    factory: (signer) => new BondUSAKpiLinkedRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BondUSAKpiLinkedRateFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BondUSAReadFacet: {
@@ -550,8 +568,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer) => new BondUSAReadFacet__factory(signer),
-    timeTravelFactory: (signer) => new BondUSAReadFacetTimeTravel__factory(signer),
+    factory: (signer) => new BondUSAReadFacet__factory(getLibLinks("holdOps") as any, signer),
+    timeTravelFactory: (signer) => new BondUSAReadFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
   },
 
   BondUSAReadKpiLinkedRateFacet: {
@@ -641,8 +659,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer) => new BondUSAReadKpiLinkedRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(signer),
+    factory: (signer) => new BondUSAReadKpiLinkedRateFacet__factory(getLibLinks("holdOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
   },
 
   BondUSAReadSustainabilityPerformanceTargetRateFacet: {
@@ -731,8 +750,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer) => new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+    factory: (signer) =>
+      new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(getLibLinks("holdOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
   },
 
   BondUSASustainabilityPerformanceTargetRateFacet: {
@@ -776,8 +797,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xc7a6ca35",
       },
     ],
-    factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
-    timeTravelFactory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
+    factory: (signer) =>
+      new BondUSASustainabilityPerformanceTargetRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(
+        getLibLinks("tokenCoreOps") as any,
+        signer,
+      ),
   },
 
   CapFacet: {
@@ -926,8 +952,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer) => new ClearingActionsFacet__factory(signer),
-    timeTravelFactory: (signer) => new ClearingActionsFacetTimeTravel__factory(signer),
+    factory: (signer) =>
+      new ClearingActionsFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingActionsFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
   },
 
   ClearingHoldCreationFacet: {
@@ -991,8 +1019,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x7fd4d7541b7da42375ec1b3f05c454acb77234a17c2f4349c102add4bc61e306",
       },
     ],
-    factory: (signer) => new ClearingHoldCreationFacet__factory(signer),
-    timeTravelFactory: (signer) => new ClearingHoldCreationFacetTimeTravel__factory(signer),
+    factory: (signer) =>
+      new ClearingHoldCreationFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingHoldCreationFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
   },
 
   ClearingReadFacet: {
@@ -1033,8 +1063,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcf38dab5",
       },
     ],
-    factory: (signer) => new ClearingReadFacet__factory(signer),
-    timeTravelFactory: (signer) => new ClearingReadFacetTimeTravel__factory(signer),
+    factory: (signer) => new ClearingReadFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingReadFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   ClearingRedeemFacet: {
@@ -1098,8 +1129,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xdd233f03eaed8aec1fe549f12e218c32dc2e73b3d5777bdeb33afa43e2fa2230",
       },
     ],
-    factory: (signer) => new ClearingRedeemFacet__factory(signer),
-    timeTravelFactory: (signer) => new ClearingRedeemFacetTimeTravel__factory(signer),
+    factory: (signer) => new ClearingRedeemFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingRedeemFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
   },
 
   ClearingTransferFacet: {
@@ -1166,8 +1198,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x8aea721bf4270b3b07d0974586b57ecd35862ae7a8b733530161d941489283f1",
       },
     ],
-    factory: (signer) => new ClearingTransferFacet__factory(signer),
-    timeTravelFactory: (signer) => new ClearingTransferFacetTimeTravel__factory(signer),
+    factory: (signer) =>
+      new ClearingTransferFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingTransferFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
   },
 
   ControlListFacet: {
@@ -1531,8 +1565,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "WrongIndexForAction", signature: "WrongIndexForAction(uint256,bytes32)", selector: "0xd3924f4e" },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
-    factory: (signer) => new EquityUSAFacet__factory(signer),
-    timeTravelFactory: (signer) => new EquityUSAFacetTimeTravel__factory(signer),
+    factory: (signer) => new EquityUSAFacet__factory(getLibLinks("holdOps") as any, signer),
+    timeTravelFactory: (signer) => new EquityUSAFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
   },
 
   ERC1410IssuerFacet: {
@@ -1574,8 +1608,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
-    factory: (signer) => new ERC1410IssuerFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC1410IssuerFacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC1410IssuerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC1410IssuerFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC1410ManagementFacet: {
@@ -1669,8 +1704,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
-    factory: (signer) => new ERC1410ManagementFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC1410ManagementFacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC1410ManagementFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC1410ManagementFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC1410ReadFacet: {
@@ -1789,6 +1825,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x5af5dacbf5ee5519e494e4ef1304293dfca9b64fc96860222581d0524c5a5621",
       },
       {
+        name: "RedeemedByPartition",
+        signature: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
+        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
+      },
+      {
         name: "RemovedFromControlList",
         signature: "RemovedFromControlList(address,address)",
         topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
@@ -1797,12 +1838,19 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
+      {
+        name: "InsufficientBalance",
+        signature: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        selector: "0x5d6824c4",
+      },
+      { name: "InvalidPartition", signature: "InvalidPartition(address,bytes32)", selector: "0xbf84f4ec" },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
       { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
-    factory: (signer) => new ERC1410TokenHolderFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC1410TokenHolderFacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC1410TokenHolderFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC1410TokenHolderFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC1594Facet: {
@@ -1891,6 +1939,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
       {
+        name: "Transfer",
+        signature: "Transfer(address,address,uint256)",
+        topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      },
+      {
+        name: "TransferByPartition",
+        signature: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+      {
         name: "TransferFromWithData",
         signature: "TransferFromWithData(address,address,address,uint256,bytes)",
         topic0: "0x7d32874c3a67d8bea4a75c3d32f8fda3b1d5c767d4d42b96710a820b22e31957",
@@ -1904,14 +1962,20 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      {
+        name: "InsufficientBalance",
+        signature: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        selector: "0x5d6824c4",
+      },
+      { name: "InvalidPartition", signature: "InvalidPartition(address,bytes32)", selector: "0xbf84f4ec" },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
       { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
       { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
     ],
-    factory: (signer) => new ERC1594Facet__factory(signer),
-    timeTravelFactory: (signer) => new ERC1594FacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC1594Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new ERC1594FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC1643Facet: {
@@ -2005,6 +2069,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x745acaacce1108849ac3b5a8667c1fd5044b5515e7d7507952493ba6a1b96d37",
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+      {
+        name: "TransferByPartition",
+        signature: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
     ],
     errors: [
       { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
@@ -2013,8 +2082,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
-    factory: (signer) => new ERC1644Facet__factory(signer),
-    timeTravelFactory: (signer) => new ERC1644FacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC1644Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new ERC1644FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC20Facet: {
@@ -2113,6 +2182,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
+      {
+        name: "InsufficientBalance",
+        signature: "InsufficientBalance(address,uint256,uint256,bytes32)",
+        selector: "0x5d6824c4",
+      },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
       { name: "s", signature: "s()", selector: "0x86b714e2" },
       { name: "SpenderWithZeroAddress", signature: "SpenderWithZeroAddress()", selector: "0x80e32d8f" },
@@ -2120,8 +2194,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" },
       { name: "ZeroOwnerAddress", signature: "ZeroOwnerAddress()", selector: "0x42cad957" },
     ],
-    factory: (signer) => new ERC20Facet__factory(signer),
-    timeTravelFactory: (signer) => new ERC20FacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC20Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new ERC20FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC20PermitFacet: {
@@ -2210,8 +2284,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "BrokenClockMode", signature: "BrokenClockMode()", selector: "0xb2b9e563" },
       { name: "ERC20VotesFutureLookup", signature: "ERC20VotesFutureLookup(uint256,uint256)", selector: "0x5877b221" },
     ],
-    factory: (signer) => new ERC20VotesFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC20VotesFacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC20VotesFacet__factory(getLibLinks("holdOps") as any, signer),
+    timeTravelFactory: (signer) => new ERC20VotesFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
   },
 
   ERC3643BatchFacet: {
@@ -2243,8 +2317,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x88d695b2",
       },
     ],
-    factory: (signer) => new ERC3643BatchFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC3643BatchFacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC3643BatchFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new ERC3643BatchFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC3643ManagementFacet: {
@@ -2325,8 +2399,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "InputBoolArrayLengthMismatch", signature: "InputBoolArrayLengthMismatch()", selector: "0x07ac0eb9" },
       { name: "WalletRecovered", signature: "WalletRecovered()", selector: "0xf9f9bcf9" },
     ],
-    factory: (signer) => new ERC3643ManagementFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC3643ManagementFacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC3643ManagementFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC3643ManagementFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC3643OperationsFacet: {
@@ -2345,8 +2420,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
     ],
-    factory: (signer) => new ERC3643OperationsFacet__factory(signer),
-    timeTravelFactory: (signer) => new ERC3643OperationsFacetTimeTravel__factory(signer),
+    factory: (signer) => new ERC3643OperationsFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC3643OperationsFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC3643ReadFacet: {
@@ -2763,8 +2839,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
       },
     ],
-    factory: (signer) => new HoldManagementFacet__factory(signer),
-    timeTravelFactory: (signer) => new HoldManagementFacetTimeTravel__factory(signer),
+    factory: (signer) => new HoldManagementFacet__factory(getLibLinks("holdOps") as any, signer),
+    timeTravelFactory: (signer) => new HoldManagementFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
   },
 
   HoldReadFacet: {
@@ -2811,8 +2887,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xeb89899d",
       },
     ],
-    factory: (signer) => new HoldReadFacet__factory(signer),
-    timeTravelFactory: (signer) => new HoldReadFacetTimeTravel__factory(signer),
+    factory: (signer) => new HoldReadFacet__factory(getLibLinks("holdOps") as any, signer),
+    timeTravelFactory: (signer) => new HoldReadFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
   },
 
   HoldTokenHolderFacet: {
@@ -2881,9 +2957,24 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
       },
     ],
-    errors: [{ name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" }],
-    factory: (signer) => new HoldTokenHolderFacet__factory(signer),
-    timeTravelFactory: (signer) => new HoldTokenHolderFacetTimeTravel__factory(signer),
+    errors: [
+      { name: "HoldExpirationNotReached", signature: "HoldExpirationNotReached()", selector: "0x20aa310e" },
+      { name: "HoldExpirationReached", signature: "HoldExpirationReached()", selector: "0x0415b9f9" },
+      {
+        name: "InsufficientHoldBalance",
+        signature: "InsufficientHoldBalance(uint256,uint256)",
+        selector: "0x7ff7d816",
+      },
+      {
+        name: "InvalidDestinationAddress",
+        signature: "InvalidDestinationAddress(address,address)",
+        selector: "0xdb0a3012",
+      },
+      { name: "IsNotEscrow", signature: "IsNotEscrow()", selector: "0xf86f2a37" },
+      { name: "WrongHoldId", signature: "WrongHoldId()", selector: "0x7e90c2c9" },
+    ],
+    factory: (signer) => new HoldTokenHolderFacet__factory(getLibLinks("holdOps") as any, signer),
+    timeTravelFactory: (signer) => new HoldTokenHolderFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
   },
 
   KpiLinkedRateFacet: {
@@ -4099,8 +4190,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf29416ed",
       },
     ],
-    factory: (signer) => new TotalBalanceFacet__factory(signer),
-    timeTravelFactory: (signer) => new TotalBalanceFacetTimeTravel__factory(signer),
+    factory: (signer) => new TotalBalanceFacet__factory(getLibLinks("holdOps") as any, signer),
+    timeTravelFactory: (signer) => new TotalBalanceFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
   },
 
   TransferAndLockFacet: {
@@ -4130,9 +4221,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
+      {
+        name: "TransferByPartition",
+        signature: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
     ],
-    factory: (signer) => new TransferAndLockFacet__factory(signer),
-    timeTravelFactory: (signer) => new TransferAndLockFacetTimeTravel__factory(signer),
+    factory: (signer) => new TransferAndLockFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new TransferAndLockFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 };
 

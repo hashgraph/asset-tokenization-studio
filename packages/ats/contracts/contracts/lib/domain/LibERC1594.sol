@@ -8,6 +8,7 @@ import { erc3643Storage } from "../../storage/ExternalStorage.sol";
 import { IKyc } from "../../facets/features/interfaces/IKyc.sol";
 import { IPause } from "../../facets/features/interfaces/IPause.sol";
 import { IERC1410 } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
+import { IERC1410TokenHolder } from "../../facets/features/interfaces/ERC1400/IERC1410TokenHolder.sol";
 import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
@@ -384,7 +385,7 @@ library LibERC1594 {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
-                IERC1410.InvalidPartition.selector,
+                IERC1410TokenHolder.InvalidPartition.selector,
                 abi.encode(_from, _partition)
             );
         }
@@ -394,7 +395,7 @@ library LibERC1594 {
             return (
                 false,
                 Eip1066.INSUFFICIENT_FUNDS,
-                IERC1410.InsufficientBalance.selector,
+                IERC1410TokenHolder.InsufficientBalance.selector,
                 abi.encode(_from, currentPartitionBalance, _value, _partition)
             );
         }

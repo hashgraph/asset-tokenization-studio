@@ -7,17 +7,16 @@ import {
 } from "../../../facets/assetCapabilities/proceedRecipients/sustainabilityPerformanceTargetRate/ProceedRecipientsSustainabilityPerformanceTargetRateFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
 contract ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel is
     ProceedRecipientsSustainabilityPerformanceTargetRateFacet,
     TimeTravelProvider
 {
-    function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockTimestamp();
     }
 
-    function _getBlockNumber() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockNumber() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockNumber();
     }
 }

@@ -27,6 +27,9 @@
 // Domain registry data (auto-generated)
 export * from "./atsRegistry.data";
 
+// Orchestrator library management (library linking for external orchestrators)
+export * from "./orchestratorLibraries";
+
 // Domain constants
 export * from "./constants";
 

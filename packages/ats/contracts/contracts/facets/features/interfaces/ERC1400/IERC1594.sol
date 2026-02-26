@@ -2,6 +2,17 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IERC1594 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event TransferByPartition(
+        bytes32 indexed _fromPartition,
+        address _operator,
+        address indexed _from,
+        address indexed _to,
+        uint256 _value,
+        bytes _data,
+        bytes _operatorData
+    );
+
     event Issued(address indexed _operator, address indexed _to, uint256 _value, bytes _data);
     event Redeemed(address indexed _operator, address indexed _from, uint256 _value, bytes _data);
 
@@ -14,6 +25,9 @@ interface IERC1594 {
         uint256 amount,
         bytes data
     );
+
+    error InvalidPartition(address account, bytes32 partition);
+    error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594() external;

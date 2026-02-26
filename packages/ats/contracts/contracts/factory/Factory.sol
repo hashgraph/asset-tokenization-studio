@@ -18,9 +18,9 @@ import {
     FactoryRegulationData,
     RegulationData,
     RegulationType,
-    RegulationSubType,
-    LibRegulation
-} from "../lib/domain/LibRegulation.sol";
+    RegulationSubType
+} from "../facets/regulation/constants/regulation.sol";
+import { LibRegulation } from "../lib/domain/LibRegulation.sol";
 import { IEquityUSA } from "../facets/regulation/interfaces/IEquityUSA.sol";
 import { IBondUSA } from "../facets/regulation/interfaces/IBondUSA.sol";
 import { IProceedRecipients } from "../facets/assetCapabilities/interfaces/proceedRecipients/IProceedRecipients.sol";

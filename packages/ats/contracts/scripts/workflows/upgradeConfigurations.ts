@@ -41,7 +41,13 @@ import {
   saveDeploymentOutput,
   resolveCheckpointForResume,
 } from "@scripts/infrastructure";
-import { atsRegistry, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
+import {
+  atsRegistry,
+  createEquityConfiguration,
+  createBondConfiguration,
+  deployOrchestratorLibraries,
+  hasOrchestratorLibraryAddresses,
+} from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
 
 // ============================================================================
@@ -375,6 +381,12 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
     info("\n✓ Step 1/5: All facets already deployed (resuming)");
     info(`✅ Loaded ${checkpoint.steps.facets.size} facets from checkpoint`);
     return;
+  }
+
+  // Deploy orchestrator libraries first (required for facet factory linking)
+  if (!hasOrchestratorLibraryAddresses()) {
+    info("   Deploying orchestrator libraries (required for facet linking)...");
+    await deployOrchestratorLibraries(signer);
   }
 
   info("\n📦 Step 1/5: Deploying all facets...");

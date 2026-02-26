@@ -7,14 +7,13 @@ import {
 } from "../../../facets/assetCapabilities/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
 contract ScheduledBalanceAdjustmentsFacetTimeTravel is ScheduledBalanceAdjustmentsFacet, TimeTravelProvider {
-    function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockTimestamp();
     }
 
-    function _getBlockNumber() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockNumber() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockNumber();
     }
 }

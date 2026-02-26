@@ -12,7 +12,7 @@ import {
 import { LibPause } from "../../../../lib/core/LibPause.sol";
 import { LibERC20Votes } from "../../../../lib/domain/LibERC20Votes.sol";
 import { LibABAF } from "../../../../lib/domain/LibABAF.sol";
-import { LibTotalBalance } from "../../../../lib/orchestrator/LibTotalBalance.sol";
+import { HoldOps } from "../../../../lib/orchestrator/HoldOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/lib/TimestampProvider.sol";
 
 abstract contract ERC20Votes is IERC20Votes, TimestampProvider {
@@ -37,7 +37,7 @@ abstract contract ERC20Votes is IERC20Votes, TimestampProvider {
         IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
         LibERC20Votes.takeAbafCheckpoint(LibABAF.getAbaf(), _getBlockNumber());
 
-        uint256 delegatorBalance = LibTotalBalance.getTotalBalanceForAdjustedAt(msg.sender, _getBlockTimestamp());
+        uint256 delegatorBalance = HoldOps.getTotalBalanceForAdjustedAt(msg.sender, _getBlockTimestamp());
 
         LibERC20Votes.delegateAndEmit(msg.sender, _delegatee, currentDelegate);
         LibERC20Votes.moveVotingPower(currentDelegate, _delegatee, delegatorBalance, _getBlockNumber());

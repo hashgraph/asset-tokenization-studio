@@ -9,7 +9,8 @@ import {
     erc1410OperatorStorage
 } from "../../storage/TokenStorage.sol";
 import { IERC1410 } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
-import { BasicTransferInfo } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
+import { IERC1410TokenHolder } from "../../facets/features/interfaces/ERC1400/IERC1410TokenHolder.sol";
+import { BasicTransferInfo } from "../../facets/features/interfaces/ERC1400/IERC1410Types.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { LibABAF } from "./LibABAF.sol";
 
@@ -55,12 +56,12 @@ library LibERC1410 {
 
     function reduceBalanceByPartition(address _from, uint256 _value, bytes32 _partition) internal {
         if (!validPartition(_partition, _from)) {
-            revert IERC1410.InvalidPartition(_from, _partition);
+            revert IERC1410TokenHolder.InvalidPartition(_from, _partition);
         }
 
         uint256 fromBalance = balanceOfByPartition(_partition, _from);
         if (fromBalance < _value) {
-            revert IERC1410.InsufficientBalance(_from, fromBalance, _value, _partition);
+            revert IERC1410TokenHolder.InsufficientBalance(_from, fromBalance, _value, _partition);
         }
 
         ERC1410BasicStorage storage s = erc1410BasicStorage();
@@ -77,7 +78,7 @@ library LibERC1410 {
 
     function increaseBalanceByPartition(address _to, uint256 _value, bytes32 _partition) internal {
         if (!validPartition(_partition, _to)) {
-            revert IERC1410.InvalidPartition(_to, _partition);
+            revert IERC1410TokenHolder.InvalidPartition(_to, _partition);
         }
 
         ERC1410BasicStorage storage s = erc1410BasicStorage();

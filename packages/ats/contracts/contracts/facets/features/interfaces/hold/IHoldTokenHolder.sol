@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Hold, HoldIdentifier } from "./IHold.sol";
+import { Hold, HoldIdentifier } from "./IHoldTypes.sol";
+import { IClearing } from "../clearing/IClearing.sol";
 
-interface IHoldTokenHolder {
-    error WrongExpirationTimestamp();
-
-    // solhint-disable-next-line ordering
+interface IHoldTokenHolder is IClearing {
     event HeldByPartition(
         address indexed operator,
         address indexed tokenHolder,
@@ -47,6 +45,13 @@ interface IHoldTokenHolder {
         uint256 holdId,
         uint256 amount
     );
+
+    error HoldExpirationNotReached();
+    error WrongHoldId();
+    error InvalidDestinationAddress(address holdDestination, address to);
+    error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+    error HoldExpirationReached();
+    error IsNotEscrow();
 
     /**
      * @notice Creates a hold on the tokens of a token holder on a specific partition

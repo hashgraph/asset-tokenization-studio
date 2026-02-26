@@ -1,8 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { holdStorage } from "../../storage/AssetStorage.sol";
-import { erc3643Storage } from "../../storage/ExternalStorage.sol";
+// Domain Libraries
+import { LibABAF } from "../domain/LibABAF.sol";
+import { LibERC1410 } from "../domain/LibERC1410.sol";
+import { LibERC20 } from "../domain/LibERC20.sol";
+import { LibSnapshots } from "../domain/LibSnapshots.sol";
+import { LibHold } from "../domain/LibHold.sol";
+import { LibClearing } from "../domain/LibClearing.sol";
+import { LibLock } from "../domain/LibLock.sol";
+import { LibFreeze } from "../domain/LibFreeze.sol";
+
+// Core Libraries
+import { LibCompliance } from "../core/LibCompliance.sol";
+import { LibControlList } from "../core/LibControlList.sol";
+import { LibERC712 } from "../core/LibERC712.sol";
+import { LibNonce } from "../core/LibNonce.sol";
+import { LibProtectedPartitions } from "../core/LibProtectedPartitions.sol";
+
+// Interfaces
+import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
+import { ICompliance } from "../../facets/features/interfaces/ERC3643/ICompliance.sol";
 import {
     Hold,
     ProtectedHold,
@@ -12,47 +30,41 @@ import {
 } from "../../facets/features/interfaces/hold/IHoldTypes.sol";
 import { IHoldTokenHolder } from "../../facets/features/interfaces/hold/IHoldTokenHolder.sol";
 import { ThirdPartyType } from "../../facets/features/types/ThirdPartyType.sol";
-import { ICompliance } from "../../facets/features/interfaces/ERC3643/ICompliance.sol";
-import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { LibLowLevelCall } from "../../infrastructure/lib/LibLowLevelCall.sol";
-import { LibERC712 } from "../core/LibERC712.sol";
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { LibHold } from "../domain/LibHold.sol";
-import { LibABAF } from "../domain/LibABAF.sol";
-import { LibERC1410 } from "../domain/LibERC1410.sol";
-import { LibSnapshots } from "../domain/LibSnapshots.sol";
-import { LibERC20 } from "../domain/LibERC20.sol";
-import { LibControlList } from "../../lib/core/LibControlList.sol";
 import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
-import { LibNonce } from "../../lib/core/LibNonce.sol";
-import { LibProtectedPartitions } from "../../lib/core/LibProtectedPartitions.sol";
+
+// Utilities
+import { LibLowLevelCall } from "../../infrastructure/lib/LibLowLevelCall.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { LibResolverProxy } from "../../infrastructure/proxy/LibResolverProxy.sol";
 
-/// @title LibHoldOps
-/// @notice Orchestration library for hold operations
-/// @dev Contains all hold creation, execution, release, and reclaim logic
-library LibHoldOps {
+/// @title HoldOps
+/// @notice Hold operations and total balance library - deployed once and called via DELEGATECALL
+/// @dev Contains ONLY orchestration logic:
+///      - Hold operations (create, execute, release, reclaim)
+///      - Total Balance calculations
+///      Accepts _timestamp as parameter (dependency injection)
+library HoldOps {
     using LibLowLevelCall for address;
-    using EnumerableSet for EnumerableSet.UintSet;
+
+    // ==========================================================================
+    // ERRORS
+    // ==========================================================================
 
     error WrongExpirationTimestamp();
 
-    /// @notice Create a hold by partition
-    /// @param _partition The partition identifier
-    /// @param _from The token holder creating the hold
-    /// @param _hold The hold data
-    /// @param _operatorData Additional data from the operator
-    /// @param _thirdPartyType The type of third party (AUTHORIZED, PROTECTED, NOTARY)
-    /// @return success_ Whether the operation was successful
-    /// @return holdId_ The ID of the newly created hold
+    // ==========================================================================
+    // HOLD OPERATIONS (Pure Orchestration)
+    // ==========================================================================
+
+    /// @notice Create a hold by partition (orchestration only)
+    /// @dev Returns holdId for facet to emit event
     function createHoldByPartition(
         bytes32 _partition,
         address _from,
         Hold memory _hold,
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
-    ) internal returns (bool success_, uint256 holdId_) {
+    ) public returns (bool success_, uint256 holdId_) {
         // Trigger and sync all ABAF adjustments
         LibABAF.triggerAndSyncAll(_partition, _from, address(0));
 
@@ -69,66 +81,17 @@ library LibHoldOps {
         // Create hold and set LABAF
         holdId_ = LibHold.createHold(_partition, _from, _hold, _operatorData, _thirdPartyType);
         LibABAF.setHeldLabafById(_partition, _from, holdId_, abaf);
-
         success_ = true;
     }
 
-    /// @notice Create a protected hold by partition with signature verification
-    /// @param _partition The partition identifier
-    /// @param _from The token holder creating the hold
-    /// @param _protectedHold The protected hold data with signature
-    /// @param _signature The signature authorizing the hold
-    /// @param _blockTimestamp The block timestamp for deadline validation
-    /// @return success_ Whether the operation was successful
-    /// @return holdId_ The ID of the newly created hold
-    function protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        ProtectedHold memory _protectedHold,
-        bytes calldata _signature,
-        uint256 _blockTimestamp
-    ) internal returns (bool success_, uint256 holdId_) {
-        // Verify nonce and deadline
-        LibERC712.checkNounceAndDeadline(
-            _protectedHold.nonce,
-            _from,
-            LibNonce.getNonceFor(_from),
-            _protectedHold.deadline,
-            _blockTimestamp
-        );
-
-        // Verify signature
-        LibProtectedPartitions.checkCreateHoldSignature(
-            _partition,
-            _from,
-            _protectedHold,
-            _signature,
-            LibERC20.getName(),
-            LibResolverProxy.getVersion(),
-            block.chainid,
-            address(this)
-        );
-
-        // Increment nonce
-        LibNonce.setNonceFor(_protectedHold.nonce, _from);
-
-        // Create the hold
-        return createHoldByPartition(_partition, _from, _protectedHold.hold, "", ThirdPartyType.PROTECTED);
-    }
-
     /// @notice Execute a hold by partition (transfer held amount to recipient)
-    /// @param _holdIdentifier The hold identifier (tokenHolder, partition, holdId)
-    /// @param _to The recipient address
-    /// @param _amount The amount to transfer from the hold
-    /// @param _blockTimestamp The block timestamp for expiration validation
-    /// @return success_ Whether the operation was successful
-    /// @return partition_ The partition of the executed hold
+    /// @dev Returns data for facet to emit event
     function executeHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount,
         uint256 _blockTimestamp
-    ) internal returns (bool success_, bytes32 partition_) {
+    ) public returns (bool success_, bytes32 partition_) {
         // Adjust hold balances and update ABAF
         _adjustHoldBalances(_holdIdentifier, _to);
 
@@ -137,7 +100,7 @@ library LibHoldOps {
         LibSnapshots.updateAccountHeldBalancesSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
 
         // Execute the hold operation
-        success_ = _operateHoldByPartition(_holdIdentifier, _to, _amount, OperationType.Execute, _blockTimestamp);
+        _operateHoldByPartition(_holdIdentifier, _to, _amount, OperationType.Execute, _blockTimestamp);
         partition_ = _holdIdentifier.partition;
 
         // Clean up if hold is now empty
@@ -145,18 +108,16 @@ library LibHoldOps {
         if (holdData.hold.amount == 0) {
             LibABAF.removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
         }
+        success_ = true;
     }
 
     /// @notice Release a hold by partition (return held amount to token holder)
-    /// @param _holdIdentifier The hold identifier (tokenHolder, partition, holdId)
-    /// @param _amount The amount to release from the hold
-    /// @param _blockTimestamp The block timestamp for expiration validation
-    /// @return success_ Whether the operation was successful
+    /// @dev Returns amount for facet to emit event
     function releaseHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         uint256 _amount,
         uint256 _blockTimestamp
-    ) internal returns (bool success_) {
+    ) public returns (bool success_) {
         // Adjust hold balances and update ABAF
         _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
 
@@ -169,7 +130,7 @@ library LibHoldOps {
         _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, _amount);
 
         // Release the hold operation
-        success_ = _operateHoldByPartition(
+        _operateHoldByPartition(
             _holdIdentifier,
             _holdIdentifier.tokenHolder,
             _amount,
@@ -182,17 +143,15 @@ library LibHoldOps {
         if (holdData.hold.amount == 0) {
             LibABAF.removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
         }
+        success_ = true;
     }
 
     /// @notice Reclaim an expired hold by partition (return held amount to token holder)
-    /// @param _holdIdentifier The hold identifier (tokenHolder, partition, holdId)
-    /// @param _blockTimestamp The block timestamp for expiration validation
-    /// @return success_ Whether the operation was successful
-    /// @return amount_ The amount reclaimed from the hold
+    /// @dev Returns amount for facet to emit event
     function reclaimHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         uint256 _blockTimestamp
-    ) internal returns (bool success_, uint256 amount_) {
+    ) public returns (bool success_, uint256 amount_) {
         // Adjust hold balances and update ABAF
         _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
 
@@ -206,7 +165,7 @@ library LibHoldOps {
         _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, amount_);
 
         // Reclaim the hold operation
-        success_ = _operateHoldByPartition(
+        _operateHoldByPartition(
             _holdIdentifier,
             _holdIdentifier.tokenHolder,
             amount_,
@@ -216,29 +175,11 @@ library LibHoldOps {
 
         // Remove hold (always cleaned up for reclaim)
         LibABAF.removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
-    }
-
-    /// @notice Decrease the allowed balance for a hold (for AUTHORIZED third parties)
-    /// @param _partition The partition identifier
-    /// @param _from The token holder
-    /// @param _amount The amount to decrease from allowance
-    /// @param _holdId The hold ID
-    function decreaseAllowedBalanceForHold(
-        bytes32 _partition,
-        address _from,
-        uint256 _amount,
-        uint256 _holdId
-    ) internal {
-        address thirdPartyAddress = msg.sender;
-        LibERC20.spendAllowance(_from, thirdPartyAddress, _amount);
-        holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = thirdPartyAddress;
+        success_ = true;
     }
 
     /// @notice Update total held amount ABAF for token holder
-    /// @param _partition The partition identifier
-    /// @param _tokenHolder The token holder address
-    /// @return abaf_ The current ABAF value
-    function updateTotalHold(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
+    function updateTotalHold(bytes32 _partition, address _tokenHolder) public returns (uint256 abaf_) {
         abaf_ = LibABAF.getAbaf();
         uint256 labaf = LibABAF.getTotalHeldLabaf(_tokenHolder);
         uint256 labafByPartition = LibABAF.getTotalHeldLabafByPartition(_partition, _tokenHolder);
@@ -258,26 +199,108 @@ library LibHoldOps {
         }
     }
 
+    /// @notice Decrease allowed balance for an authorized third-party hold
+    function decreaseAllowedBalanceForHold(bytes32 _partition, address _from, uint256 _amount, uint256 _holdId) public {
+        address thirdPartyAddress = msg.sender;
+        LibERC20.spendAllowance(_from, thirdPartyAddress, _amount);
+        LibHold.setHoldThirdPartyByParams(_from, _partition, _holdId, thirdPartyAddress);
+    }
+
+    /// @notice Create a protected hold by partition with EIP-712 signature verification
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature,
+        uint256 _blockTimestamp
+    ) public returns (bool success_, uint256 holdId_) {
+        LibERC712.checkNounceAndDeadline(
+            _protectedHold.nonce,
+            _from,
+            LibNonce.getNonceFor(_from),
+            _protectedHold.deadline,
+            _blockTimestamp
+        );
+        LibProtectedPartitions.checkCreateHoldSignature(
+            _partition,
+            _from,
+            _protectedHold,
+            _signature,
+            LibERC20.getName(),
+            LibResolverProxy.getVersion(),
+            block.chainid,
+            address(this)
+        );
+        LibNonce.setNonceFor(_protectedHold.nonce, _from);
+        return createHoldByPartition(_partition, _from, _protectedHold.hold, "", ThirdPartyType.PROTECTED);
+    }
+
+    // ==========================================================================
+    // TOTAL BALANCE OPERATIONS (Read-only composition)
+    // ==========================================================================
+
+    /// @notice Get total balance for an account at a timestamp
+    /// @dev Composes: adjusted balance + held + locked + frozen + cleared encumbrances
+    function getTotalBalanceForAdjustedAt(
+        address account,
+        uint256 timestamp
+    ) public view returns (uint256 totalBalance_) {
+        totalBalance_ =
+            LibABAF.balanceOfAdjustedAt(account, timestamp) +
+            _getAdjustedHeldAmountByAccount(account, timestamp) +
+            _getAdjustedLockedAmountByAccount(account, timestamp) +
+            _getAdjustedFrozenAmount(account, timestamp) +
+            _getAdjustedClearedAmountByAccount(account, timestamp);
+    }
+
+    /// @notice Get total balance per partition for an account at a specific timestamp
+    function getTotalBalanceForByPartitionAdjustedAt(
+        bytes32 partition,
+        address account,
+        uint256 timestamp
+    ) public view returns (uint256 totalBalance_) {
+        totalBalance_ =
+            LibABAF.balanceOfByPartitionAdjustedAt(partition, account, timestamp) +
+            _getAdjustedHeldAmountByPartition(partition, account, timestamp) +
+            _getAdjustedLockedAmountByPartition(partition, account, timestamp) +
+            _getAdjustedFrozenAmountByPartition(partition, account, timestamp) +
+            _getAdjustedClearedAmountByPartition(partition, account, timestamp);
+    }
+
+    /// @notice Get available balance for an account (total minus encumbrances)
+    function getAvailableBalanceAdjustedAt(
+        address account,
+        uint256 timestamp
+    ) public view returns (uint256 availableBalance_) {
+        uint256 totalBalance = getTotalBalanceForAdjustedAt(account, timestamp);
+        uint256 encumbrances = _getTotalEncumbrancesAdjustedAt(account, timestamp);
+        availableBalance_ = totalBalance > encumbrances ? totalBalance - encumbrances : 0;
+    }
+
+    /// @notice Get available balance per partition (total minus encumbrances)
+    function getAvailableBalanceByPartitionAdjustedAt(
+        bytes32 partition,
+        address account,
+        uint256 timestamp
+    ) public view returns (uint256 availableBalance_) {
+        uint256 totalBalance = getTotalBalanceForByPartitionAdjustedAt(partition, account, timestamp);
+        uint256 encumbrances = _getTotalEncumbrancesByPartitionAdjustedAt(partition, account, timestamp);
+        availableBalance_ = totalBalance > encumbrances ? totalBalance - encumbrances : 0;
+    }
+
     /// @notice Get held amount for token holder adjusted at timestamp
-    /// @param _tokenHolder The token holder address
-    /// @param _timestamp The timestamp to adjust at
-    /// @return The adjusted held amount
-    function getHeldAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
+    function getHeldAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) public view returns (uint256) {
         return
             LibHold.getHeldAmountFor(_tokenHolder) *
             LibABAF.calculateFactorForHeldAmountAdjustedAt(_tokenHolder, _timestamp);
     }
 
     /// @notice Get held amount by partition for token holder adjusted at timestamp
-    /// @param _partition The partition identifier
-    /// @param _tokenHolder The token holder address
-    /// @param _timestamp The timestamp to adjust at
-    /// @return The adjusted held amount by partition
     function getHeldAmountForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _timestamp
-    ) internal view returns (uint256) {
+    ) public view returns (uint256) {
         uint256 factor = LibABAF.calculateFactor(
             LibABAF.getAbafAdjustedAt(_timestamp),
             LibABAF.getTotalHeldLabafByPartition(_partition, _tokenHolder)
@@ -286,20 +309,11 @@ library LibHoldOps {
     }
 
     /// @notice Get hold data by partition adjusted at timestamp
-    /// @param _holdIdentifier The hold identifier
-    /// @param _timestamp The timestamp to adjust at
-    /// @return amount_ The adjusted hold amount
-    /// @return expirationTimestamp_ The hold expiration timestamp
-    /// @return escrow_ The escrow address
-    /// @return destination_ The destination address
-    /// @return data_ The hold data
-    /// @return operatorData_ The operator data
-    /// @return thirdPartType_ The third party type
     function getHoldForByPartitionAdjustedAt(
         HoldIdentifier calldata _holdIdentifier,
         uint256 _timestamp
     )
-        internal
+        public
         view
         returns (
             uint256 amount_,
@@ -321,20 +335,22 @@ library LibHoldOps {
         amount_ *= factor;
     }
 
+    // ==========================================================================
+    // PURE FUNCTIONS
+    // ==========================================================================
+
     /// @notice Validate that an expiration timestamp is in the future
-    /// @param _expirationTimestamp The expiration timestamp to validate
-    /// @param _blockTimestamp The current block timestamp
-    function checkValidExpirationTimestamp(uint256 _expirationTimestamp, uint256 _blockTimestamp) internal pure {
+    function checkHoldValidExpirationTimestamp(uint256 _expirationTimestamp, uint256 _blockTimestamp) public pure {
         if (_expirationTimestamp < _blockTimestamp) {
             revert WrongExpirationTimestamp();
         }
     }
 
-    // ==================== PRIVATE FUNCTIONS ====================
+    // ==========================================================================
+    // HOLD PRIVATE HELPERS
+    // ==========================================================================
 
     /// @notice Adjust hold balances and update ABAF
-    /// @param _holdIdentifier The hold identifier
-    /// @param _to The recipient address (for sync)
     function _adjustHoldBalances(HoldIdentifier calldata _holdIdentifier, address _to) private {
         // Trigger and sync all ABAF adjustments
         LibABAF.triggerAndSyncAll(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to);
@@ -347,10 +363,6 @@ library LibHoldOps {
     }
 
     /// @notice Update hold amount based on ABAF change
-    /// @param _partition The partition identifier
-    /// @param _holdId The hold ID
-    /// @param _tokenHolder The token holder address
-    /// @param _abaf The current ABAF value
     function _updateHold(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _abaf) private {
         uint256 holdLabaf = LibABAF.getHeldLabafById(_partition, _tokenHolder, _holdId);
 
@@ -362,19 +374,13 @@ library LibHoldOps {
     }
 
     /// @notice Execute hold operation (validation and transfer)
-    /// @param _holdIdentifier The hold identifier
-    /// @param _to The recipient address
-    /// @param _amount The amount to operate on
-    /// @param _operation The operation type (Execute, Release, or Reclaim)
-    /// @param _blockTimestamp The block timestamp for expiration validation
-    /// @return success_ Whether the operation was successful
     function _operateHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount,
         OperationType _operation,
         uint256 _blockTimestamp
-    ) private returns (bool success_) {
+    ) private {
         HoldData memory holdData = LibHold.getHold(_holdIdentifier);
 
         // Validate execution-specific conditions
@@ -407,14 +413,9 @@ library LibHoldOps {
 
         // Transfer the held amount
         _transferHold(_holdIdentifier, _to, _amount);
-
-        success_ = true;
     }
 
     /// @notice Transfer held amount from hold to recipient
-    /// @param _holdIdentifier The hold identifier
-    /// @param _to The recipient address
-    /// @param _amount The amount to transfer
     function _transferHold(HoldIdentifier calldata _holdIdentifier, address _to, uint256 _amount) private {
         // Decrease held amount
         LibHold.decreaseHeldAmount(_holdIdentifier, _amount);
@@ -434,7 +435,7 @@ library LibHoldOps {
 
         // Notify compliance (only for cross-partition transfers in default partition)
         if (_holdIdentifier.tokenHolder != _to && _holdIdentifier.partition == _DEFAULT_PARTITION) {
-            address compliance = erc3643Storage().compliance;
+            address compliance = address(LibCompliance.getCompliance());
             if (compliance != address(0)) {
                 compliance.functionCall(
                     abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
@@ -445,9 +446,6 @@ library LibHoldOps {
     }
 
     /// @notice Restore allowance for authorized third parties
-    /// @param _thirdPartyType The type of third party
-    /// @param _holdIdentifier The hold identifier
-    /// @param _amount The amount to restore
     function _restoreHoldAllowance(
         ThirdPartyType _thirdPartyType,
         HoldIdentifier calldata _holdIdentifier,
@@ -458,10 +456,99 @@ library LibHoldOps {
             return;
         }
 
-        address thirdParty = holdStorage().holdThirdPartyByAccountPartitionAndId[_holdIdentifier.tokenHolder][
-            _holdIdentifier.partition
-        ][_holdIdentifier.holdId];
+        address thirdParty = LibHold.getHoldThirdParty(_holdIdentifier);
 
         LibERC20.increaseAllowance(_holdIdentifier.tokenHolder, thirdParty, _amount);
+    }
+
+    // ==========================================================================
+    // TOTAL BALANCE PRIVATE HELPERS
+    // ==========================================================================
+
+    function _getTotalEncumbrancesAdjustedAt(
+        address account,
+        uint256 timestamp
+    ) private view returns (uint256 totalEncumbrances_) {
+        totalEncumbrances_ =
+            _getAdjustedHeldAmountByAccount(account, timestamp) +
+            _getAdjustedLockedAmountByAccount(account, timestamp) +
+            _getAdjustedFrozenAmount(account, timestamp) +
+            _getAdjustedClearedAmountByAccount(account, timestamp);
+    }
+
+    function _getTotalEncumbrancesByPartitionAdjustedAt(
+        bytes32 partition,
+        address account,
+        uint256 timestamp
+    ) private view returns (uint256 totalEncumbrances_) {
+        totalEncumbrances_ =
+            _getAdjustedHeldAmountByPartition(partition, account, timestamp) +
+            _getAdjustedLockedAmountByPartition(partition, account, timestamp) +
+            _getAdjustedFrozenAmountByPartition(partition, account, timestamp) +
+            _getAdjustedClearedAmountByPartition(partition, account, timestamp);
+    }
+
+    function _getAdjustedHeldAmountByAccount(address account, uint256 timestamp) private view returns (uint256) {
+        uint256 heldAmount = LibHold.getHeldAmountFor(account);
+        uint256 factor = LibABAF.calculateFactorForHeldAmountAdjustedAt(account, timestamp);
+        return heldAmount * factor;
+    }
+
+    function _getAdjustedHeldAmountByPartition(
+        bytes32 partition,
+        address account,
+        uint256 timestamp
+    ) private view returns (uint256) {
+        uint256 heldAmount = LibHold.getHeldAmountForByPartition(partition, account);
+        uint256 factor = LibABAF.calculateFactorForHeldAmountAdjustedAt(account, timestamp);
+        return heldAmount * factor;
+    }
+
+    function _getAdjustedLockedAmountByAccount(address account, uint256 timestamp) private view returns (uint256) {
+        uint256 lockedAmount = LibLock.getLockedAmountFor(account);
+        uint256 factor = LibABAF.calculateFactorForLockedAmountAdjustedAt(account, timestamp);
+        return lockedAmount * factor;
+    }
+
+    function _getAdjustedLockedAmountByPartition(
+        bytes32 partition,
+        address account,
+        uint256 timestamp
+    ) private view returns (uint256) {
+        uint256 lockedAmount = LibLock.getLockedAmountForByPartition(partition, account);
+        uint256 factor = LibABAF.calculateFactorForLockedAmountAdjustedAt(account, timestamp);
+        return lockedAmount * factor;
+    }
+
+    function _getAdjustedFrozenAmount(address account, uint256 timestamp) private view returns (uint256) {
+        uint256 frozenAmount = LibFreeze.getFrozenTokens(account);
+        uint256 factor = LibABAF.calculateFactorForFrozenAmountAdjustedAt(account, timestamp);
+        return frozenAmount * factor;
+    }
+
+    function _getAdjustedFrozenAmountByPartition(
+        bytes32 partition,
+        address account,
+        uint256 timestamp
+    ) private view returns (uint256) {
+        uint256 frozenAmount = LibFreeze.getFrozenTokensByPartition(account, partition);
+        uint256 factor = LibABAF.calculateFactorForFrozenAmountAdjustedAt(account, timestamp);
+        return frozenAmount * factor;
+    }
+
+    function _getAdjustedClearedAmountByAccount(address account, uint256 timestamp) private view returns (uint256) {
+        uint256 clearedAmount = LibClearing.getClearedAmount(account);
+        uint256 factor = LibABAF.calculateFactorForClearedAmountAdjustedAt(account, timestamp);
+        return clearedAmount * factor;
+    }
+
+    function _getAdjustedClearedAmountByPartition(
+        bytes32 partition,
+        address account,
+        uint256 timestamp
+    ) private view returns (uint256) {
+        uint256 clearedAmount = LibClearing.getClearedAmountByPartition(partition, account);
+        uint256 factor = LibABAF.calculateFactorForClearedAmountAdjustedAt(account, timestamp);
+        return clearedAmount * factor;
     }
 }

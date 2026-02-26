@@ -4,6 +4,16 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC1644Base } from "./IERC1644Base.sol";
 
 interface IERC1644 is IERC1644Base {
+    event TransferByPartition(
+        bytes32 indexed _fromPartition,
+        address _operator,
+        address indexed _from,
+        address indexed _to,
+        uint256 _value,
+        bytes _data,
+        bytes _operatorData
+    );
+
     /**
      * @dev Initial configuration
      *

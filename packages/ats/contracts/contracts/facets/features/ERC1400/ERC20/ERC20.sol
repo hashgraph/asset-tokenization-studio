@@ -9,7 +9,7 @@ import { LibABAF } from "../../../../lib/domain/LibABAF.sol";
 import { LibERC1594 } from "../../../../lib/domain/LibERC1594.sol";
 import { LibCompliance } from "../../../../lib/core/LibCompliance.sol";
 import { LibProtectedPartitions } from "../../../../lib/core/LibProtectedPartitions.sol";
-import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../../lib/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/lib/TimestampProvider.sol";
 import { IControlListBase } from "../../interfaces/controlList/IControlListBase.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
@@ -34,7 +34,7 @@ abstract contract ERC20 is IERC20, IControlListBase, TimestampProvider {
         LibCompliance.requireNotRecovered(msg.sender);
         LibCompliance.requireNotRecovered(spender);
         LibERC1410.checkWithoutMultiPartition();
-        return LibTokenTransfer.approve(msg.sender, spender, value);
+        return TokenCoreOps.approve(msg.sender, spender, value);
     }
 
     function transfer(address to, uint256 amount) external override returns (bool) {
@@ -48,7 +48,7 @@ abstract contract ERC20 is IERC20, IControlListBase, TimestampProvider {
             amount,
             _getBlockTimestamp()
         );
-        return LibTokenTransfer.transfer(msg.sender, to, amount, _getBlockTimestamp(), _getBlockNumber());
+        return TokenCoreOps.transfer(msg.sender, to, amount, _getBlockTimestamp(), _getBlockNumber());
     }
 
     function transferFrom(address from, address to, uint256 amount) external override returns (bool) {
@@ -62,21 +62,21 @@ abstract contract ERC20 is IERC20, IControlListBase, TimestampProvider {
             amount,
             _getBlockTimestamp()
         );
-        return LibTokenTransfer.transferFrom(msg.sender, from, to, amount, _getBlockTimestamp(), _getBlockNumber());
+        return TokenCoreOps.transferFrom(msg.sender, from, to, amount, _getBlockTimestamp(), _getBlockNumber());
     }
 
     function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
         LibPause.requireNotPaused();
         LibERC1594.checkCompliance(msg.sender, msg.sender, spender, false);
         LibERC1410.checkWithoutMultiPartition();
-        return LibTokenTransfer.increaseAllowance(msg.sender, spender, addedValue);
+        return TokenCoreOps.increaseAllowance(msg.sender, spender, addedValue);
     }
 
     function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
         LibPause.requireNotPaused();
         LibERC1410.checkWithoutMultiPartition();
         LibERC1594.checkCompliance(msg.sender, msg.sender, spender, false);
-        return LibTokenTransfer.decreaseAllowance(msg.sender, spender, subtractedValue);
+        return TokenCoreOps.decreaseAllowance(msg.sender, spender, subtractedValue);
     }
 
     // ════════════════════════════════════════════════════════════════════════════════════

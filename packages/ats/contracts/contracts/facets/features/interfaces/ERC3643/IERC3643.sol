@@ -13,14 +13,22 @@ import { IERC3643Batch } from "./IERC3643Batch.sol";
  * This interface is NOT meant to be inherited by any contract - it's only for external interaction.
  */
 interface IERC3643 is IERC3643Operations, IERC3643Management, IERC3643Read, IERC3643Batch {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event TransferByPartition(
+        bytes32 indexed _fromPartition,
+        address _operator,
+        address indexed _from,
+        address indexed _to,
+        uint256 _value,
+        bytes _data,
+        bytes _operatorData
+    );
+
     /**
      *  @notice This event is emitted when the Compliance has been set for the token
      */
     event ComplianceAdded(address indexed compliance);
 
-    /*
-     *   @notice Thrown when unfreezing more than what is frozen
-     */
     error InsufficientFrozenBalance(
         address user,
         uint256 requestedUnfreeze,

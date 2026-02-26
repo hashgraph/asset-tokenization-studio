@@ -5,14 +5,13 @@ import {
     KpiLinkedRateFacet
 } from "../../../facets/assetCapabilities/interestRates/kpiLinkedRate/KpiLinkedRateFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
 contract KpiLinkedRateFacetTimeTravel is KpiLinkedRateFacet, TimeTravelProvider {
-    function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockTimestamp();
     }
 
-    function _getBlockNumber() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockNumber() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockNumber();
     }
 }

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBond } from "../../assetCapabilities/interfaces/bond/IBond.sol";
 import { IBondRead } from "../../assetCapabilities/interfaces/bond/IBondRead.sol";
-import { RegulationData, AdditionalSecurityData } from "../../../lib/domain/LibRegulation.sol";
+import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 
 interface IBondUSA is IBond {
     // solhint-disable func-name-mixedcase

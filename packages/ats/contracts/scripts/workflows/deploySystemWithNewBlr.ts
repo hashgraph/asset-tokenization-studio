@@ -51,6 +51,8 @@ import {
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
   createBondSustainabilityPerformanceTargetRateConfiguration,
+  deployOrchestratorLibraries,
+  hasOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 import {
   BusinessLogicResolver__factory,
@@ -295,6 +297,14 @@ export async function deploySystemWithNewBlr(
     // Testing hook: Step-level failure injection for checkpoint testing
     if (shouldFailAtStep("blr")) {
       throw new Error(createTestFailureMessage("step", "blr"));
+    }
+
+    // Step 2a: Deploy orchestrator libraries (required for facet factory linking)
+    if (!hasOrchestratorLibraryAddresses()) {
+      info("\n📚 Deploying orchestrator libraries (required for facet linking)...");
+      await deployOrchestratorLibraries(signer);
+    } else {
+      info("\n✓ Orchestrator library addresses already set");
     }
 
     // Step 2: Deploy all facets (with incremental checkpoint saves)

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IEquity } from "../../assetCapabilities/interfaces/equity/IEquity.sol";
 import { ISecurity } from "./ISecurity.sol";
-import { RegulationData, AdditionalSecurityData } from "../../../lib/domain/LibRegulation.sol";
+import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 
 interface IEquityUSA is IEquity, ISecurity {
     // solhint-disable func-name-mixedcase

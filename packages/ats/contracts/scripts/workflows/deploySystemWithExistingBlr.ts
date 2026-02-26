@@ -47,6 +47,8 @@ import {
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
   createBondSustainabilityPerformanceTargetRateConfiguration,
+  deployOrchestratorLibraries,
+  hasOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 
 import { BusinessLogicResolver__factory } from "@contract-types";
@@ -424,6 +426,13 @@ export async function deploySystemWithExistingBlr(
         info(`✅ Loaded ${facetsResult.deployed.size} facets from checkpoint`);
       } else {
         info(`\n📦 Step 3/${totalSteps}: Deploying all facets...`);
+
+        // Deploy orchestrator libraries first (required for facet factory linking)
+        if (!hasOrchestratorLibraryAddresses()) {
+          info("   Deploying orchestrator libraries (required for facet linking)...");
+          await deployOrchestratorLibraries(signer);
+        }
+
         let allFacets = atsRegistry.getAllFacets();
         info(`   Found ${allFacets.length} facets in registry`);
 

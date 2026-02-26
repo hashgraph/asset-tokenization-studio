@@ -3,6 +3,15 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "./IBondRead.sol";
 interface IBond {
+    event RedeemedByPartition(
+        bytes32 indexed partition,
+        address indexed operator,
+        address indexed from,
+        uint256 value,
+        bytes data,
+        bytes operatorData
+    );
+
     /**
      * @notice Emitted when a coupon is created or updated for a bond or corporate action.
      * @param corporateActionId Unique identifier grouping related corporate actions or coupons.

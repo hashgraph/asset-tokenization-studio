@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing } from "./IClearing.sol";
 
-interface IClearingActions {
+interface IClearingActions is IClearing {
     enum ClearingActionType {
         Approve,
         Cancel,

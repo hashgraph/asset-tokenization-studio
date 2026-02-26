@@ -222,7 +222,7 @@ library LibClearing {
     /// @return amount_ The amount involved
     /// @return destination_ The destination address (for transfers) or zero address
     function getClearingBasicInfo(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier
     ) internal view returns (uint256 expirationTimestamp_, uint256 amount_, address destination_) {
         if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
             IClearingRedeem.ClearingRedeemData memory clearingRedeemData = getClearingRedeemData(
@@ -490,5 +490,161 @@ library LibClearing {
                 _operationType
             ];
         }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // SET CLEARING DATA BY STRUCT (for orchestrator convenience)
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// @notice Set clearing transfer data using struct
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _clearingId The clearing ID
+    /// @param _data The clearing transfer data struct
+    function setClearingTransferDataStruct(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _clearingId,
+        IClearingTransfer.ClearingTransferData memory _data
+    ) internal {
+        ClearingDataStorage storage cs = clearingStorage();
+        cs.clearingTransferByAccountPartitionAndId[_tokenHolder][_partition][_clearingId] = _data;
+        cs
+        .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][IClearing.ClearingOperationType.Transfer]
+            .add(_clearingId);
+    }
+
+    /// @notice Set clearing redeem data using struct
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _clearingId The clearing ID
+    /// @param _data The clearing redeem data struct
+    function setClearingRedeemDataStruct(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _clearingId,
+        IClearingRedeem.ClearingRedeemData memory _data
+    ) internal {
+        ClearingDataStorage storage cs = clearingStorage();
+        cs.clearingRedeemByAccountPartitionAndId[_tokenHolder][_partition][_clearingId] = _data;
+        cs
+        .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][IClearing.ClearingOperationType.Redeem].add(
+                _clearingId
+            );
+    }
+
+    /// @notice Set clearing hold creation data using struct
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _clearingId The clearing ID
+    /// @param _data The clearing hold creation data struct
+    function setClearingHoldCreationDataStruct(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _clearingId,
+        IClearingHoldCreation.ClearingHoldCreationData memory _data
+    ) internal {
+        ClearingDataStorage storage cs = clearingStorage();
+        cs.clearingHoldCreationByAccountPartitionAndId[_tokenHolder][_partition][_clearingId] = _data;
+        cs
+        .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][
+            IClearing.ClearingOperationType.HoldCreation
+        ].add(_clearingId);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // TOTAL CLEARED AMOUNT UPDATES
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// @notice Update total cleared amount by account with ABAF factor
+    /// @param _tokenHolder The token holder's address
+    /// @param _factor The multiplication factor
+    function updateTotalClearedAmountByAccount(address _tokenHolder, uint256 _factor) internal {
+        clearingStorage().totalClearedAmountByAccount[_tokenHolder] *= _factor;
+    }
+
+    /// @notice Update total cleared amount by account and partition with ABAF factor
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _factor The multiplication factor
+    function updateTotalClearedAmountByAccountAndPartition(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _factor
+    ) internal {
+        clearingStorage().totalClearedAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
+    }
+
+    /// @notice Decrease total cleared amounts
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _amount The amount to decrease
+    function decreaseTotalClearedAmounts(address _tokenHolder, bytes32 _partition, uint256 _amount) internal {
+        ClearingDataStorage storage clearing = clearingStorage();
+        clearing.totalClearedAmountByAccount[_tokenHolder] -= _amount;
+        clearing.totalClearedAmountByAccountAndPartition[_tokenHolder][_partition] -= _amount;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // CLEARING ID MANAGEMENT
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// @notice Remove a clearing ID from the enumerable set
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _operationType The operation type
+    /// @param _clearingId The clearing ID to remove
+    function removeClearingId(
+        address _tokenHolder,
+        bytes32 _partition,
+        IClearing.ClearingOperationType _operationType,
+        uint256 _clearingId
+    ) internal {
+        clearingStorage().clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][_operationType].remove(
+            _clearingId
+        );
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // CLEARING DATA DELETION
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// @notice Delete clearing transfer data
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _clearingId The clearing ID
+    function deleteClearingTransferData(address _tokenHolder, bytes32 _partition, uint256 _clearingId) internal {
+        delete clearingStorage().clearingTransferByAccountPartitionAndId[_tokenHolder][_partition][_clearingId];
+    }
+
+    /// @notice Delete clearing redeem data
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _clearingId The clearing ID
+    function deleteClearingRedeemData(address _tokenHolder, bytes32 _partition, uint256 _clearingId) internal {
+        delete clearingStorage().clearingRedeemByAccountPartitionAndId[_tokenHolder][_partition][_clearingId];
+    }
+
+    /// @notice Delete clearing hold creation data
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _clearingId The clearing ID
+    function deleteClearingHoldCreationData(address _tokenHolder, bytes32 _partition, uint256 _clearingId) internal {
+        delete clearingStorage().clearingHoldCreationByAccountPartitionAndId[_tokenHolder][_partition][_clearingId];
+    }
+
+    /// @notice Delete clearing third party
+    /// @param _tokenHolder The token holder's address
+    /// @param _partition The partition
+    /// @param _operationType The operation type
+    /// @param _clearingId The clearing ID
+    function deleteClearingThirdParty(
+        address _tokenHolder,
+        bytes32 _partition,
+        IClearing.ClearingOperationType _operationType,
+        uint256 _clearingId
+    ) internal {
+        ClearingDataStorage storage cs = clearingStorage();
+        delete cs.clearingThirdPartyByAccountPartitionTypeAndId[_tokenHolder][_partition][_operationType][_clearingId];
     }
 }

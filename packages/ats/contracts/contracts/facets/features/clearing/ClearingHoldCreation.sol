@@ -11,7 +11,8 @@ import { LibProtectedPartitions } from "../../../lib/core/LibProtectedPartitions
 import { LibAccess } from "../../../lib/core/LibAccess.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
-import { LibClearingOps } from "../../../lib/orchestrator/LibClearingOps.sol";
+import { ClearingOps } from "../../../lib/orchestrator/ClearingOps.sol";
+import { ClearingReadOps } from "../../../lib/orchestrator/ClearingReadOps.sol";
 import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
 abstract contract ClearingHoldCreation is IClearingHoldCreation, TimestampProvider {
@@ -24,12 +25,15 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, TimestampProvid
         LibCompliance.requireNotRecovered(_hold.to);
         LibERC1410.requireValidAddress(_hold.escrow);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperation.partition);
-        LibClearingOps.checkValidExpirationTimestamp(_clearingOperation.expirationTimestamp, _getBlockTimestamp());
-        LibClearingOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
+            _clearingOperation.expirationTimestamp,
+            _getBlockTimestamp()
+        );
+        ClearingReadOps.checkClearingValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
 
-        (success_, clearingId_) = LibClearingOps.clearingHoldCreationCreation(
+        (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperation,
             msg.sender,
             _hold,
@@ -49,15 +53,15 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, TimestampProvid
         LibERC1410.requireValidAddress(_hold.escrow);
         LibERC1410.requireValidAddress(_clearingOperationFrom.from);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
-        LibClearingOps.checkValidExpirationTimestamp(
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
-        LibClearingOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
+        ClearingReadOps.checkClearingValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
 
-        (success_, clearingId_) = LibClearingOps.clearingHoldCreationCreation(
+        (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
             _hold,
@@ -65,7 +69,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, TimestampProvid
             ThirdPartyType.AUTHORIZED
         );
 
-        LibClearingOps.decreaseAllowedBalanceForClearing(
+        ClearingOps.decreaseAllowedBalanceForClearing(
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
             ClearingOperationType.HoldCreation,
@@ -85,7 +89,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, TimestampProvid
         LibERC1410.requireValidAddress(_hold.escrow);
         LibERC1410.requireValidAddress(_clearingOperationFrom.from);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
-        LibClearingOps.checkValidExpirationTimestamp(
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
@@ -95,10 +99,10 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, TimestampProvid
             msg.sender,
             _clearingOperationFrom.from
         );
-        LibClearingOps.checkValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
+        ClearingReadOps.checkClearingValidExpirationTimestamp(_hold.expirationTimestamp, _getBlockTimestamp());
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
 
-        (success_, clearingId_) = LibClearingOps.clearingHoldCreationCreation(
+        (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
             _hold,
@@ -117,7 +121,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, TimestampProvid
         LibCompliance.requireNotRecovered(_hold.to);
         LibProtectedPartitions.requireProtectedPartitions();
         LibERC1410.requireValidAddress(_protectedClearingOperation.from);
-        LibClearingOps.checkValidExpirationTimestamp(
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
             _protectedClearingOperation.clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
@@ -127,7 +131,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, TimestampProvid
         );
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
 
-        (success_, clearingId_) = LibClearingOps.protectedClearingCreateHoldByPartition(
+        (success_, clearingId_) = ClearingOps.protectedClearingCreateHoldByPartition(
             _protectedClearingOperation,
             _hold,
             _signature,
@@ -141,7 +145,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, TimestampProvid
         uint256 _clearingId
     ) external view override returns (ClearingHoldCreationData memory clearingHoldCreationData_) {
         return
-            LibClearingOps.getClearingHoldCreationForByPartitionAdjustedAt(
+            ClearingReadOps.getClearingHoldCreationForByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
                 _clearingId,

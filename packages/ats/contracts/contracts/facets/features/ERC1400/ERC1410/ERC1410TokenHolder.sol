@@ -3,13 +3,13 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410TokenHolder } from "../../interfaces/ERC1400/IERC1410TokenHolder.sol";
 import { IControlListBase } from "../../interfaces/controlList/IControlListBase.sol";
-import { BasicTransferInfo } from "../../interfaces/ERC1400/IERC1410.sol";
+import { BasicTransferInfo } from "../../interfaces/ERC1400/IERC1410Types.sol";
 import { LibPause } from "../../../../lib/core/LibPause.sol";
 import { LibERC1410 } from "../../../../lib/domain/LibERC1410.sol";
 import { LibERC1594 } from "../../../../lib/domain/LibERC1594.sol";
 import { LibProtectedPartitions } from "../../../../lib/core/LibProtectedPartitions.sol";
 import { LibABAF } from "../../../../lib/domain/LibABAF.sol";
-import { LibTokenTransfer } from "../../../../lib/orchestrator/LibTokenTransfer.sol";
+import { TokenCoreOps } from "../../../../lib/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/lib/TimestampProvider.sol";
 
 abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase, TimestampProvider {
@@ -29,7 +29,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase, T
             _getBlockTimestamp()
         );
         return
-            LibTokenTransfer.transferByPartition(
+            TokenCoreOps.transferByPartition(
                 msg.sender,
                 _basicTransferInfo,
                 _partition,
@@ -45,7 +45,7 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, IControlListBase, T
         LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
         LibERC1594.checkCanRedeemFromByPartition(msg.sender, msg.sender, _partition, _value, _getBlockTimestamp());
-        LibTokenTransfer.redeemByPartition(
+        TokenCoreOps.redeemByPartition(
             _partition,
             msg.sender,
             address(0),

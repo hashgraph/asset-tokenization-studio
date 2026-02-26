@@ -3,19 +3,19 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingRead } from "../interfaces/clearing/IClearingRead.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
-import { LibClearingOps } from "../../../lib/orchestrator/LibClearingOps.sol";
+import { ClearingReadOps } from "../../../lib/orchestrator/ClearingReadOps.sol";
 import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
 abstract contract ClearingRead is IClearingRead, TimestampProvider {
     function getClearedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return LibClearingOps.getClearedAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
+        return ClearingReadOps.getClearedAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
     }
 
     function getClearedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return LibClearingOps.getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
+        return ClearingReadOps.getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
     }
 
     function getClearingCountForByPartition(

@@ -10,7 +10,8 @@ import { LibProtectedPartitions } from "../../../lib/core/LibProtectedPartitions
 import { LibAccess } from "../../../lib/core/LibAccess.sol";
 import { LibClearing } from "../../../lib/domain/LibClearing.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
-import { LibClearingOps } from "../../../lib/orchestrator/LibClearingOps.sol";
+import { ClearingOps } from "../../../lib/orchestrator/ClearingOps.sol";
+import { ClearingReadOps } from "../../../lib/orchestrator/ClearingReadOps.sol";
 import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
 abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
@@ -22,10 +23,13 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
         LibCompliance.requireNotRecovered(msg.sender);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
-        LibClearingOps.checkValidExpirationTimestamp(_clearingOperation.expirationTimestamp, _getBlockTimestamp());
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
+            _clearingOperation.expirationTimestamp,
+            _getBlockTimestamp()
+        );
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
 
-        (success_, clearingId_) = LibClearingOps.clearingRedeemCreation(
+        (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperation,
             _amount,
             msg.sender,
@@ -42,7 +46,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
         LibCompliance.requireNotRecovered(_clearingOperationFrom.from);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
-        LibClearingOps.checkValidExpirationTimestamp(
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
@@ -50,7 +54,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
         LibERC1410.requireValidAddress(_clearingOperationFrom.from);
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
 
-        (success_, clearingId_) = LibClearingOps.clearingRedeemCreation(
+        (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
@@ -58,7 +62,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
             ThirdPartyType.AUTHORIZED
         );
 
-        LibClearingOps.decreaseAllowedBalanceForClearing(
+        ClearingOps.decreaseAllowedBalanceForClearing(
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
             ClearingOperationType.Redeem,
@@ -75,7 +79,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
         LibCompliance.requireNotRecovered(_clearingOperationFrom.from);
         LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
         LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
-        LibClearingOps.checkValidExpirationTimestamp(
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
@@ -88,7 +92,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
             _clearingOperationFrom.from
         );
 
-        (success_, clearingId_) = LibClearingOps.clearingRedeemCreation(
+        (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
@@ -105,7 +109,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
         LibPause.requireNotPaused();
         LibProtectedPartitions.requireProtectedPartitions();
         LibERC1410.requireValidAddress(_protectedClearingOperation.from);
-        LibClearingOps.checkValidExpirationTimestamp(
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
             _protectedClearingOperation.clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
@@ -116,7 +120,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
         if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
         LibCompliance.requireNotRecovered(_protectedClearingOperation.from);
 
-        (success_, clearingId_) = LibClearingOps.protectedClearingRedeemByPartition(
+        (success_, clearingId_) = ClearingOps.protectedClearingRedeemByPartition(
             _protectedClearingOperation,
             _amount,
             _signature,
@@ -130,7 +134,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
         uint256 _clearingId
     ) external view override returns (ClearingRedeemData memory clearingRedeemData_) {
         return
-            LibClearingOps.getClearingRedeemForByPartitionAdjustedAt(
+            ClearingReadOps.getClearingRedeemForByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
                 _clearingId,

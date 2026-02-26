@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BasicTransferInfo } from "../../../features/interfaces/ERC1400/IERC1410.sol";
+import { BasicTransferInfo } from "./IERC1410Types.sol";
 
 /**
  * @title IERC1410TokenHolder
@@ -9,6 +9,18 @@ import { BasicTransferInfo } from "../../../features/interfaces/ERC1400/IERC1410
  * for ERC1410 tokens including transfers, operator transfers, redemptions, and issuance.
  */
 interface IERC1410TokenHolder {
+    event RedeemedByPartition(
+        bytes32 indexed partition,
+        address indexed operator,
+        address indexed from,
+        uint256 value,
+        bytes data,
+        bytes operatorData
+    );
+
+    error InvalidPartition(address account, bytes32 partition);
+    error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
+
     /**
      * @notice Transfers the ownership of tokens from a specified partition from one address to another address
      * @param _partition The partition from which to transfer tokens

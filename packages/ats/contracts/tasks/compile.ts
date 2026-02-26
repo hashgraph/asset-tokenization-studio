@@ -87,6 +87,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
   }));
 
   const constants = [
+    { src: "facets/regulation/constants/regulation", dst: "regulation" },
     { src: "lib/domain/LibRegulation", dst: "LibRegulation" },
     { src: "constants/roles", dst: "roles" },
     {
@@ -171,6 +172,9 @@ task("erc3643-clone-interfaces", async (_, hre) => {
       let content = fs.readFileSync(src, "utf8");
 
       content = content.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
+
+      // Rewrite deep relative imports to local references (files are co-located in factory dir)
+      content = content.replace(/from\s+['"]\.\.\/.*\/([^/]+)\.sol['"]/gm, 'from "./$1.sol"');
 
       fs.writeFileSync(dst, content, "utf8");
       console.log(`Copied constant with updated pragma: ${dst}`);

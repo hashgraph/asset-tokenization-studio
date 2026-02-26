@@ -15,7 +15,7 @@ import {
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE
 } from "../../../constants/values.sol";
-import { RegulationData, AdditionalSecurityData } from "../../../lib/domain/LibRegulation.sol";
+import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 import { LibEquity } from "../../../lib/domain/LibEquity.sol";
 import { LibSecurity } from "../../../lib/domain/LibSecurity.sol";
 import { LibPause } from "../../../lib/core/LibPause.sol";
@@ -24,7 +24,7 @@ import { LibCorporateActions } from "../../../lib/core/LibCorporateActions.sol";
 import { LibScheduledTasks } from "../../../lib/domain/LibScheduledTasks.sol";
 import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
 import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
-import { LibTotalBalance } from "../../../lib/orchestrator/LibTotalBalance.sol";
+import { HoldOps } from "../../../lib/orchestrator/HoldOps.sol";
 import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
 abstract contract EquityUSA is IEquityUSA, TimestampProvider {
@@ -437,7 +437,7 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
 
             balance_ = (_snapshotId != 0)
                 ? LibSnapshots.totalBalanceOfAtSnapshot(_snapshotId, _account)
-                : LibTotalBalance.getTotalBalanceForAdjustedAt(_account, _date);
+                : HoldOps.getTotalBalanceForAdjustedAt(_account, _date);
 
             decimals_ = (_snapshotId != 0)
                 ? LibSnapshots.decimalsAtSnapshot(_snapshotId, _getBlockTimestamp())

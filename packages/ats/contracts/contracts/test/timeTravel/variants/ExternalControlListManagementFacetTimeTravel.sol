@@ -5,14 +5,13 @@ import {
     ExternalControlListManagementFacet
 } from "../../../facets/features/externalControlLists/ExternalControlListManagementFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 
 contract ExternalControlListManagementFacetTimeTravel is ExternalControlListManagementFacet, TimeTravelProvider {
-    function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockTimestamp() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockTimestamp();
     }
 
-    function _getBlockNumber() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+    function _getBlockNumber() internal view override returns (uint256) {
         return TimeTravelProvider._getBlockNumber();
     }
 }

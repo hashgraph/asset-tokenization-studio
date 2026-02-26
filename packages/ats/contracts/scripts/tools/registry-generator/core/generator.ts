@@ -10,7 +10,61 @@
  * @module registry-generator/core/generator
  */
 
+import * as fs from "fs";
+import * as path from "path";
 import type { ContractMetadata, MethodDefinition, EventDefinition, ErrorDefinition } from "../types";
+
+/**
+ * Reverse mapping from Hardhat linkReferences key format to short library name.
+ * Maps "contracts/lib/orchestrator/TokenCoreOps.sol:TokenCoreOps" -> "tokenCoreOps"
+ */
+const LINK_REF_TO_LIB_NAME: Record<string, string> = {
+  "contracts/lib/orchestrator/TokenCoreOps.sol:TokenCoreOps": "tokenCoreOps",
+  "contracts/lib/orchestrator/HoldOps.sol:HoldOps": "holdOps",
+  "contracts/lib/orchestrator/ClearingOps.sol:ClearingOps": "clearingOps",
+  "contracts/lib/orchestrator/ClearingReadOps.sol:ClearingReadOps": "clearingReadOps",
+};
+
+/**
+ * Read Hardhat artifact and extract library dependencies.
+ *
+ * Checks the artifact's `linkReferences` field to determine which orchestrator
+ * libraries a facet needs linked at deployment time.
+ *
+ * @param facetName - Contract name (e.g., "BondUSAFacet")
+ * @param sourceFile - Relative path to source file (e.g., "contracts/facets/regulation/bondUSA/variableRate/BondUSAFacet.sol")
+ * @returns Array of library short names (e.g., ["tokenCoreOps"]) or empty array
+ */
+function getLibraryDependencies(facetName: string, sourceFile: string): string[] {
+  const artifactPath = path.join("artifacts", "contracts", sourceFile, `${facetName}.json`);
+  try {
+    const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
+    const linkRefs: Record<string, Record<string, unknown[]>> = artifact.linkReferences || {};
+    const libs: string[] = [];
+    for (const [filePath, refs] of Object.entries(linkRefs)) {
+      for (const libName of Object.keys(refs)) {
+        const key = `${filePath}:${libName}`;
+        const mapped = LINK_REF_TO_LIB_NAME[key];
+        if (mapped) {
+          libs.push(mapped);
+        }
+      }
+    }
+    return libs.sort();
+  } catch {
+    return [];
+  }
+}
+
+// Cache library dependencies to avoid re-reading artifacts
+const _libDepsCache = new Map<string, string[]>();
+
+function getCachedLibDeps(facetName: string, sourceFile: string): string[] {
+  if (!_libDepsCache.has(facetName)) {
+    _libDepsCache.set(facetName, getLibraryDependencies(facetName, sourceFile));
+  }
+  return _libDepsCache.get(facetName)!;
+}
 
 /**
  * Format methods array for registry output.
@@ -161,6 +215,10 @@ function generateHeader(
 
   const factoryImportsStr = factoryImports.join(", ");
 
+  // Check if any facets have library dependencies
+  const hasAnyLibDeps = facets.some((f) => getCachedLibDeps(f.name, f.sourceFile).length > 0);
+  const libLinksImport = hasAnyLibDeps ? `\nimport { getLibLinks } from './orchestratorLibraries'` : "";
+
   return `// SPDX-License-Identifier: Apache-2.0
 
 /**
@@ -181,7 +239,7 @@ function generateHeader(
  */
 
 import { FacetDefinition, ContractDefinition, StorageWrapperDefinition } from '${moduleName}'
-import { ${factoryImportsStr} } from '${typechainModuleName}'`;
+import { ${factoryImportsStr} } from '${typechainModuleName}'${libLinksImport}`;
 }
 
 /**
@@ -236,14 +294,27 @@ function generateFacetEntry(facet: ContractMetadata): string {
 
   const descriptionLine = facet.description ? `\n        description: '${facet.description}',` : "";
 
-  // Add TypeChain factory reference
-  const factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(signer),`;
+  // Add TypeChain factory reference (with library linking if needed)
+  const libDeps = getCachedLibDeps(facet.name, facet.sourceFile);
+  let factoryLine: string;
+  let timeTravelFactoryLine: string;
 
-  // Add TimeTravel variant factory if available (not for TimeTravelFacet itself)
-  const timeTravelFactoryLine =
-    facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
-      ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(signer),`
-      : "";
+  if (libDeps.length > 0) {
+    const libArgs = libDeps.map((l) => `"${l}"`).join(", ");
+    factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(getLibLinks(${libArgs}) as any, signer),`;
+
+    timeTravelFactoryLine =
+      facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
+        ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(getLibLinks(${libArgs}) as any, signer),`
+        : "";
+  } else {
+    factoryLine = `\n        factory: (signer) => new ${facet.name}__factory(signer),`;
+
+    timeTravelFactoryLine =
+      facet.hasTimeTravel && facet.name !== "TimeTravelFacet"
+        ? `\n        timeTravelFactory: (signer) => new ${facet.name}TimeTravel__factory(signer),`
+        : "";
+  }
 
   return `    ${facet.name}: {
         name: '${facet.name}',${descriptionLine}${resolverKeyLine}${rolesLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}${timeTravelFactoryLine}
