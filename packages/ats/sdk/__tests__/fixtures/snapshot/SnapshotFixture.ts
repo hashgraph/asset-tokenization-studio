@@ -8,6 +8,7 @@ import { GetTokenHoldersAtSnapshotQuery } from "@query/security/snapshot/getToke
 import { GetTotalTokenHoldersAtSnapshotQuery } from "@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery";
 import GetTokenHoldersAtSnapshotRequest from "@port/in/request/security/operations/snapshot/GetTokenHoldersAtSnapshotRequest";
 import GetTotalTokenHoldersAtSnapshotRequest from "@port/in/request/security/operations/snapshot/GetTotalTokenHoldersAtSnapshotRequest";
+import { BalancesOfAtSnapshotQueryFixture, BalancesOfAtSnapshotRequestFixture } from "./BalancesOfAtSnapshotFixture";
 
 export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>((command) => {
   command.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -44,3 +45,5 @@ export const GetTotalTokenHoldersAtSnapshotRequestFixture = createFixture<GetTot
     request.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
   },
 );
+
+export { BalancesOfAtSnapshotQueryFixture, BalancesOfAtSnapshotRequestFixture };

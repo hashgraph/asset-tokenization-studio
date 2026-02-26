@@ -6,6 +6,7 @@ import {
   GetTokenHoldersAtSnapshotRequest,
   GetTotalTokenHoldersAtSnapshotRequest,
   TakeSnapshotRequest,
+  BalancesOfAtSnapshotRequest,
 } from "../../request";
 import { TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
 import LogService from "@service/log/LogService";
@@ -18,10 +19,12 @@ import {
   GetTokenHoldersAtSnapshotRequestFixture,
   GetTotalTokenHoldersAtSnapshotRequestFixture,
   TakeSnapshotRequestFixture,
+  BalancesOfAtSnapshotRequestFixture,
 } from "@test/fixtures/snapshot/SnapshotFixture";
 import { TakeSnapshotCommand } from "@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand";
 import { GetTokenHoldersAtSnapshotQuery } from "@query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery";
 import { GetTotalTokenHoldersAtSnapshotQuery } from "@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery";
+import { BalancesOfAtSnapshotQuery } from "@query/security/snapshot/balancesOfAtSnapshot/BalancesOfAtSnapshotQuery";
 
 describe("Snapshot", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -31,6 +34,7 @@ describe("Snapshot", () => {
   let takeSnapshotRequest: TakeSnapshotRequest;
   let getTokenHoldersAtSnapshotRequest: GetTokenHoldersAtSnapshotRequest;
   let getTotalTokenHoldersAtSnapshotRequest: GetTotalTokenHoldersAtSnapshotRequest;
+  let balancesOfAtSnapshotRequest: BalancesOfAtSnapshotRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -266,6 +270,97 @@ describe("Snapshot", () => {
       await expect(Security.getTotalTokenHoldersAtSnapshot(getTotalTokenHoldersAtSnapshotRequest)).rejects.toThrow(
         ValidationError,
       );
+    });
+  });
+
+  describe("balancesOfAtSnapshot", () => {
+    balancesOfAtSnapshotRequest = new BalancesOfAtSnapshotRequest(BalancesOfAtSnapshotRequestFixture.create());
+
+    const mockBalances = [
+      { holder: "0x1234567890123456789012345678901234567890", balance: BigInt(1000) },
+      { holder: "0x0987654321098765432109876543210987654321", balance: BigInt(2000) },
+    ];
+
+    it("should get balances at snapshot successfully", async () => {
+      const expectedResponse = {
+        payload: mockBalances,
+      };
+
+      queryBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await Security.balancesOfAtSnapshot(balancesOfAtSnapshotRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(BalancesOfAtSnapshotRequest.name, balancesOfAtSnapshotRequest);
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new BalancesOfAtSnapshotQuery(
+          balancesOfAtSnapshotRequest.securityId,
+          balancesOfAtSnapshotRequest.snapshotId,
+          balancesOfAtSnapshotRequest.pageIndex,
+          balancesOfAtSnapshotRequest.pageLength,
+        ),
+      );
+      expect(result).toStrictEqual(expectedResponse.payload);
+    });
+
+    it("should throw an error if query execution fails", async () => {
+      const error = new Error("Query execution failed");
+      queryBusMock.execute.mockRejectedValue(error);
+
+      await expect(Security.balancesOfAtSnapshot(balancesOfAtSnapshotRequest)).rejects.toThrow(
+        "Query execution failed",
+      );
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(BalancesOfAtSnapshotRequest.name, balancesOfAtSnapshotRequest);
+
+      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(queryBusMock.execute).toHaveBeenCalledWith(
+        new BalancesOfAtSnapshotQuery(
+          balancesOfAtSnapshotRequest.securityId,
+          balancesOfAtSnapshotRequest.snapshotId,
+          balancesOfAtSnapshotRequest.pageIndex,
+          balancesOfAtSnapshotRequest.pageLength,
+        ),
+      );
+    });
+
+    it("should throw error if securityId is invalid", async () => {
+      balancesOfAtSnapshotRequest = new BalancesOfAtSnapshotRequest({
+        ...BalancesOfAtSnapshotRequestFixture.create(),
+        securityId: "invalid",
+      });
+
+      await expect(Security.balancesOfAtSnapshot(balancesOfAtSnapshotRequest)).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw error if snapshotId is invalid", async () => {
+      balancesOfAtSnapshotRequest = new BalancesOfAtSnapshotRequest({
+        ...BalancesOfAtSnapshotRequestFixture.create(),
+        snapshotId: -1,
+      });
+
+      await expect(Security.balancesOfAtSnapshot(balancesOfAtSnapshotRequest)).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw error if pageIndex is invalid", async () => {
+      balancesOfAtSnapshotRequest = new BalancesOfAtSnapshotRequest({
+        ...BalancesOfAtSnapshotRequestFixture.create(),
+        pageIndex: -1,
+      });
+
+      await expect(Security.balancesOfAtSnapshot(balancesOfAtSnapshotRequest)).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw error if pageLength is invalid", async () => {
+      balancesOfAtSnapshotRequest = new BalancesOfAtSnapshotRequest({
+        ...BalancesOfAtSnapshotRequestFixture.create(),
+        pageLength: 0,
+      });
+
+      await expect(Security.balancesOfAtSnapshot(balancesOfAtSnapshotRequest)).rejects.toThrow(ValidationError);
     });
   });
 });
