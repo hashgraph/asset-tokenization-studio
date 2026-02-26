@@ -3,30 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 interface ICorporateActions {
     /**
-     * @dev Emitted when a corporate action gets added
-     *
-     * @param operator The caller of the function that emitted the event
-     * @param actionType The corporate action's action type (used for classification)
-     * @param corporateActionId The corporate action's unique Id
-     * @param corporateActionIdByType The corporate action's id for its action type
-     * @param data The corporate action's data (defining the corporate aciton itself)
-     */
-    event CorporateActionAdded(
-        address indexed operator,
-        bytes32 indexed actionType,
-        bytes32 indexed corporateActionId,
-        uint256 corporateActionIdByType,
-        bytes data
-    );
-
-    error DuplicatedCorporateAction(bytes32 actionType, bytes data);
-
-    function addCorporateAction(
-        bytes32 _actionType,
-        bytes memory _data
-    ) external returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
-
-    /**
      * @dev Returns a corporate action info
      *
      * @param _corporateActionId The corporate action unique Id
