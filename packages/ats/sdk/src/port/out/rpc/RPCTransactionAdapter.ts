@@ -102,7 +102,7 @@ import { singleton } from "tsyringe";
 import { SigningError } from "../error/SigningError";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 import TransactionAdapter, { InitializationData } from "../TransactionAdapter";
-import { RPCTransactionResponseAdapter } from "./RPCTransactionResponseAdapter";
+import { RPCTransactionResponseAdapter } from "@port/out/response/RPCTransactionResponseAdapter";
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {

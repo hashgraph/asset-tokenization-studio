@@ -10,10 +10,10 @@ import { NetworkProps } from "@service/network/NetworkService";
 import TransactionAdapter from "@port/out/TransactionAdapter";
 import { RuntimeError } from "../error/RuntimeError";
 import { SDK } from "@port/in/Common";
-import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
-import { DFNSTransactionAdapter } from "@port/out/hs/hts/custodial/DFNSTransactionAdapter";
-import { FireblocksTransactionAdapter } from "@port/out/hs/hts/custodial/FireblocksTransactionAdapter";
-import { AWSKMSTransactionAdapter } from "@port/out/hs/hts/custodial/AWSKMSTransactionAdapter";
+import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/walletconnect/HederaWalletConnectTransactionAdapter";
+import { DFNSTransactionAdapter } from "@port/out/hs/custodial/DFNSTransactionAdapter";
+import { FireblocksTransactionAdapter } from "@port/out/hs/custodial/FireblocksTransactionAdapter";
+import { AWSKMSTransactionAdapter } from "@port/out/hs/custodial/AWSKMSTransactionAdapter";
 import { TOKENS } from "./Tokens";
 import { COMMAND_HANDLERS, QUERY_HANDLERS, TRANSACTION_HANDLER } from "./Handlers";
 

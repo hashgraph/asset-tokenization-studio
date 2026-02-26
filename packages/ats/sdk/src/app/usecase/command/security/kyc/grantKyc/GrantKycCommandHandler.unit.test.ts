@@ -110,6 +110,7 @@ describe("GrantKycCommandHandler", () => {
           BigDecimal.fromString((signedCredential.validFrom as string).substring(0, 10)),
           BigDecimal.fromString((signedCredential.validUntil as string).substring(0, 10)),
           evmAddress,
+          command.securityId,
         );
       });
     });

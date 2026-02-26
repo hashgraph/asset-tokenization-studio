@@ -67,6 +67,7 @@ export class GrantKycCommandHandler implements ICommandHandler<GrantKycCommand> 
         BigDecimal.fromString((updatedSignedCredential.validFrom as string).substring(0, 10)),
         BigDecimal.fromString((updatedSignedCredential.validUntil as string).substring(0, 10)),
         issuerEvmAddress,
+        securityId,
       );
 
       return Promise.resolve(new GrantKycCommandResponse(res.error === undefined, res.id!));
