@@ -277,6 +277,19 @@ Set maximum token supply to prevent over-issuance.
 
 See [Roles and Permissions Guide](./roles-and-permissions.md) for more details on role management.
 
+## Troubleshooting
+
+### "Account 0.0.XXXXX does not have Kyc status: Granted in the internal/external system"
+
+This error occurs when attempting an operation (e.g., minting or transferring tokens) on an account that has not been KYC-verified. The account must be granted KYC status before it can participate in token operations.
+
+**Resolution depends on your KYC configuration:**
+
+- **Internal KYC**: Grant KYC by uploading a Verifiable Credential for the account. See [Managing KYC and Compliance - Internal KYC](./managing-compliance.md#internal-kyc-management).
+- **External KYC**: Add the account to the external KYC list linked to your token. See [Managing External KYC Lists](./managing-external-kyc-lists.md#managing-kyc-list-members).
+
+After granting KYC through either method, retry the original operation.
+
 ## Operation Guides
 
 For detailed step-by-step instructions:

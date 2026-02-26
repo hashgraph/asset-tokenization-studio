@@ -88,9 +88,10 @@ Once you have issuers configured, you can validate KYC for specific accounts by 
 
 **Getting Test Verifiable Credentials**
 
-For testing purposes, you can generate test VCs using the hardhat command:
+For testing purposes, you can generate test VCs using the hardhat command from the `packages/ats/contracts` directory:
 
 ```bash
+cd packages/ats/contracts
 npx hardhat createVC \
   --holder <account_evm_address> \
   --privatekey <issuer_private_key>
@@ -186,6 +187,12 @@ This error means the target account **already has KYC status** (either granted i
 **Issue**: "Caller does not have SSI_MANAGER_ROLE"
 
 **Solution**: Make sure the account you're using is designated as an issuer in Step 2 (Control → SSI Manager → Add Issuer).
+
+### "The issuer 0x... is not registered in the system"
+
+**Issue**: When granting KYC, you get an error like: `An error occurred while granting KYC: The issuer 0x5d98...b955 is not registered in the system`
+
+**Solution**: The address you are using to grant KYC must first be registered as an issuer. Go to **Control** → **SSI Manager** → **Add Issuer** and add the address. See [Step 2: Configure Issuers](#step-2-configure-issuers).
 
 ### KYC Not Enforced
 
