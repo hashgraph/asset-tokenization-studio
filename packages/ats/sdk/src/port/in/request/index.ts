@@ -182,6 +182,7 @@ import RedeemAtMaturityByPartitionRequest from "./bond/RedeemAtMaturityByPartiti
 import FullRedeemAtMaturityRequest from "./bond/FullRedeemAtMaturityRequest";
 import GetTokenHoldersAtSnapshotRequest from "./security/operations/snapshot/GetTokenHoldersAtSnapshotRequest";
 import GetTotalTokenHoldersAtSnapshotRequest from "./security/operations/snapshot/GetTotalTokenHoldersAtSnapshotRequest";
+import BalancesOfAtSnapshotRequest from "./snapshots/BalancesOfAtSnapshotRequest";
 import GetCouponHoldersRequest from "./bond/GetCouponHoldersRequest";
 import GetTotalCouponHoldersRequest from "./bond/GetTotalCouponHoldersRequest";
 import GetDividendHoldersRequest from "./equity/GetDividendHoldersRequest";
@@ -401,6 +402,7 @@ export {
   FullRedeemAtMaturityRequest,
   GetTokenHoldersAtSnapshotRequest,
   GetTotalTokenHoldersAtSnapshotRequest,
+  BalancesOfAtSnapshotRequest,
   GetCouponHoldersRequest,
   GetTotalCouponHoldersRequest,
   GetDividendHoldersRequest,
