@@ -228,6 +228,38 @@ export class MirrorNodeAdapter {
     }
   }
 
+  public async getFileIdFromTransaction(transactionId: string, timeout = 20, requestInterval = 2): Promise<string> {
+    if (transactionId.match(REGEX_TRANSACTION)) {
+      transactionId = transactionId.replace("@", "-").replace(/.([^.]*)$/, "-$1");
+    }
+    const url = this.mirrorNodeConfig.baseUrl + "transactions/" + transactionId;
+    LogService.logTrace(`[MirrorNode] Querying FileCreate transaction: ${url}`);
+
+    let remainingTimeout = timeout;
+    while (remainingTimeout > 0) {
+      await Time.delay(requestInterval, "seconds");
+      remainingTimeout -= requestInterval;
+
+      try {
+        const res = await this.instance.get<ITransactionList>(url);
+        const tx = res.data?.transactions?.[0];
+
+        if (tx?.entity_id) {
+          LogService.logTrace(`[MirrorNode] Found entity_id: ${tx.entity_id}`);
+          return tx.entity_id;
+        }
+
+        LogService.logTrace(
+          `[MirrorNode] entity_id not ready yet (${remainingTimeout}s remaining), tx: ${JSON.stringify(tx)}`,
+        );
+      } catch (error) {
+        LogService.logTrace(`[MirrorNode] Error querying transaction (${remainingTimeout}s remaining): ${error}`);
+      }
+    }
+
+    return Promise.reject<string>(new InvalidResponse("No entity_id in FileCreateTransaction receipt after timeout"));
+  }
+
   async accountToEvmAddress(accountId: string): Promise<EvmAddress> {
     try {
       const accountInfo: Account = await this.getAccountInfo(accountId);
@@ -316,6 +348,7 @@ interface ITransactionList {
 
 interface ITransaction {
   result: string;
+  entity_id?: string;
 }
 
 interface IKey {
