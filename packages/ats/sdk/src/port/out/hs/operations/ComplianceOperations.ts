@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ContractCreateTransaction, ContractId } from "@hiero-ledger/sdk";
+import { ContractId } from "@hiero-ledger/sdk";
 import { ethers } from "ethers";
 import {
   KycFacet__factory,
@@ -14,7 +14,6 @@ import BigDecimal from "@domain/context/shared/BigDecimal";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
 import LogService from "@service/log/LogService";
-import { TransactionType } from "@port/out/TransactionResponseEnums";
 import { TransactionExecutor } from "../TransactionExecutor";
 
 export class ComplianceOperations {
@@ -246,13 +245,6 @@ export class ComplianceOperations {
 
   async createExternalKycListMock(): Promise<TransactionResponse> {
     LogService.logTrace(`Deploying External Kyc List List Mock contract`);
-    const bytecodeHex = MockedExternalKycList__factory.bytecode.startsWith("0x")
-      ? MockedExternalKycList__factory.bytecode.slice(2)
-      : MockedExternalKycList__factory.bytecode;
-    const bytecode = Uint8Array.from(Buffer.from(bytecodeHex, "hex"));
-    const contractCreate = new ContractCreateTransaction()
-      .setBytecode(bytecode)
-      .setGas(GAS.CREATE_EXTERNAL_KYC_LIST_MOCK);
-    return this.executor.processTransaction(contractCreate, TransactionType.RECEIPT);
+    return this.executor.deployContract(MockedExternalKycList__factory.bytecode, GAS.CREATE_EXTERNAL_KYC_LIST_MOCK);
   }
 }
