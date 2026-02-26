@@ -145,13 +145,7 @@ export * from "./workflows/upgradeTupProxies";
 // ========================================
 
 // Standalone Registry Generator (Fast, Recommended for downstream projects)
-export {
-  generateRegistryPipeline,
-  DEFAULT_CONFIG,
-  CacheManager,
-  LogLevel,
-  configureLogger,
-} from "./tools/registry-generator/exports";
+export { generateRegistryPipeline, DEFAULT_CONFIG, CacheManager } from "./tools/registry-generator/exports";
 
 export type { RegistryConfig, RegistryResult, CacheEntry, RegistryCache } from "./tools/registry-generator/exports";
 

@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION
-} from "contracts/layer_2/constants/storagePositions.sol";
+} from "../../../layer_2/constants/storagePositions.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import { ISustainabilityPerformanceTargetRate } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { ISustainabilityPerformanceTargetRate } from "../../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { KpiLinkedRateStorageWrapper } from "../kpiLinkedRate/KpiLinkedRateStorageWrapper.sol";
 
 abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinkedRateStorageWrapper {

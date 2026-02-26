@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ExternalControlListManagementFacetBase } from "../ExternalControlListManagementFacetBase.sol";
-import { _EXTERNAL_CONTROL_LIST_KPI_LINKED_RATE_RESOLVER_KEY } from "contracts/layer_1/constants/resolverKeys.sol";
+import { _EXTERNAL_CONTROL_LIST_KPI_LINKED_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract ExternalControlListManagementKpiLinkedRateFacet is
     ExternalControlListManagementFacetBase,

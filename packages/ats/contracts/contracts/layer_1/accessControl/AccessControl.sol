@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAccessControl } from "../interfaces/accessControl/IAccessControl.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 
 abstract contract AccessControl is IAccessControl, Internals {
     function grantRole(

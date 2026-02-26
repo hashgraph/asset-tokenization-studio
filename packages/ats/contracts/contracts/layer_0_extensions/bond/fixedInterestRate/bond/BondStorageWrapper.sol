@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../../layer_2/interfaces/bond/IBondRead.sol";
 import { InternalsFixedInterestRate } from "../Internals.sol";
-import { Common } from "contracts/layer_0/common/Common.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
-import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
+import { Common } from "../../../../layer_0/common/Common.sol";
+import { Internals } from "../../../../layer_0/Internals.sol";
+import { BondStorageWrapper } from "../../../../layer_0/bond/BondStorageWrapper.sol";
 
 abstract contract BondStorageWrapperFixedInterestRate is InternalsFixedInterestRate, Common {
     error InterestRateIsFixed();

@@ -4,10 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ClearingRedeemFacetBase } from "../ClearingRedeemFacetBase.sol";
 import {
     _CLEARING_REDEEM_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
-} from "contracts/layer_1/constants/resolverKeys.sol";
+} from "../../constants/resolverKeys.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import { CommonSustainabilityPerformanceTargetInterestRate } from "contracts/layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract ClearingRedeemSustainabilityPerformanceTargetRateFacet is
     ClearingRedeemFacetBase,

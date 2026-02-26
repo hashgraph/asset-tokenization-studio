@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../../../../layer_2/interfaces/bond/IBondRead.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import { ISustainabilityPerformanceTargetRate } from "contracts/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { ISustainabilityPerformanceTargetRate } from "../../../../../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";
 import { InternalsSustainabilityPerformanceTargetInterestRate } from "../Internals.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
-import { BondStorageWrapper } from "contracts/layer_0/bond/BondStorageWrapper.sol";
+import { Internals } from "../../../../../../layer_0/Internals.sol";
+import { BondStorageWrapper } from "../../../../../../layer_0/bond/BondStorageWrapper.sol";
 import { KpisStorageWrapper } from "../../KpisStorageWrapper.sol";
 
 abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is

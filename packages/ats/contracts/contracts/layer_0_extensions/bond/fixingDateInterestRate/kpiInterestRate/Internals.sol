@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
+import { CheckpointsLib } from "../../../../layer_0/common/libraries/CheckpointsLib.sol";
 import { ModifiersKpiInterestRate } from "./Modifiers.sol";
 
 abstract contract InternalsKpiInterestRate is ModifiersKpiInterestRate {
