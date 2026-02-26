@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { HStack, Stack } from "@chakra-ui/react";
-import { Tag, Tabs, Spinner, Text, TabProps } from "io-bricks-ui";
+import { Tag, Tabs, TabProps } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { History } from "../../components/History";
 import { Details } from "./Components/Details";
@@ -24,7 +24,7 @@ import {
   useGetSecurityRolesFor,
 } from "../../hooks/queries/useGetSecurityDetails";
 import { useParams } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { User } from "../../utils/constants";
 import { useUserStore } from "../../store/userStore";
 import { SecurityRole } from "../../utils/SecurityRole";
@@ -35,6 +35,7 @@ import { ControlTab } from "./Components/Tabs/Control";
 import { CorporateActionsTab } from "./Components/Tabs/CorporateActions";
 import { hasRole } from "../../utils/helpers";
 import { useWalletStore } from "../../store/walletStore";
+import { ProgressOverlay, ProgressStep } from "../../components/ProgressOverlay";
 
 export const DigitalSecurityDetails = () => {
   const { id = "" } = useParams();
@@ -45,10 +46,17 @@ export const DigitalSecurityDetails = () => {
   const { t: tTabs } = useTranslation("security", {
     keyPrefix: "details.tabs",
   });
+  const { t: tProgress } = useTranslation("security", {
+    keyPrefix: "details.progress",
+  });
 
   const { address: walletAddress } = useWalletStore();
   const { type: userType } = useUserStore();
   const { roles: rolesStored, setRoles } = useRolesStore();
+
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [animationDone, setAnimationDone] = useState(false);
 
   const {
     data: securityDetails,
@@ -115,6 +123,29 @@ export const DigitalSecurityDetails = () => {
 
   // IS PAUSED
   const { data: isPaused, isLoading: isLoadingIsPaused } = useGetIsPaused(new PauseRequest({ securityId: id }));
+
+  const progressSteps: Omit<ProgressStep, "status">[] = useMemo(() => {
+    const steps = [
+      { id: "details", label: tProgress("details") },
+      { id: "balance", label: tProgress("balance") },
+      { id: "operations", label: tProgress("operations") },
+      { id: "management", label: tProgress("management") },
+    ];
+
+    if (securityDetails?.type === "BOND_VARIABLE_RATE") {
+      steps.push({ id: "control", label: tProgress("control") });
+    }
+
+    return steps;
+  }, [securityDetails?.type, tProgress]);
+
+  const progressPercentage = animationDone ? 100 : (currentStep / progressSteps.length) * 100;
+
+  const stepsWithStatus: ProgressStep[] = progressSteps.map((step, index) => {
+    if (animationDone || index < currentStep) return { ...step, status: "completed" };
+    if (index === currentStep) return { ...step, status: "in-progress" };
+    return { ...step, status: "pending" };
+  });
 
   const tabs = useMemo(() => {
     const holderTabs = [
@@ -244,18 +275,6 @@ export const DigitalSecurityDetails = () => {
       });
     }
 
-    if (isLoadingTabs) {
-      adminTabs.push({
-        content: <></>,
-        header: (
-          <HStack>
-            <Spinner />
-            <Text>Loading</Text>
-          </HStack>
-        ),
-      });
-    }
-
     return adminTabs;
   }, [
     securityDetails,
@@ -276,6 +295,34 @@ export const DigitalSecurityDetails = () => {
     return `tabs-${rolesStored.join("-")}-${tabs.length}`;
   }, [rolesStored, tabs.length]);
 
+  const isLoadingTabs = isLoadingRoles || isLoadingSecurityDetails || isFetchingSecurityDetails;
+
+  // Advance steps once on mount using a snapshot of the initial step count.
+  // animationDone fires after the last timeout, decoupled from progressSteps changing later.
+  useEffect(() => {
+    const count = progressSteps.length;
+    progressSteps.forEach((_, index) => {
+      setTimeout(() => setCurrentStep(index + 1), (index + 1) * 500);
+    });
+    setTimeout(() => setAnimationDone(true), count * 500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Close overlay once animation is done AND real data is ready
+  useEffect(() => {
+    if (!animationDone || isLoadingTabs) return;
+
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false);
+      setCurrentStep(0);
+      setAnimationDone(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [animationDone, isLoadingTabs]);
+
+  const showProgressOverlay = isInitialLoad;
+
   return (
     <>
       <HStack align="flex-start" gap="54px">
@@ -286,6 +333,14 @@ export const DigitalSecurityDetails = () => {
       <Stack w="full" h="full" borderRadius={1} pt={6} gap={4}>
         <Tabs tabs={tabs} variant="primary" isLazy key={tabsKey} />
       </Stack>
+
+      <ProgressOverlay
+        isOpen={showProgressOverlay}
+        title={tProgress("title")}
+        description={tProgress("description")}
+        steps={stepsWithStatus}
+        progress={progressPercentage}
+      />
     </>
   );
 };

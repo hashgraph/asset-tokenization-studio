@@ -125,4 +125,5 @@ export default {
   cancelButton: "Cancel",
   nextStepButton: "Next step",
   previousStepButton: "Previous step",
+  fillWithExample: "Fill with example data",
 };

@@ -131,12 +131,14 @@ export const StepReview = () => {
       ...(identityRegistryId && {
         identityRegistryId: identityRegistryId,
       }),
-      ...(proceedRecipientsIds && {
-        proceedRecipientsIds: proceedRecipientsIds,
-      }),
-      ...(proceedRecipientsData && {
-        proceedRecipientsData: proceedRecipientsData.map((data) => textToHex(data)),
-      }),
+      ...(proceedRecipientsIds &&
+        proceedRecipientsIds.length > 0 && {
+          proceedRecipientsIds: proceedRecipientsIds,
+        }),
+      ...(proceedRecipientsData &&
+        proceedRecipientsData.length > 0 && {
+          proceedRecipientsData: proceedRecipientsData.map((data) => textToHex(data)),
+        }),
     });
 
     createBond(request);
@@ -286,7 +288,6 @@ export const StepReview = () => {
           </HStack>
         </VStack>
       </Stack>
-
       <PopUp
         id="cancelBondCreation"
         isOpen={isOpenCancel}
