@@ -6,24 +6,6 @@ import { Internals } from "../../layer_0/Internals.sol";
 import { _CORPORATE_ACTION_ROLE } from "../constants/roles.sol";
 
 abstract contract CorporateActions is ICorporateActions, Internals {
-    function addCorporateAction(
-        bytes32 _actionType,
-        bytes memory _data
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)
-    {
-        (corporateActionId_, corporateActionIdByType_) = _addCorporateAction(_actionType, _data);
-
-        if (corporateActionId_ == bytes32(0)) {
-            revert DuplicatedCorporateAction(_actionType, _data);
-        }
-        emit CorporateActionAdded(_msgSender(), _actionType, corporateActionId_, corporateActionIdByType_, _data);
-    }
-
     function getCorporateAction(
         bytes32 _corporateActionId
     ) external view override returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {

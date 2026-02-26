@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-11T09:16:17.458Z
+ * Generated: 2026-02-26T09:47:23.954Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -2822,12 +2822,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x14f1d784",
       },
       {
-        name: "addCorporateAction",
-        signature:
-          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
-        selector: "0xd9e4d92c",
-      },
-      {
         name: "getCorporateAction",
         signature:
           "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
@@ -2855,20 +2849,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
-      },
-    ],
-    events: [
-      {
-        name: "CorporateActionAdded",
-        signature: "CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)",
-        topic0: "0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a",
-      },
-    ],
-    errors: [
-      {
-        name: "DuplicatedCorporateAction",
-        signature: "DuplicatedCorporateAction(bytes32,bytes)",
-        selector: "0x3266e9e3",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -2889,12 +2869,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x14f1d784",
       },
       {
-        name: "addCorporateAction",
-        signature:
-          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
-        selector: "0xd9e4d92c",
-      },
-      {
         name: "getCorporateAction",
         signature:
           "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
@@ -2924,21 +2898,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe73bbddb",
       },
     ],
-    events: [
-      {
-        name: "CorporateActionAdded",
-        signature: "CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)",
-        topic0: "0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a",
-      },
-    ],
-    errors: [
-      {
-        name: "DuplicatedCorporateAction",
-        signature: "DuplicatedCorporateAction(bytes32,bytes)",
-        selector: "0x3266e9e3",
-      },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new CorporateActionsFixedRateFacetTimeTravel__factory(signer)
@@ -2959,12 +2919,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x14f1d784",
       },
       {
-        name: "addCorporateAction",
-        signature:
-          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
-        selector: "0xd9e4d92c",
-      },
-      {
         name: "getCorporateAction",
         signature:
           "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
@@ -2994,21 +2948,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe73bbddb",
       },
     ],
-    events: [
-      {
-        name: "CorporateActionAdded",
-        signature: "CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)",
-        topic0: "0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a",
-      },
-    ],
-    errors: [
-      {
-        name: "DuplicatedCorporateAction",
-        signature: "DuplicatedCorporateAction(bytes32,bytes)",
-        selector: "0x3266e9e3",
-      },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new CorporateActionsKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -3026,12 +2966,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "actionContentHashExists",
         signature: "function actionContentHashExists(bytes32 _contentHash) view returns (bool)",
         selector: "0x14f1d784",
-      },
-      {
-        name: "addCorporateAction",
-        signature:
-          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
-        selector: "0xd9e4d92c",
       },
       {
         name: "getCorporateAction",
