@@ -502,7 +502,20 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       },
     };
 
-    this.hederaProvider = await HederaProvider.init(providerOpts);
+    this.patchInitProvidersPrototype();
+    try {
+      this.hederaProvider = await HederaProvider.init(providerOpts);
+    } catch (error: any) {
+      if (error?.message?.includes("No RPC url provided for chainId")) {
+        LogService.logTrace(
+          "[HWC v2] Stale session with non-Hedera chains detected. Clearing WalletConnect storage and retrying...",
+        );
+        this.clearWalletConnectStorage();
+        this.hederaProvider = await HederaProvider.init(providerOpts);
+      } else {
+        throw error;
+      }
+    }
     this.patchInitProviders();
 
     this.appKit = createAppKit({
@@ -645,32 +658,89 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
     return `eip155:${this.evmChainId()}`;
   }
 
+  private clearWalletConnectStorage(): void {
+    if (typeof window === "undefined" || !window.localStorage) return;
+    const keysToRemove = Object.keys(window.localStorage).filter(
+      (key) => key.startsWith("wc@") || key.startsWith("walletconnect"),
+    );
+    keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+  }
+
   private rpcProvider(): ethers.JsonRpcProvider {
     return new ethers.JsonRpcProvider(this.networkService.rpcNode?.baseUrl);
   }
 
+  private static readonly HEDERA_EVM_CHAINS = new Set(["eip155:295", "eip155:296"]);
+  private static prototypePatched = false;
+
   /**
-   * Patches `hederaProvider.initProviders` so that when MetaMask includes many
-   * non-Hedera chains in its approved WalletConnect session (e.g. Ethereum mainnet,
-   * Polygon, Base, …), the `EIP155Provider` constructor only sees the Hedera EVM
-   * chains (chainIds 295 / 296).
+   * Patches `HederaProvider` prototype methods BEFORE any instance is created.
    *
-   * Background: `EIP155Provider.createHttpProvider` throws "No RPC url provided for
-   * chainId: X" for any chain that is not in `HederaChainDefinition.EVM` and has no
-   * entry in `rpcMap`. MetaMask v11+ includes ALL configured networks in the approved
-   * session, so the plain `rpcMap: { "eip155:296": …, "eip155:295": … }` is not
-   * enough. By filtering the session accounts to only Hedera EVM accounts before
-   * `EIP155Provider` is constructed, we avoid the throw and allow `eip155Provider` to
-   * be set correctly.
+   * Two methods need patching:
    *
-   * The session accounts are restored immediately after the call so the rest of the
-   * app continues to see the full account list.
+   * 1. `initProviders` — called by `HederaProvider.init()`, `connect()`,
+   *    `pair()` and the `rpcProviders` getter. Filters session accounts to
+   *    Hedera-only chains so `EIP155Provider` doesn't throw for non-Hedera
+   *    chains that MetaMask includes in the approved session.
+   *
+   * 2. `createProviders` — inherited from `UniversalProvider`, called during
+   *    `checkStorage()` → `initialize()`. The parent's version creates its own
+   *    EIP155 provider with the raw session chains and throws for non-Hedera
+   *    chains. Since `HederaProvider` uses `initProviders` instead, we make
+   *    `createProviders` a no-op.
+   */
+  private patchInitProvidersPrototype(): void {
+    if (HederaWalletConnectTransactionAdapter.prototypePatched) return;
+    if (!HederaProvider?.prototype) return;
+
+    const hederaChains = HederaWalletConnectTransactionAdapter.HEDERA_EVM_CHAINS;
+
+    // Patch initProviders — filter session to Hedera EVM chains only
+    if (HederaProvider.prototype.initProviders) {
+      const origInit = HederaProvider.prototype.initProviders;
+
+      HederaProvider.prototype.initProviders = function (this: any) {
+        const sessionEip155 = this.session?.namespaces?.eip155;
+
+        if (sessionEip155?.accounts?.length) {
+          const original = sessionEip155.accounts as string[];
+          const hederaOnly = original.filter((acc: string) => {
+            const [ns, chainId] = acc.split(":");
+            return hederaChains.has(`${ns}:${chainId}`);
+          });
+
+          if (hederaOnly.length > 0) {
+            sessionEip155.accounts = hederaOnly;
+            try {
+              return origInit.call(this);
+            } finally {
+              sessionEip155.accounts = original;
+            }
+          }
+        }
+
+        return origInit.call(this);
+      };
+    }
+
+    // Neutralise the parent UniversalProvider.createProviders() which is called
+    // during checkStorage() and would throw for non-Hedera chains.
+    // HederaProvider uses its own initProviders() instead.
+    HederaProvider.prototype.createProviders = function () {};
+
+    HederaWalletConnectTransactionAdapter.prototypePatched = true;
+  }
+
+  /**
+   * Instance-level patch for `initProviders` — safety net for calls that
+   * happen after `HederaProvider.init()` (e.g. `connect()`, `pair()`,
+   * `rpcProviders` getter).
    */
   private patchInitProviders(): void {
     if (!this.hederaProvider) return;
 
     const provider = this.hederaProvider;
-    const hederaEvmChains = new Set(["eip155:295", "eip155:296"]);
+    const hederaChains = HederaWalletConnectTransactionAdapter.HEDERA_EVM_CHAINS;
     const orig = provider.initProviders.bind(provider);
 
     provider.initProviders = function (this: any) {
@@ -681,13 +751,12 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       }
 
       const original = sessionEip155.accounts as string[];
-      const hederaOnly = original.filter((acc) => {
+      const hederaOnly = original.filter((acc: string) => {
         const [ns, chainId] = acc.split(":");
-        return hederaEvmChains.has(`${ns}:${chainId}`);
+        return hederaChains.has(`${ns}:${chainId}`);
       });
 
       if (hederaOnly.length === 0) {
-        // No Hedera EVM accounts — let the original run so the error surfaces normally.
         return orig();
       }
 
@@ -695,7 +764,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
       try {
         return orig();
       } finally {
-        sessionEip155.accounts = original; // always restore the full list
+        sessionEip155.accounts = original;
       }
     };
   }
