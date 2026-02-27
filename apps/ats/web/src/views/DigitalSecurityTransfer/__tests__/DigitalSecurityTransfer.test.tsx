@@ -3,6 +3,11 @@
 import { DigitalSecurityTransfer } from "../DigitalSecurityTransfer";
 import { render } from "../../../test-utils";
 
+jest.mock("react-router", () => ({
+  ...jest.requireActual("react-router"),
+  useParams: () => ({ id: "0.0.123456" }),
+}));
+
 describe(`${DigitalSecurityTransfer.name}`, () => {
   const factoryComponent = () => {
     return render(<DigitalSecurityTransfer />);
