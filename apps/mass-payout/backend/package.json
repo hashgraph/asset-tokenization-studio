@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/mass-payout-backend",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Scheduler Payment Distribution Service",
   "author": "",
   "private": true,
