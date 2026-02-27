@@ -36,7 +36,7 @@ export class DeactivateClearingCommandHandler implements ICommandHandler<Deactiv
 
       await this.validationService.checkRole(SecurityRole._CLEARING_ROLE, account.id.toString(), securityId);
 
-      const res = await handler.deactivateClearing(securityEvmAddress);
+      const res = await handler.deactivateClearing(securityEvmAddress, securityId);
       return Promise.resolve(new DeactivateClearingCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new DeactivateClearingCommandError(error as Error);
