@@ -1,9 +1,14 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 import { DigitalSecurityForceRedeem } from "../DigitalSecurityForceRedeem";
 import { render } from "../../../test-utils";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+jest.mock("react-router", () => ({
+  ...jest.requireActual("react-router"),
+  useParams: () => ({ id: "0.0.123456" }),
+}));
 
 const SOURCE_PLACEHOLDER = "Enter the account";
 const AMOUNT_PLACEHOLDER = "Enter the amount to redeem";
