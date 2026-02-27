@@ -9,7 +9,12 @@ import { IClearingRedeem } from "../layer_1/interfaces/clearing/IClearingRedeem.
 import { IClearingHoldCreation } from "../layer_1/interfaces/clearing/IClearingHoldCreation.sol";
 import { ThirdPartyType } from "./common/types/ThirdPartyType.sol";
 import { Hold, HoldData, HoldIdentifier, OperationType, ProtectedHold } from "../layer_1/interfaces/hold/IHold.sol";
-import { Snapshots, PartitionSnapshots, SnapshotsAddress } from "../layer_1/interfaces/snapshots/ISnapshots.sol";
+import {
+    Snapshots,
+    PartitionSnapshots,
+    SnapshotsAddress,
+    HolderBalance
+} from "../layer_1/interfaces/snapshots/ISnapshots.sol";
 import { ILock } from "../layer_1/interfaces/lock/ILock.sol";
 import { ISecurity } from "../layer_2/interfaces/security/ISecurity.sol";
 import { IBondRead } from "../layer_2/interfaces/bond/IBondRead.sol";
@@ -553,7 +558,6 @@ abstract contract Internals is Modifiers {
     function _setVoting(
         IEquity.Voting calldata _newVoting
     ) internal virtual returns (bytes32 corporateActionId_, uint256 voteID_);
-    function _snapshot() internal virtual returns (uint256);
     function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal virtual;
     function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal virtual;
     function _storeRegulationData(
@@ -626,6 +630,11 @@ abstract contract Internals is Modifiers {
         address account,
         uint256 snapshotId
     ) internal view virtual returns (uint256);
+    function _balancesOfAtSnapshot(
+        uint256 _snapshotID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (HolderBalance[] memory balances_);
     function _balanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder

@@ -323,8 +323,12 @@ describe("Snapshots Tests", () => {
     const snapshot_TotalSupply_1_Partition_1 = await snapshotFacet.totalSupplyAtSnapshotByPartition(_PARTITION_ID_1, 1);
     const snapshot_TotalSupply_1_Partition_2 = await snapshotFacet.totalSupplyAtSnapshotByPartition(_PARTITION_ID_2, 1);
 
-    const snapshot_Balance_Of_A_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_A.address);
-    const snapshot_Balance_Of_C_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_C.address);
+    const snapshot_Balance_Paginated = await snapshotFacet.balancesOfAtSnapshot(2, 0, 50);
+    const snapshot_Balance_Of_A_2 =
+      snapshot_Balance_Paginated.find((b) => b.holder.toLowerCase() === signer_A.address.toLowerCase())?.balance ?? 0n;
+    const snapshot_Balance_Of_C_2 =
+      snapshot_Balance_Paginated.find((b) => b.holder.toLowerCase() === signer_C.address.toLowerCase())?.balance ?? 0n;
+
     const snapshot_TotalTokenHolders_2 = await snapshotFacet.getTotalTokenHoldersAtSnapshot(2);
     const snapshot_TokenHolders_2 = await snapshotFacet.getTokenHoldersAtSnapshot(2, 0, snapshot_TotalTokenHolders_2);
     const snapshot_Balance_Of_A_2_Partition_1 = await snapshotFacet.balanceOfAtSnapshotByPartition(
