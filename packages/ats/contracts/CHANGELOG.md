@@ -1,5 +1,11 @@
 # @hashgraph/asset-tokenization-contracts
 
+## 4.3.0
+
+### Minor Changes
+
+- 5de99bd: Move SecurityFacet to layer_2
+
 ## 4.2.0
 
 ### Minor Changes
