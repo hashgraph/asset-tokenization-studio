@@ -3,6 +3,11 @@
 import { DigitalSecurityMint } from "../DigitalSecurityMint";
 import { render } from "../../../test-utils";
 
+jest.mock("react-router", () => ({
+  ...jest.requireActual("react-router"),
+  useParams: () => ({ id: "0.0.123456" }),
+}));
+
 describe(`${DigitalSecurityMint.name}`, () => {
   const factoryComponent = () => {
     return render(<DigitalSecurityMint />);

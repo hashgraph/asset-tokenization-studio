@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { Signer, ZeroAddress, id, keccak256, AbiCoder, hexlify, toUtf8Bytes, getBytes } from "ethers";
+import { ContractRunner, ZeroAddress, id, keccak256, AbiCoder, hexlify, toUtf8Bytes, getBytes } from "ethers";
 import { ethers } from "hardhat";
 import OnchainID from "@onchain-id/solidity";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-export async function deployIdentityProxy(implementationAuthority: string, managementKey: string, signer: Signer) {
+export async function deployIdentityProxy(
+  implementationAuthority: string,
+  managementKey: string,
+  signer: ContractRunner,
+) {
   const identity = await new ethers.ContractFactory(
     OnchainID.contracts.IdentityProxy.abi,
     OnchainID.contracts.IdentityProxy.bytecode,
-    signer,
+    signer as any, // @onchain-id/solidity uses ethers v5 Signer type
   ).deploy(implementationAuthority, managementKey);
 
-  return ethers.getContractAt("Identity", await identity.getAddress(), signer);
+  return ethers.getContractAt("Identity", await identity.getAddress(), signer as any);
 }
 
 export async function deployFullSuiteFixture() {
@@ -40,19 +44,19 @@ export async function deployFullSuiteFixture() {
   const identityImplementation = await new ethers.ContractFactory(
     OnchainID.contracts.Identity.abi,
     OnchainID.contracts.Identity.bytecode,
-    deployer,
+    deployer as any, // @onchain-id/solidity uses ethers v5 Signer type
   ).deploy(deployer.address, true);
 
   const identityImplementationAuthority = await new ethers.ContractFactory(
     OnchainID.contracts.ImplementationAuthority.abi,
     OnchainID.contracts.ImplementationAuthority.bytecode,
-    deployer,
+    deployer as any, // @onchain-id/solidity uses ethers v5 Signer type
   ).deploy(identityImplementation.target);
 
   const identityFactory = await new ethers.ContractFactory(
     OnchainID.contracts.Factory.abi,
     OnchainID.contracts.Factory.bytecode,
-    deployer,
+    deployer as any, // @onchain-id/solidity uses ethers v5 Signer type
   ).deploy(identityImplementationAuthority.target);
 
   const trexImplementationAuthority = await ethers.deployContract(
@@ -82,7 +86,7 @@ export async function deployFullSuiteFixture() {
     deployer,
   );
   await (
-    identityFactory.connect(deployer) as unknown as { addTokenFactory: (address: string) => Promise<void> }
+    identityFactory.connect(deployer as any) as unknown as { addTokenFactory: (address: string) => Promise<void> }
   ).addTokenFactory(String(trexFactory.target));
 
   const claimTopicsRegistry = await ethers

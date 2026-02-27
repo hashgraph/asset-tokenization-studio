@@ -39,6 +39,7 @@ import {
   ExternalKycListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
   Factory__factory,
+  FixedRate__factory,
   FreezeFacet__factory,
   HoldReadFacet__factory,
   KycFacet__factory,
@@ -58,6 +59,8 @@ import {
   ProceedRecipientsFacet__factory,
   CorporateActionsFacet__factory,
   NoncesFacet__factory,
+  Kpis__factory, KpiLinkedRate__factory,
+  ScheduledCouponListingFacet__factory
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -1281,6 +1284,36 @@ export class RPCQueryAdapter {
     return Number(total);
   }
 
+  async getCouponFromOrderedListAt(address: EvmAddress, pos: number): Promise<number> {
+      LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
+
+      const couponId = await this.connect(BondRead__factory, address.toString()).getCouponFromOrderedListAt(pos);
+
+      return Number(couponId);
+    }
+
+    async getCouponsOrderedList(address: EvmAddress, pageIndex?: number, pageLength?: number): Promise<number[]> {
+      LogService.logTrace(`Getting coupons ordered list for security ${address.toString()}, page ${pageIndex}, length ${pageLength}`);
+
+      // If pagination parameters are provided, use paginated call
+      if (pageIndex !== undefined && pageLength !== undefined) {
+        const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(pageIndex, pageLength);
+        return couponIds.map(id => Number(id));
+      }
+
+      // Otherwise get all coupons (simulate by getting first page with large length)
+      const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(0, 1000);
+      return couponIds.map(id => Number(id));
+    }
+
+    async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
+      LogService.logTrace(`Getting coupons ordered list total for security ${address.toString()}`);
+
+      const total = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedListTotal();
+
+      return Number(total);
+    }
+
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`);
     return await this.connect(Equity__factory, address.toString()).getDividendHolders(dividendId, start, end);
@@ -1365,4 +1398,64 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting actionContentHashExists for ${contentHash} for the security: ${address.toString()}`);
     return await this.connect(CorporateActionsFacet__factory, address.toString()).actionContentHashExists(contentHash);
   }
+
+  async getRate(address: EvmAddress): Promise<[bigint, number]> {
+      const result = await this.connect(FixedRate__factory, address.toString()).getRate();
+      return [result.rate_, Number(result.decimals_)];
+    }
+
+    async getInterestRate(address: EvmAddress): Promise<[bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint]> {
+      LogService.logTrace(`Getting interest rate for security: ${address.toString()}`);
+      const result = await this.connect(KpiLinkedRate__factory, address.toString()).getInterestRate();
+      return [
+        result.maxRate,
+        result.baseRate,
+        result.minRate,
+        result.startPeriod,
+        result.startRate,
+        result.missedPenalty,
+        result.reportPeriod,
+        result.rateDecimals,
+      ];
+    }
+
+    async getKpiLatestKpiData(address: EvmAddress, from: bigint, to: bigint, kpi: EvmAddress): Promise<{ value: bigint; exists: boolean }> {
+      LogService.logTrace(`Getting latest KPI data for the security: ${address.toString()}`);
+      const result = await this.connect(Kpis__factory, address.toString()).getLatestKpiData(from, to, kpi.toString());
+      return { value: result[0], exists: result[1] };
+    }
+
+    async getMinDate(address: EvmAddress): Promise<number> {
+      LogService.logTrace(`Getting min date for the security: ${address.toString()}`);
+      const result = await this.connect(Kpis__factory, address.toString()).getMinDate();
+      return Number(result);
+    }
+
+    async getImpactData(address: EvmAddress): Promise<[bigint, bigint, bigint, number, bigint]> {
+      LogService.logTrace(`Getting impact data for the security: ${address.toString()}`);
+      const result = await this.connect(KpiLinkedRate__factory, address.toString()).getImpactData();
+      return [
+        result.maxDeviationCap,
+        result.baseLine,
+        result.maxDeviationFloor,
+        Number(result.impactDataDecimals),
+        result.adjustmentPrecision,
+      ];
+    }
+
+    async isCheckPointDate(address: EvmAddress, date: number, project: EvmAddress): Promise<boolean> {
+      LogService.logTrace(`Checking if date ${date.toString()} is a checkpoint date for project ${project.toString()}`);
+      return await this.connect(Kpis__factory, address.toString()).isCheckPointDate(date, project.toString());
+    }
+
+    async scheduledCouponListingCount(address: EvmAddress): Promise<number> {
+      LogService.logTrace(`Getting scheduled coupon listing count for security: ${address.toString()}`);
+      const result = await this.connect(ScheduledCouponListingFacet__factory, address.toString()).scheduledCouponListingCount();
+      return Number(result);
+    }
+
+    async getScheduledCouponListing(address: EvmAddress, pageIndex: number, pageLength: number): Promise<any> {
+      LogService.logTrace(`Getting scheduled coupon listing for security: ${address.toString()}`);
+      return await this.connect(ScheduledCouponListingFacet__factory, address.toString()).getScheduledCouponListing(pageIndex, pageLength);
+    }
 }
