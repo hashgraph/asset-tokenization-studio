@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 import { HStack, Stack, VStack } from "@chakra-ui/react";
 import { History } from "../../components/History";
@@ -43,7 +43,7 @@ export const DigitalSecurityForceRedeem = () => {
   const { t: TCheckbox } = useTranslation("security", {
     keyPrefix: "forceRedeem.checkbox",
   });
-  const { id = "" } = useParams();
+  const { id = "" } = useParams<{ id: string }>();
   const { details } = useSecurityStore();
   const { address: walletAddress } = useWalletStore();
 

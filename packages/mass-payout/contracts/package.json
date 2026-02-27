@@ -15,6 +15,8 @@
     "compile:force": "npx hardhat compile --force",
     "typechain": "npx hardhat typechain",
     "clean:cache": "npx hardhat clean",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache",
     "clean": "rimraf dist build artifacts cache typechain-types",
     "clean:deps": "rimraf node_modules",
     "size": "npx hardhat size-contracts",
@@ -32,7 +34,8 @@
     "bn.js": "5.2.1"
   },
   "devDependencies": {
-    "@hashgraph/sdk": "2.64.5",
+    "@hashgraph/eslint-config": "*",
+    "@hiero-ledger/sdk": "2.79.0",
     "@hashgraph/smart-contracts": "github:hashgraph/hedera-smart-contracts#v0.10.1",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
