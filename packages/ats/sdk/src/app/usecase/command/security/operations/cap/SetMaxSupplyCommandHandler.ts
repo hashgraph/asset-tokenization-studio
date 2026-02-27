@@ -44,7 +44,7 @@ export class SetMaxSupplyCommandHandler implements ICommandHandler<SetMaxSupplyC
 
       await this.validationService.checkDecimals(security, maxSupply);
 
-      const res = await handler.setMaxSupply(securityEvmAddress, maxSupplyBd);
+      const res = await handler.setMaxSupply(securityEvmAddress, maxSupplyBd, securityId);
       return Promise.resolve(new SetMaxSupplyCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
       throw new SetMaxSupplyCommandError(error as Error);

@@ -192,6 +192,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
   ): Promise<TransactionResponse> {
     LogService.logInfo("[HWC v2] Signing and sending transaction...");
     this.ensureInitialized();
+    this.ensureNativeProviderReady();
 
     try {
       this.ensureFrozen(transaction);
@@ -356,6 +357,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
   async sign(message: string | Transaction): Promise<string> {
     LogService.logInfo("[HWC v2] Signing transaction...");
     this.ensureInitialized();
+    this.ensureNativeProviderReady();
 
     if (!(message instanceof Transaction)) {
       throw new SigningError("Hedera WalletConnect must sign a transaction not a string");
@@ -562,6 +564,9 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
 
     // Let provider settle after modal close
     await new Promise((r) => setTimeout(r, 300));
+
+    // Ensure native provider accounts are populated after session establishment
+    this.ensureNativeProviderReady();
   }
 
   private async resolveAndCacheAccount(currentNetwork: string): Promise<void> {
@@ -634,6 +639,23 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
   private ensureInitialized(): void {
     if (!this.hederaProvider) throw new NotInitialized();
     if (!this.account) throw new AccountNotSet();
+  }
+
+  /**
+   * Ensures the native HIP-820 provider has accounts loaded.
+   * After AppKit pairing, `initProviders()` may run before the session's
+   * hedera namespace is fully populated, leaving the native provider with
+   * an empty accounts list.  Re-running `initProviders()` picks up the
+   * accounts from the now-populated session.
+   */
+  private ensureNativeProviderReady(): void {
+    if (!this.hederaProvider) return;
+    const native = this.hederaProvider.nativeProvider;
+    if (native && (!native.namespace?.accounts || native.namespace.accounts.length === 0)) {
+      LogService.logTrace("[HWC v2] Native provider has no accounts — reinitializing providers");
+      this.hederaProvider.initProviders();
+      this.patchInitProviders();
+    }
   }
 
   private ensureFrozen(tx: Transaction): void {

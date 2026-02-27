@@ -53,7 +53,7 @@ export class BurnCommandHandler implements ICommandHandler<BurnCommand> {
 
       const amountBd: BigDecimal = BigDecimal.fromString(amount, security.decimals);
 
-      const res = await handler.burn(sourceEvmAddress, securityEvmAddress, amountBd, securityId);
+      const res = await handler.burn(securityEvmAddress, sourceEvmAddress, amountBd, securityId);
 
       return Promise.resolve(new BurnCommandResponse(res.error === undefined, res.id!));
     } catch (error) {
