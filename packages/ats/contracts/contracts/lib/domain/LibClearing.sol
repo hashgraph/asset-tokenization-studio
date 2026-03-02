@@ -1,13 +1,29 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { clearingStorage, ClearingDataStorage } from "../../storage/FinancialOpsStorageAccessor.sol";
+import { _CLEARING_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
 import { IClearingTransfer } from "../../facets/features/interfaces/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../../facets/features/interfaces/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "../../facets/features/interfaces/clearing/IClearingHoldCreation.sol";
 import { ThirdPartyType } from "../../facets/features/types/ThirdPartyType.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
+// solhint-disable max-line-length
+/// @dev Clearing data storage
+struct ClearingDataStorage {
+    bool initialized;
+    bool activated;
+    mapping(address => uint256) totalClearedAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
+    mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => uint256))) nextClearingIdByAccountPartitionAndType;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IClearingTransfer.ClearingTransferData))) clearingTransferByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IClearingRedeem.ClearingRedeemData))) clearingRedeemByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IClearingHoldCreation.ClearingHoldCreationData))) clearingHoldCreationByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
+}
+// solhint-enable max-line-length
 
 /// @title LibClearing
 /// @notice Library for managing clearing operations and state in the token contract
@@ -646,5 +662,14 @@ library LibClearing {
     ) internal {
         ClearingDataStorage storage cs = clearingStorage();
         delete cs.clearingThirdPartyByAccountPartitionTypeAndId[_tokenHolder][_partition][_operationType][_clearingId];
+    }
+
+    /// @dev Access clearing storage
+    function clearingStorage() internal pure returns (ClearingDataStorage storage clearing_) {
+        bytes32 pos = _CLEARING_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            clearing_.slot := pos
+        }
     }
 }

@@ -1,8 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC1643Storage, IERC1643Document, erc1643Storage } from "../../storage/TokenIssuanceStorageAccessor.sol";
+import { _ERC1643_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IERC1643 } from "../../facets/features/interfaces/ERC1400/IERC1643.sol";
+
+/// @dev Document details for ERC1643
+struct IERC1643Document {
+    bytes32 docHash;
+    uint256 lastModified;
+    string uri;
+}
+
+/// @dev ERC1643 document storage
+struct ERC1643Storage {
+    mapping(bytes32 => IERC1643Document) documents;
+    mapping(bytes32 => uint256) docIndexes;
+    bytes32[] docNames;
+}
 
 /// @title LibERC1643
 /// @notice Library for ERC1643 document management
@@ -43,5 +57,14 @@ library LibERC1643 {
 
     function getAllDocuments() internal view returns (bytes32[] memory) {
         return erc1643Storage().docNames;
+    }
+
+    /// @dev Access ERC1643 document storage
+    function erc1643Storage() internal pure returns (ERC1643Storage storage erc1643_) {
+        bytes32 pos = _ERC1643_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1643_.slot := pos
+        }
     }
 }

@@ -3,8 +3,18 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable ordering
 
-import { ERC20PermitStorage, erc20PermitStorage } from "../../storage/ERC20StorageAccessor.sol";
+import { _ERC20PERMIT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { LibERC712 } from "../core/LibERC712.sol";
+
+/// @dev ERC20 Permit storage (deprecated fields only)
+struct ERC20PermitStorage {
+    // solhint-disable-next-line var-name-mixedcase
+    string DEPRECATED_contractName;
+    // solhint-disable-next-line var-name-mixedcase
+    string DEPRECATED_contractVersion;
+    // solhint-disable-next-line var-name-mixedcase
+    bool DEPRECATED_initialized;
+}
 
 /// @title LibERC20Permit
 /// @notice Library for ERC20 Permit (EIP-2612) storage management
@@ -108,5 +118,14 @@ library LibERC20Permit {
     // solhint-disable-next-line no-empty-blocks
     function nonceDocumentation() internal pure {
         // This function documents the nonce architecture
+    }
+
+    /// @dev Access ERC20 Permit storage
+    function erc20PermitStorage() internal pure returns (ERC20PermitStorage storage erc20Permit_) {
+        bytes32 pos = _ERC20PERMIT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc20Permit_.slot := pos
+        }
     }
 }

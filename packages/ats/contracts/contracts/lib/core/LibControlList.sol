@@ -1,13 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ControlListStorage, controlListStorage } from "../../storage/ControlListStorageAccessor.sol";
-import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import {
+    _CONTROL_LIST_STORAGE_POSITION,
+    _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
+} from "../../constants/storagePositions.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { IExternalControlList } from "../../facets/features/interfaces/IExternalControlList.sol";
 import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";
 import { LibExternalLists } from "./LibExternalLists.sol";
+
+/// @dev Control list storage (whitelist or blacklist)
+struct ControlListStorage {
+    bool isWhiteList;
+    bool initialized;
+    EnumerableSet.AddressSet list;
+}
 
 /// @title LibControlList — Control list (whitelist/blacklist) library
 /// @notice Centralized control list functionality extracted from ControlListStorageWrapper.sol
@@ -73,5 +82,14 @@ library LibControlList {
             }
         }
         return true;
+    }
+
+    /// @dev Access control list storage
+    function controlListStorage() internal pure returns (ControlListStorage storage controlList_) {
+        bytes32 pos = _CONTROL_LIST_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            controlList_.slot := pos
+        }
     }
 }

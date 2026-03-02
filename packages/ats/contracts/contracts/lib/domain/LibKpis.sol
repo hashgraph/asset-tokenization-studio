@@ -1,8 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KpisDataStorage, kpisDataStorage } from "../../storage/ScheduledStorageAccessor.sol";
+import { _KPIS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { LibCheckpoints } from "../../infrastructure/lib/LibCheckpoints.sol";
+
+/// @dev KPIs data storage with checkpoint tracking
+struct KpisDataStorage {
+    mapping(address => LibCheckpoints.Checkpoint[]) checkpointsByProject;
+    mapping(address => mapping(uint256 => bool)) checkpointsDatesByProject;
+    uint256 minDate;
+}
 
 /// @title LibKpis
 /// @notice Library for managing KPI (Key Performance Indicator) data with checkpoint-based storage
@@ -148,5 +155,14 @@ library LibKpis {
         if (from <= _from) return (0, false);
 
         return (value, true);
+    }
+
+    /// @dev Access KPIs data storage
+    function kpisDataStorage() internal pure returns (KpisDataStorage storage kpis_) {
+        bytes32 pos = _KPIS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            kpis_.slot := pos
+        }
     }
 }

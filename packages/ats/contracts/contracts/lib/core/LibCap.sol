@@ -1,8 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CapDataStorage, capStorage } from "../../storage/FinancialOpsStorageAccessor.sol";
+import { _CAP_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { MAX_UINT256 } from "../../constants/values.sol";
+
+/// @dev Cap data storage
+struct CapDataStorage {
+    uint256 maxSupply;
+    mapping(bytes32 => uint256) maxSupplyByPartition;
+    bool initialized;
+}
 
 /// @title LibCap — Token cap management library
 /// @notice Centralized cap functionality extracted from CapStorageWrapper.sol
@@ -139,6 +146,15 @@ library LibCap {
         }
         if (currentTotalSupply > newMaxSupply) {
             revert NewMaxSupplyTooLow(newMaxSupply, currentTotalSupply);
+        }
+    }
+
+    /// @dev Access cap storage
+    function capStorage() internal pure returns (CapDataStorage storage cap_) {
+        bytes32 pos = _CAP_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            cap_.slot := pos
         }
     }
 }

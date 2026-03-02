@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    ProtectedPartitionsDataStorage,
-    protectedPartitionsStorage
-} from "../../storage/ProtectedPartitionsStorageAccessor.sol";
+import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { LibAccess } from "./LibAccess.sol";
 import { IProtectedPartitions } from "../../facets/features/interfaces/IProtectedPartitions.sol";
@@ -12,6 +9,18 @@ import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.s
 import { IHoldBase } from "../../facets/features/interfaces/hold/IHoldBase.sol";
 import { LibERC712 } from "./LibERC712.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+
+/// @dev Protected partitions storage
+struct ProtectedPartitionsDataStorage {
+    bool initialized;
+    bool arePartitionsProtected;
+    // solhint-disable-next-line var-name-mixedcase
+    string DEPRECATED_contractName;
+    // solhint-disable-next-line var-name-mixedcase
+    string DEPRECATED_contractVersion;
+    // solhint-disable-next-line var-name-mixedcase
+    mapping(address => uint256) DEPRECATED_nounces;
+}
 
 /// @title LibProtectedPartitions — Protected partitions and signature verification library
 /// @notice Extracted from ProtectedPartitionsStorageWrapper for library-based diamond migration
@@ -366,5 +375,18 @@ library LibProtectedPartitions {
     /// @dev Calculate role for partition using encode instead of encodePacked
     function calculateRoleForPartition(bytes32 partition) internal pure returns (bytes32) {
         return keccak256(abi.encode(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
+    }
+
+    /// @dev Access protected partitions storage
+    function protectedPartitionsStorage()
+        internal
+        pure
+        returns (ProtectedPartitionsDataStorage storage protectedPartitions_)
+    {
+        bytes32 pos = _PROTECTED_PARTITIONS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            protectedPartitions_.slot := pos
+        }
     }
 }

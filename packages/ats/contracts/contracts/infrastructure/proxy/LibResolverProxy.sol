@@ -1,9 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ResolverProxyStorage, resolverProxyStorage } from "../../storage/ExternalStorageAccessor.sol";
+import { _RESOLVER_PROXY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+
+/// @dev ResolverProxy storage for diamond pattern state
+struct ResolverProxyStorage {
+    IBusinessLogicResolver resolver;
+    bytes32 resolverProxyConfigurationId;
+    uint256 version;
+}
+
+/// @dev Facet ID and selector position mapping
+struct FacetIdsAndSelectorPosition {
+    bytes32 facetId;
+    uint16 selectorPosition;
+}
 
 /// @title LibResolverProxy — Resolver proxy state management library
 /// @notice Centralized resolver proxy functionality extracted from ResolverProxyStorageWrapper.sol
@@ -83,4 +96,13 @@ library LibResolverProxy {
             );
     }
     // solhint-enable quotes
+
+    /// @dev Access resolver proxy storage
+    function resolverProxyStorage() internal pure returns (ResolverProxyStorage storage resolverProxy_) {
+        bytes32 pos = _RESOLVER_PROXY_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            resolverProxy_.slot := pos
+        }
+    }
 }

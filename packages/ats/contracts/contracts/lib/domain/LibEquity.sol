@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { EquityDataStorage, equityStorage } from "../../storage/AssetTypeStorageAccessor.sol";
+import { _EQUITY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IEquity } from "../../facets/assetCapabilities/interfaces/equity/IEquity.sol";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -13,6 +13,22 @@ import { IEquity } from "../../facets/assetCapabilities/interfaces/equity/IEquit
 // dividend/voting metadata storage without logic orchestration.
 //
 // ═══════════════════════════════════════════════════════════════════════════════
+
+/// @dev Equity data storage
+struct EquityDataStorage {
+    bool votingRight;
+    bool informationRight;
+    bool liquidationRight;
+    bool subscriptionRight;
+    bool conversionRight;
+    bool redemptionRight;
+    bool putRight;
+    uint8 dividendRight;
+    bytes3 currency;
+    uint256 nominalValue;
+    bool initialized;
+    uint8 nominalValueDecimals;
+}
 
 library LibEquity {
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -135,5 +151,14 @@ library LibEquity {
     /// @return True if equity has been initialized
     function isInitialized() internal view returns (bool) {
         return equityStorage().initialized;
+    }
+
+    /// @dev Access equity storage
+    function equityStorage() internal pure returns (EquityDataStorage storage equity_) {
+        bytes32 pos = _EQUITY_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            equity_.slot := pos
+        }
     }
 }

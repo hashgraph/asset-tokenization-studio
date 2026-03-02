@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KycStorage, kycStorage } from "../../storage/KycStorageAccessor.sol";
-import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _KYC_STORAGE_POSITION, _KYC_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKyc } from "../../facets/features/interfaces/IKyc.sol";
 import { IRevocationList } from "../../facets/features/interfaces/IRevocationList.sol";
 import { IExternalKycList } from "../../facets/features/interfaces/IExternalKycList.sol";
@@ -10,6 +9,14 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { LibSSI } from "./LibSSI.sol";
 import { LibExternalLists } from "./LibExternalLists.sol";
+
+/// @dev KYC (Know Your Customer) storage
+struct KycStorage {
+    mapping(address => IKyc.KycData) kyc;
+    mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
+    bool initialized;
+    bool internalKycActivated;
+}
 
 /// @title LibKyc — Know Your Customer (KYC) management library
 /// @notice Centralized KYC functionality including internal and external KYC verification
@@ -125,5 +132,14 @@ library LibKyc {
             }
         }
         return true;
+    }
+
+    /// @dev Access KYC storage
+    function kycStorage() internal pure returns (KycStorage storage kyc_) {
+        bytes32 pos = _KYC_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            kyc_.slot := pos
+        }
     }
 }

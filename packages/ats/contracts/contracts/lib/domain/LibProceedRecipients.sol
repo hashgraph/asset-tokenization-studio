@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { proceedRecipientsDataStorage } from "../../storage/ExternalStorageAccessor.sol";
-import { _PROCEED_RECIPIENTS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import {
+    _PROCEED_RECIPIENTS_DATA_STORAGE_POSITION,
+    _PROCEED_RECIPIENTS_STORAGE_POSITION
+} from "../../constants/storagePositions.sol";
 import { LibExternalLists } from "../core/LibExternalLists.sol";
 import { IProceedRecipients } from "../../facets/assetCapabilities/interfaces/proceedRecipients/IProceedRecipients.sol";
+
+/// @dev Proceed recipients data storage (mapping of addresses to data)
+struct ProceedRecipientsDataStorage {
+    mapping(address => bytes) proceedRecipientData;
+}
 
 /// @title LibProceedRecipients
 /// @notice Library for proceed recipients management
@@ -73,5 +80,18 @@ library LibProceedRecipients {
         return
             LibExternalLists.isExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, address(0)) ||
             getProceedRecipientsCount() > 0;
+    }
+
+    /// @dev Access proceed recipients data storage
+    function proceedRecipientsDataStorage()
+        internal
+        pure
+        returns (ProceedRecipientsDataStorage storage proceedRecipientsData_)
+    {
+        bytes32 pos = _PROCEED_RECIPIENTS_DATA_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            proceedRecipientsData_.slot := pos
+        }
     }
 }

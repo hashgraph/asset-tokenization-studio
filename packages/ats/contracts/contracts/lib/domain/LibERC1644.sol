@@ -1,8 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC1644Storage, erc1644Storage } from "../../storage/TokenIssuanceStorageAccessor.sol";
+import { _ERC1644_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IERC1644Base } from "../../facets/features/interfaces/ERC1400/IERC1644Base.sol";
+
+/// @dev ERC1644 controller storage
+struct ERC1644Storage {
+    bool isControllable;
+    bool initialized;
+}
 
 /// @title LibERC1644
 /// @notice Library for ERC1644 controller feature management
@@ -31,5 +37,14 @@ library LibERC1644 {
 
     function isInitialized() internal view returns (bool) {
         return erc1644Storage().initialized;
+    }
+
+    /// @dev Access ERC1644 controller storage
+    function erc1644Storage() internal pure returns (ERC1644Storage storage erc1644_) {
+        bytes32 pos = _ERC1644_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1644_.slot := pos
+        }
     }
 }

@@ -1,10 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC20Storage, erc20Storage } from "../../storage/ERC20StorageAccessor.sol";
+import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IFactory } from "../../factory/IFactory.sol";
+
+/// @dev ERC20 metadata storage
+struct ERC20Storage {
+    string name;
+    string symbol;
+    string isin;
+    uint8 decimals;
+    bool initialized;
+    mapping(address => mapping(address => uint256)) allowed;
+    IFactory.SecurityType securityType;
+}
 
 /// @title LibERC20
 /// @notice Library for ERC20 token standard storage management
@@ -167,5 +178,14 @@ library LibERC20 {
     /// @return True if initialized
     function isInitialized() internal view returns (bool) {
         return erc20Storage().initialized;
+    }
+
+    /// @dev Access ERC20 metadata storage
+    function erc20Storage() internal pure returns (ERC20Storage storage erc20_) {
+        bytes32 pos = _ERC20_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc20_.slot := pos
+        }
     }
 }

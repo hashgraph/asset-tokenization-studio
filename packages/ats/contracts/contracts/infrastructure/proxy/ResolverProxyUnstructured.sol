@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IResolverProxy } from "../interfaces/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
 import { IDiamondLoupe } from "../interfaces/IDiamondLoupe.sol";
-import { ResolverProxyStorage, resolverProxyStorage } from "../../storage/ExternalStorageAccessor.sol";
+import { ResolverProxyStorage, LibResolverProxy } from "./LibResolverProxy.sol";
 import { LibAccess } from "../../lib/core/LibAccess.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
@@ -17,7 +17,7 @@ abstract contract ResolverProxyUnstructured {
         IResolverProxy.Rbac[] memory _rbacs
     ) internal {
         _resolver.checkResolverProxyConfigurationRegistered(_resolverProxyConfigurationId, _version);
-        ResolverProxyStorage storage ds = resolverProxyStorage();
+        ResolverProxyStorage storage ds = LibResolverProxy.resolverProxyStorage();
         _updateResolver(ds, _resolver);
         _updateConfigId(ds, _resolverProxyConfigurationId);
         _updateVersion(ds, _version);

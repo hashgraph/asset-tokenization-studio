@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ssiManagementStorage } from "../../storage/SsiStorageAccessor.sol";
+import { _SSI_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { ISsiManagement } from "../../facets/features/interfaces/ISsiManagement.sol";
+
+/// @dev SSI (Self-Sovereign Identity) management storage
+struct SsiManagementStorage {
+    EnumerableSet.AddressSet issuerList;
+    address revocationRegistry;
+}
 
 /// @title LibSSI — Self-Sovereign Identity (SSI) management library
 /// @notice Centralized SSI/issuer functionality extracted from SsiManagementStorageWrapper.sol
@@ -45,6 +51,15 @@ library LibSSI {
     function requireIssuer(address issuer) internal view {
         if (!isIssuer(issuer)) {
             revert ISsiManagement.AccountIsNotIssuer(issuer);
+        }
+    }
+
+    /// @dev Access SSI management storage
+    function ssiManagementStorage() internal pure returns (SsiManagementStorage storage ssiManagement_) {
+        bytes32 pos = _SSI_MANAGEMENT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ssiManagement_.slot := pos
         }
     }
 }

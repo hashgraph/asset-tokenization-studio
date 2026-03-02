@@ -7,8 +7,18 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { IHoldBase } from "../../facets/features/interfaces/hold/IHoldBase.sol";
 import { IHoldTokenHolder } from "../../facets/features/interfaces/hold/IHoldTokenHolder.sol";
-import { HoldDataStorage, holdStorage } from "../../storage/FinancialOpsStorageAccessor.sol";
+import { _HOLD_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ThirdPartyType } from "../../facets/features/types/ThirdPartyType.sol";
+
+/// @dev Hold data storage
+struct HoldDataStorage {
+    mapping(address => uint256) totalHeldAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(uint256 => IHoldBase.HoldData))) holdsByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
+    mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(uint256 => address))) holdThirdPartyByAccountPartitionAndId;
+}
 
 /// @title LibHold
 /// @notice Library for hold management logic
@@ -352,5 +362,14 @@ library LibHold {
     function checkHoldAmount(uint256 _amount, IHoldBase.HoldData memory _holdData) internal pure {
         if (_amount > _holdData.hold.amount)
             revert IHoldTokenHolder.InsufficientHoldBalance(_holdData.hold.amount, _amount);
+    }
+
+    /// @dev Access hold storage
+    function holdStorage() internal pure returns (HoldDataStorage storage hold_) {
+        bytes32 pos = _HOLD_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            hold_.slot := pos
+        }
     }
 }

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { ERC1594Storage, erc1594Storage } from "../../storage/TokenIssuanceStorageAccessor.sol";
+import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKyc } from "../../facets/features/interfaces/IKyc.sol";
 import { IPause } from "../../facets/features/interfaces/IPause.sol";
 import { IERC1410TokenHolder } from "../../facets/features/interfaces/ERC1400/IERC1410TokenHolder.sol";
@@ -24,6 +24,12 @@ import { LibABAF } from "./LibABAF.sol";
 import { LibERC20 } from "./LibERC20.sol";
 import { LibERC1410 } from "./LibERC1410.sol";
 import { LibClearing } from "./LibClearing.sol";
+
+/// @dev ERC1594 issuance/redemption storage
+struct ERC1594Storage {
+    bool issuance;
+    bool initialized;
+}
 
 /// @title LibERC1594
 /// @notice Library for ERC1594 issuance/redemption feature management and transfer validation
@@ -205,6 +211,15 @@ library LibERC1594 {
         );
         if (!isCompliant) {
             LibLowLevelCall.revertWithData(bytes4(reasonCode), details);
+        }
+    }
+
+    /// @dev Access ERC1594 issuance storage
+    function erc1594Storage() internal pure returns (ERC1594Storage storage erc1594_) {
+        bytes32 pos = _ERC1594_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1594_.slot := pos
         }
     }
 

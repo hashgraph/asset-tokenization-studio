@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { bondStorage, BondDataStorage } from "../../storage/AssetTypeStorageAccessor.sol";
+import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IBondRead } from "../../facets/assetCapabilities/interfaces/bond/IBondRead.sol";
 import { IBond } from "../../facets/assetCapabilities/interfaces/bond/IBond.sol";
 import { COUPON_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } from "../../constants/values.sol";
@@ -14,6 +14,17 @@ import { LibScheduledTasks } from "./LibScheduledTasks.sol";
 /// @notice Bond storage management library for security token functionality
 /// @dev Extracted from BondStorageWrapper for library-based diamond migration
 ///      Handles bond initialization, coupon management, maturity dates, and bond-specific queries
+/// @dev Bond data storage
+struct BondDataStorage {
+    bytes3 currency;
+    uint256 nominalValue;
+    uint256 startingDate;
+    uint256 maturityDate;
+    bool initialized;
+    uint8 nominalValueDecimals;
+    uint256[] couponsOrderedListByIds;
+}
+
 library LibBond {
     // ═══════════════════════════════════════════════════════════════════════════════
     // BOND INITIALIZATION
@@ -288,4 +299,13 @@ library LibBond {
     // ═══════════════════════════════════════════════════════════════════════════════
     // NOTE: getCouponHolders() and getTotalCouponHolders() require cross-domain
     // composition (LibSnapshots + LibERC1410) and are composed at the facet level.
+
+    /// @dev Access bond storage
+    function bondStorage() internal pure returns (BondDataStorage storage bond_) {
+        bytes32 pos = _BOND_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            bond_.slot := pos
+        }
+    }
 }

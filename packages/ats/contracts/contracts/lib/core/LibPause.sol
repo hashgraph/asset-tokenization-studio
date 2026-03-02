@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { pauseStorage } from "../../storage/PauseStorageAccessor.sol";
-import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _PAUSE_STORAGE_POSITION, _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IExternalPause } from "../../facets/features/interfaces/IExternalPause.sol";
 import { IPause } from "../../facets/features/interfaces/IPause.sol";
 import { LibExternalLists } from "./LibExternalLists.sol";
+
+/// @dev Pause state storage
+struct PauseDataStorage {
+    bool paused;
+}
 
 /// @title LibPause — Pause control library
 /// @notice Centralized pause functionality extracted from PauseStorageWrapper.sol
@@ -57,5 +61,14 @@ library LibPause {
             }
         }
         return false;
+    }
+
+    /// @dev Access pause storage
+    function pauseStorage() internal pure returns (PauseDataStorage storage ps) {
+        bytes32 pos = _PAUSE_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ps.slot := pos
+        }
     }
 }

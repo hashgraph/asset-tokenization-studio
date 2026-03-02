@@ -2,8 +2,22 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { LibCheckpoints } from "../../infrastructure/lib/LibCheckpoints.sol";
-import { ERC20VotesStorage, erc20VotesStorage } from "../../storage/ERC20StorageAccessor.sol";
+import { _ERC20VOTES_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IERC20Votes } from "../../facets/features/interfaces/ERC1400/IERC20Votes.sol";
+
+/// @dev ERC20 Votes storage (delegation and checkpoint voting power)
+struct ERC20VotesStorage {
+    bool activated;
+    // solhint-disable-next-line var-name-mixedcase
+    string DEPRECATED_contractName;
+    // solhint-disable-next-line var-name-mixedcase
+    string DEPRECATED_contractVersion;
+    mapping(address => address) delegates;
+    mapping(address => LibCheckpoints.Checkpoint[]) checkpoints;
+    LibCheckpoints.Checkpoint[] totalSupplyCheckpoints;
+    LibCheckpoints.Checkpoint[] abafCheckpoints;
+    bool initialized;
+}
 
 /// @title LibERC20Votes
 /// @notice Leaf library for ERC20Votes delegation and checkpoint functionality
@@ -165,6 +179,15 @@ library LibERC20Votes {
     /// @return True if initialized
     function isInitialized() internal view returns (bool) {
         return erc20VotesStorage().initialized;
+    }
+
+    /// @dev Access ERC20 Votes storage
+    function erc20VotesStorage() internal pure returns (ERC20VotesStorage storage erc20Votes_) {
+        bytes32 pos = _ERC20VOTES_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc20Votes_.slot := pos
+        }
     }
 
     /// @notice Internal delegation logic

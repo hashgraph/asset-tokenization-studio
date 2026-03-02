@@ -3,10 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable ordering
 
-import { adjustBalancesStorage } from "../../storage/ABAFStorageAccessor.sol";
+import {
+    _ADJUST_BALANCES_STORAGE_POSITION,
+    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
+} from "../../constants/storagePositions.sol";
 import { LibERC1410 } from "./LibERC1410.sol";
 import { LibCap } from "../core/LibCap.sol";
-import { _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
@@ -17,6 +19,28 @@ import { LibScheduledTasksStorage } from "./LibScheduledTasksStorage.sol";
 import { IEquity } from "../../facets/assetCapabilities/interfaces/equity/IEquity.sol";
 import { LibCorporateActions } from "../core/LibCorporateActions.sol";
 import { LibScheduledTasks } from "./LibScheduledTasks.sol";
+
+// solhint-disable max-line-length
+/// @dev Adjust Balances storage
+struct AdjustBalancesStorage {
+    mapping(address => uint256[]) labafUserPartition;
+    uint256 abaf;
+    mapping(address => uint256) labaf;
+    mapping(bytes32 => uint256) labafByPartition;
+    mapping(address => mapping(address => uint256)) labafsAllowances;
+    mapping(address => uint256) labafLockedAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) labafLockedAmountByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) labafLockedAmountByAccountPartitionAndId;
+    mapping(address => uint256) labafHeldAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) labafHeldAmountByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) labafHeldAmountByAccountPartitionAndId;
+    mapping(address => uint256) labafClearedAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) labafClearedAmountByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => mapping(uint256 => uint256)))) labafClearedAmountByAccountPartitionTypeAndId;
+    mapping(address => uint256) labafFrozenAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) labafFrozenAmountByAccountAndPartition;
+}
+// solhint-enable max-line-length
 
 /// @title LibABAF
 /// @notice Leaf library for ABAF (Aggregated Balance Adjustment Factor) and LABAF
@@ -443,6 +467,15 @@ library LibABAF {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             scheduledBalanceAdjustments_.slot := pos
+        }
+    }
+
+    /// @dev Access adjust balances storage
+    function adjustBalancesStorage() internal pure returns (AdjustBalancesStorage storage adjustBalances_) {
+        bytes32 pos = _ADJUST_BALANCES_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            adjustBalances_.slot := pos
         }
     }
 }

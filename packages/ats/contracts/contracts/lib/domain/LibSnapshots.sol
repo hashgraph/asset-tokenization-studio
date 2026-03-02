@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
-import { snapshotStorage, SnapshotStorage } from "../../storage/ABAFStorageAccessor.sol";
+import { _SNAPSHOT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     Snapshots,
     SnapshotsAddress,
@@ -20,6 +20,28 @@ import { LibHold } from "./LibHold.sol";
 import { LibFreeze } from "./LibFreeze.sol";
 import { LibClearing } from "./LibClearing.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
+
+/// @dev Snapshot storage
+struct SnapshotStorage {
+    mapping(address => Snapshots) accountBalanceSnapshots;
+    mapping(address => mapping(bytes32 => Snapshots)) accountPartitionBalanceSnapshots;
+    mapping(address => PartitionSnapshots) accountPartitionMetadata;
+    Snapshots totalSupplySnapshots;
+    CountersUpgradeable.Counter currentSnapshotId;
+    mapping(address => Snapshots) accountLockedBalanceSnapshots;
+    mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
+    mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
+    mapping(address => Snapshots) accountHeldBalanceSnapshots;
+    mapping(address => mapping(bytes32 => Snapshots)) accountPartitionHeldBalanceSnapshots;
+    mapping(address => Snapshots) accountClearedBalanceSnapshots;
+    mapping(address => mapping(bytes32 => Snapshots)) accountPartitionClearedBalanceSnapshots;
+    Snapshots abafSnapshots;
+    Snapshots decimals;
+    mapping(address => Snapshots) accountFrozenBalanceSnapshots;
+    mapping(address => mapping(bytes32 => Snapshots)) accountPartitionFrozenBalanceSnapshots;
+    mapping(uint256 => SnapshotsAddress) tokenHoldersSnapshots;
+    Snapshots totalTokenHoldersSnapshots;
+}
 
 /// @title LibSnapshots
 /// @notice Leaf library for snapshot management functionality
@@ -511,6 +533,15 @@ library LibSnapshots {
     /// @notice Get total token holders snapshots storage
     function getTotalTokenHoldersSnapshots() internal view returns (Snapshots storage) {
         return snapshotStorage().totalTokenHoldersSnapshots;
+    }
+
+    /// @dev Access snapshot storage
+    function snapshotStorage() internal pure returns (SnapshotStorage storage snapshot_) {
+        bytes32 pos = _SNAPSHOT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            snapshot_.slot := pos
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

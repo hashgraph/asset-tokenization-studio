@@ -11,7 +11,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ResolverProxyUnstructured } from "./ResolverProxyUnstructured.sol";
 import { IResolverProxy } from "../interfaces/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
-import { resolverProxyStorage } from "../../storage/ExternalStorageAccessor.sol";
+import { LibResolverProxy } from "./LibResolverProxy.sol";
 
 contract ResolverProxy is ResolverProxyUnstructured {
     constructor(
@@ -30,7 +30,7 @@ contract ResolverProxy is ResolverProxyUnstructured {
     // solhint-disable-next-line no-complex-fallback
     fallback() external payable {
         // get facet from function selector
-        address facet = _getFacetAddress(resolverProxyStorage(), msg.sig);
+        address facet = _getFacetAddress(LibResolverProxy.resolverProxyStorage(), msg.sig);
         if (facet == address(0)) {
             revert IResolverProxy.FunctionNotFound(msg.sig);
         }

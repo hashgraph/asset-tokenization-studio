@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { externalListStorage } from "../../storage/ExternalListStorageAccessor.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
+
+/// @dev External list storage (generic, for pause/control-list/kyc management)
+struct ExternalListDataStorage {
+    bool initialized;
+    EnumerableSet.AddressSet list;
+}
 
 /// @title LibExternalLists — Generic external list management library
 /// @notice Centralized external list management (handles add/remove/query for any external list)
@@ -75,5 +80,15 @@ library LibExternalLists {
 
     function requireValidAddress(address addr) internal pure {
         if (addr == address(0)) revert ZeroAddressNotAllowed();
+    }
+
+    /// @dev Generic external list accessor (for pause management, control list management, KYC management)
+    function externalListStorage(
+        bytes32 _position
+    ) internal pure returns (ExternalListDataStorage storage externalList_) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            externalList_.slot := _position
+        }
     }
 }

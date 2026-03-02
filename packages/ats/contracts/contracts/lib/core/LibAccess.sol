@@ -1,10 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { RoleDataStorage, rolesStorage } from "../../storage/RolesStorageAccessor.sol";
+import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IAccessControl } from "../../facets/features/interfaces/IAccessControl.sol";
+
+/// @dev Role data for access control
+struct RoleData {
+    bytes32 roleAdmin;
+    EnumerableSet.AddressSet roleMembers;
+}
+
+/// @dev Role-based access control storage
+struct RoleDataStorage {
+    mapping(bytes32 => RoleData) roles;
+    mapping(address => EnumerableSet.Bytes32Set) memberRoles;
+}
 
 /// @title LibAccess
 /// @notice Leaf library for role-based access control functionality
@@ -189,6 +201,15 @@ library LibAccess {
     function checkSameRolesAndActivesLength(uint256 rolesLength, uint256 activesLength) internal pure {
         if (rolesLength != activesLength) {
             revert IAccessControl.RolesAndActivesLengthMismatch(rolesLength, activesLength);
+        }
+    }
+
+    /// @dev Access role-based access control storage
+    function rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
+        bytes32 pos = _ACCESS_CONTROL_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            roles_.slot := pos
         }
     }
 }

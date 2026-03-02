@@ -3,10 +3,19 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import { lockStorage, LockDataStorage } from "../../storage/FinancialOpsStorageAccessor.sol";
+import { _LOCK_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ILock } from "../../facets/features/interfaces/ILock.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { LibABAF } from "./LibABAF.sol";
+
+/// @dev Lock data storage
+struct LockDataStorage {
+    mapping(address => uint256) totalLockedAmountByAccount;
+    mapping(address => mapping(bytes32 => uint256)) totalLockedAmountByAccountAndPartition;
+    mapping(address => mapping(bytes32 => mapping(uint256 => ILock.LockData))) locksByAccountPartitionAndId;
+    mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIdsByAccountAndPartition;
+    mapping(address => mapping(bytes32 => uint256)) nextLockIdByAccountAndPartition;
+}
 
 /// @title LibLock
 /// @notice Leaf library for lock management functionality
@@ -298,6 +307,15 @@ library LibLock {
     // ═══════════════════════════════════════════════════════════════════════════════
     // PRIVATE HELPERS
     // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// @dev Access lock storage
+    function lockStorage() internal pure returns (LockDataStorage storage lock_) {
+        bytes32 pos = _LOCK_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            lock_.slot := pos
+        }
+    }
 
     /// @notice Paginates through an EnumerableSet of lock IDs
     /// @param lockIds The set of lock IDs

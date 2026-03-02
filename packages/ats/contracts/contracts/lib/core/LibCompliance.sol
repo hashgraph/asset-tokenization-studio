@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { erc3643Storage } from "../../storage/ExternalStorageAccessor.sol";
+import { _ERC3643_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IERC3643Management } from "../../facets/features/interfaces/ERC3643/IERC3643Management.sol";
 import { ICompliance } from "../../facets/features/interfaces/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../facets/features/interfaces/ERC3643/IIdentityRegistry.sol";
@@ -126,6 +126,15 @@ library LibCompliance {
     function requireNotRecovered(address account) internal view {
         if (isRecovered(account)) {
             revert IERC3643Management.WalletRecovered();
+        }
+    }
+
+    /// @dev Access ERC3643 storage
+    function erc3643Storage() internal pure returns (IERC3643Management.ERC3643Storage storage erc3643_) {
+        bytes32 pos = _ERC3643_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc3643_.slot := pos
         }
     }
 }

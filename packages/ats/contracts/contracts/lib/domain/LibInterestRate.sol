@@ -2,15 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import {
-    FixedRateDataStorage,
-    KpiLinkedRateDataStorage,
-    SustainabilityPerformanceTargetRateDataStorage
-} from "../../storage/ScheduledStorageAccessor.sol";
-import {
-    fixedRateStorage,
-    kpiLinkedRateStorage,
-    sustainabilityPerformanceTargetRateStorage
-} from "../../storage/ScheduledStorageAccessor.sol";
+    _FIXED_RATE_STORAGE_POSITION,
+    _KPI_LINKED_RATE_STORAGE_POSITION,
+    _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION
+} from "../../constants/storagePositions.sol";
 // solhint-disable max-line-length
 import {
     ISustainabilityPerformanceTargetRate
@@ -19,6 +14,41 @@ import {
 import {
     IKpiLinkedRate
 } from "../../facets/assetCapabilities/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+/// @dev Fixed rate interest storage
+struct FixedRateDataStorage {
+    uint256 rate;
+    uint8 decimals;
+    bool initialized;
+}
+
+/// @dev KPI-linked rate interest storage
+struct KpiLinkedRateDataStorage {
+    uint256 maxRate;
+    uint256 baseRate;
+    uint256 minRate;
+    uint256 startPeriod;
+    uint256 startRate;
+    uint256 missedPenalty;
+    uint256 reportPeriod;
+    uint8 rateDecimals;
+    uint256 maxDeviationCap;
+    uint256 baseLine;
+    uint256 maxDeviationFloor;
+    uint256 adjustmentPrecision;
+    uint8 impactDataDecimals;
+    bool initialized;
+}
+
+/// @dev Sustainability performance target rate interest storage
+struct SustainabilityPerformanceTargetRateDataStorage {
+    uint256 baseRate;
+    uint256 startPeriod;
+    uint256 startRate;
+    uint8 rateDecimals;
+    mapping(address project => ISustainabilityPerformanceTargetRate.ImpactData impactData) impactDataByProject;
+    bool initialized;
+}
+
 /// @title LibInterestRate
 /// @notice Centralized library for interest rate storage management across fixed, KPI-linked,
 ///         and sustainability performance target rate variants
@@ -441,6 +471,37 @@ library LibInterestRate {
             return _amount / (10 ** (_decimals - _newDecimals));
         } else {
             return _amount * (10 ** (_newDecimals - _decimals));
+        }
+    }
+
+    /// @dev Access fixed rate interest storage
+    function fixedRateStorage() internal pure returns (FixedRateDataStorage storage fixedRate_) {
+        bytes32 pos = _FIXED_RATE_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            fixedRate_.slot := pos
+        }
+    }
+
+    /// @dev Access KPI-linked rate interest storage
+    function kpiLinkedRateStorage() internal pure returns (KpiLinkedRateDataStorage storage kpiLinkedRate_) {
+        bytes32 pos = _KPI_LINKED_RATE_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            kpiLinkedRate_.slot := pos
+        }
+    }
+
+    /// @dev Access sustainability performance target rate interest storage
+    function sustainabilityPerformanceTargetRateStorage()
+        internal
+        pure
+        returns (SustainabilityPerformanceTargetRateDataStorage storage sptRate_)
+    {
+        bytes32 pos = _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            sptRate_.slot := pos
         }
     }
 }

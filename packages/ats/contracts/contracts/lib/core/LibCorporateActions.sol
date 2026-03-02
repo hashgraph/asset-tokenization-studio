@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CorporateActionDataStorage, corporateActionsStorage } from "../../storage/ABAFStorageAccessor.sol";
+import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { LibPagination } from "../../infrastructure/lib/LibPagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { ICorporateActions } from "../../facets/features/interfaces/ICorporateActions.sol";
+import { ICorporateActions, CorporateActionDataStorage } from "../../facets/features/interfaces/ICorporateActions.sol";
 
 /// @title LibCorporateActions — Corporate actions management library
 /// @notice Centralized corporate actions functionality extracted from CorporateActionsStorageWrapper.sol
@@ -167,6 +167,15 @@ library LibCorporateActions {
     function validateDates(uint256 firstDate, uint256 secondDate) internal pure {
         if (secondDate < firstDate) {
             revert ICorporateActions.WrongDates(firstDate, secondDate);
+        }
+    }
+
+    /// @dev Access corporate actions storage
+    function corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
+        bytes32 pos = _CORPORATE_ACTION_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            corporateActions_.slot := pos
         }
     }
 }
