@@ -85,9 +85,9 @@ describe("Scheduled Snapshots Tests", () => {
       amount: dividendsAmountPerEquity,
       amountDecimals: dividendAmountDecimalsPerEquity,
     };
-    await equityFacet.connect(signer_C).setDividends(dividendData_2);
-    await equityFacet.connect(signer_C).setDividends(dividendData_3);
-    await equityFacet.connect(signer_C).setDividends(dividendData_1);
+    await equityFacet.connect(signer_C).setDividend(dividendData_2);
+    await equityFacet.connect(signer_C).setDividend(dividendData_3);
+    await equityFacet.connect(signer_C).setDividend(dividendData_1);
 
     const dividend_2_Id = "0x0000000000000000000000000000000000000000000000000000000000000001";
     const dividend_3_Id = "0x0000000000000000000000000000000000000000000000000000000000000002";

@@ -211,10 +211,10 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         uint256 _couponID,
         address _account
     ) internal view override returns (IBondRead.CouponFor memory couponFor_) {
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , bool isDisabled_) = _getCoupon(_couponID);
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , bool isDisabled) = _getCoupon(_couponID);
 
         couponFor_.coupon = registeredCoupon.coupon;
-        couponFor_.isDisabled = isDisabled_;
+        couponFor_.isDisabled = isDisabled;
 
         if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
             couponFor_.recordDateReached = true;

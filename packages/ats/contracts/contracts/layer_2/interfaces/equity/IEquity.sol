@@ -52,6 +52,7 @@ interface IEquity {
         uint256 executionDate;
         uint8 decimals;
         bool recordDateReached;
+        bool isDisabled;
     }
 
     struct DividendAmountFor {
@@ -78,7 +79,15 @@ interface IEquity {
      * @notice Sets a new dividend
      * @dev Can only be called by an account with the corporate actions role
      */
-    function setDividends(Dividend calldata _newDividend) external returns (uint256 dividendID_);
+    function setDividend(Dividend calldata _newDividend) external returns (uint256 dividendID_);
+
+    /**
+     * @notice Cancels an existing dividend
+     * @dev Can only be called by an account with the corporate actions role
+     * @param _dividendId The ID of the dividend to cancel
+     * @return success_ True if the dividend was cancelled successfully
+     */
+    function cancelDividend(uint256 _dividendId) external returns (bool success_);
 
     /**
      * @notice Sets a new voting
@@ -100,8 +109,12 @@ interface IEquity {
      * @dev returns the properties and related snapshots (if any) of a dividend.
      *
      * @param _dividendID The dividend Id
+     * @return registeredDividend_ The dividend data
+     * @return isDisabled_ True if the dividend has been cancelled
      */
-    function getDividends(uint256 _dividendID) external view returns (RegisteredDividend memory registeredDividend_);
+    function getDividend(
+        uint256 _dividendID
+    ) external view returns (RegisteredDividend memory registeredDividend_, bool isDisabled_);
 
     /**
      * @dev returns the dividends for an account.
@@ -109,7 +122,7 @@ interface IEquity {
      * @param _dividendID The dividend Id
      * @param _account The account
      */
-    function getDividendsFor(
+    function getDividendFor(
         uint256 _dividendID,
         address _account
     ) external view returns (DividendFor memory dividendFor_);

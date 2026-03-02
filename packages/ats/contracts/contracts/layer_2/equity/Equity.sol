@@ -14,7 +14,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 abstract contract Equity is IEquity, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    function setDividends(
+    function setDividend(
         Dividend calldata _newDividend
     )
         external
@@ -26,7 +26,7 @@ abstract contract Equity is IEquity, Common {
         returns (uint256 dividendID_)
     {
         bytes32 corporateActionID;
-        (corporateActionID, dividendID_) = _setDividends(_newDividend);
+        (corporateActionID, dividendID_) = _setDividend(_newDividend);
         emit DividendSet(
             corporateActionID,
             dividendID_,
@@ -36,6 +36,12 @@ abstract contract Equity is IEquity, Common {
             _newDividend.amount,
             _newDividend.amountDecimals
         );
+    }
+
+    function cancelDividend(
+        uint256 _dividendId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_, ) = _cancelDividend(_dividendId);
     }
 
     function setVoting(
@@ -80,19 +86,19 @@ abstract contract Equity is IEquity, Common {
         return _getEquityDetails();
     }
 
-    function getDividends(
+    function getDividend(
         uint256 _dividendID
     )
         external
         view
         override
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (RegisteredDividend memory registeredDividend_)
+        returns (RegisteredDividend memory registeredDividend_, bool isDisabled_)
     {
-        return _getDividends(_dividendID);
+        (registeredDividend_, , isDisabled_) = _getDividend(_dividendID);
     }
 
-    function getDividendsFor(
+    function getDividendFor(
         uint256 _dividendID,
         address _account
     )
@@ -102,7 +108,7 @@ abstract contract Equity is IEquity, Common {
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
         returns (DividendFor memory dividendFor_)
     {
-        return _getDividendsFor(_dividendID, _account);
+        return _getDividendFor(_dividendID, _account);
     }
 
     function getDividendAmountFor(
