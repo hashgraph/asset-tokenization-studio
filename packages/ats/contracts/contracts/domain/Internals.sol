@@ -47,6 +47,8 @@ abstract contract Internals is Modifiers {
         bytes32 _actionType,
         bytes memory _data
     ) internal virtual returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
+    function _cancelCorporateAction(bytes32 _actionId) internal virtual;
+
     function _addExternalList(bytes32 _position, address _list) internal virtual returns (bool success_);
     function _addIssuer(address _issuer) internal virtual returns (bool success_);
     function _addNewTokenHolder(address tokenHolder) internal virtual;
@@ -507,6 +509,7 @@ abstract contract Internals is Modifiers {
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
     ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_);
+    function _cancelCoupon(uint256 _couponId) internal virtual returns (bool success_, bytes32 corporateActionId_);
     function _setDividends(
         IEquity.Dividend calldata _newDividend
     ) internal virtual returns (bytes32 corporateActionId_, uint256 dividendId_);
@@ -856,9 +859,23 @@ abstract contract Internals is Modifiers {
         uint256 _pageLength
     ) internal view virtual returns (address[] memory members_);
     function _getControlListType() internal view virtual returns (bool);
+    function _isCorporateActionDisabled(bytes32 _actionId) internal view virtual returns (bool isDisabled_);
     function _getCorporateAction(
         bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_);
+    ) internal view virtual returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_, bool isDisabled_);
+    function _getCorporateActions(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        virtual
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        );
     function _getCorporateActionCount() internal view virtual returns (uint256 corporateActionCount_);
     function _getCorporateActionCountByType(
         bytes32 _actionType
@@ -877,6 +894,20 @@ abstract contract Internals is Modifiers {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (bytes32[] memory corporateActionIds_);
+    function _getCorporateActionsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        virtual
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        );
     function _getCorporateActionResult(
         bytes32 actionId,
         uint256 resultId
@@ -884,7 +915,11 @@ abstract contract Internals is Modifiers {
     function _getCorporateActionResultCount(bytes32 actionId) internal view virtual returns (uint256);
     function _getCoupon(
         uint256 _couponID
-    ) internal view virtual returns (IBondRead.RegisteredCoupon memory registeredCoupon_);
+    )
+        internal
+        view
+        virtual
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_);
     function _getCouponAmountFor(
         uint256 _couponID,
         address _account

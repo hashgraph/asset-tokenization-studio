@@ -17,9 +17,9 @@ abstract contract BondRead is IBondRead, Internals {
         view
         override
         onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
-        returns (RegisteredCoupon memory registeredCoupon_)
+        returns (RegisteredCoupon memory registeredCoupon_, bool isDisabled_)
     {
-        return _getCoupon(_couponID);
+        (registeredCoupon_, , isDisabled_) = _getCoupon(_couponID);
     }
 
     function getCouponFor(

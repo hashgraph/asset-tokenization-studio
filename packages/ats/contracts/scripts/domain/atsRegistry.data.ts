@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-26T09:47:23.954Z
+ * Generated: 2026-03-02T11:24:28.690Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -850,6 +850,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x86d59729",
       },
       {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
+      },
+      {
         name: "fullRedeemAtMaturity",
         signature: "function fullRedeemAtMaturity(address _tokenHolder)",
         selector: "0xd0db5fb2",
@@ -895,6 +900,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
+      },
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
       },
       {
         name: "fullRedeemAtMaturity",
@@ -943,6 +953,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
+      },
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
       },
       {
         name: "fullRedeemAtMaturity",
@@ -997,7 +1012,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
         selector: "0x936e3169",
       },
       {
@@ -1014,7 +1029,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1089,7 +1104,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
         selector: "0x936e3169",
       },
       {
@@ -1106,7 +1121,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1184,7 +1199,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
         selector: "0x936e3169",
       },
       {
@@ -1201,7 +1216,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1278,7 +1293,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
         selector: "0x936e3169",
       },
       {
@@ -1295,7 +1310,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1367,6 +1382,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
+      },
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
       },
       {
         name: "fullRedeemAtMaturity",
@@ -2824,7 +2844,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCorporateAction",
         signature:
-          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
         selector: "0x911181da",
       },
       {
@@ -2849,6 +2869,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
+      },
+      {
+        name: "getCorporateActions",
+        signature:
+          "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0xe248a917",
+      },
+      {
+        name: "getCorporateActionsByType",
+        signature:
+          "function getCorporateActionsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0x7715ccac",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -2871,7 +2903,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCorporateAction",
         signature:
-          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
         selector: "0x911181da",
       },
       {
@@ -2896,6 +2928,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
+      },
+      {
+        name: "getCorporateActions",
+        signature:
+          "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0xe248a917",
+      },
+      {
+        name: "getCorporateActionsByType",
+        signature:
+          "function getCorporateActionsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0x7715ccac",
       },
     ],
     errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
@@ -2921,7 +2965,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCorporateAction",
         signature:
-          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
         selector: "0x911181da",
       },
       {
@@ -2946,6 +2990,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
+      },
+      {
+        name: "getCorporateActions",
+        signature:
+          "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0xe248a917",
+      },
+      {
+        name: "getCorporateActionsByType",
+        signature:
+          "function getCorporateActionsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0x7715ccac",
       },
     ],
     errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
@@ -2970,7 +3026,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCorporateAction",
         signature:
-          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
         selector: "0x911181da",
       },
       {
@@ -2995,6 +3051,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
+      },
+      {
+        name: "getCorporateActions",
+        signature:
+          "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0xe248a917",
+      },
+      {
+        name: "getCorporateActionsByType",
+        signature:
+          "function getCorporateActionsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0x7715ccac",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -10973,6 +11041,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
     events: [
       {
+        name: "CouponCancelled",
+        signature: "CouponCancelled(uint256,address)",
+        topic0: "0xf3f7ee3ec63ca38fe59a56a06f6d730ef89a41b7819ca5c04dda2205c4f2a712",
+      },
+      {
         name: "CouponSet",
         signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
         topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
@@ -10980,6 +11053,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
     errors: [
       { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
+      {
+        name: "CouponAlreadyExecuted",
+        signature: "CouponAlreadyExecuted(bytes32\tcorporateActionId,uint256)",
+        selector: "0x2dd9530b",
+      },
       { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
     ],
   },
