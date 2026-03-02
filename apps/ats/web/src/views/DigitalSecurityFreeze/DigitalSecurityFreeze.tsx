@@ -44,7 +44,7 @@ export const DigitalSecurityFreeze = () => {
     mode: "all",
   });
   const { address: walletAddress } = useWalletStore();
-  const { id = "" } = useParams();
+  const { id = "" } = useParams<{ id: string }>();
   const { details } = useSecurityStore();
   const { isLoading: isBalancePanelLoading, update } = useDetailsBalancePanel(id, walletAddress);
   const { mutate: freezeSecurity, isLoading: isFreezeLoading } = useFreezeSecurity();
