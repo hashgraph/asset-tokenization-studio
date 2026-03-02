@@ -67,7 +67,7 @@ describe("Corporate Actions Tests", () => {
 
     const actionContentHashExistsBefore = await corporateActionsFacet.actionContentHashExists(contentHash);
 
-    await equityFacet.connect(signer_C).setDividends(dividendData);
+    await equityFacet.connect(signer_C).setDividend(dividendData);
 
     // check list members
     const listCount = await corporateActionsFacet.getCorporateActionCount();

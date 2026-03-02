@@ -510,9 +510,10 @@ abstract contract Internals is Modifiers {
         IBondRead.Coupon memory _newCoupon
     ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_);
     function _cancelCoupon(uint256 _couponId) internal virtual returns (bool success_, bytes32 corporateActionId_);
-    function _setDividends(
+    function _setDividend(
         IEquity.Dividend calldata _newDividend
     ) internal virtual returns (bytes32 corporateActionId_, uint256 dividendId_);
+    function _cancelDividend(uint256 _dividendId) internal virtual returns (bool success_, bytes32 corporateActionId_);
     function _setHeldLabafById(
         bytes32 _partition,
         address _tokenHolder,
@@ -951,11 +952,15 @@ abstract contract Internals is Modifiers {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory holders_);
-    function _getDividends(
+    function _getDividend(
         uint256 _dividendID
-    ) internal view virtual returns (IEquity.RegisteredDividend memory registeredDividend_);
+    )
+        internal
+        view
+        virtual
+        returns (IEquity.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_);
     function _getDividendsCount() internal view virtual returns (uint256 dividendCount_);
-    function _getDividendsFor(
+    function _getDividendFor(
         uint256 _dividendID,
         address _account
     ) internal view virtual returns (IEquity.DividendFor memory dividendFor_);

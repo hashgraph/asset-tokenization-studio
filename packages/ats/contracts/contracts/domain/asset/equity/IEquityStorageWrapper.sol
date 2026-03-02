@@ -29,7 +29,15 @@ interface IEquityStorageWrapper {
         uint256 decimals
     );
 
+    /**
+     * @notice Emitted when a dividend is cancelled.
+     * @param dividendId Identifier of the cancelled dividend.
+     * @param operator Address that performed the cancellation.
+     */
+    event DividendCancelled(uint256 dividendId, address indexed operator);
+
     error DividendCreationFailed();
     error VotingRightsCreationFailed();
     error BalanceAdjustmentCreationFailed();
+    error DividendAlreadyExecuted(bytes32 corporateActionId, uint256 dividendId);
 }

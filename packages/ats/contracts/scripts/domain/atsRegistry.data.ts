@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-02T11:24:28.690Z
+ * Generated: 2026-03-02T15:52:04.505Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -3196,10 +3196,27 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8c505179",
       },
       {
+        name: "cancelDividend",
+        signature: "function cancelDividend(uint256 _dividendId) returns (bool success_)",
+        selector: "0xd1869b7c",
+      },
+      {
+        name: "getDividend",
+        signature:
+          "function getDividend(uint256 _dividendID) view returns (((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_, bool isDisabled_)",
+        selector: "0x0ecfcaa4",
+      },
+      {
         name: "getDividendAmountFor",
         signature:
           "function getDividendAmountFor(uint256 _dividendID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) dividendAmountFor_)",
         selector: "0xd258b2f1",
+      },
+      {
+        name: "getDividendFor",
+        signature:
+          "function getDividendFor(uint256 _dividendID, address _account) view returns ((uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached, bool isDisabled) dividendFor_)",
+        selector: "0x85f196b0",
       },
       {
         name: "getDividendHolders",
@@ -3208,21 +3225,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xeba3918e",
       },
       {
-        name: "getDividends",
-        signature:
-          "function getDividends(uint256 _dividendID) view returns (((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_)",
-        selector: "0x3837ac88",
-      },
-      {
         name: "getDividendsCount",
         signature: "function getDividendsCount() view returns (uint256 dividendCount_)",
         selector: "0x9e676952",
-      },
-      {
-        name: "getDividendsFor",
-        signature:
-          "function getDividendsFor(uint256 _dividendID, address _account) view returns ((uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached) dividendFor_)",
-        selector: "0x323e22da",
       },
       {
         name: "getEquityDetails",
@@ -3292,10 +3297,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x009f64ac",
       },
       {
-        name: "setDividends",
+        name: "setDividend",
         signature:
-          "function setDividends((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
-        selector: "0x1129e1c1",
+          "function setDividend((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
+        selector: "0xe7686a05",
       },
       {
         name: "setScheduledBalanceAdjustment",
@@ -11053,11 +11058,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
     errors: [
       { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
-      {
-        name: "CouponAlreadyExecuted",
-        signature: "CouponAlreadyExecuted(bytes32\tcorporateActionId,uint256)",
-        selector: "0x2dd9530b",
-      },
+      { name: "CouponAlreadyExecuted", signature: "CouponAlreadyExecuted(bytes32,uint256)", selector: "0xae5a5af7" },
       { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
     ],
   },
@@ -11189,6 +11190,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
     events: [
       {
+        name: "DividendCancelled",
+        signature: "DividendCancelled(uint256,address)",
+        topic0: "0x188bc828dca3e79fc15106a0bd0347c4fa4c9be522391b586199a133d1ed28c8",
+      },
+      {
         name: "DividendSet",
         signature: "DividendSet(bytes32,uint256,address,uint256,uint256,uint256,uint8)",
         topic0: "0xc849cd6d345b059ab830e5aa8ab5e38bd118833e14bcdfea70231b0e5c072a12",
@@ -11209,6 +11215,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         name: "BalanceAdjustmentCreationFailed",
         signature: "BalanceAdjustmentCreationFailed()",
         selector: "0x0c68e660",
+      },
+      {
+        name: "DividendAlreadyExecuted",
+        signature: "DividendAlreadyExecuted(bytes32,uint256)",
+        selector: "0x50fe6757",
       },
       { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
       { name: "VotingRightsCreationFailed", signature: "VotingRightsCreationFailed()", selector: "0x0cc16600" },
