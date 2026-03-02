@@ -8,7 +8,8 @@ import { GetTokenHoldersAtSnapshotQuery } from "@query/security/snapshot/getToke
 import { GetTotalTokenHoldersAtSnapshotQuery } from "@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery";
 import GetTokenHoldersAtSnapshotRequest from "@port/in/request/security/operations/snapshot/GetTokenHoldersAtSnapshotRequest";
 import GetTotalTokenHoldersAtSnapshotRequest from "@port/in/request/security/operations/snapshot/GetTotalTokenHoldersAtSnapshotRequest";
-import { BalancesOfAtSnapshotQueryFixture, BalancesOfAtSnapshotRequestFixture } from "./BalancesOfAtSnapshotFixture";
+import { BalancesOfAtSnapshotQuery } from "@query/security/snapshot/balancesOfAtSnapshot/BalancesOfAtSnapshotQuery";
+import { BalancesOfAtSnapshotRequest } from "src";
 
 export const TakeSnapshotCommandFixture = createFixture<TakeSnapshotCommand>((command) => {
   command.securityId.as(() => HederaIdPropsFixture.create().value);
@@ -46,4 +47,16 @@ export const GetTotalTokenHoldersAtSnapshotRequestFixture = createFixture<GetTot
   },
 );
 
-export { BalancesOfAtSnapshotQueryFixture, BalancesOfAtSnapshotRequestFixture };
+export const BalancesOfAtSnapshotQueryFixture = createFixture<BalancesOfAtSnapshotQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  query.pageIndex.faker((faker) => faker.number.int({ min: 0, max: 100 }));
+  query.pageLength.faker((faker) => faker.number.int({ min: 1, max: 50 }));
+});
+
+export const BalancesOfAtSnapshotRequestFixture = createFixture<BalancesOfAtSnapshotRequest>((request) => {
+  request.securityId.as(() => HederaIdPropsFixture.create().value);
+  request.snapshotId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  request.pageIndex.faker((faker) => faker.number.int({ min: 0, max: 100 }));
+  request.pageLength.faker((faker) => faker.number.int({ min: 1, max: 50 }));
+});
