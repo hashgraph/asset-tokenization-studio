@@ -643,12 +643,12 @@ describe("Clearing Tests", () => {
           amountDecimals: 0,
         };
 
-        const dividendId = await equityFacet.connect(signer_A).setDividends.staticCall(dividendInput);
-        await equityFacet.connect(signer_A).setDividends(dividendInput);
+        const dividendId = await equityFacet.connect(signer_A).setDividend.staticCall(dividendInput);
+        await equityFacet.connect(signer_A).setDividend(dividendInput);
 
         await timeTravelFacet.changeSystemTimestamp(recordDate + 1n);
 
-        const dividendFor = await equityFacet.getDividendsFor(dividendId, signer_A.address);
+        const dividendFor = await equityFacet.getDividendFor(dividendId, signer_A.address);
 
         const currentBalance = await erc1410Facet.balanceOf(signer_A.address);
         const clearedAmount = await clearingFacet.getClearedAmountFor(signer_A.address);
