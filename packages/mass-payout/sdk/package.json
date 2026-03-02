@@ -2,7 +2,7 @@
   "name": "@hashgraph/mass-payout-sdk",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Scheduler Payment Distribution SDK",
   "author": "",
   "private": true,
@@ -11,8 +11,8 @@
     "setup": "npm install",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint \"{src,test}/**/*.ts\" --cache",
-    "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -29,10 +29,13 @@
     "bn.js": "5.2.1",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.2",
+    "ethers": "^6.15.0",
+    "joi": "17.12.2",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8"
   },
   "devDependencies": {
+    "@hashgraph/eslint-config": "*",
     "@nestjs/testing": "10.3.3",
     "@types/node": "20.11.24",
     "typescript": "5.3.3"

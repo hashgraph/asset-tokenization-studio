@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-dapp",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc && vite build",
@@ -15,12 +15,13 @@
     "test:update": "NODE_ENV=test jest --updateSnapshot",
     "test:clear:cache": "npx jest --clearCache",
     "theme": "chakra-cli tokens src/theme/index.ts",
-    "lint": "eslint '**/*.{js,jsx,mjs,cjs,ts,tsx,mts}' --cache",
-    "lint:fix": "eslint '**/*.{js,jsx,mjs,cjs,ts,tsx,mts}' --fix --cache && npm run format",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache && npm run format",
     "format": "prettier --write '**/*.{js,jsx,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache",
     "format:check": "prettier --check '**/*.{js,jsx,mjs,cjs,ts,tsx,mts,json,md,yml,yaml}' --cache"
   },
   "devDependencies": {
+    "@hashgraph/eslint-config": "*",
     "@babel/preset-env": "^7.21.4",
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.21.5",

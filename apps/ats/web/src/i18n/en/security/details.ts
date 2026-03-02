@@ -22,6 +22,15 @@ export default {
   header: {
     title: "Digital security details",
   },
+  progress: {
+    title: "Loading Security Details",
+    description: "Please wait while we fetch all the information...",
+    details: "Loading Details",
+    balance: "Loading Balance",
+    operations: "Loading Operations",
+    control: "Loading Control",
+    management: "Loading Management",
+  },
   tabs: {
     balance: "Balance",
     allowedList: "Allowed list",

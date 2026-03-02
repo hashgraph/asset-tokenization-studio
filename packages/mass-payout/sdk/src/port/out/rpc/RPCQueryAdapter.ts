@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable camelcase */
 import { Injectable, Logger } from "@nestjs/common";
-import { ethers } from "ethers";
+import { JsonRpcProvider } from "ethers";
 import { LifeCycleCashFlow__factory } from "@hashgraph/mass-payout-contracts";
 import EvmAddress from "@domain/contract/EvmAddress";
 import NetworkService from "@app/services/network/NetworkService";
@@ -26,7 +26,7 @@ export class RPCQueryAdapter {
    * The ethers.js provider used to interact with the Ethereum network.
    * It is initialized with a JSON RPC URL, which can be set via the init method.
    */
-  provider: ethers.providers.JsonRpcProvider;
+  provider: JsonRpcProvider;
 
   constructor(
     private readonly networkService: NetworkService,
@@ -35,7 +35,7 @@ export class RPCQueryAdapter {
 
   async init(urlRpcProvider?: string, apiKey?: string): Promise<string> {
     const url = urlRpcProvider ? (apiKey ? urlRpcProvider + apiKey : urlRpcProvider) : LOCAL_JSON_RPC_RELAY_URL;
-    this.provider = new ethers.providers.JsonRpcProvider(url);
+    this.provider = new JsonRpcProvider(url);
     this.logger.log("RPC Query Adapter Initialized on: ", url);
 
     return this.networkService.environment;
@@ -60,6 +60,7 @@ export class RPCQueryAdapter {
   async getPaymentTokenDecimals(lifeCycleCashFlow: EvmAddress): Promise<number> {
     this.logger.log(`Getting the payment token decimals for the contract ${lifeCycleCashFlow.toString()}`);
 
-    return await this.connect(LifeCycleCashFlow__factory, lifeCycleCashFlow.toString()).getPaymentTokenDecimals();
+    const decimals = await this.connect(LifeCycleCashFlow__factory, lifeCycleCashFlow.toString()).getPaymentTokenDecimals();
+    return Number(decimals);
   }
 }

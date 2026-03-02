@@ -22,5 +22,6 @@
       "@test/*": ["./test/*"],
       "@typechain": ["./typechain-types/*", "./typechain-types/index.ts"]
     }
-  }
+  },
+  "exclude": ["node_modules", "dist", "build", "test"]
 }

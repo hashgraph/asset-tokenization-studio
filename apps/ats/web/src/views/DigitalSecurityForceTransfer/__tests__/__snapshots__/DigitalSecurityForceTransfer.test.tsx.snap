@@ -224,13 +224,18 @@ exports[`DigitalSecurityForceTransfer render correctly 1`] = `
         <div
           class="css-131o3s"
         >
-          <p
-            class="css-1ysbn4y"
+          <div
+            class="chakra-stack css-qbwe6s"
           >
-            <span
-              class="css-650xeh"
-            />
-          </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+              data-testid="skeleton"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div
