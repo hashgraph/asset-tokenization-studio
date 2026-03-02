@@ -24,7 +24,6 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         _;
     }
 
-    // Internal
     function _addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
@@ -51,6 +50,10 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         corporateActions_.actionsData[corporateActionId_].actionIdByType = corporateActionIdByType_;
     }
 
+    function _cancelCorporateAction(bytes32 _actionId) internal override {
+        _corporateActionsStorage().actionsData[_actionId].isDisabled = true;
+    }
+
     function _updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal override {
         _corporateActionsStorage().actionsData[_actionId].data = _newData;
     }
@@ -75,13 +78,24 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         corporateActions_.actionsData[actionId].results.push(newResult);
     }
 
+    function _isCorporateActionDisabled(bytes32 _actionId) internal view override returns (bool) {
+        (, , , bool isDisabled) = _getCorporateAction(_actionId);
+        return isDisabled;
+    }
+
     function _getCorporateAction(
         bytes32 _corporateActionId
-    ) internal view override returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
+    )
+        internal
+        view
+        override
+        returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_, bool isDisabled_)
+    {
         CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
         actionType_ = corporateActions_.actionsData[_corporateActionId].actionType;
         data_ = corporateActions_.actionsData[_corporateActionId].data;
         actionTypeId_ = corporateActions_.actionsData[_corporateActionId].actionIdByType;
+        isDisabled_ = corporateActions_.actionsData[_corporateActionId].isDisabled;
     }
 
     function _getCorporateActionCount() internal view virtual override returns (uint256 corporateActionCount_) {
@@ -138,6 +152,65 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
 
     function _getCorporateActionData(bytes32 actionId) internal view override returns (bytes memory) {
         return _corporateActionsStorage().actionsData[actionId].data;
+    }
+
+    function _getCorporateActions(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        override
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        bytes32[] memory corporateActionIds = _getCorporateActionIds(_pageIndex, _pageLength);
+        uint256 totalCorporateActions = corporateActionIds.length;
+
+        actionTypes_ = new bytes32[](totalCorporateActions);
+        actionTypeIds_ = new uint256[](totalCorporateActions);
+        datas_ = new bytes[](totalCorporateActions);
+        isDisabled_ = new bool[](totalCorporateActions);
+
+        for (uint256 i = 0; i < totalCorporateActions; i++) {
+            (actionTypes_[i], actionTypeIds_[i], datas_[i], isDisabled_[i]) = _getCorporateAction(
+                corporateActionIds[i]
+            );
+        }
+    }
+
+    function _getCorporateActionsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        override
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        bytes32[] memory corporateActionIds = _getCorporateActionIdsByType(_actionType, _pageIndex, _pageLength);
+        uint256 totalCorporateActions = corporateActionIds.length;
+
+        actionTypes_ = new bytes32[](totalCorporateActions);
+        actionTypeIds_ = new uint256[](totalCorporateActions);
+        datas_ = new bytes[](totalCorporateActions);
+        isDisabled_ = new bool[](totalCorporateActions);
+
+        for (uint256 i = 0; i < totalCorporateActions; i++) {
+            (actionTypes_[i], actionTypeIds_[i], datas_[i], isDisabled_[i]) = _getCorporateAction(
+                corporateActionIds[i]
+            );
+        }
     }
 
     function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view override returns (uint256) {

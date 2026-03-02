@@ -77,6 +77,12 @@ describe("Corporate Actions Tests", () => {
     const corporateAction = await corporateActionsFacet.getCorporateAction(corporateActionId_1);
     const actionContentHashExistsAfter = await corporateActionsFacet.actionContentHashExists(contentHash);
 
+    // Get all corporate actions with pagination
+    const corporateActions = await corporateActionsFacet.getCorporateActions(0, listCount);
+
+    // Get all corporate actions by type with pagination
+    const corporateActionsByType = await corporateActionsFacet.getCorporateActionsByType(actionType, 0, listCount);
+
     expect(listCount).to.equal(1);
     expect(listMembers.length).to.equal(listCount);
     expect(listMembers[0]).to.equal(corporateActionId_1);
@@ -86,7 +92,36 @@ describe("Corporate Actions Tests", () => {
     expect(corporateAction.actionType_.toUpperCase()).to.equal(actionType.toUpperCase());
     expect(corporateAction.actionTypeId_).to.equal(BigInt(listMembersByType[0]));
     expect(corporateAction.data_.toUpperCase()).to.equal(encodedDividendData.toUpperCase());
+    expect(corporateAction.isDisabled_).to.be.false;
     expect(actionContentHashExistsBefore).to.be.false;
     expect(actionContentHashExistsAfter).to.be.true;
+
+    // Validate getCorporateActions response
+    expect(corporateActions.actionTypes_.length).to.equal(1);
+    expect(corporateActions.actionTypeIds_.length).to.equal(1);
+    expect(corporateActions.datas_.length).to.equal(1);
+    expect(corporateActions.isDisabled_.length).to.equal(1);
+
+    expect(corporateActions.actionTypes_[0].toUpperCase()).to.equal(actionType.toUpperCase());
+    expect(corporateActions.actionTypeIds_[0]).to.equal(BigInt(corporateActionId_1));
+    expect(corporateActions.datas_[0].toUpperCase()).to.equal(encodedDividendData.toUpperCase());
+    expect(corporateActions.isDisabled_[0]).to.be.false;
+
+    // Validate getCorporateActionsByType response
+    expect(corporateActionsByType.actionTypes_.length).to.equal(1);
+    expect(corporateActionsByType.actionTypeIds_.length).to.equal(1);
+    expect(corporateActionsByType.datas_.length).to.equal(1);
+    expect(corporateActionsByType.isDisabled_.length).to.equal(1);
+
+    expect(corporateActionsByType.actionTypes_[0].toUpperCase()).to.equal(actionType.toUpperCase());
+    expect(corporateActionsByType.actionTypeIds_[0]).to.equal(BigInt(corporateActionId_1));
+    expect(corporateActionsByType.datas_[0].toUpperCase()).to.equal(encodedDividendData.toUpperCase());
+    expect(corporateActionsByType.isDisabled_[0]).to.be.false;
+
+    // Cross-validate that getCorporateActions and getCorporateActionsByType return the same data
+    expect(corporateActions.actionTypes_[0]).to.equal(corporateActionsByType.actionTypes_[0]);
+    expect(corporateActions.actionTypeIds_[0]).to.equal(corporateActionsByType.actionTypeIds_[0]);
+    expect(corporateActions.datas_[0]).to.equal(corporateActionsByType.datas_[0]);
+    expect(corporateActions.isDisabled_[0]).to.equal(corporateActionsByType.isDisabled_[0]);
   });
 });

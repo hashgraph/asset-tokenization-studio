@@ -172,7 +172,7 @@ describe("Bond KpiLinked Rate Tests", () => {
     couponID: number,
     accountAddress: string,
   ) {
-    const registeredCouponPostFixingDate = await bondReadFacet.getCoupon(couponID);
+    const registeredCouponPostFixingDate = (await bondReadFacet.getCoupon(couponID)).registeredCoupon_;
     const couponForPostFixingDate = await bondReadFacet.getCouponFor(couponID, accountAddress);
     const couponAmountForPostFixingDate = await bondReadFacet.getCouponAmountFor(couponID, accountAddress);
 
@@ -276,7 +276,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       const couponCount = await bondReadFacet.getCouponCount();
       expect(couponCount).to.equal(1);
 
-      const registeredCoupon = await bondReadFacet.getCoupon(1);
+      const registeredCoupon = (await bondReadFacet.getCoupon(1)).registeredCoupon_;
       expect(registeredCoupon.coupon.recordDate).to.equal(couponRecordDateInSeconds);
       expect(registeredCoupon.coupon.executionDate).to.equal(couponExecutionDateInSeconds);
       expect(registeredCoupon.coupon.startDate).to.equal(couponStartDateInSeconds);
@@ -292,7 +292,7 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
 
-      const registeredCouponPreFixingDate = await bondReadFacet.getCoupon(1);
+      const registeredCouponPreFixingDate = (await bondReadFacet.getCoupon(1)).registeredCoupon_;
       const couponForPreFixingDate = await bondReadFacet.getCouponFor(1, signer_A.address);
       const couponAmountForPreFixingDate = await bondReadFacet.getCouponAmountFor(1, signer_A.address);
 

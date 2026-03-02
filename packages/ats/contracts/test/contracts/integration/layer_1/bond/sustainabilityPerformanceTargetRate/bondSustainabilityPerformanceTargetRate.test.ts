@@ -157,7 +157,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
     nominalValue: number = 100,
     nominalValueDecimals: number = 2,
   ) {
-    const registeredCouponPostFixingDate = await bondReadFacet.getCoupon(couponID);
+    const registeredCouponPostFixingDate = (await bondReadFacet.getCoupon(couponID)).registeredCoupon_;
     const couponForPostFixingDate = await bondReadFacet.getCouponFor(couponID, accountAddress);
     const couponAmountForPostFixingDate = await bondReadFacet.getCouponAmountFor(couponID, accountAddress);
 
