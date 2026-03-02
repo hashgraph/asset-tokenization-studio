@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { BondRead } from "../../layer_2/bond/BondRead.sol";
-import { Security } from "../security/Security.sol";
+import { Security } from "../../layer_2/security/Security.sol";
 import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
-import { ISecurity } from "../interfaces/ISecurity.sol";
+import { ISecurity } from "../../layer_2/interfaces/security/ISecurity.sol";
 import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 
 abstract contract BondUSAReadFacetBase is BondRead, IStaticFunctionSelectors, Security {

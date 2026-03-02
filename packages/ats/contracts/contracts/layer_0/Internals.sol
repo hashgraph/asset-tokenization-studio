@@ -11,7 +11,7 @@ import { ThirdPartyType } from "./common/types/ThirdPartyType.sol";
 import { Hold, HoldData, HoldIdentifier, OperationType, ProtectedHold } from "../layer_1/interfaces/hold/IHold.sol";
 import { Snapshots, PartitionSnapshots, SnapshotsAddress } from "../layer_1/interfaces/snapshots/ISnapshots.sol";
 import { ILock } from "../layer_1/interfaces/lock/ILock.sol";
-import { ISecurity } from "../layer_3/interfaces/ISecurity.sol";
+import { ISecurity } from "../layer_2/interfaces/security/ISecurity.sol";
 import { IBondRead } from "../layer_2/interfaces/bond/IBondRead.sol";
 import { RegulationData, AdditionalSecurityData } from "../layer_3/constants/regulation.sol";
 import { ICap } from "../layer_1/interfaces/cap/ICap.sol";

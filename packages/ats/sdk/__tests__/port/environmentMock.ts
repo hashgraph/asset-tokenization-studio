@@ -2157,6 +2157,19 @@ jest.mock("@port/out/hs/custodial/AWSKMSTransactionAdapter", () => {
 
   singletonInstance.createBond = jest.fn(createBondMockImplementation);
 
+  singletonInstance.setupDisconnectEventHandler = jest.fn(async () => {
+    return true;
+  });
+
+  singletonInstance.addKpiData = jest.fn(
+    async (security: EvmAddress, date: number, value: string, project: EvmAddress) => {
+      return {
+        status: "success",
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
   return {
     AWSKMSTransactionAdapter: jest.fn(() => singletonInstance),
   };
