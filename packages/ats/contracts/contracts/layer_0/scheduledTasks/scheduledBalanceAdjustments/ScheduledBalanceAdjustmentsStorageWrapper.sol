@@ -38,7 +38,10 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
     ) internal override {
         bytes memory data = _scheduledTask.data;
 
-        (, , bytes memory balanceAdjustmentData) = _getCorporateAction(abi.decode(data, (bytes32)));
+        (, , bytes memory balanceAdjustmentData, bool isDisabled) = _getCorporateAction(abi.decode(data, (bytes32)));
+        if (isDisabled) {
+            return;
+        }
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
             balanceAdjustmentData,
             (IEquity.ScheduledBalanceAdjustment)

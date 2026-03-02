@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
 import { _KPIS_STORAGE_POSITION } from "contracts/layer_0/constants/storagePositions.sol";
 import { IKpis } from "contracts/layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
 import { CheckpointsLib } from "contracts/layer_0/common/libraries/CheckpointsLib.sol";
@@ -87,7 +88,8 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
     function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, BondStorageWrapper) {
         super._addToCouponsOrderedList(_couponID);
 
-        uint256 lastFixingDate = _getCoupon(_couponID).coupon.fixingDate;
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
+        uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
         assert(lastFixingDate >= _kpisDataStorage().minDate);
 
@@ -111,7 +113,8 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
 
         if (total == 0) return minDate_;
 
-        uint256 lastFixingDate = _getCoupon(_getCouponFromOrderedListAt(total - 1)).coupon.fixingDate;
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_getCouponFromOrderedListAt(total - 1));
+        uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
         assert(lastFixingDate >= minDate_);
 

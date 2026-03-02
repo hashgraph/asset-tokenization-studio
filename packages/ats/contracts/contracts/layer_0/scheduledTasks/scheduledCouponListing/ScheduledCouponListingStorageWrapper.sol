@@ -37,6 +37,9 @@ abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStor
         bytes memory data = _scheduledTask.data;
 
         bytes32 actionId = abi.decode(data, (bytes32));
+        if (_isCorporateActionDisabled(actionId)) {
+            return;
+        }
 
         _addToCouponsOrderedList(uint256(actionId));
         uint256 pos = _getCouponsOrderedListTotal();
@@ -88,7 +91,7 @@ abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStor
 
         bytes32 actionId = abi.decode(couponListing.data, (bytes32));
 
-        (, couponID_, ) = _getCorporateAction(actionId);
+        (, couponID_, , ) = _getCorporateAction(actionId);
     }
 
     function _scheduledCouponListingStorage()

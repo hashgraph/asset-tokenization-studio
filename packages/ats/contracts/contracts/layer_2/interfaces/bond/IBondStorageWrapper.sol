@@ -14,6 +14,13 @@ interface IBondStorageWrapper {
     event CouponSet(bytes32 corporateActionId, uint256 couponId, address indexed operator, IBondRead.Coupon coupon);
 
     /**
+     * @notice Emitted when a coupon is cancelled.
+     * @param couponId Identifier of the cancelled coupon.
+     * @param operator Address that performed the cancellation.
+     */
+    event CouponCancelled(uint256 couponId, address indexed operator);
+
+    /**
      * @notice Coupon creation failed due to an internal failure.
      */
     error CouponCreationFailed();
@@ -22,4 +29,9 @@ interface IBondStorageWrapper {
      * @notice Provided maturity date is invalid (e.g. in the past or before issuance).
      */
     error BondMaturityDateWrong();
+
+    /**
+     * @notice Coupon execution failed because the coupon has already been executed or cancelled.
+     */
+    error CouponAlreadyExecuted(bytes32 corporateActionId, uint256 couponId);
 }

@@ -30,6 +30,12 @@ interface IBond {
     function setCoupon(IBondRead.Coupon calldata _newCoupon) external returns (uint256 couponID_);
 
     /**
+     * @notice Cancels an existing coupon for the bond
+     * @param _couponID The ID of the coupon to be cancelled
+     */
+    function cancelCoupon(uint256 _couponID) external returns (bool success_);
+
+    /**
      * @notice Updates the maturity date of the bond.
      * @param _maturityDate The new maturity date to be set.
      */

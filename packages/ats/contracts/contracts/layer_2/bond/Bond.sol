@@ -69,6 +69,12 @@ abstract contract Bond is IBond, Internals {
         (corporateActionID, couponID_) = _setCoupon(_newCoupon);
     }
 
+    function cancelCoupon(
+        uint256 _couponID
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_, ) = _cancelCoupon(_couponID);
+    }
+
     function updateMaturityDate(
         uint256 _newMaturityDate
     )

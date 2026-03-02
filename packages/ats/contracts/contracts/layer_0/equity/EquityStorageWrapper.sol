@@ -143,7 +143,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     ) internal view override returns (IEquity.RegisteredDividend memory registeredDividend_) {
         bytes32 actionId = _getCorporateActionIdByTypeIndex(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
 
-        (, , bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data, ) = _getCorporateAction(actionId);
 
         assert(data.length > 0);
         (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
@@ -228,7 +228,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     ) internal view override returns (IEquity.RegisteredVoting memory registeredVoting_) {
         bytes32 actionId = _getCorporateActionIdByTypeIndex(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
 
-        (, , bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data, ) = _getCorporateAction(actionId);
 
         assert(data.length > 0);
         (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
@@ -300,7 +300,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
             _balanceAdjustmentID - 1
         );
 
-        (, , bytes memory data) = _getCorporateAction(actionId);
+        (, , bytes memory data, ) = _getCorporateAction(actionId);
 
         assert(data.length > 0);
         (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));

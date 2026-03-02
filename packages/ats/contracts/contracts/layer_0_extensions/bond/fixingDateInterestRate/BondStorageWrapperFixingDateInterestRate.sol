@@ -38,12 +38,19 @@ abstract contract BondStorageWrapperFixingDateInterestRate is
         uint256 _couponID,
         function(uint256, IBondRead.Coupon memory) internal view returns (uint256, uint8) _calculateRate,
         uint256 _timestamp
-    ) internal view virtual returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
-        registeredCoupon_ = super._getCoupon(_couponID);
+    )
+        internal
+        view
+        virtual
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
+    {
+        (registeredCoupon_, corporateActionId_, isDisabled_) = super._getCoupon(_couponID);
 
-        if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return registeredCoupon_;
+        if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET)
+            return (registeredCoupon_, corporateActionId_, isDisabled_);
 
-        if (registeredCoupon_.coupon.fixingDate > _timestamp) return registeredCoupon_;
+        if (registeredCoupon_.coupon.fixingDate > _timestamp)
+            return (registeredCoupon_, corporateActionId_, isDisabled_);
 
         (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = _calculateRate(
             _couponID,
