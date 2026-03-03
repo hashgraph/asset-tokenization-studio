@@ -6,6 +6,7 @@ import { QueryBus } from "@core/query/QueryBus";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
 
+import { CancelCouponCommand } from "@command/bond/coupon/cancel/CancelCouponCommand";
 import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
 import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
 import { CreateBondFixedRateCommand } from "@command/bond/createfixedrate/CreateBondFixedRateCommand";
@@ -65,6 +66,7 @@ import GetPrincipalForRequest from "../request/bond/GetPrincipalForRequest";
 import IsProceedRecipientRequest from "../request/bond/IsProceedRecipientRequest";
 import RedeemAtMaturityByPartitionRequest from "../request/bond/RedeemAtMaturityByPartitionRequest";
 import RemoveProceedRecipientRequest from "../request/bond/RemoveProceedRecipientRequest";
+import CancelCouponRequest from "../request/bond/CancelCouponRequest";
 import SetCouponRequest from "../request/bond/SetCouponRequest";
 import UpdateMaturityDateRequest from "../request/bond/UpdateMaturityDateRequest";
 import UpdateProceedRecipientDataRequest from "../request/bond/UpdateProceedRecipientDataRequest";
@@ -81,6 +83,7 @@ interface IBondInPort {
   createFixedRate(request: CreateBondFixedRateRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
   getBondDetails(request: GetBondDetailsRequest): Promise<BondDetailsViewModel>;
   setCoupon(request: SetCouponRequest): Promise<{ payload: number; transactionId: string }>;
+  cancelCoupon(request: CancelCouponRequest): Promise<{ payload: boolean; transactionId: string }>;
   getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
   getCouponAmountFor(request: GetCouponForRequest): Promise<CouponAmountForViewModel>;
   getPrincipalFor(request: GetPrincipalForRequest): Promise<PrincipalForViewModel>;
@@ -386,6 +389,14 @@ class BondInPort implements IBondInPort {
   }
 
   @LogError
+  async cancelCoupon(request: CancelCouponRequest): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, couponId } = request;
+    ValidatedRequest.handleValidation("CancelCouponRequest", request);
+
+    return await this.commandBus.execute(new CancelCouponCommand(securityId, couponId));
+  }
+
+  @LogError
   async getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel> {
     ValidatedRequest.handleValidation("GetCouponForRequest", request);
 
@@ -396,6 +407,7 @@ class BondInPort implements IBondInPort {
     const couponFor: CouponForViewModel = {
       tokenBalance: res.tokenBalance.toString(),
       decimals: res.decimals.toString(),
+      isDisabled: res.isDisabled,
     };
 
     return couponFor;
@@ -448,6 +460,7 @@ class BondInPort implements IBondInPort {
       endDate: new Date(res.coupon.endTimeStamp * ONE_THOUSAND),
       fixingDate: new Date(res.coupon.fixingTimeStamp * ONE_THOUSAND),
       rateStatus: CastRateStatus.toNumber(res.coupon.rateStatus),
+      isDisabled: res.coupon.isDisabled,
     };
 
     return coupon;

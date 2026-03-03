@@ -375,6 +375,14 @@ describe("🧪 Bond test", () => {
   }, 600_000);
 
   it("addKpiData", async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: bond.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._KPI_MANAGER_ROLE,
+      }),
+    );
+
     const request = new AddKpiDataRequest({
       securityId: bond.evmDiamondAddress!.toString(),
       date: Math.floor(Date.now() / 1000),

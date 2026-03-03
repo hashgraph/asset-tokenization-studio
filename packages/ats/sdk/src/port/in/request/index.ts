@@ -215,6 +215,7 @@ import { AddKpiDataRequest } from "./kpis/AddKpiDataRequest";
 import GetImpactDataRequest from "./kpiLinkedRate/GetImpactDataRequest";
 import SetImpactDataRequest from "./interestRates/SetImpactDataRequest";
 import GetScheduledCouponListingRequest from "./scheduledTasks/GetScheduledCouponListingRequest";
+import CancelCouponRequest from "./bond/CancelCouponRequest";
 
 export {
   CreateEquityRequest,
@@ -431,4 +432,5 @@ export {
   AddKpiDataRequest,
   GetImpactDataRequest,
   GetScheduledCouponListingRequest,
+  CancelCouponRequest,
 };
