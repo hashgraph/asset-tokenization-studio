@@ -15,7 +15,7 @@ contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](22);
+        staticFunctionSelectors_ = new bytes4[](23);
         staticFunctionSelectors_[selectorIndex++] = this._initialize_equityUSA.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getEquityDetails.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setDividend.selector;
@@ -25,6 +25,7 @@ contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.getDividendAmountFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getDividendsCount.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setVoting.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.cancelVoting.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getVoting.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getVotingFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getVotingCount.selector;

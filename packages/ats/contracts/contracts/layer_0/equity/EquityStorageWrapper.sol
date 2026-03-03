@@ -94,6 +94,17 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _initVotingRights(corporateActionId_, data);
     }
 
+    function _cancelVoting(uint256 _voteId) internal override returns (bool success_, bytes32 corporateActionId_) {
+        IEquity.RegisteredVoting memory registeredVoting;
+        (registeredVoting, corporateActionId_, ) = _getVoting(_voteId);
+        if (registeredVoting.voting.recordDate != 0 && registeredVoting.voting.recordDate <= _blockTimestamp()) {
+            revert IEquityStorageWrapper.VotingAlreadyRecorded(corporateActionId_, _voteId);
+        }
+        _cancelCorporateAction(corporateActionId_);
+        success_ = true;
+        emit VotingCancelled(_voteId, _msgSender());
+    }
+
     function _initVotingRights(bytes32 _actionId, bytes memory _data) internal override {
         if (_actionId == bytes32(0)) {
             revert IEquityStorageWrapper.VotingRightsCreationFailed();
@@ -249,15 +260,21 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _getVoting(
         uint256 _voteID
-    ) internal view override returns (IEquity.RegisteredVoting memory registeredVoting_) {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
+    )
+        internal
+        view
+        override
+        returns (IEquity.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_)
+    {
+        corporateActionId_ = _getCorporateActionIdByTypeIndex(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
 
-        (, , bytes memory data, ) = _getCorporateAction(actionId);
+        bytes memory data;
+        (, , data, isDisabled_) = _getCorporateAction(corporateActionId_);
 
         assert(data.length > 0);
         (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
 
-        registeredVoting_.snapshotId = _getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredVoting_.snapshotId = _getUintResultAt(corporateActionId_, SNAPSHOT_RESULT_ID);
     }
 
     /**
@@ -271,10 +288,11 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint256 _voteID,
         address _account
     ) internal view override returns (IEquity.VotingFor memory votingFor_) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+        (IEquity.RegisteredVoting memory registeredVoting, , bool isDisabled_) = _getVoting(_voteID);
 
         votingFor_.recordDate = registeredVoting.voting.recordDate;
         votingFor_.data = registeredVoting.voting.data;
+        votingFor_.isDisabled = isDisabled_;
 
         (
             votingFor_.tokenBalance,
@@ -296,7 +314,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view override returns (address[] memory holders_) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+        IEquity.RegisteredVoting memory registeredVoting;
+        (registeredVoting, , ) = _getVoting(_voteID);
 
         if (registeredVoting.voting.recordDate >= _blockTimestamp()) return new address[](0);
 
@@ -307,7 +326,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     }
 
     function _getTotalVotingHolders(uint256 _voteID) internal view override returns (uint256) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+        IEquity.RegisteredVoting memory registeredVoting;
+        (registeredVoting, , ) = _getVoting(_voteID);
 
         if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
 

@@ -44,6 +44,12 @@ abstract contract Equity is IEquity, Common {
         (success_, ) = _cancelDividend(_dividendId);
     }
 
+    function cancelVoting(
+        uint256 _voteId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_, ) = _cancelVoting(_voteId);
+    }
+
     function setVoting(
         Voting calldata _newVoting
     )
@@ -147,9 +153,9 @@ abstract contract Equity is IEquity, Common {
         view
         override
         onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
-        returns (RegisteredVoting memory registeredVoting_)
+        returns (RegisteredVoting memory registeredVoting_, bool isDisabled_)
     {
-        return _getVoting(_voteID);
+        (registeredVoting_, , isDisabled_) = _getVoting(_voteID);
     }
 
     function getVotingFor(
