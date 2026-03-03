@@ -427,7 +427,7 @@ export class RPCQueryAdapter {
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
-    const votingInfo = await this.connect(Equity__factory, address.toString()).getVoting(voting);
+    const votingInfo = (await this.connect(Equity__factory, address.toString()).getVoting(voting)).registeredVoting_;
 
     return new VotingRights(
       Number(votingInfo.voting.recordDate),
