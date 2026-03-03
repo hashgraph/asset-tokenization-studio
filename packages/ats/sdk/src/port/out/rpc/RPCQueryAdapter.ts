@@ -370,7 +370,7 @@ export class RPCQueryAdapter {
   async getDividendsFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendFor> {
     LogService.logTrace(`Getting dividends for`);
 
-    const dividendFor = await this.connect(Equity__factory, address.toString()).getDividendsFor(
+    const dividendFor = await this.connect(Equity__factory, address.toString()).getDividendFor(
       dividend,
       target.toString(),
     );
@@ -396,7 +396,8 @@ export class RPCQueryAdapter {
   async getDividends(address: EvmAddress, dividend: number): Promise<Dividend> {
     LogService.logTrace(`Getting dividends`);
 
-    const dividendInfo = await this.connect(Equity__factory, address.toString()).getDividends(dividend);
+    //TODO change this
+    const dividendInfo = (await this.connect(Equity__factory, address.toString()).getDividend(dividend)).registeredDividend_;
 
     return new Dividend(
       new BigDecimal(dividendInfo.dividend.amount.toString()),
@@ -477,7 +478,8 @@ export class RPCQueryAdapter {
   async getCoupon(address: EvmAddress, coupon: number): Promise<Coupon> {
     LogService.logTrace(`Getting Coupon`);
 
-    const couponInfo = await this.connect(BondRead__factory, address.toString()).getCoupon(coupon);
+    //TODO change this
+    const couponInfo = (await this.connect(BondRead__factory, address.toString()).getCoupon(coupon)).registeredCoupon_;
 
     return new Coupon(
       Number(couponInfo.coupon.recordDate),
