@@ -78,6 +78,7 @@ export class ProtectedTransferFromByPartitionCommandHandler
         BigDecimal.fromString(deadline.substring(0, 10)),
         BigDecimal.fromString(nounce.toString()),
         signature,
+        securityId,
       );
 
       return Promise.resolve(new ProtectedTransferFromByPartitionCommandResponse(res.error === undefined, res.id!));

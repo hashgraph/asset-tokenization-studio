@@ -37,6 +37,7 @@ export class AddKpiDataCommandHandler implements ICommandHandler<AddKpiDataComma
         date,
         value,
         new EvmAddress(project),
+        securityId,
       );
 
       return new AddKpiDataCommandResponse(result.id!);

@@ -20,6 +20,8 @@ module.exports = {
   moduleNameMapper: {
     "^@hashgraph/io-axios-services/(.*)$": "<rootDir>/node_modules/@hashgraph/io-axios-services/lib/$1.js",
     "^@terminal3/(.*)$": "<rootDir>/__mocks__/@terminal3/$1.js",
+    "^@hashgraph/hedera-wallet-connect$": "<rootDir>/__mocks__/@hashgraph/hedera-wallet-connect.js",
+    "^@reown/appkit$": "<rootDir>/__mocks__/@reown/appkit.js",
     "\\.(css|less|scss|sass|ttf|png)$": "ts-jest",
   },
   moduleDirectories: ["node_modules", "<rootDir>/node_modules", "<rootDir>/../../node_modules"],
