@@ -129,6 +129,19 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _initBalanceAdjustment(corporateActionId_, data);
     }
 
+    function _cancelScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentId
+    ) internal override returns (bool success_, bytes32 corporateActionId_) {
+        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment;
+        (balanceAdjustment, corporateActionId_, ) = _getScheduledBalanceAdjustment(_balanceAdjustmentId);
+        if (balanceAdjustment.executionDate != 0 && balanceAdjustment.executionDate <= _blockTimestamp()) {
+            revert IEquityStorageWrapper.BalanceAdjustmentAlreadyExecuted(corporateActionId_, _balanceAdjustmentId);
+        }
+        _cancelCorporateAction(corporateActionId_);
+        success_ = true;
+        emit ScheduledBalanceAdjustmentCancelled(_balanceAdjustmentId, _msgSender());
+    }
+
     function _initBalanceAdjustment(bytes32 _actionId, bytes memory _data) internal override {
         if (_actionId == bytes32(0)) {
             revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
@@ -338,13 +351,23 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) internal view override returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(
+    )
+        internal
+        view
+        override
+        returns (
+            IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_,
+            bytes32 corporateActionId_,
+            bool isDisabled_
+        )
+    {
+        corporateActionId_ = _getCorporateActionIdByTypeIndex(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             _balanceAdjustmentID - 1
         );
 
-        (, , bytes memory data, ) = _getCorporateAction(actionId);
+        bytes memory data;
+        (, , data, isDisabled_) = _getCorporateAction(corporateActionId_);
 
         assert(data.length > 0);
         (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));

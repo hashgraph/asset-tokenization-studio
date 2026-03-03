@@ -112,6 +112,8 @@ interface IEquity {
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) external returns (uint256 balanceAdjustmentID_);
 
+    function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) external returns (bool success_);
+
     function getEquityDetails() external view returns (EquityDetailsData memory equityDetailsData_);
 
     /**
@@ -199,7 +201,7 @@ interface IEquity {
      */
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_);
 
     /**
      * @notice Returns the total number of scheduled balance adjustments

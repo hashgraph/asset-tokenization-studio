@@ -549,6 +549,9 @@ abstract contract Internals is Modifiers {
     function _setScheduledBalanceAdjustment(
         IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) internal virtual returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_);
+    function _cancelScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentId
+    ) internal virtual returns (bool success_, bytes32 corporateActionId_);
     function _setTotalClearedLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
     function _setTotalClearedLabafByPartition(
         bytes32 _partition,
@@ -1169,7 +1172,15 @@ abstract contract Internals is Modifiers {
         returns (ISustainabilityPerformanceTargetRate.InterestRate memory interestRate_);
     function _getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) internal view virtual returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_);
+    )
+        internal
+        view
+        virtual
+        returns (
+            IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_,
+            bytes32 corporateActionId_,
+            bool isDisabled_
+        );
     function _getScheduledBalanceAdjustmentCount() internal view virtual returns (uint256);
     function _getScheduledBalanceAdjustments(
         uint256 _pageIndex,

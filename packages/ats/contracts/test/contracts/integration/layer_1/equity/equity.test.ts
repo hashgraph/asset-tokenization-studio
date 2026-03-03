@@ -17,6 +17,7 @@ import {
   ClearingTransferFacet,
   FreezeFacet,
   TimeTravelFacet,
+  ScheduledCrossOrderedTasks,
 } from "@contract-types";
 import {
   DEFAULT_PARTITION,
@@ -78,6 +79,7 @@ describe("Equity Tests", () => {
   let timeTravelFacet: TimeTravelFacet;
   let kycFacet: Kyc;
   let ssiManagementFacet: SsiManagement;
+  let scheduledTasksFacet: ScheduledCrossOrderedTasks;
   let clearingActionsFacet: ClearingActionsFacet;
   let clearingTransferFacet: ClearingTransferFacet;
   let freezeFacet: FreezeFacet;
@@ -116,6 +118,7 @@ describe("Equity Tests", () => {
     clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
     clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
     freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target, signer_A);
+    scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasks", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -1122,12 +1125,127 @@ describe("Equity Tests", () => {
         );
 
       const listCount = await equityFacet.getScheduledBalanceAdjustmentCount();
-      const balanceAdjustment = await equityFacet.getScheduledBalanceAdjustment(1);
+      const [balanceAdjustment, isDisabled] = await equityFacet.getScheduledBalanceAdjustment(1);
 
       expect(listCount).to.equal(1);
+      expect(isDisabled).to.equal(false);
       expect(balanceAdjustment.executionDate).to.equal(balanceAdjustmentExecutionDateInSeconds);
       expect(balanceAdjustment.factor).to.equal(balanceAdjustmentFactor);
       expect(balanceAdjustment.decimals).to.equal(balanceAdjustmentDecimals);
+    });
+
+    describe("Cancel Scheduled Balance Adjustment", () => {
+      it("GIVEN an account without corporateActions role WHEN cancelScheduledBalanceAdjustment THEN transaction fails with AccountHasNoRole", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await equityFacet.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1)).to.be.rejectedWith(
+          "AccountHasNoRole",
+        );
+      });
+
+      it("GIVEN a paused Token WHEN cancelScheduledBalanceAdjustment THEN transaction fails with TokenIsPaused", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
+        await equityFacet.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
+        await pauseFacet.connect(signer_B).pause();
+
+        await expect(equityFacet.connect(signer_B).cancelScheduledBalanceAdjustment(1)).to.be.rejectedWith(
+          "TokenIsPaused",
+        );
+      });
+
+      it("GIVEN a balance adjustment already executed WHEN cancelScheduledBalanceAdjustment THEN transaction fails with BalanceAdjustmentAlreadyExecuted", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+        await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds + 1000);
+
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1)).to.be.revertedWithCustomError(
+          equityFacet,
+          "BalanceAdjustmentAlreadyExecuted",
+        );
+      });
+
+      it("GIVEN a balance adjustment not yet executed WHEN cancelScheduledBalanceAdjustment THEN transaction succeeds", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1))
+          .to.emit(equityFacet, "ScheduledBalanceAdjustmentCancelled")
+          .withArgs(1, signer_C.address);
+        const [balanceAdjustment, isDisabled] = await equityFacet.getScheduledBalanceAdjustment(1);
+        expect(isDisabled).to.equal(true);
+        expect(balanceAdjustment.factor).to.equal(balanceAdjustmentFactor);
+        expect(balanceAdjustment.decimals).to.equal(balanceAdjustmentDecimals);
+      });
+
+      it("GIVEN a non-existent balance adjustment WHEN cancelScheduledBalanceAdjustment THEN transaction fails", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(999)).to.be.rejected;
+      });
+
+      it("GIVEN multiple balance adjustments WHEN cancelScheduledBalanceAdjustment on one THEN only that adjustment is cancelled", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+        // Create first balance adjustment
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+        // Create second balance adjustment with different execution date
+        const secondBalanceAdjustmentData = {
+          executionDate: (balanceAdjustmentExecutionDateInSeconds + 10000).toString(),
+          factor: 500,
+          decimals: 3,
+        };
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(secondBalanceAdjustmentData);
+
+        // Cancel only first balance adjustment
+        await expect(equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1))
+          .to.emit(equityFacet, "ScheduledBalanceAdjustmentCancelled")
+          .withArgs(1, signer_C.address);
+
+        // Verify first adjustment is cancelled by checking it still exists but with correct data
+        const [balanceAdjustment1, isDisabled1] = await equityFacet.getScheduledBalanceAdjustment(1);
+        expect(isDisabled1).to.equal(true);
+        expect(balanceAdjustment1.factor).to.equal(balanceAdjustmentFactor);
+
+        // Verify second adjustment is still active
+        const [balanceAdjustment2, isDisabled2] = await equityFacet.getScheduledBalanceAdjustment(2);
+        expect(isDisabled2).to.equal(false);
+        expect(balanceAdjustment2.factor).to.equal(500);
+        expect(balanceAdjustment2.decimals).to.equal(3);
+      });
+
+      it("GIVEN a cancelled balance adjustment WHEN triggerScheduledCrossOrderedTasks is called THEN scheduled task executes but token balance remains unchanged", async () => {
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+
+        const tokenAmount = 1000n;
+        await erc1410Facet.connect(signer_C).issueByPartition({
+          partition: DEFAULT_PARTITION,
+          tokenHolder: signer_A.address,
+          value: tokenAmount,
+          data: "0x",
+        });
+
+        const balanceBeforeAdjustment = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
+        expect(balanceBeforeAdjustment).to.equal(tokenAmount);
+
+        await equityFacet.connect(signer_C).setScheduledBalanceAdjustment(balanceAdjustmentData);
+
+        await equityFacet.connect(signer_C).cancelScheduledBalanceAdjustment(1);
+
+        const balanceAfterCancel = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
+        expect(balanceAfterCancel).to.equal(balanceBeforeAdjustment);
+
+        await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds + 1);
+
+        await scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+
+        const balanceAfterTrigger = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_A.address);
+        expect(balanceAfterTrigger).to.equal(balanceBeforeAdjustment);
+      });
     });
   });
 });
