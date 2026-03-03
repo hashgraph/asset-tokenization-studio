@@ -564,6 +564,7 @@ abstract contract Internals is Modifiers {
     function _setVoting(
         IEquity.Voting calldata _newVoting
     ) internal virtual returns (bytes32 corporateActionId_, uint256 voteID_);
+    function _cancelVoting(uint256 _voteId) internal virtual returns (bool success_, bytes32 corporateActionId_);
     function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal virtual;
     function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal virtual;
     function _storeRegulationData(
@@ -1248,7 +1249,11 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (uint256);
     function _getVoting(
         uint256 _voteID
-    ) internal view virtual returns (IEquity.RegisteredVoting memory registeredVoting_);
+    )
+        internal
+        view
+        virtual
+        returns (IEquity.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_);
     function _getVotingCount() internal view virtual returns (uint256 votingCount_);
     function _getVotingFor(
         uint256 _voteID,

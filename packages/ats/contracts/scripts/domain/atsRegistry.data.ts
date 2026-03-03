@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-02T15:52:04.505Z
+ * Generated: 2026-03-03T10:19:21.438Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -3201,6 +3201,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xd1869b7c",
       },
       {
+        name: "cancelVoting",
+        signature: "function cancelVoting(uint256 _voteId) returns (bool success_)",
+        selector: "0x549bdd6e",
+      },
+      {
         name: "getDividend",
         signature:
           "function getDividend(uint256 _dividendID) view returns (((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_, bool isDisabled_)",
@@ -3276,7 +3281,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getVoting",
         signature:
-          "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_)",
+          "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
         selector: "0x3afc7282",
       },
       {
@@ -3287,7 +3292,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getVotingFor",
         signature:
-          "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached) votingFor_)",
+          "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached, bool isDisabled) votingFor_)",
         selector: "0x7633eccf",
       },
       {
@@ -11205,6 +11210,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
       },
       {
+        name: "VotingCancelled",
+        signature: "VotingCancelled(uint256,address)",
+        topic0: "0x0ca8f69518859b63e253a165f70a3ef3ad0db94215d1703ebcadd269c4c860bc",
+      },
+      {
         name: "VotingSet",
         signature: "VotingSet(bytes32,uint256,address,uint256,bytes)",
         topic0: "0x5ca20e6ec9818c8d574ae3452d46ed4c9dc9d8df2ffa263150507c7e9124ac2f",
@@ -11222,6 +11232,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0x50fe6757",
       },
       { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
+      { name: "VotingAlreadyRecorded", signature: "VotingAlreadyRecorded(bytes32,uint256)", selector: "0x7a2e2617" },
       { name: "VotingRightsCreationFailed", signature: "VotingRightsCreationFailed()", selector: "0x0cc16600" },
     ],
   },

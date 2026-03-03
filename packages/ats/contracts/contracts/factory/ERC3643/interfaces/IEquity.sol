@@ -67,6 +67,7 @@ interface TRexIEquity {
         bytes data;
         uint8 decimals;
         bool recordDateReached;
+        bool isDisabled;
     }
 
     struct ScheduledBalanceAdjustment {
@@ -94,6 +95,14 @@ interface TRexIEquity {
      * @dev Can only be called by an account with the corporate actions role
      */
     function setVoting(Voting calldata _newVoting) external returns (uint256 voteID_);
+
+    /**
+     * @notice Cancels an existing voting
+     * @dev Can only be called by an account with the corporate actions role
+     * @param _voteId The ID of the voting to cancel
+     * @return success_ True if the voting was cancelled successfully
+     */
+    function cancelVoting(uint256 _voteId) external returns (bool success_);
 
     /**
      * @notice Sets a new scheduled balance adjustment
@@ -157,7 +166,9 @@ interface TRexIEquity {
     /**
      * @notice Returns the details of a previously registered voting
      */
-    function getVoting(uint256 _voteID) external view returns (RegisteredVoting memory registeredVoting_);
+    function getVoting(
+        uint256 _voteID
+    ) external view returns (RegisteredVoting memory registeredVoting_, bool isDisabled_);
 
     /**
      * @notice Returns the voting details for an account
