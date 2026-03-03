@@ -580,7 +580,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     return this.executeTransaction(
       Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
-      "setDividends",
+      "setDividend",
       [dividendStruct],
       GAS.SET_DIVIDENDS,
       SET_DIVIDEND_EVENT,
