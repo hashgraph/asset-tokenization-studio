@@ -22,19 +22,14 @@ export type { TupProxyFixtureResult } from "./tupProxy.fixture";
 // Token fixtures
 export { deployEquityTokenFixture, DEFAULT_EQUITY_PARAMS, getEquityDetails } from "./tokens/equity.fixture";
 
-export { deployBondTokenFixture, DEFAULT_BOND_PARAMS, getBondDetails } from "./tokens/bond.fixture";
-
-export { deployBondFixedRateTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "./tokens/bondFixedRate.fixture";
-
 export {
-  deployBondKpiLinkedRateTokenFixture,
+  deployBondTokenFixture,
+  DEFAULT_BOND_PARAMS,
+  getBondDetails,
+  DEFAULT_BOND_FIXED_RATE_PARAMS,
   DEFAULT_BOND_KPI_LINKED_RATE_PARAMS,
-} from "./tokens/bondKpiLinkedRate.fixture";
-
-export {
-  deployBondSustainabilityPerformanceTargetRateTokenFixture,
-  DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS,
-} from "./tokens/bondSustainabilityPerformanceTargetRate.fixture";
+  DEFAULT_BOND_SPT_RATE_PARAMS,
+} from "./tokens/bond.fixture";
 
 // Common token utilities
 export {

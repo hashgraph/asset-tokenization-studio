@@ -14,7 +14,7 @@ import {
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH
 } from "../../constants/values.sol";
-import { Hold, ProtectedHold } from "../../facets/features/interfaces/hold/IHold.sol";
+import { Hold, ProtectedHold } from "../../facets/features/interfaces/hold/IHoldTypes.sol";
 import { IClearing } from "../../facets/features/interfaces/clearing/IClearing.sol";
 import { IERC712 } from "../../facets/features/interfaces/IERC712.sol";
 

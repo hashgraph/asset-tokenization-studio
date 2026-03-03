@@ -410,7 +410,8 @@ function parseResolverKeyFromImports(source: string): string | null {
       const parts = content.split(",");
       for (const part of parts) {
         const trimmed = part.trim();
-        if (trimmed.endsWith("_RESOLVER_KEY")) {
+        // Match any name containing _RESOLVER_KEY (e.g., _BOND_USA_WRITE_RESOLVER_KEY)
+        if (trimmed.includes("_RESOLVER_KEY")) {
           return trimmed;
         }
       }

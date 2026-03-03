@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledBalanceAdjustments } from "./ScheduledBalanceAdjustments.sol";
+// solhint-disable-next-line max-line-length
 import {
     IScheduledBalanceAdjustments
 } from "../../interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol";

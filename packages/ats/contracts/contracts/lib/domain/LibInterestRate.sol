@@ -16,9 +16,11 @@ import {
     ISustainabilityPerformanceTargetRate
 } from "../../facets/assetCapabilities/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 // solhint-enable max-line-length
+// solhint-disable-next-line max-line-length
 import {
     IKpiLinkedRate
 } from "../../facets/assetCapabilities/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+// solhint-disable-next-line max-line-length
 /// @title LibInterestRate
 /// @notice Centralized library for interest rate storage management across fixed, KPI-linked,
 ///         and sustainability performance target rate variants

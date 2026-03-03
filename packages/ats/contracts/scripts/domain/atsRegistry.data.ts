@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-26T10:47:49.686Z
- * Facets: 64
+ * Generated: 2026-03-03T16:17:08.342Z
+ * Facets: 59
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -22,12 +22,7 @@ import {
   AccessControlFacet__factory,
   AdjustBalancesFacet__factory,
   BondUSAFacet__factory,
-  BondUSAFixedRateFacet__factory,
-  BondUSAKpiLinkedRateFacet__factory,
   BondUSAReadFacet__factory,
-  BondUSAReadKpiLinkedRateFacet__factory,
-  BondUSAReadSustainabilityPerformanceTargetRateFacet__factory,
-  BondUSASustainabilityPerformanceTargetRateFacet__factory,
   CapFacet__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
@@ -86,12 +81,7 @@ import {
   AccessControlFacetTimeTravel__factory,
   AdjustBalancesFacetTimeTravel__factory,
   BondUSAFacetTimeTravel__factory,
-  BondUSAFixedRateFacetTimeTravel__factory,
-  BondUSAKpiLinkedRateFacetTimeTravel__factory,
   BondUSAReadFacetTimeTravel__factory,
-  BondUSAReadKpiLinkedRateFacetTimeTravel__factory,
-  BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
-  BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   CapFacetTimeTravel__factory,
   ClearingActionsFacetTimeTravel__factory,
   ClearingHoldCreationFacetTimeTravel__factory,
@@ -285,79 +275,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
   BondUSAFacet: {
     name: "BondUSAFacet",
     resolverKey: {
-      name: "_BOND_VARIABLE_RATE_RESOLVER_KEY",
-      value: "0xe6594ee8f54f346ab25268fdc7955031a6b06102355e1446353d89ab1d593de3",
+      name: "_BOND_USA_WRITE_RESOLVER_KEY",
+      value: "0xcc210210246d0a40411c97f640074e9d37723131d2173e56443ec220593dc17b",
     },
     inheritance: ["BondUSA", "IStaticFunctionSelectors"],
     methods: [
       {
         name: "_initialize_bondUSA",
         signature:
-          "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-        selector: "0x86d59729",
-      },
-      {
-        name: "fullRedeemAtMaturity",
-        signature: "function fullRedeemAtMaturity(address _tokenHolder)",
-        selector: "0xd0db5fb2",
-      },
-      {
-        name: "redeemAtMaturityByPartition",
-        signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
-        selector: "0x8a647211",
-      },
-      {
-        name: "setCoupon",
-        signature:
-          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-        selector: "0xb16fd0cc",
-      },
-      {
-        name: "updateMaturityDate",
-        signature: "function updateMaturityDate(uint256 _newMaturityDate) returns (bool success_)",
-        selector: "0xc7a6ca35",
-      },
-    ],
-    events: [
-      {
-        name: "CouponSet",
-        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
-        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
-      },
-      {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
-      },
-      {
-        name: "RedeemedByPartition",
-        signature: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
-        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
-      },
-    ],
-    errors: [
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
-      { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
-      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
-      { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
-    ],
-    factory: (signer) => new BondUSAFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) => new BondUSAFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
-  },
-
-  BondUSAFixedRateFacet: {
-    name: "BondUSAFixedRateFacet",
-    resolverKey: {
-      name: "_BOND_FIXED_RATE_RESOLVER_KEY",
-      value: "0xd55d8787d23b78e70dada1ade45b8758f5c027e2cddf3556606c07d388ce159a",
-    },
-    inheritance: ["BondUSAFixedRate", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "_initialize_bondUSA",
-        signature:
-          "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-        selector: "0x86d59729",
+          "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData, uint8 _rateType)",
+        selector: "0xebd3af94",
       },
       {
         name: "fullRedeemAtMaturity",
@@ -403,89 +330,23 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
       { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
       { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-      { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
-    ],
-    factory: (signer) => new BondUSAFixedRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAFixedRateFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
-  },
-
-  BondUSAKpiLinkedRateFacet: {
-    name: "BondUSAKpiLinkedRateFacet",
-    resolverKey: {
-      name: "_BOND_KPI_LINKED_RATE_RESOLVER_KEY",
-      value: "0x99c145ff21354eb7b25cb096873143fa3d3aba98457b96bcd13f1d1f2b9bf28c",
-    },
-    inheritance: ["BondUSAKpiLinkedRate", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "_initialize_bondUSA",
-        signature:
-          "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-        selector: "0x86d59729",
-      },
-      {
-        name: "fullRedeemAtMaturity",
-        signature: "function fullRedeemAtMaturity(address _tokenHolder)",
-        selector: "0xd0db5fb2",
-      },
-      {
-        name: "getCoupon",
-        signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
-        selector: "0x936e3169",
-      },
-      {
-        name: "redeemAtMaturityByPartition",
-        signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
-        selector: "0x8a647211",
-      },
-      {
-        name: "setCoupon",
-        signature:
-          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-        selector: "0xb16fd0cc",
-      },
-      {
-        name: "updateMaturityDate",
-        signature: "function updateMaturityDate(uint256 _newMaturityDate) returns (bool success_)",
-        selector: "0xc7a6ca35",
-      },
-    ],
-    events: [
-      {
-        name: "CouponSet",
-        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
-        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
-      },
-      {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
-      },
-      {
-        name: "RedeemedByPartition",
-        signature: "RedeemedByPartition(bytes32,address,address,uint256,bytes,bytes)",
-        topic0: "0xa4f62471c9bdf88115b97203943c74c59b655913ee5ee592706d84ef53fb6be2",
-      },
-    ],
-    errors: [
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
-      { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
-      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
       { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
       { name: "WrongTimestamp", signature: "WrongTimestamp(uint256)", selector: "0xdcf61246" },
     ],
-    factory: (signer) => new BondUSAKpiLinkedRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAKpiLinkedRateFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
+    factory: (signer) => new BondUSAFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new BondUSAFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   BondUSAReadFacet: {
     name: "BondUSAReadFacet",
     resolverKey: {
-      name: "_BOND_VARIABLE_READ_RESOLVER_KEY",
-      value: "0x624866e79d4c0a78a8dc32cbce49563cdf86eba627bd05a9821dbaa1674ac231",
+      name: "_BOND_USA_READ_RESOLVER_KEY",
+      value: "0xdcbf48ff7aa9f42a275f075ffeb4b0747c2681242aa2c85adb0c42bd542bcdf0",
     },
     inheritance: ["BondUSARead", "IStaticFunctionSelectors"],
     methods: [
@@ -570,240 +431,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     factory: (signer) => new BondUSAReadFacet__factory(getLibLinks("holdOps") as any, signer),
     timeTravelFactory: (signer) => new BondUSAReadFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
-  },
-
-  BondUSAReadKpiLinkedRateFacet: {
-    name: "BondUSAReadKpiLinkedRateFacet",
-    resolverKey: {
-      name: "_BOND_KPI_LINKED_READ_RESOLVER_KEY",
-      value: "0xcced91a2a03bf45bd62730a7f4703ee2d762f8ebccff315c7145258265f73249",
-    },
-    inheritance: ["BondUSAReadKpiLinkedRate", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getBondDetails",
-        signature:
-          "function getBondDetails() view returns ((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
-        selector: "0x4ce02414",
-      },
-      {
-        name: "getCoupon",
-        signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
-        selector: "0x936e3169",
-      },
-      {
-        name: "getCouponAmountFor",
-        signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
-        selector: "0x439efc2e",
-      },
-      {
-        name: "getCouponCount",
-        signature: "function getCouponCount() view returns (uint256 couponCount_)",
-        selector: "0x468bb240",
-      },
-      {
-        name: "getCouponFor",
-        signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
-        selector: "0xbba7b56d",
-      },
-      {
-        name: "getCouponFromOrderedListAt",
-        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-        selector: "0x65a88a2c",
-      },
-      {
-        name: "getCouponHolders",
-        signature:
-          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature:
-          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-        selector: "0xee1d26eb",
-      },
-      {
-        name: "getPrincipalFor",
-        signature:
-          "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-        selector: "0x6f131c78",
-      },
-      {
-        name: "getSecurityHolders",
-        signature: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[])",
-        selector: "0x81438d2f",
-      },
-      {
-        name: "getSecurityRegulationData",
-        signature:
-          "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData))",
-        selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-        selector: "0xec116ae3",
-      },
-      {
-        name: "getTotalSecurityHolders",
-        signature: "function getTotalSecurityHolders() view returns (uint256)",
-        selector: "0xbd007c8f",
-      },
-    ],
-    factory: (signer) => new BondUSAReadKpiLinkedRateFacet__factory(getLibLinks("holdOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
-  },
-
-  BondUSAReadSustainabilityPerformanceTargetRateFacet: {
-    name: "BondUSAReadSustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY",
-      value: "0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504",
-    },
-    methods: [
-      {
-        name: "getBondDetails",
-        signature:
-          "function getBondDetails() view returns ((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) bondDetailsData_)",
-        selector: "0x4ce02414",
-      },
-      {
-        name: "getCoupon",
-        signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
-        selector: "0x936e3169",
-      },
-      {
-        name: "getCouponAmountFor",
-        signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
-        selector: "0x439efc2e",
-      },
-      {
-        name: "getCouponCount",
-        signature: "function getCouponCount() view returns (uint256 couponCount_)",
-        selector: "0x468bb240",
-      },
-      {
-        name: "getCouponFor",
-        signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
-        selector: "0xbba7b56d",
-      },
-      {
-        name: "getCouponFromOrderedListAt",
-        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-        selector: "0x65a88a2c",
-      },
-      {
-        name: "getCouponHolders",
-        signature:
-          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature:
-          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-        selector: "0xee1d26eb",
-      },
-      {
-        name: "getPrincipalFor",
-        signature:
-          "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
-        selector: "0x6f131c78",
-      },
-      {
-        name: "getSecurityHolders",
-        signature: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[])",
-        selector: "0x81438d2f",
-      },
-      {
-        name: "getSecurityRegulationData",
-        signature:
-          "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData))",
-        selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-        selector: "0xec116ae3",
-      },
-      {
-        name: "getTotalSecurityHolders",
-        signature: "function getTotalSecurityHolders() view returns (uint256)",
-        selector: "0xbd007c8f",
-      },
-    ],
-    factory: (signer) =>
-      new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(getLibLinks("holdOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(getLibLinks("holdOps") as any, signer),
-  },
-
-  BondUSASustainabilityPerformanceTargetRateFacet: {
-    name: "BondUSASustainabilityPerformanceTargetRateFacet",
-    resolverKey: {
-      name: "_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
-      value: "0x8048a878c656dcf3886e69ad27a9272a4fb9499299ab5f0e1b6c99ac3b1130f8",
-    },
-    methods: [
-      {
-        name: "_initialize_bondUSA",
-        signature:
-          "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-        selector: "0x86d59729",
-      },
-      {
-        name: "fullRedeemAtMaturity",
-        signature: "function fullRedeemAtMaturity(address _tokenHolder)",
-        selector: "0xd0db5fb2",
-      },
-      {
-        name: "getCoupon",
-        signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
-        selector: "0x936e3169",
-      },
-      {
-        name: "redeemAtMaturityByPartition",
-        signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
-        selector: "0x8a647211",
-      },
-      {
-        name: "setCoupon",
-        signature:
-          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-        selector: "0xb16fd0cc",
-      },
-      {
-        name: "updateMaturityDate",
-        signature: "function updateMaturityDate(uint256 _newMaturityDate) returns (bool success_)",
-        selector: "0xc7a6ca35",
-      },
-    ],
-    factory: (signer) =>
-      new BondUSASustainabilityPerformanceTargetRateFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
-    timeTravelFactory: (signer) =>
-      new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(
-        getLibLinks("tokenCoreOps") as any,
-        signer,
-      ),
   },
 
   CapFacet: {
@@ -995,28 +622,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function protectedClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x9b646ab9",
-      },
-    ],
-    events: [
-      {
-        name: "ClearedHoldByPartition",
-        signature: "ClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xecba87eb6d871a001547362d9a9bb69ae25dd165858d73fe5cc600a705f3f3a0",
-      },
-      {
-        name: "ClearedHoldFromByPartition",
-        signature: "ClearedHoldFromByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xc8f249767e17c28ab7d211bf631a717a0ee7f840405af4618f625a7659bf7f63",
-      },
-      {
-        name: "ClearedOperatorHoldByPartition",
-        signature: "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0xa9683588d7eb6dd41a2a62f56bd396a439f9e506ac7ca2efa031bcc5f99b4651",
-      },
-      {
-        name: "ProtectedClearedHoldByPartition",
-        signature: "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
-        topic0: "0x7fd4d7541b7da42375ec1b3f05c454acb77234a17c2f4349c102add4bc61e306",
       },
     ],
     factory: (signer) =>
@@ -4236,7 +3841,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 64 as const;
+export const TOTAL_FACETS = 59 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).

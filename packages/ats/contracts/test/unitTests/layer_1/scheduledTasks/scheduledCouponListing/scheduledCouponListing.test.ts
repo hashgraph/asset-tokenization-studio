@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type BondUSAKpiLinkedRateFacet,
+  type BondUSAFacet,
   type ScheduledCouponListing,
   type IAccessControl,
   type ScheduledCrossOrderedTasks,
@@ -22,7 +22,7 @@ describe("Scheduled Coupon Listing Tests", () => {
 
   let account_C: string;
 
-  let bondFacet: BondUSAKpiLinkedRateFacet;
+  let bondFacet: BondUSAFacet;
   let scheduledCouponListingFacet: ScheduledCouponListing;
   let scheduledTasksFacet: ScheduledCrossOrderedTasks;
   let accessControlFacet: IAccessControl;
@@ -54,7 +54,7 @@ describe("Scheduled Coupon Listing Tests", () => {
     account_C = signer_C.address;
 
     accessControlFacet = await ethers.getContractAt("IAccessControl", diamond.target);
-    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacet", diamond.target);
+    bondFacet = await ethers.getContractAt("BondUSAFacet", diamond.target);
     scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
     scheduledTasksFacet = await ethers.getContractAt("IScheduledCrossOrderedTasks", diamond.target);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);

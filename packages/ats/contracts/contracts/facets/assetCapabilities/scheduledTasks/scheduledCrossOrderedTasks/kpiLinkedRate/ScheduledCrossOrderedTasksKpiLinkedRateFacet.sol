@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable-next-line max-line-length
 import {
     _SCHEDULED_CROSS_ORDERED_TASKS_KPI_LINKED_RATE_RESOLVER_KEY
 } from "../../../../../constants/resolverKeys/assets.sol";
 import { ScheduledCrossOrderedTasksKpiLinkedRate } from "./ScheduledCrossOrderedTasksKpiLinkedRate.sol";
+// solhint-disable-next-line max-line-length
 import {
     IScheduledCrossOrderedTasks
 } from "../../../interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";

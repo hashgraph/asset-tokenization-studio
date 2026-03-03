@@ -7,13 +7,9 @@ import {
   SustainabilityPerformanceTargetRateFacet,
   ProceedRecipientsFacet,
 } from "@contract-types";
-import { ATS_ROLES, BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID } from "@scripts";
+import { ATS_ROLES, BOND_CONFIG_ID } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import {
-  DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS,
-  deployBondSustainabilityPerformanceTargetRateTokenFixture,
-  deployAtsInfrastructureFixture,
-} from "@test";
+import { deployBondTokenFixture, deployAtsInfrastructureFixture, DEFAULT_BOND_SPT_RATE_PARAMS } from "@test";
 import { executeRbac } from "@test";
 
 describe("Sustainability Performance Target Rate Tests", () => {
@@ -29,7 +25,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
   let proceedRecipientsFacet: ProceedRecipientsFacet;
 
   async function deploySecurityFixtureMultiPartition() {
-    const base = await deployBondSustainabilityPerformanceTargetRateTokenFixture();
+    const base = await deployBondTokenFixture({ rateType: "Spt" });
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;
@@ -99,17 +95,12 @@ describe("Sustainability Performance Target Rate Tests", () => {
 
     // Deploy a raw ResolverProxy without initialization
     const ResolverProxyFactory = await ethers.getContractFactory("ResolverProxy");
-    const uninitializedDiamond = await ResolverProxyFactory.deploy(
-      blr.target,
-      BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
-      1,
-      [
-        {
-          role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
-          members: [signer_A.address],
-        },
-      ],
-    );
+    const uninitializedDiamond = await ResolverProxyFactory.deploy(blr.target, BOND_CONFIG_ID, 1, [
+      {
+        role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
+        members: [signer_A.address],
+      },
+    ]);
     await uninitializedDiamond.waitForDeployment();
 
     // Get facets for the uninitialized diamond
@@ -236,10 +227,10 @@ describe("Sustainability Performance Target Rate Tests", () => {
   describe("Interest Rate", () => {
     it("GIVEN correct interest rate WHEN setInterestRate THEN transaction succeeds", async () => {
       const newInterestRate = {
-        baseRate: DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS.baseRate + 10,
-        startPeriod: DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS.startPeriod + 1000,
-        startRate: DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS.startRate + 10,
-        rateDecimals: DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS.rateDecimals + 1,
+        baseRate: DEFAULT_BOND_SPT_RATE_PARAMS.baseRate + 10,
+        startPeriod: DEFAULT_BOND_SPT_RATE_PARAMS.startPeriod + 1000,
+        startRate: DEFAULT_BOND_SPT_RATE_PARAMS.startRate + 10,
+        rateDecimals: DEFAULT_BOND_SPT_RATE_PARAMS.rateDecimals + 1,
       };
 
       await expect(sustainabilityPerformanceTargetRateFacet.connect(signer_A).setInterestRate(newInterestRate))
@@ -304,9 +295,9 @@ describe("Sustainability Performance Target Rate Tests", () => {
     it("GIVEN correct impact data for existing project WHEN setImpactData THEN transaction succeeds", async () => {
       const newImpactData = [
         {
-          baseLine: DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS.baseLine + 100,
+          baseLine: DEFAULT_BOND_SPT_RATE_PARAMS.baseLine + 100,
           baseLineMode: 1, // MAXIMUM
-          deltaRate: DEFAULT_BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_PARAMS.deltaRate + 5,
+          deltaRate: DEFAULT_BOND_SPT_RATE_PARAMS.deltaRate + 5,
           impactDataMode: 1, // BONUS
         },
       ];

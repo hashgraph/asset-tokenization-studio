@@ -42,22 +42,14 @@ export * from "./factory/types";
 
 // Token deployment from factory
 export * from "./factory/deployEquityToken";
+// Bond token deployment (includes BondRateType enum)
 export * from "./factory/deployBondToken";
-export * from "./factory/deployBondFixedRateToken";
-export * from "./factory/deployBondKpiLinkedRateToken";
-export * from "./factory/deployBondSustainabilityPerformanceTargetRateToken";
 
 // Equity configuration
 export * from "./equity/createConfiguration";
 
-// Bond Variable Rate configuration
+// Bond configuration (unified for all rate types)
 export * from "./bond/createConfiguration";
 
-// Bond Fixed Rate configuration
-export * from "./bondFixedRate/createConfiguration";
-
-// Bond Kpi Linked Rate configuration
-export * from "./bondKpiLinkedRate/createConfiguration";
-
-// Bond Sustainability Performance Target Rate configuration
-export * from "./bondSustainabilityPerformanceTargetRate/createConfiguration";
+// Bond configuration shims (backward compatibility)
+export * from "./bond/createConfiguration.shim";

@@ -24,7 +24,7 @@ import { LibERC20 } from "../domain/LibERC20.sol";
 import { LibNonce } from "../../lib/core/LibNonce.sol";
 import { LibProtectedPartitions } from "../../lib/core/LibProtectedPartitions.sol";
 import { LibResolverProxy } from "../../infrastructure/proxy/LibResolverProxy.sol";
-import { Hold } from "../../facets/features/interfaces/hold/IHold.sol";
+import { Hold } from "../../facets/features/interfaces/hold/IHoldTypes.sol";
 import { LibHoldOps } from "./LibHoldOps.sol";
 
 library LibClearingOps {

@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpiLinkedRate } from "../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
+// solhint-disable-next-line max-line-length
 import {
     IScheduledCrossOrderedTasks
 } from "../../interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";

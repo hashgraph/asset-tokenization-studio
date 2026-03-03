@@ -4,9 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ProceedRecipients } from "../ProceedRecipients.sol";
 import { IProceedRecipients } from "../../interfaces/proceedRecipients/IProceedRecipients.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
+// solhint-disable-next-line max-line-length
 import {
     _PROCEED_RECIPIENTS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
 } from "../../../../constants/resolverKeys/assets.sol";
+// solhint-disable-next-line max-line-length
 import {
     IScheduledCrossOrderedTasks
 } from "../../interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";

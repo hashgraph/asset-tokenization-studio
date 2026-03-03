@@ -11,14 +11,7 @@ import {
   AccessControlFacet__factory,
   IPause__factory,
 } from "@contract-types";
-import {
-  ATS_ROLES,
-  BOND_CONFIG_ID,
-  BOND_FIXED_RATE_CONFIG_ID,
-  BOND_KPI_LINKED_RATE_CONFIG_ID,
-  BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
-  EQUITY_CONFIG_ID,
-} from "@scripts";
+import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
 import { deployAtsInfrastructureFixture } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -40,9 +33,9 @@ describe("DiamondCutManager", () => {
   let pause: IPause;
   let equityFacetIdList: string[] = [];
   let bondFacetIdList: string[] = [];
-  let bondFixedRateFacetIdList: string[] = [];
-  let bondKpiLinkedRateFacetIdList: string[] = [];
-  let bondSustainabilityPerformanceTargetRateFacetIdList: string[] = [];
+  let _bondFixedRateFacetIdList: string[] = [];
+  let _bondKpiLinkedRateFacetIdList: string[] = [];
+  let _bondSustainabilityPerformanceTargetRateFacetIdList: string[] = [];
   let equityFacetVersionList: number[] = [];
 
   async function atsInfrastructureFixture() {
@@ -66,9 +59,9 @@ describe("DiamondCutManager", () => {
     diamondCutManager = DiamondCutManager__factory.connect(businessLogicResolver.target.toString(), signer_A);
     equityFacetIdList = Object.values(infrastructure.equityFacetKeys);
     bondFacetIdList = Object.values(infrastructure.bondFacetKeys);
-    bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
-    bondKpiLinkedRateFacetIdList = Object.values(infrastructure.bondKpiLinkedRateFacetKeys);
-    bondSustainabilityPerformanceTargetRateFacetIdList = Object.values(
+    _bondFixedRateFacetIdList = Object.values(infrastructure.bondFixedRateFacetKeys);
+    _bondKpiLinkedRateFacetIdList = Object.values(infrastructure.bondKpiLinkedRateFacetKeys);
+    _bondSustainabilityPerformanceTargetRateFacetIdList = Object.values(
       infrastructure.bondSustainabilityPerformanceTargetRateFacetKeys,
     );
     equityFacetVersionList = Array(equityFacetIdList.length).fill(1);
@@ -284,17 +277,7 @@ describe("DiamondCutManager", () => {
     expect([...facetAddresses]).to.have.members([...facetAddresses_2]);
 
     const expectedFacetIdList =
-      configId === EQUITY_CONFIG_ID
-        ? equityFacetIdList
-        : configId === BOND_CONFIG_ID
-          ? bondFacetIdList
-          : configId == BOND_FIXED_RATE_CONFIG_ID
-            ? bondFixedRateFacetIdList
-            : configId == BOND_KPI_LINKED_RATE_CONFIG_ID
-              ? bondKpiLinkedRateFacetIdList
-              : configId == BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID
-                ? bondSustainabilityPerformanceTargetRateFacetIdList
-                : null;
+      configId === EQUITY_CONFIG_ID ? equityFacetIdList : configId === BOND_CONFIG_ID ? bondFacetIdList : null;
 
     if (!expectedFacetIdList) {
       expect.fail("Unknown configId");
@@ -306,16 +289,10 @@ describe("DiamondCutManager", () => {
 
   it("GIVEN a resolver WHEN reading configuration information THEN everything matches", async () => {
     const configLength = Number(await diamondCutManager.getConfigurationsLength());
-    expect(configLength).to.equal(5);
+    expect(configLength).to.equal(2);
 
     const configIds = await diamondCutManager.getConfigurations(0, configLength);
-    expect([...configIds]).to.have.members([
-      EQUITY_CONFIG_ID,
-      BOND_CONFIG_ID,
-      BOND_FIXED_RATE_CONFIG_ID,
-      BOND_KPI_LINKED_RATE_CONFIG_ID,
-      BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
-    ]);
+    expect([...configIds]).to.have.members([EQUITY_CONFIG_ID, BOND_CONFIG_ID]);
 
     for (const configId of configIds) {
       const configLatestVersion = Number(await diamondCutManager.getLatestVersionByConfiguration(configId));
@@ -468,7 +445,7 @@ describe("DiamondCutManager", () => {
     const originalDiamondCutManager = diamondCutManager;
     diamondCutManager = batchDiamondCutManager;
 
-    for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID, BOND_FIXED_RATE_CONFIG_ID]) {
+    for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID]) {
       const configLatestVersion = Number(await batchDiamondCutManager.getLatestVersionByConfiguration(configId));
       expect(configLatestVersion).to.equal(0);
 

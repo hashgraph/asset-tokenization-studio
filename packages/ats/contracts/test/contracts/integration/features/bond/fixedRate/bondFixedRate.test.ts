@@ -1,11 +1,13 @@
+// SPDX-License-Identifier: Apache-2.0
+
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { ResolverProxy, BondUSAFixedRateFacet, FixedRate, BondUSAReadFacet } from "@contract-types";
+import { ResolverProxy, BondUSAFacet, FixedRateFacet, BondUSAReadFacet } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
-import { SecurityType } from "@scripts/domain";
+import { SecurityType, BondRateType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondFixedRateTokenFixture } from "@test";
+import { deployBondTokenFixture } from "@test";
 import { executeRbac } from "@test";
 
 let couponRecordDateInSeconds = 0;
@@ -30,12 +32,15 @@ describe("Bond Fixed Rate Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
 
-  let bondFixedRateFacet: BondUSAFixedRateFacet;
+  let bondFacet: BondUSAFacet;
   let bondReadFacet: BondUSAReadFacet;
-  let fixedRateFacet: FixedRate;
+  let fixedRateFacet: FixedRateFacet;
 
   async function deploySecurityFixture() {
-    const base = await deployBondFixedRateTokenFixture();
+    const base = await deployBondTokenFixture({
+      rateType: BondRateType.Fixed,
+      useLoadFixture: false,
+    });
 
     diamond = base.diamond;
     signer_A = base.deployer;
@@ -47,9 +52,9 @@ describe("Bond Fixed Rate Tests", () => {
       },
     ]);
 
-    bondFixedRateFacet = await ethers.getContractAt("BondUSAFixedRateFacet", diamond.target, signer_A);
+    bondFacet = await ethers.getContractAt("BondUSAFacet", diamond.target, signer_A);
     bondReadFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target, signer_A);
-    fixedRateFacet = await ethers.getContractAt("IFixedRate", diamond.target, signer_A);
+    fixedRateFacet = await ethers.getContractAt("FixedRateFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -71,38 +76,38 @@ describe("Bond Fixed Rate Tests", () => {
     await loadFixture(deploySecurityFixture);
   });
 
-  it("GIVEN a bond fixed rate WHEN deployed THEN securityType is BOND_FIXED_RATE", async () => {
+  it("GIVEN a fixed rate bond WHEN deployed THEN securityType is BOND", async () => {
     const erc20Facet = await ethers.getContractAt(
       "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
       diamond.target,
     );
     const metadata = await erc20Facet.getERC20Metadata();
-    expect(metadata.securityType).to.be.equal(SecurityType.BOND_FIXED_RATE);
+    expect(metadata.securityType).to.be.equal(SecurityType.BOND);
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rateStatus = 1;
 
-    await expect(bondFixedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
+    await expect(bondFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rate = 1;
 
-    await expect(bondFixedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
+    await expect(bondFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rateDecimals = 1;
 
-    await expect(bondFixedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
+    await expect(bondFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {
     const fixedRate = await fixedRateFacet.getRate();
 
-    await expect(bondFixedRateFacet.connect(signer_A).setCoupon(couponData))
-      .to.emit(bondFixedRateFacet, "CouponSet")
+    await expect(bondFacet.connect(signer_A).setCoupon(couponData))
+      .to.emit(bondFacet, "CouponSet")
       .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_A.address, [
         couponRecordDateInSeconds,
         couponExecutionDateInSeconds,
@@ -123,8 +128,8 @@ describe("Bond Fixed Rate Tests", () => {
     expect(registeredCoupon.coupon.startDate).to.equal(couponStartDateInSeconds);
     expect(registeredCoupon.coupon.endDate).to.equal(couponEndDateInSeconds);
     expect(registeredCoupon.coupon.fixingDate).to.equal(couponFixingDateInSeconds);
-    expect(registeredCoupon.coupon.rate).to.equal(fixedRate.rate_);
-    expect(registeredCoupon.coupon.rateDecimals).to.equal(fixedRate.decimals_);
+    expect(registeredCoupon.coupon.rate).to.equal(fixedRate[0]);
+    expect(registeredCoupon.coupon.rateDecimals).to.equal(fixedRate[1]);
     expect(registeredCoupon.coupon.rateStatus).to.equal(1);
   });
 });

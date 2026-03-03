@@ -11,7 +11,7 @@ import {
 } from "@contract-types";
 import { ATS_ROLES, dateToUnixTimestamp } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondSustainabilityPerformanceTargetRateTokenFixture } from "@test";
+import { deployBondTokenFixture } from "@test";
 import { executeRbac } from "@test";
 
 describe("Kpi Latest Tests", () => {
@@ -27,7 +27,7 @@ describe("Kpi Latest Tests", () => {
   let proceedRecipientsFacet: ProceedRecipientsFacet;
 
   async function deploySecurityFixtureMultiPartition() {
-    const base = await deployBondSustainabilityPerformanceTargetRateTokenFixture();
+    const base = await deployBondTokenFixture({ rateType: "Spt" });
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;

@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledCrossOrderedTasks } from "../ScheduledCrossOrderedTasks.sol";
 import { IBondRead } from "../../../interfaces/bond/IBondRead.sol";
+// solhint-disable-next-line max-line-length
 import {
     ISustainabilityPerformanceTargetRate
 } from "../../../interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";

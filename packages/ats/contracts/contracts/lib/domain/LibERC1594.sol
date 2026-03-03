@@ -7,7 +7,6 @@ import { erc20Storage } from "../../storage/TokenStorage.sol";
 import { erc3643Storage } from "../../storage/ExternalStorage.sol";
 import { IKyc } from "../../facets/features/interfaces/IKyc.sol";
 import { IPause } from "../../facets/features/interfaces/IPause.sol";
-import { IERC1410 } from "../../facets/features/interfaces/ERC1400/IERC1410.sol";
 import { IERC1410TokenHolder } from "../../facets/features/interfaces/ERC1400/IERC1410TokenHolder.sol";
 import { IERC20 } from "../../facets/features/interfaces/ERC1400/IERC20.sol";
 import { IControlListBase } from "../../facets/features/interfaces/controlList/IControlListBase.sol";

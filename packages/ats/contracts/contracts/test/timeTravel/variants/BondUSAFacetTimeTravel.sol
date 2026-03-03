@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BondUSAFacet } from "../../../facets/regulation/bondUSA/variableRate/BondUSAFacet.sol";
+import { BondUSAFacet } from "../../../facets/regulation/bondUSA/BondUSAFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
 

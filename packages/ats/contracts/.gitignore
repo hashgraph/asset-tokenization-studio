@@ -67,3 +67,6 @@ deployments/**/.checkpoints/
 
 # Test artifacts - all test-generated files go here
 .temp/
+
+# Auto-generated MCP server context (added automatically)
+.mcp-server-context.md

@@ -32,7 +32,7 @@ const LINK_REF_TO_LIB_NAME: Record<string, string> = {
  * libraries a facet needs linked at deployment time.
  *
  * @param facetName - Contract name (e.g., "BondUSAFacet")
- * @param sourceFile - Relative path to source file (e.g., "contracts/facets/regulation/bondUSA/variableRate/BondUSAFacet.sol")
+ * @param sourceFile - Relative path to source file (e.g., "contracts/facets/regulation/bondUSA/BondUSAFacet.sol")
  * @returns Array of library short names (e.g., ["tokenCoreOps"]) or empty array
  */
 function getLibraryDependencies(facetName: string, sourceFile: string): string[] {

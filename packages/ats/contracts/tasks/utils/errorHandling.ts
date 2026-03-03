@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { ADDRESS_ZERO } from "@scripts";
 import { exec } from "child_process";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+
+const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 
 /**
  * Enhanced exec wrapper with improved error handling

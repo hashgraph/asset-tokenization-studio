@@ -4,7 +4,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js"
 import { type ResolverProxy, IPause, FixedRate } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { DEFAULT_BOND_FIXED_RATE_PARAMS, deployBondFixedRateTokenFixture } from "@test";
+import { deployBondTokenFixture, DEFAULT_BOND_FIXED_RATE_PARAMS } from "@test";
 import { executeRbac } from "@test";
 
 describe("Fixed Rate Tests", () => {
@@ -17,7 +17,7 @@ describe("Fixed Rate Tests", () => {
   let pauseFacet: IPause;
 
   async function deploySecurityFixtureMultiPartition() {
-    const base = await deployBondFixedRateTokenFixture();
+    const base = await deployBondTokenFixture({ rateType: "Fixed" });
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldRead } from "../interfaces/hold/IHoldRead.sol";
-import { HoldIdentifier } from "../interfaces/hold/IHold.sol";
+import { HoldIdentifier } from "../interfaces/hold/IHoldTypes.sol";
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";
 import { LibHold } from "../../../lib/domain/LibHold.sol";
 import { HoldOps } from "../../../lib/orchestrator/HoldOps.sol";

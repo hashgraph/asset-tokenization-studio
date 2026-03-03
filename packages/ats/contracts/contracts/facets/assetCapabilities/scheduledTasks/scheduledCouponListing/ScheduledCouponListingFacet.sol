@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledCouponListing } from "./ScheduledCouponListing.sol";
+// solhint-disable-next-line max-line-length
 import {
     IScheduledCouponListing
 } from "../../interfaces/scheduledTasks/scheduledCouponListing/IScheduledCouponListing.sol";

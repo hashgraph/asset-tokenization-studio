@@ -23,6 +23,7 @@ import {
 import { LibRegulation } from "../lib/domain/LibRegulation.sol";
 import { IEquityUSA } from "../facets/regulation/interfaces/IEquityUSA.sol";
 import { IBondUSA } from "../facets/regulation/interfaces/IBondUSA.sol";
+import { BondRateType } from "../storage/AssetStorage.sol";
 import { IProceedRecipients } from "../facets/assetCapabilities/interfaces/proceedRecipients/IProceedRecipients.sol";
 import { IProtectedPartitions } from "../facets/features/interfaces/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/features/interfaces/IExternalPauseManagement.sol";
@@ -143,7 +144,12 @@ contract Factory is IFactory, Context {
         checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
+        bondAddress_ = _deployBond(
+            _bondData,
+            _factoryRegulationData,
+            SecurityType.BondVariableRate,
+            BondRateType.Variable
+        );
 
         emit BondDeployed(_msgSender(), bondAddress_, _bondData, _factoryRegulationData);
     }
@@ -164,7 +170,8 @@ contract Factory is IFactory, Context {
         bondAddress_ = _deployBond(
             _bondFixedRateData.bondData,
             _bondFixedRateData.factoryRegulationData,
-            SecurityType.BondFixedRate
+            SecurityType.BondFixedRate,
+            BondRateType.Fixed
         );
 
         IFixedRate(bondAddress_).initialize_FixedRate(_bondFixedRateData.fixedRateData);
@@ -190,7 +197,8 @@ contract Factory is IFactory, Context {
         bondAddress_ = _deployBond(
             _bondKpiLinkedRateData.bondData,
             _bondKpiLinkedRateData.factoryRegulationData,
-            SecurityType.BondKpiLinkedRate
+            SecurityType.BondKpiLinkedRate,
+            BondRateType.KpiLinked
         );
 
         IKpiLinkedRate(bondAddress_).initialize_KpiLinkedRate(
@@ -217,7 +225,8 @@ contract Factory is IFactory, Context {
         bondAddress_ = _deployBond(
             _bondSustainabilityPerformanceTargetRateData.bondData,
             _bondSustainabilityPerformanceTargetRateData.factoryRegulationData,
-            SecurityType.BondSPTRate
+            SecurityType.BondSPTRate,
+            BondRateType.Spt
         );
 
         ISustainabilityPerformanceTargetRate(bondAddress_).initialize_SustainabilityPerformanceTargetRate(
@@ -243,7 +252,8 @@ contract Factory is IFactory, Context {
     function _deployBond(
         BondData calldata _bondData,
         FactoryRegulationData calldata _factoryRegulationData,
-        SecurityType _securityType
+        SecurityType _securityType,
+        BondRateType _rateType
     ) internal returns (address bondAddress_) {
         bondAddress_ = _deploySecurity(_bondData.security, _securityType);
 
@@ -253,7 +263,8 @@ contract Factory is IFactory, Context {
                 _factoryRegulationData.regulationType,
                 _factoryRegulationData.regulationSubType
             ),
-            _factoryRegulationData.additionalSecurityData
+            _factoryRegulationData.additionalSecurityData,
+            _rateType
         );
 
         IProceedRecipients(bondAddress_).initialize_ProceedRecipients(

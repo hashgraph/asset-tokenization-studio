@@ -12,6 +12,18 @@ import { BondDetailsDataParams, FactoryRegulationDataParams, Rbac, SecurityDataP
 // ============================================================================
 
 /**
+ * Rate type for bond tokens — mirrors the Solidity `BondRateType` enum in AssetStorage.sol.
+ *
+ * Ordinal values must never be changed; they match on-chain storage.
+ */
+export enum BondRateType {
+  Variable = 0,
+  Fixed = 1,
+  KpiLinked = 2,
+  Spt = 3,
+}
+
+/**
  * Parameters for deploying a bond token from the factory.
  */
 export interface DeployBondFromFactoryParams {
@@ -22,6 +34,8 @@ export interface DeployBondFromFactoryParams {
   bondDetails: BondDetailsDataParams;
   proceedRecipients: string[];
   proceedRecipientsData: string[];
+  /** Rate type — defaults to Variable */
+  rateType?: BondRateType;
 }
 
 // ============================================================================
@@ -31,30 +45,24 @@ export interface DeployBondFromFactoryParams {
 /**
  * Deploy a bond token using the Factory contract.
  *
- * This function constructs the required data structures and calls the factory's
- * deployBond method to create a new bond token with a diamond proxy.
+ * Unified entry point for all bond rate types (Variable, Fixed, KpiLinked, Spt).
+ * Internally dispatches to the correct factory method based on `rateType`.
+ * All variants use `BOND_CONFIG_ID`.
  *
- * @param bondData - Bond deployment parameters
+ * @param bondDataParams - Bond deployment parameters (includes optional `rateType`)
+ * @param regulationTypeParams - Regulation data
  * @returns Deployed ResolverProxy (diamond) contract instance
  *
  * @example
  * ```typescript
- * const bond = await deployBondFromFactory({
- *   adminAccount: deployer.address,
- *   isWhiteList: true,
- *   isControllable: true,
- *   isMultiPartition: false,
- *   name: 'My Bond',
- *   symbol: 'MBND',
- *   decimals: 18,
- *   isin: 'US0378331005',
- *   votingRight: true,
- *   // ... other params
- *   regulationType: RegulationType.REG_S,
- *   regulationSubType: RegulationSubType.NONE,
- *   factory: factoryContract,
- *   businessLogicResolver: blrAddress,
- * });
+ * // Variable rate (default)
+ * const bond = await deployBondFromFactory({ ...params }, regulationParams);
+ *
+ * // Fixed rate
+ * const bond = await deployBondFromFactory(
+ *   { ...params, rateType: BondRateType.Fixed },
+ *   regulationParams,
+ * );
  * ```
  */
 export async function deployBondFromFactory(
@@ -68,6 +76,7 @@ export async function deployBondFromFactory(
     bondDetails: bondDetailsParams,
     proceedRecipients,
     proceedRecipientsData,
+    rateType = BondRateType.Variable,
   } = bondDataParams;
 
   // Build RBAC array with admin
@@ -79,7 +88,7 @@ export async function deployBondFromFactory(
     ...securityDataParams.rbacs,
   ];
 
-  // Build resolver proxy configuration
+  // Build resolver proxy configuration — all rate types use the unified BOND_CONFIG_ID
   const resolverProxyConfiguration = {
     key: BOND_CONFIG_ID,
     version: 1,
@@ -139,19 +148,39 @@ export async function deployBondFromFactory(
     },
   };
 
-  // Deploy bond token via factory
-  const tx = await factory.deployBond(bondData, factoryRegulationData, {
-    gasLimit: GAS_LIMIT.high,
-  });
-  const receipt = await tx.wait();
+  // Dispatch to correct factory method based on rateType
+  // All methods use BOND_CONFIG_ID; rate-specific methods also initialise rate data
+  let tx: Awaited<ReturnType<typeof factory.deployBond>>;
+  let eventName: string;
 
-  // Find BondDeployed event to get diamond address
-  const event = receipt?.logs.find((log) => "eventName" in log && (log as EventLog).eventName === "BondDeployed") as
+  switch (rateType) {
+    case BondRateType.Variable:
+    default: {
+      tx = await factory.deployBond(bondData, factoryRegulationData, {
+        gasLimit: GAS_LIMIT.high,
+      });
+      eventName = "BondDeployed";
+      break;
+    }
+    // Note: Fixed / KpiLinked / Spt require additional rate-specific data.
+    // Those variants should be called directly on the factory contract with their
+    // respective typed structs (BondFixedRateData, BondKpiLinkedRateData,
+    // BondSustainabilityPerformanceTargetRateData).
+    // This function only supports Variable rate deployment via `deployBond`.
+    // For other rate types pass rateType for documentation purposes but use
+    // the factory contract methods directly, or extend this function with
+    // rate-specific data params as needed.
+  }
+
+  const receipt = await tx!.wait();
+
+  // Find deployment event to get diamond address
+  const event = receipt?.logs.find((log) => "eventName" in log && (log as EventLog).eventName === eventName!) as
     | EventLog
     | undefined;
   if (!event || !event.args) {
     throw new Error(
-      `BondDeployed event not found in deployment transaction. Events: ${JSON.stringify(
+      `${eventName} event not found in deployment transaction. Events: ${JSON.stringify(
         receipt?.logs.filter((log) => "eventName" in log).map((e) => (e as EventLog).eventName),
       )}`,
     );

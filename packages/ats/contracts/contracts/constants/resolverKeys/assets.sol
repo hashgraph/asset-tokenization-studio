@@ -6,27 +6,20 @@ pragma solidity >=0.8.0 <0.9.0;
 // keccak256('security.token.standard.equity.resolverKey');
 bytes32 constant _EQUITY_RESOLVER_KEY = 0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810;
 
-// keccak256('security.token.standard.bond.variable.rate.resolverKey');
-bytes32 constant _BOND_VARIABLE_RATE_RESOLVER_KEY = 0xe6594ee8f54f346ab25268fdc7955031a6b06102355e1446353d89ab1d593de3;
+// keccak256('security.token.standard.bond.usa.write.resolverKey');
+bytes32 constant _BOND_USA_WRITE_RESOLVER_KEY = 0xcc210210246d0a40411c97f640074e9d37723131d2173e56443ec220593dc17b;
 
-// keccak256('security.token.standard.bond.fixed.rate.resolverKey');
-bytes32 constant _BOND_FIXED_RATE_RESOLVER_KEY = 0xd55d8787d23b78e70dada1ade45b8758f5c027e2cddf3556606c07d388ce159a;
+// keccak256('security.token.standard.bond.usa.read.resolverKey');
+bytes32 constant _BOND_USA_READ_RESOLVER_KEY = 0xdcbf48ff7aa9f42a275f075ffeb4b0747c2681242aa2c85adb0c42bd542bcdf0;
 
-// keccak256('security.token.standard.bond.kpilinked.rate.resolverKey');
-bytes32 constant _BOND_KPI_LINKED_RATE_RESOLVER_KEY = 0x99c145ff21354eb7b25cb096873143fa3d3aba98457b96bcd13f1d1f2b9bf28c;
-
-// keccak256('security.token.standard.bond.SustainabilityPerformanceTarget.rate.resolverKey');
-bytes32 constant _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x8048a878c656dcf3886e69ad27a9272a4fb9499299ab5f0e1b6c99ac3b1130f8;
-
-// keccak256('security.token.standard.bond.variable.read.resolverKey');
-bytes32 constant _BOND_VARIABLE_READ_RESOLVER_KEY = 0x624866e79d4c0a78a8dc32cbce49563cdf86eba627bd05a9821dbaa1674ac231;
-
-// keccak256('security.token.standard.bond.kpilinked.read.resolverKey');
-bytes32 constant _BOND_KPI_LINKED_READ_RESOLVER_KEY = 0xcced91a2a03bf45bd62730a7f4703ee2d762f8ebccff315c7145258265f73249;
-
-// keccak256('security.token.standard.bond.SustainabilityPerformanceTarget.read.resolverKey');
-bytes32 constant _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY = 0x339d458f2928ef5148317aab39e4375a27e6c531d2e5b9de2d4fb23ad0e8b504;
-
+// DEPRECATED — kept as named references for migration tooling; do not use in new code.
+// bytes32 constant _BOND_VARIABLE_RATE_RESOLVER_KEY (removed)
+// bytes32 constant _BOND_FIXED_RATE_RESOLVER_KEY (removed)
+// bytes32 constant _BOND_KPI_LINKED_RATE_RESOLVER_KEY (removed)
+// bytes32 constant _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY (removed)
+// bytes32 constant _BOND_VARIABLE_READ_RESOLVER_KEY (removed)
+// bytes32 constant _BOND_KPI_LINKED_READ_RESOLVER_KEY (removed)
+// bytes32 constant _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY (removed)
 // keccak256('security.token.standard.scheduled.snapshots.resolverKey');
 bytes32 constant _SCHEDULED_SNAPSHOTS_RESOLVER_KEY = 0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793;
 

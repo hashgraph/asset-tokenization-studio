@@ -32,7 +32,7 @@ import { IClearingTransfer } from "../facets/features/interfaces/clearing/IClear
 import { IClearingRedeem } from "../facets/features/interfaces/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "../facets/features/interfaces/clearing/IClearingHoldCreation.sol";
 import { ILock } from "../facets/features/interfaces/ILock.sol";
-import { HoldDataStorage } from "../facets/features/interfaces/hold/IHold.sol";
+import { HoldDataStorage } from "../facets/features/interfaces/hold/IHoldTypes.sol";
 import { CorporateActionDataStorage } from "../facets/features/interfaces/ICorporateActions.sol";
 import { Snapshots, SnapshotsAddress, PartitionSnapshots } from "../facets/features/interfaces/ISnapshots.sol";
 import { ISecurity } from "../facets/regulation/interfaces/ISecurity.sol";
@@ -40,6 +40,15 @@ import { ISecurity } from "../facets/regulation/interfaces/ISecurity.sol";
 // ═══════════════════════════════════════════════════════════════════════════════
 // STORAGE STRUCTS
 // ═══════════════════════════════════════════════════════════════════════════════
+
+/// @dev Bond rate type — determines which interest-rate variant applies
+/// @notice Ordinal values are stable; do not reorder after deployment
+enum BondRateType {
+    Variable, // 0 — default (variable / no scheduled rate)
+    Fixed, // 1
+    KpiLinked, // 2
+    Spt // 3  (Sustainability Performance Target)
+}
 
 /// @dev Bond data storage
 struct BondDataStorage {
@@ -50,6 +59,7 @@ struct BondDataStorage {
     bool initialized;
     uint8 nominalValueDecimals;
     uint256[] couponsOrderedListByIds;
+    BondRateType rateType; // persisted once during _initialize_bondUSA; never mutated
 }
 
 /// @dev Equity data storage

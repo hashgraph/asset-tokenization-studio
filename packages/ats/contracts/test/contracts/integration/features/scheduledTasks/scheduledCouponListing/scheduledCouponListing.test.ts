@@ -1,13 +1,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  type ResolverProxy,
-  ScheduledCouponListingFacet,
-  BondUSAKpiLinkedRateFacet,
-  IAccessControl,
-} from "@contract-types";
-import { deployBondKpiLinkedRateTokenFixture, getDltTimestamp } from "@test";
+import { type ResolverProxy, ScheduledCouponListingFacet, BondUSAFacet, IAccessControl } from "@contract-types";
+import { deployBondTokenFixture, getDltTimestamp } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 
@@ -16,7 +11,7 @@ describe("ScheduledCouponListing Tests", () => {
   let signer_A: HardhatEthersSigner;
 
   let scheduledCouponListingFacet: ScheduledCouponListingFacet;
-  let bondFacet: BondUSAKpiLinkedRateFacet;
+  let bondFacet: BondUSAFacet;
   let accessControlFacet: IAccessControl;
 
   let startingDate = 0;
@@ -28,7 +23,8 @@ describe("ScheduledCouponListing Tests", () => {
     maturityDate = startingDate + TIME_PERIODS_S.YEAR;
 
     // Deploy KPI-linked bond which uses fixing dates and scheduled coupon listing
-    const base = await deployBondKpiLinkedRateTokenFixture({
+    const base = await deployBondTokenFixture({
+      rateType: "KpiLinked",
       bondDataParams: {
         securityData: {
           internalKycActivated: true,
@@ -44,7 +40,7 @@ describe("ScheduledCouponListing Tests", () => {
     signer_A = base.deployer;
 
     scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
-    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacet", diamond.target);
+    bondFacet = await ethers.getContractAt("BondUSAFacet", diamond.target);
     accessControlFacet = await ethers.getContractAt("IAccessControl", diamond.target);
 
     // Grant corporate action role to signer_A

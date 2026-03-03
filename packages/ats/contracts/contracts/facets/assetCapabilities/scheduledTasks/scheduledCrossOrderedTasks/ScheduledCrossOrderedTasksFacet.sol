@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledCrossOrderedTasks } from "./ScheduledCrossOrderedTasks.sol";
+// solhint-disable-next-line max-line-length
 import {
     IScheduledCrossOrderedTasks
 } from "../../interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";

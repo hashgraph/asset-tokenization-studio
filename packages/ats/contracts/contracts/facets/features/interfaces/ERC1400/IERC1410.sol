@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-// solhint-disable-next-line no-unused-vars
-import * as Types1410 from "./IERC1410Types.sol";
 import { IERC1410Read } from "./IERC1410Read.sol";
 import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";

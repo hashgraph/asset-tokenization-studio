@@ -23,9 +23,6 @@ import {
   GAS_LIMIT,
   ATS_ROLES,
   BOND_CONFIG_ID,
-  BOND_FIXED_RATE_CONFIG_ID,
-  BOND_KPI_LINKED_RATE_CONFIG_ID,
-  BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
 } from "@scripts";
 import { Rbac, SecurityType } from "@scripts/domain";
 import { getBondDetails } from "@test";
@@ -994,7 +991,7 @@ describe("Factory Tests", () => {
       };
 
       bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1040,7 +1037,7 @@ describe("Factory Tests", () => {
 
       bondFixedRateData.bondData.security.resolver = ADDRESS_ZERO;
       bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1066,7 +1063,7 @@ describe("Factory Tests", () => {
       };
 
       bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1089,7 +1086,7 @@ describe("Factory Tests", () => {
       };
 
       bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1117,7 +1114,7 @@ describe("Factory Tests", () => {
       };
 
       bondFixedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_FIXED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1159,7 +1156,7 @@ describe("Factory Tests", () => {
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1223,7 +1220,7 @@ describe("Factory Tests", () => {
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1264,7 +1261,7 @@ describe("Factory Tests", () => {
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1305,7 +1302,7 @@ describe("Factory Tests", () => {
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1346,7 +1343,7 @@ describe("Factory Tests", () => {
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1388,7 +1385,7 @@ describe("Factory Tests", () => {
 
       bondKpiLinkedRateData.bondData.security.resolver = ADDRESS_ZERO;
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1427,7 +1424,7 @@ describe("Factory Tests", () => {
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1463,7 +1460,7 @@ describe("Factory Tests", () => {
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1504,7 +1501,7 @@ describe("Factory Tests", () => {
       };
 
       bondKpiLinkedRateData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_KPI_LINKED_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1544,7 +1541,7 @@ describe("Factory Tests", () => {
       };
 
       bondSustainabilityData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1602,7 +1599,7 @@ describe("Factory Tests", () => {
 
       bondSustainabilityData.bondData.security.resolver = ADDRESS_ZERO;
       bondSustainabilityData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1641,7 +1638,7 @@ describe("Factory Tests", () => {
       };
 
       bondSustainabilityData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1677,7 +1674,7 @@ describe("Factory Tests", () => {
       };
 
       bondSustainabilityData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 
@@ -1723,7 +1720,7 @@ describe("Factory Tests", () => {
       };
 
       bondSustainabilityData.bondData.security.resolverProxyConfiguration = {
-        key: BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID,
+        key: BOND_CONFIG_ID,
         version: 1,
       };
 

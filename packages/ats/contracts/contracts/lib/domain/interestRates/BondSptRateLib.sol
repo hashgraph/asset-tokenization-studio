@@ -1,36 +1,57 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BondUSA } from "../BondUSA.sol";
-import { IBondRead } from "../../../assetCapabilities/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../facets/assetCapabilities/interfaces/bond/IBondRead.sol";
 // solhint-disable max-line-length
 import {
     ISustainabilityPerformanceTargetRate
-} from "../../../assetCapabilities/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../../../facets/assetCapabilities/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 // solhint-enable max-line-length
-import { LibBond } from "../../../../lib/domain/LibBond.sol";
-import { LibInterestRate } from "../../../../lib/domain/LibInterestRate.sol";
-import { SustainabilityPerformanceTargetRateDataStorage } from "../../../../storage/ScheduledStorage.sol";
-import { LibKpis } from "../../../../lib/domain/LibKpis.sol";
-import { LibProceedRecipients } from "../../../../lib/domain/LibProceedRecipients.sol";
-import { LibPause } from "../../../../lib/core/LibPause.sol";
-import { LibAccess } from "../../../../lib/core/LibAccess.sol";
-import { LibCorporateActions } from "../../../../lib/core/LibCorporateActions.sol";
-import { _CORPORATE_ACTION_ROLE } from "../../../../constants/roles.sol";
+import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
+import { SustainabilityPerformanceTargetRateDataStorage } from "../../../storage/ScheduledStorage.sol";
+import { LibBond } from "../LibBond.sol";
+import { LibInterestRate } from "../LibInterestRate.sol";
+import { LibKpis } from "../LibKpis.sol";
+import { LibProceedRecipients } from "../LibProceedRecipients.sol";
+import { LibPause } from "../../core/LibPause.sol";
+import { LibAccess } from "../../core/LibAccess.sol";
+import { LibCorporateActions } from "../../core/LibCorporateActions.sol";
 
-abstract contract BondUSASustainabilityPerformanceTargetRate is BondUSA {
+/**
+ * @title BondSptRateLib
+ * @notice External library for Sustainability Performance Target (SPT) Rate bond coupon operations
+ * @dev Executes via DELEGATECALL from BondUSAFacet/BondUSAReadFacet - operates on Diamond storage
+ *
+ * Phase 2 of Bond Domain Unification ADR:
+ * - Extracted from BondUSA._setCouponSpt() and _calculateSustainabilityRate()
+ * - Deployed as external library to reduce facet bytecode size
+ * - Handles both write (setCoupon) and read (calculateSustainabilityRate) operations
+ */
+library BondSptRateLib {
     // ═══════════════════════════════════════════════════════════════════════════════
-    // ERROR DEFINITIONS
+    // ERRORS
     // ═══════════════════════════════════════════════════════════════════════════════
 
     error InterestRateIsSustainabilityPerformanceTarget();
+    error WrongTimestamp(uint256 timeStamp);
 
     // ═══════════════════════════════════════════════════════════════════════════════
-    // COUPON MANAGEMENT (OVERRIDE)
+    // SPT RATE COUPON CREATION
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    function setCoupon(IBondRead.Coupon calldata _newCoupon) external override returns (uint256 couponID_) {
-        // Validate that coupon rate parameters are appropriate for SPT rate bond
+    /**
+     * @notice Create a new SPT rate coupon
+     * @dev Rate is calculated dynamically on read based on sustainability performance data
+     * @param _newCoupon Coupon data (rate params must be zero/PENDING)
+     * @return couponID_ The ID of the created coupon
+     *
+     * Requirements:
+     * - rateStatus must be PENDING
+     * - rate and rateDecimals must be 0 (calculated dynamically)
+     * - All timestamp validations must pass
+     */
+    function setCoupon(IBondRead.Coupon calldata _newCoupon) external returns (uint256 couponID_) {
+        // Validate input: SPT rate must not be provided in the coupon data
         if (
             _newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING ||
             _newCoupon.rate != 0 ||
@@ -39,7 +60,7 @@ abstract contract BondUSASustainabilityPerformanceTargetRate is BondUSA {
             revert InterestRateIsSustainabilityPerformanceTarget();
         }
 
-        // Proceed with standard coupon creation (rate will be calculated dynamically on read)
+        // Standard validations (pause, access control, dates, timestamps)
         LibPause.requireNotPaused();
         LibAccess.checkRole(_CORPORATE_ACTION_ROLE);
         LibCorporateActions.validateDates(_newCoupon.startDate, _newCoupon.endDate);
@@ -48,61 +69,41 @@ abstract contract BondUSASustainabilityPerformanceTargetRate is BondUSA {
         _requireValidTimestamp(_newCoupon.recordDate);
         _requireValidTimestamp(_newCoupon.fixingDate);
 
+        // Store coupon in Diamond storage via LibBond
         bytes32 corporateActionID;
         (corporateActionID, couponID_) = LibBond.setCoupon(_newCoupon);
     }
 
-    function getCoupon(uint256 _couponID) external view returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
-        // Get the base coupon from storage
-        registeredCoupon_ = LibBond.getCoupon(_couponID);
-
-        // Only calculate rate if:
-        // 1. Rate hasn't been set yet (PENDING status), AND
-        // 2. We've reached or passed the fixing date
-        if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET) {
-            return registeredCoupon_;
-        }
-
-        if (registeredCoupon_.coupon.fixingDate > _getBlockTimestamp()) {
-            return registeredCoupon_;
-        }
-
-        // Calculate and update the SPT interest rate dynamically
-        (uint256 rate, uint8 rateDecimals) = _calculateSustainabilityRate(_couponID, registeredCoupon_.coupon);
-        registeredCoupon_.coupon.rate = rate;
-        registeredCoupon_.coupon.rateDecimals = rateDecimals;
-        registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
-        return registeredCoupon_;
-    }
-
     // ═══════════════════════════════════════════════════════════════════════════════
-    // INTERNAL SPT RATE CALCULATION
+    // SPT RATE CALCULATION (READ-SIDE)
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    /// @notice Calculate sustainability performance target interest rate based on project impact data
-    /// @param _couponID The coupon ID (for accessing previous coupon fixing date)
-    /// @param _coupon The coupon data structure
-    /// @return rate_ Calculated interest rate
-    /// @return rateDecimals_ Decimal places for the calculated rate
-    function _calculateSustainabilityRate(
+    /**
+     * @notice Calculate sustainability performance target interest rate based on project impact data
+     * @dev Called from getCoupon() to dynamically compute rate
+     * @param _couponID The coupon ID (for accessing previous coupon fixing date)
+     * @param _coupon   The coupon data structure
+     * @return rate_ Calculated interest rate
+     * @return rateDecimals_ Rate decimal precision
+     */
+    function calculateSustainabilityRate(
         uint256 _couponID,
         IBondRead.Coupon memory _coupon
-    ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
-        // Get SPT rate storage reference
+    ) external view returns (uint256 rate_, uint8 rateDecimals_) {
         SustainabilityPerformanceTargetRateDataStorage storage sptRateStorage = LibInterestRate.getSustainabilityRate();
 
-        // Check if we're before the start period
+        // If fixing date is before start period, return start rate
         if (_coupon.fixingDate < sptRateStorage.startPeriod) {
             return (sptRateStorage.startRate, sptRateStorage.rateDecimals);
         }
 
-        // Get the base rate and decimals
+        // Get base rate
         (uint256 baseRate, uint8 decimals) = LibInterestRate.getBaseRate();
 
-        // Determine the start of the KPI data period (previous coupon's fixing date or 0)
+        // Get previous fixing date
         uint256 periodStart = _getPreviousFixingDate(_couponID);
 
-        // Aggregate rate adjustments from all proceed recipients (projects)
+        // Gather impact data from all proceed recipients
         address[] memory projects = LibProceedRecipients.getProceedRecipients(
             0,
             LibProceedRecipients.getProceedRecipientsCount()
@@ -113,14 +114,11 @@ abstract contract BondUSASustainabilityPerformanceTargetRate is BondUSA {
         for (uint256 index = 0; index < projects.length; ) {
             address project = projects[index];
 
-            // Get the impact data configuration for this project
             ISustainabilityPerformanceTargetRate.ImpactData memory impactData = LibInterestRate
                 .getSustainabilityImpactData(project);
 
-            // Get the latest KPI data for this project (from previous fixing date to current)
             (uint256 value, bool exists) = LibKpis.getLatestKpiData(periodStart, _coupon.fixingDate, project);
 
-            // Calculate the rate adjustment for this project
             int256 adjustment = LibInterestRate.calculateRateAdjustment(impactData, value, exists);
             totalRateAdjustment += adjustment;
 
@@ -129,7 +127,7 @@ abstract contract BondUSASustainabilityPerformanceTargetRate is BondUSA {
             }
         }
 
-        // Apply adjustments to base rate, ensuring result doesn't go below 0
+        // Calculate final rate: base rate + total adjustments
         int256 finalRate = int256(baseRate) + totalRateAdjustment;
         if (finalRate < 0) {
             finalRate = 0;
@@ -138,11 +136,17 @@ abstract contract BondUSASustainabilityPerformanceTargetRate is BondUSA {
         return (uint256(finalRate), decimals);
     }
 
-    /// @notice Get the fixing date of the previous coupon
-    /// @param _couponID Current coupon ID (to find the previous one)
-    /// @return fixingDate_ The previous coupon's fixing date, or 0 if no previous coupon
-    function _getPreviousFixingDate(uint256 _couponID) internal view returns (uint256 fixingDate_) {
-        uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, _getBlockTimestamp());
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // INTERNAL HELPERS
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /**
+     * @notice Get the fixing date of the previous coupon
+     * @param _couponID Current coupon ID
+     * @return fixingDate_ Previous coupon fixing date
+     */
+    function _getPreviousFixingDate(uint256 _couponID) private view returns (uint256 fixingDate_) {
+        uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, block.timestamp);
 
         if (previousCouponId == 0) {
             return 0;
@@ -150,5 +154,15 @@ abstract contract BondUSASustainabilityPerformanceTargetRate is BondUSA {
 
         IBondRead.Coupon memory previousCoupon = LibBond.getCoupon(previousCouponId).coupon;
         return previousCoupon.fixingDate;
+    }
+
+    /**
+     * @dev Validates that timestamp is in the future
+     * @param _timestamp The timestamp to validate
+     */
+    function _requireValidTimestamp(uint256 _timestamp) private view {
+        if (_timestamp <= block.timestamp) {
+            revert WrongTimestamp(_timestamp);
+        }
     }
 }

@@ -91,6 +91,11 @@ const BOND_FACETS = [
   "SsiManagementFacet",
   "TransferAndLockFacet",
 
+  // Interest Rate facets
+  "FixedRateFacet",
+  "KpiLinkedRateFacet",
+  "SustainabilityPerformanceTargetRateFacet",
+
   // Jurisdiction-Specific
   "BondUSAFacet",
   "BondUSAReadFacet",

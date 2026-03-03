@@ -6,20 +6,23 @@ import fs from "fs";
 import { sync as globSync } from "glob";
 import { Artifact } from "hardhat/types";
 import path from "path";
+import { exec } from "child_process";
 
 task(
   TASK_COMPILE,
   "Replace 'interface' with 'interfaces' in TypeChain generated files to avoid compilation errors",
   async function (taskArguments, hre, runSuper) {
+    // Step 1: Generate ERC3643 interfaces FIRST (required by TREXFactory.sol)
+    await hre.run("erc3643-clone-interfaces");
+
+    // Step 2: Run main compilation
     await runSuper(taskArguments);
 
-    await hre.run("erc3643-clone-interfaces");
+    // Step 3: Patch TypeChain files
     const PATTERN = `${hre.config.typechain.outDir}/**/*.ts`;
     patchTypeChainFiles(PATTERN);
 
-    // Generate registry after successful compilation
-    // This ensures the registry always reflects the latest contract state
-    // Use --silent flag to minimize output during compilation
+    // Step 4: Generate registry
     await hre.run("generate-registry", { silent: true });
   },
 );
@@ -46,9 +49,20 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     changePragma?: boolean;
     removeHierarchy?: boolean;
   }
+
   const targetDir = hre.config.paths.sources + "/factory/ERC3643/interfaces";
+
+  // Ensure target directory exists
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+
   const interfacesToClone: DataSustitution[] = [
+    // Base interfaces first (dependencies for others)
     { original: "IAccessControl" },
+    { original: "IResolverProxy" },
+    { original: "IStaticFunctionSelectors" },
+    // Now dependent interfaces
     { original: "IBondRead" },
     {
       original: "IBusinessLogicResolver",
@@ -64,8 +78,6 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     },
     { original: "IEquity" },
     { original: "IFactory", removeImports: false },
-    { original: "IResolverProxy" },
-    { original: "IStaticFunctionSelectors" },
     {
       original: "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
       removeImports: false,
@@ -73,6 +85,10 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     // Coupon Interest Rates interfaces
     { original: "IFixedRate" },
     { original: "IKpiLinkedRate" },
+    {
+      original: "ISustainabilityPerformanceTargetRate",
+      removeImports: false,
+    },
     {
       original: "IScheduledCouponListing",
       removeImports: false,
@@ -91,16 +107,16 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     { src: "lib/domain/LibRegulation", dst: "LibRegulation" },
     { src: "constants/roles", dst: "roles" },
     {
-      src: "assetCapabilities/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon",
+      src: "facets/assetCapabilities/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon",
       dst: "IScheduledTasksCommon",
     },
   ];
 
   function rewriteImports(source: string): string {
-    // 1. Eliminar cualquier import a ficheros *StorageWrapper.sol
+    // 1. Remove any imports to *StorageWrapper.sol files
     source = source.replace(/^\s*import\s+[^;]*StorageWrapper\.sol['"];\s*$/gm, "");
 
-    // 2. Reescribir el resto de imports
+    // 2. Rewrite remaining imports
     return source.replace(
       /import\s*\{([^}]+)\}\s*from\s*['"](.+\/)?([^/]+)\.sol['"];/gm,
       (_match, names, _path, filePath) => {
@@ -121,49 +137,56 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     );
   }
 
-  await Promise.all(
-    normalized.map(async (i) => {
-      const originalArtifact = await hre.artifacts.readArtifact(i.original);
-      let erc3643Artifact: Artifact | undefined;
-      try {
-        const parts = i.original.split(":");
-        erc3643Artifact = await hre.artifacts.readArtifact("TRex" + parts[parts.length - 1]);
-      } catch {
-        console.log(`Contract ${i.original} in ERC3643/interfaces not found, will be generated`);
-      }
+  // Generate interfaces sequentially to handle dependencies
+  for (const i of normalized) {
+    let originalArtifact: Artifact;
+    try {
+      originalArtifact = await hre.artifacts.readArtifact(i.original);
+    } catch {
+      console.log(`Source artifact for ${i.original} not found, skipping`);
+      continue;
+    }
 
-      const shouldGenerate =
-        !erc3643Artifact || JSON.stringify(originalArtifact.abi) !== JSON.stringify(erc3643Artifact.abi);
+    let erc3643Artifact: Artifact | undefined;
+    try {
+      const parts = i.original.split(":");
+      erc3643Artifact = await hre.artifacts.readArtifact("TRex" + parts[parts.length - 1]);
+    } catch {
+      console.log(`Contract ${i.original} in ERC3643/interfaces not found, will be generated`);
+    }
 
-      if (!shouldGenerate) {
-        console.log(`Did not generate ${i.original} because an up-to-date version already exists`);
-        return;
-      }
+    const shouldGenerate =
+      !erc3643Artifact || JSON.stringify(originalArtifact.abi) !== JSON.stringify(erc3643Artifact.abi);
 
-      let source = fs.readFileSync(originalArtifact.sourceName, "utf8");
+    if (!shouldGenerate) {
+      console.log(`Did not generate ${i.original} because an up-to-date version already exists`);
+      continue;
+    }
 
-      if (i.removeImports) {
-        source = source.replace(/^\s*import\s+[^;]+;\s*$/gm, "");
-      } else {
-        source = rewriteImports(source);
-      }
+    let source = fs.readFileSync(originalArtifact.sourceName, "utf8");
 
-      if (i.changePragma) {
-        source = source.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
-      }
+    if (i.removeImports) {
+      source = source.replace(/^\s*import\s+[^;]+;\s*$/gm, "");
+    } else {
+      source = rewriteImports(source);
+    }
 
-      // Renombrar interface/contract y eliminar herencia en un solo paso
-      source = source.replace(
-        new RegExp(`(contract|interface)\\s+${originalArtifact.contractName}\\b(\\s+is[^\\{]+)?`, "m"),
-        `$1 TRex${originalArtifact.contractName}`,
-      );
+    if (i.changePragma) {
+      source = source.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
+    }
 
-      const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`;
-      fs.writeFileSync(targetPath, source, "utf8");
-      console.log(`Generated: ${targetPath}`);
-    }),
-  );
+    // Rename interface/contract and remove inheritance
+    source = source.replace(
+      new RegExp(`(contract|interface)\\s+${originalArtifact.contractName}\\b(\\s+is[^\\{]+)?`, "m"),
+      `$1 TRex${originalArtifact.contractName}`,
+    );
 
+    const targetPath = `${targetDir}/${originalArtifact.contractName}.sol`;
+    fs.writeFileSync(targetPath, source, "utf8");
+    console.log(`Generated: ${targetPath}`);
+  }
+
+  // Copy constant files
   for (const c of constants) {
     const src = path.join(hre.config.paths.sources, `${c.src}.sol`);
     const dst = path.join(targetDir, `${c.dst}.sol`);
@@ -173,7 +196,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
 
       content = content.replace(/^pragma solidity\s+[^;]+;/m, "pragma solidity ^0.8.17;");
 
-      // Rewrite deep relative imports to local references (files are co-located in factory dir)
+      // Rewrite deep relative imports to local references
       content = content.replace(/from\s+['"]\.\.\/.*\/([^/]+)\.sol['"]/gm, 'from "./$1.sol"');
 
       fs.writeFileSync(dst, content, "utf8");
@@ -182,16 +205,22 @@ task("erc3643-clone-interfaces", async (_, hre) => {
       console.warn(`Not found: ${src}`);
     }
   }
-  const { execWithErrorHandling } = await import("./utils/errorHandling");
 
+  // Try to format with prettier (non-blocking)
   try {
-    await execWithErrorHandling(
-      "npx prettier --write ./contracts/factory/ERC3643/interfaces",
-      "Prettier code formatting",
-    );
-    console.log("✅ Successfully formatted ERC3643 interface files");
-  } catch (error) {
-    console.error("Failed to format ERC3643 interface files");
-    throw error;
+    await new Promise<void>((resolve, _reject) => {
+      exec("npx prettier --write ./contracts/factory/ERC3643/interfaces", (error) => {
+        if (error) {
+          console.warn("⚠️  Prettier formatting skipped (not available)");
+        } else {
+          console.log("✅ Formatted ERC3643 interfaces with prettier");
+        }
+        resolve();
+      });
+    });
+  } catch {
+    console.warn("⚠️  Prettier formatting skipped");
   }
+
+  console.log("✅ ERC3643 interface generation completed");
 });

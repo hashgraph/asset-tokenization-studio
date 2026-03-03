@@ -5,9 +5,9 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   ResolverProxy,
-  BondUSAKpiLinkedRateFacet,
+  BondUSAFacet,
   KpiLinkedRateFacet,
-  BondUSAReadKpiLinkedRateFacet,
+  BondUSAReadFacet,
   TimeTravelFacet,
   ERC1594Facet,
   ProceedRecipientsKpiLinkedRateFacet,
@@ -15,9 +15,9 @@ import {
   ScheduledCrossOrderedTasksKpiLinkedRateFacet,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
-import { SecurityType } from "@scripts/domain";
+import { SecurityType, BondRateType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondKpiLinkedRateTokenFixture, DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, getDltTimestamp } from "@test";
+import { deployBondTokenFixture, DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, getDltTimestamp } from "@test";
 import { executeRbac } from "@test";
 
 const couponPeriod = TIME_PERIODS_S.WEEK;
@@ -54,8 +54,8 @@ describe("Bond KpiLinked Rate Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let bondKpiLinkedRateFacet: BondUSAKpiLinkedRateFacet;
-  let bondReadFacet: BondUSAReadKpiLinkedRateFacet;
+  let bondFacet: BondUSAFacet;
+  let bondReadFacet: BondUSAReadFacet;
   let kpiLinkedRateFacet: KpiLinkedRateFacet;
   let timeTravelFacet: TimeTravelFacet;
   let erc1594Facet: ERC1594Facet;
@@ -75,7 +75,7 @@ describe("Bond KpiLinked Rate Tests", () => {
   };
 
   async function deploySecurityFixture() {
-    const base = await deployBondKpiLinkedRateTokenFixture();
+    const base = await deployBondTokenFixture({ rateType: BondRateType.KpiLinked, useLoadFixture: false });
 
     diamond = base.diamond;
     signer_A = base.deployer;
@@ -105,8 +105,8 @@ describe("Bond KpiLinked Rate Tests", () => {
       },
     ]);
 
-    bondKpiLinkedRateFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacet", diamond.target, signer_A);
-    bondReadFacet = await ethers.getContractAt("BondUSAReadKpiLinkedRateFacet", diamond.target, signer_A);
+    bondFacet = await ethers.getContractAt("BondUSAFacet", diamond.target, signer_A);
+    bondReadFacet = await ethers.getContractAt("BondUSAReadFacet", diamond.target, signer_A);
     kpiLinkedRateFacet = await ethers.getContractAt("KpiLinkedRateFacet", diamond.target, signer_A);
     erc1594Facet = await ethers.getContractAt("ERC1594Facet", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
@@ -243,24 +243,24 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rateStatus = 1;
 
-      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(bondFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rate = 1;
 
-      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(bondFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsKpiLinked", async () => {
       couponData.rateDecimals = 1;
 
-      await expect(bondKpiLinkedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
+      await expect(bondFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsKpiLinked");
     });
 
     it("GIVEN a kpiLinked rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {
-      await expect(bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData))
-        .to.emit(bondKpiLinkedRateFacet, "CouponSet")
+      await expect(bondFacet.connect(signer_A).setCoupon(couponData))
+        .to.emit(bondFacet, "CouponSet")
         .withArgs("0x0000000000000000000000000000000000000000000000000000000000000001", 1, signer_A.address, [
           couponRecordDateInSeconds,
           couponExecutionDateInSeconds,
@@ -289,7 +289,7 @@ describe("Bond KpiLinked Rate Tests", () => {
     it("GIVEN a kpiLinked rate bond WHEN rate is during start Period THEN transaction success and rate is start rate", async () => {
       await setKpiConfiguration(10);
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       const registeredCouponPreFixingDate = await bondReadFacet.getCoupon(1);
       const couponForPreFixingDate = await bondReadFacet.getCouponFor(1, signer_A.address);
@@ -315,7 +315,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       await setKpiConfiguration(-10);
 
       // Test missed penalty when there is a single coupon
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
@@ -330,7 +330,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       // Test missed penalty when there are two coupons
       updateCouponDates();
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
@@ -361,7 +361,7 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       updateCouponDates();
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
@@ -384,7 +384,7 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       updateCouponDates();
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
@@ -405,7 +405,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       await kpiLinkedRateFacet.connect(signer_A).setInterestRate(newInterestRate);
 
       // Test missed penalty when there is a single coupon
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
@@ -425,7 +425,7 @@ describe("Bond KpiLinked Rate Tests", () => {
         signer_C.address,
       );
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
       await checkMinDates(couponData.fixingDate);
@@ -440,7 +440,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
       await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 2, impactData_2, signer_B.address);
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
       await checkMinDates(couponData.fixingDate);
@@ -458,7 +458,7 @@ describe("Bond KpiLinked Rate Tests", () => {
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
       await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, impactData, signer_B.address);
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
       await checkMinDates(couponData.fixingDate);
@@ -479,7 +479,7 @@ describe("Bond KpiLinked Rate Tests", () => {
         signer_C.address,
       );
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
       await checkMinDates(couponData.fixingDate);
@@ -494,10 +494,10 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       let originalFixingDate = couponData.fixingDate;
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       couponData.fixingDate = (parseInt(couponData.fixingDate) - 1).toString();
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await bondFacet.connect(signer_A).setCoupon(couponData);
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
@@ -535,7 +535,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        await bondKpiLinkedRateFacet.setCoupon(coupon1);
+        await bondFacet.setCoupon(coupon1);
 
         const coupon2 = {
           recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 3,
@@ -548,7 +548,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        await bondKpiLinkedRateFacet.setCoupon(coupon2);
+        await bondFacet.setCoupon(coupon2);
 
         const coupon3 = {
           recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 5,
@@ -561,7 +561,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        await bondKpiLinkedRateFacet.setCoupon(coupon3);
+        await bondFacet.setCoupon(coupon3);
 
         // Move time forward past all fixing dates
         await timeTravelFacet.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
@@ -590,7 +590,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        await bondKpiLinkedRateFacet.setCoupon(coupon);
+        await bondFacet.setCoupon(coupon);
 
         // Move time forward past fixing date
         await timeTravelFacet.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 2);
@@ -613,7 +613,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        const tx1 = await bondKpiLinkedRateFacet.setCoupon(coupon1);
+        const tx1 = await bondFacet.setCoupon(coupon1);
         await tx1.wait();
 
         const coupon2 = {
@@ -627,7 +627,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        const tx2 = await bondKpiLinkedRateFacet.setCoupon(coupon2);
+        const tx2 = await bondFacet.setCoupon(coupon2);
         await tx2.wait();
 
         const coupon3 = {
@@ -641,7 +641,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        const tx3 = await bondKpiLinkedRateFacet.setCoupon(coupon3);
+        const tx3 = await bondFacet.setCoupon(coupon3);
         await tx3.wait();
 
         // Move time forward past all fixing dates so coupons appear in ordered list
@@ -680,7 +680,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        await bondKpiLinkedRateFacet.setCoupon(coupon1);
+        await bondFacet.setCoupon(coupon1);
 
         const coupon2 = {
           recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 3,
@@ -693,7 +693,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        await bondKpiLinkedRateFacet.setCoupon(coupon2);
+        await bondFacet.setCoupon(coupon2);
 
         const coupon3 = {
           recordDate: currentBlockTimestamp + TIME_PERIODS_S.DAY * 5,
@@ -706,7 +706,7 @@ describe("Bond KpiLinked Rate Tests", () => {
           rateStatus: 0,
         };
 
-        await bondKpiLinkedRateFacet.setCoupon(coupon3);
+        await bondFacet.setCoupon(coupon3);
 
         // Move time forward past all fixing dates
         await timeTravelFacet.changeSystemTimestamp(currentBlockTimestamp + TIME_PERIODS_S.DAY * 6);
@@ -732,7 +732,7 @@ describe("Bond KpiLinked Rate Tests", () => {
             rateStatus: 0,
           };
 
-          await bondKpiLinkedRateFacet.setCoupon(coupon);
+          await bondFacet.setCoupon(coupon);
         }
 
         // Move time forward past all fixing dates
@@ -774,7 +774,7 @@ describe("Bond KpiLinked Rate Tests", () => {
             rateStatus: 0,
           };
 
-          await bondKpiLinkedRateFacet.setCoupon(coupon);
+          await bondFacet.setCoupon(coupon);
         }
 
         // Move time forward past all fixing dates

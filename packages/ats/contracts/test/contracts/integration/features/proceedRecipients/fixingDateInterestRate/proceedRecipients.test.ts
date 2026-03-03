@@ -7,13 +7,13 @@ import {
   ProceedRecipientsKpiLinkedRateFacet,
   ResolverProxy,
   IAccessControl,
-  BondUSAKpiLinkedRateFacet,
+  BondUSAFacet,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet,
   TimeTravelFacet,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondKpiLinkedRateTokenFixture } from "@test";
+import { deployBondTokenFixture } from "@test";
 
 const PROCEED_RECIPIENT_1 = "0x1234567890123456789012345678901234567890";
 const PROCEED_RECIPIENT_1_DATA = "0xabcdef";
@@ -25,7 +25,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   let diamond: ResolverProxy;
   let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacet;
   let accessControlFacet: IAccessControl;
-  let bondKpiLinkedRateFacet: BondUSAKpiLinkedRateFacet;
+  let _bondFacet: BondUSAFacet;
   let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacet;
   let timeTravelFacet: TimeTravelFacet;
 
@@ -41,7 +41,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   };
 
   async function deploySecurityFixtureR() {
-    const base = await deployBondKpiLinkedRateTokenFixture();
+    const base = await deployBondTokenFixture({ rateType: "KpiLinked" });
 
     diamond = base.diamond;
     signer_A = base.deployer;
@@ -52,7 +52,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
       signer_A,
     );
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    bondKpiLinkedRateFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacet", diamond.target, signer_A);
+    _bondFacet = await ethers.getContractAt("BondUSAFacet", diamond.target, signer_A);
     scheduledTasksFacet = await ethers.getContractAt(
       "ScheduledCrossOrderedTasksKpiLinkedRateFacet",
       diamond.target,
@@ -70,7 +70,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
 
   describe("Add Tests", () => {
     it("GIVEN a unlisted proceed recipient WHEN authorized user adds it THEN it is listed and pending tasks triggered", async () => {
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await _bondFacet.connect(signer_A).setCoupon(couponData);
       const tasks_count_Before = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
 
       await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);
@@ -88,7 +88,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
     it("GIVEN a unlisted proceed recipient WHEN authorized user adds it THEN it is listed and pending tasks triggered", async () => {
       await proceedRecipientsFacet.addProceedRecipient(PROCEED_RECIPIENT_1, PROCEED_RECIPIENT_1_DATA);
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await _bondFacet.connect(signer_A).setCoupon(couponData);
       const tasks_count_Before = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
 
       await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);
