@@ -18,12 +18,15 @@ The ATS SDK is a TypeScript library for interacting with Asset Tokenization Stud
 
 ## Supported Wallets
 
-The SDK integrates with popular Hedera wallets:
+The SDK supports the following wallet connection modes:
 
-- **HashPack** - Browser extension and mobile wallet
-- **Blade** - Browser extension wallet
+- **Hedera WalletConnect (HWC 2.0)** - Standard WalletConnect 2.0 integration for Hedera wallets, including HashPack and Blade. Requires a WalletConnect `projectId`.
 - **MetaMask** - EVM-compatible wallet via Hedera JSON-RPC Relay
-- **WalletConnect** - Mobile wallet integration protocol
+- **Dfns** - Enterprise custodial key management
+- **Fireblocks** - Institutional custody
+- **AWS KMS** - Cloud-based key management signing
+
+> **Note**: Direct HashPack and Blade integrations have been unified under Hedera WalletConnect 2.0 (`SupportedWallets.HWALLETCONNECT`). These wallets now connect via the standard WalletConnect protocol using `@hiero-ledger/sdk`.
 
 Users sign transactions with their own wallets, maintaining full control of their private keys.
 
