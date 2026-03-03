@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-03T10:19:21.438Z
+ * Generated: 2026-03-03T13:51:49.353Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -3201,6 +3201,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xd1869b7c",
       },
       {
+        name: "cancelScheduledBalanceAdjustment",
+        signature: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
+        selector: "0x564387f9",
+      },
+      {
         name: "cancelVoting",
         signature: "function cancelVoting(uint256 _voteId) returns (bool success_)",
         selector: "0x549bdd6e",
@@ -3243,7 +3248,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledBalanceAdjustment",
         signature:
-          "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns ((uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_)",
+          "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns ((uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_, bool isDisabled_)",
         selector: "0x3d5338e8",
       },
       {
@@ -11205,6 +11210,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         topic0: "0xc849cd6d345b059ab830e5aa8ab5e38bd118833e14bcdfea70231b0e5c072a12",
       },
       {
+        name: "ScheduledBalanceAdjustmentCancelled",
+        signature: "ScheduledBalanceAdjustmentCancelled(uint256,address)",
+        topic0: "0x94a946c45b2317528f3b8fed727c5627bed2062d7fe7a83a5c6b38aa2dcc178a",
+      },
+      {
         name: "ScheduledBalanceAdjustmentSet",
         signature: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
         topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
@@ -11221,6 +11231,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
     ],
     errors: [
+      {
+        name: "BalanceAdjustmentAlreadyExecuted",
+        signature: "BalanceAdjustmentAlreadyExecuted(bytes32,uint256)",
+        selector: "0xd0447e7d",
+      },
       {
         name: "BalanceAdjustmentCreationFailed",
         signature: "BalanceAdjustmentCreationFailed()",

@@ -50,6 +50,12 @@ abstract contract Equity is IEquity, Common {
         (success_, ) = _cancelVoting(_voteId);
     }
 
+    function cancelScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_, ) = _cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
+    }
+
     function setVoting(
         Voting calldata _newVoting
     )
@@ -194,9 +200,9 @@ abstract contract Equity is IEquity, Common {
         view
         override
         onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
-        returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_)
     {
-        return _getScheduledBalanceAdjustment(_balanceAdjustmentID);
+        (balanceAdjustment_, , isDisabled_) = _getScheduledBalanceAdjustment(_balanceAdjustmentID);
     }
 
     function getScheduledBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {
