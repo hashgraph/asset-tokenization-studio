@@ -105,6 +105,7 @@ describe("SetMaxSupplyCommandHandler", () => {
         expect(transactionServiceMock.getHandler().setMaxSupply).toHaveBeenCalledWith(
           evmAddress,
           BigDecimal.fromString(command.maxSupply, security.decimals),
+          command.securityId,
         );
       });
     });
