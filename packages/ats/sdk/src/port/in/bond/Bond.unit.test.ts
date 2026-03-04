@@ -2,6 +2,7 @@
 
 import { createMock } from "@golevelup/ts-jest";
 import { CommandBus } from "@core/command/CommandBus";
+import CancelCouponRequest from "../request/bond/CancelCouponRequest";
 import {
   CreateBondRequest,
   GetBondDetailsRequest,
@@ -44,6 +45,7 @@ import {
   RedeemAtMaturityByPartitionRequestFixture,
   FullRedeemAtMaturityRequestFixture,
   GetTotalCouponHoldersRequestFixture,
+  CancelCouponRequestFixture,
   SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
   CreateTrexSuiteBondRequestFixture,
@@ -65,6 +67,7 @@ import BigDecimal from "@domain/context/shared/BigDecimal";
 import { faker } from "@faker-js/faker/.";
 import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
 import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
+import { CancelCouponCommand } from "@command/bond/coupon/cancel/CancelCouponCommand";
 import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
 
 import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
@@ -97,6 +100,7 @@ describe("Bond", () => {
   let createBondRequest: CreateBondRequest;
   let getBondDetailsRequest: GetBondDetailsRequest;
   let setCouponRequest: SetCouponRequest;
+  let cancelCouponRequest: CancelCouponRequest;
   let getCouponForRequest: GetCouponForRequest;
   let getCouponRequest: GetCouponRequest;
   let getAllCouponsRequest: GetAllCouponsRequest;
@@ -557,6 +561,54 @@ describe("Bond", () => {
     });
   });
 
+  describe("cancelCoupon", () => {
+    beforeEach(() => {
+      cancelCouponRequest = new CancelCouponRequest(CancelCouponRequestFixture.create());
+    });
+    it("should cancel coupon successfully", async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await BondToken.cancelCoupon(cancelCouponRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("CancelCouponRequest", cancelCouponRequest);
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CancelCouponCommand(cancelCouponRequest.securityId, cancelCouponRequest.couponId),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(BondToken.cancelCoupon(cancelCouponRequest)).rejects.toThrow("Command execution failed");
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("CancelCouponRequest", cancelCouponRequest);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CancelCouponCommand(cancelCouponRequest.securityId, cancelCouponRequest.couponId),
+      );
+    });
+
+    it("should throw error if securityId is invalid", async () => {
+      cancelCouponRequest = new CancelCouponRequest({
+        ...CancelCouponRequestFixture.create(),
+        securityId: "invalid",
+      });
+
+      await expect(BondToken.cancelCoupon(cancelCouponRequest)).rejects.toThrow(ValidationError);
+    });
+  });
+
   describe("getCouponFor", () => {
     beforeEach(() => {
       getCouponForRequest = new GetCouponForRequest(GetCouponForRequestFixture.create());
@@ -565,6 +617,7 @@ describe("Bond", () => {
       const expectedResponse = {
         tokenBalance: BigInt(1000),
         decimals: 2,
+        isDisabled: false,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
@@ -587,6 +640,7 @@ describe("Bond", () => {
         expect.objectContaining({
           tokenBalance: expectedResponse.tokenBalance.toString(),
           decimals: expectedResponse.decimals.toString(),
+          isDisabled: false,
         }),
       );
     });
@@ -875,6 +929,7 @@ describe("Bond", () => {
             endDate: new Date(expectedResponse2.coupon.endTimeStamp * ONE_THOUSAND),
             fixingDate: new Date(expectedResponse2.coupon.fixingTimeStamp * ONE_THOUSAND),
             rateStatus: CastRateStatus.toNumber(expectedResponse2.coupon.rateStatus),
+            isDisabled: expectedResponse2.coupon.isDisabled,
           },
         ]),
       );

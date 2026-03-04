@@ -91,7 +91,7 @@ interface ITransactionAdapter {
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
-createBondFixedRate(
+  createBondFixedRate(
     security: Security,
     bondFixedRateDetails: BondFixedRateDetails,
     factory: EvmAddress,
@@ -222,6 +222,11 @@ createBondFixedRate(
     endDate: BigDecimal,
     fixingDate: BigDecimal,
     rateStatus: RateStatus,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setDocument(
@@ -1126,6 +1131,11 @@ export default abstract class TransactionAdapter
     endDate: BigDecimal,
     fixingDate: BigDecimal,
     rateStatus: RateStatus,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract setVotingRights(

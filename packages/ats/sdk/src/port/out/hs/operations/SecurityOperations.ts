@@ -56,6 +56,21 @@ export class SecurityOperations {
       GAS.SET_COUPON,
     );
   }
+	  async cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
+
+    return this.executor.executeContractCall(
+			securityId.toString(),
+      BondUSAFacet__factory.createInterface(),
+      "cancelCoupon",
+      [couponId],
+      GAS.CANCEL_COUPON,
+    );
+  }
 
   setRate(
     security: EvmAddress,

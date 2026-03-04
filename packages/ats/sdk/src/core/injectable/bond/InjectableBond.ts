@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
+import { CancelCouponCommandHandler } from "@command/bond/coupon/cancel/CancelCouponCommandHandler";
 import { SetCouponCommandHandler } from "@command/bond/coupon/set/SetCouponCommandHandler";
 import { CreateBondCommandHandler } from "@command/bond/create/CreateBondCommandHandler";
 import { CreateBondFixedRateCommandHandler } from "@command/bond/createfixedrate/CreateBondFixedRateCommandHandler";
@@ -47,6 +48,10 @@ export const COMMAND_HANDLERS_BOND = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetCouponCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CancelCouponCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,
