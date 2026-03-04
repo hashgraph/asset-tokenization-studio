@@ -30,7 +30,7 @@ export class GetDividendsForQueryHandler implements IQueryHandler<GetDividendsFo
 
       const res = await this.queryAdapter.getDividendsFor(securityEvmAddress, targetEvmAddress, dividendId);
 
-      return new GetDividendsForQueryResponse(res.tokenBalance, res.decimals);
+      return new GetDividendsForQueryResponse(res.tokenBalance, res.decimals, res.isDisabled);
     } catch (error) {
       throw new GetDividendsForQueryError(error as Error);
     }

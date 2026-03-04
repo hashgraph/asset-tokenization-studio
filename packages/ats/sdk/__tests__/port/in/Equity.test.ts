@@ -180,7 +180,7 @@ describe("🧪 Equity test", () => {
     const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
     const executionTimestamp = recordTimestamp + 1000;
 
-    await Equity.setDividends(
+    await Equity.setDividend(
       new SetDividendsRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         amountPerUnitOfSecurity: amount,
@@ -189,7 +189,7 @@ describe("🧪 Equity test", () => {
       }),
     );
 
-    const dividend = await Equity.getDividends(
+    const dividend = await Equity.getDividend(
       new GetDividendsRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         dividendId: 1,
@@ -202,7 +202,7 @@ describe("🧪 Equity test", () => {
       }),
     );
 
-    const dividendFor = await Equity.getDividendsFor(
+    const dividendFor = await Equity.getDividendFor(
       new GetDividendsForRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),

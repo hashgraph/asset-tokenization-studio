@@ -60,6 +60,7 @@ describe("GetDividendsForQueryHandler", () => {
       expect(result).toBeInstanceOf(GetDividendsForQueryResponse);
       expect(result.tokenBalance).toBe(dividendFor.tokenBalance);
       expect(result.decimals).toBe(dividendFor.decimals);
+      expect(result.isDisabled).toBe(dividendFor.isDisabled);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
