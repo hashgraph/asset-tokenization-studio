@@ -13,4 +13,5 @@ export default interface CouponViewModel extends QueryResponse {
   fixingDate: Date;
   rateStatus: number;
   snapshotId?: number;
+  isDisabled: boolean;
 }
