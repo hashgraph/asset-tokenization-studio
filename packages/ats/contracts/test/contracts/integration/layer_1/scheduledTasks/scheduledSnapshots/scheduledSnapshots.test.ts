@@ -148,4 +148,41 @@ describe("Scheduled Snapshots Tests", () => {
     expect(scheduledSnapshotCount).to.equal(0);
     expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount);
   });
+
+  it("GIVEN a disabled corporate action WHEN triggerSnapshots is called THEN snapshot is not executed", async () => {
+    await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+    const dividendsRecordDateInSeconds = dateToUnixTimestamp("2030-01-01T00:00:06Z");
+    const dividendsExecutionDateInSeconds = dateToUnixTimestamp("2030-01-01T00:01:00Z");
+    const dividendsAmountPerEquity = 1;
+    const dividendAmountDecimalsPerEquity = 3;
+    const dividendData = {
+      recordDate: dividendsRecordDateInSeconds.toString(),
+      executionDate: dividendsExecutionDateInSeconds.toString(),
+      amount: dividendsAmountPerEquity,
+      amountDecimals: dividendAmountDecimalsPerEquity,
+    };
+    await equityFacet.connect(signer_C).setDividend(dividendData);
+
+    let scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
+    expect(scheduledSnapshotCount).to.equal(1);
+
+    const [dividendBefore] = await equityFacet.getDividend(1);
+    expect(dividendBefore.snapshotId).to.equal(0);
+
+    await equityFacet.connect(signer_C).cancelDividend(1);
+
+    await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
+
+    await expect(scheduledTasksFacet.connect(signer_A).triggerPendingScheduledCrossOrderedTasks()).not.to.emit(
+      scheduledSnapshotsFacet,
+      "SnapshotTriggered",
+    );
+
+    scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
+    expect(scheduledSnapshotCount).to.equal(0);
+
+    const [dividendAfter] = await equityFacet.getDividend(1);
+    expect(dividendAfter.snapshotId).to.equal(0);
+  });
 });
