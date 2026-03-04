@@ -261,7 +261,7 @@ async function validateAndInitialize(
   // Validate BLR address format
   try {
     validateAddress(blrAddress, "BLR address");
-  } catch (err) {
+  } catch (_err) {
     throw new Error(`Invalid BLR address format: ${blrAddress}`);
   }
 

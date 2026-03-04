@@ -184,7 +184,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
   }
 
   async function checkMinDates(expectedMinDate: string) {
-    let minDate = await kpisFacet.getMinDate();
+    const minDate = await kpisFacet.getMinDate();
     expect(minDate.toString()).to.equal(expectedMinDate);
   }
 
@@ -241,7 +241,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       couponData.recordDate = (parseInt(couponData.fixingDate) + 1).toString();
       couponData.executionDate = (parseInt(couponData.recordDate) + 1).toString();
 
-      let originalFixingDate = couponData.fixingDate;
+      const originalFixingDate = couponData.fixingDate;
 
       await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
       const tasks_count_Before = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();

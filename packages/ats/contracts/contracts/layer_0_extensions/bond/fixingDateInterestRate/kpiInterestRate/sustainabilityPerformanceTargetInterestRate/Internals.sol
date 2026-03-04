@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ModifiersSustainabilityPerformanceTargetInterestRate } from "./Modifiers.sol";
-import { IBondRead } from "contracts/layer_2/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../../../layer_2/interfaces/bond/IBondRead.sol";
 
 abstract contract InternalsSustainabilityPerformanceTargetInterestRate is
     ModifiersSustainabilityPerformanceTargetInterestRate

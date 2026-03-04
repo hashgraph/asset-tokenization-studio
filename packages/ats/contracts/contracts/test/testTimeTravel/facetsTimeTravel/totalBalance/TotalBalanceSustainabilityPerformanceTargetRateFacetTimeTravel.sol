@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
+
 import {
     TotalBalanceSustainabilityPerformanceTargetRateFacet
-} from "contracts/layer_1/totalBalance/sustainabilityPerformanceTargetRate/TotalBalanceSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../layer_1/totalBalance/sustainabilityPerformanceTargetRate/TotalBalanceSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "contracts/layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 
 contract TotalBalanceSustainabilityPerformanceTargetRateFacetTimeTravel is
     TotalBalanceSustainabilityPerformanceTargetRateFacet,

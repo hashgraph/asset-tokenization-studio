@@ -13,7 +13,7 @@ import { expect } from "chai";
 import { configureLogger, LogLevel } from "@scripts/infrastructure";
 import { TEST_LOGGER_PREFIXES } from "@test";
 
-// Internal functions not exported from barrel - direct import required for unit testing
+// getLoggerConfig is internal, not exported from barrel — direct import required for unit testing
 import { getLoggerConfig, resetLogger } from "../../../../scripts/infrastructure/utils/logging";
 
 describe("Logging Utilities", () => {

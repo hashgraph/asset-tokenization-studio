@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICap } from "contracts/layer_1/interfaces/cap/ICap.sol";
+import { ICap } from "../interfaces/cap/ICap.sol";
 import { _CAP_ROLE } from "../constants/roles.sol";
 import { Internals } from "../../layer_0/Internals.sol";
 
