@@ -104,8 +104,8 @@ import { MissingRegulationType } from "@domain/context/factory/error/MissingRegu
 import { BaseContract, Contract, ContractTransactionResponse } from "ethers";
 import { CastRateStatus, RateStatus } from "@domain/context/bond/RateStatus";
 import { ProtectionData } from "@domain/context/factory/ProtectionData";
-import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
-import { BondFixedRateDetailsData } from '@domain/context/factory/BondFixedRateDetailsData';
+import { BondFixedRateDetails } from "@domain/context/bond/BondFixedRateDetails";
+import { BondFixedRateDetailsData } from "@domain/context/factory/BondFixedRateDetailsData";
 import { BondKpiLinkedRateDetails } from "@domain/context/bond/BondKpiLinkedRateDetails";
 import { InterestRate } from "@domain/context/bond/InterestRate";
 import { ImpactData } from "@domain/context/bond/ImpactData";
@@ -503,10 +503,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       );
 
       const bondFixedRateData = {
-            bondData: securityTokenToCreate,
-            factoryRegulationData: factoryRegulationData,
-            fixedRateData: { rate: bondInfo.rate, rateDecimals: bondInfo.rateDecimals },
-        };
+        bondData: securityTokenToCreate,
+        factoryRegulationData: factoryRegulationData,
+        fixedRateData: { rate: bondInfo.rate, rateDecimals: bondInfo.rateDecimals },
+      };
 
       LogService.logTrace(
         `Deploying bond fixed rate: ${{
@@ -516,16 +516,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
       return this.executeWithArgs(
         new Factory__factory().attach(factory.toString()),
-        'deployBondFixedRate',
+        "deployBondFixedRate",
         factoryId!,
         GAS.CREATE_BOND_ST,
         [bondFixedRateData],
       );
     } catch (error) {
       LogService.logError(error);
-      throw new SigningError(
-        `Unexpected error in HederaTransactionAdapter create operation : ${error}`,
-      );
+      throw new SigningError(`Unexpected error in HederaTransactionAdapter create operation : ${error}`);
     }
   }
 
@@ -580,19 +578,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         rbacs: rbacs,
         isControllable: securityInfo.isControllable,
         isWhiteList: securityInfo.isWhiteList,
-        maxSupply: securityInfo.maxSupply
-          ? securityInfo.maxSupply.toString()
-          : '0',
+        maxSupply: securityInfo.maxSupply ? securityInfo.maxSupply.toString() : "0",
         erc20VotesActivated: securityInfo.erc20VotesActivated,
         erc20MetadataInfo: erc20MetadataInfo,
         clearingActive: securityInfo.clearingActive,
         internalKycActivated: securityInfo.internalKycActivated,
-        externalPauses:
-          externalPauses?.map((address) => address.toString()) ?? [],
-        externalControlLists:
-          externalControlLists?.map((address) => address.toString()) ?? [],
-        externalKycLists:
-          externalKycLists?.map((address) => address.toString()) ?? [],
+        externalPauses: externalPauses?.map((address) => address.toString()) ?? [],
+        externalControlLists: externalControlLists?.map((address) => address.toString()) ?? [],
+        externalKycLists: externalKycLists?.map((address) => address.toString()) ?? [],
         compliance: compliance.toString(),
         identityRegistry: identityRegistry.toString(),
       };
@@ -609,13 +602,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         security,
         bondDetails,
         proceedRecipients.map((addr) => addr.toString()),
-        proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
+        proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
       );
 
       const additionalSecurityData: AdditionalSecurityData = {
         countriesControlListType: securityInfo.isCountryControlListWhiteList,
-        listOfCountries: securityInfo.countries ?? '',
-        info: securityInfo.info ?? '',
+        listOfCountries: securityInfo.countries ?? "",
+        info: securityInfo.info ?? "",
       };
 
       const factoryRegulationData = new FactoryRegulationData(
@@ -632,7 +625,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         bondInfo.interestRate.startRate,
         bondInfo.interestRate.missedPenalty,
         bondInfo.interestRate.reportPeriod,
-        bondInfo.interestRate.rateDecimals
+        bondInfo.interestRate.rateDecimals,
       );
 
       const impactData = new ImpactData(
@@ -640,16 +633,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         bondInfo.impactData.baseLine,
         bondInfo.impactData.maxDeviationFloor,
         bondInfo.impactData.impactDataDecimals,
-        bondInfo.impactData.adjustmentPrecision
+        bondInfo.impactData.adjustmentPrecision,
       );
 
       const bondKpiLinkedRateData = {
-            bondData: securityTokenToCreate,
-            factoryRegulationData: factoryRegulationData,
-            interestRate: interestRate,
-            impactData: impactData,
-            kpiOracle: EVM_ZERO_ADDRESS
-        };
+        bondData: securityTokenToCreate,
+        factoryRegulationData: factoryRegulationData,
+        interestRate: interestRate,
+        impactData: impactData,
+        kpiOracle: EVM_ZERO_ADDRESS,
+      };
 
       LogService.logTrace(
         `Deploying bond kpi linked rate: ${{
@@ -659,7 +652,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
       return this.executeWithArgs(
         new Factory__factory().attach(factory.toString()),
-        'deployBondKpiLinkedRate',
+        "deployBondKpiLinkedRate",
         factoryId!,
         GAS.CREATE_BOND_ST,
         [bondKpiLinkedRateData],
@@ -1018,6 +1011,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       securityId,
       GAS.SET_COUPON,
       [coupon],
+    );
+  }
+
+  async cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
+
+    return this.executeWithArgs(
+      new BondUSAFacet__factory().attach(security.toString()),
+      "cancelCoupon",
+      securityId,
+      GAS.CANCEL_COUPON,
+      [couponId],
     );
   }
 
@@ -3169,7 +3178,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  setRate(security: EvmAddress, rate: BigDecimal, rateDecimals: number, securityId?: ContractId | string): Promise<TransactionResponse> {
+  setRate(
+    security: EvmAddress,
+    rate: BigDecimal,
+    rateDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Setting Rate ${rate.toString()} with decimals ${rateDecimals} for security ${security.toString()}`,
     );
@@ -3194,24 +3208,24 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     rateDecimals: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
-    LogService.logTrace(
-      `Setting Interest Rate for security ${security.toString()}`,
-    );
+    LogService.logTrace(`Setting Interest Rate for security ${security.toString()}`);
     return this.executeWithArgs(
       new KpiLinkedRate__factory().attach(security.toString()),
       "setInterestRate",
       securityId!,
       GAS.SET_INTEREST_RATE,
-      [{
-        maxRate: maxRate,
-        baseRate: baseRate,
-        minRate: minRate,
-        startPeriod: startPeriod,
-        startRate: startRate,
-        missedPenalty: missedPenalty,
-        reportPeriod: reportPeriod,
-        rateDecimals: rateDecimals,
-      }],
+      [
+        {
+          maxRate: maxRate,
+          baseRate: baseRate,
+          minRate: minRate,
+          startPeriod: startPeriod,
+          startRate: startRate,
+          missedPenalty: missedPenalty,
+          reportPeriod: reportPeriod,
+          rateDecimals: rateDecimals,
+        },
+      ],
     );
   }
 
@@ -3224,21 +3238,21 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     adjustmentPrecision: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
-    LogService.logTrace(
-      `Setting Impact Data for security ${security.toString()}`,
-    );
+    LogService.logTrace(`Setting Impact Data for security ${security.toString()}`);
     return this.executeWithArgs(
       new KpiLinkedRate__factory().attach(security.toString()),
       "setImpactData",
       securityId!,
       GAS.SET_IMPACT_DATA,
-      [{
-        maxDeviationCap: maxDeviationCap,
-        baseLine: baseLine,
-        maxDeviationFloor: maxDeviationFloor,
-        impactDataDecimals: impactDataDecimals,
-        adjustmentPrecision: adjustmentPrecision,
-      }],
+      [
+        {
+          maxDeviationCap: maxDeviationCap,
+          baseLine: baseLine,
+          maxDeviationFloor: maxDeviationFloor,
+          impactDataDecimals: impactDataDecimals,
+          adjustmentPrecision: adjustmentPrecision,
+        },
+      ],
     );
   }
 
