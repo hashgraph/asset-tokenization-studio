@@ -6,6 +6,7 @@ import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCoun
 import { GetDividendsForQuery } from "@query/equity/dividends/getDividendsFor/GetDividendsForQuery";
 import { GetDividendAmountForQuery } from "@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQuery";
 import { SetVotingRightsCommand } from "@command/equity/votingRights/set/SetVotingRightsCommand";
+import { CancelVotingCommand } from "@command/equity/votingRights/cancel/CancelVotingCommand";
 import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQuery";
 import { GetVotingCountQuery } from "@query/equity/votingRights/getVotingCount/GetVotingCountQuery";
 import { GetVotingForQuery } from "@query/equity/votingRights/getVotingFor/GetVotingForQuery";
@@ -60,6 +61,7 @@ import GetTotalVotingHoldersRequest from "../request/equity/GetTotalVotingHolder
 import CreateTrexSuiteEquityRequest from "../request/equity/CreateTrexSuiteEquityRequest";
 import { CreateTrexSuiteEquityCommand } from "@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand";
 import DividendAmountForViewModel from "../response/DividendAmountForViewModel";
+import CancelVotingRequest from "../request/equity/CancelVotingRequest";
 
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
@@ -73,6 +75,7 @@ interface IEquityInPort {
   getDividends(request: GetDividendsRequest): Promise<DividendsViewModel>;
   getAllDividends(request: GetAllDividendsRequest): Promise<DividendsViewModel[]>;
   setVotingRights(request: SetVotingRightsRequest): Promise<{ payload: number; transactionId: string }>;
+  cancelVoting(request: CancelVotingRequest): Promise<{ payload: boolean; transactionId: string }>;
   getVotingRightsFor(request: GetVotingRightsForRequest): Promise<VotingRightsForViewModel>;
   getVotingRights(request: GetVotingRightsRequest): Promise<VotingRightsViewModel>;
   getAllVotingRights(request: GetAllVotingRightsRequest): Promise<VotingRightsViewModel[]>;
@@ -291,6 +294,14 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
+  async cancelVoting(request: CancelVotingRequest): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, votingId } = request;
+    ValidatedRequest.handleValidation("CancelVotingRequest", request);
+
+    return await this.commandBus.execute(new CancelVotingCommand(securityId, votingId));
+  }
+
+  @LogError
   async getVotingRightsFor(request: GetVotingRightsForRequest): Promise<VotingRightsForViewModel> {
     ValidatedRequest.handleValidation("GetVotingRightsForRequest", request);
 
@@ -301,6 +312,7 @@ class EquityInPort implements IEquityInPort {
     const votingFor: VotingRightsForViewModel = {
       tokenBalance: res.tokenBalance.toString(),
       decimals: res.decimals.toString(),
+      isDisabled: res.isDisabled,
     };
 
     return votingFor;
@@ -316,6 +328,7 @@ class EquityInPort implements IEquityInPort {
       votingId: request.votingId,
       recordDate: new Date(res.voting.recordTimeStamp * ONE_THOUSAND),
       data: res.voting.data,
+      isDisabled: res.voting.isDisabled,
     };
 
     return votingRight;
@@ -338,6 +351,7 @@ class EquityInPort implements IEquityInPort {
         votingId: i,
         recordDate: new Date(res.voting.recordTimeStamp * ONE_THOUSAND),
         data: res.voting.data,
+        isDisabled: res.voting.isDisabled,
       };
 
       votingRights.push(votingright);

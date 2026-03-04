@@ -423,19 +423,19 @@ export class RPCQueryAdapter {
 
     const votingFor = await this.connect(Equity__factory, address.toString()).getVotingFor(voting, target.toString());
 
-    return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals));
+    return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals), votingFor.isDisabled);
   }
 
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
-    //TODO change this
-    const votingInfo = (await this.connect(Equity__factory, address.toString()).getVoting(voting)).registeredVoting_;
+    const { registeredVoting_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getVoting(voting);
 
     return new VotingRights(
-      Number(votingInfo.voting.recordDate),
-      votingInfo.voting.data,
-      Number(votingInfo.snapshotId),
+      Number(registeredVoting_.voting.recordDate),
+      registeredVoting_.voting.data,
+      Number(registeredVoting_.snapshotId),
+      isDisabled_,
     );
   }
 

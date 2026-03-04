@@ -30,7 +30,7 @@ export class GetVotingForQueryHandler implements IQueryHandler<GetVotingForQuery
 
       const res = await this.queryAdapter.getVotingFor(securityEvmAddress, targetEvmAddress, votingId);
 
-      return new GetVotingForQueryResponse(res.tokenBalance, res.decimals);
+      return new GetVotingForQueryResponse(res.tokenBalance, res.decimals, res.isDisabled);
     } catch (error) {
       throw new GetVotingForQueryError(error as Error);
     }
