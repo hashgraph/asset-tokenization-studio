@@ -756,9 +756,9 @@ export class RPCQueryAdapter {
     ).getScheduledBalanceAdjustment(balanceAdjustmentId);
 
     return new ScheduledBalanceAdjustment(
-      Number(scheduledBalanceAdjustmentInfo.executionDate),
-      Number(scheduledBalanceAdjustmentInfo.factor),
-      Number(scheduledBalanceAdjustmentInfo.decimals),
+      Number(scheduledBalanceAdjustmentInfo.balanceAdjustment_.executionDate),
+      Number(scheduledBalanceAdjustmentInfo.balanceAdjustment_.factor),
+      Number(scheduledBalanceAdjustmentInfo.balanceAdjustment_.decimals),
     );
   }
 
