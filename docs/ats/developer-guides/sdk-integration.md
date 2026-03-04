@@ -44,6 +44,8 @@ await Network.init(initRequest);
 
 ### 2. Connect a Wallet
 
+#### Hedera WalletConnect 2.0 (HashPack, Blade, and other WC-compatible wallets)
+
 ```typescript
 import { ConnectRequest, SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
 
@@ -59,7 +61,27 @@ const connectRequest = new ConnectRequest({
     apiKey: "",
     headerName: "",
   },
-  wallet: SupportedWallets.HASHPACK, // or BLADE, METAMASK, HWALLETCONNECT
+  wallet: SupportedWallets.HWALLETCONNECT,
+  hwcSettings: {
+    projectId: "your_walletconnect_project_id", // from https://cloud.walletconnect.com
+    dappName: "My ATS App",
+    dappDescription: "Asset Tokenization Studio dApp",
+    dappURL: "https://example.com",
+    dappIcons: ["https://example.com/icon.png"],
+  },
+});
+
+const walletData = await Network.connect(connectRequest);
+```
+
+> **Note**: HashPack and Blade wallets connect via Hedera WalletConnect 2.0 (`SupportedWallets.HWALLETCONNECT`). You need a WalletConnect `projectId` from [cloud.walletconnect.com](https://cloud.walletconnect.com).
+
+#### MetaMask
+
+```typescript
+const connectRequest = new ConnectRequest({
+  // ...network config...
+  wallet: SupportedWallets.METAMASK,
 });
 
 const walletData = await Network.connect(connectRequest);

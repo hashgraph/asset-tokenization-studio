@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
-import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
-import { DFNSTransactionAdapter } from "@port/out/hs/hts/custodial/DFNSTransactionAdapter";
-import { FireblocksTransactionAdapter } from "@port/out/hs/hts/custodial/FireblocksTransactionAdapter";
-import { AWSKMSTransactionAdapter } from "@port/out/hs/hts/custodial/AWSKMSTransactionAdapter";
+import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/walletconnect/HederaWalletConnectTransactionAdapter";
+import { DFNSTransactionAdapter } from "@port/out/hs/custodial/DFNSTransactionAdapter";
+import { FireblocksTransactionAdapter } from "@port/out/hs/custodial/FireblocksTransactionAdapter";
+import { AWSKMSTransactionAdapter } from "@port/out/hs/custodial/AWSKMSTransactionAdapter";
 import { COMMAND_HANDLERS_AGENT } from "./agent/InjectableAgent";
 import { COMMAND_HANDLERS_BOND, QUERY_HANDLERS_BOND } from "./bond/InjectableBond";
 import { COMMAND_HANDLERS_CLEARING, QUERY_HANDLERS_CLEARING } from "./clearing/InjectableClearing";

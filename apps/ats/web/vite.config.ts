@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
-// yarn add --dev @esbuild-plugins/node-modules-polyfill
-import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill"; // Temporarily disabled
-// You don't need to add this to deps, it's included by @esbuild-plugins/node-modules-polyfill
 import commonjs from "@rollup/plugin-commonjs";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import EnvironmentPlugin from "vite-plugin-environment";
 import pluginRewriteAll from "vite-plugin-rewrite-all";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default {
   plugins: [
@@ -36,6 +37,7 @@ export default {
   },
   resolve: {
     alias: {
+      events: path.resolve(__dirname, "../../../node_modules/events/events.js"),
       winston: "/src/winston-mock.js",
       "winston-daily-rotate-file": "/src/winston-mock.js",
       "winston-transport": "/src/winston-mock.js",
@@ -57,11 +59,18 @@ export default {
         global: "globalThis",
       },
       plugins: [
+        {
+          name: "fix-events-polyfill",
+          setup(build: any) {
+            build.onResolve({ filter: /^events$/ }, () => ({
+              path: path.resolve(__dirname, "../../../node_modules/events/events.js"),
+            }));
+          },
+        },
         NodeGlobalsPolyfillPlugin({
           process: true,
           buffer: true,
         }),
-        NodeModulesPolyfillPlugin(),
       ],
     },
   },

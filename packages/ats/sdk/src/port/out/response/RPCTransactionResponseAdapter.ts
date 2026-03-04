@@ -3,8 +3,8 @@
 import { ContractTransactionResponse, EventLog } from "ethers";
 import LogService from "@service/log/LogService";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
-import { TransactionResponseError } from "../error/TransactionResponseError";
-import { TransactionResponseAdapter } from "../TransactionResponseAdapter";
+import { TransactionResponseError } from "@port/out/error/TransactionResponseError";
+import { TransactionResponseAdapter } from "@port/out/TransactionResponseAdapter";
 
 export class RPCTransactionResponseAdapter extends TransactionResponseAdapter {
   public static async manageResponse(
