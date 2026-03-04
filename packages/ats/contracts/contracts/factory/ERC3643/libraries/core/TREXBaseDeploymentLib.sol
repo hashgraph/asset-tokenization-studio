@@ -78,6 +78,7 @@ library TREXBaseDeploymentLib {
             tir = ITrustedIssuersRegistry(IIdentityRegistry(_identityRegistry).issuersRegistry());
             ctr = IClaimTopicsRegistry(IIdentityRegistry(_identityRegistry).topicsRegistry());
             irs = IIdentityRegistryStorage(IIdentityRegistry(_identityRegistry).identityStorage());
+            _token.setIdentityRegistry(_identityRegistry);
         }
         address _tokenID = _tokenDetails.ONCHAINID;
         if (_tokenID == address(0)) {

@@ -10,6 +10,7 @@ import {
   KpiLinkedRateFacet,
   SustainabilityPerformanceTargetRateFacet,
   ERC1594Facet,
+  AccessControlFacet,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S, BondRateType } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -236,26 +237,26 @@ describe("Bond Rate Dispatch Tests", () => {
   describe("Rate Type Persistence", () => {
     it("GIVEN a Variable rate bond WHEN deployed THEN rateType is persisted as Variable(0)", async () => {
       await loadFixture(deployVariableRateFixture);
-      const bondData = await variableBondReadFacet.getBondData();
-      expect(bondData.rateType).to.equal(BondRateType.Variable);
+      const rateType = await variableBondReadFacet.getRateType();
+      expect(rateType).to.equal(BondRateType.Variable);
     });
 
     it("GIVEN a Fixed rate bond WHEN deployed THEN rateType is persisted as Fixed(1)", async () => {
       await loadFixture(deployFixedRateFixture);
-      const bondData = await fixedBondReadFacet.getBondData();
-      expect(bondData.rateType).to.equal(BondRateType.Fixed);
+      const rateType = await fixedBondReadFacet.getRateType();
+      expect(rateType).to.equal(BondRateType.Fixed);
     });
 
     it("GIVEN a KPI-linked rate bond WHEN deployed THEN rateType is persisted as KpiLinked(2)", async () => {
       await loadFixture(deployKpiLinkedRateFixture);
-      const bondData = await kpiBondReadFacet.getBondData();
-      expect(bondData.rateType).to.equal(BondRateType.KpiLinked);
+      const rateType = await kpiBondReadFacet.getRateType();
+      expect(rateType).to.equal(BondRateType.KpiLinked);
     });
 
     it("GIVEN an SPT rate bond WHEN deployed THEN rateType is persisted as Spt(3)", async () => {
       await loadFixture(deploySptRateFixture);
-      const bondData = await sptBondReadFacet.getBondData();
-      expect(bondData.rateType).to.equal(BondRateType.Spt);
+      const rateType = await sptBondReadFacet.getRateType();
+      expect(rateType).to.equal(BondRateType.Spt);
     });
   });
 
@@ -263,13 +264,7 @@ describe("Bond Rate Dispatch Tests", () => {
     it("GIVEN a Variable rate bond WHEN getCoupon is called THEN it returns the correct coupon data", async () => {
       await loadFixture(deployVariableRateFixture);
 
-      // Set a coupon with variable rate
-      await executeRbac(variableBondFacet, [
-        {
-          role: ATS_ROLES._CORPORATE_ACTION_ROLE,
-          members: [variableSigner.address],
-        },
-      ]);
+      // Fixture already grants CORPORATE_ACTION_ROLE and ISSUER_ROLE to deployer
 
       const variableCouponData = {
         ...couponData,
@@ -301,6 +296,15 @@ describe("Bond Rate Dispatch Tests", () => {
     it("GIVEN a KPI-linked rate bond WHEN getCoupon is called THEN it returns the KPI-adjusted rate", async () => {
       await loadFixture(deployKpiLinkedRateFixture);
 
+      // Grant INTEREST_RATE_MANAGER_ROLE to deployer for KPI rate operations
+      const accessControlFacet = (await ethers.getContractAt(
+        "AccessControlFacet",
+        kpiDiamond.target,
+        kpiSigner,
+      )) as AccessControlFacet;
+      const INTEREST_RATE_MANAGER_ROLE = "0xa174f099c94c902831d8b8a07810700505da86a76ea0bcb7629884ef26cf682e";
+      await accessControlFacet.grantRole(INTEREST_RATE_MANAGER_ROLE, kpiSigner.address);
+
       // Set up KPI configuration
       const kpiInterestRate = {
         maxRate: 10000,
@@ -329,6 +333,10 @@ describe("Bond Rate Dispatch Tests", () => {
       // Set coupon
       await kpiBondFacet.setCoupon(couponData);
 
+      // Time travel past fixing date to trigger rate calculation
+      const timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", kpiDiamond.target, kpiSigner);
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) + 1);
+
       const coupon = await kpiBondReadFacet.getCoupon(1);
       expect(coupon.coupon.rate).to.be.greaterThan(0);
       expect(coupon.coupon.rateDecimals).to.equal(kpiInterestRate.rateDecimals);
@@ -336,6 +344,15 @@ describe("Bond Rate Dispatch Tests", () => {
 
     it("GIVEN an SPT rate bond WHEN getCoupon is called THEN it returns the SPT-adjusted rate", async () => {
       await loadFixture(deploySptRateFixture);
+
+      // Grant INTEREST_RATE_MANAGER_ROLE to deployer for SPT rate operations
+      const accessControlFacet = (await ethers.getContractAt(
+        "AccessControlFacet",
+        sptDiamond.target,
+        sptSigner,
+      )) as AccessControlFacet;
+      const INTEREST_RATE_MANAGER_ROLE = "0xa174f099c94c902831d8b8a07810700505da86a76ea0bcb7629884ef26cf682e";
+      await accessControlFacet.grantRole(INTEREST_RATE_MANAGER_ROLE, sptSigner.address);
 
       // Set up SPT configuration
       const sptInterestRate = {
@@ -347,18 +364,28 @@ describe("Bond Rate Dispatch Tests", () => {
 
       await sptRateFacet.setInterestRate(sptInterestRate);
 
-      // Set impact data
-      const impactData = {
-        baseLine: 750,
-        baseLineMode: 0, // MINIMUM
-        deltaRate: 1000,
-        impactDataMode: 0, // PENALTY
-      };
+      // Add a project address for SPT (projects and impactData arrays must match in length)
+      const projectAddress = sptSigner.address;
+      const projects = [projectAddress];
 
-      await sptRateFacet.setImpactData(impactData);
+      // Set impact data - SPT uses arrays for impact data and projects
+      const impactData = [
+        {
+          baseLine: 750,
+          baseLineMode: 0, // MINIMUM
+          deltaRate: 1000,
+          impactDataMode: 0, // PENALTY
+        },
+      ];
+
+      await sptRateFacet.setImpactData(impactData, projects);
 
       // Set coupon
       await sptBondFacet.setCoupon(couponData);
+
+      // Time travel past fixing date to trigger rate calculation
+      const timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", sptDiamond.target, sptSigner);
+      await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) + 1);
 
       const coupon = await sptBondReadFacet.getCoupon(1);
       expect(coupon.coupon.rate).to.be.greaterThan(0);

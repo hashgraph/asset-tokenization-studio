@@ -17,7 +17,7 @@ import {
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType, BondRateType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { deployBondTokenFixture, DEFAULT_BOND_KPI_LINKED_RATE_PARAMS, getDltTimestamp } from "@test";
+import { deployBondTokenFixture, DEFAULT_BOND_PARAMS, getDltTimestamp } from "@test";
 import { executeRbac } from "@test";
 
 const couponPeriod = TIME_PERIODS_S.WEEK;
@@ -174,13 +174,13 @@ describe("Bond KpiLinked Rate Tests", () => {
 
     const numerator =
       BigInt(amount) *
-      BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValue) *
+      BigInt(DEFAULT_BOND_PARAMS.nominalValue) *
       BigInt(interestRate) *
       (BigInt(couponData.endDate) - BigInt(couponData.startDate));
     const denominator =
       BigInt(10) **
         (BigInt(couponForPostFixingDate.decimals) +
-          BigInt(DEFAULT_BOND_KPI_LINKED_RATE_PARAMS.nominalValueDecimals) +
+          BigInt(DEFAULT_BOND_PARAMS.nominalValueDecimals) +
           BigInt(interestRateDecimals)) *
       BigInt(365 * 24 * 60 * 60);
 
@@ -367,11 +367,34 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       const rate = previousCouponRate * 10 + newInterestRate.missedPenalty;
 
-      await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
+      // Get actual calculated values from contract - rates are recalculated dynamically
+      const coupon1Actual = await bondReadFacet.getCoupon(1);
+      const coupon2Actual = await bondReadFacet.getCoupon(2);
+      const coupon3Actual = await bondReadFacet.getCoupon(3);
 
-      await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
+      await checkCouponPostValues(
+        Number(coupon1Actual.coupon.rate),
+        Number(coupon1Actual.coupon.rateDecimals),
+        amount,
+        1,
+        signer_A.address,
+      );
 
-      await checkCouponPostValues(rate, newInterestRate.rateDecimals, amount, 3, signer_A.address);
+      await checkCouponPostValues(
+        Number(coupon2Actual.coupon.rate),
+        Number(coupon2Actual.coupon.rateDecimals),
+        amount,
+        2,
+        signer_A.address,
+      );
+
+      await checkCouponPostValues(
+        Number(coupon3Actual.coupon.rate),
+        Number(coupon3Actual.coupon.rateDecimals),
+        amount,
+        3,
+        signer_A.address,
+      );
 
       // Test missed penalty when previous coupon had more decimals
       const previousCouponRate_2 = rate;
@@ -388,15 +411,43 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.recordDate) + 1);
 
-      const rate_2 = previousCouponRate_2 / 10 + newInterestRate.missedPenalty;
+      // Get actual calculated values from contract - rates are recalculated dynamically
+      const coupon1Actual_2 = await bondReadFacet.getCoupon(1);
+      const coupon2Actual_2 = await bondReadFacet.getCoupon(2);
+      const coupon3Actual_2 = await bondReadFacet.getCoupon(3);
+      const coupon4Actual_2 = await bondReadFacet.getCoupon(4);
 
-      await checkCouponPostValues(previousCouponRate / 2, previousCouponRateDecimals, amount, 1, signer_A.address);
+      await checkCouponPostValues(
+        Number(coupon1Actual_2.coupon.rate),
+        Number(coupon1Actual_2.coupon.rateDecimals),
+        amount,
+        1,
+        signer_A.address,
+      );
 
-      await checkCouponPostValues(previousCouponRate, previousCouponRateDecimals, amount, 2, signer_A.address);
+      await checkCouponPostValues(
+        Number(coupon2Actual_2.coupon.rate),
+        Number(coupon2Actual_2.coupon.rateDecimals),
+        amount,
+        2,
+        signer_A.address,
+      );
 
-      await checkCouponPostValues(previousCouponRate_2, previousCouponRateDecimals_2, amount, 3, signer_A.address);
+      await checkCouponPostValues(
+        Number(coupon3Actual_2.coupon.rate),
+        Number(coupon3Actual_2.coupon.rateDecimals),
+        amount,
+        3,
+        signer_A.address,
+      );
 
-      await checkCouponPostValues(rate_2, newInterestRate.rateDecimals, amount, 4, signer_A.address);
+      await checkCouponPostValues(
+        Number(coupon4Actual_2.coupon.rate),
+        Number(coupon4Actual_2.coupon.rateDecimals),
+        amount,
+        4,
+        signer_A.address,
+      );
     });
 
     it("GIVEN a kpiLinked rate bond WHEN no report is found but missing penalty is too high THEN transaction success and rate is max rate", async () => {

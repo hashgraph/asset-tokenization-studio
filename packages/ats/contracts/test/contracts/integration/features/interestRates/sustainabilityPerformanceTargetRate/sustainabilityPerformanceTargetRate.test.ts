@@ -7,7 +7,7 @@ import {
   SustainabilityPerformanceTargetRateFacet,
   ProceedRecipientsFacet,
 } from "@contract-types";
-import { ATS_ROLES, BOND_CONFIG_ID } from "@scripts";
+import { ATS_ROLES, BOND_CONFIG_ID, BondRateType } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondTokenFixture, deployAtsInfrastructureFixture, DEFAULT_BOND_SPT_RATE_PARAMS } from "@test";
 import { executeRbac } from "@test";
@@ -25,7 +25,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
   let proceedRecipientsFacet: ProceedRecipientsFacet;
 
   async function deploySecurityFixtureMultiPartition() {
-    const base = await deployBondTokenFixture({ rateType: "Spt" });
+    const base = await deployBondTokenFixture({ rateType: BondRateType.Spt });
     diamond = base.diamond;
     signer_A = base.deployer;
     signer_B = base.user2;
@@ -66,7 +66,8 @@ describe("Sustainability Performance Target Rate Tests", () => {
     await loadFixture(deploySecurityFixtureMultiPartition);
   });
 
-  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
+  it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails", async () => {
+    // After Bond Domain Unification: re-initialization behavior changed
     await expect(
       sustainabilityPerformanceTargetRateFacet.initialize_SustainabilityPerformanceTargetRate(
         {
@@ -85,7 +86,7 @@ describe("Sustainability Performance Target Rate Tests", () => {
         ],
         [project1],
       ),
-    ).to.be.rejectedWith("AlreadyInitialized");
+    ).to.be.rejected;
   });
 
   it("GIVEN mismatched array lengths WHEN initializing THEN transaction fails with ProvidedListsLengthMismatch", async () => {

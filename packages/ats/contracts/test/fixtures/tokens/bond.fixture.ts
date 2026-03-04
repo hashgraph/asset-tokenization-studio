@@ -7,6 +7,8 @@ import {
   PauseFacet__factory,
   KycFacet__factory,
   ControlListFacet__factory,
+  ERC3643ManagementFacet__factory,
+  IIdentityRegistry__factory,
 } from "@contract-types";
 import { DeployBondFromFactoryParams, deployBondFromFactory, BondRateType } from "@scripts/domain";
 import { BondDetailsDataParams, FactoryRegulationDataParams } from "@scripts/domain";
@@ -16,6 +18,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { GAS_LIMIT } from "@scripts/infrastructure";
 import { ResolverProxy__factory } from "@contract-types";
 import { ethers, type EventLog, type ContractTransaction } from "ethers";
+import { registerUserIdentity } from "../trex/identitySetup.fixture";
 
 /**
  * Default bond token parameters.
@@ -148,10 +151,14 @@ export async function deployBondTokenFixture({
   const infrastructure = useLoadFixture
     ? await loadFixture(deployAtsInfrastructureFixture)
     : await deployAtsInfrastructureFixture();
-  const { factory, blr, deployer } = infrastructure;
+  const { factory, blr, deployer, trexIdentity } = infrastructure;
+
+  // Ensure identityRegistry is passed correctly
+  const identityRegistryAddress = await trexIdentity.identityRegistry.getAddress();
 
   const securityData = getSecurityData(blr, {
     ...bondDataParams?.securityData,
+    identityRegistry: identityRegistryAddress,
     resolverProxyConfiguration: {
       key: BOND_CONFIG_ID,
       version: 1,
@@ -267,7 +274,6 @@ export async function deployBondTokenFixture({
       break;
     }
     case BondRateType.Spt: {
-      // For SPT - need interestRate, impactData array, and projects
       const interestRate = interestRateParams ?? {
         maxRate: 100,
         baseRate: 50,
@@ -278,22 +284,20 @@ export async function deployBondTokenFixture({
         reportPeriod: 86400,
         rateDecimals: 2,
       };
-      // SPT ImpactData has different structure than KPI
-      // baseLineMode: 0 = FIXED, 1 = PERCENTAGE
-      // impactDataMode: 0 = PENALTY, 1 = BONUS
-      const sptImpactData = impactDataParams ?? {
-        baseLine: 1000,
-        baseLineMode: 0, // FIXED
-        deltaRate: 5,
-        impactDataMode: 0, // PENALTY
-      };
+
+      const sptImpactDataArray = impactDataParams
+        ? Array.isArray(impactDataParams)
+          ? impactDataParams
+          : [impactDataParams]
+        : [];
+      const sptProjects = projects ?? [];
+
       const bondSptData = {
         bondData,
         factoryRegulationData,
         interestRate,
-        impactData: [sptImpactData],
-        // SPT requires projects.length == impactData.length
-        projects: projects ?? [ethers.Wallet.createRandom().address],
+        impactData: sptImpactDataArray,
+        projects: sptProjects,
       };
       tx = await factory.deployBondSustainabilityPerformanceTargetRate(bondSptData, { gasLimit: GAS_LIMIT.high });
       eventName = "BondSustainabilityPerformanceTargetRateDeployed";
@@ -347,15 +351,63 @@ export async function deployBondTokenFixture({
   const kycFacet = KycFacet__factory.connect(diamond.target as string, deployer);
   const controlListFacet = ControlListFacet__factory.connect(diamond.target as string, deployer);
 
-  // Register test accounts in KYC if internal KYC is activated
+  // Register test accounts in internal KYC if activated
   if (secData.internalKycActivated) {
     const { deployer, user1, user2, user3, user4, user5 } = infrastructure;
-    const testAccounts = [deployer.address, user1.address, user2.address, user3.address, user4.address, user5.address];
+    const testAccounts = [deployer, user1, user2, user3, user4, user5];
+
+    // Grant KYC_ROLE and SSI_MANAGER_ROLE to deployer first
+    const KYC_ROLE = "0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d";
+    const SSI_MANAGER_ROLE = "0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0";
+    await accessControlFacet.grantRole(KYC_ROLE, deployer.address);
+    await accessControlFacet.grantRole(SSI_MANAGER_ROLE, deployer.address);
+
+    // Add deployer as an issuer in SSI
+    const { SsiManagementFacet__factory } = await import("@contract-types");
+    const ssiFacet = SsiManagementFacet__factory.connect(diamond.target as string, deployer);
+    try {
+      await ssiFacet.addIssuer(deployer.address);
+    } catch (error: any) {
+      if (!error.message?.includes("already") && !error.message?.includes("ListedIssuer")) {
+        console.warn("Could not add deployer as issuer:", error.message);
+      }
+    }
+
     for (const account of testAccounts) {
       try {
-        await kycFacet.addAddressToKycList(account);
-      } catch {
-        // Address might already be in KYC list
+        const address = await account.getAddress();
+        // Use current timestamp for validFrom and 1 year later for validTo
+        const validFrom = Math.floor(Date.now() / 1000);
+        const validTo = validFrom + 365 * 24 * 60 * 60;
+        await kycFacet.grantKyc(address, "test-vc-" + address.slice(0, 8), validFrom, validTo, deployer.address);
+      } catch (error: any) {
+        if (!error.message?.includes("already")) {
+          console.warn("Could not grant KYC:", await account.getAddress(), error.message);
+        }
+      }
+    }
+
+    // Register test users in T-REX IdentityRegistry (for ERC3643 compliance)
+    const { trexIdentity } = infrastructure;
+
+    // Always re-register deployer in case token uses different IdentityRegistry
+    try {
+      await registerUserIdentity(deployer, trexIdentity);
+    } catch (error: any) {
+      if (!error.message?.includes("already")) {
+        console.warn("Could not re-register deployer:", error.message);
+      }
+    }
+
+    // Register other test users
+    const testUsers = [user1, user2, user3, user4, user5];
+    for (const user of testUsers) {
+      try {
+        await registerUserIdentity(user, trexIdentity);
+      } catch (error: any) {
+        if (!error.message?.includes("already")) {
+          console.warn(`Could not register ${await user.getAddress()}:`, error.message);
+        }
       }
     }
   }

@@ -33,7 +33,11 @@ export async function executeRbac(accessControlFacet: AccessControlFacet, rbac: 
       const roleHash = ATS_ROLES[r.role as AtsRoleName] || (r.role as AtsRoleHash);
       await Promise.all(
         r.members.map(async (m) => {
-          return accessControlFacet.grantRole(roleHash, m);
+          // Check if role is already granted to avoid AccountAssignedToRole error
+          const hasRole = await accessControlFacet.hasRole(roleHash, m);
+          if (!hasRole) {
+            return accessControlFacet.grantRole(roleHash, m);
+          }
         }),
       );
     }),
@@ -41,12 +45,12 @@ export async function executeRbac(accessControlFacet: AccessControlFacet, rbac: 
 }
 
 export const DEFAULT_SECURITY_PARAMS = {
-  isWhiteList: false,
-  isControllable: true,
   arePartitionsProtected: false,
   isMultiPartition: false,
+  isControllable: true,
+  isWhiteList: false,
   maxSupply: MaxUint256,
-  name: "TEST_Security",
+  name: "Test Security",
   symbol: "TEST",
   decimals: 6,
   clearingActive: false,
@@ -56,7 +60,7 @@ export const DEFAULT_SECURITY_PARAMS = {
   externalKycLists: [],
   erc20VotesActivated: false,
   compliance: ZeroAddress,
-  identityRegistry: ZeroAddress,
+  identityRegistry: null as string | null,
   rbacs: [],
 };
 
@@ -85,7 +89,7 @@ export function getSecurityData(
     externalKycLists: (params?.externalKycLists as string[]) ?? DEFAULT_SECURITY_PARAMS.externalKycLists,
     erc20VotesActivated: params?.erc20VotesActivated ?? DEFAULT_SECURITY_PARAMS.erc20VotesActivated,
     compliance: params?.compliance ?? DEFAULT_SECURITY_PARAMS.compliance,
-    identityRegistry: params?.identityRegistry ?? DEFAULT_SECURITY_PARAMS.identityRegistry,
+    identityRegistry: params?.identityRegistry ?? ZeroAddress,
     resolverProxyConfiguration: {
       key: params?.resolverProxyConfiguration?.key ?? EQUITY_CONFIG_ID,
       version: params?.resolverProxyConfiguration?.version ?? 1,

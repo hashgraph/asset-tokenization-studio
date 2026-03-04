@@ -36,6 +36,10 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
         return LibBond.getBondDetails();
     }
 
+    function getRateType() external view returns (BondRateType rateType_) {
+        return bondStorage().rateType;
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════════
     // COUPON QUERIES
     // ═══════════════════════════════════════════════════════════════════════════════

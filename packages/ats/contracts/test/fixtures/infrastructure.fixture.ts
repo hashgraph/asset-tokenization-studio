@@ -19,6 +19,7 @@ import { ethers } from "hardhat";
 import { deploySystemWithNewBlr, configureLogger, LogLevel, DEFAULT_BATCH_SIZE } from "../../scripts";
 import { Factory__factory, BusinessLogicResolver__factory, ProxyAdmin__factory } from "@contract-types";
 import type { IFactory, BusinessLogicResolver, ProxyAdmin } from "@contract-types";
+import { deployMinimalTrexIdentityFixture } from "./trex/identitySetup.fixture";
 
 /**
  * Fixture: Deploy complete ATS infrastructure
@@ -61,6 +62,9 @@ export async function deployAtsInfrastructureFixture(
 
   const proxyAdmin = ProxyAdmin__factory.connect(deployment.infrastructure.proxyAdmin.address, deployer) as ProxyAdmin;
 
+  // Deploy T-REX identity infrastructure for deployer
+  const trexIdentity = await deployMinimalTrexIdentityFixture(deployer);
+
   return {
     // Signers
     signers,
@@ -76,6 +80,9 @@ export async function deployAtsInfrastructureFixture(
     factory,
     blr,
     proxyAdmin,
+
+    // T-REX identity infrastructure
+    trexIdentity,
 
     // Deployment metadata
     deployment,

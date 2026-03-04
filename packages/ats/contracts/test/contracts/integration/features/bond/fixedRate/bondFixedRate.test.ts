@@ -82,7 +82,7 @@ describe("Bond Fixed Rate Tests", () => {
       diamond.target,
     );
     const metadata = await erc20Facet.getERC20Metadata();
-    expect(metadata.securityType).to.be.equal(SecurityType.BOND);
+    expect(metadata.securityType).to.be.equal(SecurityType.BOND_FIXED_RATE);
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsFixed", async () => {

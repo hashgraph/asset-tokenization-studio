@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-03T16:17:08.342Z
+ * Generated: 2026-03-03T21:39:02.836Z
  * Facets: 59
  * Infrastructure: 2
  *
@@ -408,6 +408,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x6f131c78",
       },
       {
+        name: "getRateType",
+        signature: "function getRateType() view returns (uint8 rateType_)",
+        selector: "0xf043d0b1",
+      },
+      {
         name: "getSecurityHolders",
         signature: "function getSecurityHolders(uint256 _pageIndex, uint256 _pageLength) view returns (address[])",
         selector: "0x81438d2f",
@@ -622,6 +627,28 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function protectedClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x9b646ab9",
+      },
+    ],
+    events: [
+      {
+        name: "ClearedHoldByPartition",
+        signature: "ClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0xecba87eb6d871a001547362d9a9bb69ae25dd165858d73fe5cc600a705f3f3a0",
+      },
+      {
+        name: "ClearedHoldFromByPartition",
+        signature: "ClearedHoldFromByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0xc8f249767e17c28ab7d211bf631a717a0ee7f840405af4618f625a7659bf7f63",
+      },
+      {
+        name: "ClearedOperatorHoldByPartition",
+        signature: "ClearedOperatorHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0xa9683588d7eb6dd41a2a62f56bd396a439f9e506ac7ca2efa031bcc5f99b4651",
+      },
+      {
+        name: "ProtectedClearedHoldByPartition",
+        signature: "ProtectedClearedHoldByPartition(address,address,bytes32,uint256,Hold,uint256,bytes,bytes)",
+        topic0: "0x7fd4d7541b7da42375ec1b3f05c454acb77234a17c2f4349c102add4bc61e306",
       },
     ],
     factory: (signer) =>

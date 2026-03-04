@@ -96,6 +96,10 @@ const BOND_FACETS = [
   "KpiLinkedRateFacet",
   "SustainabilityPerformanceTargetRateFacet",
 
+  // KPI facets (for KPI-linked and SPT rate types)
+  "KpisKpiLinkedRateFacet",
+  "KpisSustainabilityPerformanceTargetRateFacet",
+
   // Jurisdiction-Specific
   "BondUSAFacet",
   "BondUSAReadFacet",
