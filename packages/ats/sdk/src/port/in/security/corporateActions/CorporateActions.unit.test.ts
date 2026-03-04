@@ -1,14 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createMock } from "@golevelup/ts-jest";
-import { ActionContentHashExistsRequest } from "../../request";
+import {
+  ActionContentHashExistsRequest,
+  GetCorporateActionRequest,
+  GetCorporateActionsRequest,
+  GetCorporateActionsByTypeRequest,
+} from "../../request";
 import LogService from "@service/log/LogService";
 import { QueryBus } from "@core/query/QueryBus";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import { ValidationError } from "@core/validation/ValidationError";
 import CorporateActions from "./CorporateActions";
 
-import { ActionContentHashExistsRequestFixture } from "@test/fixtures/corporateActions/CorporateActionsFixture";
+import {
+  ActionContentHashExistsRequestFixture,
+  GetCorporateActionRequestFixture,
+  GetCorporateActionResponseFixture,
+  GetCorporateActionsRequestFixture,
+  GetCorporateActionsResponseFixture,
+  GetCorporateActionsByTypeRequestFixture,
+} from "@test/fixtures/corporateActions/CorporateActionsFixture";
 import { ActionContentHashExistsQuery } from "@query/security/actionContentHashExists/ActionContentHashExistsQuery";
 
 describe("Corporate Actions", () => {
@@ -98,6 +110,149 @@ describe("Corporate Actions", () => {
       await expect(CorporateActions.actionContentHashExists(actionContentHashExistsRequest)).rejects.toThrow(
         ValidationError,
       );
+    });
+  });
+
+  describe("getCorporateAction", () => {
+    it("should get corporate action successfully", async () => {
+      const request = GetCorporateActionRequestFixture.create();
+      const expectedResponse = GetCorporateActionResponseFixture.create();
+
+      queryBusMock.execute.mockResolvedValue({ payload: expectedResponse });
+
+      const result = await CorporateActions.getCorporateAction(request);
+
+      expect(result).toEqual(expectedResponse);
+      expect(result.actionType).toBe(expectedResponse.actionType);
+      expect(result.actionTypeId).toBe(expectedResponse.actionTypeId);
+      expect(result.data).toBe(expectedResponse.data);
+      expect(result.isDisabled).toBe(expectedResponse.isDisabled);
+    });
+
+    it("should throw ValidationError for invalid securityId", async () => {
+      const invalidRequest = new GetCorporateActionRequest({
+        securityId: "invalid-id",
+        corporateActionId: "0x" + "a".repeat(64),
+      });
+
+      await expect(CorporateActions.getCorporateAction(invalidRequest)).rejects.toThrow();
+    });
+
+    it("should throw ValidationError for invalid corporateActionId", async () => {
+      const invalidRequest = new GetCorporateActionRequest({
+        securityId: "0.0.12345",
+        corporateActionId: "invalid-bytes32",
+      });
+
+      await expect(CorporateActions.getCorporateAction(invalidRequest)).rejects.toThrow();
+    });
+  });
+
+  describe("getCorporateActions", () => {
+    it("should get corporate actions successfully", async () => {
+      const request = GetCorporateActionsRequestFixture.create();
+      const expectedResponse = GetCorporateActionsResponseFixture.create();
+
+      queryBusMock.execute.mockResolvedValue({ payload: expectedResponse });
+
+      const result = await CorporateActions.getCorporateActions(request);
+
+      expect(result).toEqual(expectedResponse);
+      expect(result.actionTypes).toEqual(expectedResponse.actionTypes);
+      expect(result.actionTypeIds).toEqual(expectedResponse.actionTypeIds);
+      expect(result.datas).toEqual(expectedResponse.datas);
+      expect(result.isDisabled).toEqual(expectedResponse.isDisabled);
+    });
+
+    it("should throw ValidationError for invalid securityId", async () => {
+      const invalidRequest = new GetCorporateActionsRequest({
+        securityId: "invalid-id",
+        pageIndex: 0,
+        pageLength: 10,
+      });
+
+      await expect(CorporateActions.getCorporateActions(invalidRequest)).rejects.toThrow();
+    });
+
+    it("should throw ValidationError for invalid pageIndex", async () => {
+      const invalidRequest = new GetCorporateActionsRequest({
+        securityId: "0.0.12345",
+        pageIndex: -1,
+        pageLength: 10,
+      });
+
+      await expect(CorporateActions.getCorporateActions(invalidRequest)).rejects.toThrow();
+    });
+
+    it("should throw ValidationError for invalid pageLength", async () => {
+      const invalidRequest = new GetCorporateActionsRequest({
+        securityId: "0.0.12345",
+        pageIndex: 0,
+        pageLength: 0,
+      });
+
+      await expect(CorporateActions.getCorporateActions(invalidRequest)).rejects.toThrow();
+    });
+  });
+
+  describe("getCorporateActionsByType", () => {
+    it("should get corporate actions by type successfully", async () => {
+      const request = GetCorporateActionsByTypeRequestFixture.create();
+      const expectedResponse = GetCorporateActionsResponseFixture.create();
+
+      queryBusMock.execute.mockResolvedValue({ payload: expectedResponse });
+
+      const result = await CorporateActions.getCorporateActionsByType(request);
+
+      expect(result).toEqual(expectedResponse);
+      expect(result.actionTypes).toEqual(expectedResponse.actionTypes);
+      expect(result.actionTypeIds).toEqual(expectedResponse.actionTypeIds);
+      expect(result.datas).toEqual(expectedResponse.datas);
+      expect(result.isDisabled).toEqual(expectedResponse.isDisabled);
+    });
+
+    it("should throw ValidationError for invalid securityId", async () => {
+      const invalidRequest = new GetCorporateActionsByTypeRequest({
+        securityId: "invalid-id",
+        actionType: "0x" + "a".repeat(64),
+        pageIndex: 0,
+        pageLength: 10,
+      });
+
+      await expect(CorporateActions.getCorporateActionsByType(invalidRequest)).rejects.toThrow();
+    });
+
+    it("should throw ValidationError for invalid actionType", async () => {
+      const invalidRequest = new GetCorporateActionsByTypeRequest({
+        securityId: "0.0.12345",
+        actionType: "invalid-bytes32",
+        pageIndex: 0,
+        pageLength: 10,
+      });
+
+      await expect(CorporateActions.getCorporateActionsByType(invalidRequest)).rejects.toThrow();
+    });
+
+    it("should throw ValidationError for invalid pageIndex", async () => {
+      const invalidRequest = new GetCorporateActionsByTypeRequest({
+        securityId: "0.0.12345",
+        actionType: "0x" + "a".repeat(64),
+        pageIndex: -1,
+        pageLength: 10,
+      });
+
+      await expect(CorporateActions.getCorporateActionsByType(invalidRequest)).rejects.toThrow();
+    });
+
+    it("should throw ValidationError for invalid pageLength", async () => {
+      const invalidRequest = new GetCorporateActionsByTypeRequest({
+        securityId: "0.0.12345",
+        actionType: "0x" + "a".repeat(64),
+        pageIndex: 0,
+        pageLength: 0,
+      });
+
+      await expect(CorporateActions.getCorporateActionsByType(invalidRequest)).rejects.toThrow();
     });
   });
 });

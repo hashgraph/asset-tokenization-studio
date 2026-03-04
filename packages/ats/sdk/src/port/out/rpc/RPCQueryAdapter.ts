@@ -1409,6 +1409,57 @@ export class RPCQueryAdapter {
     return await this.connect(CorporateActionsFacet__factory, address.toString()).actionContentHashExists(contentHash);
   }
 
+  async getCorporateAction(
+    address: EvmAddress,
+    corporateActionId: string
+  ): Promise<{ actionType: string; actionTypeId: number; data: string; isDisabled: boolean }> {
+    LogService.logTrace(`Getting corporate action ${corporateActionId} for security: ${address.toString()}`);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
+      .getCorporateAction(corporateActionId);
+
+    return {
+      actionType: result.actionType_,
+      actionTypeId: Number(result.actionTypeId_),
+      data: result.data_,
+      isDisabled: result.isDisabled_,
+    };
+  }
+
+  async getCorporateActions(
+    address: EvmAddress,
+    pageIndex: number,
+    pageLength: number
+  ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
+    LogService.logTrace(`Getting corporate actions page ${pageIndex} for security: ${address.toString()}`);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
+      .getCorporateActions(pageIndex, pageLength);
+
+    return {
+      actionTypes: result.actionTypes_,
+      actionTypeIds: result.actionTypeIds_.map(id => Number(id)),
+      datas: result.datas_,
+      isDisabled: result.isDisabled_,
+    };
+  }
+
+  async getCorporateActionsByType(
+    address: EvmAddress,
+    actionType: string,
+    pageIndex: number,
+    pageLength: number
+  ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
+    LogService.logTrace(`Getting corporate actions of type ${actionType} page ${pageIndex} for security: ${address.toString()}`);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
+      .getCorporateActionsByType(actionType, pageIndex, pageLength);
+
+    return {
+      actionTypes: result.actionTypes_,
+      actionTypeIds: result.actionTypeIds_.map(id => Number(id)),
+      datas: result.datas_,
+      isDisabled: result.isDisabled_,
+    };
+  }
+
   async getRate(address: EvmAddress): Promise<[bigint, number]> {
     const result = await this.connect(FixedRate__factory, address.toString()).getRate();
     return [result.rate_, Number(result.decimals_)];
