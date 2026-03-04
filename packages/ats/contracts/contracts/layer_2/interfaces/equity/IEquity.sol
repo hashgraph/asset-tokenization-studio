@@ -112,6 +112,14 @@ interface IEquity {
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) external returns (uint256 balanceAdjustmentID_);
 
+    /**
+     * @notice Cancels a scheduled balance adjustment
+     * @dev Can only be called by an account with the corporate actions role.
+     * @param _balanceAdjustmentId The ID of the scheduled balance adjustment to cancel
+     * @return success_ True if the scheduled balance adjustment was cancelled successfully
+     */
+    function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) external returns (bool success_);
+
     function getEquityDetails() external view returns (EquityDetailsData memory equityDetailsData_);
 
     /**
@@ -199,7 +207,7 @@ interface IEquity {
      */
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_);
 
     /**
      * @notice Returns the total number of scheduled balance adjustments

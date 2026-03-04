@@ -7,6 +7,7 @@
 import { CommandBus } from "@core/command/CommandBus";
 import {
   _PARTITION_ID_1,
+  CANCEL_COUPON_EVENT,
   CANCEL_DIVIDEND_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
@@ -657,6 +658,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [couponStruct],
       GAS.SET_COUPON,
       SET_COUPON_EVENT,
+    );
+  }
+
+  async cancelCoupon(security: EvmAddress, couponId: number): Promise<TransactionResponse> {
+    LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
+
+    return this.executeTransaction(
+      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelCoupon",
+      [couponId],
+      GAS.CANCEL_COUPON,
+      CANCEL_COUPON_EVENT,
     );
   }
 

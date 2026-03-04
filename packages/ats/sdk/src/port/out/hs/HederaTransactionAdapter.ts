@@ -1028,6 +1028,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
+
+    return this.executeWithArgs(
+      new BondUSAFacet__factory().attach(security.toString()),
+      "cancelCoupon",
+      securityId,
+      GAS.CANCEL_COUPON,
+      [couponId],
+    );
+  }
+
   async takeSnapshot(security: EvmAddress, securityId: ContractId | string): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
 

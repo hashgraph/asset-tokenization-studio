@@ -434,6 +434,7 @@ export class RPCQueryAdapter {
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
+    //TODO change this
     const votingInfo = (await this.connect(Equity__factory, address.toString()).getVoting(voting)).registeredVoting_;
 
     return new VotingRights(
@@ -456,7 +457,7 @@ export class RPCQueryAdapter {
 
     const couponFor = await this.connect(BondRead__factory, address.toString()).getCouponFor(coupon, target.toString());
 
-    return new CouponFor(new BigDecimal(couponFor.tokenBalance), Number(couponFor.decimals));
+    return new CouponFor(new BigDecimal(couponFor.tokenBalance), Number(couponFor.decimals), couponFor.isDisabled);
   }
 
   async getCouponAmountFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponAmountFor> {
@@ -485,19 +486,21 @@ export class RPCQueryAdapter {
   async getCoupon(address: EvmAddress, coupon: number): Promise<Coupon> {
     LogService.logTrace(`Getting Coupon`);
 
-    //TODO change this
-    const couponInfo = (await this.connect(BondRead__factory, address.toString()).getCoupon(coupon)).registeredCoupon_;
+    const { registeredCoupon_, isDisabled_ } = await this.connect(BondRead__factory, address.toString()).getCoupon(
+      coupon,
+    );
 
     return new Coupon(
-      Number(couponInfo.coupon.recordDate),
-      Number(couponInfo.coupon.executionDate),
-      new BigDecimal(couponInfo.coupon.rate.toString()),
-      Number(couponInfo.coupon.rateDecimals),
-      Number(couponInfo.coupon.startDate),
-      Number(couponInfo.coupon.endDate),
-      Number(couponInfo.coupon.fixingDate),
-      CastRateStatus.fromBigint(couponInfo.coupon.rateStatus),
-      Number(couponInfo.snapshotId),
+      Number(registeredCoupon_.coupon.recordDate),
+      Number(registeredCoupon_.coupon.executionDate),
+      new BigDecimal(registeredCoupon_.coupon.rate.toString()),
+      Number(registeredCoupon_.coupon.rateDecimals),
+      Number(registeredCoupon_.coupon.startDate),
+      Number(registeredCoupon_.coupon.endDate),
+      Number(registeredCoupon_.coupon.fixingDate),
+      CastRateStatus.fromBigint(registeredCoupon_.coupon.rateStatus),
+      Number(registeredCoupon_.snapshotId),
+      isDisabled_,
     );
   }
 

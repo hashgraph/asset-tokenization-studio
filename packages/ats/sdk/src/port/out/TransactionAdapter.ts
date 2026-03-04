@@ -229,6 +229,11 @@ interface ITransactionAdapter {
     rateStatus: RateStatus,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
+  cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
   setDocument(
     security: EvmAddress,
     name: string,
@@ -1136,6 +1141,11 @@ export default abstract class TransactionAdapter
     endDate: BigDecimal,
     fixingDate: BigDecimal,
     rateStatus: RateStatus,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract setVotingRights(
