@@ -508,6 +508,45 @@ describe("Bond KpiLinked Rate Tests", () => {
 
       await checkMinDates(originalFixingDate);
     });
+
+    it("GIVEN a cancelled coupon WHEN triggerScheduledCrossOrderedTasks executes THEN coupon is not added in ordered list", async () => {
+      const timestamp = await getDltTimestamp();
+
+      const coupon1 = {
+        recordDate: (timestamp + TIME_PERIODS_S.WEEK).toString(),
+        executionDate: (timestamp + TIME_PERIODS_S.WEEK * 2).toString(),
+        rate: 0,
+        rateDecimals: 0,
+        startDate: timestamp.toString(),
+        endDate: (timestamp + TIME_PERIODS_S.DAY * 7).toString(),
+        fixingDate: (timestamp + TIME_PERIODS_S.WEEK).toString(),
+        rateStatus: 0,
+      };
+
+      const coupon2 = {
+        recordDate: (timestamp + TIME_PERIODS_S.WEEK * 2).toString(),
+        executionDate: (timestamp + TIME_PERIODS_S.WEEK * 3).toString(),
+        rate: 0,
+        rateDecimals: 0,
+        startDate: timestamp.toString(),
+        endDate: (timestamp + TIME_PERIODS_S.WEEK * 2).toString(),
+        fixingDate: (timestamp + TIME_PERIODS_S.WEEK * 2).toString(),
+        rateStatus: 0,
+      };
+
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon1);
+      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(coupon2);
+
+      await bondKpiLinkedRateFacet.connect(signer_A).cancelCoupon(1);
+
+      await timeTravelFacet.changeSystemTimestamp(timestamp + TIME_PERIODS_S.WEEK * 3);
+
+      await scheduledTasksFacet.connect(signer_A).triggerScheduledCrossOrderedTasks(100);
+
+      const orderedList = await bondReadFacet.getCouponsOrderedList(0, 10);
+      expect(orderedList).to.be.an("array").with.lengthOf(1);
+      expect(orderedList[0]).to.equal(2); // couponId 2 is the only one in the ordered list
+    });
   });
 
   describe("Bond Read - Ordered List", () => {
