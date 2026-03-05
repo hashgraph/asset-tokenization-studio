@@ -28,6 +28,8 @@ import KycAccountDataViewModel from "./KycAccountDataViewModel";
 import ClearingCreateHoldViewModel from "./ClearingCreateHoldViewModel";
 import ClearingRedeemViewModel from "./ClearingRedeemViewModel";
 import ClearingTransferViewModel from "./ClearingTransferViewModel";
+import GetCorporateActionResponse from "./corporateActions/GetCorporateActionResponse";
+import GetCorporateActionsResponse from "./corporateActions/GetCorporateActionsResponse";
 
 export {
   AccountViewModel,
@@ -58,4 +60,6 @@ export {
   ClearingCreateHoldViewModel,
   ClearingRedeemViewModel,
   ClearingTransferViewModel,
+  GetCorporateActionResponse,
+  GetCorporateActionsResponse,
 };
