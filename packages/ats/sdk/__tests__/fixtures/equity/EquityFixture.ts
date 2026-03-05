@@ -46,6 +46,8 @@ import { GetConfigInfoQuery } from "@query/management/GetConfigInfoQuery";
 import { SetScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand";
 import { CreateEquityCommand } from "@command/equity/create/CreateEquityCommand";
 import { SetDividendsCommand } from "@command/equity/dividends/set/SetDividendsCommand";
+import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
+import CancelDividendRequest from "@port/in/request/equity/CancelDividendRequest";
 import { SetVotingRightsCommand } from "@command/equity/votingRights/set/SetVotingRightsCommand";
 import ContractId from "@domain/context/contract/ContractId";
 import { SecurityPropsFixture } from "../shared/SecurityFixture";
@@ -374,6 +376,16 @@ export const SetScheduledBalanceAdjustmentCommandFixture = createFixture<SetSche
   },
 );
 
+export const CancelDividendCommandFixture = createFixture<CancelDividendCommand>((command) => {
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
+  command.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+});
+
+export const CancelDividendRequestFixture = createFixture<CancelDividendRequest>((request) => {
+  request.securityId.as(() => HederaIdPropsFixture.create().value);
+  request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+});
+
 export const SetDividendsCommandFixture = createFixture<SetDividendsCommand>((command) => {
   command.address.as(() => HederaIdPropsFixture.create().value);
   let recordDate: Date;
@@ -410,11 +422,13 @@ export const DividendFixture = createFixture<Dividend>((props) => {
   props.recordTimeStamp.faker((faker) => faker.date.past());
   props.executionTimeStamp.faker((faker) => faker.date.future());
   props.snapshotId?.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  props.isDisabled.faker((faker) => faker.datatype.boolean());
 });
 
 export const DividendForFixture = createFixture<DividendFor>((props) => {
   props.tokenBalance.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   props.decimals.faker((faker) => faker.date.past());
+  props.isDisabled.faker((faker) => faker.datatype.boolean());
 });
 
 export const EquityDetailsFixture = createFixture<EquityDetails>((props) => {
