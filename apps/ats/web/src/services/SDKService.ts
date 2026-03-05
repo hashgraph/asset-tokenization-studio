@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 import {
   ApplyRolesRequest,
@@ -526,12 +526,12 @@ export class SDKService {
 
   // DIVIDENDS ////////////////////////////////////////////
   public static async setDividends(req: SetDividendsRequest): Promise<number> {
-    const response = await Equity.setDividends(req);
+    const response = await Equity.setDividend(req);
     return response.payload;
   }
 
   public static async getDividendsFor(req: GetDividendsForRequest): Promise<DividendsForViewModel> {
-    return await Equity.getDividendsFor(req);
+    return await Equity.getDividendFor(req);
   }
 
   public static async getDividendAmountFor(req: GetDividendsForRequest): Promise<DividendAmountForViewModel> {
@@ -539,7 +539,7 @@ export class SDKService {
   }
 
   public static async getDividends(req: GetDividendsRequest): Promise<DividendsViewModel> {
-    return await Equity.getDividends(req);
+    return await Equity.getDividend(req);
   }
 
   public static async getAllDividends(req: GetAllDividendsRequest): Promise<DividendsViewModel[]> {

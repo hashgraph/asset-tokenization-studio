@@ -60,6 +60,7 @@ describe(OnChainDistributionRepository.name, () => {
           endDate: faker.date.future(),
           fixingDate: faker.date.recent(),
           rateStatus: 1,
+          isDisabled: false,
         },
       ]
       mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
@@ -77,6 +78,7 @@ describe(OnChainDistributionRepository.name, () => {
           amountPerUnitOfSecurity: faker.number.float({ min: 1, max: 100 }).toString(),
           recordDate: faker.date.recent(),
           amountDecimals: 18,
+          isDisabled: false,
         },
       ]
       mockEquity.getAllDividends.mockResolvedValue(mockDividends)
@@ -112,6 +114,7 @@ describe(OnChainDistributionRepository.name, () => {
           endDate: faker.date.future(),
           fixingDate: faker.date.recent(),
           rateStatus: 1,
+          isDisabled: false,
         },
         {
           couponId: 1,
@@ -123,6 +126,7 @@ describe(OnChainDistributionRepository.name, () => {
           endDate: faker.date.future(),
           fixingDate: faker.date.recent(),
           rateStatus: 1,
+          isDisabled: false,
         },
       ]
       mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
@@ -151,6 +155,7 @@ describe(OnChainDistributionRepository.name, () => {
           endDate: faker.date.future(),
           fixingDate: faker.date.recent(),
           rateStatus: 1,
+          isDisabled: false,
         },
       ]
       mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
@@ -185,6 +190,7 @@ describe(OnChainDistributionRepository.name, () => {
           endDate: faker.date.future(),
           fixingDate: faker.date.recent(),
           rateStatus: 1,
+          isDisabled: false,
         },
         {
           couponId: 3,
@@ -196,6 +202,7 @@ describe(OnChainDistributionRepository.name, () => {
           endDate: faker.date.future(),
           fixingDate: faker.date.recent(),
           rateStatus: 1,
+          isDisabled: false,
         },
         {
           couponId: 2,
@@ -207,6 +214,7 @@ describe(OnChainDistributionRepository.name, () => {
           endDate: faker.date.future(),
           fixingDate: faker.date.recent(),
           rateStatus: 1,
+          isDisabled: false,
         },
       ]
       mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
@@ -234,6 +242,7 @@ describe(OnChainDistributionRepository.name, () => {
           amountPerUnitOfSecurity: faker.number.float({ min: 1, max: 100 }).toString(),
           recordDate: faker.date.recent(),
           amountDecimals: 18,
+          isDisabled: false,
         },
         {
           dividendId: 1,
@@ -241,6 +250,7 @@ describe(OnChainDistributionRepository.name, () => {
           amountPerUnitOfSecurity: faker.number.float({ min: 1, max: 100 }).toString(),
           recordDate: faker.date.recent(),
           amountDecimals: 18,
+          isDisabled: false,
         },
       ]
       mockEquity.getAllDividends.mockResolvedValue(mockDividends)
@@ -265,6 +275,7 @@ describe(OnChainDistributionRepository.name, () => {
           amountPerUnitOfSecurity: faker.number.float({ min: 1, max: 100 }).toString(),
           recordDate: faker.date.recent(),
           amountDecimals: 18,
+          isDisabled: false,
         },
       ]
       mockEquity.getAllDividends.mockResolvedValue(mockDividends)
@@ -295,6 +306,7 @@ describe(OnChainDistributionRepository.name, () => {
           amountPerUnitOfSecurity: faker.number.float({ min: 1, max: 100 }).toString(),
           recordDate: faker.date.recent(),
           amountDecimals: 18,
+          isDisabled: false,
         },
         {
           dividendId: 3,
@@ -302,6 +314,7 @@ describe(OnChainDistributionRepository.name, () => {
           amountPerUnitOfSecurity: faker.number.float({ min: 1, max: 100 }).toString(),
           recordDate: faker.date.recent(),
           amountDecimals: 18,
+          isDisabled: false,
         },
         {
           dividendId: 2,
@@ -309,6 +322,7 @@ describe(OnChainDistributionRepository.name, () => {
           amountPerUnitOfSecurity: faker.number.float({ min: 1, max: 100 }).toString(),
           recordDate: faker.date.recent(),
           amountDecimals: 18,
+          isDisabled: false,
         },
       ]
       mockEquity.getAllDividends.mockResolvedValue(mockDividends)

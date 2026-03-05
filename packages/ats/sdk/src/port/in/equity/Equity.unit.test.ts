@@ -22,6 +22,7 @@ import {
   GetVotingHoldersRequest,
   GetTotalVotingHoldersRequest,
   CreateTrexSuiteEquityRequest,
+  CancelDividendRequest,
 } from "../request";
 import { HederaIdPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
 import LogService from "@service/log/LogService";
@@ -58,6 +59,7 @@ import {
   GetVotingRightsRequestFixture,
   ScheduledBalanceAdjustmentFixture,
   SetDividendsRequestFixture,
+  CancelDividendRequestFixture,
   SetScheduledBalanceAdjustmentRequestFixture,
   SetVotingRightsRequestFixture,
   VotingRightsFixture,
@@ -70,6 +72,7 @@ import { GetVotingForQuery } from "@query/equity/votingRights/getVotingFor/GetVo
 import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQuery";
 import { GetVotingCountQuery } from "@query/equity/votingRights/getVotingCount/GetVotingCountQuery";
 import { SetDividendsCommand } from "@command/equity/dividends/set/SetDividendsCommand";
+import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
 import { GetDividendsForQuery } from "@query/equity/dividends/getDividendsFor/GetDividendsForQuery";
 import { GetDividendsQuery } from "@query/equity/dividends/getDividends/GetDividendsQuery";
 import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCount/GetDividendsCountQuery";
@@ -106,6 +109,7 @@ describe("Equity", () => {
   let getVotingHoldersRequest: GetVotingHoldersRequest;
   let getTotalVotingHoldersRequest: GetTotalVotingHoldersRequest;
   let createTrexSuiteEquityRequest: CreateTrexSuiteEquityRequest;
+  let cancelDividendRequest: CancelDividendRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -825,12 +829,56 @@ describe("Equity", () => {
     });
   });
 
+  describe("cancelDividend", () => {
+    cancelDividendRequest = new CancelDividendRequest(CancelDividendRequestFixture.create());
+
+    it("should cancel dividend successfully", async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await EquityToken.cancelDividend(cancelDividendRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("CancelDividendRequest", cancelDividendRequest);
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CancelDividendCommand(cancelDividendRequest.securityId, cancelDividendRequest.dividendId),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(EquityToken.cancelDividend(cancelDividendRequest)).rejects.toThrow("Command execution failed");
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("CancelDividendRequest", cancelDividendRequest);
+    });
+
+    it("should throw error if securityId is invalid", async () => {
+      cancelDividendRequest = new CancelDividendRequest({
+        ...CancelDividendRequestFixture.create(),
+        securityId: "invalid",
+      });
+
+      await expect(EquityToken.cancelDividend(cancelDividendRequest)).rejects.toThrow(ValidationError);
+    });
+  });
+
   describe("getDividendsFor", () => {
     getDividendsForRequest = new GetDividendsForRequest(GetDividendsForRequestFixture.create());
     it("should get dividends for successfully", async () => {
       const expectedResponse = {
         tokenBalance: new BigDecimal(BigInt(10)),
         decimals: 1,
+        isDisabled: false,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
@@ -853,6 +901,7 @@ describe("Equity", () => {
         expect.objectContaining({
           tokenBalance: expectedResponse.tokenBalance.toString(),
           decimals: expectedResponse.decimals.toString(),
+          isDisabled: expectedResponse.isDisabled,
         }),
       );
     });
@@ -927,6 +976,7 @@ describe("Equity", () => {
           amountPerUnitOfSecurity: expectedResponse.dividend.amountPerUnitOfSecurity.toString(),
           recordDate: new Date(expectedResponse.dividend.recordTimeStamp * ONE_THOUSAND),
           executionDate: new Date(expectedResponse.dividend.executionTimeStamp * ONE_THOUSAND),
+          isDisabled: expectedResponse.dividend.isDisabled,
         }),
       );
     });
@@ -997,8 +1047,10 @@ describe("Equity", () => {
           {
             dividendId: 1,
             amountPerUnitOfSecurity: expectedResponse2.dividend.amountPerUnitOfSecurity.toString(),
+            amountDecimals: expectedResponse2.dividend.amountDecimals,
             recordDate: new Date(expectedResponse2.dividend.recordTimeStamp * ONE_THOUSAND),
             executionDate: new Date(expectedResponse2.dividend.executionTimeStamp * ONE_THOUSAND),
+            isDisabled: expectedResponse2.dividend.isDisabled,
           },
         ]),
       );

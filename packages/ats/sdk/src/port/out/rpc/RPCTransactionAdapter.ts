@@ -8,6 +8,7 @@ import { CommandBus } from "@core/command/CommandBus";
 import {
   _PARTITION_ID_1,
   CANCEL_COUPON_EVENT,
+  CANCEL_DIVIDEND_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
   SET_COUPON_EVENT,
@@ -562,7 +563,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async setDividends(
+  async setDividend(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
@@ -587,6 +588,16 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [dividendStruct],
       GAS.SET_DIVIDENDS,
       SET_DIVIDEND_EVENT,
+    );
+  }
+
+  async cancelDividend(security: EvmAddress, dividendId: number): Promise<TransactionResponse> {
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelDividend",
+      [dividendId],
+      GAS.CANCEL_DIVIDEND,
+      CANCEL_DIVIDEND_EVENT,
     );
   }
 

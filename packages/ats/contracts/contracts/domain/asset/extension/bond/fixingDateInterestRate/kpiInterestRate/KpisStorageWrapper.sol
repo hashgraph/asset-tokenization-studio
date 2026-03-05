@@ -8,6 +8,7 @@ import { InternalsKpiInterestRate } from "./Internals.sol";
 import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "../../../../../../domain/Internals.sol";
 import { BondStorageWrapper } from "../../../../../../domain/asset/bond/BondStorageWrapper.sol";
+import { IBondRead } from "../../../../../../facets/layer_2/bond/IBondRead.sol";
 
 abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWrapperFixingDateInterestRate {
     using CheckpointsLib for CheckpointsLib.Checkpoint[];

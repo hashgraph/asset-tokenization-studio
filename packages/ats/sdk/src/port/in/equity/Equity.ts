@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SetDividendsCommand } from "@command/equity/dividends/set/SetDividendsCommand";
+import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
 import { GetDividendsQuery } from "@query/equity/dividends/getDividends/GetDividendsQuery";
 import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCount/GetDividendsCountQuery";
 import { GetDividendsForQuery } from "@query/equity/dividends/getDividendsFor/GetDividendsForQuery";
@@ -53,6 +54,7 @@ import { GetTotalDividendHoldersQuery } from "@query/equity/dividends/getTotalDi
 import { GetVotingHoldersQuery } from "@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery";
 import { GetTotalVotingHoldersQuery } from "@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery";
 import GetAllScheduledBalanceAdjustmentsRequest from "../request/equity/GetAllScheduledBalanceAdjustmentst";
+import CancelDividendRequest from "../request/equity/CancelDividendRequest";
 import GetDividendHoldersRequest from "../request/equity/GetDividendHoldersRequest";
 import GetTotalDividendHoldersRequest from "../request/equity/GetTotalDividendHoldersRequest";
 import GetVotingHoldersRequest from "../request/equity/GetVotingHoldersRequest";
@@ -68,6 +70,7 @@ interface IEquityInPort {
   }>;
   getEquityDetails(request: GetEquityDetailsRequest): Promise<EquityDetailsViewModel>;
   setDividends(request: SetDividendsRequest): Promise<{ payload: number; transactionId: string }>;
+  cancelDividend(request: CancelDividendRequest): Promise<{ payload: boolean; transactionId: string }>;
   getDividendsFor(request: GetDividendsForRequest): Promise<DividendsForViewModel>;
   getDividendAmountFor(request: GetDividendsForRequest): Promise<DividendAmountForViewModel>;
   getDividends(request: GetDividendsRequest): Promise<DividendsViewModel>;
@@ -357,6 +360,14 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
+  async cancelDividend(request: CancelDividendRequest): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, dividendId } = request;
+    ValidatedRequest.handleValidation("CancelDividendRequest", request);
+
+    return await this.commandBus.execute(new CancelDividendCommand(securityId, dividendId));
+  }
+
+  @LogError
   async getDividendsFor(request: GetDividendsForRequest): Promise<DividendsForViewModel> {
     ValidatedRequest.handleValidation("GetDividendsForRequest", request);
 
@@ -367,6 +378,7 @@ class EquityInPort implements IEquityInPort {
     const dividendsFor: DividendsForViewModel = {
       tokenBalance: res.tokenBalance.toString(),
       decimals: res.decimals.toString(),
+      isDisabled: res.isDisabled,
     };
 
     return dividendsFor;
@@ -401,6 +413,7 @@ class EquityInPort implements IEquityInPort {
       amountDecimals: res.dividend.amountDecimals,
       recordDate: new Date(res.dividend.recordTimeStamp * ONE_THOUSAND),
       executionDate: new Date(res.dividend.executionTimeStamp * ONE_THOUSAND),
+      isDisabled: res.dividend.isDisabled,
     };
 
     return dividend;
@@ -425,6 +438,7 @@ class EquityInPort implements IEquityInPort {
         amountDecimals: res.dividend.amountDecimals,
         recordDate: new Date(res.dividend.recordTimeStamp * ONE_THOUSAND),
         executionDate: new Date(res.dividend.executionTimeStamp * ONE_THOUSAND),
+        isDisabled: res.dividend.isDisabled,
       };
 
       dividends.push(dividend);

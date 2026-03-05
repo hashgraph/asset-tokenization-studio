@@ -1384,7 +1384,7 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     } as TransactionResponse;
   });
 
-  singletonInstance.setDividends = jest.fn(
+  singletonInstance.setDividend = jest.fn(
     async (address: EvmAddress, recordDate: BigDecimal, executionDate: BigDecimal, amount: BigDecimal) => {
       const dividend = new Dividend(
         amount,
