@@ -23,8 +23,8 @@ export default class GetCorporateActionsByTypeRequest extends ValidatedRequest<G
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       actionType: FormatValidation.checkBytes32Format(),
-      pageIndex: FormatValidation.checkIsNotNegative(),
-      pageLength: FormatValidation.checkIsPositive(),
+      pageIndex: FormatValidation.checkNumber({ min: 0 }),
+      pageLength: FormatValidation.checkNumber({ min: 1 }),
     });
 
     this.securityId = securityId;

@@ -115,7 +115,11 @@ describe("Corporate Actions", () => {
 
   describe("getCorporateAction", () => {
     it("should get corporate action successfully", async () => {
-      const request = GetCorporateActionRequestFixture.create();
+      const fixtureData = GetCorporateActionRequestFixture.create();
+      const request = new GetCorporateActionRequest({
+        securityId: fixtureData.securityId,
+        corporateActionId: fixtureData.corporateActionId,
+      });
       const expectedResponse = GetCorporateActionResponseFixture.create();
 
       queryBusMock.execute.mockResolvedValue({ payload: expectedResponse });
@@ -150,7 +154,12 @@ describe("Corporate Actions", () => {
 
   describe("getCorporateActions", () => {
     it("should get corporate actions successfully", async () => {
-      const request = GetCorporateActionsRequestFixture.create();
+      const fixtureData = GetCorporateActionsRequestFixture.create();
+      const request = new GetCorporateActionsRequest({
+        securityId: fixtureData.securityId,
+        pageIndex: fixtureData.pageIndex,
+        pageLength: fixtureData.pageLength,
+      });
       const expectedResponse = GetCorporateActionsResponseFixture.create();
 
       queryBusMock.execute.mockResolvedValue({ payload: expectedResponse });
@@ -197,7 +206,13 @@ describe("Corporate Actions", () => {
 
   describe("getCorporateActionsByType", () => {
     it("should get corporate actions by type successfully", async () => {
-      const request = GetCorporateActionsByTypeRequestFixture.create();
+      const fixtureData = GetCorporateActionsByTypeRequestFixture.create();
+      const request = new GetCorporateActionsByTypeRequest({
+        securityId: fixtureData.securityId,
+        actionType: fixtureData.actionType,
+        pageIndex: fixtureData.pageIndex,
+        pageLength: fixtureData.pageLength,
+      });
       const expectedResponse = GetCorporateActionsResponseFixture.create();
 
       queryBusMock.execute.mockResolvedValue({ payload: expectedResponse });

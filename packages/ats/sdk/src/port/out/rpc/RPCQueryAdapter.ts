@@ -1310,12 +1310,12 @@ export class RPCQueryAdapter {
         pageIndex,
         pageLength,
       );
-      return couponIds.map((id) => Number(id));
+      return couponIds.map((id: any) => Number(id));
     }
 
     // Otherwise get all coupons (simulate by getting first page with large length)
     const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(0, 1000);
-    return couponIds.map((id) => Number(id));
+    return couponIds.map((id: any) => Number(id));
   }
 
   async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
@@ -1436,7 +1436,7 @@ export class RPCQueryAdapter {
 
     return {
       actionTypes: result.actionTypes_,
-      actionTypeIds: result.actionTypeIds_.map(id => Number(id)),
+      actionTypeIds: result.actionTypeIds_.map((id: any) => Number(id)),
       datas: result.datas_,
       isDisabled: result.isDisabled_,
     };
@@ -1454,7 +1454,7 @@ export class RPCQueryAdapter {
 
     return {
       actionTypes: result.actionTypes_,
-      actionTypeIds: result.actionTypeIds_.map(id => Number(id)),
+      actionTypeIds: result.actionTypeIds_.map((id: any) => Number(id)),
       datas: result.datas_,
       isDisabled: result.isDisabled_,
     };

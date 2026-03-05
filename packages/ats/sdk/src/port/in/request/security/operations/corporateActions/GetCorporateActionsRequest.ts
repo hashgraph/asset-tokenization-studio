@@ -11,8 +11,8 @@ export default class GetCorporateActionsRequest extends ValidatedRequest<GetCorp
   constructor({ securityId, pageIndex, pageLength }: { securityId: string; pageIndex: number; pageLength: number }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
-      pageIndex: FormatValidation.checkIsNotNegative(),
-      pageLength: FormatValidation.checkIsPositive(),
+      pageIndex: FormatValidation.checkNumber({ min: 0 }),
+      pageLength: FormatValidation.checkNumber({ min: 1 }),
     });
 
     this.securityId = securityId;
