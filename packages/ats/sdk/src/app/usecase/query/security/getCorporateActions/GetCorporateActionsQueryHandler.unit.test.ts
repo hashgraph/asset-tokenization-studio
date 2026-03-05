@@ -65,11 +65,7 @@ describe("GetCorporateActionsQueryHandler", () => {
 
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
-      expect(queryAdapterServiceMock.getCorporateActions).toHaveBeenCalledWith(
-        evmAddress,
-        query.pageIndex,
-        query.pageLength,
-      );
+      expect(queryAdapterServiceMock.getCorporateActions).toHaveBeenCalledWith(evmAddress, query.start, query.end);
     });
   });
 });

@@ -71,8 +71,8 @@ describe("GetCorporateActionsByTypeQueryHandler", () => {
       expect(queryAdapterServiceMock.getCorporateActionsByType).toHaveBeenCalledWith(
         evmAddress,
         query.actionType,
-        query.pageIndex,
-        query.pageLength,
+        query.start,
+        query.end,
       );
     });
   });
