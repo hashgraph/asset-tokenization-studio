@@ -43,14 +43,14 @@ export const GetCorporateActionResponseFixture = createFixture<GetCorporateActio
 
 export const GetCorporateActionsRequestFixture = createFixture<GetCorporateActionsRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
-  request.pageIndex.faker((faker) => faker.number.int({ min: 0, max: 10 }));
-  request.pageLength.faker((faker) => faker.number.int({ min: 1, max: 100 }));
+  request.start.faker((faker) => faker.number.int({ min: 0, max: 10 }));
+  request.end.faker((faker) => faker.number.int({ min: 1, max: 100 }));
 });
 
 export const GetCorporateActionsQueryFixture = createFixture<GetCorporateActionsQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.pageIndex.faker((faker) => faker.number.int({ min: 0, max: 10 }));
-  query.pageLength.faker((faker) => faker.number.int({ min: 1, max: 100 }));
+  query.start.faker((faker: any) => faker.number.int({ min: 0, max: 10 }));
+  query.end.faker((faker: any) => faker.number.int({ min: 1, max: 100 }));
 });
 
 export const GetCorporateActionsResponseFixture = createFixture<GetCorporateActionsResponse>((response) => {
@@ -77,13 +77,13 @@ export const GetCorporateActionsResponseFixture = createFixture<GetCorporateActi
 export const GetCorporateActionsByTypeRequestFixture = createFixture<GetCorporateActionsByTypeRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
   request.actionType.faker((faker) => `0x${faker.string.hexadecimal({ length: 64, prefix: "" })}`);
-  request.pageIndex.faker((faker) => faker.number.int({ min: 0, max: 10 }));
-  request.pageLength.faker((faker) => faker.number.int({ min: 1, max: 100 }));
+  request.start.faker((faker) => faker.number.int({ min: 0, max: 10 }));
+  request.end.faker((faker) => faker.number.int({ min: 1, max: 100 }));
 });
 
 export const GetCorporateActionsByTypeQueryFixture = createFixture<GetCorporateActionsByTypeQuery>((query) => {
   query.securityId.as(() => HederaIdPropsFixture.create().value);
-  query.actionType.faker((faker) => `0x${faker.string.hexadecimal({ length: 64, prefix: "" })}`);
-  query.pageIndex.faker((faker) => faker.number.int({ min: 0, max: 10 }));
-  query.pageLength.faker((faker) => faker.number.int({ min: 1, max: 100 }));
+  query.actionType.faker((faker: any) => `0x${faker.string.hexadecimal({ length: 64, prefix: "" })}`);
+  query.start.faker((faker: any) => faker.number.int({ min: 0, max: 10 }));
+  query.end.faker((faker: any) => faker.number.int({ min: 1, max: 100 }));
 });

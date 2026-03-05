@@ -1427,12 +1427,12 @@ export class RPCQueryAdapter {
 
   async getCorporateActions(
     address: EvmAddress,
-    pageIndex: number,
-    pageLength: number
+    start: number,
+    end: number
   ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
-    LogService.logTrace(`Getting corporate actions page ${pageIndex} for security: ${address.toString()}`);
+    LogService.logTrace(`Getting corporate actions from ${start} to ${end} for security: ${address.toString()}`);
     const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateActions(pageIndex, pageLength);
+      .getCorporateActions(start, end);
 
     return {
       actionTypes: result.actionTypes_,
@@ -1445,12 +1445,12 @@ export class RPCQueryAdapter {
   async getCorporateActionsByType(
     address: EvmAddress,
     actionType: string,
-    pageIndex: number,
-    pageLength: number
+    start: number,
+    end: number
   ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
-    LogService.logTrace(`Getting corporate actions of type ${actionType} page ${pageIndex} for security: ${address.toString()}`);
+    LogService.logTrace(`Getting corporate actions of type ${actionType} from ${start} to ${end} for security: ${address.toString()}`);
     const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateActionsByType(actionType, pageIndex, pageLength);
+      .getCorporateActionsByType(actionType, start, end);
 
     return {
       actionTypes: result.actionTypes_,

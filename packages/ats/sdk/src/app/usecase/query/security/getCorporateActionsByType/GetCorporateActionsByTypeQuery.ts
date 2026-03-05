@@ -12,8 +12,8 @@ export class GetCorporateActionsByTypeQuery extends Query<GetCorporateActionsByT
   constructor(
     public readonly securityId: string,
     public readonly actionType: string,
-    public readonly pageIndex: number,
-    public readonly pageLength: number,
+    public readonly start: number,
+    public readonly end: number,
   ) {
     super();
   }

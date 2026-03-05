@@ -23,16 +23,11 @@ export class GetCorporateActionsByTypeQueryHandler implements IQueryHandler<GetC
 
   async execute(query: GetCorporateActionsByTypeQuery): Promise<GetCorporateActionsByTypeQueryResponse> {
     try {
-      const { securityId, actionType, pageIndex, pageLength } = query;
+      const { securityId, actionType, start, end } = query;
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
-      const res = await this.queryAdapter.getCorporateActionsByType(
-        securityEvmAddress,
-        actionType,
-        pageIndex,
-        pageLength,
-      );
+      const res = await this.queryAdapter.getCorporateActionsByType(securityEvmAddress, actionType, start, end);
 
       return new GetCorporateActionsByTypeQueryResponse(res);
     } catch (error) {

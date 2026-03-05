@@ -20,11 +20,11 @@ export class GetCorporateActionsQueryHandler implements IQueryHandler<GetCorpora
 
   async execute(query: GetCorporateActionsQuery): Promise<GetCorporateActionsQueryResponse> {
     try {
-      const { securityId, pageIndex, pageLength } = query;
+      const { securityId, start, end } = query;
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
 
-      const res = await this.queryAdapter.getCorporateActions(securityEvmAddress, pageIndex, pageLength);
+      const res = await this.queryAdapter.getCorporateActions(securityEvmAddress, start, end);
 
       return new GetCorporateActionsQueryResponse(res);
     } catch (error) {

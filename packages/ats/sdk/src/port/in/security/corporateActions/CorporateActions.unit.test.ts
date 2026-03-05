@@ -157,8 +157,8 @@ describe("Corporate Actions", () => {
       const fixtureData = GetCorporateActionsRequestFixture.create();
       const request = new GetCorporateActionsRequest({
         securityId: fixtureData.securityId,
-        pageIndex: fixtureData.pageIndex,
-        pageLength: fixtureData.pageLength,
+        start: fixtureData.start,
+        end: fixtureData.end,
       });
       const expectedResponse = GetCorporateActionsResponseFixture.create();
 
@@ -176,28 +176,28 @@ describe("Corporate Actions", () => {
     it("should throw ValidationError for invalid securityId", async () => {
       const invalidRequest = new GetCorporateActionsRequest({
         securityId: "invalid-id",
-        pageIndex: 0,
-        pageLength: 10,
+        start: 0,
+        end: 10,
       });
 
       await expect(CorporateActions.getCorporateActions(invalidRequest)).rejects.toThrow();
     });
 
-    it("should throw ValidationError for invalid pageIndex", async () => {
+    it("should throw ValidationError for invalid start", async () => {
       const invalidRequest = new GetCorporateActionsRequest({
         securityId: "0.0.12345",
-        pageIndex: -1,
-        pageLength: 10,
+        start: -1,
+        end: 10,
       });
 
       await expect(CorporateActions.getCorporateActions(invalidRequest)).rejects.toThrow();
     });
 
-    it("should throw ValidationError for invalid pageLength", async () => {
+    it("should throw ValidationError for invalid end", async () => {
       const invalidRequest = new GetCorporateActionsRequest({
         securityId: "0.0.12345",
-        pageIndex: 0,
-        pageLength: 0,
+        start: 0,
+        end: 0,
       });
 
       await expect(CorporateActions.getCorporateActions(invalidRequest)).rejects.toThrow();
@@ -210,8 +210,8 @@ describe("Corporate Actions", () => {
       const request = new GetCorporateActionsByTypeRequest({
         securityId: fixtureData.securityId,
         actionType: fixtureData.actionType,
-        pageIndex: fixtureData.pageIndex,
-        pageLength: fixtureData.pageLength,
+        start: fixtureData.start,
+        end: fixtureData.end,
       });
       const expectedResponse = GetCorporateActionsResponseFixture.create();
 
@@ -230,8 +230,8 @@ describe("Corporate Actions", () => {
       const invalidRequest = new GetCorporateActionsByTypeRequest({
         securityId: "invalid-id",
         actionType: "0x" + "a".repeat(64),
-        pageIndex: 0,
-        pageLength: 10,
+        start: 0,
+        end: 10,
       });
 
       await expect(CorporateActions.getCorporateActionsByType(invalidRequest)).rejects.toThrow();
@@ -241,30 +241,30 @@ describe("Corporate Actions", () => {
       const invalidRequest = new GetCorporateActionsByTypeRequest({
         securityId: "0.0.12345",
         actionType: "invalid-bytes32",
-        pageIndex: 0,
-        pageLength: 10,
+        start: 0,
+        end: 10,
       });
 
       await expect(CorporateActions.getCorporateActionsByType(invalidRequest)).rejects.toThrow();
     });
 
-    it("should throw ValidationError for invalid pageIndex", async () => {
+    it("should throw ValidationError for invalid start", async () => {
       const invalidRequest = new GetCorporateActionsByTypeRequest({
         securityId: "0.0.12345",
         actionType: "0x" + "a".repeat(64),
-        pageIndex: -1,
-        pageLength: 10,
+        start: -1,
+        end: 10,
       });
 
       await expect(CorporateActions.getCorporateActionsByType(invalidRequest)).rejects.toThrow();
     });
 
-    it("should throw ValidationError for invalid pageLength", async () => {
+    it("should throw ValidationError for invalid end", async () => {
       const invalidRequest = new GetCorporateActionsByTypeRequest({
         securityId: "0.0.12345",
         actionType: "0x" + "a".repeat(64),
-        pageIndex: 0,
-        pageLength: 0,
+        start: 0,
+        end: 0,
       });
 
       await expect(CorporateActions.getCorporateActionsByType(invalidRequest)).rejects.toThrow();

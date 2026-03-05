@@ -11,8 +11,8 @@ export class GetCorporateActionsQueryResponse implements QueryResponse {
 export class GetCorporateActionsQuery extends Query<GetCorporateActionsQueryResponse> {
   constructor(
     public readonly securityId: string,
-    public readonly pageIndex: number,
-    public readonly pageLength: number,
+    public readonly start: number,
+    public readonly end: number,
   ) {
     super();
   }

@@ -54,7 +54,7 @@ class CorporateActionsInPort implements ICorporateActionsInPort {
     ValidatedRequest.handleValidation("GetCorporateActionsRequest", request);
 
     const res = await this.queryBus.execute(
-      new GetCorporateActionsQuery(request.securityId, request.pageIndex, request.pageLength),
+      new GetCorporateActionsQuery(request.securityId, request.start, request.end),
     );
 
     return res.payload;
@@ -65,7 +65,7 @@ class CorporateActionsInPort implements ICorporateActionsInPort {
     ValidatedRequest.handleValidation("GetCorporateActionsByTypeRequest", request);
 
     const res = await this.queryBus.execute(
-      new GetCorporateActionsByTypeQuery(request.securityId, request.actionType, request.pageIndex, request.pageLength),
+      new GetCorporateActionsByTypeQuery(request.securityId, request.actionType, request.start, request.end),
     );
 
     return res.payload;

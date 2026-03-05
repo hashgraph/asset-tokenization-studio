@@ -6,30 +6,30 @@ import FormatValidation from "@port/in/request/FormatValidation";
 export default class GetCorporateActionsByTypeRequest extends ValidatedRequest<GetCorporateActionsByTypeRequest> {
   securityId: string;
   actionType: string;
-  pageIndex: number;
-  pageLength: number;
+  start: number;
+  end: number;
 
   constructor({
     securityId,
     actionType,
-    pageIndex,
-    pageLength,
+    start,
+    end,
   }: {
     securityId: string;
     actionType: string;
-    pageIndex: number;
-    pageLength: number;
+    start: number;
+    end: number;
   }) {
     super({
       securityId: FormatValidation.checkHederaIdFormatOrEvmAddress(),
       actionType: FormatValidation.checkBytes32Format(),
-      pageIndex: FormatValidation.checkNumber({ min: 0 }),
-      pageLength: FormatValidation.checkNumber({ min: 1 }),
+      start: FormatValidation.checkNumber({ min: 0 }),
+      end: FormatValidation.checkNumber({ min: 1 }),
     });
 
     this.securityId = securityId;
     this.actionType = actionType;
-    this.pageIndex = pageIndex;
-    this.pageLength = pageLength;
+    this.start = start;
+    this.end = end;
   }
 }
