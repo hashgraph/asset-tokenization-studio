@@ -9,4 +9,5 @@ export default interface DividendsViewModel extends QueryResponse {
   recordDate: Date;
   executionDate: Date;
   snapshotId?: number;
+  isDisabled: boolean;
 }

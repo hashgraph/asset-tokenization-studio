@@ -35,6 +35,7 @@ import GetRoleMemberCountRequest from "./security/roles/GetRoleMemberCountReques
 import GetRoleMembersRequest from "./security/roles/GetRoleMembersRequest";
 import GetSecurityDetailsRequest from "./security/GetSecurityDetailsRequest";
 import SetDividendsRequest from "./equity/SetDividendsRequest";
+import CancelDividendRequest from "./equity/CancelDividendRequest";
 import SetCouponRequest from "./bond/SetCouponRequest";
 import SetVotingRightsRequest from "./equity/SetVotingRightsRequest";
 import GetBondDetailsRequest from "./bond/GetBondDetailsRequest";
@@ -255,6 +256,7 @@ export {
   GetRoleMemberCountRequest,
   GetRoleMembersRequest,
   SetDividendsRequest,
+  CancelDividendRequest,
   SetCouponRequest,
   SetVotingRightsRequest,
   GetAccountBalanceRequest,

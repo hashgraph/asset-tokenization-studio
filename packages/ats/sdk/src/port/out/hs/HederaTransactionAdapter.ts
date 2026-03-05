@@ -949,6 +949,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async cancelDividend(
+    security: EvmAddress,
+    dividendId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    return this.executeWithArgs(
+      new EquityUSAFacet__factory().attach(security.toString()),
+      "cancelDividend",
+      securityId,
+      GAS.CANCEL_DIVIDEND,
+      [dividendId],
+    );
+  }
+
   async setVotingRights(
     security: EvmAddress,
     recordDate: BigDecimal,

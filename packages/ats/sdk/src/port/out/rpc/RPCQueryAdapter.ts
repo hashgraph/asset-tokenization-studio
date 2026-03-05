@@ -376,7 +376,11 @@ export class RPCQueryAdapter {
       target.toString(),
     );
 
-    return new DividendFor(new BigDecimal(dividendFor.tokenBalance), Number(dividendFor.decimals));
+    return new DividendFor(
+      new BigDecimal(dividendFor.tokenBalance),
+      Number(dividendFor.decimals),
+      dividendFor.isDisabled,
+    );
   }
 
   async getDividendAmountFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendAmountFor> {
@@ -397,16 +401,17 @@ export class RPCQueryAdapter {
   async getDividends(address: EvmAddress, dividend: number): Promise<Dividend> {
     LogService.logTrace(`Getting dividends`);
 
-    //TODO change this
-    const dividendInfo = (await this.connect(Equity__factory, address.toString()).getDividend(dividend))
-      .registeredDividend_;
+    const { registeredDividend_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getDividend(
+      dividend,
+    );
 
     return new Dividend(
-      new BigDecimal(dividendInfo.dividend.amount.toString()),
-      Number(dividendInfo.dividend.amountDecimals),
-      Number(dividendInfo.dividend.recordDate),
-      Number(dividendInfo.dividend.executionDate),
-      Number(dividendInfo.snapshotId),
+      new BigDecimal(registeredDividend_.dividend.amount.toString()),
+      Number(registeredDividend_.dividend.amountDecimals),
+      Number(registeredDividend_.dividend.recordDate),
+      Number(registeredDividend_.dividend.executionDate),
+      Number(registeredDividend_.snapshotId),
+      isDisabled_,
     );
   }
 
