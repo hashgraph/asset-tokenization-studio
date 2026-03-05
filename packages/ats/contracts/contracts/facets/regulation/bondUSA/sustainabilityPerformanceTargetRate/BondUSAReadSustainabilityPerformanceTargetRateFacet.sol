@@ -5,9 +5,9 @@ import {
     _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY
 } from "../../../../constants/resolverKeys/assets.sol";
 import { BondUSAReadSustainabilityPerformanceTargetRate } from "./BondUSAReadSustainabilityPerformanceTargetRate.sol";
-import { ISecurity } from "../../interfaces/ISecurity.sol";
-import { IBondRead } from "../../../assetCapabilities/interfaces/bond/IBondRead.sol";
-import { IStaticFunctionSelectors } from "../../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
+import { ISecurity } from "../../constants/ISecurity.sol";
+import { IBondRead } from "../../../assets/bond/IBondRead.sol";
+import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 
 contract BondUSAReadSustainabilityPerformanceTargetRateFacet is
     BondUSAReadSustainabilityPerformanceTargetRate,

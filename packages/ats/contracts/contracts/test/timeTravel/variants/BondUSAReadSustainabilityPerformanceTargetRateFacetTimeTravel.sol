@@ -7,7 +7,7 @@ import {
 } from "../../../facets/regulation/bondUSA/sustainabilityPerformanceTargetRate/BondUSAReadSustainabilityPerformanceTargetRateFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 contract BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel is
     BondUSAReadSustainabilityPerformanceTargetRateFacet,

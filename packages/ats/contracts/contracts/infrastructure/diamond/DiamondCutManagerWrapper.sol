@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibPagination } from "../lib/LibPagination.sol";
-import { EnumerableSetBytes4 } from "../lib/EnumerableSetBytes4.sol";
-import { IDiamondCutManager } from "../interfaces/IDiamondCutManager.sol";
-import { IStaticFunctionSelectors } from "../interfaces/IStaticFunctionSelectors.sol";
-import { IDiamondLoupe } from "../interfaces/IDiamondLoupe.sol";
+import { LibPagination } from "../utils/LibPagination.sol";
+import { EnumerableSetBytes4 } from "../utils/EnumerableSetBytes4.sol";
+import { IDiamondCutManager } from "./IDiamondCutManager.sol";
+import { IStaticFunctionSelectors } from "./IStaticFunctionSelectors.sol";
+import { IDiamondLoupe } from "./IDiamondLoupe.sol";
 import { BusinessLogicResolverWrapper } from "./BusinessLogicResolverWrapper.sol";
 import { _DIAMOND_CUT_MANAGER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 

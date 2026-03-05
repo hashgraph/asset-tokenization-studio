@@ -322,7 +322,7 @@ contract MyContract {}
           contractsPath,
           artifactPath,
           includeMocksInRegistry: true,
-          mockContractPaths: ["**/mocks/MockedExternalKycList.sol"], // Specific file
+          mockContractPaths: ["**/test/mocks/MockedExternalKycList.sol"], // Specific file
           logLevel: "SILENT",
         },
         false,

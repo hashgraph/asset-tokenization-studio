@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondUSA } from "../interfaces/IBondUSA.sol";
-import { IBond } from "../../assetCapabilities/interfaces/bond/IBond.sol";
-import { IBondRead } from "../../assetCapabilities/interfaces/bond/IBondRead.sol";
-import { IKyc } from "../../features/interfaces/IKyc.sol";
+import { IBondUSA } from "./IBondUSA.sol";
+import { IBond } from "../../assets/bond/IBond.sol";
+import { IBondRead } from "../../assets/bond/IBondRead.sol";
+import { IKyc } from "../../core/kyc/IKyc.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
 
-import { LibBond } from "../../../lib/domain/LibBond.sol";
-import { LibSecurity } from "../../../lib/domain/LibSecurity.sol";
-import { TokenCoreOps } from "../../../lib/orchestrator/TokenCoreOps.sol";
-import { LibPause } from "../../../lib/core/LibPause.sol";
-import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
-import { LibControlList } from "../../../lib/core/LibControlList.sol";
-import { LibAccess } from "../../../lib/core/LibAccess.sol";
-import { LibClearing } from "../../../lib/domain/LibClearing.sol";
-import { LibKyc } from "../../../lib/core/LibKyc.sol";
-import { LibCompliance } from "../../../lib/core/LibCompliance.sol";
-import { LibCorporateActions } from "../../../lib/core/LibCorporateActions.sol";
-import { IClearing } from "../../features/interfaces/clearing/IClearing.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { LibBond } from "../../../domain/assets/LibBond.sol";
+import { LibSecurity } from "../../../domain/assets/LibSecurity.sol";
+import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
+import { LibPause } from "../../../domain/core/LibPause.sol";
+import { LibERC1410 } from "../../../domain/assets/LibERC1410.sol";
+import { LibControlList } from "../../../domain/core/LibControlList.sol";
+import { LibAccess } from "../../../domain/core/LibAccess.sol";
+import { LibClearing } from "../../../domain/assets/LibClearing.sol";
+import { LibKyc } from "../../../domain/core/LibKyc.sol";
+import { LibCompliance } from "../../../domain/core/LibCompliance.sol";
+import { LibCorporateActions } from "../../../domain/core/LibCorporateActions.sol";
+import { IClearing } from "../../core/clearing/IClearing.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract BondUSA is IBond, IBondUSA, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════

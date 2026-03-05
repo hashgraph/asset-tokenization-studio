@@ -3,17 +3,17 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { _LOCKER_ROLE } from "../../../constants/roles.sol";
-import { ITransferAndLock } from "../interfaces/ITransferAndLock.sol";
-import { BasicTransferInfo } from "../../features/interfaces/ERC1400/IERC1410Types.sol";
-import { LibAccess } from "../../../lib/core/LibAccess.sol";
-import { LibPause } from "../../../lib/core/LibPause.sol";
-import { LibProtectedPartitions } from "../../../lib/core/LibProtectedPartitions.sol";
-import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
-import { LibABAF } from "../../../lib/domain/LibABAF.sol";
-import { LibLock } from "../../../lib/domain/LibLock.sol";
-import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
-import { TokenCoreOps } from "../../../lib/orchestrator/TokenCoreOps.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { ITransferAndLock } from "./ITransferAndLock.sol";
+import { BasicTransferInfo } from "../../core/ERC1400/ERC1410/IERC1410Types.sol";
+import { LibAccess } from "../../../domain/core/LibAccess.sol";
+import { LibPause } from "../../../domain/core/LibPause.sol";
+import { LibProtectedPartitions } from "../../../domain/core/LibProtectedPartitions.sol";
+import { LibERC1410 } from "../../../domain/assets/LibERC1410.sol";
+import { LibABAF } from "../../../domain/assets/LibABAF.sol";
+import { LibLock } from "../../../domain/assets/LibLock.sol";
+import { LibSnapshots } from "../../../domain/assets/LibSnapshots.sol";
+import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract TransferAndLock is ITransferAndLock, TimestampProvider {
     function transferAndLockByPartition(

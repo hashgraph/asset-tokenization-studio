@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSAReadKpiLinkedRate } from "./BondUSAReadKpiLinkedRate.sol";
 import { _BOND_KPI_LINKED_READ_RESOLVER_KEY } from "../../../../constants/resolverKeys/assets.sol";
-import { ISecurity } from "../../interfaces/ISecurity.sol";
-import { IBondRead } from "../../../assetCapabilities/interfaces/bond/IBondRead.sol";
-import { IStaticFunctionSelectors } from "../../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
+import { ISecurity } from "../../constants/ISecurity.sol";
+import { IBondRead } from "../../../assets/bond/IBondRead.sol";
+import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 
 contract BondUSAReadKpiLinkedRateFacet is BondUSAReadKpiLinkedRate, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {

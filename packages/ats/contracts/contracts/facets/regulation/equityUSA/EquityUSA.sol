@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable ordering
 
-import { IEquityUSA } from "../interfaces/IEquityUSA.sol";
-import { IEquity } from "../../assetCapabilities/interfaces/equity/IEquity.sol";
-import { ISecurity } from "../interfaces/ISecurity.sol";
+import { IEquityUSA } from "./IEquityUSA.sol";
+import { IEquity } from "../../assets/equity/IEquity.sol";
+import { ISecurity } from "../constants/ISecurity.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
@@ -16,16 +16,16 @@ import {
     BALANCE_ADJUSTMENT_TASK_TYPE
 } from "../../../constants/values.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
-import { LibEquity } from "../../../lib/domain/LibEquity.sol";
-import { LibSecurity } from "../../../lib/domain/LibSecurity.sol";
-import { LibPause } from "../../../lib/core/LibPause.sol";
-import { LibAccess } from "../../../lib/core/LibAccess.sol";
-import { LibCorporateActions } from "../../../lib/core/LibCorporateActions.sol";
-import { LibScheduledTasks } from "../../../lib/domain/LibScheduledTasks.sol";
-import { LibSnapshots } from "../../../lib/domain/LibSnapshots.sol";
-import { LibERC1410 } from "../../../lib/domain/LibERC1410.sol";
-import { HoldOps } from "../../../lib/orchestrator/HoldOps.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { LibEquity } from "../../../domain/assets/LibEquity.sol";
+import { LibSecurity } from "../../../domain/assets/LibSecurity.sol";
+import { LibPause } from "../../../domain/core/LibPause.sol";
+import { LibAccess } from "../../../domain/core/LibAccess.sol";
+import { LibCorporateActions } from "../../../domain/core/LibCorporateActions.sol";
+import { LibScheduledTasks } from "../../../domain/assets/LibScheduledTasks.sol";
+import { LibSnapshots } from "../../../domain/assets/LibSnapshots.sol";
+import { LibERC1410 } from "../../../domain/assets/LibERC1410.sol";
+import { HoldOps } from "../../../domain/orchestrator/HoldOps.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     error AlreadyInitialized();

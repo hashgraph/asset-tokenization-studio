@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC20PermitFacet } from "../../../facets/features/ERC1400/ERC20Permit/ERC20PermitFacet.sol";
+import { ERC20PermitFacet } from "../../../facets/core/ERC1400/ERC20Permit/ERC20PermitFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract ERC20PermitFacetTimeTravel is ERC20PermitFacet, TimeTravelProvider {

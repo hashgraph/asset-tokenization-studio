@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ExternalPauseManagementFacet } from "../../../facets/features/externalPauses/ExternalPauseManagementFacet.sol";
+import { ExternalPauseManagementFacet } from "../../../facets/core/externalPauses/ExternalPauseManagementFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract ExternalPauseManagementFacetTimeTravel is ExternalPauseManagementFacet, TimeTravelProvider {

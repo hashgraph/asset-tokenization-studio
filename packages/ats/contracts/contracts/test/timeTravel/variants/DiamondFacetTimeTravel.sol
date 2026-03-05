@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { DiamondFacet } from "../../../infrastructure/proxy/facets/DiamondFacet.sol";
+import { DiamondFacet } from "../../../infrastructure/diamond/DiamondFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract DiamondFacetTimeTravel is DiamondFacet, TimeTravelProvider {

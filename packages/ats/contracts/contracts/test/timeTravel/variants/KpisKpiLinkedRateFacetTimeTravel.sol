@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import {
-    KpisKpiLinkedRateFacet
-} from "../../../facets/assetCapabilities/kpis/kpiLatest/kpiLinkedRate/KpisKpiLinkedRateFacet.sol";
+import { KpisKpiLinkedRateFacet } from "../../../facets/assets/kpis/kpiLatest/kpiLinkedRate/KpisKpiLinkedRateFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 contract KpisKpiLinkedRateFacetTimeTravel is KpisKpiLinkedRateFacet, TimeTravelProvider {
     function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {

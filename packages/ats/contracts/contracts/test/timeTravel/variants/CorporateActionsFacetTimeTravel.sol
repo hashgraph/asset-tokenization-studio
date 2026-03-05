@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CorporateActionsFacet } from "../../../facets/features/corporateActions/CorporateActionsFacet.sol";
+import { CorporateActionsFacet } from "../../../facets/core/corporateActions/CorporateActionsFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract CorporateActionsFacetTimeTravel is CorporateActionsFacet, TimeTravelProvider {

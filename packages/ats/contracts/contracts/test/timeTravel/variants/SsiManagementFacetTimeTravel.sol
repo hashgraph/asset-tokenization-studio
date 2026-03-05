@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { SsiManagementFacet } from "../../../facets/features/ssi/SsiManagementFacet.sol";
+import { SsiManagementFacet } from "../../../facets/core/ssi/SsiManagementFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract SsiManagementFacetTimeTravel is SsiManagementFacet, TimeTravelProvider {

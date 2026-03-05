@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSAFacet } from "../../../facets/regulation/bondUSA/variableRate/BondUSAFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 contract BondUSAFacetTimeTravel is BondUSAFacet, TimeTravelProvider {
     function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {

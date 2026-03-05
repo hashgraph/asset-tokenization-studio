@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
-import { LibPagination } from "../lib/LibPagination.sol";
-import { EnumerableSetBytes4 } from "../lib/EnumerableSetBytes4.sol";
+import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
+import { LibPagination } from "../utils/LibPagination.sol";
+import { EnumerableSetBytes4 } from "../utils/EnumerableSetBytes4.sol";
 import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 abstract contract BusinessLogicResolverWrapper {

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC3643OperationsFacet } from "../../../facets/features/ERC3643/ERC3643OperationsFacet.sol";
+import { ERC3643OperationsFacet } from "../../../facets/core/ERC3643/ERC3643OperationsFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 contract ERC3643OperationsFacetTimeTravel is ERC3643OperationsFacet, TimeTravelProvider {
     function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {

@@ -2,19 +2,19 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSA } from "../BondUSA.sol";
-import { IBondRead } from "../../../assetCapabilities/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../assets/bond/IBondRead.sol";
 // solhint-disable max-line-length
 import {
     ISustainabilityPerformanceTargetRate
-} from "../../../assetCapabilities/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../../../assets/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 // solhint-enable max-line-length
-import { LibBond } from "../../../../lib/domain/LibBond.sol";
-import { LibInterestRate } from "../../../../lib/domain/LibInterestRate.sol";
-import { LibKpis } from "../../../../lib/domain/LibKpis.sol";
-import { LibProceedRecipients } from "../../../../lib/domain/LibProceedRecipients.sol";
-import { LibPause } from "../../../../lib/core/LibPause.sol";
-import { LibAccess } from "../../../../lib/core/LibAccess.sol";
-import { LibCorporateActions } from "../../../../lib/core/LibCorporateActions.sol";
+import { LibBond } from "../../../../domain/assets/LibBond.sol";
+import { LibInterestRate } from "../../../../domain/assets/LibInterestRate.sol";
+import { LibKpis } from "../../../../domain/assets/LibKpis.sol";
+import { LibProceedRecipients } from "../../../../domain/assets/LibProceedRecipients.sol";
+import { LibPause } from "../../../../domain/core/LibPause.sol";
+import { LibAccess } from "../../../../domain/core/LibAccess.sol";
+import { LibCorporateActions } from "../../../../domain/core/LibCorporateActions.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../../../constants/roles.sol";
 
 abstract contract BondUSASustainabilityPerformanceTargetRate is BondUSA {

@@ -16,13 +16,13 @@ import type { ContractMetadata, MethodDefinition, EventDefinition, ErrorDefiniti
 
 /**
  * Reverse mapping from Hardhat linkReferences key format to short library name.
- * Maps "contracts/lib/orchestrator/TokenCoreOps.sol:TokenCoreOps" -> "tokenCoreOps"
+ * Maps "contracts/domain/orchestrator/TokenCoreOps.sol:TokenCoreOps" -> "tokenCoreOps"
  */
 const LINK_REF_TO_LIB_NAME: Record<string, string> = {
-  "contracts/lib/orchestrator/TokenCoreOps.sol:TokenCoreOps": "tokenCoreOps",
-  "contracts/lib/orchestrator/HoldOps.sol:HoldOps": "holdOps",
-  "contracts/lib/orchestrator/ClearingOps.sol:ClearingOps": "clearingOps",
-  "contracts/lib/orchestrator/ClearingReadOps.sol:ClearingReadOps": "clearingReadOps",
+  "contracts/domain/orchestrator/TokenCoreOps.sol:TokenCoreOps": "tokenCoreOps",
+  "contracts/domain/orchestrator/HoldOps.sol:HoldOps": "holdOps",
+  "contracts/domain/orchestrator/ClearingOps.sol:ClearingOps": "clearingOps",
+  "contracts/domain/orchestrator/ClearingReadOps.sol:ClearingReadOps": "clearingReadOps",
 };
 
 /**

@@ -5,7 +5,7 @@ import {
     BondUSAKpiLinkedRateFacet
 } from "../../../facets/regulation/bondUSA/kpiLinkedRate/BondUSAKpiLinkedRateFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 contract BondUSAKpiLinkedRateFacetTimeTravel is BondUSAKpiLinkedRateFacet, TimeTravelProvider {
     function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {

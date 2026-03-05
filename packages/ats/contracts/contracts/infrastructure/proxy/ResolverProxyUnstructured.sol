@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IResolverProxy } from "../interfaces/IResolverProxy.sol";
-import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
-import { IDiamondLoupe } from "../interfaces/IDiamondLoupe.sol";
+import { IResolverProxy } from "./IResolverProxy.sol";
+import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
+import { IDiamondLoupe } from "../diamond/IDiamondLoupe.sol";
 import { ResolverProxyStorage, LibResolverProxy } from "./LibResolverProxy.sol";
-import { LibAccess } from "../../lib/core/LibAccess.sol";
+import { LibAccess } from "../../domain/core/LibAccess.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
 // The loupe functions are required by the EIP2535 ResolverProxys standard

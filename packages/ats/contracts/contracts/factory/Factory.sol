@@ -3,41 +3,41 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IFactory } from "./IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
-import { IResolverProxy } from "../infrastructure/interfaces/IResolverProxy.sol";
+import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
-import { IControlList } from "../facets/features/interfaces/controlList/IControlList.sol";
-import { IERC20 } from "../facets/features/interfaces/ERC1400/IERC20.sol";
-import { IERC20Votes } from "../facets/features/interfaces/ERC1400/IERC20Votes.sol";
-import { IERC1644 } from "../facets/features/interfaces/ERC1400/IERC1644.sol";
-import { IERC1410 } from "../facets/features/interfaces/ERC1400/IERC1410.sol";
-import { ICap } from "../facets/features/interfaces/ICap.sol";
-import { IERC1594 } from "../facets/features/interfaces/ERC1400/IERC1594.sol";
-import { IClearingActions } from "../facets/features/interfaces/clearing/IClearingActions.sol";
-import { IBusinessLogicResolver } from "../infrastructure/interfaces/IBusinessLogicResolver.sol";
+import { IControlList } from "../facets/core/controlList/IControlList.sol";
+import { IERC20 } from "../facets/core/ERC1400/ERC20/IERC20.sol";
+import { IERC20Votes } from "../facets/core/ERC1400/ERC20Votes/IERC20Votes.sol";
+import { IERC1644 } from "../facets/core/ERC1400/ERC1644/IERC1644.sol";
+import { IERC1410 } from "../facets/core/ERC1400/ERC1410/IERC1410.sol";
+import { ICap } from "../facets/core/cap/ICap.sol";
+import { IERC1594 } from "../facets/core/ERC1400/ERC1594/IERC1594.sol";
+import { IClearingActions } from "../facets/core/clearing/IClearingActions.sol";
+import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
     RegulationData,
     RegulationType,
     RegulationSubType
 } from "../facets/regulation/constants/regulation.sol";
-import { LibRegulation } from "../lib/domain/LibRegulation.sol";
-import { IEquityUSA } from "../facets/regulation/interfaces/IEquityUSA.sol";
-import { IBondUSA } from "../facets/regulation/interfaces/IBondUSA.sol";
-import { IProceedRecipients } from "../facets/assetCapabilities/interfaces/proceedRecipients/IProceedRecipients.sol";
-import { IProtectedPartitions } from "../facets/features/interfaces/IProtectedPartitions.sol";
-import { IExternalPauseManagement } from "../facets/features/interfaces/IExternalPauseManagement.sol";
-import { IExternalControlListManagement } from "../facets/features/interfaces/IExternalControlListManagement.sol";
-import { IExternalKycListManagement } from "../facets/features/interfaces/IExternalKycListManagement.sol";
-import { IKyc } from "../facets/features/interfaces/IKyc.sol";
-import { IERC3643 } from "../facets/features/interfaces/ERC3643/IERC3643.sol";
+import { LibRegulation } from "../domain/assets/LibRegulation.sol";
+import { IEquityUSA } from "../facets/regulation/equityUSA/IEquityUSA.sol";
+import { IBondUSA } from "../facets/regulation/bondUSA/IBondUSA.sol";
+import { IProceedRecipients } from "../facets/assets/proceedRecipients/IProceedRecipients.sol";
+import { IProtectedPartitions } from "../facets/core/protectedPartitions/IProtectedPartitions.sol";
+import { IExternalPauseManagement } from "../facets/core/externalPauses/IExternalPauseManagement.sol";
+import { IExternalControlListManagement } from "../facets/core/externalControlLists/IExternalControlListManagement.sol";
+import { IExternalKycListManagement } from "../facets/core/externalKycLists/IExternalKycListManagement.sol";
+import { IKyc } from "../facets/core/kyc/IKyc.sol";
+import { IERC3643 } from "../facets/core/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
-import { IFixedRate } from "../facets/assetCapabilities/interfaces/interestRates/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../facets/assetCapabilities/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "../facets/assets/interestRates/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../facets/assets/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 // solhint-disable max-line-length
 import {
     ISustainabilityPerformanceTargetRate
-} from "../facets/assetCapabilities/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../facets/assets/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 // solhint-enable max-line-length
 
 contract Factory is IFactory, Context {

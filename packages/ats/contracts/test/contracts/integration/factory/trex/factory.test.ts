@@ -35,7 +35,7 @@ describe("TREX Factory Tests", () => {
   async function setFacets(diamond: string) {
     accessControlFacet = await ethers.getContractAt("IAccessControl", diamond);
 
-    erc20Facet = await ethers.getContractAt("contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20", diamond);
+    erc20Facet = await ethers.getContractAt("contracts/facets/core/ERC1400/ERC20/IERC20.sol:IERC20", diamond);
   }
   async function deployAtsFactoryFixture() {
     const base = await deployAtsInfrastructureFixture();

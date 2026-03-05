@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC20VotesFacet } from "../../../facets/features/ERC1400/ERC20Votes/ERC20VotesFacet.sol";
+import { ERC20VotesFacet } from "../../../facets/core/ERC1400/ERC20Votes/ERC20VotesFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 contract ERC20VotesFacetTimeTravel is ERC20VotesFacet, TimeTravelProvider {
     function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {

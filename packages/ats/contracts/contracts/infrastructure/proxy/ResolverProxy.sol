@@ -9,8 +9,8 @@ pragma solidity >=0.8.0 <0.9.0;
 /******************************************************************************/
 
 import { ResolverProxyUnstructured } from "./ResolverProxyUnstructured.sol";
-import { IResolverProxy } from "../interfaces/IResolverProxy.sol";
-import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
+import { IResolverProxy } from "./IResolverProxy.sol";
+import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
 import { LibResolverProxy } from "./LibResolverProxy.sol";
 
 contract ResolverProxy is ResolverProxyUnstructured {

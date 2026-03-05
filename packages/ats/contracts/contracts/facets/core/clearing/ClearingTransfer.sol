@@ -1,0 +1,160 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IClearingTransfer } from "../clearing/IClearingTransfer.sol";
+import { IClearing } from "../clearing/IClearing.sol";
+import { ThirdPartyType } from "../externalControlLists/ThirdPartyType.sol";
+import { LibPause } from "../../../domain/core/LibPause.sol";
+import { LibCompliance } from "../../../domain/core/LibCompliance.sol";
+import { LibProtectedPartitions } from "../../../domain/core/LibProtectedPartitions.sol";
+import { LibAccess } from "../../../domain/core/LibAccess.sol";
+import { LibClearing } from "../../../domain/assets/LibClearing.sol";
+import { LibERC1410 } from "../../../domain/assets/LibERC1410.sol";
+import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
+import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+
+abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
+    function clearingTransferByPartition(
+        ClearingOperation calldata _clearingOperation,
+        uint256 _amount,
+        address _to
+    ) external override returns (bool success_, uint256 clearingId_) {
+        LibPause.requireNotPaused();
+        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperation.partition);
+        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
+            _clearingOperation.expirationTimestamp,
+            _getBlockTimestamp()
+        );
+        LibERC1410.requireValidAddress(_to);
+        LibCompliance.requireNotRecovered(msg.sender);
+        LibCompliance.requireNotRecovered(_to);
+        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+
+        (success_, clearingId_) = ClearingOps.clearingTransferCreation(
+            _clearingOperation,
+            _amount,
+            _to,
+            msg.sender,
+            "",
+            ThirdPartyType.NULL
+        );
+    }
+
+    function clearingTransferFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount,
+        address _to
+    ) external override returns (bool success_, uint256 clearingId_) {
+        LibPause.requireNotPaused();
+        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
+        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _getBlockTimestamp()
+        );
+        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        LibERC1410.requireValidAddress(_clearingOperationFrom.from);
+        LibERC1410.requireValidAddress(_to);
+        LibCompliance.requireNotRecovered(msg.sender);
+        LibCompliance.requireNotRecovered(_to);
+        LibCompliance.requireNotRecovered(_clearingOperationFrom.from);
+
+        (success_, clearingId_) = ClearingOps.clearingTransferCreation(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _to,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.AUTHORIZED
+        );
+
+        ClearingOps.decreaseAllowedBalanceForClearing(
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ClearingOperationType.Transfer,
+            _clearingOperationFrom.from,
+            _amount
+        );
+    }
+
+    function operatorClearingTransferByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount,
+        address _to
+    ) external override returns (bool success_, uint256 clearingId_) {
+        LibPause.requireNotPaused();
+        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
+        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _getBlockTimestamp()
+        );
+        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        LibERC1410.requireValidAddress(_clearingOperationFrom.from);
+        LibERC1410.requireValidAddress(_to);
+        LibERC1410.checkOperator(
+            _clearingOperationFrom.clearingOperation.partition,
+            msg.sender,
+            _clearingOperationFrom.from
+        );
+        LibCompliance.requireNotRecovered(msg.sender);
+        LibCompliance.requireNotRecovered(_to);
+        LibCompliance.requireNotRecovered(_clearingOperationFrom.from);
+
+        (success_, clearingId_) = ClearingOps.clearingTransferCreation(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _to,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.operatorData,
+            ThirdPartyType.OPERATOR
+        );
+    }
+
+    function protectedClearingTransferByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        address _to,
+        bytes calldata _signature
+    ) external override returns (bool success_, uint256 clearingId_) {
+        LibPause.requireNotPaused();
+        LibProtectedPartitions.requireProtectedPartitions();
+        LibERC1410.requireValidAddress(_protectedClearingOperation.from);
+        LibERC1410.requireValidAddress(_to);
+        LibCompliance.requireNotRecovered(_protectedClearingOperation.from);
+        LibCompliance.requireNotRecovered(_to);
+        ClearingReadOps.checkClearingValidExpirationTimestamp(
+            _protectedClearingOperation.clearingOperation.expirationTimestamp,
+            _getBlockTimestamp()
+        );
+        LibAccess.checkRole(
+            LibProtectedPartitions.protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition),
+            msg.sender
+        );
+        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+
+        (success_, clearingId_) = ClearingOps.protectedClearingTransferByPartition(
+            _protectedClearingOperation,
+            _amount,
+            _to,
+            _signature,
+            _getBlockTimestamp()
+        );
+    }
+
+    function getClearingTransferForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId
+    ) external view override returns (ClearingTransferData memory clearingTransferData_) {
+        return
+            ClearingReadOps.getClearingTransferForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _clearingId,
+                _getBlockTimestamp()
+            );
+    }
+}

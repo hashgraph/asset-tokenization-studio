@@ -167,10 +167,7 @@ describe("ERC3643 Tests", () => {
       ]);
       accessControlFacet = await ethers.getContractAt("IAccessControl", diamond.target);
 
-      erc20Facet = await ethers.getContractAt(
-        "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
-        diamond.target,
-      );
+      erc20Facet = await ethers.getContractAt("contracts/facets/core/ERC1400/ERC20/IERC20.sol:IERC20", diamond.target);
 
       erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target);
 
@@ -180,7 +177,7 @@ describe("ERC3643 Tests", () => {
       erc3643Transferor = erc3643Facet.connect(signer_E);
 
       erc20Facet = await ethers.getContractAt(
-        "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
+        "contracts/facets/core/ERC1400/ERC20/IERC20.sol:IERC20",
         diamond.target,
         signer_E,
       );
@@ -812,7 +809,7 @@ describe("ERC3643 Tests", () => {
         const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
         const kycNoCompliance = await ethers.getContractAt("IKyc", newTokenFixture.diamond.target, signer_B);
         const erc20NoCompliance = await ethers.getContractAt(
-          "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
+          "contracts/facets/core/ERC1400/ERC20/IERC20.sol:IERC20",
           newTokenFixture.diamond.target,
           signer_E,
         );
@@ -868,7 +865,7 @@ describe("ERC3643 Tests", () => {
         const erc3643NoCompliance = await ethers.getContractAt("IERC3643", newTokenFixture.diamond.target);
         const kycNoCompliance = await ethers.getContractAt("IKyc", newTokenFixture.diamond.target, signer_B);
         const erc20NoCompliance = await ethers.getContractAt(
-          "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
+          "contracts/facets/core/ERC1400/ERC20/IERC20.sol:IERC20",
           newTokenFixture.diamond.target,
           signer_E,
         );

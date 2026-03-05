@@ -2,13 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
-import { IDiamondLoupe } from "../interfaces/IDiamondLoupe.sol";
-import { IAccessControl } from "../../facets/features/interfaces/IAccessControl.sol";
-import { IPause } from "../../facets/features/interfaces/IPause.sol";
+import { IDiamondLoupe } from "./IDiamondLoupe.sol";
+import { IAccessControl } from "../../facets/core/accessControl/IAccessControl.sol";
+import { IPause } from "../../facets/core/pause/IPause.sol";
 import { _PAUSER_ROLE } from "../../constants/roles.sol";
-import { LibAccess } from "../../lib/core/LibAccess.sol";
-import { LibPause } from "../../lib/core/LibPause.sol";
-import { LibArrayValidation } from "../lib/LibArrayValidation.sol";
+import { LibAccess } from "../../domain/core/LibAccess.sol";
+import { LibPause } from "../../domain/core/LibPause.sol";
+import { LibArrayValidation } from "../utils/LibArrayValidation.sol";
 
 bytes32 constant _DEFAULT_ADMIN_ROLE = bytes32(0);
 

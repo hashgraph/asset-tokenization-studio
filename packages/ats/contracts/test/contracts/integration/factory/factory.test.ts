@@ -84,10 +84,7 @@ describe("Factory Tests", () => {
 
     erc1644Facet = await ethers.getContractAt("IERC1644", equityAddress);
 
-    erc20Facet = await ethers.getContractAt(
-      "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
-      equityAddress,
-    );
+    erc20Facet = await ethers.getContractAt("contracts/facets/core/ERC1400/ERC20/IERC20.sol:IERC20", equityAddress);
   }
 
   beforeEach(async () => {

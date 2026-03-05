@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { TimeTravel } from "./TimeTravel.sol";
 import { ITimeTravel } from "./ITimeTravel.sol";
-import { IStaticFunctionSelectors } from "../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
-import { _TIME_TRAVEL_RESOLVER_KEY } from "../../constants/resolverKeys/features.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/diamond/IStaticFunctionSelectors.sol";
+import { _TIME_TRAVEL_RESOLVER_KEY } from "../../constants/resolverKeys/core.sol";
 
 contract TimeTravelFacet is TimeTravel, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {

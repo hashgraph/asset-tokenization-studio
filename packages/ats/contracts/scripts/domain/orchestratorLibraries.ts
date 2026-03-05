@@ -33,10 +33,10 @@ export interface OrchestratorLibraryAddresses {
  * These are the keys used in Hardhat artifact `linkReferences` and TypeChain `LibraryAddresses` interfaces.
  */
 export const LIBRARY_KEYS = {
-  tokenCoreOps: "contracts/lib/orchestrator/TokenCoreOps.sol:TokenCoreOps",
-  holdOps: "contracts/lib/orchestrator/HoldOps.sol:HoldOps",
-  clearingOps: "contracts/lib/orchestrator/ClearingOps.sol:ClearingOps",
-  clearingReadOps: "contracts/lib/orchestrator/ClearingReadOps.sol:ClearingReadOps",
+  tokenCoreOps: "contracts/domain/orchestrator/TokenCoreOps.sol:TokenCoreOps",
+  holdOps: "contracts/domain/orchestrator/HoldOps.sol:HoldOps",
+  clearingOps: "contracts/domain/orchestrator/ClearingOps.sol:ClearingOps",
+  clearingReadOps: "contracts/domain/orchestrator/ClearingReadOps.sol:ClearingReadOps",
 } as const;
 
 /**
@@ -81,7 +81,7 @@ export function hasOrchestratorLibraryAddresses(): boolean {
 /**
  * Get library link addresses in TypeChain format for factory construction.
  *
- * Returns a Record with TypeChain-format keys (e.g., "contracts/lib/orchestrator/TokenCoreOps.sol:TokenCoreOps")
+ * Returns a Record with TypeChain-format keys (e.g., "contracts/domain/orchestrator/TokenCoreOps.sol:TokenCoreOps")
  * mapped to deployed library addresses. This can be passed directly to TypeChain factory constructors.
  *
  * @param libs - Library names to include

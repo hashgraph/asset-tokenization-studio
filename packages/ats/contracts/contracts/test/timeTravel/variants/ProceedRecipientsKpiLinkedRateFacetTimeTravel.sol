@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ProceedRecipientsKpiLinkedRateFacet
-} from "../../../facets/assetCapabilities/proceedRecipients/kpiLinkedRate/ProceedRecipientsKpiLinkedRateFacet.sol";
+} from "../../../facets/assets/proceedRecipients/kpiLinkedRate/ProceedRecipientsKpiLinkedRateFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract ProceedRecipientsKpiLinkedRateFacetTimeTravel is ProceedRecipientsKpiLinkedRateFacet, TimeTravelProvider {

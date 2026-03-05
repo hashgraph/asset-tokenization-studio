@@ -49,7 +49,7 @@ describe("ERC20Permit Tests", () => {
     noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.target);
     pauseFacet = await ethers.getContractAt("IPause", diamond.target, signer_A);
     erc20Facet = await ethers.getContractAt(
-      "contracts/facets/features/interfaces/ERC1400/IERC20.sol:IERC20",
+      "contracts/facets/core/ERC1400/ERC20/IERC20.sol:IERC20",
       diamond.target,
       signer_A,
     );

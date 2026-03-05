@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _RESOLVER_PROXY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { IBusinessLogicResolver } from "../interfaces/IBusinessLogicResolver.sol";
+import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 
 /// @dev ResolverProxy storage for diamond pattern state

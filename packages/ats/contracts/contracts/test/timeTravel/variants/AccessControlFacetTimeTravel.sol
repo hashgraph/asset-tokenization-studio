@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AccessControlFacet } from "../../../facets/features/accessControl/AccessControlFacet.sol";
+import { AccessControlFacet } from "../../../facets/core/accessControl/AccessControlFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract AccessControlFacetTimeTravel is AccessControlFacet, TimeTravelProvider {

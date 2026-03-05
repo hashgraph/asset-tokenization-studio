@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IResolverProxy } from "../infrastructure/interfaces/IResolverProxy.sol";
-import { IBusinessLogicResolver } from "../infrastructure/interfaces/IBusinessLogicResolver.sol";
-import { IERC20 } from "../facets/features/interfaces/ERC1400/IERC20.sol";
-import { IBondRead } from "../facets/assetCapabilities/interfaces/bond/IBondRead.sol";
-import { IEquity } from "../facets/assetCapabilities/interfaces/equity/IEquity.sol";
+import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
+import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
+import { IERC20 } from "../facets/core/ERC1400/ERC20/IERC20.sol";
+import { IBondRead } from "../facets/assets/bond/IBondRead.sol";
+import { IEquity } from "../facets/assets/equity/IEquity.sol";
 import {
     FactoryRegulationData,
     RegulationData,
     RegulationType,
     RegulationSubType
 } from "../facets/regulation/constants/regulation.sol";
-import { IFixedRate } from "../facets/assetCapabilities/interfaces/interestRates/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../facets/assetCapabilities/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "../facets/assets/interestRates/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../facets/assets/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 // solhint-disable max-line-length
 import {
     ISustainabilityPerformanceTargetRate
-} from "../facets/assetCapabilities/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../facets/assets/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 // solhint-enable max-line-length
 
 interface IFactory {

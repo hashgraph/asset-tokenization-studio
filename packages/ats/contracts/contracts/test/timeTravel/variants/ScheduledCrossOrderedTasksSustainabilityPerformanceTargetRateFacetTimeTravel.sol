@@ -4,10 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable max-line-length
 import {
     ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet
-} from "../../../facets/assetCapabilities/scheduledTasks/scheduledCrossOrderedTasks/sustainabilityPerformanceTargetRate/ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../facets/assets/scheduledTasks/scheduledCrossOrderedTasks/sustainabilityPerformanceTargetRate/ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 contract ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel is
     ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet,

@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _BOND_VARIABLE_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys/assets.sol";
 import { BondUSA } from "../BondUSA.sol";
-import { IStaticFunctionSelectors } from "../../../../infrastructure/interfaces/IStaticFunctionSelectors.sol";
-import { IBond } from "../../../assetCapabilities/interfaces/bond/IBond.sol";
-import { IBondUSA } from "../../interfaces/IBondUSA.sol";
+import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
+import { IBond } from "../../../assets/bond/IBond.sol";
+import { IBondUSA } from "../IBondUSA.sol";
 
 contract BondUSAFacet is BondUSA, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

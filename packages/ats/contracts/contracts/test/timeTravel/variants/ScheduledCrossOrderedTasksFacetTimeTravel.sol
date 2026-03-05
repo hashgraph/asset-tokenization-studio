@@ -4,10 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable max-line-length
 import {
     ScheduledCrossOrderedTasksFacet
-} from "../../../facets/assetCapabilities/scheduledTasks/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksFacet.sol";
+} from "../../../facets/assets/scheduledTasks/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
-import { TimestampProvider } from "../../../infrastructure/lib/TimestampProvider.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 contract ScheduledCrossOrderedTasksFacetTimeTravel is ScheduledCrossOrderedTasksFacet, TimeTravelProvider {
     function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
