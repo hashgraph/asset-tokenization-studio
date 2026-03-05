@@ -250,12 +250,25 @@ export class SecurityOperations {
     return this.executor.executeContractCall(
       securityId.toString(),
       EquityUSAFacet__factory.createInterface(),
-      "setDividends",
+      "setDividend",
       [dividend],
       GAS.SET_DIVIDENDS,
     );
   }
 
+	async cancelDividend(
+    security: EvmAddress,
+    dividendId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    return this.executor.executeContractCall(
+      securityId.toString(),
+      EquityUSAFacet__factory.createInterface(),
+      "cancelDividend",
+      [dividendId],
+			GAS.CANCEL_DIVIDEND,
+    );
+  }
   async setVotingRights(
     security: EvmAddress,
     recordDate: BigDecimal,

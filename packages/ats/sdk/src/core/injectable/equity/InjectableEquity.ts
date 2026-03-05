@@ -3,6 +3,7 @@
 import { TOKENS } from "../Tokens";
 import { CreateEquityCommandHandler } from "@command/equity/create/CreateEquityCommandHandler";
 import { SetDividendsCommandHandler } from "@command/equity/dividends/set/SetDividendsCommandHandler";
+import { CancelDividendCommandHandler } from "@command/equity/dividends/cancel/CancelDividendCommandHandler";
 import { SetVotingRightsCommandHandler } from "@command/equity/votingRights/set/SetVotingRightsCommandHandler";
 import { GetDividendsForQueryHandler } from "@query/equity/dividends/getDividendsFor/GetDividendsForQueryHandler";
 import { GetDividendAmountForQueryHandler } from "@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQueryHandler";
@@ -25,6 +26,10 @@ export const COMMAND_HANDLERS_EQUITY = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetDividendsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CancelDividendCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,
