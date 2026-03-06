@@ -18,6 +18,7 @@ import {
   GetAllVotingRightsRequest,
   GetDividendsForRequest,
   GetVotingRightsForRequest,
+  CancelVotingRequest,
   SetScheduledBalanceAdjustmentRequest,
   PauseRequest,
   Security,
@@ -437,6 +438,46 @@ describe("🧪 Equity test", () => {
     expect(allScheduledAdjustments[0].factor).toEqual(factor);
     expect(allScheduledAdjustments[0].decimals).toEqual(decimals);
     expect(allScheduledAdjustments[0].executionDate.getTime() / 1000).toEqual(executionTimestamp);
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+  }, 60_000);
+
+  it("cancelVoting", async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
+    const data = "0x0123456789ABCDEF";
+
+    const { payload: votingId } = await Equity.setVotingRights(
+      new SetVotingRightsRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        recordTimestamp: recordTimestamp.toString(),
+        data: data,
+      }),
+    );
+
+    const result = await Equity.cancelVoting(
+      new CancelVotingRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        votingId,
+      }),
+    );
+
+    expect(result).toHaveProperty("transactionId");
+    expect(typeof result.transactionId).toBe("string");
+    expect(result.payload).toBe(true);
 
     await Role.revokeRole(
       new RoleRequest({
