@@ -1271,6 +1271,23 @@ export class RPCQueryAdapter {
     return Number(total);
   }
 
+  async balancesOfAtSnapshot(
+    address: EvmAddress,
+    snapshotId: number,
+    pageIndex: number,
+    pageLength: number,
+  ): Promise<{ holder: string; balance: bigint }[]> {
+    LogService.logTrace(
+      `Getting balances at snapshot ${snapshotId} for security ${address.toString()}, page ${pageIndex}, length ${pageLength}`,
+    );
+
+    return await this.connect(SnapshotsFacet__factory, address.toString()).balancesOfAtSnapshot(
+      snapshotId,
+      pageIndex,
+      pageLength,
+    );
+  }
+
   async getCouponHolders(address: EvmAddress, couponId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting coupon holders for coupon ${couponId} for security ${address.toString()}`);
     return await this.connect(BondRead__factory, address.toString()).getCouponHolders(couponId, start, end);
@@ -1298,12 +1315,12 @@ export class RPCQueryAdapter {
       // If pagination parameters are provided, use paginated call
       if (pageIndex !== undefined && pageLength !== undefined) {
         const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(pageIndex, pageLength);
-        return couponIds.map(id => Number(id));
+        return couponIds.map((id: any) => Number(id));
       }
 
       // Otherwise get all coupons (simulate by getting first page with large length)
       const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(0, 1000);
-      return couponIds.map(id => Number(id));
+      return couponIds.map((id: any) => Number(id));
     }
 
     async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {

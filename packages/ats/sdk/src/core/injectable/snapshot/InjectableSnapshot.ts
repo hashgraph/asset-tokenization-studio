@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { GetTokenHoldersAtSnapshotQueryHandler } from "@query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQueryHandler";
+import { BalancesOfAtSnapshotQueryHandler } from "@query/security/snapshot/balancesOfAtSnapshot/BalancesOfAtSnapshotQueryHandler";
 import { TOKENS } from "../Tokens";
 import { TakeSnapshotCommandHandler } from "@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommandHandler";
 import { GetTotalTokenHoldersAtSnapshotQueryHandler } from "@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQueryHandler";
@@ -20,5 +21,9 @@ export const QUERY_HANDLERS_SNAPSHOT = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetTotalTokenHoldersAtSnapshotQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: BalancesOfAtSnapshotQueryHandler,
   },
 ];

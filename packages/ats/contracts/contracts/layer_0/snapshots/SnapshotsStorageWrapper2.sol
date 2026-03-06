@@ -4,7 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     ISnapshotsStorageWrapper,
     Snapshots,
-    PartitionSnapshots
+    PartitionSnapshots,
+    HolderBalance
 } from "../../layer_1/interfaces/snapshots/ISnapshots.sol";
 import { ERC20StorageWrapper2 } from "../ERC1400/ERC20/ERC20StorageWrapper2.sol";
 import { LibCommon } from "../../layer_0/common/libraries/LibCommon.sol";
@@ -147,6 +148,26 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
         return _balanceOfAt(_tokenHolder, _snapshotID);
     }
 
+    function _balancesOfAtSnapshot(
+        uint256 _snapshotID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view override returns (HolderBalance[] memory balances_) {
+        address[] memory tokenHolders = _tokenHoldersAt(_snapshotID, _pageIndex, _pageLength);
+        uint256 length = tokenHolders.length;
+        balances_ = new HolderBalance[](length);
+        for (uint256 i = 0; i < length; ) {
+            address tokenHolder = tokenHolders[i];
+            balances_[i] = HolderBalance({
+                holder: tokenHolder,
+                balance: _balanceOfAtSnapshot(_snapshotID, tokenHolder)
+            });
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     function _getTotalBalanceOfAtSnapshot(
         uint256 _snapshotId,
         address _tokenHolder
@@ -206,8 +227,8 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
         (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
 
         address[] memory tk = new address[](LibCommon.getSize(start, end, _totalTokenHoldersAt(snapshotId)));
-
-        for (uint256 i = 0; i < tk.length; i++) {
+        uint256 length = tk.length;
+        for (uint256 i = 0; i < length; ) {
             uint256 index = i + 1;
             (bool snapshotted, address value) = _addressValueAt(
                 snapshotId,
@@ -215,6 +236,9 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
             );
 
             tk[i] = snapshotted ? value : _getTokenHolder(index);
+            unchecked {
+                ++i;
+            }
         }
 
         return tk;
