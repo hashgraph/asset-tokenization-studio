@@ -56,7 +56,7 @@ export class SecurityOperations {
       GAS.SET_COUPON,
     );
   }
-	  async cancelCoupon(
+  async cancelCoupon(
     security: EvmAddress,
     couponId: number,
     securityId: ContractId | string,
@@ -64,7 +64,7 @@ export class SecurityOperations {
     LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
 
     return this.executor.executeContractCall(
-			securityId.toString(),
+      securityId.toString(),
       BondUSAFacet__factory.createInterface(),
       "cancelCoupon",
       [couponId],
@@ -256,7 +256,7 @@ export class SecurityOperations {
     );
   }
 
-	async cancelDividend(
+  async cancelDividend(
     security: EvmAddress,
     dividendId: number,
     securityId: ContractId | string,
@@ -266,7 +266,7 @@ export class SecurityOperations {
       EquityUSAFacet__factory.createInterface(),
       "cancelDividend",
       [dividendId],
-			GAS.CANCEL_DIVIDEND,
+      GAS.CANCEL_DIVIDEND,
     );
   }
   async setVotingRights(
@@ -286,6 +286,21 @@ export class SecurityOperations {
       "setVoting",
       [voting],
       GAS.SET_VOTING_RIGHTS,
+    );
+  }
+  async cancelVoting(
+    security: EvmAddress,
+    votingId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
+
+    return this.executor.executeContractCall(
+      securityId.toString(),
+      EquityUSAFacet__factory.createInterface(),
+      "cancelVoting",
+      [votingId],
+      GAS.CANCEL_VOTING,
     );
   }
 

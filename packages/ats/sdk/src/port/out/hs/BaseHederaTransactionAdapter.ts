@@ -695,6 +695,10 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityOps.setVotingRights(...args);
   }
 
+  async cancelVotingRights(...args: Parameters<SecurityOperations["cancelVoting"]>): Promise<TransactionResponse> {
+    return this.securityOps.cancelVoting(...args);
+  }
+
   async setScheduledBalanceAdjustment(
     ...args: Parameters<SecurityOperations["setScheduledBalanceAdjustment"]>
   ): Promise<TransactionResponse> {
