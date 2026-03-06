@@ -2,14 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Domain Libraries
-import { LibABAF } from "../assets/LibABAF.sol";
-import { LibERC1410 } from "../assets/LibERC1410.sol";
-import { LibERC20 } from "../assets/LibERC20.sol";
-import { LibSnapshots } from "../assets/LibSnapshots.sol";
-import { LibHold } from "../assets/LibHold.sol";
-import { LibClearing } from "../assets/LibClearing.sol";
-import { LibLock } from "../assets/LibLock.sol";
-import { LibFreeze } from "../assets/LibFreeze.sol";
+import { LibABAF } from "../asset/LibABAF.sol";
+import { LibERC1410 } from "../asset/LibERC1410.sol";
+import { LibERC20 } from "../asset/LibERC20.sol";
+import { LibSnapshots } from "../asset/LibSnapshots.sol";
+import { LibHold } from "../asset/LibHold.sol";
+import { LibClearing } from "../asset/LibClearing.sol";
+import { LibLock } from "../asset/LibLock.sol";
+import { LibFreeze } from "../asset/LibFreeze.sol";
 
 // Core Libraries
 import { LibCompliance } from "../core/LibCompliance.sol";
@@ -23,7 +23,7 @@ import { IERC3643Management } from "../../facets/core/ERC3643/IERC3643Management
 import { ICompliance } from "../../facets/core/ERC3643/ICompliance.sol";
 import { IHoldBase } from "../../facets/core/hold/IHoldBase.sol";
 import { IHoldTokenHolder } from "../../facets/core/hold/IHoldTokenHolder.sol";
-import { ThirdPartyType } from "../../facets/core/externalControlLists/ThirdPartyType.sol";
+import { ThirdPartyType } from "../../facets/core/externalControlList/ThirdPartyType.sol";
 import { IControlListBase } from "../../facets/core/controlList/IControlListBase.sol";
 
 // Utilities

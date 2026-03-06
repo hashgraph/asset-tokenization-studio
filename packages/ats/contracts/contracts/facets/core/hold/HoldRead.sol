@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldRead } from "../hold/IHoldRead.sol";
-import { ThirdPartyType } from "../externalControlLists/ThirdPartyType.sol";
-import { LibHold } from "../../../domain/assets/LibHold.sol";
+import { ThirdPartyType } from "../externalControlList/ThirdPartyType.sol";
+import { LibHold } from "../../../domain/asset/LibHold.sol";
 import { HoldOps } from "../../../domain/orchestrator/HoldOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 

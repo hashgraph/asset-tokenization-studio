@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ProtectedPartitionsFacet } from "../../../facets/core/protectedPartitions/ProtectedPartitionsFacet.sol";
+import { ProtectedPartitionsFacet } from "../../../facets/core/protectedPartition/ProtectedPartitionsFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract ProtectedPartitionsFacetTimeTravel is ProtectedPartitionsFacet, TimeTravelProvider {

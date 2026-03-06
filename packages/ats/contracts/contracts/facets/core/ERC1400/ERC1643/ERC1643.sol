@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1643 } from "../../ERC1400/ERC1643/IERC1643.sol";
-import { LibERC1643 } from "../../../../domain/assets/LibERC1643.sol";
+import { LibERC1643 } from "../../../../domain/asset/LibERC1643.sol";
 import { LibAccess } from "../../../../domain/core/LibAccess.sol";
 import { LibPause } from "../../../../domain/core/LibPause.sol";
 import { _DOCUMENTER_ROLE } from "../../../../constants/roles.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IEquity } from "../../assets/equity/IEquity.sol";
+import { IEquity } from "../../asset/equity/IEquity.sol";
 import { ISecurity } from "../constants/ISecurity.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 

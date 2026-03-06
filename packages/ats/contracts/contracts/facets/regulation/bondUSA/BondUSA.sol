@@ -2,20 +2,20 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondUSA } from "./IBondUSA.sol";
-import { IBond } from "../../assets/bond/IBond.sol";
-import { IBondRead } from "../../assets/bond/IBondRead.sol";
+import { IBond } from "../../asset/bond/IBond.sol";
+import { IBondRead } from "../../asset/bond/IBondRead.sol";
 import { IKyc } from "../../core/kyc/IKyc.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
 
-import { LibBond } from "../../../domain/assets/LibBond.sol";
-import { LibSecurity } from "../../../domain/assets/LibSecurity.sol";
+import { LibBond } from "../../../domain/asset/LibBond.sol";
+import { LibSecurity } from "../../../domain/asset/LibSecurity.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { LibPause } from "../../../domain/core/LibPause.sol";
-import { LibERC1410 } from "../../../domain/assets/LibERC1410.sol";
+import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
 import { LibControlList } from "../../../domain/core/LibControlList.sol";
 import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibClearing } from "../../../domain/assets/LibClearing.sol";
+import { LibClearing } from "../../../domain/asset/LibClearing.sol";
 import { LibKyc } from "../../../domain/core/LibKyc.sol";
 import { LibCompliance } from "../../../domain/core/LibCompliance.sol";
 import { LibCorporateActions } from "../../../domain/core/LibCorporateActions.sol";

@@ -2,11 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Domain Libraries
-import { LibABAF } from "../assets/LibABAF.sol";
-import { LibERC1410 } from "../assets/LibERC1410.sol";
-import { LibERC20 } from "../assets/LibERC20.sol";
-import { LibERC20Votes } from "../assets/LibERC20Votes.sol";
-import { LibSnapshots } from "../assets/LibSnapshots.sol";
+import { LibABAF } from "../asset/LibABAF.sol";
+import { LibERC1410 } from "../asset/LibERC1410.sol";
+import { LibERC20 } from "../asset/LibERC20.sol";
+import { LibERC20Votes } from "../asset/LibERC20Votes.sol";
+import { LibSnapshots } from "../asset/LibSnapshots.sol";
 
 // Core Libraries
 import { LibCompliance } from "../core/LibCompliance.sol";

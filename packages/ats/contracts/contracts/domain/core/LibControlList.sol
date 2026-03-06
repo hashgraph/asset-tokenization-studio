@@ -7,7 +7,7 @@ import {
 } from "../../constants/storagePositions.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/utils/LibPagination.sol";
-import { IExternalControlList } from "../../facets/core/externalControlLists/IExternalControlList.sol";
+import { IExternalControlList } from "../../facets/core/externalControlList/IExternalControlList.sol";
 import { IControlListBase } from "../../facets/core/controlList/IControlListBase.sol";
 import { LibExternalLists } from "./LibExternalLists.sol";
 

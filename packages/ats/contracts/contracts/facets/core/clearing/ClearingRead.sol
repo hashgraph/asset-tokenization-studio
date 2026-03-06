@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingRead } from "../clearing/IClearingRead.sol";
-import { LibClearing } from "../../../domain/assets/LibClearing.sol";
+import { LibClearing } from "../../../domain/asset/LibClearing.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 

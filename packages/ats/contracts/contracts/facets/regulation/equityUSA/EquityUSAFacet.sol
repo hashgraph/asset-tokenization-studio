@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EquityUSA } from "./EquityUSA.sol";
 import { IEquityUSA } from "./IEquityUSA.sol";
-import { IEquity } from "../../assets/equity/IEquity.sol";
+import { IEquity } from "../../asset/equity/IEquity.sol";
 import { ISecurity } from "../constants/ISecurity.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { _EQUITY_RESOLVER_KEY } from "../../../constants/resolverKeys/assets.sol";

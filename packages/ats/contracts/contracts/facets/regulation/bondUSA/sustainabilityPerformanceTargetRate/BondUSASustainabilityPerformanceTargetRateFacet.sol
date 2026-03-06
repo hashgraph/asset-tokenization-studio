@@ -6,7 +6,7 @@ import {
 } from "../../../../constants/resolverKeys/assets.sol";
 import { BondUSASustainabilityPerformanceTargetRate } from "./BondUSASustainabilityPerformanceTargetRate.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { IBond } from "../../../assets/bond/IBond.sol";
+import { IBond } from "../../../asset/bond/IBond.sol";
 import { IBondUSA } from "../IBondUSA.sol";
 
 contract BondUSASustainabilityPerformanceTargetRateFacet is

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _BOND_FIXED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys/assets.sol";
 import { BondUSAFixedRate } from "./BondUSAFixedRate.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { IBond } from "../../../assets/bond/IBond.sol";
+import { IBond } from "../../../asset/bond/IBond.sol";
 import { IBondUSA } from "../IBondUSA.sol";
 
 contract BondUSAFixedRateFacet is BondUSAFixedRate, IStaticFunctionSelectors {

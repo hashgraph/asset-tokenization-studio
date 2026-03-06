@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _WILD_CARD_ROLE } from "../../constants/roles.sol";
 import { LibAccess } from "./LibAccess.sol";
-import { IProtectedPartitions } from "../../facets/core/protectedPartitions/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "../../facets/core/protectedPartition/IProtectedPartitions.sol";
 import { IClearing } from "../../facets/core/clearing/IClearing.sol";
 import { IHoldBase } from "../../facets/core/hold/IHoldBase.sol";
 import { LibERC712 } from "./LibERC712.sol";

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable max-line-length
 import {
     ProceedRecipientsSustainabilityPerformanceTargetRateFacet
-} from "../../../facets/assets/proceedRecipients/sustainabilityPerformanceTargetRate/ProceedRecipientsSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../facets/asset/proceedRecipient/sustainabilityPerformanceTargetRate/ProceedRecipientsSustainabilityPerformanceTargetRateFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 

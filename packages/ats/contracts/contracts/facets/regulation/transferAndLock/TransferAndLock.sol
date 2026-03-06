@@ -8,10 +8,10 @@ import { BasicTransferInfo } from "../../core/ERC1400/ERC1410/IERC1410Types.sol"
 import { LibAccess } from "../../../domain/core/LibAccess.sol";
 import { LibPause } from "../../../domain/core/LibPause.sol";
 import { LibProtectedPartitions } from "../../../domain/core/LibProtectedPartitions.sol";
-import { LibERC1410 } from "../../../domain/assets/LibERC1410.sol";
-import { LibABAF } from "../../../domain/assets/LibABAF.sol";
-import { LibLock } from "../../../domain/assets/LibLock.sol";
-import { LibSnapshots } from "../../../domain/assets/LibSnapshots.sol";
+import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
+import { LibABAF } from "../../../domain/asset/LibABAF.sol";
+import { LibLock } from "../../../domain/asset/LibLock.sol";
+import { LibSnapshots } from "../../../domain/asset/LibSnapshots.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 

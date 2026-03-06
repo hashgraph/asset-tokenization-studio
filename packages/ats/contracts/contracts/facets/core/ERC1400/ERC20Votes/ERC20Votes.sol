@@ -7,11 +7,11 @@ import { LibCheckpoints } from "../../../../infrastructure/utils/LibCheckpoints.
 // solhint-disable max-line-length
 import {
     IScheduledCrossOrderedTasks
-} from "../../../assets/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
+} from "../../../asset/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 // solhint-enable max-line-length
 import { LibPause } from "../../../../domain/core/LibPause.sol";
-import { LibERC20Votes } from "../../../../domain/assets/LibERC20Votes.sol";
-import { LibABAF } from "../../../../domain/assets/LibABAF.sol";
+import { LibERC20Votes } from "../../../../domain/asset/LibERC20Votes.sol";
+import { LibABAF } from "../../../../domain/asset/LibABAF.sol";
 import { HoldOps } from "../../../../domain/orchestrator/HoldOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 

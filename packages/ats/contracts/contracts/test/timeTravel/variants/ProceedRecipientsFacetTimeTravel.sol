@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ProceedRecipientsFacet } from "../../../facets/assets/proceedRecipients/ProceedRecipientsFacet.sol";
+import { ProceedRecipientsFacet } from "../../../facets/asset/proceedRecipient/ProceedRecipientsFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract ProceedRecipientsFacetTimeTravel is ProceedRecipientsFacet, TimeTravelProvider {

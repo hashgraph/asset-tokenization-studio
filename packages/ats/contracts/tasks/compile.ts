@@ -88,10 +88,10 @@ task("erc3643-clone-interfaces", async (_, hre) => {
 
   const constants = [
     { src: "facets/regulation/constants/regulation", dst: "regulation" },
-    { src: "domain/assets/LibRegulation", dst: "LibRegulation" },
+    { src: "domain/asset/LibRegulation", dst: "LibRegulation" },
     { src: "constants/roles", dst: "roles" },
     {
-      src: "assets/scheduledTasks/IScheduledTasksCommon",
+      src: "facets/asset/scheduledTask/IScheduledTasksCommon",
       dst: "IScheduledTasksCommon",
     },
   ];

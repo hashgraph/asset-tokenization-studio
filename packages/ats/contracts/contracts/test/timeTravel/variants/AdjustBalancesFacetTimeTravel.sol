@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AdjustBalancesFacet } from "../../../facets/assets/adjustBalances/AdjustBalancesFacet.sol";
+import { AdjustBalancesFacet } from "../../../facets/asset/adjustBalances/AdjustBalancesFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract AdjustBalancesFacetTimeTravel is AdjustBalancesFacet, TimeTravelProvider {

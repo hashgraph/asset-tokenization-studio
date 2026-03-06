@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable max-line-length
 import {
     KpisSustainabilityPerformanceTargetRateFacet
-} from "../../../facets/assets/kpis/kpiLatest/sustainabilityPerformanceTargetRate/KpisSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../facets/asset/kpi/kpiLatest/sustainabilityPerformanceTargetRate/KpisSustainabilityPerformanceTargetRateFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";

@@ -4,10 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { LibPagination } from "../../infrastructure/utils/LibPagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    ICorporateActions,
-    CorporateActionDataStorage
-} from "../../facets/core/corporateActions/ICorporateActions.sol";
+import { ICorporateActions, CorporateActionDataStorage } from "../../facets/core/corporateAction/ICorporateActions.sol";
 
 /// @title LibCorporateActions — Corporate actions management library
 /// @notice Centralized corporate actions functionality extracted from CorporateActionsStorageWrapper.sol
