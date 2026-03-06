@@ -49,6 +49,7 @@ export const GAS = {
   SET_VOTING_RIGHTS: 7000000,
   SET_COUPON: 7000000,
   CANCEL_COUPON: 7000000,
+  CANCEL_VOTING: 7000000,
   SET_DOCUMENT: 7000000,
   REMOVE_DOCUMENT: 7000000,
   AUTHORIZE_OPERATOR: 7000000,
@@ -165,6 +166,7 @@ export const CANCEL_DIVIDEND_EVENT = "DividendCancelled";
 export const SET_VOTING_RIGHTS_EVENT = "VotingSet";
 export const SET_COUPON_EVENT = "CouponSet";
 export const CANCEL_COUPON_EVENT = "CouponCancelled";
+export const CANCEL_VOTING_EVENT = "VotingCancelled";
 export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT = "ScheduledBalanceAdjustmentSet";
 
 // * Generic

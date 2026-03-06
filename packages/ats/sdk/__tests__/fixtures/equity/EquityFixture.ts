@@ -49,6 +49,8 @@ import { SetDividendsCommand } from "@command/equity/dividends/set/SetDividendsC
 import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
 import CancelDividendRequest from "@port/in/request/equity/CancelDividendRequest";
 import { SetVotingRightsCommand } from "@command/equity/votingRights/set/SetVotingRightsCommand";
+import { CancelVotingCommand } from "@command/equity/votingRights/cancel/CancelVotingCommand";
+import CancelVotingRequest from "@port/in/request/equity/CancelVotingRequest";
 import ContractId from "@domain/context/contract/ContractId";
 import { SecurityPropsFixture } from "../shared/SecurityFixture";
 import { GetDividendHoldersQuery } from "@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery";
@@ -448,12 +450,24 @@ export const EquityDetailsFixture = createFixture<EquityDetails>((props) => {
 export const VotingForFixture = createFixture<VotingFor>((props) => {
   props.tokenBalance.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   props.decimals.faker((faker) => faker.date.past());
+  props.isDisabled.faker((faker) => faker.datatype.boolean());
 });
 
 export const VotingRightsFixture = createFixture<VotingRights>((props) => {
   props.data.faker((faker) => faker.lorem.words());
   props.recordTimeStamp.faker((faker) => faker.date.past());
   props.snapshotId?.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  props.isDisabled.faker((faker) => faker.datatype.boolean());
+});
+
+export const CancelVotingRequestFixture = createFixture<CancelVotingRequest>((request) => {
+  request.securityId.as(() => HederaIdPropsFixture.create().value);
+  request.votingId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
+export const CancelVotingCommandFixture = createFixture<CancelVotingCommand>((command) => {
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
+  command.votingId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
 });
 
 export const CreateTrexSuiteEquityRequestFixture = createFixture<CreateTrexSuiteEquityRequest>((request) => {
