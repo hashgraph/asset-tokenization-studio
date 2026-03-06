@@ -24,6 +24,7 @@ import {
   GetTotalVotingHoldersRequest,
   CreateTrexSuiteEquityRequest,
   CancelDividendRequest,
+  CancelScheduledBalanceAdjustmentRequest,
 } from "../request";
 import { HederaIdPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
 import LogService from "@service/log/LogService";
@@ -62,6 +63,7 @@ import {
   SetDividendsRequestFixture,
   CancelDividendRequestFixture,
   SetScheduledBalanceAdjustmentRequestFixture,
+  CancelScheduledBalanceAdjustmentRequestFixture,
   SetVotingRightsRequestFixture,
   VotingRightsFixture,
   CancelVotingRequestFixture,
@@ -83,6 +85,7 @@ import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCoun
 import { SetScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand";
 import { GetScheduledBalanceAdjustmentQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery";
 import { GetScheduledBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery";
+import { CancelScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/cancelScheduledBalanceAdjustment/CancelScheduledBalanceAdjustmentCommand";
 import { GetDividendHoldersQuery } from "@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery";
 import { GetTotalDividendHoldersQuery } from "@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery";
 import { GetVotingHoldersQuery } from "@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery";
@@ -108,6 +111,7 @@ describe("Equity", () => {
   let setScheduledBalanceAdjustmentRequest: SetScheduledBalanceAdjustmentRequest;
   let getScheduledBalanceAdjustmentCountRequest: GetScheduledBalanceAdjustmentCountRequest;
   let getScheduledBalanceAdjustmentRequest: GetScheduledBalanceAdjustmentRequest;
+  let cancelScheduledBalanceAdjustmentRequest: CancelScheduledBalanceAdjustmentRequest;
   let getAllScheduledBalanceAdjustmentsRequest: GetAllScheduledBalanceAdjustmentsRequest;
   let getDividendHoldersRequest: GetDividendHoldersRequest;
   let getTotalDividendHoldersRequest: GetTotalDividendHoldersRequest;
@@ -1195,6 +1199,70 @@ describe("Equity", () => {
     });
   });
 
+  describe("cancelScheduledBalanceAdjustment", () => {
+    cancelScheduledBalanceAdjustmentRequest = new CancelScheduledBalanceAdjustmentRequest(
+      CancelScheduledBalanceAdjustmentRequestFixture.create(),
+    );
+    it("should set scheduled balance adjustment successfully", async () => {
+      const expectedResponse = {
+        payload: 1,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await EquityToken.cancelScheduledBalanceAdjustment(cancelScheduledBalanceAdjustmentRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        "CancelScheduledBalanceAdjustmentRequest",
+        cancelScheduledBalanceAdjustmentRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CancelScheduledBalanceAdjustmentCommand(
+          cancelScheduledBalanceAdjustmentRequest.securityId,
+          cancelScheduledBalanceAdjustmentRequest.balanceAdjustmentId,
+        ),
+      );
+
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(
+        EquityToken.cancelScheduledBalanceAdjustment(cancelScheduledBalanceAdjustmentRequest),
+      ).rejects.toThrow("Command execution failed");
+
+      expect(handleValidationSpy).toHaveBeenCalledWith(
+        "CancelScheduledBalanceAdjustmentRequest",
+        cancelScheduledBalanceAdjustmentRequest,
+      );
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CancelScheduledBalanceAdjustmentCommand(
+          cancelScheduledBalanceAdjustmentRequest.securityId,
+          cancelScheduledBalanceAdjustmentRequest.balanceAdjustmentId,
+        ),
+      );
+    });
+
+    it("should throw error if securityId is invalid", async () => {
+      cancelScheduledBalanceAdjustmentRequest = new CancelScheduledBalanceAdjustmentRequest({
+        ...CancelScheduledBalanceAdjustmentRequestFixture.create(),
+        securityId: "invalid",
+      });
+
+      await expect(
+        EquityToken.cancelScheduledBalanceAdjustment(cancelScheduledBalanceAdjustmentRequest),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
   describe("getScheduledBalanceAdjustment", () => {
     getScheduledBalanceAdjustmentRequest = new GetScheduledBalanceAdjustmentRequest(
       GetScheduledBalanceAdjustmentRequestFixture.create(),
@@ -1228,6 +1296,7 @@ describe("Equity", () => {
           executionDate: new Date(expectedResponse.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND),
           factor: expectedResponse.scheduleBalanceAdjustment.factor.toString(),
           decimals: expectedResponse.scheduleBalanceAdjustment.decimals.toString(),
+          isDisabled: expectedResponse.scheduleBalanceAdjustment.isDisabled,
         }),
       );
     });
@@ -1374,6 +1443,7 @@ describe("Equity", () => {
             id: 1,
             executionDate: new Date(expectedResponse2.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND),
             factor: expectedResponse2.scheduleBalanceAdjustment.factor.toString(),
+            isDisabled: expectedResponse2.scheduleBalanceAdjustment.isDisabled,
           },
         ]),
       );

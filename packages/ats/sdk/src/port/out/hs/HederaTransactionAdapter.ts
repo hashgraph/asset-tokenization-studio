@@ -3305,6 +3305,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    return this.executeWithArgs(
+      new EquityUSAFacet__factory().attach(security.toString()),
+      "cancelScheduledBalanceAdjustment",
+      securityId,
+      GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
+      [balanceAdjustmentId],
+    );
+  }
+
   // * Definition of the abstract methods
   abstract signAndSendTransaction(
     transaction: Transaction,

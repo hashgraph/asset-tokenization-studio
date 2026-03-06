@@ -352,6 +352,11 @@ interface ITransactionAdapter {
     sourceId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
 }
 
 interface RoleTransactionAdapter {
@@ -1793,4 +1798,10 @@ export default abstract class TransactionAdapter
     rateDecimals: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+
+  abstract cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
 }
