@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable max-line-length
 import {
     ScheduledCrossOrderedTasksKpiLinkedRateFacet
-} from "../../../facets/assets/scheduledTasks/scheduledCrossOrderedTasks/kpiLinkedRate/ScheduledCrossOrderedTasksKpiLinkedRateFacet.sol";
+} from "../../../facets/asset/scheduledTask/scheduledCrossOrderedTask/kpiLinkedRate/ScheduledCrossOrderedTasksKpiLinkedRateFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";

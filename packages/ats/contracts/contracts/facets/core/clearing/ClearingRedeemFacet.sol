@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ClearingRedeem } from "./ClearingRedeem.sol";
 import { IClearingRedeem } from "../clearing/IClearingRedeem.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _CLEARING_REDEEM_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _CLEARING_REDEEM_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 
 contract ClearingRedeemFacet is ClearingRedeem, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

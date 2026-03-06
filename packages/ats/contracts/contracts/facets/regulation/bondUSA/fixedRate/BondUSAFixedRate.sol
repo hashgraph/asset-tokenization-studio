@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSA } from "../BondUSA.sol";
-import { IBondRead } from "../../../assets/bond/IBondRead.sol";
-import { LibBond } from "../../../../domain/assets/LibBond.sol";
-import { LibInterestRate } from "../../../../domain/assets/LibInterestRate.sol";
+import { IBondRead } from "../../../asset/bond/IBondRead.sol";
+import { LibBond } from "../../../../domain/asset/LibBond.sol";
+import { LibInterestRate } from "../../../../domain/asset/LibInterestRate.sol";
 import { LibPause } from "../../../../domain/core/LibPause.sol";
 import { LibAccess } from "../../../../domain/core/LibAccess.sol";
 import { LibCorporateActions } from "../../../../domain/core/LibCorporateActions.sol";

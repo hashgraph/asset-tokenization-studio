@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { TotalBalance } from "./TotalBalance.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { ITotalBalance } from "../totalBalance/ITotalBalance.sol";
-import { _TOTAL_BALANCE_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _TOTAL_BALANCE_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 
 contract TotalBalanceFacet is TotalBalance, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {

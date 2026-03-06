@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { DiamondCut } from "./DiamondCut.sol";
 import { DiamondLoupe } from "./DiamondLoupe.sol";
-import { _DIAMOND_RESOLVER_KEY } from "../../constants/resolverKeys/core.sol";
+import { _DIAMOND_RESOLVER_KEY } from "../../constants/resolverKeys/resolverKeys.sol";
 import { IDiamond } from "./IDiamond.sol";
 import { IDiamondCut } from "./IDiamondCut.sol";
 import { IDiamondLoupe } from "./IDiamondLoupe.sol";

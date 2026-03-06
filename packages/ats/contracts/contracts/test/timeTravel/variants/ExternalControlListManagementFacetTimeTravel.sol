@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ExternalControlListManagementFacet
-} from "../../../facets/core/externalControlLists/ExternalControlListManagementFacet.sol";
+} from "../../../facets/core/externalControlList/ExternalControlListManagementFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract ExternalControlListManagementFacetTimeTravel is ExternalControlListManagementFacet, TimeTravelProvider {

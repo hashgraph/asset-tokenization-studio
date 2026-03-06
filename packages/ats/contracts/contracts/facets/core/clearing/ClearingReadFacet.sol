@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ClearingRead } from "./ClearingRead.sol";
 import { IClearingRead } from "../clearing/IClearingRead.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _CLEARING_READ_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _CLEARING_READ_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 
 contract ClearingReadFacet is ClearingRead, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

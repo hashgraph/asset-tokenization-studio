@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ERC3643_BATCH_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _ERC3643_BATCH_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 import { ERC3643Batch } from "./ERC3643Batch.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IERC3643Batch } from "../ERC3643/IERC3643Batch.sol";

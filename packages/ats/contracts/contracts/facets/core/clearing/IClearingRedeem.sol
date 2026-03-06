@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing } from "./IClearing.sol";
-import { ThirdPartyType } from "../externalControlLists/ThirdPartyType.sol";
+import { ThirdPartyType } from "../externalControlList/ThirdPartyType.sol";
 
 interface IClearingRedeem is IClearing {
     struct ClearingRedeemData {

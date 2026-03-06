@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { HoldRead } from "./HoldRead.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IHoldRead } from "../hold/IHoldRead.sol";
-import { _HOLD_READ_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _HOLD_READ_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 
 contract HoldReadFacet is HoldRead, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {

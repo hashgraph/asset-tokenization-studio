@@ -16,7 +16,7 @@ import {
 } from "../../constants/values.sol";
 import { IHoldBase } from "../../facets/core/hold/IHoldBase.sol";
 import { IClearing } from "../../facets/core/clearing/IClearing.sol";
-import { IERC712 } from "../../facets/core/nonces/IERC712.sol";
+import { IERC712 } from "../../facets/core/nonce/IERC712.sol";
 
 library LibERC712 {
     function getDomainHash(

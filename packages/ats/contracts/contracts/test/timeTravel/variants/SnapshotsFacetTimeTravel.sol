@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { SnapshotsFacet } from "../../../facets/core/snapshots/SnapshotsFacet.sol";
+import { SnapshotsFacet } from "../../../facets/core/snapshot/SnapshotsFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 

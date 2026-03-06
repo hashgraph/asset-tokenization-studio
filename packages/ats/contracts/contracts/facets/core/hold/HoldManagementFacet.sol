@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { HoldManagement } from "./HoldManagement.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IHoldManagement } from "../hold/IHoldManagement.sol";
-import { _HOLD_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _HOLD_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 
 contract HoldManagementFacet is HoldManagement, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {

@@ -4,9 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable ordering
 
 import { IERC1410Read } from "../../ERC1400/ERC1410/IERC1410Read.sol";
-import { LibABAF } from "../../../../domain/assets/LibABAF.sol";
-import { LibERC1410 } from "../../../../domain/assets/LibERC1410.sol";
-import { LibERC1594 } from "../../../../domain/assets/LibERC1594.sol";
+import { LibABAF } from "../../../../domain/asset/LibABAF.sol";
+import { LibERC1410 } from "../../../../domain/asset/LibERC1410.sol";
+import { LibERC1594 } from "../../../../domain/asset/LibERC1594.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract ERC1410Read is IERC1410Read, TimestampProvider {

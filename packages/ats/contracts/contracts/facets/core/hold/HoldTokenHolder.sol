@@ -3,14 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldTokenHolder } from "../hold/IHoldTokenHolder.sol";
 import { IClearing } from "../clearing/IClearing.sol";
-import { ThirdPartyType } from "../externalControlLists/ThirdPartyType.sol";
+import { ThirdPartyType } from "../externalControlList/ThirdPartyType.sol";
 import { LibPause } from "../../../domain/core/LibPause.sol";
 import { LibCompliance } from "../../../domain/core/LibCompliance.sol";
 import { LibProtectedPartitions } from "../../../domain/core/LibProtectedPartitions.sol";
-import { LibClearing } from "../../../domain/assets/LibClearing.sol";
-import { LibERC1410 } from "../../../domain/assets/LibERC1410.sol";
-import { LibERC1594 } from "../../../domain/assets/LibERC1594.sol";
-import { LibHold } from "../../../domain/assets/LibHold.sol";
+import { LibClearing } from "../../../domain/asset/LibClearing.sol";
+import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
+import { LibERC1594 } from "../../../domain/asset/LibERC1594.sol";
+import { LibHold } from "../../../domain/asset/LibHold.sol";
 import { HoldOps } from "../../../domain/orchestrator/HoldOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 

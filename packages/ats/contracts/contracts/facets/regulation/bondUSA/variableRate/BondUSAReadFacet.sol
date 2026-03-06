@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _BOND_VARIABLE_READ_RESOLVER_KEY } from "../../../../constants/resolverKeys/assets.sol";
+import { _BOND_VARIABLE_READ_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
 import { BondUSARead } from "../BondUSARead.sol";
 import { ISecurity } from "../../constants/ISecurity.sol";
-import { IBondRead } from "../../../assets/bond/IBondRead.sol";
+import { IBondRead } from "../../../asset/bond/IBondRead.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 
 contract BondUSAReadFacet is BondUSARead, IStaticFunctionSelectors {

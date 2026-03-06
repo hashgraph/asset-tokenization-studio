@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC20Permit } from "./ERC20Permit.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _ERC20PERMIT_RESOLVER_KEY } from "../../../../constants/resolverKeys/core.sol";
+import { _ERC20PERMIT_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
 import { IERC20Permit } from "../../ERC1400/ERC20Permit/IERC20Permit.sol";
 
 contract ERC20PermitFacet is ERC20Permit, IStaticFunctionSelectors {

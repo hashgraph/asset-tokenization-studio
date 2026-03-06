@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _KYC_STORAGE_POSITION, _KYC_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKyc } from "../../facets/core/kyc/IKyc.sol";
 import { IRevocationList } from "../../facets/core/ssi/IRevocationList.sol";
-import { IExternalKycList } from "../../facets/core/externalKycLists/IExternalKycList.sol";
+import { IExternalKycList } from "../../facets/core/externalKycList/IExternalKycList.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { LibPagination } from "../../infrastructure/utils/LibPagination.sol";
 import { LibSSI } from "./LibSSI.sol";

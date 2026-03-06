@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ClearingHoldCreation } from "./ClearingHoldCreation.sol";
 import { IClearingHoldCreation } from "../clearing/IClearingHoldCreation.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _CLEARING_HOLDCREATION_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _CLEARING_HOLDCREATION_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 
 contract ClearingHoldCreationFacet is ClearingHoldCreation, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

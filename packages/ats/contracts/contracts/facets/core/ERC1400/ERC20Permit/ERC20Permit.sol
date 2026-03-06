@@ -11,8 +11,8 @@ import { LibPause } from "../../../../domain/core/LibPause.sol";
 import { LibControlList } from "../../../../domain/core/LibControlList.sol";
 import { LibCompliance } from "../../../../domain/core/LibCompliance.sol";
 import { LibNonce } from "../../../../domain/core/LibNonce.sol";
-import { LibERC20 } from "../../../../domain/assets/LibERC20.sol";
-import { LibERC1410 } from "../../../../domain/assets/LibERC1410.sol";
+import { LibERC20 } from "../../../../domain/asset/LibERC20.sol";
+import { LibERC1410 } from "../../../../domain/asset/LibERC1410.sol";
 import { LibResolverProxy } from "../../../../infrastructure/proxy/LibResolverProxy.sol";
 
 abstract contract ERC20Permit is IERC20Permit {

@@ -2,16 +2,16 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSARead } from "../BondUSARead.sol";
-import { IBondRead } from "../../../assets/bond/IBondRead.sol";
+import { IBondRead } from "../../../asset/bond/IBondRead.sol";
 // solhint-disable max-line-length
 import {
     ISustainabilityPerformanceTargetRate
-} from "../../../assets/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../../../asset/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 // solhint-enable max-line-length
-import { LibBond } from "../../../../domain/assets/LibBond.sol";
-import { LibInterestRate } from "../../../../domain/assets/LibInterestRate.sol";
-import { LibKpis } from "../../../../domain/assets/LibKpis.sol";
-import { LibProceedRecipients } from "../../../../domain/assets/LibProceedRecipients.sol";
+import { LibBond } from "../../../../domain/asset/LibBond.sol";
+import { LibInterestRate } from "../../../../domain/asset/LibInterestRate.sol";
+import { LibKpis } from "../../../../domain/asset/LibKpis.sol";
+import { LibProceedRecipients } from "../../../../domain/asset/LibProceedRecipients.sol";
 import { LibCorporateActions } from "../../../../domain/core/LibCorporateActions.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../../constants/values.sol";
 

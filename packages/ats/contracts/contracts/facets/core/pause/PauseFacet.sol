@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Pause } from "./Pause.sol";
 import { IPause } from "../pause/IPause.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _PAUSE_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _PAUSE_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 
 contract PauseFacet is Pause, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ERC1410Issuer } from "./ERC1410Issuer.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IERC1410Issuer } from "../../ERC1400/ERC1410/IERC1410Issuer.sol";
-import { _ERC1410_ISSUER_RESOLVER_KEY } from "../../../../constants/resolverKeys/core.sol";
+import { _ERC1410_ISSUER_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
 
 contract ERC1410IssuerFacet is ERC1410Issuer, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

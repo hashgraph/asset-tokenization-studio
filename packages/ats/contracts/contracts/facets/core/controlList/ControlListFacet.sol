@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { ControlList } from "./ControlList.sol";
 import { IControlList } from "../controlList/IControlList.sol";
-import { _CONTROL_LIST_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _CONTROL_LIST_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 
 /**
  * @title ControlListFacet

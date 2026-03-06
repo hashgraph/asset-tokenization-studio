@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Domain Libraries
-import { LibABAF } from "../assets/LibABAF.sol";
-import { LibClearing } from "../assets/LibClearing.sol";
-import { LibSnapshots } from "../assets/LibSnapshots.sol";
+import { LibABAF } from "../asset/LibABAF.sol";
+import { LibClearing } from "../asset/LibClearing.sol";
+import { LibSnapshots } from "../asset/LibSnapshots.sol";
 
 // Interfaces
 import { IClearing } from "../../facets/core/clearing/IClearing.sol";

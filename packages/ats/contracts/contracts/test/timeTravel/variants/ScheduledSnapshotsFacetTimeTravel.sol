@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ScheduledSnapshotsFacet
-} from "../../../facets/assets/scheduledTasks/scheduledSnapshots/ScheduledSnapshotsFacet.sol";
+} from "../../../facets/asset/scheduledTask/scheduledSnapshot/ScheduledSnapshotsFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract ScheduledSnapshotsFacetTimeTravel is ScheduledSnapshotsFacet, TimeTravelProvider {

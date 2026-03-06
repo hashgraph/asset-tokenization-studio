@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Freeze } from "./Freeze.sol";
 import { IFreeze } from "../freeze/IFreeze.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _FREEZE_RESOLVER_KEY } from "../../../constants/resolverKeys/core.sol";
+import { _FREEZE_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
 
 contract FreezeFacet is Freeze, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

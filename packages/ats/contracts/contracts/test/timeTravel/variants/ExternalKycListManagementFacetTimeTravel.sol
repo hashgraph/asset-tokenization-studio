@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ExternalKycListManagementFacet
-} from "../../../facets/core/externalKycLists/ExternalKycListManagementFacet.sol";
+} from "../../../facets/core/externalKycList/ExternalKycListManagementFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract ExternalKycListManagementFacetTimeTravel is ExternalKycListManagementFacet, TimeTravelProvider {

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 // solhint-disable max-line-length
 import {
     ScheduledBalanceAdjustmentsFacet
-} from "../../../facets/assets/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsFacet.sol";
+} from "../../../facets/asset/scheduledTask/scheduledBalanceAdjustment/ScheduledBalanceAdjustmentsFacet.sol";
 // solhint-enable max-line-length
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 

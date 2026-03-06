@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
-} from "../../../../constants/resolverKeys/assets.sol";
+} from "../../../../constants/resolverKeys/resolverKeys.sol";
 import { BondUSASustainabilityPerformanceTargetRate } from "./BondUSASustainabilityPerformanceTargetRate.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { IBond } from "../../../assets/bond/IBond.sol";
+import { IBond } from "../../../asset/bond/IBond.sol";
 import { IBondUSA } from "../IBondUSA.sol";
 
 contract BondUSASustainabilityPerformanceTargetRateFacet is

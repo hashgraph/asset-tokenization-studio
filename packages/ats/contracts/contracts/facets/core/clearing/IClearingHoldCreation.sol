@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldBase } from "../hold/IHoldBase.sol";
 import { IClearing } from "./IClearing.sol";
-import { ThirdPartyType } from "../externalControlLists/ThirdPartyType.sol";
+import { ThirdPartyType } from "../externalControlList/ThirdPartyType.sol";
 
 interface IClearingHoldCreation is IClearing, IHoldBase {
     struct ClearingHoldCreationData {

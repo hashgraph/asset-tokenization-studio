@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../assets/bond/IBondRead.sol";
+import { IBondRead } from "../../asset/bond/IBondRead.sol";
 import { ISecurity } from "../constants/ISecurity.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 
-import { LibBond } from "../../../domain/assets/LibBond.sol";
-import { LibSecurity } from "../../../domain/assets/LibSecurity.sol";
-import { LibABAF } from "../../../domain/assets/LibABAF.sol";
-import { LibSnapshots } from "../../../domain/assets/LibSnapshots.sol";
-import { LibERC1410 } from "../../../domain/assets/LibERC1410.sol";
+import { LibBond } from "../../../domain/asset/LibBond.sol";
+import { LibSecurity } from "../../../domain/asset/LibSecurity.sol";
+import { LibABAF } from "../../../domain/asset/LibABAF.sol";
+import { LibSnapshots } from "../../../domain/asset/LibSnapshots.sol";
+import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
 import { LibCorporateActions } from "../../../domain/core/LibCorporateActions.sol";
 import { HoldOps } from "../../../domain/orchestrator/HoldOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";

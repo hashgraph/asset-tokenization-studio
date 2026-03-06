@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ERC1644 } from "./ERC1644.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IERC1644 } from "../../ERC1400/ERC1644/IERC1644.sol";
-import { _ERC1644_RESOLVER_KEY } from "../../../../constants/resolverKeys/core.sol";
+import { _ERC1644_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
 
 contract ERC1644Facet is ERC1644, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KpiLinkedRateFacet } from "../../../facets/assets/interestRates/kpiLinkedRate/KpiLinkedRateFacet.sol";
+import { KpiLinkedRateFacet } from "../../../facets/asset/interestRate/kpiLinkedRate/KpiLinkedRateFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract KpiLinkedRateFacetTimeTravel is KpiLinkedRateFacet, TimeTravelProvider {

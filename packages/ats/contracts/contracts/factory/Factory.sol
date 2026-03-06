@@ -20,24 +20,24 @@ import {
     RegulationType,
     RegulationSubType
 } from "../facets/regulation/constants/regulation.sol";
-import { LibRegulation } from "../domain/assets/LibRegulation.sol";
+import { LibRegulation } from "../domain/asset/LibRegulation.sol";
 import { IEquityUSA } from "../facets/regulation/equityUSA/IEquityUSA.sol";
 import { IBondUSA } from "../facets/regulation/bondUSA/IBondUSA.sol";
-import { IProceedRecipients } from "../facets/assets/proceedRecipients/IProceedRecipients.sol";
-import { IProtectedPartitions } from "../facets/core/protectedPartitions/IProtectedPartitions.sol";
-import { IExternalPauseManagement } from "../facets/core/externalPauses/IExternalPauseManagement.sol";
-import { IExternalControlListManagement } from "../facets/core/externalControlLists/IExternalControlListManagement.sol";
-import { IExternalKycListManagement } from "../facets/core/externalKycLists/IExternalKycListManagement.sol";
+import { IProceedRecipients } from "../facets/asset/proceedRecipient/IProceedRecipients.sol";
+import { IProtectedPartitions } from "../facets/core/protectedPartition/IProtectedPartitions.sol";
+import { IExternalPauseManagement } from "../facets/core/externalPause/IExternalPauseManagement.sol";
+import { IExternalControlListManagement } from "../facets/core/externalControlList/IExternalControlListManagement.sol";
+import { IExternalKycListManagement } from "../facets/core/externalKycList/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/core/kyc/IKyc.sol";
 import { IERC3643 } from "../facets/core/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
-import { IFixedRate } from "../facets/assets/interestRates/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../facets/assets/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "../facets/asset/interestRate/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../facets/asset/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 // solhint-disable max-line-length
 import {
     ISustainabilityPerformanceTargetRate
-} from "../facets/assets/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../facets/asset/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 // solhint-enable max-line-length
 
 contract Factory is IFactory, Context {

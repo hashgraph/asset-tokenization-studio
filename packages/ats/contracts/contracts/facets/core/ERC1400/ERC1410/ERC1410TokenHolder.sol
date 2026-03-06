@@ -5,10 +5,10 @@ import { IERC1410TokenHolder } from "../../ERC1400/ERC1410/IERC1410TokenHolder.s
 import { IControlListBase } from "../../controlList/IControlListBase.sol";
 import { BasicTransferInfo } from "../../ERC1400/ERC1410/IERC1410Types.sol";
 import { LibPause } from "../../../../domain/core/LibPause.sol";
-import { LibERC1410 } from "../../../../domain/assets/LibERC1410.sol";
-import { LibERC1594 } from "../../../../domain/assets/LibERC1594.sol";
+import { LibERC1410 } from "../../../../domain/asset/LibERC1410.sol";
+import { LibERC1594 } from "../../../../domain/asset/LibERC1594.sol";
 import { LibProtectedPartitions } from "../../../../domain/core/LibProtectedPartitions.sol";
-import { LibABAF } from "../../../../domain/assets/LibABAF.sol";
+import { LibABAF } from "../../../../domain/asset/LibABAF.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 

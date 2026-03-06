@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20 } from "../../ERC1400/ERC20/IERC20.sol";
 import { LibPause } from "../../../../domain/core/LibPause.sol";
-import { LibERC1410 } from "../../../../domain/assets/LibERC1410.sol";
-import { LibERC20 } from "../../../../domain/assets/LibERC20.sol";
-import { LibABAF } from "../../../../domain/assets/LibABAF.sol";
-import { LibERC1594 } from "../../../../domain/assets/LibERC1594.sol";
+import { LibERC1410 } from "../../../../domain/asset/LibERC1410.sol";
+import { LibERC20 } from "../../../../domain/asset/LibERC20.sol";
+import { LibABAF } from "../../../../domain/asset/LibABAF.sol";
+import { LibERC1594 } from "../../../../domain/asset/LibERC1594.sol";
 import { LibCompliance } from "../../../../domain/core/LibCompliance.sol";
 import { LibProtectedPartitions } from "../../../../domain/core/LibProtectedPartitions.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";

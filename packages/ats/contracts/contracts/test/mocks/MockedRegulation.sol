@@ -10,7 +10,7 @@ import {
     ManualInvestorVerification,
     InternationalInvestors,
     ResaleHoldPeriod
-} from "../../domain/assets/LibRegulation.sol";
+} from "../../domain/asset/LibRegulation.sol";
 /**
  * @notice Helper contract to expose regulation.sol pure functions for testing
  */

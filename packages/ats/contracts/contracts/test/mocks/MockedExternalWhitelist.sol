@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalControlList } from "../../facets/core/externalControlLists/IExternalControlList.sol";
+import { IExternalControlList } from "../../facets/core/externalControlList/IExternalControlList.sol";
 
 contract MockedWhitelist is IExternalControlList {
     mapping(address => bool) private _whitelist;

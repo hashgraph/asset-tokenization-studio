@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ScheduledCouponListingFacet
-} from "../../../facets/assets/scheduledTasks/scheduledCouponListing/ScheduledCouponListingFacet.sol";
+} from "../../../facets/asset/scheduledTask/scheduledCouponListing/ScheduledCouponListingFacet.sol";
 import { TimeTravelProvider } from "../TimeTravelProvider.sol";
 
 contract ScheduledCouponListingFacetTimeTravel is ScheduledCouponListingFacet, TimeTravelProvider {

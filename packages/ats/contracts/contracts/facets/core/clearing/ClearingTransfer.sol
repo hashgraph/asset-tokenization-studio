@@ -3,13 +3,13 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingTransfer } from "../clearing/IClearingTransfer.sol";
 import { IClearing } from "../clearing/IClearing.sol";
-import { ThirdPartyType } from "../externalControlLists/ThirdPartyType.sol";
+import { ThirdPartyType } from "../externalControlList/ThirdPartyType.sol";
 import { LibPause } from "../../../domain/core/LibPause.sol";
 import { LibCompliance } from "../../../domain/core/LibCompliance.sol";
 import { LibProtectedPartitions } from "../../../domain/core/LibProtectedPartitions.sol";
 import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibClearing } from "../../../domain/assets/LibClearing.sol";
-import { LibERC1410 } from "../../../domain/assets/LibERC1410.sol";
+import { LibClearing } from "../../../domain/asset/LibClearing.sol";
+import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
