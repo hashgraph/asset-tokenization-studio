@@ -12,7 +12,6 @@ import {
     ListOfPartitions
 } from "../../layer_1/interfaces/snapshots/ISnapshots.sol";
 import { CorporateActionsStorageWrapper } from "../corporateActions/CorporateActionsStorageWrapper.sol";
-import { EMPTY_BYTES } from "../../layer_0/constants/values.sol";
 
 abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, CorporateActionsStorageWrapper {
     using ArraysUpgradeable for uint256[];
