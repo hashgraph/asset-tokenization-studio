@@ -1686,6 +1686,19 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     } as TransactionResponse;
   });
 
+  singletonInstance.cancelScheduledBalanceAdjustment = jest.fn(async function (
+    _security: EvmAddress,
+    balanceAdjustmentId: number,
+  ) {
+    if (balanceAdjustmentId > 0 && balanceAdjustmentId <= scheduledBalanceAdjustments.length) {
+      scheduledBalanceAdjustments.splice(balanceAdjustmentId - 1, 1);
+    }
+    return {
+      status: "success",
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
   singletonInstance.protectPartitions = jest.fn(async () => {
     securityInfo.arePartitionsProtected = true;
     return {

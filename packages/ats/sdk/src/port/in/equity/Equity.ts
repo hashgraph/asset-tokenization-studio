@@ -10,6 +10,7 @@ import { SetVotingRightsCommand } from "@command/equity/votingRights/set/SetVoti
 import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQuery";
 import { GetVotingCountQuery } from "@query/equity/votingRights/getVotingCount/GetVotingCountQuery";
 import { GetVotingForQuery } from "@query/equity/votingRights/getVotingFor/GetVotingForQuery";
+import { CancelScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/cancelScheduledBalanceAdjustment/CancelScheduledBalanceAdjustmentCommand";
 import { SetScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand";
 import Injectable from "@core/injectable/Injectable";
 import { CommandBus } from "@core/command/CommandBus";
@@ -43,6 +44,7 @@ import GetEquityDetailsRequest from "../request/equity/GetEquityDetailsRequest";
 import EquityDetailsViewModel from "../response/EquityDetailsViewModel";
 import { GetEquityDetailsQuery } from "@query/equity/get/getEquityDetails/GetEquityDetailsQuery";
 import { CastRegulationSubType, CastRegulationType } from "@domain/context/factory/RegulationType";
+import CancelScheduledBalanceAdjustmentRequest from "../request/equity/CancelScheduledBalanceAdjustmentRequest";
 import SetScheduledBalanceAdjustmentRequest from "../request/equity/SetScheduledBalanceAdjustmentRequest";
 import GetScheduledBalanceAdjustmentRequest from "../request/equity/GetScheduledBalanceAdjustmentRequest";
 import ScheduledBalanceAdjustmentViewModel from "../response/ScheduledBalanceAdjustmentViewModel";
@@ -96,6 +98,10 @@ interface IEquityInPort {
 
   createTrexSuite(request: CreateTrexSuiteEquityRequest): Promise<{
     security: SecurityViewModel;
+    transactionId: string;
+  }>;
+  cancelScheduledBalanceAdjustment(request: CancelScheduledBalanceAdjustmentRequest): Promise<{
+    payload: boolean;
     transactionId: string;
   }>;
 }
@@ -549,6 +555,17 @@ class EquityInPort implements IEquityInPort {
     ValidatedRequest.handleValidation(GetTotalVotingHoldersRequest.name, request);
 
     return (await this.queryBus.execute(new GetTotalVotingHoldersQuery(securityId, voteId))).payload;
+  }
+
+  @LogError
+  async cancelScheduledBalanceAdjustment(request: CancelScheduledBalanceAdjustmentRequest): Promise<{
+    payload: boolean;
+    transactionId: string;
+  }> {
+    const { securityId, balanceAdjustmentId } = request;
+    ValidatedRequest.handleValidation("CancelScheduledBalanceAdjustmentRequest", request);
+
+    return await this.commandBus.execute(new CancelScheduledBalanceAdjustmentCommand(securityId, balanceAdjustmentId));
   }
 }
 

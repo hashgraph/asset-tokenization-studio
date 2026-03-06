@@ -44,6 +44,8 @@ import { VotingRights } from "@domain/context/equity/VotingRights";
 import { GetRegulationDetailsQuery } from "@query/factory/get/GetRegulationDetailsQuery";
 import { GetConfigInfoQuery } from "@query/management/GetConfigInfoQuery";
 import { SetScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand";
+import CancelScheduledBalanceAdjustmentRequest from "@port/in/request/equity/CancelScheduledBalanceAdjustmentRequest";
+import { CancelScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/cancelScheduledBalanceAdjustment/CancelScheduledBalanceAdjustmentCommand";
 import { CreateEquityCommand } from "@command/equity/create/CreateEquityCommand";
 import { SetDividendsCommand } from "@command/equity/dividends/set/SetDividendsCommand";
 import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
@@ -385,6 +387,20 @@ export const CancelDividendRequestFixture = createFixture<CancelDividendRequest>
   request.securityId.as(() => HederaIdPropsFixture.create().value);
   request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
 });
+
+export const CancelScheduledBalanceAdjustmentCommandFixture = createFixture<CancelScheduledBalanceAdjustmentCommand>(
+  (command) => {
+    command.securityId.as(() => HederaIdPropsFixture.create().value);
+    command.balanceAdjustmentId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  },
+);
+
+export const CancelScheduledBalanceAdjustmentRequestFixture = createFixture<CancelScheduledBalanceAdjustmentRequest>(
+  (request) => {
+    request.securityId.as(() => HederaIdPropsFixture.create().value);
+    request.balanceAdjustmentId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  },
+);
 
 export const SetDividendsCommandFixture = createFixture<SetDividendsCommand>((command) => {
   command.address.as(() => HederaIdPropsFixture.create().value);

@@ -9,6 +9,7 @@ import {
   _PARTITION_ID_1,
   CANCEL_COUPON_EVENT,
   CANCEL_DIVIDEND_EVENT,
+  CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
   SET_COUPON_EVENT,
@@ -2702,6 +2703,16 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "addKpiData",
       [date, value, project.toString()],
       GAS.ADD_KPI_DATA,
+    );
+  }
+
+  async cancelScheduledBalanceAdjustment(security: EvmAddress, balanceAdjustmentId: number): Promise<TransactionResponse> {
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelScheduledBalanceAdjustment",
+      [balanceAdjustmentId],
+      GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
+      CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
     );
   }
 }
