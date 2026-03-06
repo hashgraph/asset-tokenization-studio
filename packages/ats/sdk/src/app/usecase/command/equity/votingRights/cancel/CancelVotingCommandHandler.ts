@@ -37,7 +37,7 @@ export class CancelVotingCommandHandler implements ICommandHandler<CancelVotingC
 
       const res = await handler.cancelVoting(securityEvmAddress, votingId, securityId);
 
-      return Promise.resolve(new CancelVotingCommandResponse(res.error === undefined, res.id!));
+      return new CancelVotingCommandResponse(res.error === undefined, res.id!);
     } catch (error) {
       throw new CancelVotingCommandError(error as Error);
     }
