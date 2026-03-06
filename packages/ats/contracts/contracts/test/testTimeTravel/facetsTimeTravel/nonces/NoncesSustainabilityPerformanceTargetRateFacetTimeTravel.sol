@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
+
 import {
     NoncesSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/nonces/sustainabilityPerformanceTargetRate/NoncesSustainabilityPerformanceTargetRateFacet.sol";

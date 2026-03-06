@@ -61,18 +61,9 @@ abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, Corporat
     }
 
     function _takeSnapshot() internal override returns (uint256 snapshotID_) {
-        snapshotID_ = _snapshot();
-        emit SnapshotTaken(_msgSender(), snapshotID_);
-    }
-
-    function _snapshot() internal override returns (uint256) {
         _snapshotStorage().currentSnapshotId.increment();
 
-        uint256 currentId = _getCurrentSnapshotId();
-
-        emit SnapshotTriggered(currentId);
-
-        return currentId;
+        return _getCurrentSnapshotId();
     }
 
     function _updateSnapshot(Snapshots storage snapshots, uint256 currentValue) internal override {

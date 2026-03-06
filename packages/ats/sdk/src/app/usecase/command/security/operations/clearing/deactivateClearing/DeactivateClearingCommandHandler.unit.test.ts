@@ -89,7 +89,10 @@ describe("DeactivateClearingCommandHandler", () => {
         expect(validationServiceMock.checkRole).toHaveBeenCalledTimes(1);
 
         expect(transactionServiceMock.getHandler().deactivateClearing).toHaveBeenCalledTimes(1);
-        expect(transactionServiceMock.getHandler().deactivateClearing).toHaveBeenCalledWith(evmAddress);
+        expect(transactionServiceMock.getHandler().deactivateClearing).toHaveBeenCalledWith(
+          evmAddress,
+          command.securityId,
+        );
       });
     });
   });

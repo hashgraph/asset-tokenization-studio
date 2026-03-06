@@ -94,7 +94,10 @@ describe("ActivateClearingCommandHandler", () => {
         );
         expect(contractServiceMock.getContractEvmAddress).toHaveBeenNthCalledWith(1, command.securityId);
 
-        expect(transactionServiceMock.getHandler().activateClearing).toHaveBeenCalledWith(evmAddress);
+        expect(transactionServiceMock.getHandler().activateClearing).toHaveBeenCalledWith(
+          evmAddress,
+          command.securityId,
+        );
       });
     });
   });
