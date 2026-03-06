@@ -60,6 +60,7 @@ describe("GetVotingForQueryHandler", () => {
       expect(result).toBeInstanceOf(GetVotingForQueryResponse);
       expect(result.tokenBalance).toBe(votingFor.tokenBalance);
       expect(result.decimals).toBe(votingFor.decimals);
+      expect(result.isDisabled).toBe(votingFor.isDisabled);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);

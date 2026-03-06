@@ -428,19 +428,19 @@ export class RPCQueryAdapter {
 
     const votingFor = await this.connect(Equity__factory, address.toString()).getVotingFor(voting, target.toString());
 
-    return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals));
+    return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals), votingFor.isDisabled);
   }
 
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
-    //TODO change this
-    const votingInfo = (await this.connect(Equity__factory, address.toString()).getVoting(voting)).registeredVoting_;
+    const { registeredVoting_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getVoting(voting);
 
     return new VotingRights(
-      Number(votingInfo.voting.recordDate),
-      votingInfo.voting.data,
-      Number(votingInfo.snapshotId),
+      Number(registeredVoting_.voting.recordDate),
+      registeredVoting_.voting.data,
+      Number(registeredVoting_.snapshotId),
+      isDisabled_,
     );
   }
 
@@ -1413,6 +1413,57 @@ export class RPCQueryAdapter {
   async actionContentHashExists(address: EvmAddress, contentHash: string): Promise<boolean> {
     LogService.logTrace(`Getting actionContentHashExists for ${contentHash} for the security: ${address.toString()}`);
     return await this.connect(CorporateActionsFacet__factory, address.toString()).actionContentHashExists(contentHash);
+  }
+
+  async getCorporateAction(
+    address: EvmAddress,
+    corporateActionId: string
+  ): Promise<{ actionType: string; actionTypeId: number; data: string; isDisabled: boolean }> {
+    LogService.logTrace(`Getting corporate action ${corporateActionId} for security: ${address.toString()}`);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
+      .getCorporateAction(corporateActionId);
+
+    return {
+      actionType: result.actionType_,
+      actionTypeId: Number(result.actionTypeId_),
+      data: result.data_,
+      isDisabled: result.isDisabled_,
+    };
+  }
+
+  async getCorporateActions(
+    address: EvmAddress,
+    start: number,
+    end: number
+  ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
+    LogService.logTrace(`Getting corporate actions from ${start} to ${end} for security: ${address.toString()}`);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
+      .getCorporateActions(start, end);
+
+    return {
+      actionTypes: result.actionTypes_,
+      actionTypeIds: result.actionTypeIds_.map((id) => Number(id)),
+      datas: result.datas_,
+      isDisabled: result.isDisabled_,
+    };
+  }
+
+  async getCorporateActionsByType(
+    address: EvmAddress,
+    actionType: string,
+    start: number,
+    end: number
+  ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
+    LogService.logTrace(`Getting corporate actions of type ${actionType} from ${start} to ${end} for security: ${address.toString()}`);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
+      .getCorporateActionsByType(actionType, start, end);
+
+    return {
+      actionTypes: result.actionTypes_,
+      actionTypeIds: result.actionTypeIds_.map((id) => Number(id)),
+      datas: result.datas_,
+      isDisabled: result.isDisabled_,
+    };
   }
 
   async getRate(address: EvmAddress): Promise<[bigint, number]> {

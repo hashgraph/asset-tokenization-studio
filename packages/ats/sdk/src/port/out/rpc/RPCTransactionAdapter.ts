@@ -10,6 +10,7 @@ import {
   CANCEL_COUPON_EVENT,
   CANCEL_DIVIDEND_EVENT,
   CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+  CANCEL_VOTING_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
   SET_COUPON_EVENT,
@@ -671,6 +672,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [couponId],
       GAS.CANCEL_COUPON,
       CANCEL_COUPON_EVENT,
+    );
+  }
+
+  async cancelVoting(security: EvmAddress, votingId: number): Promise<TransactionResponse> {
+    LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
+
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelVoting",
+      [votingId],
+      GAS.CANCEL_VOTING,
+      CANCEL_VOTING_EVENT,
     );
   }
 

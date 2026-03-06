@@ -203,6 +203,9 @@ import IsProceedRecipientRequest from "./bond/IsProceedRecipientRequest";
 import GetCouponFromOrderedListAtRequest from "./bond/GetCouponFromOrderedListAtRequest";
 import GetPrincipalForRequest from "./bond/GetPrincipalForRequest";
 import ActionContentHashExistsRequest from "./security/operations/corporateActions/ActionContentHashExistsRequest";
+import GetCorporateActionRequest from "./security/operations/corporateActions/GetCorporateActionRequest";
+import GetCorporateActionsRequest from "./security/operations/corporateActions/GetCorporateActionsRequest";
+import GetCorporateActionsByTypeRequest from "./security/operations/corporateActions/GetCorporateActionsByTypeRequest";
 import SetRateRequest from "@port/in/request/interestRates/SetRateRequest";
 import GetRateRequest from "@port/in/request/interestRates/GetRateRequest";
 import SetInterestRateRequest from "./interestRates/SetInterestRateRequest";
@@ -218,6 +221,7 @@ import SetImpactDataRequest from "./interestRates/SetImpactDataRequest";
 import GetScheduledCouponListingRequest from "./scheduledTasks/GetScheduledCouponListingRequest";
 import CancelCouponRequest from "./bond/CancelCouponRequest";
 import CancelScheduledBalanceAdjustmentRequest from "./equity/CancelScheduledBalanceAdjustmentRequest";
+import CancelVotingRequest from "./equity/CancelVotingRequest";
 
 export {
   CreateEquityRequest,
@@ -423,6 +427,9 @@ export {
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
   ActionContentHashExistsRequest,
+  GetCorporateActionRequest,
+  GetCorporateActionsRequest,
+  GetCorporateActionsByTypeRequest,
   SetRateRequest,
   SetInterestRateRequest,
   SetImpactDataRequest,
@@ -437,4 +444,5 @@ export {
   GetScheduledCouponListingRequest,
   CancelCouponRequest,
   CancelScheduledBalanceAdjustmentRequest,
+  CancelVotingRequest,
 };

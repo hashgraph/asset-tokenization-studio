@@ -1044,6 +1044,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
   }
 
+  async cancelVoting(
+    security: EvmAddress,
+    votingId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
+
+    return this.executeWithArgs(
+      new EquityUSAFacet__factory().attach(security.toString()),
+      "cancelVoting",
+      securityId,
+      GAS.CANCEL_VOTING,
+      [votingId],
+    );
+  }
+
   async takeSnapshot(security: EvmAddress, securityId: ContractId | string): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
 

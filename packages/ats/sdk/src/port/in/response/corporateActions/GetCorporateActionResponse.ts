@@ -2,10 +2,9 @@
 
 import { QueryResponse } from "@core/query/QueryResponse";
 
-export default interface VotingRightsViewModel extends QueryResponse {
-  votingId: number;
-  recordDate: Date;
+export default interface GetCorporateActionResponse extends QueryResponse {
+  actionType: string;
+  actionTypeId: number;
   data: string;
-  snapshotId?: number;
   isDisabled: boolean;
 }

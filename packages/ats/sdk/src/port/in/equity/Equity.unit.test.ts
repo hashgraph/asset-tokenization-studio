@@ -10,6 +10,7 @@ import {
   GetDividendsRequest,
   GetAllDividendsRequest,
   SetVotingRightsRequest,
+  CancelVotingRequest,
   SetScheduledBalanceAdjustmentRequest,
   GetVotingRightsRequest,
   GetVotingRightsForRequest,
@@ -65,11 +66,14 @@ import {
   CancelScheduledBalanceAdjustmentRequestFixture,
   SetVotingRightsRequestFixture,
   VotingRightsFixture,
+  CancelVotingRequestFixture,
+  CancelVotingCommandFixture,
 } from "@test/fixtures/equity/EquityFixture";
 import { CreateEquityCommand } from "@command/equity/create/CreateEquityCommand";
 import { CastDividendType } from "@domain/context/equity/DividendType";
 import { GetEquityDetailsQuery } from "@query/equity/get/getEquityDetails/GetEquityDetailsQuery";
 import { SetVotingRightsCommand } from "@command/equity/votingRights/set/SetVotingRightsCommand";
+import { CancelVotingCommand } from "@command/equity/votingRights/cancel/CancelVotingCommand";
 import { GetVotingForQuery } from "@query/equity/votingRights/getVotingFor/GetVotingForQuery";
 import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQuery";
 import { GetVotingCountQuery } from "@query/equity/votingRights/getVotingCount/GetVotingCountQuery";
@@ -100,6 +104,7 @@ describe("Equity", () => {
   let getDividendsRequest: GetDividendsRequest;
   let getAllDividendsRequest: GetAllDividendsRequest;
   let setVotingRightsRequest: SetVotingRightsRequest;
+  let cancelVotingRequest: CancelVotingRequest;
   let getVotingRightsForRequest: GetVotingRightsForRequest;
   let getVotingRightsRequest: GetVotingRightsRequest;
   let getAllVotingRightsRequest: GetAllVotingRightsRequest;
@@ -548,6 +553,7 @@ describe("Equity", () => {
       const expectedResponse = {
         tokenBalance: new BigDecimal(BigInt(10)),
         decimals: 1,
+        isDisabled: false,
       };
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
@@ -570,6 +576,7 @@ describe("Equity", () => {
         expect.objectContaining({
           tokenBalance: expectedResponse.tokenBalance.toString(),
           decimals: expectedResponse.decimals.toString(),
+          isDisabled: expectedResponse.isDisabled,
         }),
       );
     });
@@ -643,6 +650,7 @@ describe("Equity", () => {
           votingId: getVotingRightsRequest.votingId,
           recordDate: new Date(expectedResponse.voting.recordTimeStamp * ONE_THOUSAND),
           data: expectedResponse.voting.data,
+          isDisabled: expectedResponse.voting.isDisabled,
         }),
       );
     });
@@ -714,6 +722,7 @@ describe("Equity", () => {
             votingId: 1,
             recordDate: new Date(expectedResponse2.voting.recordTimeStamp * ONE_THOUSAND),
             data: expectedResponse2.voting.data,
+            isDisabled: expectedResponse2.voting.isDisabled,
           },
         ]),
       );
@@ -2072,6 +2081,53 @@ describe("Equity", () => {
       );
 
       await expect(EquityToken.createTrexSuite(createTrexSuiteEquityRequest)).rejects.toThrow(ValidationError);
+    });
+  });
+
+  describe("cancelVoting", () => {
+    cancelVotingRequest = new CancelVotingRequest(CancelVotingRequestFixture.create());
+    it("should cancel a voting successfully", async () => {
+      const expectedResponse = {
+        payload: true,
+        transactionId: transactionId,
+      };
+
+      commandBusMock.execute.mockResolvedValue(expectedResponse);
+
+      const result = await EquityToken.cancelVoting(cancelVotingRequest);
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("CancelVotingRequest", cancelVotingRequest);
+
+      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CancelVotingCommand(cancelVotingRequest.securityId, cancelVotingRequest.votingId),
+      );
+
+      expect(result.payload).toBe(true);
+      expect(result.transactionId).toBe(transactionId);
+    });
+
+    it("should throw an error if command execution fails", async () => {
+      const error = new Error("Command execution failed");
+      commandBusMock.execute.mockRejectedValue(error);
+
+      await expect(EquityToken.cancelVoting(cancelVotingRequest)).rejects.toThrow("Command execution failed");
+
+      expect(handleValidationSpy).toHaveBeenCalledWith("CancelVotingRequest", cancelVotingRequest);
+
+      expect(commandBusMock.execute).toHaveBeenCalledWith(
+        new CancelVotingCommand(cancelVotingRequest.securityId, cancelVotingRequest.votingId),
+      );
+    });
+
+    it("should throw error if securityId is invalid", async () => {
+      cancelVotingRequest = new CancelVotingRequest({
+        ...CancelVotingRequestFixture.create(),
+        securityId: "invalid",
+      });
+
+      await expect(EquityToken.cancelVoting(cancelVotingRequest)).rejects.toThrow(ValidationError);
     });
   });
 });
