@@ -56,7 +56,7 @@ export function findAllContracts(contractsDir: string, artifactDir: string): Con
           source,
           artifactData,
         });
-      } catch (error) {
+      } catch (_error) {
         // Skip if artifact doesn't exist or is malformed
         continue;
       }

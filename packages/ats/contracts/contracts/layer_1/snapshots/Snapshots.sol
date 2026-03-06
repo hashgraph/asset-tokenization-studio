@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ISnapshots } from "../interfaces/snapshots/ISnapshots.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 import { _SNAPSHOT_ROLE } from "../constants/roles.sol";
 
 abstract contract Snapshots is ISnapshots, Internals {

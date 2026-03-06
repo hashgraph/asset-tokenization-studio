@@ -151,9 +151,12 @@ function generateHeader(
     }
   }
 
-  // Include mock contract factory imports
+  // Include mock contract factory imports (only for deployable mocks)
   if (mocks && mocks.length > 0) {
-    const sortedMockNames = [...mocks].map((m) => m.name).sort();
+    const sortedMockNames = mocks
+      .filter((m) => m.isDeployable)
+      .map((m) => m.name)
+      .sort();
     for (const name of sortedMockNames) {
       factoryImports.push(`${name}__factory`);
     }
@@ -403,8 +406,9 @@ function generateMockEntry(mock: ContractMetadata): string {
 
   const descriptionLine = mock.description ? `\n        description: '${mock.description}',` : "";
 
-  // Add TypeChain factory reference (mocks don't have TimeTravel variants)
-  const factoryLine = `\n        factory: (signer) => new ${mock.name}__factory(signer),`;
+  // Add TypeChain factory reference only for deployable mocks (non-empty bytecode + ABI)
+  // Non-deployable contracts (interfaces, internal-only) don't have TypeChain factories
+  const factoryLine = mock.isDeployable ? `\n        factory: (signer) => new ${mock.name}__factory(signer),` : "";
 
   return `    ${mock.name}: {
         name: '${mock.name}',${descriptionLine}${resolverKeyLine}${inheritanceLine}${methodsLine}${eventsLine}${errorsLine}${factoryLine}

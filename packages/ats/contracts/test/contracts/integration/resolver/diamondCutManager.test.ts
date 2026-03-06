@@ -94,7 +94,7 @@ describe("DiamondCutManager", () => {
     for (const configId of configIdsToCleanup) {
       try {
         await businessLogicResolver.removeSelectorsFromBlacklist(configId, [pauseSelector]);
-      } catch (error) {
+      } catch (_error) {
         // Ignore errors if selector wasn't blacklisted - contract may be in different state
       }
     }

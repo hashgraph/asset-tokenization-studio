@@ -5,7 +5,7 @@ import { IEquityUSA } from "../interfaces/IEquityUSA.sol";
 import { _EQUITY_RESOLVER_KEY } from "../../layer_2/constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 import { IEquity } from "../../layer_2/interfaces/equity/IEquity.sol";
-import { ISecurity } from "../interfaces/ISecurity.sol";
+import { ISecurity } from "../../layer_2/interfaces/security/ISecurity.sol";
 import { EquityUSA } from "./EquityUSA.sol";
 
 contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {

@@ -8,10 +8,10 @@ import Service from "@service/Service";
 import { SupportedWallets } from "@domain/context/network/Wallet";
 import { InvalidWalletTypeError } from "@domain/context/network/error/InvalidWalletAccountTypeError";
 import LogService from "@service/log/LogService";
-import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
-import { DFNSTransactionAdapter } from "@port/out/hs/hts/custodial/DFNSTransactionAdapter";
-import { FireblocksTransactionAdapter } from "@port/out/hs/hts/custodial/FireblocksTransactionAdapter";
-import { AWSKMSTransactionAdapter } from "@port/out/hs/hts/custodial/AWSKMSTransactionAdapter";
+import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/walletconnect/HederaWalletConnectTransactionAdapter";
+import { DFNSTransactionAdapter } from "@port/out/hs/custodial/DFNSTransactionAdapter";
+import { FireblocksTransactionAdapter } from "@port/out/hs/custodial/FireblocksTransactionAdapter";
+import { AWSKMSTransactionAdapter } from "@port/out/hs/custodial/AWSKMSTransactionAdapter";
 import { WalletNotSupported } from "./error/WalletNotSupported";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
 import { InvalidResponse } from "@core/error/InvalidResponse";
@@ -100,8 +100,11 @@ export default class TransactionService extends Service {
       [
         "CreateEquityCommandHandler",
         "CreateBondCommandHandler",
+        "CreateBondFixedRateCommandHandler",
+        "CreateBondKpiLinkedRateCommandHandler",
         "CreateTrexSuiteBondCommandHandler",
         "CreateTrexSuiteEquityCommandHandler",
+        "SetRateCommandHandler",
       ].some((handler) => className.includes(handler))
     ) {
       const data = results.map((result) => result.substring(BYTES_32_LENGTH - ADDRESS_LENGTH + 2));

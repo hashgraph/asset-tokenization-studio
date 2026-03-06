@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RPCTransactionAdapter } from "@port/out/rpc/RPCTransactionAdapter";
-import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
-import { DFNSTransactionAdapter } from "@port/out/hs/hts/custodial/DFNSTransactionAdapter";
-import { FireblocksTransactionAdapter } from "@port/out/hs/hts/custodial/FireblocksTransactionAdapter";
-import { AWSKMSTransactionAdapter } from "@port/out/hs/hts/custodial/AWSKMSTransactionAdapter";
+import { HederaWalletConnectTransactionAdapter } from "@port/out/hs/walletconnect/HederaWalletConnectTransactionAdapter";
+import { DFNSTransactionAdapter } from "@port/out/hs/custodial/DFNSTransactionAdapter";
+import { FireblocksTransactionAdapter } from "@port/out/hs/custodial/FireblocksTransactionAdapter";
+import { AWSKMSTransactionAdapter } from "@port/out/hs/custodial/AWSKMSTransactionAdapter";
 import { COMMAND_HANDLERS_AGENT } from "./agent/InjectableAgent";
 import { COMMAND_HANDLERS_BOND, QUERY_HANDLERS_BOND } from "./bond/InjectableBond";
 import { COMMAND_HANDLERS_CLEARING, QUERY_HANDLERS_CLEARING } from "./clearing/InjectableClearing";
@@ -36,9 +36,10 @@ import { QUERY_HANDLERS_ACCOUNT } from "./account/InjectableAccount";
 import { QUERY_HANDLERS_OPERATOR } from "./operator/InjectableOperator";
 import { COMMAND_HANDLERS_TREX_FACTORY, QUERY_HANDLERS_TREX_FACTORY } from "./trexFactory/InjectableTrexFactory";
 import {
-  QUERY_HANDLERS_PROCEED_RECIPIENT,
   COMMAND_HANDLERS_PROCEED_RECIPIENT,
+  QUERY_HANDLERS_PROCEED_RECIPIENT,
 } from "./proceedRecipient/ProceedRecipientInjectable";
+import { COMMAND_HANDLERS_KPI, QUERY_HANDLERS_KPI } from "./kpis/InjectableKpis";
 
 export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_AGENT,
@@ -68,6 +69,7 @@ export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_BALANCE,
   ...COMMAND_HANDLERS_TREX_FACTORY,
   ...COMMAND_HANDLERS_PROCEED_RECIPIENT,
+  ...COMMAND_HANDLERS_KPI,
 ];
 
 export const QUERY_HANDLERS = [
@@ -97,6 +99,7 @@ export const QUERY_HANDLERS = [
   ...QUERY_HANDLERS_SNAPSHOT,
   ...QUERY_HANDLERS_TREX_FACTORY,
   ...QUERY_HANDLERS_PROCEED_RECIPIENT,
+  ...QUERY_HANDLERS_KPI,
 ];
 
 export const TRANSACTION_HANDLER = [

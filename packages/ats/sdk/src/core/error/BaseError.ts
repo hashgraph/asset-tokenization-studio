@@ -35,6 +35,7 @@ export enum ErrorCode {
   InvalidTimeUnits = "10037",
   InvalidInterestRateType = "10038",
   InvalidRateStatus = "10039",
+  InvalidNegativeRate = "10040",
 
   // Error codes for Logic Errors (Prefix: 2XXXX)
   AccountAlreadyInControlList = "20013",

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalControlListManagement } from "../interfaces/externalControlLists/IExternalControlListManagement.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 import { _CONTROL_LIST_MANAGER_ROLE } from "../constants/roles.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
 

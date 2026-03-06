@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC1410_OPERATOR_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { BasicTransferInfo, OperatorTransferData } from "contracts/layer_1/interfaces/ERC1400/IERC1410.sol";
+import { BasicTransferInfo, OperatorTransferData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { ERC1410BasicStorageWrapper } from "./ERC1410BasicStorageWrapper.sol";
 
 abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {

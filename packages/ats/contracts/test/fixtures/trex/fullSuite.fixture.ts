@@ -1,18 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { Signer, ZeroAddress, id, keccak256, AbiCoder, hexlify, toUtf8Bytes, getBytes } from "ethers";
+import { ContractRunner, ZeroAddress, id, keccak256, AbiCoder, hexlify, toUtf8Bytes, getBytes } from "ethers";
 import { ethers } from "hardhat";
 import OnchainID from "@onchain-id/solidity";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-export async function deployIdentityProxy(implementationAuthority: string, managementKey: string, signer: Signer) {
+export async function deployIdentityProxy(
+  implementationAuthority: string,
+  managementKey: string,
+  signer: ContractRunner,
+) {
+  // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
   const identity = await new ethers.ContractFactory(
+    // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
     OnchainID.contracts.IdentityProxy.abi,
+    // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
     OnchainID.contracts.IdentityProxy.bytecode,
-    signer,
+    signer as any, // @onchain-id/solidity uses ethers v5 Signer type
   ).deploy(implementationAuthority, managementKey);
 
-  return ethers.getContractAt("Identity", await identity.getAddress(), signer);
+  // @ts-ignore - T-REX contract lacks generated typechain types
+  return ethers.getContractAt("Identity", await identity.getAddress(), signer as any);
 }
 
 export async function deployFullSuiteFixture() {
@@ -37,29 +45,39 @@ export async function deployFullSuiteFixture() {
   const identityRegistryStorageImplementation = await ethers.deployContract("IdentityRegistryStorage", deployer);
   const identityRegistryImplementation = await ethers.deployContract("IdentityRegistry", deployer);
   const modularComplianceImplementation = await ethers.deployContract("ModularCompliance", deployer);
+  // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
   const identityImplementation = await new ethers.ContractFactory(
+    // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
     OnchainID.contracts.Identity.abi,
+    // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
     OnchainID.contracts.Identity.bytecode,
-    deployer,
+    deployer as any, // @onchain-id/solidity uses ethers v5 Signer type
   ).deploy(deployer.address, true);
 
+  // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
   const identityImplementationAuthority = await new ethers.ContractFactory(
+    // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
     OnchainID.contracts.ImplementationAuthority.abi,
+    // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
     OnchainID.contracts.ImplementationAuthority.bytecode,
-    deployer,
+    deployer as any, // @onchain-id/solidity uses ethers v5 Signer type
   ).deploy(identityImplementation.target);
 
+  // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
   const identityFactory = await new ethers.ContractFactory(
+    // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
     OnchainID.contracts.Factory.abi,
+    // @ts-ignore - @onchain-id/solidity lacks TypeScript declarations
     OnchainID.contracts.Factory.bytecode,
-    deployer,
+    deployer as any, // @onchain-id/solidity uses ethers v5 Signer type
   ).deploy(identityImplementationAuthority.target);
 
-  const trexImplementationAuthority = await ethers.deployContract(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const trexImplementationAuthority = (await ethers.deployContract(
     "TREXImplementationAuthority",
     [true, ZeroAddress, ZeroAddress],
     deployer,
-  );
+  )) as any;
   const versionStruct = {
     major: 4,
     minor: 0,
@@ -81,25 +99,30 @@ export async function deployFullSuiteFixture() {
     [trexImplementationAuthority.target, identityFactory.target],
     deployer,
   );
+  // @ts-ignore - T-REX contract lacks generated typechain types
   await (
-    identityFactory.connect(deployer) as unknown as { addTokenFactory: (address: string) => Promise<void> }
+    identityFactory.connect(deployer as any) as unknown as { addTokenFactory: (address: string) => Promise<void> }
   ).addTokenFactory(String(trexFactory.target));
 
-  const claimTopicsRegistry = await ethers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const claimTopicsRegistry = (await ethers
     .deployContract("ClaimTopicsRegistryProxy", [trexImplementationAuthority.target], deployer)
-    .then(async (proxy) => ethers.getContractAt("ClaimTopicsRegistry", proxy.target));
+    .then(async (proxy) => ethers.getContractAt("ClaimTopicsRegistry", proxy.target))) as any;
 
-  const trustedIssuersRegistry = await ethers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const trustedIssuersRegistry = (await ethers
     .deployContract("TrustedIssuersRegistryProxy", [trexImplementationAuthority.target], deployer)
-    .then(async (proxy) => ethers.getContractAt("TrustedIssuersRegistry", proxy.target));
+    .then(async (proxy) => ethers.getContractAt("TrustedIssuersRegistry", proxy.target))) as any;
 
-  const identityRegistryStorage = await ethers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const identityRegistryStorage = (await ethers
     .deployContract("IdentityRegistryStorageProxy", [trexImplementationAuthority.target], deployer)
-    .then(async (proxy) => ethers.getContractAt("IdentityRegistryStorage", proxy.target));
+    .then(async (proxy) => ethers.getContractAt("IdentityRegistryStorage", proxy.target))) as any;
 
   const defaultCompliance = await ethers.deployContract("DefaultCompliance", deployer);
 
-  const identityRegistry = await ethers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const identityRegistry = (await ethers
     .deployContract(
       "IdentityRegistryProxy",
       [
@@ -110,7 +133,7 @@ export async function deployFullSuiteFixture() {
       ],
       deployer,
     )
-    .then(async (proxy) => ethers.getContractAt("IdentityRegistry", proxy.target));
+    .then(async (proxy) => ethers.getContractAt("IdentityRegistry", proxy.target))) as any;
 
   const tokenOID = await deployIdentityProxy(
     String(identityImplementationAuthority.target),
@@ -123,31 +146,35 @@ export async function deployFullSuiteFixture() {
   const claimTopics = [id("CLAIM_TOPIC")];
   await claimTopicsRegistry.connect(deployer).addClaimTopic(claimTopics[0]);
 
-  const claimIssuerContract = await ethers.deployContract("ClaimIssuer", [claimIssuer.address], claimIssuer);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const claimIssuerContract = (await ethers.deployContract("ClaimIssuer", [claimIssuer.address], claimIssuer)) as any;
   await claimIssuerContract
     .connect(claimIssuer)
     .addKey(keccak256(AbiCoder.defaultAbiCoder().encode(["address"], [claimIssuerSigningKey.address])), 3, 1);
 
   await trustedIssuersRegistry.connect(deployer).addTrustedIssuer(claimIssuerContract.target, claimTopics);
 
-  const aliceIdentity = await deployIdentityProxy(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const aliceIdentity = (await deployIdentityProxy(
     String(identityImplementationAuthority.target),
     aliceWallet.address,
     deployer,
-  );
+  )) as any;
   await aliceIdentity
     .connect(aliceWallet)
     .addKey(keccak256(AbiCoder.defaultAbiCoder().encode(["address"], [aliceActionKey.address])), 2, 1);
-  const bobIdentity = await deployIdentityProxy(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bobIdentity = (await deployIdentityProxy(
     String(identityImplementationAuthority.target),
     bobWallet.address,
     deployer,
-  );
-  const charlieIdentity = await deployIdentityProxy(
+  )) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const charlieIdentity = (await deployIdentityProxy(
     String(identityImplementationAuthority.target),
     charlieWallet.address,
     deployer,
-  );
+  )) as any;
 
   await identityRegistry.connect(deployer).addAgent(tokenAgent.address);
 

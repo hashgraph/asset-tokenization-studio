@@ -341,7 +341,9 @@ export async function registerAdditionalFacets(
 
       success(`Successfully registered ${registeredSlice.length} facets`);
       for (const facetName of registeredSlice) {
-        info(`  ✓ ${facetName}`);
+        if (facetName) {
+          info(`  ✓ ${facetName}`);
+        }
       }
     }
 

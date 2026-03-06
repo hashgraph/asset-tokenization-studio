@@ -29,7 +29,6 @@ import { CastRegulationSubType, CastRegulationType } from "@domain/context/facto
 import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
 import { DividendFor } from "@domain/context/equity/DividendFor";
 import { VotingFor } from "@domain/context/equity/VotingFor";
-import DfnsSettings from "@core/settings/custodialWalletSettings/DfnsSettings";
 import { Kyc } from "@domain/context/kyc/Kyc";
 import { KycAccountData } from "@domain/context/kyc/KycAccountData";
 import {
@@ -305,6 +304,11 @@ function createBondMockImplementation(
       RateStatus.PENDING,
     );
     coupons.push(coupon);
+  }
+
+  if (user_account) {
+    const accountEvm = identifiers(user_account.id)[1];
+    grantRole(accountEvm, SecurityRole._KPI_MANAGER_ROLE);
   }
 
   return Promise.resolve({
@@ -633,6 +637,34 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
 
   singletonInstance.getCouponCount = jest.fn(async (address: EvmAddress) => {
     return coupons.length;
+  });
+
+  singletonInstance.getCouponsOrderedList = jest.fn(
+    async (address: EvmAddress, pageIndex?: number, pageLength?: number) => {
+      const allCoupons = coupons.map((_, index) => index + 1); // Return 1-based coupon IDs
+
+      // If pagination parameters are provided, return paginated result
+      if (pageIndex !== undefined && pageLength !== undefined) {
+        const start = pageIndex * pageLength;
+        const end = start + pageLength;
+        return allCoupons.slice(start, end);
+      }
+
+      // Otherwise return all coupons
+      return allCoupons;
+    },
+  );
+
+  singletonInstance.getCouponsOrderedListTotal = jest.fn(async (address: EvmAddress) => {
+    return coupons.length;
+  });
+
+  singletonInstance.getCouponFromOrderedListAt = jest.fn(async (address: EvmAddress, pos: number) => {
+    if (pos >= coupons.length || pos < 0) {
+      // Return a default value instead of throwing error for tests
+      return pos + 1;
+    }
+    return pos + 1;
   });
 
   singletonInstance.getAccountSecurityRelationship = jest.fn(async (address: EvmAddress, target: EvmAddress) => {});
@@ -2053,13 +2085,22 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     } as TransactionResponse;
   });
 
+  singletonInstance.addKpiData = jest.fn(
+    async (security: EvmAddress, date: number, value: string, project: EvmAddress) => {
+      return {
+        status: "success",
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
   };
 });
 
-jest.mock("@port/out/hs/hts/custodial/DFNSTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/hts/custodial/DFNSTransactionAdapter.ts");
+jest.mock("@port/out/hs/custodial/DFNSTransactionAdapter", () => {
+  const actual = jest.requireActual("@port/out/hs/custodial/DFNSTransactionAdapter");
 
   const singletonInstance = new actual.DFNSTransactionAdapter();
 
@@ -2067,13 +2108,20 @@ jest.mock("@port/out/hs/hts/custodial/DFNSTransactionAdapter", () => {
     return network;
   });
 
+  singletonInstance.register = jest.fn(async () => {
+    Injectable.registerTransactionHandler(singletonInstance);
+    return {} as InitializationData;
+  });
+
+  singletonInstance.createBond = jest.fn(createBondMockImplementation);
+
   return {
     DFNSTransactionAdapter: jest.fn(() => singletonInstance),
   };
 });
 
-jest.mock("@port/out/hs/hts/custodial/FireblocksTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/hts/custodial/FireblocksTransactionAdapter.ts");
+jest.mock("@port/out/hs/custodial/FireblocksTransactionAdapter", () => {
+  const actual = jest.requireActual("@port/out/hs/custodial/FireblocksTransactionAdapter");
 
   const singletonInstance = new actual.FireblocksTransactionAdapter();
 
@@ -2081,13 +2129,20 @@ jest.mock("@port/out/hs/hts/custodial/FireblocksTransactionAdapter", () => {
     return network;
   });
 
+  singletonInstance.register = jest.fn(async () => {
+    Injectable.registerTransactionHandler(singletonInstance);
+    return {} as InitializationData;
+  });
+
+  singletonInstance.createBond = jest.fn(createBondMockImplementation);
+
   return {
     FireblocksTransactionAdapter: jest.fn(() => singletonInstance),
   };
 });
 
-jest.mock("@port/out/hs/hts/custodial/AWSKMSTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/hts/custodial/AWSKMSTransactionAdapter.ts");
+jest.mock("@port/out/hs/custodial/AWSKMSTransactionAdapter", () => {
+  const actual = jest.requireActual("@port/out/hs/custodial/AWSKMSTransactionAdapter");
 
   const singletonInstance = new actual.AWSKMSTransactionAdapter();
 
@@ -2095,29 +2150,10 @@ jest.mock("@port/out/hs/hts/custodial/AWSKMSTransactionAdapter", () => {
     return network;
   });
 
-  return {
-    AWSKMSTransactionAdapter: jest.fn(() => singletonInstance),
-  };
-});
-
-jest.mock("@port/out/hs/hts/custodial/CustodialTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/hts/custodial/CustodialTransactionAdapter.ts");
-
-  const singletonInstance = new actual.CustodialTransactionAdapter();
-
-  singletonInstance.register = jest.fn(async (settings: DfnsSettings) => {
+  singletonInstance.register = jest.fn(async () => {
     Injectable.registerTransactionHandler(singletonInstance);
     return {} as InitializationData;
   });
-  return {
-    CustodialTransactionAdapter: jest.fn(() => singletonInstance),
-  };
-});
-
-jest.mock("@port/out/hs/HederaTransactionAdapter", () => {
-  const actual = jest.requireActual("@port/out/hs/HederaTransactionAdapter.ts");
-
-  const singletonInstance = new actual.HederaTransactionAdapter();
 
   singletonInstance.createBond = jest.fn(createBondMockImplementation);
 
@@ -2125,8 +2161,17 @@ jest.mock("@port/out/hs/HederaTransactionAdapter", () => {
     return true;
   });
 
+  singletonInstance.addKpiData = jest.fn(
+    async (security: EvmAddress, date: number, value: string, project: EvmAddress) => {
+      return {
+        status: "success",
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
   return {
-    HederaTransactionAdapter: jest.fn(() => singletonInstance),
+    AWSKMSTransactionAdapter: jest.fn(() => singletonInstance),
   };
 });
 

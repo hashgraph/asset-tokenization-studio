@@ -6,11 +6,10 @@
   "include": [
     "scripts/**/*",
     "Configuration.ts",
-    "typechain-types/**/*",
-    "test/fixtures/**/*",
-    "test/helpers/**/*",
-    "test/common.ts",
     "test/index.ts",
+    "test/helpers/**/*",
+    "test/fixtures/**/*",
+    "test/common.ts",
     "test/types.d.ts",
     "test/isin-generator.d.ts"
   ],

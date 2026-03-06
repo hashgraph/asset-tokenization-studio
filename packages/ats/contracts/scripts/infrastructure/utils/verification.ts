@@ -174,7 +174,7 @@ export async function verifyContractInterface(
           });
 
           foundSelectors.push(selector);
-        } catch (error) {
+        } catch (_error) {
           // Function doesn't exist or reverted
           missingSelectors.push(selector);
         }

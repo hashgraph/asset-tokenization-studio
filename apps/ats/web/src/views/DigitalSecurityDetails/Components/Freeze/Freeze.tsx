@@ -36,7 +36,7 @@ export const Freeze = () => {
     mode: "onChange",
   });
 
-  const { id = "" } = useParams();
+  const { id = "" } = useParams<{ id: string }>();
   const { details } = useSecurityStore();
 
   const { mutate: freezeSecurity, isLoading: isFreezeLoading } = useFreezeSecurity();

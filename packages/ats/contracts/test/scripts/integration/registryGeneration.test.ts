@@ -412,6 +412,91 @@ contract MyContract {}
       }
     }).timeout(30000);
 
+    it("should only include factory imports for deployable mock contracts", async () => {
+      const result = await generateRegistryPipeline(
+        {
+          contractsPath,
+          artifactPath,
+          includeMocksInRegistry: true,
+          mockContractPaths: ["**/mocks/**/*.sol"],
+          logLevel: "SILENT",
+        },
+        false,
+      );
+
+      if (result.stats.totalMocks > 0) {
+        // Extract import section (everything before first 'export const')
+        const importSection = result.code.split("export const")[0];
+
+        // Extract MOCK_CONTRACTS section
+        const mockSection = result.code.match(/MOCK_CONTRACTS[\s\S]*?(?=export const TOTAL_MOCKS)/);
+        expect(mockSection).to.not.be.null;
+
+        // For each mock entry that has a factory line, its __factory must be imported
+        const factoryLines = mockSection?.[0].match(/factory:.*new (\w+__factory)/g);
+        if (factoryLines) {
+          for (const line of factoryLines) {
+            const factoryName = line.match(/new (\w+__factory)/)?.[1];
+            expect(importSection).to.include(
+              factoryName!,
+              `Factory ${factoryName} used in MOCK_CONTRACTS must be imported`,
+            );
+          }
+        }
+
+        // Mock entries WITHOUT factory line should NOT have __factory in imports
+        // Find all mock names in MOCK_CONTRACTS
+        const mockNames = mockSection?.[0].match(/name: '(\w+)'/g)?.map((m) => m.match(/'(\w+)'/)?.[1]) ?? [];
+        const factoryMockNames = factoryLines?.map((l) => l.match(/new (\w+)__factory/)?.[1]) ?? [];
+
+        for (const mockName of mockNames) {
+          if (mockName && !factoryMockNames.includes(mockName)) {
+            expect(importSection).to.not.include(
+              `${mockName}__factory`,
+              `Non-deployable mock ${mockName} should not have __factory import`,
+            );
+          }
+        }
+      }
+    }).timeout(30000);
+
+    it("should not emit factory for interface or internal-only mock contracts", async () => {
+      const result = await generateRegistryPipeline(
+        {
+          contractsPath,
+          artifactPath,
+          includeMocksInRegistry: true,
+          mockContractPaths: ["**/mocks/**/*.sol"],
+          logLevel: "SILENT",
+        },
+        false,
+      );
+
+      if (result.stats.totalMocks > 0) {
+        // Extract MOCK_CONTRACTS section
+        const mockSection = result.code.match(/MOCK_CONTRACTS[\s\S]*?(?=export const TOTAL_MOCKS)/);
+        expect(mockSection).to.not.be.null;
+
+        // Find all mock names
+        const mockNames = mockSection?.[0].match(/(\w+):\s*\{/g)?.map((m) => m.replace(/:\s*\{/, "").trim()) ?? [];
+
+        // For names starting with "I" (interfaces), verify no factory
+        for (const name of mockNames) {
+          if (name.startsWith("I") && name[1] === name[1]?.toUpperCase()) {
+            // Extract the specific entry
+            const entryRegex = new RegExp(`${name}:\\s*\\{[\\s\\S]*?\\n\\s{4}\\}`);
+            const entryMatch = mockSection?.[0].match(entryRegex);
+            if (entryMatch) {
+              expect(entryMatch[0]).to.not.include(
+                "factory:",
+                `Interface ${name} should not have factory in MOCK_CONTRACTS`,
+              );
+            }
+          }
+        }
+      }
+    }).timeout(30000);
+
     it("should categorize mock facets as mocks, not production facets", async () => {
       // This test ensures MockXxxFacet contracts in /mocks/ directory
       // are categorized as mocks, not as production facets

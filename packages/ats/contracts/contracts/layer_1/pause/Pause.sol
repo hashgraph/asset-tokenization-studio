@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IPause } from "../interfaces/pause/IPause.sol";
 import { _PAUSER_ROLE } from "../constants/roles.sol";
-import { Internals } from "contracts/layer_0/Internals.sol";
+import { Internals } from "../../layer_0/Internals.sol";
 
 abstract contract Pause is IPause, Internals {
     function pause() external override onlyRole(_PAUSER_ROLE) onlyUnpaused returns (bool success_) {

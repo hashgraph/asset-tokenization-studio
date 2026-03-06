@@ -219,7 +219,7 @@ export async function loadDeploymentByWorkflow<T = AnyDeploymentOutput>(
     }
 
     return null;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

@@ -1,5 +1,51 @@
 # @hashgraph/asset-tokenization-sdk
 
+## 5.0.0
+
+### Major Changes
+
+- 77aa333: Migrate to HWC 2
+
+### Minor Changes
+
+- 77aa333: Implement comprehensive bond tokenization SDK with KPI-linked rates and coupon management:
+  - Add CreateBondFixedRate and CreateBondKpiLinkedRate commands for bond creation
+  - Implement setInterestRate, setRate, getRate, and getInterestRate for rate management
+  - Add KPI data infrastructure: addKpiData, getLatestKpiData, getMinDate, getIsCheckPointDate, setImpactData
+  - Implement coupon management: getCouponsOrdered, GetCouponFromOrderedListAt, getOrderedLiistTotal
+  - Add scheduled coupon distribution: GetScheduledCouponListing, getScheduledCouponListingCount
+  - Enhance RPC and Hedera transaction adapters for bond operations
+
+### Patch Changes
+
+- 77aa333: Fix failing tests in web app and SDK:
+  - Mock ESM-only packages (@hashgraph/hedera-wallet-connect, @reown/appkit) in web jest config to resolve CJS/ESM incompatibility
+  - Fix HederaWalletConnectTransactionAdapter unit test: use jest.spyOn for read-only rpcProvider property
+  - Update environmentMock paths for custodial adapters (hs/hts/custodial → hs/custodial) following file restructure
+  - Remove mocks for deleted HederaTransactionAdapter and abstract CustodialTransactionAdapter
+  - Add register() and createBond() mocks to DFNS, Fireblocks, and AWSKMS custodial adapter mocks
+  - Grant \_KPI_MANAGER_ROLE to bond creator in createBond mock to enable addKpiData tests
+
+- Updated dependencies [f809d77]
+  - @hashgraph/asset-tokenization-contracts@5.0.0
+
+## 4.3.0
+
+### Minor Changes
+
+- 5ba3560: Implement comprehensive bond tokenization SDK with KPI-linked rates and coupon management:
+  - Add CreateBondFixedRate and CreateBondKpiLinkedRate commands for bond creation
+  - Implement setInterestRate, setRate, getRate, and getInterestRate for rate management
+  - Add KPI data infrastructure: addKpiData, getLatestKpiData, getMinDate, getIsCheckPointDate, setImpactData
+  - Implement coupon management: getCouponsOrdered, GetCouponFromOrderedListAt, getOrderedLiistTotal
+  - Add scheduled coupon distribution: GetScheduledCouponListing, getScheduledCouponListingCount
+  - Enhance RPC and Hedera transaction adapters for bond operations
+
+### Patch Changes
+
+- Updated dependencies [5de99bd]
+  - @hashgraph/asset-tokenization-contracts@4.3.0
+
 ## 4.2.0
 
 ### Minor Changes
