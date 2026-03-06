@@ -1287,6 +1287,7 @@ describe("Equity", () => {
           executionDate: new Date(expectedResponse.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND),
           factor: expectedResponse.scheduleBalanceAdjustment.factor.toString(),
           decimals: expectedResponse.scheduleBalanceAdjustment.decimals.toString(),
+          isDisabled: expectedResponse.scheduleBalanceAdjustment.isDisabled,
         }),
       );
     });
@@ -1433,6 +1434,7 @@ describe("Equity", () => {
             id: 1,
             executionDate: new Date(expectedResponse2.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND),
             factor: expectedResponse2.scheduleBalanceAdjustment.factor.toString(),
+            isDisabled: expectedResponse2.scheduleBalanceAdjustment.isDisabled,
           },
         ]),
       );

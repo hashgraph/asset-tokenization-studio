@@ -314,6 +314,7 @@ describe("🧪 Equity test", () => {
     expect(scheduledBalanceAdjustment.executionDate.getTime() / 1000).toEqual(recordTimestamp);
     expect(scheduledBalanceAdjustment.factor).toEqual(factor);
     expect(scheduledBalanceAdjustment.decimals).toEqual(decimals.toString());
+    expect(scheduledBalanceAdjustment.isDisabled).toEqual(false);
 
     await Role.revokeRole(
       new RoleRequest({
@@ -565,6 +566,7 @@ describe("🧪 Equity test", () => {
     expect(allScheduledAdjustments[0].factor).toEqual(factor);
     expect(allScheduledAdjustments[0].decimals).toEqual(decimals);
     expect(allScheduledAdjustments[0].executionDate.getTime() / 1000).toEqual(executionTimestamp);
+    expect(allScheduledAdjustments[0].isDisabled).toEqual(false);
 
     await Role.revokeRole(
       new RoleRequest({

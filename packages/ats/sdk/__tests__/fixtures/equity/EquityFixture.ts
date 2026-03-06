@@ -431,6 +431,7 @@ export const ScheduledBalanceAdjustmentFixture = createFixture<ScheduledBalanceA
   props.executionTimeStamp.faker((faker) => faker.date.future());
   props.factor.faker((faker) => faker.number.int({ min: 1, max: 999 }));
   props.decimals.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  props.isDisabled.faker((faker) => faker.datatype.boolean());
 });
 
 export const DividendFixture = createFixture<Dividend>((props) => {

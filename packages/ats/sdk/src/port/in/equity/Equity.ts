@@ -480,6 +480,7 @@ class EquityInPort implements IEquityInPort {
       executionDate: new Date(res.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND),
       factor: res.scheduleBalanceAdjustment.factor.toString(),
       decimals: res.scheduleBalanceAdjustment.decimals.toString(),
+      isDisabled: res.scheduleBalanceAdjustment.isDisabled,
     };
 
     return scheduledBalanceAdjustment;
@@ -517,6 +518,7 @@ class EquityInPort implements IEquityInPort {
         executionDate: new Date(res.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND),
         factor: res.scheduleBalanceAdjustment.factor.toString(),
         decimals: res.scheduleBalanceAdjustment.decimals.toString(),
+        isDisabled: res.scheduleBalanceAdjustment.isDisabled,
       };
 
       scheduledBalanceAdjustments.push(scheduledBalanceAdjustment);
