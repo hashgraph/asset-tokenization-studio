@@ -46,7 +46,7 @@
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^6.1.2",
     "@types/mocha": "10.0.10",
-    "chai": "^4.4.0",
+    "chai": "^6.2.2",
     "chai-as-promised": "^7.1.1",
     "dotenv": "^16.0.3",
     "ethers": "^6.15.0",
