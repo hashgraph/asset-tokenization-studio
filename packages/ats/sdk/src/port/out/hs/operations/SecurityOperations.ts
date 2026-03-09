@@ -328,6 +328,20 @@ export class SecurityOperations {
     );
   }
 
+  async cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    return this.executor.executeContractCall(
+      securityId.toString(),
+      EquityUSAFacet__factory.createInterface(),
+      "cancelScheduledBalanceAdjustment",
+      [balanceAdjustmentId],
+      GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
+    );
+  }
+
   async takeSnapshot(security: EvmAddress, securityId: ContractId | string): Promise<TransactionResponse> {
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
     return this.executor.executeContractCall(

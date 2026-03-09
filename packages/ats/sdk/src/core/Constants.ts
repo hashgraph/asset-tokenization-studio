@@ -156,6 +156,7 @@ export const GAS = {
   SET_INTEREST_RATE: 7000000,
   ADD_KPI_DATA: 7000000,
   SET_IMPACT_DATA: 7000000,
+  CANCEL_SCHEDULED_BALANCE_ADJUSTMENT: 7000000,
 } as const;
 
 export const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
@@ -168,6 +169,7 @@ export const SET_COUPON_EVENT = "CouponSet";
 export const CANCEL_COUPON_EVENT = "CouponCancelled";
 export const CANCEL_VOTING_EVENT = "VotingCancelled";
 export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT = "ScheduledBalanceAdjustmentSet";
+export const CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT = "ScheduledBalanceAdjustmentCancelled";
 
 // * Generic
 export const BYTES_32_LENGTH = 32 * 2;

@@ -759,6 +759,7 @@ export class RPCQueryAdapter {
       Number(scheduledBalanceAdjustmentInfo.balanceAdjustment_.executionDate),
       Number(scheduledBalanceAdjustmentInfo.balanceAdjustment_.factor),
       Number(scheduledBalanceAdjustmentInfo.balanceAdjustment_.decimals),
+      scheduledBalanceAdjustmentInfo.isDisabled_,
     );
   }
 
