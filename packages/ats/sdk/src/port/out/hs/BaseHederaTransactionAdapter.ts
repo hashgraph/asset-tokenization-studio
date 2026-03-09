@@ -705,6 +705,12 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityOps.setScheduledBalanceAdjustment(...args);
   }
 
+  async cancelScheduledBalanceAdjustment(
+    ...args: Parameters<SecurityOperations["cancelScheduledBalanceAdjustment"]>
+  ): Promise<TransactionResponse> {
+    return this.securityOps.cancelScheduledBalanceAdjustment(...args);
+  }
+
   async takeSnapshot(...args: Parameters<SecurityOperations["takeSnapshot"]>): Promise<TransactionResponse> {
     return this.securityOps.takeSnapshot(...args);
   }

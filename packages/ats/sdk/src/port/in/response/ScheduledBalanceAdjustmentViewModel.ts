@@ -7,4 +7,5 @@ export default interface ScheduledBalanceAdjustmentViewModel extends QueryRespon
   executionDate: Date;
   factor: string;
   decimals: string;
+  isDisabled: boolean;
 }

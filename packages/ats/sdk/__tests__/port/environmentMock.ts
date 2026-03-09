@@ -1411,6 +1411,16 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     } as TransactionResponse;
   });
 
+  singletonInstance.cancelVoting = jest.fn(async function (_security: EvmAddress, votingId: number) {
+    if (votingId > 0 && votingId <= votingRights.length) {
+      votingRights.splice(votingId - 1, 1);
+    }
+    return {
+      status: "success",
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
   singletonInstance.setCoupon = jest.fn(
     async (
       address: EvmAddress,
@@ -1684,6 +1694,19 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     scheduledBalanceAdjustments.pop();
     scheduledBalanceAdjustments.push(scheduledBalanceAdjustment);
 
+    return {
+      status: "success",
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.cancelScheduledBalanceAdjustment = jest.fn(async function (
+    _security: EvmAddress,
+    balanceAdjustmentId: number,
+  ) {
+    if (balanceAdjustmentId > 0 && balanceAdjustmentId <= scheduledBalanceAdjustments.length) {
+      scheduledBalanceAdjustments.splice(balanceAdjustmentId - 1, 1);
+    }
     return {
       status: "success",
       id: transactionId,

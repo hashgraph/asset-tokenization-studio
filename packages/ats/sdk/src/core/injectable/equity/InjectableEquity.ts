@@ -18,6 +18,7 @@ import { GetDividendHoldersQueryHandler } from "@query/equity/dividends/getDivid
 import { GetTotalDividendHoldersQueryHandler } from "@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQueryHandler";
 import { GetVotingHoldersQueryHandler } from "@query/equity/votingRights/getVotingHolders/GetVotingHoldersQueryHandler";
 import { GetTotalVotingHoldersQueryHandler } from "@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQueryHandler";
+import { CancelScheduledBalanceAdjustmentCommandHandler } from "@command/equity/balanceAdjustments/cancelScheduledBalanceAdjustment/CancelScheduledBalanceAdjustmentCommandHandler";
 
 export const COMMAND_HANDLERS_EQUITY = [
   {
@@ -35,6 +36,10 @@ export const COMMAND_HANDLERS_EQUITY = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetVotingRightsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CancelScheduledBalanceAdjustmentCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,
