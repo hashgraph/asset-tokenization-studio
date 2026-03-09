@@ -125,7 +125,7 @@ const config: HardhatUserConfig = {
     outputDir: "./docs/api",
     freshOutput: true,
     include: ["contracts"],
-    exclude: ["contracts/test", "contracts/mocks", "node_modules"],
+    exclude: ["contracts/test", "contracts/test/mocks", "node_modules"],
   },
 };
 

@@ -20,7 +20,7 @@ import {
     ManualInvestorVerification,
     InternationalInvestors,
     ResaleHoldPeriod
-} from "../factory/ERC3643/interfaces/regulation.sol";
+} from "../../factory/ERC3643/interfaces/regulation.sol";
 /**
  * @notice Helper contract to expose regulation.sol pure functions for testing
  */
