@@ -556,6 +556,14 @@ abstract contract Internals is Modifiers {
     function _snapshot() internal virtual returns (uint256);
     function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal virtual;
     function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal virtual;
+    function _initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual;
+    function _setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual;
+    // MIGRATION: Remove the following 6 declarations once all legacy tokens have been
+    // migrated to the dedicated NominalValue storage. After removal, also simplify
+    // _getNominalValue() and _getNominalValueDecimals() to return only their own storage,
+    // and remove the migration calls from setNominalValue().
+    function _migrateBondNominalValueIfNeeded() internal virtual;
+    function _migrateEquityNominalValueIfNeeded() internal virtual;
     function _storeRegulationData(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
@@ -602,6 +610,8 @@ abstract contract Internals is Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function _DOMAIN_SEPARATOR() internal view virtual returns (bytes32);
     function _abafAtSnapshot(uint256 _snapshotID) internal view virtual returns (uint256 abaf_);
+    function _bondNominalValue() internal view virtual returns (uint256);
+    function _bondNominalValueDecimals() internal view virtual returns (uint8);
     function _addressValueAt(
         uint256 snapshotId,
         SnapshotsAddress storage snapshots
@@ -914,6 +924,8 @@ abstract contract Internals is Modifiers {
         address _account
     ) internal view virtual returns (IEquity.DividendFor memory dividendFor_);
     function _getERC20Metadata() internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
+    function _equityNominalValue() internal view virtual returns (uint256);
+    function _equityNominalValueDecimals() internal view virtual returns (uint8);
     function _getName() internal view virtual returns (string memory);
     function _getERC20MetadataAdjustedAt(
         uint256 _timestamp
@@ -1076,6 +1088,8 @@ abstract contract Internals is Modifiers {
         bytes32 partition,
         uint256 timestamp
     ) internal view virtual returns (uint256);
+    function _getNominalValue() internal view virtual returns (uint256);
+    function _getNominalValueDecimals() internal view virtual returns (uint8);
     function _getNonceFor(address _account) internal view virtual returns (uint256);
     function _getOnchainID() internal view virtual returns (address);
     function _getPastTotalSupply(uint256 timepoint) internal view virtual returns (uint256);
@@ -1303,6 +1317,7 @@ abstract contract Internals is Modifiers {
         uint256 _lockId
     ) internal view virtual returns (bool);
     function _isMultiPartition() internal view virtual returns (bool);
+    function _isNominalValueInitialized() internal view virtual returns (bool);
     function _isOperator(address _operator, address _tokenHolder) internal view virtual returns (bool);
     function _isOperatorForPartition(
         bytes32 _partition,

@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-11T09:16:17.458Z
- * Facets: 196
+ * Generated: 2026-03-05T15:48:47.399Z
+ * Facets: 197
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -311,6 +311,8 @@ import {
   LockKpiLinkedRateFacetTimeTravel__factory,
   LockSustainabilityPerformanceTargetRateFacet__factory,
   LockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  NominalValueFacet__factory,
+  NominalValueFacetTimeTravel__factory,
   NoncesFacet__factory,
   NoncesFacetTimeTravel__factory,
   NoncesFixedRateFacet__factory,
@@ -8441,6 +8443,46 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new LockSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
+  NominalValueFacet: {
+    name: "NominalValueFacet",
+    resolverKey: {
+      name: "_NOMINAL_VALUE_RESOLVER_KEY",
+      value: "0x48903d4da8b1f0a5e9a9874be74ec5d2f8043d4d5b65cc093173c3dae103df8f",
+    },
+    inheritance: ["NominalValue", "Common", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "getNominalValue",
+        signature: "function getNominalValue() view returns (uint256)",
+        selector: "0xbd4ff0a9",
+      },
+      {
+        name: "getNominalValueDecimals",
+        signature: "function getNominalValueDecimals() view returns (uint8)",
+        selector: "0x27e4bb51",
+      },
+      {
+        name: "initialize_NominalValue",
+        signature: "function initialize_NominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals)",
+        selector: "0x0c0e65af",
+      },
+      {
+        name: "setNominalValue",
+        signature: "function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals)",
+        selector: "0x40ba1a0d",
+      },
+    ],
+    events: [
+      {
+        name: "NominalValueSet",
+        signature: "NominalValueSet(address,uint256,uint8)",
+        topic0: "0x82c69cdf3dea5ac004c2c46c4184c1f5e39bc3268e2b12d3ed05a03a96706f3a",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new NominalValueFacetTimeTravel__factory(signer) : new NominalValueFacet__factory(signer),
+  },
+
   NoncesFacet: {
     name: "NoncesFacet",
     resolverKey: {
@@ -10529,7 +10571,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 196 as const;
+export const TOTAL_FACETS = 197 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -10829,7 +10871,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   BondStorageWrapper: {
     name: "BondStorageWrapper",
-    inheritance: ["IBondStorageWrapper", "ERC20PermitStorageWrapper"],
+    inheritance: ["IBondStorageWrapper", "NominalValueStorageWrapper"],
     methods: [],
   },
 
@@ -11453,6 +11495,12 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  NominalValueStorageWrapper: {
+    name: "NominalValueStorageWrapper",
+    inheritance: ["ERC20PermitStorageWrapper"],
+    methods: [],
+  },
+
   NonceStorageWrapper: {
     name: "NonceStorageWrapper",
     inheritance: ["Internals"],
@@ -11553,7 +11601,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 57 as const;
+export const TOTAL_STORAGE_WRAPPERS = 58 as const;
 
 /**
  * All role identifiers extracted from contracts.

@@ -37,6 +37,7 @@ import { validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Common } from "../layer_0/common/Common.sol";
+import { INominalValue } from "../layer_2/interfaces/nominalValue/INominalValue.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
 import { ISustainabilityPerformanceTargetRate } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
@@ -106,6 +107,11 @@ contract Factory is IFactory, Common {
             _equityData.equityDetails,
             buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
+        );
+
+        INominalValue(equityAddress_).initialize_NominalValue(
+            _equityData.equityDetails.nominalValue,
+            _equityData.equityDetails.nominalValueDecimals
         );
 
         emit EquityDeployed(_msgSender(), equityAddress_, _equityData, _factoryRegulationData);
@@ -230,6 +236,11 @@ contract Factory is IFactory, Common {
             _bondData.bondDetails,
             buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
+        );
+
+        INominalValue(bondAddress_).initialize_NominalValue(
+            _bondData.bondDetails.nominalValue,
+            _bondData.bondDetails.nominalValueDecimals
         );
 
         IProceedRecipients(bondAddress_).initialize_ProceedRecipients(

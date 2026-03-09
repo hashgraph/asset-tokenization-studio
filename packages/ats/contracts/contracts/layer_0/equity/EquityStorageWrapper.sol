@@ -28,9 +28,11 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         bool putRight;
         IEquity.DividendType dividendRight;
         bytes3 currency;
-        uint256 nominalValue;
+        // solhint-disable-next-line var-name-mixedcase
+        uint256 DEPRECATED_nominalValue;
         bool initialized;
-        uint8 nominalValueDecimals;
+        // solhint-disable-next-line var-name-mixedcase
+        uint8 DEPRECATED_nominalValueDecimals;
     }
 
     function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal override {
@@ -43,8 +45,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _equityStorage().putRight = _equityDetailsData.putRight;
         _equityStorage().dividendRight = _equityDetailsData.dividendRight;
         _equityStorage().currency = _equityDetailsData.currency;
-        _equityStorage().nominalValue = _equityDetailsData.nominalValue;
-        _equityStorage().nominalValueDecimals = _equityDetailsData.nominalValueDecimals;
+        _equityStorage().DEPRECATED_nominalValue = _equityDetailsData.nominalValue;
+        _equityStorage().DEPRECATED_nominalValueDecimals = _equityDetailsData.nominalValueDecimals;
     }
 
     function _setDividends(
@@ -116,6 +118,14 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, _actionId);
     }
 
+    // MIGRATION: Remove the following 3 functions and the DEPRECATED_ fields from
+    // EquityDataStorage once all legacy tokens have been migrated.
+    function _migrateEquityNominalValueIfNeeded() internal virtual override {
+        if (_equityStorage().DEPRECATED_nominalValue == 0) return;
+        _equityStorage().DEPRECATED_nominalValue = 0;
+        _equityStorage().DEPRECATED_nominalValueDecimals = 0;
+    }
+
     function _getEquityDetails() internal view override returns (IEquity.EquityDetailsData memory equityDetails_) {
         equityDetails_ = IEquity.EquityDetailsData({
             votingRight: _equityStorage().votingRight,
@@ -127,8 +137,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
             putRight: _equityStorage().putRight,
             dividendRight: _equityStorage().dividendRight,
             currency: _equityStorage().currency,
-            nominalValue: _equityStorage().nominalValue,
-            nominalValueDecimals: _equityStorage().nominalValueDecimals
+            nominalValue: _getNominalValue(),
+            nominalValueDecimals: _getNominalValueDecimals()
         });
     }
 
@@ -241,7 +251,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
      *
      * @param _voteID The dividend Id
      * @param _account The account
-
+     *
      */
     function _getVotingFor(
         uint256 _voteID,
@@ -324,6 +334,14 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
             decimals_ = (_snapshotId != 0) ? _decimalsAtSnapshot(_snapshotId) : _decimalsAdjustedAt(_date);
         }
+    }
+
+    function _equityNominalValue() internal view virtual override returns (uint256) {
+        return _equityStorage().DEPRECATED_nominalValue;
+    }
+
+    function _equityNominalValueDecimals() internal view virtual override returns (uint8) {
+        return _equityStorage().DEPRECATED_nominalValueDecimals;
     }
 
     function _equityStorage() internal pure returns (EquityDataStorage storage equityData_) {
