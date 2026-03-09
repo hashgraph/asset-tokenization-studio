@@ -11,20 +11,20 @@ abstract contract NominalValueStorageWrapper is ERC20PermitStorageWrapper {
         uint8 nominalValueDecimals;
     }
 
-    /// @dev Initializes the nominal value in the new dedicated storage. Clears any
-    /// deprecated bond/equity fields to avoid double-counting in the aggregated sum.
-    /// MIGRATION: Once all legacy tokens have been migrated, remove the two _migrate* calls.
+    /// @dev Initializes the nominal value in the new dedicated storage.
     function _initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual override {
-        _migrateBondNominalValueIfNeeded();
-        _migrateEquityNominalValueIfNeeded();
         NominalValueDataStorage storage nvStorage = _nominalValueStorage();
         nvStorage.nominalValue = _nominalValue;
         nvStorage.nominalValueDecimals = _nominalValueDecimals;
         nvStorage.initialized = true;
     }
 
-    /// @dev Sets the nominal value in the new dedicated storage. Does not set the initialized flag.
+    /// @dev Sets the nominal value in the new dedicated storage. Clears any
+    /// deprecated bond/equity fields to avoid double-counting in the aggregated sum.
+    /// MIGRATION: Once all legacy tokens have been migrated, remove the two _migrate* calls.
     function _setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual override {
+        _migrateBondNominalValueIfNeeded();
+        _migrateEquityNominalValueIfNeeded();
         NominalValueDataStorage storage nvStorage = _nominalValueStorage();
         nvStorage.nominalValue = _nominalValue;
         nvStorage.nominalValueDecimals = _nominalValueDecimals;

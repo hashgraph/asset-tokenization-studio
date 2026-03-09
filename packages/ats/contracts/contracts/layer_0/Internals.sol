@@ -562,10 +562,11 @@ abstract contract Internals is Modifiers {
     function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal virtual;
     function _initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual;
     function _setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual;
-    // MIGRATION: Remove the following 6 declarations once all legacy tokens have been
-    // migrated to the dedicated NominalValue storage. After removal, also simplify
-    // _getNominalValue() and _getNominalValueDecimals() to return only their own storage,
-    // and remove the migration calls from setNominalValue().
+    // MIGRATION: Remove these 2 declarations plus _bondNominalValue(),
+    // _bondNominalValueDecimals(), _equityNominalValue(), _equityNominalValueDecimals()
+    // (in the view section) once all legacy tokens have been migrated. After removal,
+    // also simplify _getNominalValue() and _getNominalValueDecimals() to return only
+    // their own storage, and remove the migration calls from setNominalValue().
     function _migrateBondNominalValueIfNeeded() internal virtual;
     function _migrateEquityNominalValueIfNeeded() internal virtual;
     function _storeRegulationData(

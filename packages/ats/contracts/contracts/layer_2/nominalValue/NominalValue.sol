@@ -15,9 +15,10 @@ abstract contract NominalValue is INominalValue, Internals {
         emit NominalValueSet(_msgSender(), _nominalValue, _nominalValueDecimals);
     }
 
-    /// @dev Sets the nominal value and handles migration of legacy tokens.
+    /// @dev Sets the nominal value. Migration of deprecated bond/equity fields
+    /// is handled internally by _setNominalValue.
     /// MIGRATION: Once all legacy tokens have been migrated, remove the
-    /// _isNominalValueInitialized check and the two _migrate* calls, leaving only:
+    /// _isNominalValueInitialized check, leaving only:
     ///   _setNominalValue(_nominalValue, _nominalValueDecimals);
     function setNominalValue(
         uint256 _nominalValue,
@@ -26,8 +27,6 @@ abstract contract NominalValue is INominalValue, Internals {
         if (!_isNominalValueInitialized()) {
             _initializeNominalValue(_nominalValue, _nominalValueDecimals);
         }
-        _migrateBondNominalValueIfNeeded();
-        _migrateEquityNominalValueIfNeeded();
         _setNominalValue(_nominalValue, _nominalValueDecimals);
         emit NominalValueSet(_msgSender(), _nominalValue, _nominalValueDecimals);
     }
