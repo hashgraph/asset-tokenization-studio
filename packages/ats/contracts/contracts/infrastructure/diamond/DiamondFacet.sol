@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { DiamondCut } from "./DiamondCut.sol";
 import { DiamondLoupe } from "./DiamondLoupe.sol";
-import { _DIAMOND_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
-import { IDiamond } from "../../../interfaces/resolver/resolverProxy/IDiamond.sol";
-import { IDiamondCut } from "../../../interfaces/resolver/resolverProxy/IDiamondCut.sol";
-import { IDiamondLoupe } from "../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
+import { _DIAMOND_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { IDiamond } from "../proxy/IDiamond.sol";
+import { IDiamondCut } from "../proxy/IDiamondCut.sol";
+import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet to the diamond.

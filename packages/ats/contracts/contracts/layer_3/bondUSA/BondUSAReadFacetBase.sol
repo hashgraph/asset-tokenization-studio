@@ -5,7 +5,7 @@ import { BondRead } from "../../layer_2/bond/BondRead.sol";
 import { Security } from "../../layer_2/security/Security.sol";
 import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
 import { ISecurity } from "../../layer_2/interfaces/security/ISecurity.sol";
-import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 
 abstract contract BondUSAReadFacetBase is BondRead, IStaticFunctionSelectors, Security {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {

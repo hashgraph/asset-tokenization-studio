@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20Permit } from "../../interfaces/ERC1400/IERC20Permit.sol";
-import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ERC20Permit } from "./ERC20Permit.sol";
 
 abstract contract ERC20PermitFacetBase is ERC20Permit, IStaticFunctionSelectors {

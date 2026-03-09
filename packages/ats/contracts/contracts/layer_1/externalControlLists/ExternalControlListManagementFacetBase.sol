@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalControlListManagement } from "../interfaces/externalControlLists/IExternalControlListManagement.sol";
-import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ExternalControlListManagement } from "./ExternalControlListManagement.sol";
 
 abstract contract ExternalControlListManagementFacetBase is ExternalControlListManagement, IStaticFunctionSelectors {

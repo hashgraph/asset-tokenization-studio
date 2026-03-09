@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { DiamondFacet } from "../../../../resolver/resolverProxy/facets/DiamondFacet.sol";
+import { DiamondFacet } from "../../../../infrastructure/diamond/DiamondFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
 

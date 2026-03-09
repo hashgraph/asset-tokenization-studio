@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { LibCommon } from "../../layer_0/common/libraries/LibCommon.sol";
 import { EnumerableSetBytes4 } from "../../layer_0/common/libraries/EnumerableSetBytes4.sol";
-import { IDiamondCutManager } from "../../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol";
-import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import { IDiamondLoupe } from "../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
-import { BusinessLogicResolverWrapper } from "../BusinessLogicResolverWrapper.sol";
+import { IDiamondCutManager } from "./IDiamondCutManager.sol";
+import { IStaticFunctionSelectors } from "../proxy/IStaticFunctionSelectors.sol";
+import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
+import { BusinessLogicResolverWrapper } from "./BusinessLogicResolverWrapper.sol";
 import { _DIAMOND_CUT_MANAGER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicResolverWrapper {

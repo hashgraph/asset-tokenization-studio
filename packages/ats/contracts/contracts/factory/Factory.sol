@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IFactory } from "../interfaces/factory/IFactory.sol";
-import { ResolverProxy } from "../resolver/resolverProxy/ResolverProxy.sol";
-import { IResolverProxy } from "../interfaces/resolver/resolverProxy/IResolverProxy.sol";
+import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
+import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { IControlList } from "../layer_1/interfaces/controlList/IControlList.sol";
 import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
@@ -13,7 +13,7 @@ import { IERC1410 } from "../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { ICap } from "../layer_1/interfaces/cap/ICap.sol";
 import { IERC1594 } from "../layer_1/interfaces/ERC1400/IERC1594.sol";
 import { IClearingActions } from "../layer_1/interfaces/clearing/IClearingActions.sol";
-import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
+import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
     buildRegulationData,

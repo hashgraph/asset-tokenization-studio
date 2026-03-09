@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalKycListManagement } from "../interfaces/externalKycLists/IExternalKycListManagement.sol";
-import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ExternalKycListManagement } from "./ExternalKycListManagement.sol";
 
 abstract contract ExternalKycListManagementFacetBase is ExternalKycListManagement, IStaticFunctionSelectors {

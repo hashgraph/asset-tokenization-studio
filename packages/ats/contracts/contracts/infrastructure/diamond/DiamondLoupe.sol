@@ -4,8 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 // The functions in DiamondLoupeFacet.sol.sol MUST be added to a resolverProxy.
 // The EIP-2535 ResolverProxy standard requires these functions.
 
-import { ResolverProxyUnstructured } from "../unstructured/ResolverProxyUnstructured.sol";
-import { IDiamondLoupe } from "../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
+import { ResolverProxyUnstructured } from "../proxy/ResolverProxyUnstructured.sol";
+import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 abstract contract DiamondLoupe is IDiamondLoupe, IERC165, ResolverProxyUnstructured {

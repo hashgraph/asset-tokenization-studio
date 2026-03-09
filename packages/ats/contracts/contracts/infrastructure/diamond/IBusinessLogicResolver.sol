@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-import { IDiamondCutManager } from "./diamondCutManager/IDiamondCutManager.sol";
+import { IDiamondCutManager } from "./IDiamondCutManager.sol";
 
 /**
  * @title Contracts Repository

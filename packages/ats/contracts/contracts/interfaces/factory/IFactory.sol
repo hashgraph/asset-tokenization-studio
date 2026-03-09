@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IResolverProxy } from "../resolver/resolverProxy/IResolverProxy.sol";
-import { IBusinessLogicResolver } from "../resolver/IBusinessLogicResolver.sol";
+import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
+import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLogicResolver.sol";
 import { IERC20 } from "../../layer_1/interfaces/ERC1400/IERC20.sol";
 import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
 import { IEquity } from "../../layer_2/interfaces/equity/IEquity.sol";

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IDiamondCut } from "../../../interfaces/resolver/resolverProxy/IDiamondCut.sol";
-import { ResolverProxyUnstructured } from "../unstructured/ResolverProxyUnstructured.sol";
-import { IBusinessLogicResolver } from "../../../interfaces/resolver/IBusinessLogicResolver.sol";
-import { _DEFAULT_ADMIN_ROLE } from "../../../constants/roles.sol";
+import { IDiamondCut } from "../proxy/IDiamondCut.sol";
+import { ResolverProxyUnstructured } from "../proxy/ResolverProxyUnstructured.sol";
+import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
+import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
     function updateConfigVersion(uint256 _newVersion) external override onlyRole(_DEFAULT_ADMIN_ROLE) {

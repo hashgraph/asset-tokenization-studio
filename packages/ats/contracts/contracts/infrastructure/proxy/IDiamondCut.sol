@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "./IStaticFunctionSelectors.sol";
-import { IBusinessLogicResolver } from "../../../interfaces/resolver/IBusinessLogicResolver.sol";
+import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
 
 interface IDiamondCut is IStaticFunctionSelectors {
     /**

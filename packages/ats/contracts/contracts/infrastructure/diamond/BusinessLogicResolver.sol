@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
-import { DiamondCutManager } from "./diamondCutManager/DiamondCutManager.sol";
-import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
+import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
+import { DiamondCutManager } from "./DiamondCutManager.sol";
+import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();

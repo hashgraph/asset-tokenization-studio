@@ -37,7 +37,7 @@ import { ICompliance } from "../layer_1/interfaces/ERC3643/ICompliance.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
-import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
+import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 
 abstract contract Internals is Modifiers {
     function _addAgent(address _agent) internal virtual;

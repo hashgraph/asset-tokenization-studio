@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalPauseManagement } from "../interfaces/externalPauses/IExternalPauseManagement.sol";
-import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ExternalPauseManagement } from "./ExternalPauseManagement.sol";
 
 abstract contract ExternalPauseManagementFacetBase is ExternalPauseManagement, IStaticFunctionSelectors {

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
-import { LibCommon } from "../layer_0/common/libraries/LibCommon.sol";
-import { EnumerableSetBytes4 } from "../layer_0/common/libraries/EnumerableSetBytes4.sol";
-import { IBusinessLogicResolverWrapper } from "../interfaces/resolver/IBusinessLogicResolverWrapper.sol";
-import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
-import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
+import { LibCommon } from "../../layer_0/common/libraries/LibCommon.sol";
+import { EnumerableSetBytes4 } from "../../layer_0/common/libraries/EnumerableSetBytes4.sol";
+import { IBusinessLogicResolverWrapper } from "./IBusinessLogicResolverWrapper.sol";
+import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     struct BusinessLogicResolverDataStorage {

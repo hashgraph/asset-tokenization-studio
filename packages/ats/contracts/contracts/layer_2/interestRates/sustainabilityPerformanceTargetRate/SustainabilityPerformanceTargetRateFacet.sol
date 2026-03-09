@@ -4,7 +4,7 @@ import {
     ISustainabilityPerformanceTargetRate
 } from "../../interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 import { _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
-import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { SustainabilityPerformanceTargetRate } from "./SustainabilityPerformanceTargetRate.sol";
 
 contract SustainabilityPerformanceTargetRateFacet is SustainabilityPerformanceTargetRate, IStaticFunctionSelectors {
