@@ -46,15 +46,17 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorage
     {
         BondDataStorage storage bondStorage = _bondStorage();
         bondStorage.initialized = true;
-        _storeBondDetails(_bondDetailsData);
+        _setCurrency(_bondDetailsData.currency);
+        _setStartingDate(_bondDetailsData.startingDate);
+        _setMaturityDate(_bondDetailsData.maturityDate);
     }
 
-    function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal override {
-        _bondStorage().currency = _bondDetails.currency;
-        _bondStorage().DEPRECATED_nominalValue = _bondDetails.nominalValue;
-        _bondStorage().DEPRECATED_nominalValueDecimals = _bondDetails.nominalValueDecimals;
-        _bondStorage().startingDate = _bondDetails.startingDate;
-        _bondStorage().maturityDate = _bondDetails.maturityDate;
+    function _setCurrency(bytes3 _currency) internal override {
+        _bondStorage().currency = _currency;
+    }
+
+    function _setStartingDate(uint256 _startingDate) internal override {
+        _bondStorage().startingDate = _startingDate;
     }
 
     function _setCoupon(

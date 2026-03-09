@@ -558,9 +558,19 @@ abstract contract Internals is Modifiers {
     function _setVoting(
         IEquity.Voting calldata _newVoting
     ) internal virtual returns (bytes32 corporateActionId_, uint256 voteID_);
-    function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal virtual;
-    function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal virtual;
-    function _initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual;
+    function _setCurrency(bytes3 _currency) internal virtual;
+    function _setStartingDate(uint256 _startingDate) internal virtual;
+    function _setVotingRight(bool _votingRight) internal virtual;
+    function _setInformationRight(bool _informationRight) internal virtual;
+    function _setLiquidationRight(bool _liquidationRight) internal virtual;
+    function _setSubscriptionRight(bool _subscriptionRight) internal virtual;
+    function _setConversionRight(bool _conversionRight) internal virtual;
+    function _setRedemptionRight(bool _redemptionRight) internal virtual;
+    function _setPutRight(bool _putRight) internal virtual;
+    function _setDividendRight(IEquity.DividendType _dividendRight) internal virtual;
+    function _setEquityCurrency(bytes3 _currency) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_NominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual;
     function _setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual;
     // MIGRATION: Remove these 2 declarations plus _bondNominalValue(),
     // _bondNominalValueDecimals(), _equityNominalValue(), _equityNominalValueDecimals()

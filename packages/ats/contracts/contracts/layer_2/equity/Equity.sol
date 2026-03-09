@@ -195,6 +195,14 @@ abstract contract Equity is IEquity, Common {
     function _initializeEquity(EquityDetailsData calldata _equityDetailsData) internal {
         EquityDataStorage storage equityStorage = _equityStorage();
         equityStorage.initialized = true;
-        _storeEquityDetails(_equityDetailsData);
+        _setVotingRight(_equityDetailsData.votingRight);
+        _setInformationRight(_equityDetailsData.informationRight);
+        _setLiquidationRight(_equityDetailsData.liquidationRight);
+        _setSubscriptionRight(_equityDetailsData.subscriptionRight);
+        _setConversionRight(_equityDetailsData.conversionRight);
+        _setRedemptionRight(_equityDetailsData.redemptionRight);
+        _setPutRight(_equityDetailsData.putRight);
+        _setDividendRight(_equityDetailsData.dividendRight);
+        _setEquityCurrency(_equityDetailsData.currency);
     }
 }

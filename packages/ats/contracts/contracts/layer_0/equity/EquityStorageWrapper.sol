@@ -35,18 +35,40 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint8 DEPRECATED_nominalValueDecimals;
     }
 
-    function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal override {
-        _equityStorage().votingRight = _equityDetailsData.votingRight;
-        _equityStorage().informationRight = _equityDetailsData.informationRight;
-        _equityStorage().liquidationRight = _equityDetailsData.liquidationRight;
-        _equityStorage().subscriptionRight = _equityDetailsData.subscriptionRight;
-        _equityStorage().conversionRight = _equityDetailsData.conversionRight;
-        _equityStorage().redemptionRight = _equityDetailsData.redemptionRight;
-        _equityStorage().putRight = _equityDetailsData.putRight;
-        _equityStorage().dividendRight = _equityDetailsData.dividendRight;
-        _equityStorage().currency = _equityDetailsData.currency;
-        _equityStorage().DEPRECATED_nominalValue = _equityDetailsData.nominalValue;
-        _equityStorage().DEPRECATED_nominalValueDecimals = _equityDetailsData.nominalValueDecimals;
+    function _setVotingRight(bool _votingRight) internal override {
+        _equityStorage().votingRight = _votingRight;
+    }
+
+    function _setInformationRight(bool _informationRight) internal override {
+        _equityStorage().informationRight = _informationRight;
+    }
+
+    function _setLiquidationRight(bool _liquidationRight) internal override {
+        _equityStorage().liquidationRight = _liquidationRight;
+    }
+
+    function _setSubscriptionRight(bool _subscriptionRight) internal override {
+        _equityStorage().subscriptionRight = _subscriptionRight;
+    }
+
+    function _setConversionRight(bool _conversionRight) internal override {
+        _equityStorage().conversionRight = _conversionRight;
+    }
+
+    function _setRedemptionRight(bool _redemptionRight) internal override {
+        _equityStorage().redemptionRight = _redemptionRight;
+    }
+
+    function _setPutRight(bool _putRight) internal override {
+        _equityStorage().putRight = _putRight;
+    }
+
+    function _setDividendRight(IEquity.DividendType _dividendRight) internal override {
+        _equityStorage().dividendRight = _dividendRight;
+    }
+
+    function _setEquityCurrency(bytes3 _currency) internal override {
+        _equityStorage().currency = _currency;
     }
 
     function _setDividends(

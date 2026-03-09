@@ -11,7 +11,7 @@ abstract contract NominalValue is INominalValue, Internals {
         uint256 _nominalValue,
         uint8 _nominalValueDecimals
     ) external override onlyUninitialized(_isNominalValueInitialized()) {
-        _initializeNominalValue(_nominalValue, _nominalValueDecimals);
+        _initialize_NominalValue(_nominalValue, _nominalValueDecimals);
         emit NominalValueSet(_msgSender(), _nominalValue, _nominalValueDecimals);
     }
 
@@ -25,7 +25,7 @@ abstract contract NominalValue is INominalValue, Internals {
         uint8 _nominalValueDecimals
     ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
         if (!_isNominalValueInitialized()) {
-            _initializeNominalValue(_nominalValue, _nominalValueDecimals);
+            _initialize_NominalValue(_nominalValue, _nominalValueDecimals);
         }
         _setNominalValue(_nominalValue, _nominalValueDecimals);
         emit NominalValueSet(_msgSender(), _nominalValue, _nominalValueDecimals);

@@ -13,7 +13,8 @@ abstract contract NominalValueStorageWrapper is ERC20PermitStorageWrapper {
 
     /// @dev Initializes the nominal value in the new dedicated storage.
     /// Delegates to _setNominalValue which handles migration of deprecated fields.
-    function _initializeNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual override {
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_NominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual override {
         _nominalValueStorage().initialized = true;
         _setNominalValue(_nominalValue, _nominalValueDecimals);
     }
