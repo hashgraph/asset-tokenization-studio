@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1410TokenHolderFacetBase } from "../ERC1410TokenHolderFacetBase.sol";
-import { _ERC1410_TOKEN_HOLDER_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { _ERC1410_TOKEN_HOLDER_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { Common } from "../../../../layer_0/common/Common.sol";
 
 contract ERC1410TokenHolderFacet is ERC1410TokenHolderFacetBase, Common {

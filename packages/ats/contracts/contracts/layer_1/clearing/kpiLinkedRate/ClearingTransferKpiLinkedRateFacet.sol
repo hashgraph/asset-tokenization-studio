@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingTransferFacetBase } from "../ClearingTransferFacetBase.sol";
-import { _CLEARING_TRANSFER_KPI_LINKED_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { _CLEARING_TRANSFER_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
 } from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";

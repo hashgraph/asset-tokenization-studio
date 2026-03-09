@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { TotalBalanceFacetBase } from "../TotalBalanceFacetBase.sol";
-import { _TOTAL_BALANCE_FIXED_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { _TOTAL_BALANCE_FIXED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { CommonFixedInterestRate } from "../../../layer_0_extensions/bond/fixedInterestRate/Common.sol";
 
 contract TotalBalanceFixedRateFacet is TotalBalanceFacetBase, CommonFixedInterestRate {

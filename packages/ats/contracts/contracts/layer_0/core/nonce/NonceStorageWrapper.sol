@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../Internals.sol";
-import { _NONCE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _NONCE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 
 abstract contract NonceStorageWrapper is Internals {
     struct NonceDataStorage {

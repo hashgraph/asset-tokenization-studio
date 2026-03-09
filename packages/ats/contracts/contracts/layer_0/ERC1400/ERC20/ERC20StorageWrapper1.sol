@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _ERC20_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { IERC20 } from "../../../layer_1/interfaces/ERC1400/IERC20.sol";
 import { IERC20StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 import { ERC1410BasicStorageWrapperRead } from "../ERC1410/ERC1410BasicStorageWrapperRead.sol";

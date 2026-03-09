@@ -5,7 +5,7 @@ import { IKyc } from "../../../layer_1/interfaces/kyc/IKyc.sol";
 import {
     ExternalKycListManagementStorageWrapper
 } from "../externalKycLists/ExternalKycListManagementStorageWrapper.sol";
-import { _KYC_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _KYC_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { LibCommon } from "../../common/libraries/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IRevocationList } from "../../../layer_1/interfaces/kyc/IRevocationList.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../constants/roles.sol";
+import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
 import { IERC3643Operations } from "../interfaces/ERC3643/IERC3643Operations.sol";
 import { Internals } from "../../layer_0/Internals.sol";
 

@@ -7,7 +7,7 @@ import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../laye
 import {
     ISustainabilityPerformanceTargetRate
 } from "../../interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
-import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
+import { _INTEREST_RATE_MANAGER_ROLE } from "../../../constants/roles.sol";
 
 contract SustainabilityPerformanceTargetRate is
     ISustainabilityPerformanceTargetRate,

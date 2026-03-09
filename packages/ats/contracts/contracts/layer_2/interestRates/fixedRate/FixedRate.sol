@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { CommonFixedInterestRate } from "../../../layer_0_extensions/bond/fixedInterestRate/Common.sol";
 import { IFixedRate } from "../../interfaces/interestRates/fixedRate/IFixedRate.sol";
-import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
+import { _INTEREST_RATE_MANAGER_ROLE } from "../../../constants/roles.sol";
 
 contract FixedRate is IFixedRate, CommonFixedInterestRate {
     // solhint-disable-next-line func-name-mixedcase

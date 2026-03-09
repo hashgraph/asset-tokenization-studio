@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION } from "../constants/values.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper2 } from "../snapshots/SnapshotsStorageWrapper2.sol";
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
 import { IERC20StorageWrapper } from "../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";

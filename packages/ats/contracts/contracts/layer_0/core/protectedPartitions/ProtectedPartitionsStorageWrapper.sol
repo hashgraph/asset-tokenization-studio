@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../constants/roles.sol";
-import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../../constants/roles.sol";
+import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";

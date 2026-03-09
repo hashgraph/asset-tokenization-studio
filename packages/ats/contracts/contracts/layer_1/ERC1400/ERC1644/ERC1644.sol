@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1644 } from "../../interfaces/ERC1400/IERC1644.sol";
-import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
+import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { Internals } from "../../../layer_0/Internals.sol";
 
 abstract contract ERC1644 is IERC1644, Internals {

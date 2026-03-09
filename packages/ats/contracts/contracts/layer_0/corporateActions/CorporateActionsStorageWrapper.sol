@@ -7,7 +7,7 @@ import {
 } from "../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
 import { LibCommon } from "../../layer_0/common/libraries/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _CORPORATE_ACTION_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ClearingStorageWrapper1 } from "../clearing/ClearingStorageWrapper1.sol";
 
 abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     ISustainabilityPerformanceTargetRate
 } from "../../interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
-import { _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 import { SustainabilityPerformanceTargetRate } from "./SustainabilityPerformanceTargetRate.sol";
 

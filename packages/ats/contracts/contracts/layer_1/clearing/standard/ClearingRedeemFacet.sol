@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingRedeemFacetBase } from "../ClearingRedeemFacetBase.sol";
-import { _CLEARING_REDEEM_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { _CLEARING_REDEEM_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { Common } from "../../../layer_0/common/Common.sol";
 
 contract ClearingRedeemFacet is ClearingRedeemFacetBase, Common {

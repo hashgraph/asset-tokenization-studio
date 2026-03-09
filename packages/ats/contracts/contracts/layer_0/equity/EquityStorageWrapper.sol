@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _EQUITY_STORAGE_POSITION } from "../../layer_2/constants/storagePositions.sol";
+import { _EQUITY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
@@ -9,7 +9,7 @@ import {
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE
-} from "../../layer_2/constants/values.sol";
+} from "../../constants/values.sol";
 import { IEquity } from "../../layer_2/interfaces/equity/IEquity.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IEquityStorageWrapper } from "../../layer_2/interfaces/equity/IEquityStorageWrapper.sol";

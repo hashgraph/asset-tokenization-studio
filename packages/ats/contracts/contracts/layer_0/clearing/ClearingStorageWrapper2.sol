@@ -13,7 +13,7 @@ import { Hold } from "../../layer_1/interfaces/hold/IHold.sol";
 import { ThirdPartyType } from "../common/types/ThirdPartyType.sol";
 import { ICompliance } from "../../layer_1/interfaces/ERC3643/ICompliance.sol";
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
-import { _DEFAULT_PARTITION } from "../constants/values.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { LowLevelCall } from "../common/libraries/LowLevelCall.sol";
 
 abstract contract ClearingStorageWrapper2 is IClearingStorageWrapper, HoldStorageWrapper2 {

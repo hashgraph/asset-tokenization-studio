@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { LibCommon } from "../../common/libraries/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { AccessControlStorageWrapper } from "../accessControl/AccessControlStorageWrapper.sol";
-import { _SSI_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _SSI_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ISsiManagement } from "../../../layer_1/interfaces/ssi/ISsiManagement.sol";
 
 abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {

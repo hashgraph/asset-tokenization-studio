@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CLEARING_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { _CLEARING_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { HoldStorageWrapper1 } from "../hold/HoldStorageWrapper1.sol";
 import { IClearing } from "../../layer_1/interfaces/clearing/IClearing.sol";
 import { IClearingTransfer } from "../../layer_1/interfaces/clearing/IClearingTransfer.sol";

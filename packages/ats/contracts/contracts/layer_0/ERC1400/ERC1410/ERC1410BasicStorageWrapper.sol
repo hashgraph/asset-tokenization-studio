@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { ICompliance } from "../../../layer_1/interfaces/ERC3643/ICompliance.sol";
 import { IERC3643Management } from "../../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
 import { BasicTransferInfo } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IEquityUSA } from "../interfaces/IEquityUSA.sol";
-import { _EQUITY_RESOLVER_KEY } from "../../layer_2/constants/resolverKeys.sol";
+import { _EQUITY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 import { IEquity } from "../../layer_2/interfaces/equity/IEquity.sol";
 import { ISecurity } from "../../layer_2/interfaces/security/ISecurity.sol";

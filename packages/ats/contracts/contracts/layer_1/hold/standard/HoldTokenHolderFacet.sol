@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { HoldTokenHolderFacetBase } from "../HoldTokenHolderFacetBase.sol";
-import { _HOLD_TOKEN_HOLDER_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { _HOLD_TOKEN_HOLDER_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { Common } from "../../../layer_0/common/Common.sol";
 
 contract HoldTokenHolderFacet is HoldTokenHolderFacetBase, Common {

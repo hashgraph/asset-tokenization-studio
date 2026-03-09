@@ -5,7 +5,7 @@ import { ProtectedPartitionsStorageWrapper } from "../protectedPartitions/Protec
 import { LibCommon } from "../../common/libraries/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalControlList } from "../../../layer_1/interfaces/externalControlLists/IExternalControlList.sol";
-import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 
 abstract contract ExternalControlListManagementStorageWrapper is ProtectedPartitionsStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;

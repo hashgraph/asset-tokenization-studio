@@ -11,7 +11,7 @@ import {
     RegulationData,
     RegulationType,
     RegulationSubType
-} from "../../layer_3/constants/regulation.sol";
+} from "../../constants/regulation.sol";
 import { IFixedRate } from "../../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 // prettier-ignore

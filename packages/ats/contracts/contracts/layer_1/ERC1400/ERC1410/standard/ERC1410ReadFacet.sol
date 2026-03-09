@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1410ReadFacetBase } from "../ERC1410ReadFacetBase.sol";
-import { _ERC1410_READ_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { _ERC1410_READ_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { Common } from "../../../../layer_0/common/Common.sol";
 
 contract ERC1410ReadFacet is ERC1410ReadFacetBase, Common {

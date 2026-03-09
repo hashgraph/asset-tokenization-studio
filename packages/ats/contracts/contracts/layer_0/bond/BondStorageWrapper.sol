@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _BOND_STORAGE_POSITION } from "../../layer_2/constants/storagePositions.sol";
-import { COUPON_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } from "../constants/values.sol";
+import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { COUPON_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } from "../../constants/values.sol";
 import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
 import { IBondStorageWrapper } from "../../layer_2/interfaces/bond/IBondStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";

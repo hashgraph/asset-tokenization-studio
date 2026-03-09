@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _KPI_LINKED_RATE_STORAGE_POSITION } from "../../../layer_2/constants/storagePositions.sol";
+import { _KPI_LINKED_RATE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { IKpiLinkedRate } from "../../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { PauseStorageWrapper } from "../../core/pause/PauseStorageWrapper.sol";
 

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     _ERC3643_MANAGEMENT_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
-} from "../../constants/resolverKeys.sol";
+} from "../../../constants/resolverKeys.sol";
 import { ERC3643ManagementFacetBase } from "../ERC3643ManagementFacetBase.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length

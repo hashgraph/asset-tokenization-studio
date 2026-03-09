@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { AccessControlFacetBase } from "../AccessControlFacetBase.sol";
-import { _ACCESS_CONTROL_FIXED_RATE_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { _ACCESS_CONTROL_FIXED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { CommonFixedInterestRate } from "../../../layer_0_extensions/bond/fixedInterestRate/Common.sol";
 
 contract AccessControlFixedRateFacet is AccessControlFacetBase, CommonFixedInterestRate {

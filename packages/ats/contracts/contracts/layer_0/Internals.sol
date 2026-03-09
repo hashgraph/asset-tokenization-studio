@@ -18,7 +18,7 @@ import {
 import { ILock } from "../layer_1/interfaces/lock/ILock.sol";
 import { ISecurity } from "../layer_2/interfaces/security/ISecurity.sol";
 import { IBondRead } from "../layer_2/interfaces/bond/IBondRead.sol";
-import { RegulationData, AdditionalSecurityData } from "../layer_3/constants/regulation.sol";
+import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 import { ICap } from "../layer_1/interfaces/cap/ICap.sol";
 import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
 import { IEquity } from "../layer_2/interfaces/equity/IEquity.sol";

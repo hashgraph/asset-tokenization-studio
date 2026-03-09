@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalPauseManagement } from "../interfaces/externalPauses/IExternalPauseManagement.sol";
 import { Internals } from "../../layer_0/Internals.sol";
-import { _PAUSE_MANAGER_ROLE } from "../constants/roles.sol";
-import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../layer_0/constants/storagePositions.sol";
+import { _PAUSE_MANAGER_ROLE } from "../../constants/roles.sol";
+import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 abstract contract ExternalPauseManagement is IExternalPauseManagement, Internals {
     // solhint-disable-next-line func-name-mixedcase

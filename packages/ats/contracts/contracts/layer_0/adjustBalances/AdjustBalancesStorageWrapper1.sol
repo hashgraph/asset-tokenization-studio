@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ADJUST_BALANCES_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { _ADJUST_BALANCES_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     ScheduledCrossOrderedTasksStorageWrapper
 } from "../../layer_0/scheduledTasks/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksStorageWrapper.sol";

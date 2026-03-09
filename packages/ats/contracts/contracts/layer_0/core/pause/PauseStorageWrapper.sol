@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IPauseStorageWrapper } from "../../../layer_1/interfaces/pause/IPauseStorageWrapper.sol";
-import { _PAUSE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _PAUSE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ExternalPauseManagementStorageWrapper } from "../externalPauses/ExternalPauseManagementStorageWrapper.sol";
 
 abstract contract PauseStorageWrapper is IPauseStorageWrapper, ExternalPauseManagementStorageWrapper {

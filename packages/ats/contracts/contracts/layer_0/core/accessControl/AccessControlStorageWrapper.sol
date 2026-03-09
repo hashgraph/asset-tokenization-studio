@@ -8,7 +8,7 @@ import {
     IAccessControlStorageWrapper
 } from "../../../layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol";
 import { BusinessLogicResolverWrapper } from "../../../resolver/BusinessLogicResolverWrapper.sol";
-import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ResolverProxyStorageWrapper } from "../resolverProxy/ResolverProxyStorageWrapper.sol";
 
 abstract contract AccessControlStorageWrapper is

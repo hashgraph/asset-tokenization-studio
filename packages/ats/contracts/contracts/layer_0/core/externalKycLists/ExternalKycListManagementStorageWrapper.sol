@@ -5,7 +5,7 @@ import { LibCommon } from "../../common/libraries/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalKycList } from "../../../layer_1/interfaces/externalKycLists/IExternalKycList.sol";
 import { ExternalListManagementStorageWrapper } from "../externalLists/ExternalListManagementStorageWrapper.sol";
-import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { IKyc } from "../../../layer_1/interfaces/kyc/IKyc.sol";
 
 abstract contract ExternalKycListManagementStorageWrapper is ExternalListManagementStorageWrapper {

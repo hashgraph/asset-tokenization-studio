@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { _ERC1410_BASIC_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
+import { _ERC1410_BASIC_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { IERC1410StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol";
 import { LockStorageWrapper1 } from "../../lock/LockStorageWrapper1.sol";
 import { LibCommon } from "../../../layer_0/common/libraries/LibCommon.sol";

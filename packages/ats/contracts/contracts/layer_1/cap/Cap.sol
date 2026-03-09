@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap } from "../interfaces/cap/ICap.sol";
-import { _CAP_ROLE } from "../constants/roles.sol";
+import { _CAP_ROLE } from "../../constants/roles.sol";
 import { Internals } from "../../layer_0/Internals.sol";
 
 abstract contract Cap is ICap, Internals {

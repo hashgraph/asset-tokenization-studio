@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { HoldReadFacetBase } from "../HoldReadFacetBase.sol";
-import { _HOLD_READ_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { _HOLD_READ_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { Common } from "../../../layer_0/common/Common.sol";
 
 contract HoldReadFacet is HoldReadFacetBase, Common {

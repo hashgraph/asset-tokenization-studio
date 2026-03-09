@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ERC20VotesStorageWrapper } from "../../ERC1400/ERC20Votes/ERC20VotesStorageWrapper.sol";
 import { IERC20Permit } from "../../../layer_1/interfaces/ERC1400/IERC20Permit.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import { ERC20PERMIT_TYPEHASH } from "../../constants/values.sol";
+import { ERC20PERMIT_TYPEHASH } from "../../../constants/values.sol";
 import { getDomainHash } from "../../../layer_0/common/libraries/ERC712Lib.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { RegulationData, AdditionalSecurityData } from "../../layer_3/constants/regulation.sol";
-import { _SECURITY_STORAGE_POSITION } from "../../layer_3/constants/storagePositions.sol";
+import { RegulationData, AdditionalSecurityData } from "../../constants/regulation.sol";
+import { _SECURITY_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { ISecurity } from "../../layer_2/interfaces/security/ISecurity.sol";
 import { EquityStorageWrapper } from "../equity/EquityStorageWrapper.sol";
 

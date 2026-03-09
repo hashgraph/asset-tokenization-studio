@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC20FacetBase } from "../ERC20FacetBase.sol";
-import { _ERC20_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { _ERC20_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
 } from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IFactory } from "../interfaces/factory/IFactory.sol";
 import { ResolverProxy } from "../resolver/resolverProxy/ResolverProxy.sol";
 import { IResolverProxy } from "../interfaces/resolver/resolverProxy/IResolverProxy.sol";
-import { _DEFAULT_ADMIN_ROLE } from "../layer_1/constants/roles.sol";
+import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
 import { IControlList } from "../layer_1/interfaces/controlList/IControlList.sol";
 import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
 import { IERC20Votes } from "../layer_1/interfaces/ERC1400/IERC20Votes.sol";
@@ -21,7 +21,7 @@ import {
     RegulationType,
     RegulationSubType,
     checkRegulationTypeAndSubType
-} from "../layer_3/constants/regulation.sol";
+} from "../constants/regulation.sol";
 import { IEquityUSA } from "../layer_3/interfaces/IEquityUSA.sol";
 import { IBondUSA } from "../layer_3/interfaces/IBondUSA.sol";
 import { IProceedRecipients } from "../layer_2/interfaces/proceedRecipients/IProceedRecipients.sol";

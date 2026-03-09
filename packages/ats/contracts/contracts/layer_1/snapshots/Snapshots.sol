@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ISnapshots, HolderBalance } from "../interfaces/snapshots/ISnapshots.sol";
 import { Internals } from "../../layer_0/Internals.sol";
-import { _SNAPSHOT_ROLE } from "../constants/roles.sol";
+import { _SNAPSHOT_ROLE } from "../../constants/roles.sol";
 
 abstract contract Snapshots is ISnapshots, Internals {
     function takeSnapshot() external override onlyUnpaused onlyRole(_SNAPSHOT_ROLE) returns (uint256 snapshotID_) {

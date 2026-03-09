@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1644FacetBase } from "../ERC1644FacetBase.sol";
-import { _ERC1644_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { _ERC1644_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
 } from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";

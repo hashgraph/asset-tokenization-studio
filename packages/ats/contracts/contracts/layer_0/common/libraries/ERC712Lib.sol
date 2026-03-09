@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DOMAIN_TYPE_HASH, _SALT } from "../../constants/values.sol";
+import { _DOMAIN_TYPE_HASH, _SALT } from "../../../constants/values.sol";
 import {
     _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH,
     _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH,
@@ -13,7 +13,7 @@ import {
     _CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH
-} from "../../../layer_1/constants/values.sol";
+} from "../../../constants/values.sol";
 import { Hold, ProtectedHold } from "../../../layer_1/interfaces/hold/IHold.sol";
 import { IClearing } from "../../../layer_1/interfaces/clearing/IClearing.sol";
 

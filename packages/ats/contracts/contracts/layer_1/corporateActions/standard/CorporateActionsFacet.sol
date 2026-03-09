@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { CorporateActionsFacetBase } from "../CorporateActionsFacetBase.sol";
-import { _CORPORATE_ACTIONS_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { _CORPORATE_ACTIONS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { Common } from "../../../layer_0/common/Common.sol";
 
 contract CorporateActionsFacet is CorporateActionsFacetBase, Common {

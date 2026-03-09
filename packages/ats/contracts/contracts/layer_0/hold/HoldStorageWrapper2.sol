@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _DEFAULT_PARTITION } from "../constants/values.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { ThirdPartyType } from "../common/types/ThirdPartyType.sol";
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
 import { IERC20StorageWrapper } from "../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";

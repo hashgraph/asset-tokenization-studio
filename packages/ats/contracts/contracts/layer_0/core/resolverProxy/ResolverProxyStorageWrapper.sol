@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBusinessLogicResolver } from "../../../interfaces/resolver/IBusinessLogicResolver.sol";
-import { _RESOLVER_PROXY_STORAGE_POSITION } from "../../../layer_1/constants/storagePositions.sol";
+import { _RESOLVER_PROXY_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { NonceStorageWrapper } from "../nonce/NonceStorageWrapper.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.

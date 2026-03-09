@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { LibCommon } from "../../common/libraries/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IControlListStorageWrapper } from "../../../layer_1/interfaces/controlList/IControlListStorageWrapper.sol";
-import { _CONTROL_LIST_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _CONTROL_LIST_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import {
     ExternalControlListManagementStorageWrapper
 } from "../externalControlLists/ExternalControlListManagementStorageWrapper.sol";

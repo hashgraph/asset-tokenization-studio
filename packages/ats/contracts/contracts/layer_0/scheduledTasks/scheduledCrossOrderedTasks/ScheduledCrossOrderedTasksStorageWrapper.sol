@@ -2,11 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
-import { _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from "../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol";
-import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE } from "../../constants/values.sol";
+import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE } from "../../../constants/values.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage

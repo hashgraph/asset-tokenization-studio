@@ -5,7 +5,7 @@ import { KpisFacetBase } from "../KpisFacetBase.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
 import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
-import { _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract KpisSustainabilityPerformanceTargetRateFacet is
     KpisFacetBase,

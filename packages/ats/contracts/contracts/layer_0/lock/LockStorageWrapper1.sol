@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { LibCommon } from "../common/libraries/LibCommon.sol";
-import { _LOCK_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { _LOCK_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { CapStorageWrapper1 } from "../cap/CapStorageWrapper1.sol";
 import { ILock } from "../../layer_1/interfaces/lock/ILock.sol";

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CORPORATE_ACTION_ROLE } from "../../layer_1/constants/roles.sol";
+import { _CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
-} from "../../layer_0/constants/values.sol";
+} from "../../constants/values.sol";
 import { IEquity } from "../interfaces/equity/IEquity.sol";
 import { Common } from "../../layer_0/common/Common.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ERC20VOTES_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _ERC20VOTES_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ERC1594StorageWrapper } from "../ERC1594/ERC1594StorageWrapper.sol";
 import { IERC20Votes } from "../../../layer_1/interfaces/ERC1400/IERC20Votes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";

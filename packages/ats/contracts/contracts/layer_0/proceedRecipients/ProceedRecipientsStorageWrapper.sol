@@ -5,7 +5,7 @@ import { TotalBalancesStorageWrapper } from "../totalBalances/TotalBalancesStora
 import {
     _PROCEED_RECIPIENTS_STORAGE_POSITION,
     _PROCEED_RECIPIENTS_DATA_STORAGE_POSITION
-} from "../constants/storagePositions.sol";
+} from "../../constants/storagePositions.sol";
 import { IProceedRecipients } from "../../layer_2/interfaces/proceedRecipients/IProceedRecipients.sol";
 
 abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper {

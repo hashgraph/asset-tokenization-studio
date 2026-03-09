@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ArraysUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol";
 import { CountersUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import { _SNAPSHOT_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { _SNAPSHOT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import {
     ISnapshotsStorageWrapper,
     Snapshots,

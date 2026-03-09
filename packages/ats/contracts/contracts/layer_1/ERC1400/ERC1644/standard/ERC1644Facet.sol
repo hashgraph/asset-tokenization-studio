@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1644FacetBase } from "../ERC1644FacetBase.sol";
-import { _ERC1644_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { _ERC1644_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { Common } from "../../../../layer_0/common/Common.sol";
 
 contract ERC1644Facet is ERC1644FacetBase, Common {

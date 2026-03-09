@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ISSUER_ROLE, _AGENT_ROLE } from "../../constants/roles.sol";
+import { _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { IERC1594 } from "../../interfaces/ERC1400/IERC1594.sol";
 import { Internals } from "../../../layer_0/Internals.sol";
-import { _DEFAULT_PARTITION } from "../../../layer_0/constants/values.sol";
+import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 
 abstract contract ERC1594 is IERC1594, Internals {
     // solhint-disable-next-line func-name-mixedcase

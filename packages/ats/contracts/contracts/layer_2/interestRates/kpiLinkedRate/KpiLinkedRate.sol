@@ -5,7 +5,7 @@ import {
     CommonKpiLinkedInterestRate
 } from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 import { IKpiLinkedRate } from "../../interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
-import { _INTEREST_RATE_MANAGER_ROLE } from "../../constants/roles.sol";
+import { _INTEREST_RATE_MANAGER_ROLE } from "../../../constants/roles.sol";
 
 contract KpiLinkedRate is IKpiLinkedRate, CommonKpiLinkedInterestRate {
     // solhint-disable-next-line func-name-mixedcase

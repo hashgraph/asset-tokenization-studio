@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBond } from "../interfaces/bond/IBond.sol";
 import { IBondRead } from "../interfaces/bond/IBondRead.sol";
 import { IKyc } from "../../layer_1/interfaces/kyc/IKyc.sol";
-import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../layer_1/constants/roles.sol";
+import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../constants/roles.sol";
 import { Internals } from "../../layer_0/Internals.sol";
 
 abstract contract Bond is IBond, Internals {
