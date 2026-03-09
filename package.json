@@ -142,7 +142,7 @@
     "ats:sdk:build": "npm run build --workspace=packages/ats/sdk",
     "ats:sdk:test": "npm run test --workspace=packages/ats/sdk",
     "ats:sdk:test:coverage": "npm run test:coverage --workspace=packages/ats/sdk",
-    "ats:sdk:test:ci": "npm run test:ci --workspace=packages/ats/sdk --if-present || npm run test --workspace=packages/ats/sdk",
+    "ats:sdk:test:ci": "npm run test:ci --workspace=packages/ats/sdk || npm run test --workspace=packages/ats/sdk",
     "ats:sdk:clean": "npm run clean --workspace=packages/ats/sdk",
     "ats:sdk:publish": "npm run publish --workspace=packages/ats/sdk",
     "ats:web:build": "NODE_OPTIONS='--max-old-space-size=8192' npm run build --workspace=apps/ats/web",

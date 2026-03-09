@@ -29,7 +29,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
 
-  let couponData = {
+  const couponData = {
     startDate: referenceDate.toString(),
     endDate: (referenceDate + 100).toString(),
     fixingDate: (referenceDate + 200).toString(),

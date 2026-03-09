@@ -275,7 +275,7 @@ export class CheckpointManager {
           if (!status || checkpoint.status === status) {
             checkpoints.push(checkpoint);
           }
-        } catch (err) {
+        } catch (_err) {
           // Skip invalid checkpoint files
           continue;
         }

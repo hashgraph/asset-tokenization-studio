@@ -223,7 +223,7 @@ describe("Checkpoint Resumability - Integration Tests", () => {
       await manager.saveCheckpoint(partialCheckpoint);
 
       // Verify failure was saved
-      let failedCheckpoints = await manager.findCheckpoints(TEST_NETWORKS.HARDHAT, TEST_CHECKPOINT_STATUS.FAILED);
+      const failedCheckpoints = await manager.findCheckpoints(TEST_NETWORKS.HARDHAT, TEST_CHECKPOINT_STATUS.FAILED);
       expect(failedCheckpoints.length).to.be.greaterThan(0);
 
       const savedFailedCheckpoint = failedCheckpoints[0];

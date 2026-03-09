@@ -9551,6 +9551,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe002bcdf",
       },
       {
+        name: "balancesOfAtSnapshot",
+        signature:
+          "function balancesOfAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns ((address holder, uint256 balance)[] balances_)",
+        selector: "0xe956875c",
+      },
+      {
         name: "clearedBalanceOfAtSnapshot",
         signature:
           "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
@@ -9660,6 +9666,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function balanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0xe002bcdf",
+      },
+      {
+        name: "balancesOfAtSnapshot",
+        signature:
+          "function balancesOfAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns ((address holder, uint256 balance)[] balances_)",
+        selector: "0xe956875c",
       },
       {
         name: "clearedBalanceOfAtSnapshot",
@@ -9776,6 +9788,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe002bcdf",
       },
       {
+        name: "balancesOfAtSnapshot",
+        signature:
+          "function balancesOfAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns ((address holder, uint256 balance)[] balances_)",
+        selector: "0xe956875c",
+      },
+      {
         name: "clearedBalanceOfAtSnapshot",
         signature:
           "function clearedBalanceOfAtSnapshot(uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
@@ -9887,6 +9905,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function balanceOfAtSnapshotByPartition(bytes32 _partition, uint256 _snapshotID, address _tokenHolder) view returns (uint256 balance_)",
         selector: "0xe002bcdf",
+      },
+      {
+        name: "balancesOfAtSnapshot",
+        signature:
+          "function balancesOfAtSnapshot(uint256 _snapshotID, uint256 _pageIndex, uint256 _pageLength) view returns ((address holder, uint256 balance)[] balances_)",
+        selector: "0xe956875c",
       },
       {
         name: "clearedBalanceOfAtSnapshot",
@@ -11434,8 +11458,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
       {
         name: "SnapshotTriggered",
-        signature: "SnapshotTriggered(uint256)",
-        topic0: "0x0eec0abde2b179159e265a3659aa23e6c815e932b49ed19684a9717c1db37c8f",
+        signature: "SnapshotTriggered(uint256,bytes)",
+        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
       },
     ],
     errors: [

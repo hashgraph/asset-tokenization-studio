@@ -96,8 +96,8 @@ describe("BurnCommandHandler", () => {
 
       const expectedAmountBd = BigDecimal.fromString(command.amount, security.decimals);
       expect(handlerMock.burn).toHaveBeenCalledWith(
-        sourceEvmAddress,
         securityEvmAddress,
+        sourceEvmAddress,
         expectedAmountBd,
         command.securityId,
       );

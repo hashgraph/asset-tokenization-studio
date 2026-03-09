@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "4.3.0",
+  "version": "5.0.0",
   "repository": "https://github.com/hashgraph/asset-tokenization-studio",
   "type": "commonjs",
   "main": "./build/typechain-types/index.js",
@@ -9,7 +9,8 @@
     "*": {
       "scripts": ["./build/scripts/index.d.ts"],
       "typechain-types": ["./build/typechain-types/index.d.ts"],
-      "test": ["./build/test/index.d.ts"]
+      "test": ["./build/test/index.d.ts"],
+      "test/fixtures": ["./build/test/fixtures/index.d.ts"]
     }
   },
   "files": ["artifacts/", "contracts/", "typechain-types/", "build/", "!artifacts/build-info/", "!build/**/*.map"],
@@ -39,6 +40,12 @@
       "import": "./build/test/index.js",
       "require": "./build/test/index.js",
       "default": "./build/test/index.js"
+    },
+    "./test/fixtures": {
+      "types": "./build/test/fixtures/index.d.ts",
+      "import": "./build/test/fixtures/index.js",
+      "require": "./build/test/fixtures/index.js",
+      "default": "./build/test/fixtures/index.js"
     },
     "./package.json": "./package.json"
   },

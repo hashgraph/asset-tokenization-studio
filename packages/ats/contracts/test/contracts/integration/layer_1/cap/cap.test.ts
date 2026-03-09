@@ -336,7 +336,7 @@ describe("Cap Tests", () => {
     });
 
     it("GIVEN a token with max supply equal to MAX_UINT THEN balance adjustment occurs but max supply remains unchanged", async () => {
-      let adjustmentFactor = 2n;
+      const adjustmentFactor = 2n;
 
       // Before
       await capFacet.setMaxSupply(MAX_UINT256 / adjustmentFactor);

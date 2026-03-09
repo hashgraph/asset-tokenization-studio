@@ -148,6 +148,7 @@ describe("ProtectedTransferFromByPartitionCommandHandler", () => {
           BigDecimal.fromString(command.deadline.substring(0, 10)),
           BigDecimal.fromString(command.nounce.toString()),
           command.signature,
+          command.securityId,
         );
       });
     });

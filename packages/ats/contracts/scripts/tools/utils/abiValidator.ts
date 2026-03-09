@@ -35,7 +35,7 @@ export function loadABI(contractName: string, contractsDir: string): any[] | und
 
     const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
     return artifact.abi;
-  } catch (error) {
+  } catch (_error) {
     return undefined;
   }
 }

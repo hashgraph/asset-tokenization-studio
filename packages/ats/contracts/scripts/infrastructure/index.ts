@@ -255,7 +255,18 @@ export {
 
 export type { VerificationOptions, VerificationResult } from "./utils/verification";
 
-export { info, success, error, warn, section, debug, table, configureLogger, LogLevel } from "./utils/logging";
+export {
+  info,
+  success,
+  error,
+  warn,
+  section,
+  debug,
+  table,
+  configureLogger,
+  resetLogger,
+  LogLevel,
+} from "./utils/logging";
 export type { LoggerConfig } from "./utils/logging";
 
 export {

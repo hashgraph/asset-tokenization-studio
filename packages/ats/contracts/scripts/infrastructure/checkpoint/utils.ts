@@ -494,7 +494,7 @@ export async function resolveCheckpointForResume(
   const resumable = await manager.findResumableCheckpoints(network, workflowType);
   if (resumable.length === 0) return null;
 
-  let selected: DeploymentCheckpoint | null =
+  const selected: DeploymentCheckpoint | null =
     resumable.length > 1 ? await selectCheckpointToResume(resumable) : resumable[0];
 
   if (!selected) return null;
