@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ScheduledSnapshotsStorageWrapper } from "../scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol";
-import { ScheduledTasksLib } from "../../../../facets/layer_2/scheduledTasks/ScheduledTasksLib.sol";
+import { ScheduledSnapshotsStorageWrapper } from "../scheduledSnapshot/ScheduledSnapshotsStorageWrapper.sol";
+import { ScheduledTasksLib } from "../../../../facets/layer_2/scheduledTask/ScheduledTasksLib.sol";
 import { _SCHEDULED_COUPON_LISTING_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../../facets/layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../../facets/layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { COUPON_LISTING_RESULT_ID } from "../../../../constants/values.sol";
 
 abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStorageWrapper {

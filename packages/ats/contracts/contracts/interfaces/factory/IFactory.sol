@@ -12,12 +12,12 @@ import {
     RegulationType,
     RegulationSubType
 } from "../../constants/regulation.sol";
-import { IFixedRate } from "../../facets/layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../../facets/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "../../facets/layer_2/interfaces/interestRate/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../../facets/layer_2/interfaces/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
 /* solhint-disable max-line-length */
-import { ISustainabilityPerformanceTargetRate } from "../../facets/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { ISustainabilityPerformanceTargetRate } from "../../facets/layer_2/interfaces/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 
 interface IFactory {

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _KPIS_STORAGE_POSITION } from "../../../../../../constants/storagePositions.sol";
-import { IKpis } from "../../../../../../facets/layer_2/interfaces/kpis/kpiLatest/IKpis.sol";
+import { IKpis } from "../../../../../../facets/layer_2/interfaces/kpi/kpiLatest/IKpis.sol";
 import { CheckpointsLib } from "../../../../../../infrastructure/utils/CheckpointsLib.sol";
 import { InternalsKpiInterestRate } from "./Internals.sol";
 import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";

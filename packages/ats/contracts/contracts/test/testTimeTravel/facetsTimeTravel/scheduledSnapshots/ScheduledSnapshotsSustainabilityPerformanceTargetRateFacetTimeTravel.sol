@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /* solhint-disable max-line-length */
 import {
     ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet
-} from "../../../../facets/layer_2/scheduledTasks/scheduledSnapshots/sustainabilityPerformanceTargetRate/ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/layer_2/scheduledTask/scheduledSnapshot/sustainabilityPerformanceTargetRate/ScheduledSnapshotsSustainabilityPerformanceTargetRateFacet.sol";
 /* solhint-enable max-line-length */
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";

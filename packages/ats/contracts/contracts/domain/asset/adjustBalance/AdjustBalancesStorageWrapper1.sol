@@ -4,10 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _ADJUST_BALANCES_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import {
     ScheduledCrossOrderedTasksStorageWrapper
-} from "../../../domain/asset/scheduledTask/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksStorageWrapper.sol";
+} from "../../../domain/asset/scheduledTask/scheduledCrossOrderedTask/ScheduledCrossOrderedTasksStorageWrapper.sol";
 import {
     IAdjustBalancesStorageWrapper
-} from "../../../facets/layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol";
+} from "../../../facets/layer_2/interfaces/adjustBalance/IAdjustBalancesStorageWrapper.sol";
 import { IClearing } from "../../../facets/layer_1/interfaces/clearing/IClearing.sol";
 
 abstract contract AdjustBalancesStorageWrapper1 is

@@ -90,7 +90,7 @@ task("erc3643-clone-interfaces", async (_, hre) => {
     { src: "constants/regulation", dst: "regulation" },
     { src: "constants/roles", dst: "roles" },
     {
-      src: "facets/layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon",
+      src: "facets/layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon",
       dst: "IScheduledTasksCommon",
     },
   ];

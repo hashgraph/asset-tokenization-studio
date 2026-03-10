@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     SnapshotsKpiLinkedRateFacet
-} from "../../../../facets/layer_1/snapshots/kpiLinkedRate/SnapshotsKpiLinkedRateFacet.sol";
+} from "../../../../facets/layer_1/snapshot/kpiLinkedRate/SnapshotsKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

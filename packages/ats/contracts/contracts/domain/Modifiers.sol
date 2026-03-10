@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { LocalContext } from "../infrastructure/utils/LocalContext.sol";
 import { IKyc } from "../facets/layer_1/interfaces/kyc/IKyc.sol";
-import { IKpiLinkedRate } from "../facets/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IKpiLinkedRate } from "../facets/layer_2/interfaces/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IClearing } from "../facets/layer_1/interfaces/clearing/IClearing.sol";
 import { HoldIdentifier } from "../facets/layer_1/interfaces/hold/IHold.sol";
 

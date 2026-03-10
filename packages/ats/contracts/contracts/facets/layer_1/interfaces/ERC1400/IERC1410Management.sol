@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { OperatorTransferData } from "./IERC1410.sol";
-import { IProtectedPartitionsStorageWrapper } from "../protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+import { IProtectedPartitionsStorageWrapper } from "../protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 
 /**
  * @title IERC1410Management

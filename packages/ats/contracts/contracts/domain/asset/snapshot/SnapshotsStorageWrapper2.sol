@@ -6,7 +6,7 @@ import {
     Snapshots,
     PartitionSnapshots,
     HolderBalance
-} from "../../../facets/layer_1/interfaces/snapshots/ISnapshots.sol";
+} from "../../../facets/layer_1/interfaces/snapshot/ISnapshots.sol";
 import { ERC20StorageWrapper2 } from "../ERC1400/ERC20/ERC20StorageWrapper2.sol";
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 

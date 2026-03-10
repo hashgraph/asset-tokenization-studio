@@ -7,7 +7,7 @@ import { IERC1410Management } from "../../interfaces/ERC1400/IERC1410Management.
 import { Internals } from "../../../../domain/Internals.sol";
 import {
     IProtectedPartitionsStorageWrapper
-} from "../../interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+} from "../../interfaces/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Internals {
     // solhint-disable-next-line func-name-mixedcase

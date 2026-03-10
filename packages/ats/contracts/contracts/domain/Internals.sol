@@ -20,7 +20,7 @@ import {
     PartitionSnapshots,
     SnapshotsAddress,
     HolderBalance
-} from "../facets/layer_1/interfaces/snapshots/ISnapshots.sol";
+} from "../facets/layer_1/interfaces/snapshot/ISnapshots.sol";
 import { ILock } from "../facets/layer_1/interfaces/lock/ILock.sol";
 import { ISecurity } from "../facets/layer_2/interfaces/security/ISecurity.sol";
 import { IBondRead } from "../facets/layer_2/interfaces/bond/IBondRead.sol";
@@ -28,23 +28,23 @@ import { RegulationData, AdditionalSecurityData } from "../constants/regulation.
 import { ICap } from "../facets/layer_1/interfaces/cap/ICap.sol";
 import { IERC20 } from "../facets/layer_1/interfaces/ERC1400/IERC20.sol";
 import { IEquity } from "../facets/layer_2/interfaces/equity/IEquity.sol";
-import { IKpiLinkedRate } from "../facets/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IKpiLinkedRate } from "../facets/layer_2/interfaces/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IKyc } from "../facets/layer_1/interfaces/kyc/IKyc.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate
-} from "../facets/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../facets/layer_2/interfaces/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../facets/layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../facets/layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { IssueData, OperatorTransferData, BasicTransferInfo } from "../facets/layer_1/interfaces/ERC1400/IERC1410.sol";
 import { IIdentityRegistry } from "../facets/layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
 import { ICompliance } from "../facets/layer_1/interfaces/ERC3643/ICompliance.sol";
 import {
     IProtectedPartitionsStorageWrapper
-} from "../facets/layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+} from "../facets/layer_1/interfaces/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 
 abstract contract Internals is Modifiers {

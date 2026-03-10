@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ExternalKycListManagementKpiLinkedRateFacet
-} from "../../../../facets/layer_1/externalKycLists/kpiLinkedRate/ExternalKycListManagementKpiLinkedRateFacet.sol";
+} from "../../../../facets/layer_1/externalKycList/kpiLinkedRate/ExternalKycListManagementKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

@@ -24,25 +24,25 @@ import {
 } from "../constants/regulation.sol";
 import { IEquityUSA } from "../facets/layer_3/interfaces/IEquityUSA.sol";
 import { IBondUSA } from "../facets/layer_3/interfaces/IBondUSA.sol";
-import { IProceedRecipients } from "../facets/layer_2/interfaces/proceedRecipients/IProceedRecipients.sol";
-import { IProtectedPartitions } from "../facets/layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol";
-import { IExternalPauseManagement } from "../facets/layer_1/interfaces/externalPauses/IExternalPauseManagement.sol";
+import { IProceedRecipients } from "../facets/layer_2/interfaces/proceedRecipient/IProceedRecipients.sol";
+import { IProtectedPartitions } from "../facets/layer_1/interfaces/protectedPartition/IProtectedPartitions.sol";
+import { IExternalPauseManagement } from "../facets/layer_1/interfaces/externalPause/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
-} from "../facets/layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol";
+} from "../facets/layer_1/interfaces/externalControlList/IExternalControlListManagement.sol";
 import {
     IExternalKycListManagement
-} from "../facets/layer_1/interfaces/externalKycLists/IExternalKycListManagement.sol";
+} from "../facets/layer_1/interfaces/externalKycList/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/layer_1/interfaces/kyc/IKyc.sol";
 import { IERC3643 } from "../facets/layer_1/interfaces/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
-import { IFixedRate } from "../facets/layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../facets/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "../facets/layer_2/interfaces/interestRate/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../facets/layer_2/interfaces/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Common } from "../domain/Common.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate
-} from "../facets/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../facets/layer_2/interfaces/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 
 contract Factory is IFactory, Common {

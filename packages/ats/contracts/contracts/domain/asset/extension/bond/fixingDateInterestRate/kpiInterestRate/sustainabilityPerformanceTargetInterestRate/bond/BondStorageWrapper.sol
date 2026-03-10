@@ -5,7 +5,7 @@ import { IBondRead } from "../../../../../../../../facets/layer_2/interfaces/bon
 // prettier-ignore
 // solhint-disable-next-line max-line-length
 /* solhint-disable max-line-length */
-import { ISustainabilityPerformanceTargetRate } from "../../../../../../../../facets/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { ISustainabilityPerformanceTargetRate } from "../../../../../../../../facets/layer_2/interfaces/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";

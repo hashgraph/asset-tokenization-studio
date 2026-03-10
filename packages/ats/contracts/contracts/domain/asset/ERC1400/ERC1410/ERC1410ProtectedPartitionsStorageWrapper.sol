@@ -6,7 +6,7 @@ import { ERC1644StorageWrapper } from "../ERC1644/ERC1644StorageWrapper.sol";
 import { checkNounceAndDeadline } from "../../../../infrastructure/utils/ERC712Lib.sol";
 import {
     IProtectedPartitionsStorageWrapper
-} from "../../../../facets/layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+} from "../../../../facets/layer_1/interfaces/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract ERC1410ProtectedPartitionsStorageWrapper is ERC1644StorageWrapper {
     function _protectedTransferFromByPartition(

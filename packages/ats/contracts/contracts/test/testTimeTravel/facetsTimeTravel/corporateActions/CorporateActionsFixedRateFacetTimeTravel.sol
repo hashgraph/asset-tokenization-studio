@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     CorporateActionsFixedRateFacet
-} from "../../../../facets/layer_1/corporateActions/fixedRate/CorporateActionsFixedRateFacet.sol";
+} from "../../../../facets/layer_1/corporateAction/fixedRate/CorporateActionsFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

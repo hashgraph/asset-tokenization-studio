@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ProtectedPartitionsFacet
-} from "../../../../facets/layer_1/protectedPartitions/standard/ProtectedPartitionsFacet.sol";
+} from "../../../../facets/layer_1/protectedPartition/standard/ProtectedPartitionsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

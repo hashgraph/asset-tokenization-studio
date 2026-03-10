@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { NoncesFacet } from "../../../../facets/layer_1/nonces/standard/NoncesFacet.sol";
+import { NoncesFacet } from "../../../../facets/layer_1/nonce/standard/NoncesFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

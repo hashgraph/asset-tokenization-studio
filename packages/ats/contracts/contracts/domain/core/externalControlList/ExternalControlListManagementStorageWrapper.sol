@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ProtectedPartitionsStorageWrapper } from "../protectedPartition/ProtectedPartitionsStorageWrapper.sol";
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IExternalControlList } from "../../../facets/layer_1/interfaces/externalControlLists/IExternalControlList.sol";
+import { IExternalControlList } from "../../../facets/layer_1/interfaces/externalControlList/IExternalControlList.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 
 abstract contract ExternalControlListManagementStorageWrapper is ProtectedPartitionsStorageWrapper {
