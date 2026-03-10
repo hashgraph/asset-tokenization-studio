@@ -4,19 +4,21 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLogicResolver.sol";
 import { IERC20 } from "../../facets/layer_1/interfaces/ERC1400/IERC20.sol";
-import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
-import { IEquity } from "../../layer_2/interfaces/equity/IEquity.sol";
+import { IBondRead } from "../../facets/layer_2/interfaces/bond/IBondRead.sol";
+import { IEquity } from "../../facets/layer_2/interfaces/equity/IEquity.sol";
 import {
     FactoryRegulationData,
     RegulationData,
     RegulationType,
     RegulationSubType
 } from "../../constants/regulation.sol";
-import { IFixedRate } from "../../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "../../facets/layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../../facets/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import { ISustainabilityPerformanceTargetRate } from "../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+/* solhint-disable max-line-length */
+import { ISustainabilityPerformanceTargetRate } from "../../facets/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+/* solhint-enable max-line-length */
 
 interface IFactory {
     enum SecurityType {

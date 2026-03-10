@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ScheduledTasksLib } from "../../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
+import { ScheduledTasksLib } from "../../../../facets/layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { ScheduledTasksCommon } from "../ScheduledTasksCommon.sol";
 import { _SCHEDULED_SNAPSHOTS_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
 import { SNAPSHOT_RESULT_ID } from "../../../../constants/values.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../../facets/layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
     function _addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes32 _actionId) internal override {

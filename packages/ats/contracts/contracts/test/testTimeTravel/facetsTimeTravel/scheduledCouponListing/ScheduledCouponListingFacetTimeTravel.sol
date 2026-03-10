@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ScheduledCouponListingFacet
-} from "../../../../layer_2/scheduledTasks/scheduledCouponListing/standard/ScheduledCouponListingFacet.sol";
+} from "../../../../facets/layer_2/scheduledTasks/scheduledCouponListing/standard/ScheduledCouponListingFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

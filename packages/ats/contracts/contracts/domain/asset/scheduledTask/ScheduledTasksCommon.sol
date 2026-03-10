@@ -2,11 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { SnapshotsStorageWrapper1 } from "../snapshot/SnapshotsStorageWrapper1.sol";
-import { ScheduledTasksLib } from "../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
+import { ScheduledTasksLib } from "../../../facets/layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../facets/layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);

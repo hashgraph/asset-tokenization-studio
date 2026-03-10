@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ProceedRecipientsFacet } from "../../../../layer_2/proceedRecipients/standard/ProceedRecipientsFacet.sol";
+import {
+    ProceedRecipientsFacet
+} from "../../../../facets/layer_2/proceedRecipients/standard/ProceedRecipientsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

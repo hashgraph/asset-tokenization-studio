@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../facets/layer_2/interfaces/bond/IBondRead.sol";
 
 contract MockBond is IBondRead {
     // --- Storage ---

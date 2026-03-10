@@ -24,7 +24,7 @@ import {
 } from "../constants/regulation.sol";
 import { IEquityUSA } from "../layer_3/interfaces/IEquityUSA.sol";
 import { IBondUSA } from "../layer_3/interfaces/IBondUSA.sol";
-import { IProceedRecipients } from "../layer_2/interfaces/proceedRecipients/IProceedRecipients.sol";
+import { IProceedRecipients } from "../facets/layer_2/interfaces/proceedRecipients/IProceedRecipients.sol";
 import { IProtectedPartitions } from "../facets/layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/layer_1/interfaces/externalPauses/IExternalPauseManagement.sol";
 import {
@@ -36,13 +36,13 @@ import {
 import { IKyc } from "../facets/layer_1/interfaces/kyc/IKyc.sol";
 import { IERC3643 } from "../facets/layer_1/interfaces/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
-import { IFixedRate } from "../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "../facets/layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../facets/layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Common } from "../domain/Common.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate
-} from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../facets/layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 
 contract Factory is IFactory, Common {

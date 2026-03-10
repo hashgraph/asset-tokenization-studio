@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBond } from "../../layer_2/interfaces/bond/IBond.sol";
-import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
+import { IBond } from "../../facets/layer_2/interfaces/bond/IBond.sol";
+import { IBondRead } from "../../facets/layer_2/interfaces/bond/IBondRead.sol";
 import { RegulationData, AdditionalSecurityData } from "../../constants/regulation.sol";
 
 interface IBondUSA is IBond {

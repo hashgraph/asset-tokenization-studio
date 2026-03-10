@@ -4,8 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IEquityUSA } from "../interfaces/IEquityUSA.sol";
 import { _EQUITY_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IEquity } from "../../layer_2/interfaces/equity/IEquity.sol";
-import { ISecurity } from "../../layer_2/interfaces/security/ISecurity.sol";
+import { IEquity } from "../../facets/layer_2/interfaces/equity/IEquity.sol";
+import { ISecurity } from "../../facets/layer_2/interfaces/security/ISecurity.sol";
 import { EquityUSA } from "./EquityUSA.sol";
 
 contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {

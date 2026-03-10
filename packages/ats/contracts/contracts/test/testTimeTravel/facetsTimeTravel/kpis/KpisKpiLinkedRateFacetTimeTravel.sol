@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { KpisKpiLinkedRateFacet } from "../../../../layer_2/kpis/kpiLatest/kpiLinkedRate/KpisKpiLinkedRateFacet.sol";
+import {
+    KpisKpiLinkedRateFacet
+} from "../../../../facets/layer_2/kpis/kpiLatest/kpiLinkedRate/KpisKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

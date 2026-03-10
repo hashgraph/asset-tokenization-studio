@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ScheduledTasksLib } from "../../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
+import { ScheduledTasksLib } from "../../../../facets/layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { _SCHEDULED_CROSS_ORDERED_TASKS_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
@@ -10,10 +10,12 @@ import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE } from "../../../../co
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../../facets/layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+/* solhint-disable max-line-length */
 import {
     IScheduledCrossOrderedTasks
-} from "../../../../layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
+} from "../../../../facets/layer_2/interfaces/scheduledTasks/scheduledCrossOrderedTasks/IScheduledCrossOrderedTasks.sol";
+/* solhint-enable max-line-length */
 
 abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAdjustmentsStorageWrapper {
     function _addScheduledCrossOrderedTask(uint256 _newScheduledTimestamp, bytes32 _taskType) internal override {

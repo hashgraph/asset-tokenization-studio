@@ -10,9 +10,9 @@ import {
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE
 } from "../../../constants/values.sol";
-import { IEquity } from "../../../layer_2/interfaces/equity/IEquity.sol";
+import { IEquity } from "../../../facets/layer_2/interfaces/equity/IEquity.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IEquityStorageWrapper } from "../../../layer_2/interfaces/equity/IEquityStorageWrapper.sol";
+import { IEquityStorageWrapper } from "../../../facets/layer_2/interfaces/equity/IEquityStorageWrapper.sol";
 import { BondStorageWrapper } from "../bond/BondStorageWrapper.sol";
 
 abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrapper {

@@ -7,7 +7,7 @@ import {
 } from "../../../domain/asset/scheduledTask/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksStorageWrapper.sol";
 import {
     IAdjustBalancesStorageWrapper
-} from "../../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol";
+} from "../../../facets/layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol";
 import { IClearing } from "../../../facets/layer_1/interfaces/clearing/IClearing.sol";
 
 abstract contract AdjustBalancesStorageWrapper1 is

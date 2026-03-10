@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondUSA } from "../interfaces/IBondUSA.sol";
-import { IBond } from "../../layer_2/interfaces/bond/IBond.sol";
+import { IBond } from "../../facets/layer_2/interfaces/bond/IBond.sol";
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { BondUSA } from "./BondUSA.sol";
 

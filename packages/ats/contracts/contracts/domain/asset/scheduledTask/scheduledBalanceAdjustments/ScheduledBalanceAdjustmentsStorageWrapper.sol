@@ -4,13 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     ScheduledCouponListingStorageWrapper
 } from "../scheduledCouponListing/ScheduledCouponListingStorageWrapper.sol";
-import { ScheduledTasksLib } from "../../../../layer_2/scheduledTasks/ScheduledTasksLib.sol";
+import { ScheduledTasksLib } from "../../../../facets/layer_2/scheduledTasks/ScheduledTasksLib.sol";
 import { _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
-import { IEquity } from "../../../../layer_2/interfaces/equity/IEquity.sol";
+import { IEquity } from "../../../../facets/layer_2/interfaces/equity/IEquity.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../../facets/layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponListingStorageWrapper {
     function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes32 _actionId) internal override {
