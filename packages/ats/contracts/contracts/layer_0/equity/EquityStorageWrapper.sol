@@ -28,9 +28,11 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         bool putRight;
         IEquity.DividendType dividendRight;
         bytes3 currency;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
         // solhint-disable-next-line var-name-mixedcase
         uint256 DEPRECATED_nominalValue;
         bool initialized;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
         // solhint-disable-next-line var-name-mixedcase
         uint8 DEPRECATED_nominalValueDecimals;
     }
@@ -69,6 +71,21 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _setEquityCurrency(bytes3 _currency) internal override {
         _equityStorage().currency = _currency;
+    }
+
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_equity(IEquity.EquityDetailsData calldata _equityDetailsData) internal override {
+        EquityDataStorage storage equityStorage = _equityStorage();
+        equityStorage.initialized = true;
+        _setVotingRight(_equityDetailsData.votingRight);
+        _setInformationRight(_equityDetailsData.informationRight);
+        _setLiquidationRight(_equityDetailsData.liquidationRight);
+        _setSubscriptionRight(_equityDetailsData.subscriptionRight);
+        _setConversionRight(_equityDetailsData.conversionRight);
+        _setRedemptionRight(_equityDetailsData.redemptionRight);
+        _setPutRight(_equityDetailsData.putRight);
+        _setDividendRight(_equityDetailsData.dividendRight);
+        _setEquityCurrency(_equityDetailsData.currency);
     }
 
     function _setDividends(
@@ -140,8 +157,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, _actionId);
     }
 
-    // MIGRATION: Remove the following 3 functions and the DEPRECATED_ fields from
-    // EquityDataStorage once all legacy tokens have been migrated.
+    /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
+    /// EquityDataStorage once all legacy tokens have been migrated.
     function _migrateEquityNominalValueIfNeeded() internal virtual override {
         if (_equityStorage().DEPRECATED_nominalValue == 0) return;
         _equityStorage().DEPRECATED_nominalValue = 0;
@@ -358,10 +375,12 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         }
     }
 
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _equityNominalValue() internal view virtual override returns (uint256) {
         return _equityStorage().DEPRECATED_nominalValue;
     }
 
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _equityNominalValueDecimals() internal view virtual override returns (uint8) {
         return _equityStorage().DEPRECATED_nominalValueDecimals;
     }

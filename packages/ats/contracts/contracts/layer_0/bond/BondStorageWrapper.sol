@@ -14,11 +14,13 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorage
 
     struct BondDataStorage {
         bytes3 currency;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
         // solhint-disable-next-line var-name-mixedcase
         uint256 DEPRECATED_nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
         bool initialized;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
         // solhint-disable-next-line var-name-mixedcase
         uint8 DEPRECATED_nominalValueDecimals;
         uint256[] couponsOrderedListByIds;
@@ -109,8 +111,8 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorage
         _updateCorporateActionData(actionId, abi.encode(_coupon));
     }
 
-    // MIGRATION: Remove the following 3 functions and the DEPRECATED_ fields from
-    // BondDataStorage once all legacy tokens have been migrated.
+    /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
+    /// BondDataStorage once all legacy tokens have been migrated.
     function _migrateBondNominalValueIfNeeded() internal virtual override {
         if (_bondStorage().DEPRECATED_nominalValue == 0) return;
         _bondStorage().DEPRECATED_nominalValue = 0;
@@ -284,10 +286,12 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorage
         return _bondStorage().initialized;
     }
 
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _bondNominalValue() internal view virtual override returns (uint256) {
         return _bondStorage().DEPRECATED_nominalValue;
     }
 
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _bondNominalValueDecimals() internal view virtual override returns (uint8) {
         return _bondStorage().DEPRECATED_nominalValueDecimals;
     }

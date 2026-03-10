@@ -207,6 +207,8 @@ abstract contract Internals is Modifiers {
     function _initialize_ERC3643(address _compliance, address _identityRegistry) internal virtual;
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_bond(IBondRead.BondDetailsData calldata _bondDetailsData) internal virtual;
+    // solhint-disable-next-line func-name-mixedcase
+    function _initialize_equity(IEquity.EquityDetailsData calldata _equityDetailsData) internal virtual;
     function _setExternalListInitialized(bytes32 _position) internal virtual;
     function _issue(address _tokenHolder, uint256 _value, bytes memory _data) internal virtual;
     function _issueByPartition(IssueData memory _issueData) internal virtual;
@@ -577,7 +579,9 @@ abstract contract Internals is Modifiers {
     // (in the view section) once all legacy tokens have been migrated. After removal,
     // also simplify _getNominalValue() and _getNominalValueDecimals() to return only
     // their own storage, and remove the migration calls from setNominalValue().
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _migrateBondNominalValueIfNeeded() internal virtual;
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _migrateEquityNominalValueIfNeeded() internal virtual;
     function _storeRegulationData(
         RegulationData memory _regulationData,
@@ -625,7 +629,9 @@ abstract contract Internals is Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function _DOMAIN_SEPARATOR() internal view virtual returns (bytes32);
     function _abafAtSnapshot(uint256 _snapshotID) internal view virtual returns (uint256 abaf_);
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _bondNominalValue() internal view virtual returns (uint256);
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _bondNominalValueDecimals() internal view virtual returns (uint8);
     function _addressValueAt(
         uint256 snapshotId,
@@ -944,7 +950,9 @@ abstract contract Internals is Modifiers {
         address _account
     ) internal view virtual returns (IEquity.DividendFor memory dividendFor_);
     function _getERC20Metadata() internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _equityNominalValue() internal view virtual returns (uint256);
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _equityNominalValueDecimals() internal view virtual returns (uint8);
     function _getName() internal view virtual returns (string memory);
     function _getERC20MetadataAdjustedAt(

@@ -190,19 +190,4 @@ abstract contract Equity is IEquity, Common {
     function getScheduledBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {
         return _getScheduledBalanceAdjustmentsCount();
     }
-
-    // solhint-disable-next-line func-name-mixedcase
-    function _initializeEquity(EquityDetailsData calldata _equityDetailsData) internal {
-        EquityDataStorage storage equityStorage = _equityStorage();
-        equityStorage.initialized = true;
-        _setVotingRight(_equityDetailsData.votingRight);
-        _setInformationRight(_equityDetailsData.informationRight);
-        _setLiquidationRight(_equityDetailsData.liquidationRight);
-        _setSubscriptionRight(_equityDetailsData.subscriptionRight);
-        _setConversionRight(_equityDetailsData.conversionRight);
-        _setRedemptionRight(_equityDetailsData.redemptionRight);
-        _setPutRight(_equityDetailsData.putRight);
-        _setDividendRight(_equityDetailsData.dividendRight);
-        _setEquityCurrency(_equityDetailsData.currency);
-    }
 }

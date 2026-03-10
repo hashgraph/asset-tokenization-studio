@@ -14,7 +14,7 @@ abstract contract EquityUSA is IEquityUSA, Equity, Security {
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
     ) external override onlyUninitialized(_equityStorage().initialized) {
-        _initializeEquity(_equityDetailsData);
+        _initialize_equity(_equityDetailsData);
         _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 }
