@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     BondUSAReadKpiLinkedRateFacet
-} from "../../../../layer_3/bondUSA/kpiLinkedRate/BondUSAReadKpiLinkedRateFacet.sol";
+} from "../../../../facets/layer_3/bondUSA/kpiLinkedRate/BondUSAReadKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

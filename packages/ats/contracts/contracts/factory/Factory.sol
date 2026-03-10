@@ -22,8 +22,8 @@ import {
     RegulationSubType,
     checkRegulationTypeAndSubType
 } from "../constants/regulation.sol";
-import { IEquityUSA } from "../layer_3/interfaces/IEquityUSA.sol";
-import { IBondUSA } from "../layer_3/interfaces/IBondUSA.sol";
+import { IEquityUSA } from "../facets/layer_3/interfaces/IEquityUSA.sol";
+import { IBondUSA } from "../facets/layer_3/interfaces/IBondUSA.sol";
 import { IProceedRecipients } from "../facets/layer_2/interfaces/proceedRecipients/IProceedRecipients.sol";
 import { IProtectedPartitions } from "../facets/layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/layer_1/interfaces/externalPauses/IExternalPauseManagement.sol";

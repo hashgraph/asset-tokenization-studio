@@ -6,7 +6,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /* solhint-disable max-line-length */
 import {
     BondUSAReadSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_3/bondUSA/sustainabilityPerformanceTargetRate/BondUSAReadSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/layer_3/bondUSA/sustainabilityPerformanceTargetRate/BondUSAReadSustainabilityPerformanceTargetRateFacet.sol";
 /* solhint-enable max-line-length */
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
