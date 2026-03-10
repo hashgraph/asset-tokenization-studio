@@ -5,12 +5,12 @@ import { IBondRead } from "../../asset/bond/IBondRead.sol";
 import { ISecurity } from "../constants/ISecurity.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../constants/values.sol";
 
-import { LibBond } from "../../../domain/asset/LibBond.sol";
-import { LibSecurity } from "../../../domain/asset/LibSecurity.sol";
-import { LibABAF } from "../../../domain/asset/LibABAF.sol";
-import { LibSnapshots } from "../../../domain/asset/LibSnapshots.sol";
-import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
-import { LibCorporateActions } from "../../../domain/core/LibCorporateActions.sol";
+import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
+import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
+import { ABAFStorageWrapper } from "../../../domain/asset/ABAFStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { HoldOps } from "../../../domain/orchestrator/HoldOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
@@ -20,7 +20,7 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function getBondDetails() external view override returns (BondDetailsData memory bondDetailsData_) {
-        return LibBond.getBondDetails();
+        return BondStorageWrapper.getBondDetails();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -30,15 +30,15 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
     function getCoupon(
         uint256 _couponID
     ) external view virtual override returns (RegisteredCoupon memory registeredCoupon_) {
-        LibCorporateActions.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
-        return LibBond.getCoupon(_couponID);
+        CorporateActionsStorageWrapper.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+        return BondStorageWrapper.getCoupon(_couponID);
     }
 
     function getCouponFor(
         uint256 _couponID,
         address _account
     ) external view override returns (CouponFor memory couponFor_) {
-        LibCorporateActions.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+        CorporateActionsStorageWrapper.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
         return _getCouponFor(_couponID, _account);
     }
 
@@ -46,12 +46,12 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
         uint256 _couponID,
         address _account
     ) external view override returns (CouponAmountFor memory couponAmountFor_) {
-        LibCorporateActions.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+        CorporateActionsStorageWrapper.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
         return _getCouponAmountFor(_couponID, _account);
     }
 
     function getCouponCount() external view override returns (uint256 couponCount_) {
-        return LibBond.getCouponCount();
+        return BondStorageWrapper.getCouponCount();
     }
 
     function getCouponHolders(
@@ -71,18 +71,18 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
     }
 
     function getCouponFromOrderedListAt(uint256 _pos) external view override returns (uint256 couponID_) {
-        return LibBond.getCouponFromOrderedListAt(_pos, _getBlockTimestamp());
+        return BondStorageWrapper.getCouponFromOrderedListAt(_pos, _getBlockTimestamp());
     }
 
     function getCouponsOrderedList(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory couponIDs_) {
-        return LibBond.getCouponsOrderedList(_pageIndex, _pageLength, _getBlockTimestamp());
+        return BondStorageWrapper.getCouponsOrderedList(_pageIndex, _pageLength, _getBlockTimestamp());
     }
 
     function getCouponsOrderedListTotal() external view override returns (uint256 total_) {
-        return LibBond.getCouponsOrderedListTotalAdjustedAt(_getBlockTimestamp());
+        return BondStorageWrapper.getCouponsOrderedListTotalAdjustedAt(_getBlockTimestamp());
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -93,15 +93,15 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory) {
-        return LibERC1410.getTokenHolders(_pageIndex, _pageLength);
+        return ERC1410StorageWrapper.getTokenHolders(_pageIndex, _pageLength);
     }
 
     function getTotalSecurityHolders() external view override returns (uint256) {
-        return LibERC1410.getTotalTokenHolders();
+        return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
     function getSecurityRegulationData() external pure override returns (ISecurity.SecurityRegulationData memory) {
-        return LibSecurity.getSecurityRegulationData();
+        return SecurityStorageWrapper.getSecurityRegulationData();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -118,11 +118,11 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
         if (registeredCoupon.coupon.recordDate < _getBlockTimestamp()) {
             couponFor_.recordDateReached = true;
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? LibSnapshots.totalBalanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
+                ? SnapshotsStorageWrapper.totalBalanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
                 : HoldOps.getTotalBalanceForAdjustedAt(_account, _getBlockTimestamp());
             couponFor_.decimals = (registeredCoupon.snapshotId != 0)
-                ? LibSnapshots.decimalsAtSnapshot(registeredCoupon.snapshotId, _getBlockTimestamp())
-                : LibSnapshots.decimalsAdjustedAt(_getBlockTimestamp());
+                ? SnapshotsStorageWrapper.decimalsAtSnapshot(registeredCoupon.snapshotId, _getBlockTimestamp())
+                : SnapshotsStorageWrapper.decimalsAdjustedAt(_getBlockTimestamp());
         }
     }
 
@@ -134,7 +134,7 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
 
         if (!couponFor.recordDateReached) return couponAmountFor_;
 
-        IBondRead.BondDetailsData memory bondDetails = LibBond.getBondDetails();
+        IBondRead.BondDetailsData memory bondDetails = BondStorageWrapper.getBondDetails();
 
         couponAmountFor_.recordDateReached = true;
 
@@ -147,13 +147,13 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
     }
 
     function _getPrincipalFor(address _account) internal view returns (IBondRead.PrincipalFor memory principalFor_) {
-        IBondRead.BondDetailsData memory bondDetails = LibBond.getBondDetails();
+        IBondRead.BondDetailsData memory bondDetails = BondStorageWrapper.getBondDetails();
 
         principalFor_.numerator =
-            LibABAF.balanceOfAdjustedAt(_account, _getBlockTimestamp()) *
+            ABAFStorageWrapper.balanceOfAdjustedAt(_account, _getBlockTimestamp()) *
             bondDetails.nominalValue;
         principalFor_.denominator =
-            10 ** (LibSnapshots.decimalsAdjustedAt(_getBlockTimestamp()) + bondDetails.nominalValueDecimals);
+            10 ** (SnapshotsStorageWrapper.decimalsAdjustedAt(_getBlockTimestamp()) + bondDetails.nominalValueDecimals);
     }
 
     function _getCouponHolders(
@@ -161,26 +161,26 @@ abstract contract BondUSARead is IBondRead, ISecurity, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory holders_) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = LibBond.getCoupon(_couponID);
+        IBondRead.RegisteredCoupon memory registeredCoupon = BondStorageWrapper.getCoupon(_couponID);
 
         if (registeredCoupon.coupon.recordDate >= _getBlockTimestamp()) return new address[](0);
 
         if (registeredCoupon.snapshotId != 0) {
-            return LibSnapshots.tokenHoldersAt(registeredCoupon.snapshotId, _pageIndex, _pageLength);
+            return SnapshotsStorageWrapper.tokenHoldersAt(registeredCoupon.snapshotId, _pageIndex, _pageLength);
         }
 
-        return LibERC1410.getTokenHolders(_pageIndex, _pageLength);
+        return ERC1410StorageWrapper.getTokenHolders(_pageIndex, _pageLength);
     }
 
     function _getTotalCouponHolders(uint256 _couponID) internal view returns (uint256) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = LibBond.getCoupon(_couponID);
+        IBondRead.RegisteredCoupon memory registeredCoupon = BondStorageWrapper.getCoupon(_couponID);
 
         if (registeredCoupon.coupon.recordDate >= _getBlockTimestamp()) return 0;
 
         if (registeredCoupon.snapshotId != 0) {
-            return LibSnapshots.totalTokenHoldersAt(registeredCoupon.snapshotId);
+            return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredCoupon.snapshotId);
         }
 
-        return LibERC1410.getTotalTokenHolders();
+        return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 }

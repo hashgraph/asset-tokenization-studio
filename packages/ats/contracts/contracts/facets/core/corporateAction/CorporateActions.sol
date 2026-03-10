@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICorporateActions } from "../corporateAction/ICorporateActions.sol";
-import { LibCorporateActions } from "../../../domain/core/LibCorporateActions.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
+import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 
 abstract contract CorporateActions is ICorporateActions {
@@ -12,9 +12,12 @@ abstract contract CorporateActions is ICorporateActions {
         bytes32 _actionType,
         bytes memory _data
     ) external override returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_CORPORATE_ACTION_ROLE);
-        (corporateActionId_, corporateActionIdByType_) = LibCorporateActions.addCorporateAction(_actionType, _data);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE);
+        (corporateActionId_, corporateActionIdByType_) = CorporateActionsStorageWrapper.addCorporateAction(
+            _actionType,
+            _data
+        );
 
         if (corporateActionId_ == bytes32(0)) {
             revert DuplicatedCorporateAction(_actionType, _data);
@@ -25,24 +28,24 @@ abstract contract CorporateActions is ICorporateActions {
     function getCorporateAction(
         bytes32 _corporateActionId
     ) external view override returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
-        (actionType_, actionTypeId_, data_) = LibCorporateActions.getCorporateAction(_corporateActionId);
+        (actionType_, actionTypeId_, data_) = CorporateActionsStorageWrapper.getCorporateAction(_corporateActionId);
     }
 
     function getCorporateActionCount() external view override returns (uint256 corporateActionCount_) {
-        corporateActionCount_ = LibCorporateActions.getCorporateActionCount();
+        corporateActionCount_ = CorporateActionsStorageWrapper.getCorporateActionCount();
     }
 
     function getCorporateActionIds(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = LibCorporateActions.getCorporateActionIds(_pageIndex, _pageLength);
+        corporateActionIds_ = CorporateActionsStorageWrapper.getCorporateActionIds(_pageIndex, _pageLength);
     }
 
     function getCorporateActionCountByType(
         bytes32 _actionType
     ) external view override returns (uint256 corporateActionCount_) {
-        corporateActionCount_ = LibCorporateActions.getCorporateActionCountByType(_actionType);
+        corporateActionCount_ = CorporateActionsStorageWrapper.getCorporateActionCountByType(_actionType);
     }
 
     function getCorporateActionIdsByType(
@@ -50,10 +53,14 @@ abstract contract CorporateActions is ICorporateActions {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = LibCorporateActions.getCorporateActionIdsByType(_actionType, _pageIndex, _pageLength);
+        corporateActionIds_ = CorporateActionsStorageWrapper.getCorporateActionIdsByType(
+            _actionType,
+            _pageIndex,
+            _pageLength
+        );
     }
 
     function actionContentHashExists(bytes32 _contentHash) external view returns (bool) {
-        return LibCorporateActions.actionContentHashExists(_contentHash);
+        return CorporateActionsStorageWrapper.actionContentHashExists(_contentHash);
     }
 }

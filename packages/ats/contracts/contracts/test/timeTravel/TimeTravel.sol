@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibTimeTravel } from "./LibTimeTravel.sol";
+import { TimeTravelStorageWrapper } from "./TimeTravelStorageWrapper.sol";
 import { ITimeTravel } from "./ITimeTravel.sol";
 
 abstract contract TimeTravel is ITimeTravel {
@@ -9,13 +9,13 @@ abstract contract TimeTravel is ITimeTravel {
         if (newTimestamp == 0) {
             revert InvalidTimestamp(newTimestamp);
         }
-        uint256 oldTimestamp = LibTimeTravel.getTimestampOverride();
-        LibTimeTravel.setTimestampOverride(newTimestamp);
+        uint256 oldTimestamp = TimeTravelStorageWrapper.getTimestampOverride();
+        TimeTravelStorageWrapper.setTimestampOverride(newTimestamp);
         emit SystemTimestampChanged(oldTimestamp, newTimestamp);
     }
 
     function resetSystemTimestamp() external override {
-        LibTimeTravel.setTimestampOverride(0);
+        TimeTravelStorageWrapper.setTimestampOverride(0);
         emit SystemTimestampReset();
     }
 
@@ -23,18 +23,18 @@ abstract contract TimeTravel is ITimeTravel {
         if (_newSystemBlocknumber == 0) {
             revert InvalidBlocknumber(_newSystemBlocknumber);
         }
-        uint256 oldBlocknumber = LibTimeTravel.getBlockNumberOverride();
-        LibTimeTravel.setBlockNumberOverride(_newSystemBlocknumber);
+        uint256 oldBlocknumber = TimeTravelStorageWrapper.getBlockNumberOverride();
+        TimeTravelStorageWrapper.setBlockNumberOverride(_newSystemBlocknumber);
         emit SystemBlocknumberChanged(oldBlocknumber, _newSystemBlocknumber);
     }
 
     function resetSystemBlocknumber() external override {
-        LibTimeTravel.setBlockNumberOverride(0);
+        TimeTravelStorageWrapper.setBlockNumberOverride(0);
         emit SystemBlocknumberReset();
     }
 
     function blockTimestamp() external view override returns (uint256) {
-        return LibTimeTravel.getBlockTimestamp();
+        return TimeTravelStorageWrapper.getBlockTimestamp();
     }
 
     /*

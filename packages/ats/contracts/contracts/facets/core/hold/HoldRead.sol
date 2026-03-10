@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IHoldRead } from "../hold/IHoldRead.sol";
 import { ThirdPartyType } from "../externalControlList/ThirdPartyType.sol";
-import { LibHold } from "../../../domain/asset/LibHold.sol";
+import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
 import { HoldOps } from "../../../domain/orchestrator/HoldOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
@@ -23,7 +23,7 @@ abstract contract HoldRead is IHoldRead, TimestampProvider {
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 holdCount_) {
-        return LibHold.getHoldCountForByPartition(_partition, _tokenHolder);
+        return HoldStorageWrapper.getHoldCountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldsIdForByPartition(
@@ -32,7 +32,7 @@ abstract contract HoldRead is IHoldRead, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory holdsId_) {
-        return LibHold.getHoldsIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
+        return HoldStorageWrapper.getHoldsIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
     }
 
     function getHoldForByPartition(
@@ -57,6 +57,6 @@ abstract contract HoldRead is IHoldRead, TimestampProvider {
     function getHoldThirdParty(
         HoldIdentifier calldata _holdIdentifier
     ) external view override returns (address thirdParty_) {
-        thirdParty_ = LibHold.getHoldThirdParty(_holdIdentifier);
+        thirdParty_ = HoldStorageWrapper.getHoldThirdParty(_holdIdentifier);
     }
 }

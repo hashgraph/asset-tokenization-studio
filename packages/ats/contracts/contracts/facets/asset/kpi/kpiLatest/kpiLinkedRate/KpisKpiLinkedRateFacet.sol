@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Kpis } from "../Kpis.sol";
 import { IKpis } from "../../../kpi/kpiLatest/IKpis.sol";
 import { IStaticFunctionSelectors } from "../../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../../constants/resolverKeys/resolverKeys.sol";
+import { _KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../../constants/resolverKeys.sol";
 
 contract KpisKpiLinkedRateFacet is Kpis, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

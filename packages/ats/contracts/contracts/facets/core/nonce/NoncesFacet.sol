@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Nonces } from "./Nonces.sol";
 import { INonces } from "../nonce/INonces.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _NONCES_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _NONCES_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract NoncesFacet is Nonces, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

@@ -16,14 +16,14 @@ import {
     BALANCE_ADJUSTMENT_TASK_TYPE
 } from "../../../constants/values.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
-import { LibEquity } from "../../../domain/asset/LibEquity.sol";
-import { LibSecurity } from "../../../domain/asset/LibSecurity.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibCorporateActions } from "../../../domain/core/LibCorporateActions.sol";
-import { LibScheduledTasks } from "../../../domain/asset/LibScheduledTasks.sol";
-import { LibSnapshots } from "../../../domain/asset/LibSnapshots.sol";
-import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
+import { EquityStorageWrapper } from "../../../domain/asset/EquityStorageWrapper.sol";
+import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
+import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { HoldOps } from "../../../domain/orchestrator/HoldOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
@@ -44,11 +44,11 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
     ) external override {
-        if (LibEquity.isInitialized()) {
+        if (EquityStorageWrapper.isInitialized()) {
             revert AlreadyInitialized();
         }
-        LibEquity.storeEquityDetails(_equityDetailsData);
-        LibSecurity.initializeSecurity(_regulationData, _additionalSecurityData);
+        EquityStorageWrapper.storeEquityDetails(_equityDetailsData);
+        SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -56,14 +56,17 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function setDividends(Dividend calldata _newDividend) external override returns (uint256 dividendID_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_CORPORATE_ACTION_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE);
         _checkDates(_newDividend.recordDate, _newDividend.executionDate);
         _checkTimestamp(_newDividend.recordDate);
 
         bytes memory data = abi.encode(_newDividend);
         bytes32 corporateActionID;
-        (corporateActionID, dividendID_) = LibCorporateActions.addCorporateAction(DIVIDEND_CORPORATE_ACTION_TYPE, data);
+        (corporateActionID, dividendID_) = CorporateActionsStorageWrapper.addCorporateAction(
+            DIVIDEND_CORPORATE_ACTION_TYPE,
+            data
+        );
         _initDividend(corporateActionID, data);
 
         emit IEquity.DividendSet(
@@ -82,13 +85,13 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function setVoting(Voting calldata _newVoting) external override returns (uint256 voteID_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_CORPORATE_ACTION_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE);
         _checkTimestamp(_newVoting.recordDate);
 
         bytes memory data = abi.encode(_newVoting);
         bytes32 corporateActionID;
-        (corporateActionID, voteID_) = LibCorporateActions.addCorporateAction(
+        (corporateActionID, voteID_) = CorporateActionsStorageWrapper.addCorporateAction(
             VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
             data
         );
@@ -104,14 +107,14 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     function setScheduledBalanceAdjustment(
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) external override returns (uint256 balanceAdjustmentID_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_CORPORATE_ACTION_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE);
         _checkTimestamp(_newBalanceAdjustment.executionDate);
         _checkFactor(_newBalanceAdjustment.factor);
 
         bytes memory data = abi.encode(_newBalanceAdjustment);
         bytes32 corporateActionID;
-        (corporateActionID, balanceAdjustmentID_) = LibCorporateActions.addCorporateAction(
+        (corporateActionID, balanceAdjustmentID_) = CorporateActionsStorageWrapper.addCorporateAction(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             data
         );
@@ -155,7 +158,7 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     }
 
     function getDividendsCount() external view override returns (uint256) {
-        return LibCorporateActions.getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
     }
 
     function getDividendHolders(
@@ -184,7 +187,7 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     }
 
     function getVotingCount() external view override returns (uint256) {
-        return LibCorporateActions.getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
     }
 
     function getVotingHolders(
@@ -207,7 +210,7 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     }
 
     function getScheduledBalanceAdjustmentCount() external view override returns (uint256) {
-        return LibCorporateActions.getCorporateActionCountByType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE);
+        return CorporateActionsStorageWrapper.getCorporateActionCountByType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -218,19 +221,19 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory holders_) {
-        return LibERC1410.getTokenHolders(_pageIndex, _pageLength);
+        return ERC1410StorageWrapper.getTokenHolders(_pageIndex, _pageLength);
     }
 
     function getSecurityRegulationData() external pure override returns (ISecurity.SecurityRegulationData memory) {
-        return LibSecurity.getSecurityRegulationData();
+        return SecurityStorageWrapper.getSecurityRegulationData();
     }
 
     function getTotalSecurityHolders() external view override returns (uint256) {
-        return LibERC1410.getTotalTokenHolders();
+        return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
     function getEquityDetails() external view override returns (EquityDetailsData memory) {
-        return LibEquity.getEquityDetails();
+        return EquityStorageWrapper.getEquityDetails();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -244,8 +247,11 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
 
         IEquity.Dividend memory newDividend = abi.decode(_data, (IEquity.Dividend));
 
-        LibScheduledTasks.addScheduledCrossOrderedTask(newDividend.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        LibScheduledTasks.addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
+            newDividend.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        ScheduledTasksStorageWrapper.addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
     }
 
     function _initVotingRights(bytes32 _actionId, bytes memory _data) internal {
@@ -255,8 +261,8 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
 
         IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
 
-        LibScheduledTasks.addScheduledCrossOrderedTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        LibScheduledTasks.addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        ScheduledTasksStorageWrapper.addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
     }
 
     function _initBalanceAdjustment(bytes32 _actionId, bytes memory _data) internal {
@@ -269,11 +275,14 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
             (IEquity.ScheduledBalanceAdjustment)
         );
 
-        LibScheduledTasks.addScheduledCrossOrderedTask(
+        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
             newBalanceAdjustment.executionDate,
             abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
         );
-        LibScheduledTasks.addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, abi.encode(_actionId));
+        ScheduledTasksStorageWrapper.addScheduledBalanceAdjustment(
+            newBalanceAdjustment.executionDate,
+            abi.encode(_actionId)
+        );
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -283,17 +292,17 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     function _getDividends(
         uint256 _dividendID
     ) internal view returns (IEquity.RegisteredDividend memory registeredDividend_) {
-        bytes32 actionId = LibCorporateActions.getCorporateActionIdByTypeIndex(
+        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             DIVIDEND_CORPORATE_ACTION_TYPE,
             _dividendID - 1
         );
 
-        (, , bytes memory data) = LibCorporateActions.getCorporateAction(actionId);
+        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
 
         assert(data.length > 0);
         (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
 
-        registeredDividend_.snapshotId = LibCorporateActions.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredDividend_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
 
     function _getDividendsFor(
@@ -341,9 +350,9 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
         if (registeredDividend.dividend.recordDate >= _getBlockTimestamp()) return new address[](0);
 
         if (registeredDividend.snapshotId != 0)
-            return LibSnapshots.tokenHoldersAt(registeredDividend.snapshotId, _pageIndex, _pageLength);
+            return SnapshotsStorageWrapper.tokenHoldersAt(registeredDividend.snapshotId, _pageIndex, _pageLength);
 
-        return LibERC1410.getTokenHolders(_pageIndex, _pageLength);
+        return ERC1410StorageWrapper.getTokenHolders(_pageIndex, _pageLength);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -351,17 +360,17 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function _getVoting(uint256 _voteID) internal view returns (IEquity.RegisteredVoting memory registeredVoting_) {
-        bytes32 actionId = LibCorporateActions.getCorporateActionIdByTypeIndex(
+        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
             _voteID - 1
         );
 
-        (, , bytes memory data) = LibCorporateActions.getCorporateAction(actionId);
+        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
 
         assert(data.length > 0);
         (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
 
-        registeredVoting_.snapshotId = LibCorporateActions.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredVoting_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
 
     function _getVotingFor(
@@ -394,9 +403,9 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
         if (registeredVoting.voting.recordDate >= _getBlockTimestamp()) return new address[](0);
 
         if (registeredVoting.snapshotId != 0)
-            return LibSnapshots.tokenHoldersAt(registeredVoting.snapshotId, _pageIndex, _pageLength);
+            return SnapshotsStorageWrapper.tokenHoldersAt(registeredVoting.snapshotId, _pageIndex, _pageLength);
 
-        return LibERC1410.getTokenHolders(_pageIndex, _pageLength);
+        return ERC1410StorageWrapper.getTokenHolders(_pageIndex, _pageLength);
     }
 
     function _getTotalVotingHolders(uint256 _voteID) internal view returns (uint256) {
@@ -404,20 +413,21 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
 
         if (registeredVoting.voting.recordDate >= _getBlockTimestamp()) return 0;
 
-        if (registeredVoting.snapshotId != 0) return LibSnapshots.totalTokenHoldersAt(registeredVoting.snapshotId);
+        if (registeredVoting.snapshotId != 0)
+            return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredVoting.snapshotId);
 
-        return LibERC1410.getTotalTokenHolders();
+        return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
     function _getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
     ) internal view returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        bytes32 actionId = LibCorporateActions.getCorporateActionIdByTypeIndex(
+        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             _balanceAdjustmentID - 1
         );
 
-        (, , bytes memory data) = LibCorporateActions.getCorporateAction(actionId);
+        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
 
         assert(data.length > 0);
         (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));
@@ -436,17 +446,17 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
             dateReached_ = true;
 
             balance_ = (_snapshotId != 0)
-                ? LibSnapshots.totalBalanceOfAtSnapshot(_snapshotId, _account)
+                ? SnapshotsStorageWrapper.totalBalanceOfAtSnapshot(_snapshotId, _account)
                 : HoldOps.getTotalBalanceForAdjustedAt(_account, _date);
 
             decimals_ = (_snapshotId != 0)
-                ? LibSnapshots.decimalsAtSnapshot(_snapshotId, _getBlockTimestamp())
+                ? SnapshotsStorageWrapper.decimalsAtSnapshot(_snapshotId, _getBlockTimestamp())
                 : _decimalsAdjustedAt(_date);
         }
     }
 
     function _decimalsAdjustedAt(uint256 _timestamp) internal view returns (uint8) {
-        return LibSnapshots.decimalsAdjustedAt(_timestamp);
+        return SnapshotsStorageWrapper.decimalsAdjustedAt(_timestamp);
     }
 
     function _checkTimestamp(uint256 _timestamp) internal view {
@@ -456,7 +466,7 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
     }
 
     function _checkMatchingActionType(bytes32 _actionType, uint256 _index) internal view {
-        if (LibCorporateActions.getCorporateActionCountByType(_actionType) <= _index) {
+        if (CorporateActionsStorageWrapper.getCorporateActionCountByType(_actionType) <= _index) {
             revert WrongIndexForAction(_index, _actionType);
         }
     }
@@ -466,9 +476,10 @@ abstract contract EquityUSA is IEquityUSA, TimestampProvider {
 
         if (registeredDividend.dividend.recordDate >= _getBlockTimestamp()) return 0;
 
-        if (registeredDividend.snapshotId != 0) return LibSnapshots.totalTokenHoldersAt(registeredDividend.snapshotId);
+        if (registeredDividend.snapshotId != 0)
+            return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredDividend.snapshotId);
 
-        return LibERC1410.getTotalTokenHolders();
+        return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
     function _checkDates(uint256 _firstDate, uint256 _secondDate) internal pure {

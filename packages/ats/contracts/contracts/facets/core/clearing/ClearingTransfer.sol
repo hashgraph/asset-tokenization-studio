@@ -4,12 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearingTransfer } from "../clearing/IClearingTransfer.sol";
 import { IClearing } from "../clearing/IClearing.sol";
 import { ThirdPartyType } from "../externalControlList/ThirdPartyType.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
-import { LibCompliance } from "../../../domain/core/LibCompliance.sol";
-import { LibProtectedPartitions } from "../../../domain/core/LibProtectedPartitions.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibClearing } from "../../../domain/asset/LibClearing.sol";
-import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { ComplianceStorageWrapper } from "../../../domain/core/ComplianceStorageWrapper.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
@@ -20,17 +20,17 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
         uint256 _amount,
         address _to
     ) external override returns (bool success_, uint256 clearingId_) {
-        LibPause.requireNotPaused();
-        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperation.partition);
-        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.checkDefaultPartitionWithSinglePartition(_clearingOperation.partition);
+        ProtectedPartitionsStorageWrapper.checkUnProtectedPartitionsOrWildCardRole();
         ClearingReadOps.checkClearingValidExpirationTimestamp(
             _clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
-        LibERC1410.requireValidAddress(_to);
-        LibCompliance.requireNotRecovered(msg.sender);
-        LibCompliance.requireNotRecovered(_to);
-        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        ERC1410StorageWrapper.requireValidAddress(_to);
+        ComplianceStorageWrapper.requireNotRecovered(msg.sender);
+        ComplianceStorageWrapper.requireNotRecovered(_to);
+        if (!ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsDisabled();
 
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperation,
@@ -47,19 +47,21 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
         uint256 _amount,
         address _to
     ) external override returns (bool success_, uint256 clearingId_) {
-        LibPause.requireNotPaused();
-        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
-        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.checkDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        );
+        ProtectedPartitionsStorageWrapper.checkUnProtectedPartitionsOrWildCardRole();
         ClearingReadOps.checkClearingValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
-        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
-        LibERC1410.requireValidAddress(_clearingOperationFrom.from);
-        LibERC1410.requireValidAddress(_to);
-        LibCompliance.requireNotRecovered(msg.sender);
-        LibCompliance.requireNotRecovered(_to);
-        LibCompliance.requireNotRecovered(_clearingOperationFrom.from);
+        if (!ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
+        ERC1410StorageWrapper.requireValidAddress(_to);
+        ComplianceStorageWrapper.requireNotRecovered(msg.sender);
+        ComplianceStorageWrapper.requireNotRecovered(_to);
+        ComplianceStorageWrapper.requireNotRecovered(_clearingOperationFrom.from);
 
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
@@ -84,24 +86,26 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
         uint256 _amount,
         address _to
     ) external override returns (bool success_, uint256 clearingId_) {
-        LibPause.requireNotPaused();
-        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition);
-        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.checkDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        );
+        ProtectedPartitionsStorageWrapper.checkUnProtectedPartitionsOrWildCardRole();
         ClearingReadOps.checkClearingValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
-        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
-        LibERC1410.requireValidAddress(_clearingOperationFrom.from);
-        LibERC1410.requireValidAddress(_to);
-        LibERC1410.checkOperator(
+        if (!ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
+        ERC1410StorageWrapper.requireValidAddress(_to);
+        ERC1410StorageWrapper.checkOperator(
             _clearingOperationFrom.clearingOperation.partition,
             msg.sender,
             _clearingOperationFrom.from
         );
-        LibCompliance.requireNotRecovered(msg.sender);
-        LibCompliance.requireNotRecovered(_to);
-        LibCompliance.requireNotRecovered(_clearingOperationFrom.from);
+        ComplianceStorageWrapper.requireNotRecovered(msg.sender);
+        ComplianceStorageWrapper.requireNotRecovered(_to);
+        ComplianceStorageWrapper.requireNotRecovered(_clearingOperationFrom.from);
 
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
@@ -119,21 +123,23 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
         address _to,
         bytes calldata _signature
     ) external override returns (bool success_, uint256 clearingId_) {
-        LibPause.requireNotPaused();
-        LibProtectedPartitions.requireProtectedPartitions();
-        LibERC1410.requireValidAddress(_protectedClearingOperation.from);
-        LibERC1410.requireValidAddress(_to);
-        LibCompliance.requireNotRecovered(_protectedClearingOperation.from);
-        LibCompliance.requireNotRecovered(_to);
+        PauseStorageWrapper.requireNotPaused();
+        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
+        ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
+        ERC1410StorageWrapper.requireValidAddress(_to);
+        ComplianceStorageWrapper.requireNotRecovered(_protectedClearingOperation.from);
+        ComplianceStorageWrapper.requireNotRecovered(_to);
         ClearingReadOps.checkClearingValidExpirationTimestamp(
             _protectedClearingOperation.clearingOperation.expirationTimestamp,
             _getBlockTimestamp()
         );
-        LibAccess.checkRole(
-            LibProtectedPartitions.protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition),
+        AccessStorageWrapper.checkRole(
+            ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            ),
             msg.sender
         );
-        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        if (!ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsDisabled();
 
         (success_, clearingId_) = ClearingOps.protectedClearingTransferByPartition(
             _protectedClearingOperation,

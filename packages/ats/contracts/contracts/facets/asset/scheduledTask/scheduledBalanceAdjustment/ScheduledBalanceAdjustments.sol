@@ -5,19 +5,22 @@ import {
     IScheduledBalanceAdjustments
 } from "../../scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
 import { ScheduledTask } from "../../scheduledTask/IScheduledTasksCommon.sol";
-import { LibScheduledTasks } from "../../../../domain/asset/LibScheduledTasks.sol";
+import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
 /// @title ScheduledBalanceAdjustments
 /// @notice Abstract read-only facade for scheduled balance adjustments
 abstract contract ScheduledBalanceAdjustments is IScheduledBalanceAdjustments {
     function scheduledBalanceAdjustmentCount() external view override returns (uint256) {
-        return LibScheduledTasks.getScheduledBalanceAdjustmentCount();
+        return ScheduledTasksStorageWrapper.getScheduledBalanceAdjustmentCount();
     }
 
     function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
-        scheduledBalanceAdjustment_ = LibScheduledTasks.getScheduledBalanceAdjustments(_pageIndex, _pageLength);
+        scheduledBalanceAdjustment_ = ScheduledTasksStorageWrapper.getScheduledBalanceAdjustments(
+            _pageIndex,
+            _pageLength
+        );
     }
 }

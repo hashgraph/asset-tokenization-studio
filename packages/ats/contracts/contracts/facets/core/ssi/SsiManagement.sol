@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ISsiManagement } from "../ssi/ISsiManagement.sol";
-import { LibSSI } from "../../../domain/core/LibSSI.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
+import { SSIStorageWrapper } from "../../../domain/core/SSIStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { _SSI_MANAGER_ROLE } from "../../../constants/roles.sol";
 
 abstract contract SsiManagement is ISsiManagement {
@@ -14,20 +14,20 @@ abstract contract SsiManagement is ISsiManagement {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
     ) external override returns (bool success_) {
-        LibAccess.checkRole(_SSI_MANAGER_ROLE);
-        LibPause.requireNotPaused();
-        address oldRevocationRegistryAddress = LibSSI.getRevocationRegistryAddress();
-        success_ = LibSSI.setRevocationRegistryAddress(_revocationRegistryAddress);
-        emit RevocationRegistryUpdated(oldRevocationRegistryAddress, LibSSI.getRevocationRegistryAddress());
+        AccessStorageWrapper.checkRole(_SSI_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        address oldRevocationRegistryAddress = SSIStorageWrapper.getRevocationRegistryAddress();
+        success_ = SSIStorageWrapper.setRevocationRegistryAddress(_revocationRegistryAddress);
+        emit RevocationRegistryUpdated(oldRevocationRegistryAddress, SSIStorageWrapper.getRevocationRegistryAddress());
     }
 
     /// @notice Add an issuer to the issuer list
     /// @param _issuer The issuer address to add
     /// @return success_ True if the operation was successful
     function addIssuer(address _issuer) external override returns (bool success_) {
-        LibAccess.checkRole(_SSI_MANAGER_ROLE);
-        LibPause.requireNotPaused();
-        success_ = LibSSI.addIssuer(_issuer);
+        AccessStorageWrapper.checkRole(_SSI_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = SSIStorageWrapper.addIssuer(_issuer);
         if (!success_) {
             revert ListedIssuer(_issuer);
         }
@@ -38,9 +38,9 @@ abstract contract SsiManagement is ISsiManagement {
     /// @param _issuer The issuer address to remove
     /// @return success_ True if the operation was successful
     function removeIssuer(address _issuer) external override returns (bool success_) {
-        LibAccess.checkRole(_SSI_MANAGER_ROLE);
-        LibPause.requireNotPaused();
-        success_ = LibSSI.removeIssuer(_issuer);
+        AccessStorageWrapper.checkRole(_SSI_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = SSIStorageWrapper.removeIssuer(_issuer);
         if (!success_) {
             revert UnlistedIssuer(_issuer);
         }
@@ -50,20 +50,20 @@ abstract contract SsiManagement is ISsiManagement {
     /// @notice Get the revocation registry address
     /// @return revocationRegistryAddress_ The current revocation registry address
     function getRevocationRegistryAddress() external view override returns (address revocationRegistryAddress_) {
-        return LibSSI.getRevocationRegistryAddress();
+        return SSIStorageWrapper.getRevocationRegistryAddress();
     }
 
     /// @notice Check if an account is an issuer
     /// @param _issuer The address to check
     /// @return True if the address is an issuer, false otherwise
     function isIssuer(address _issuer) external view override returns (bool) {
-        return LibSSI.isIssuer(_issuer);
+        return SSIStorageWrapper.isIssuer(_issuer);
     }
 
     /// @notice Get the count of issuers in the issuer list
     /// @return issuerListCount_ The number of issuers
     function getIssuerListCount() external view override returns (uint256 issuerListCount_) {
-        return LibSSI.getIssuerListCount();
+        return SSIStorageWrapper.getIssuerListCount();
     }
 
     /// @notice Get a paginated list of issuer addresses
@@ -74,6 +74,6 @@ abstract contract SsiManagement is ISsiManagement {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return LibSSI.getIssuerListMembers(_pageIndex, _pageLength);
+        return SSIStorageWrapper.getIssuerListMembers(_pageIndex, _pageLength);
     }
 }

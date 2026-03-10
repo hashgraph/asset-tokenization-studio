@@ -3,39 +3,39 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IProtectedPartitions } from "../protectedPartition/IProtectedPartitions.sol";
 import { _PROTECTED_PARTITIONS_ROLE } from "../../../constants/roles.sol";
-import { LibProtectedPartitions } from "../../../domain/core/LibProtectedPartitions.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 
 abstract contract ProtectedPartitions is IProtectedPartitions {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProtectedPartitions(bool _protectPartitions) external override returns (bool success_) {
-        if (LibProtectedPartitions.isProtectedPartitionInitialized()) revert AlreadyInitialized();
-        LibProtectedPartitions.initializeProtectedPartitions(_protectPartitions);
+        if (ProtectedPartitionsStorageWrapper.isProtectedPartitionInitialized()) revert AlreadyInitialized();
+        ProtectedPartitionsStorageWrapper.initializeProtectedPartitions(_protectPartitions);
         success_ = true;
     }
 
     function protectPartitions() external override returns (bool success_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_PROTECTED_PARTITIONS_ROLE);
-        LibProtectedPartitions.setProtectedPartitions(true);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_PROTECTED_PARTITIONS_ROLE);
+        ProtectedPartitionsStorageWrapper.setProtectedPartitions(true);
         success_ = true;
     }
 
     function unprotectPartitions() external override returns (bool success_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_PROTECTED_PARTITIONS_ROLE);
-        LibProtectedPartitions.setProtectedPartitions(false);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_PROTECTED_PARTITIONS_ROLE);
+        ProtectedPartitionsStorageWrapper.setProtectedPartitions(false);
         success_ = true;
     }
 
     function arePartitionsProtected() external view override returns (bool) {
-        return LibProtectedPartitions.arePartitionsProtected();
+        return ProtectedPartitionsStorageWrapper.arePartitionsProtected();
     }
 
     function calculateRoleForPartition(bytes32 partition) external pure override returns (bytes32 role) {
-        role = LibProtectedPartitions.calculateRoleForPartition(partition);
+        role = ProtectedPartitionsStorageWrapper.calculateRoleForPartition(partition);
     }
 }

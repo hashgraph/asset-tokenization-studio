@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _BOND_VARIABLE_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { _BOND_VARIABLE_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { BondUSA } from "../BondUSA.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IBond } from "../../../asset/bond/IBond.sol";

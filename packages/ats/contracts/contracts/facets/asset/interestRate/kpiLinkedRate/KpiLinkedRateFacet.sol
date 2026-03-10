@@ -6,10 +6,10 @@ import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/ISt
 import {
     IScheduledCrossOrderedTasks
 } from "../../scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { LibInterestRate } from "../../../../domain/asset/LibInterestRate.sol";
-import { LibPause } from "../../../../domain/core/LibPause.sol";
-import { LibAccess } from "../../../../domain/core/LibAccess.sol";
-import { _KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../../domain/core/AccessStorageWrapper.sol";
+import { _KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 
 contract KpiLinkedRateFacet is IKpiLinkedRate, IStaticFunctionSelectors {
@@ -20,8 +20,8 @@ contract KpiLinkedRateFacet is IKpiLinkedRate, IStaticFunctionSelectors {
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData
     ) external override {
-        if (LibInterestRate.isKpiLinkedRateInitialized()) revert AlreadyInitialized();
-        LibInterestRate.initializeKpiLinkedRate(
+        if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) revert AlreadyInitialized();
+        InterestRateStorageWrapper.initializeKpiLinkedRate(
             _interestRate.maxRate,
             _interestRate.baseRate,
             _interestRate.minRate,
@@ -39,29 +39,29 @@ contract KpiLinkedRateFacet is IKpiLinkedRate, IStaticFunctionSelectors {
     }
 
     function setInterestRate(InterestRate calldata _newInterestRate) external override {
-        LibAccess.checkRole(_INTEREST_RATE_MANAGER_ROLE);
-        LibPause.requireNotPaused();
-        LibInterestRate.requireValidKpiLinkedRate(_newInterestRate);
+        AccessStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        InterestRateStorageWrapper.requireValidKpiLinkedRate(_newInterestRate);
         IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
-        LibInterestRate.setKpiLinkedInterestRate(_newInterestRate);
+        InterestRateStorageWrapper.setKpiLinkedInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
     }
 
     function setImpactData(ImpactData calldata _newImpactData) external override {
-        LibAccess.checkRole(_INTEREST_RATE_MANAGER_ROLE);
-        LibPause.requireNotPaused();
-        LibInterestRate.requireValidKpiLinkedImpactData(_newImpactData);
+        AccessStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        InterestRateStorageWrapper.requireValidKpiLinkedImpactData(_newImpactData);
         IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
-        LibInterestRate.setKpiLinkedImpactData(_newImpactData);
+        InterestRateStorageWrapper.setKpiLinkedImpactData(_newImpactData);
         emit ImpactDataUpdated(msg.sender, _newImpactData);
     }
 
     function getInterestRate() external view override returns (InterestRate memory interestRate_) {
-        return LibInterestRate.getKpiLinkedInterestRate();
+        return InterestRateStorageWrapper.getKpiLinkedInterestRate();
     }
 
     function getImpactData() external view override returns (ImpactData memory impactData_) {
-        return LibInterestRate.getKpiLinkedImpactData();
+        return InterestRateStorageWrapper.getKpiLinkedImpactData();
     }
 
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

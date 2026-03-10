@@ -8,13 +8,11 @@ import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/ISt
 import {
     IScheduledCrossOrderedTasks
 } from "../../scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { LibInterestRate } from "../../../../domain/asset/LibInterestRate.sol";
-import { LibPause } from "../../../../domain/core/LibPause.sol";
-import { LibAccess } from "../../../../domain/core/LibAccess.sol";
-import { LibProceedRecipients } from "../../../../domain/asset/LibProceedRecipients.sol";
-import {
-    _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
-} from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../../domain/core/AccessStorageWrapper.sol";
+import { ProceedRecipientsStorageWrapper } from "../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 
 contract SustainabilityPerformanceTargetRateFacet is ISustainabilityPerformanceTargetRate, IStaticFunctionSelectors {
@@ -26,11 +24,11 @@ contract SustainabilityPerformanceTargetRateFacet is ISustainabilityPerformanceT
         ImpactData[] calldata _impactData,
         address[] calldata _projects
     ) external override {
-        if (LibInterestRate.isSustainabilityRateInitialized()) revert AlreadyInitialized();
+        if (InterestRateStorageWrapper.isSustainabilityRateInitialized()) revert AlreadyInitialized();
         if (_impactData.length != _projects.length)
             revert ProvidedListsLengthMismatch(_impactData.length, _projects.length);
 
-        LibInterestRate.initializeSustainabilityRate(
+        InterestRateStorageWrapper.initializeSustainabilityRate(
             _interestRate.baseRate,
             _interestRate.startPeriod,
             _interestRate.startRate,
@@ -38,40 +36,42 @@ contract SustainabilityPerformanceTargetRateFacet is ISustainabilityPerformanceT
         );
 
         for (uint256 index = 0; index < _impactData.length; index++) {
-            if (!LibProceedRecipients.isProceedRecipient(_projects[index])) revert NotExistingProject(_projects[index]);
-            LibInterestRate.setSustainabilityImpactData(_projects[index], _impactData[index]);
+            if (!ProceedRecipientsStorageWrapper.isProceedRecipient(_projects[index]))
+                revert NotExistingProject(_projects[index]);
+            InterestRateStorageWrapper.setSustainabilityImpactData(_projects[index], _impactData[index]);
         }
     }
 
     function setInterestRate(InterestRate calldata _newInterestRate) external override {
-        LibAccess.checkRole(_INTEREST_RATE_MANAGER_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
         IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
-        LibInterestRate.setSustainabilityInterestRate(_newInterestRate);
+        InterestRateStorageWrapper.setSustainabilityInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
     }
 
     function setImpactData(ImpactData[] calldata _newImpactData, address[] calldata _projects) external override {
-        LibAccess.checkRole(_INTEREST_RATE_MANAGER_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
         if (_newImpactData.length != _projects.length)
             revert ProvidedListsLengthMismatch(_newImpactData.length, _projects.length);
 
         for (uint256 index = 0; index < _newImpactData.length; index++) {
-            if (!LibProceedRecipients.isProceedRecipient(_projects[index])) revert NotExistingProject(_projects[index]);
+            if (!ProceedRecipientsStorageWrapper.isProceedRecipient(_projects[index]))
+                revert NotExistingProject(_projects[index]);
             IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
-            LibInterestRate.setSustainabilityImpactData(_projects[index], _newImpactData[index]);
+            InterestRateStorageWrapper.setSustainabilityImpactData(_projects[index], _newImpactData[index]);
         }
 
         emit ImpactDataUpdated(msg.sender, _newImpactData, _projects);
     }
 
     function getInterestRate() external view override returns (InterestRate memory interestRate_) {
-        return LibInterestRate.getSustainabilityInterestRate();
+        return InterestRateStorageWrapper.getSustainabilityInterestRate();
     }
 
     function getImpactDataFor(address _project) external view override returns (ImpactData memory impactData_) {
-        return LibInterestRate.getSustainabilityImpactData(_project);
+        return InterestRateStorageWrapper.getSustainabilityImpactData(_project);
     }
 
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

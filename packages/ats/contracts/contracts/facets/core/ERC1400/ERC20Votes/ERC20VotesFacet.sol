@@ -7,7 +7,7 @@ import { IERC20Votes } from "../../ERC1400/ERC20Votes/IERC20Votes.sol";
 import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";
-import { _ERC20VOTES_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { _ERC20VOTES_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ERC20VotesFacet is ERC20Votes, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {

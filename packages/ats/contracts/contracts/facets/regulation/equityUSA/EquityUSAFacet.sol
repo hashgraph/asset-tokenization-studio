@@ -6,7 +6,7 @@ import { IEquityUSA } from "./IEquityUSA.sol";
 import { IEquity } from "../../asset/equity/IEquity.sol";
 import { ISecurity } from "../constants/ISecurity.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _EQUITY_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _EQUITY_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract EquityUSAFacet is EquityUSA, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32) {

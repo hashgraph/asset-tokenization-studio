@@ -5,13 +5,13 @@ import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { _LOCKER_ROLE } from "../../../constants/roles.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
 import { BasicTransferInfo } from "../../core/ERC1400/ERC1410/IERC1410Types.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
-import { LibProtectedPartitions } from "../../../domain/core/LibProtectedPartitions.sol";
-import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
-import { LibABAF } from "../../../domain/asset/LibABAF.sol";
-import { LibLock } from "../../../domain/asset/LibLock.sol";
-import { LibSnapshots } from "../../../domain/asset/LibSnapshots.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ABAFStorageWrapper } from "../../../domain/asset/ABAFStorageWrapper.sol";
+import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
@@ -23,11 +23,11 @@ abstract contract TransferAndLock is ITransferAndLock, TimestampProvider {
         bytes calldata _data,
         uint256 _expirationTimestamp
     ) external override returns (bool success_, uint256 lockId_) {
-        LibAccess.checkRole(_LOCKER_ROLE, msg.sender);
-        LibPause.requireNotPaused();
-        LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
+        AccessStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.checkDefaultPartitionWithSinglePartition(_partition);
         _checkValidExpirationTimestamp(_expirationTimestamp);
-        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        ProtectedPartitionsStorageWrapper.checkUnProtectedPartitionsOrWildCardRole();
 
         TokenCoreOps.transferByPartition(
             msg.sender,
@@ -51,11 +51,11 @@ abstract contract TransferAndLock is ITransferAndLock, TimestampProvider {
         bytes calldata _data,
         uint256 _expirationTimestamp
     ) external override returns (bool success_, uint256 lockId_) {
-        LibAccess.checkRole(_LOCKER_ROLE, msg.sender);
-        LibPause.requireNotPaused();
-        LibERC1410.checkWithoutMultiPartition();
+        AccessStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.checkWithoutMultiPartition();
         _checkValidExpirationTimestamp(_expirationTimestamp);
-        LibProtectedPartitions.checkUnProtectedPartitionsOrWildCardRole();
+        ProtectedPartitionsStorageWrapper.checkUnProtectedPartitionsOrWildCardRole();
 
         TokenCoreOps.transferByPartition(
             msg.sender,
@@ -91,23 +91,23 @@ abstract contract TransferAndLock is ITransferAndLock, TimestampProvider {
         address _tokenHolder,
         uint256 _expirationTimestamp
     ) internal returns (bool success_, uint256 lockId_) {
-        LibABAF.triggerAndSyncAll(_partition, _tokenHolder, address(0));
-        uint256 abaf = LibLock.updateTotalLock(_partition, _tokenHolder);
+        ABAFStorageWrapper.triggerAndSyncAll(_partition, _tokenHolder, address(0));
+        uint256 abaf = LockStorageWrapper.updateTotalLock(_partition, _tokenHolder);
 
-        LibSnapshots.updateAccountSnapshot(_tokenHolder, _partition);
-        LibSnapshots.updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_tokenHolder, _partition);
+        SnapshotsStorageWrapper.updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
 
-        LibERC1410.reduceBalanceByPartition(_tokenHolder, _amount, _partition);
+        ERC1410StorageWrapper.reduceBalanceByPartition(_tokenHolder, _amount, _partition);
 
-        lockId_ = LibLock.createLockByPartition(_partition, _amount, _tokenHolder, _expirationTimestamp);
-        LibABAF.setLockLabafById(_partition, _tokenHolder, lockId_, abaf);
+        lockId_ = LockStorageWrapper.createLockByPartition(_partition, _amount, _tokenHolder, _expirationTimestamp);
+        ABAFStorageWrapper.setLockLabafById(_partition, _tokenHolder, lockId_, abaf);
 
         success_ = true;
     }
 
     function _checkValidExpirationTimestamp(uint256 _expirationTimestamp) internal view {
         if (_expirationTimestamp <= _getBlockTimestamp()) {
-            revert LibLock.WrongExpirationTimestamp();
+            revert LockStorageWrapper.WrongExpirationTimestamp();
         }
     }
 }

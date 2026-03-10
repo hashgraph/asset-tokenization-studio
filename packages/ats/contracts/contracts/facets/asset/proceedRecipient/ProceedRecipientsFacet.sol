@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ProceedRecipients } from "./ProceedRecipients.sol";
 import { IProceedRecipients } from "./IProceedRecipients.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _PROCEED_RECIPIENTS_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _PROCEED_RECIPIENTS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 /// @title ProceedRecipientsFacet
 /// @notice Diamond facet for managing proceed recipients

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ERC1410TokenHolder } from "./ERC1410TokenHolder.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IERC1410TokenHolder } from "../../ERC1400/ERC1410/IERC1410TokenHolder.sol";
-import { _ERC1410_TOKEN_HOLDER_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { _ERC1410_TOKEN_HOLDER_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ERC1410TokenHolderFacet is ERC1410TokenHolder, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

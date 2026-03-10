@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Domain Libraries
-import { LibABAF } from "../asset/LibABAF.sol";
-import { LibClearing } from "../asset/LibClearing.sol";
-import { LibSnapshots } from "../asset/LibSnapshots.sol";
+import { ABAFStorageWrapper } from "../asset/ABAFStorageWrapper.sol";
+import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 
 // Interfaces
 import { IClearing } from "../../facets/core/clearing/IClearing.sol";
@@ -32,12 +32,12 @@ library ClearingReadOps {
         address _to
     ) public {
         _adjustClearingBalances(_clearingOperationIdentifier, _to);
-        LibSnapshots.updateAccountSnapshot(
+        SnapshotsStorageWrapper.updateAccountSnapshot(
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition
         );
-        LibSnapshots.updateAccountSnapshot(_to, _clearingOperationIdentifier.partition);
-        LibSnapshots.updateAccountClearedBalancesSnapshot(
+        SnapshotsStorageWrapper.updateAccountSnapshot(_to, _clearingOperationIdentifier.partition);
+        SnapshotsStorageWrapper.updateAccountClearedBalancesSnapshot(
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition
         );
@@ -45,20 +45,23 @@ library ClearingReadOps {
 
     /// @notice Update total cleared amount ABAF
     function updateTotalCleared(bytes32 _partition, address _tokenHolder) public returns (uint256 abaf_) {
-        abaf_ = LibABAF.getAbaf();
-        uint256 labaf = LibABAF.getTotalClearedLabaf(_tokenHolder);
-        uint256 labafByPartition = LibABAF.getTotalClearedLabafByPartition(_partition, _tokenHolder);
+        abaf_ = ABAFStorageWrapper.getAbaf();
+        uint256 labaf = ABAFStorageWrapper.getTotalClearedLabaf(_tokenHolder);
+        uint256 labafByPartition = ABAFStorageWrapper.getTotalClearedLabafByPartition(_partition, _tokenHolder);
         if (abaf_ != labaf) {
-            LibClearing.updateTotalClearedAmountByAccount(_tokenHolder, LibABAF.calculateFactor(abaf_, labaf));
-            LibABAF.setTotalClearedLabaf(_tokenHolder, abaf_);
+            ClearingStorageWrapper.updateTotalClearedAmountByAccount(
+                _tokenHolder,
+                ABAFStorageWrapper.calculateFactor(abaf_, labaf)
+            );
+            ABAFStorageWrapper.setTotalClearedLabaf(_tokenHolder, abaf_);
         }
         if (abaf_ != labafByPartition) {
-            LibClearing.updateTotalClearedAmountByAccountAndPartition(
+            ClearingStorageWrapper.updateTotalClearedAmountByAccountAndPartition(
                 _tokenHolder,
                 _partition,
-                LibABAF.calculateFactor(abaf_, labafByPartition)
+                ABAFStorageWrapper.calculateFactor(abaf_, labafByPartition)
             );
-            LibABAF.setTotalClearedLabafByPartition(_partition, _tokenHolder, abaf_);
+            ABAFStorageWrapper.setTotalClearedLabafByPartition(_partition, _tokenHolder, abaf_);
         }
     }
 
@@ -69,8 +72,8 @@ library ClearingReadOps {
     /// @notice Get cleared amount for token holder adjusted at timestamp
     function getClearedAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) public view returns (uint256) {
         return
-            LibClearing.getClearedAmount(_tokenHolder) *
-            LibABAF.calculateFactorForClearedAmountAdjustedAt(_tokenHolder, _timestamp);
+            ClearingStorageWrapper.getClearedAmount(_tokenHolder) *
+            ABAFStorageWrapper.calculateFactorForClearedAmountAdjustedAt(_tokenHolder, _timestamp);
     }
 
     /// @notice Get cleared amount by partition for token holder adjusted at timestamp
@@ -79,11 +82,11 @@ library ClearingReadOps {
         address _tokenHolder,
         uint256 _timestamp
     ) public view returns (uint256) {
-        uint256 factor = LibABAF.calculateFactor(
-            LibABAF.getAbafAdjustedAt(_timestamp),
-            LibABAF.getTotalClearedLabafByPartition(_partition, _tokenHolder)
+        uint256 factor = ABAFStorageWrapper.calculateFactor(
+            ABAFStorageWrapper.getAbafAdjustedAt(_timestamp),
+            ABAFStorageWrapper.getTotalClearedLabafByPartition(_partition, _tokenHolder)
         );
-        return LibClearing.getClearedAmountByPartition(_partition, _tokenHolder) * factor;
+        return ClearingStorageWrapper.getClearedAmountByPartition(_partition, _tokenHolder) * factor;
     }
 
     /// @notice Get clearing transfer data by partition adjusted at timestamp
@@ -93,10 +96,10 @@ library ClearingReadOps {
         uint256 _clearingId,
         uint256 _timestamp
     ) public view returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_) {
-        clearingTransferData_ = LibClearing.getClearingTransferData(_partition, _tokenHolder, _clearingId);
-        clearingTransferData_.amount *= LibABAF.calculateFactor(
-            LibABAF.getAbafAdjustedAt(_timestamp),
-            LibABAF.getClearingLabafById(
+        clearingTransferData_ = ClearingStorageWrapper.getClearingTransferData(_partition, _tokenHolder, _clearingId);
+        clearingTransferData_.amount *= ABAFStorageWrapper.calculateFactor(
+            ABAFStorageWrapper.getAbafAdjustedAt(_timestamp),
+            ABAFStorageWrapper.getClearingLabafById(
                 _buildClearingOperationIdentifier(
                     _tokenHolder,
                     _partition,
@@ -114,10 +117,10 @@ library ClearingReadOps {
         uint256 _clearingId,
         uint256 _timestamp
     ) public view returns (IClearingRedeem.ClearingRedeemData memory clearingRedeemData_) {
-        clearingRedeemData_ = LibClearing.getClearingRedeemData(_partition, _tokenHolder, _clearingId);
-        clearingRedeemData_.amount *= LibABAF.calculateFactor(
-            LibABAF.getAbafAdjustedAt(_timestamp),
-            LibABAF.getClearingLabafById(
+        clearingRedeemData_ = ClearingStorageWrapper.getClearingRedeemData(_partition, _tokenHolder, _clearingId);
+        clearingRedeemData_.amount *= ABAFStorageWrapper.calculateFactor(
+            ABAFStorageWrapper.getAbafAdjustedAt(_timestamp),
+            ABAFStorageWrapper.getClearingLabafById(
                 _buildClearingOperationIdentifier(
                     _tokenHolder,
                     _partition,
@@ -135,10 +138,14 @@ library ClearingReadOps {
         uint256 _clearingId,
         uint256 _timestamp
     ) public view returns (IClearingHoldCreation.ClearingHoldCreationData memory clearingHoldCreationData_) {
-        clearingHoldCreationData_ = LibClearing.getClearingHoldCreationData(_partition, _tokenHolder, _clearingId);
-        clearingHoldCreationData_.amount *= LibABAF.calculateFactor(
-            LibABAF.getAbafAdjustedAt(_timestamp),
-            LibABAF.getClearingLabafById(
+        clearingHoldCreationData_ = ClearingStorageWrapper.getClearingHoldCreationData(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
+        clearingHoldCreationData_.amount *= ABAFStorageWrapper.calculateFactor(
+            ABAFStorageWrapper.getAbafAdjustedAt(_timestamp),
+            ABAFStorageWrapper.getClearingLabafById(
                 _buildClearingOperationIdentifier(
                     _tokenHolder,
                     _partition,
@@ -159,7 +166,7 @@ library ClearingReadOps {
         bool _mustBeExpired,
         uint256 _blockTimestamp
     ) public view {
-        (uint256 expirationTimestamp, , ) = LibClearing.getClearingBasicInfo(_clearingOperationIdentifier);
+        (uint256 expirationTimestamp, , ) = ClearingStorageWrapper.getClearingBasicInfo(_clearingOperationIdentifier);
         if ((_blockTimestamp > expirationTimestamp) != _mustBeExpired) {
             if (_mustBeExpired) revert IClearing.ExpirationDateNotReached();
             revert IClearing.ExpirationDateReached();
@@ -180,7 +187,7 @@ library ClearingReadOps {
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         address _to
     ) private {
-        LibABAF.triggerAndSyncAll(
+        ABAFStorageWrapper.triggerAndSyncAll(
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.tokenHolder,
             _to
@@ -197,10 +204,13 @@ library ClearingReadOps {
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         uint256 _abaf
     ) private {
-        uint256 clearingLabaf = LibABAF.getClearingLabafById(_clearingOperationIdentifier);
+        uint256 clearingLabaf = ABAFStorageWrapper.getClearingLabafById(_clearingOperationIdentifier);
         if (_abaf == clearingLabaf) return;
-        LibClearing.updateClearingAmount(_clearingOperationIdentifier, LibABAF.calculateFactor(_abaf, clearingLabaf));
-        LibABAF.setClearedLabafById(_clearingOperationIdentifier, _abaf);
+        ClearingStorageWrapper.updateClearingAmount(
+            _clearingOperationIdentifier,
+            ABAFStorageWrapper.calculateFactor(_abaf, clearingLabaf)
+        );
+        ABAFStorageWrapper.setClearedLabafById(_clearingOperationIdentifier, _abaf);
     }
 
     /// @notice Build clearing operation identifier

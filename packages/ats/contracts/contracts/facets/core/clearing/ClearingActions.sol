@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingActions } from "../clearing/IClearingActions.sol";
 import { IClearing } from "../clearing/IClearing.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibClearing } from "../../../domain/asset/LibClearing.sol";
-import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
-import { LibERC1594 } from "../../../domain/asset/LibERC1594.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
@@ -17,34 +17,34 @@ abstract contract ClearingActions is IClearingActions, TimestampProvider {
     error AlreadyInitialized();
 
     function initializeClearing(bool _clearingActive) external override {
-        if (LibClearing.isClearingInitialized()) revert AlreadyInitialized();
-        LibClearing.initializeClearing(_clearingActive);
+        if (ClearingStorageWrapper.isClearingInitialized()) revert AlreadyInitialized();
+        ClearingStorageWrapper.initializeClearing(_clearingActive);
     }
 
     function activateClearing() external override returns (bool success_) {
-        LibAccess.checkRole(_CLEARING_ROLE, msg.sender);
-        LibPause.requireNotPaused();
-        success_ = LibClearing.setClearing(true);
+        AccessStorageWrapper.checkRole(_CLEARING_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = ClearingStorageWrapper.setClearing(true);
         emit ClearingActivated(msg.sender);
     }
 
     function deactivateClearing() external override returns (bool success_) {
-        LibAccess.checkRole(_CLEARING_ROLE, msg.sender);
-        LibPause.requireNotPaused();
-        success_ = LibClearing.setClearing(false);
+        AccessStorageWrapper.checkRole(_CLEARING_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = ClearingStorageWrapper.setClearing(false);
         emit ClearingDeactivated(msg.sender);
     }
 
     function approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external override returns (bool success_, bytes32 partition_) {
-        LibAccess.checkRole(_CLEARING_VALIDATOR_ROLE, msg.sender);
-        LibPause.requireNotPaused();
-        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
-        if (!LibClearing.isClearingIdValid(_clearingOperationIdentifier)) {
+        AccessStorageWrapper.checkRole(_CLEARING_VALIDATOR_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.checkDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
+        if (!ClearingStorageWrapper.isClearingIdValid(_clearingOperationIdentifier)) {
             revert IClearing.WrongClearingId();
         }
-        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        if (!ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsDisabled();
         ClearingReadOps.checkClearingExpirationTimestamp(_clearingOperationIdentifier, false, _getBlockTimestamp());
 
         bytes memory operationData;
@@ -65,13 +65,13 @@ abstract contract ClearingActions is IClearingActions, TimestampProvider {
     function cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external override returns (bool success_) {
-        LibAccess.checkRole(_CLEARING_VALIDATOR_ROLE, msg.sender);
-        LibPause.requireNotPaused();
-        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
-        if (!LibClearing.isClearingIdValid(_clearingOperationIdentifier)) {
+        AccessStorageWrapper.checkRole(_CLEARING_VALIDATOR_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.checkDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
+        if (!ClearingStorageWrapper.isClearingIdValid(_clearingOperationIdentifier)) {
             revert IClearing.WrongClearingId();
         }
-        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        if (!ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsDisabled();
         ClearingReadOps.checkClearingExpirationTimestamp(_clearingOperationIdentifier, false, _getBlockTimestamp());
 
         success_ = ClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
@@ -88,13 +88,13 @@ abstract contract ClearingActions is IClearingActions, TimestampProvider {
     function reclaimClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) external override returns (bool success_) {
-        LibPause.requireNotPaused();
-        LibERC1410.checkDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
-        if (!LibClearing.isClearingIdValid(_clearingOperationIdentifier)) {
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.checkDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
+        if (!ClearingStorageWrapper.isClearingIdValid(_clearingOperationIdentifier)) {
             revert IClearing.WrongClearingId();
         }
-        LibERC1594.checkIdentity(_clearingOperationIdentifier.tokenHolder, address(0));
-        if (!LibClearing.isClearingActivated()) revert IClearing.ClearingIsDisabled();
+        ERC1594StorageWrapper.checkIdentity(_clearingOperationIdentifier.tokenHolder, address(0));
+        if (!ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsDisabled();
         ClearingReadOps.checkClearingExpirationTimestamp(_clearingOperationIdentifier, true, _getBlockTimestamp());
 
         success_ = ClearingOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
@@ -109,6 +109,6 @@ abstract contract ClearingActions is IClearingActions, TimestampProvider {
     }
 
     function isClearingActivated() external view override returns (bool) {
-        return LibClearing.isClearingActivated();
+        return ClearingStorageWrapper.isClearingActivated();
     }
 }

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ProtectedPartitions } from "./ProtectedPartitions.sol";
 import { IProtectedPartitions } from "../protectedPartition/IProtectedPartitions.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _PROTECTED_PARTITIONS_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _PROTECTED_PARTITIONS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract ProtectedPartitionsFacet is ProtectedPartitions, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

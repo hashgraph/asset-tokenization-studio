@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { HoldTokenHolder } from "./HoldTokenHolder.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IHoldTokenHolder } from "../hold/IHoldTokenHolder.sol";
-import { _HOLD_TOKEN_HOLDER_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _HOLD_TOKEN_HOLDER_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract HoldTokenHolderFacet is HoldTokenHolder, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure returns (bytes32 staticResolverKey_) {

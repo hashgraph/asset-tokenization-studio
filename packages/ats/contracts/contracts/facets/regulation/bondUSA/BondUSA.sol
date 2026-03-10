@@ -8,17 +8,17 @@ import { IKyc } from "../../core/kyc/IKyc.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
 
-import { LibBond } from "../../../domain/asset/LibBond.sol";
-import { LibSecurity } from "../../../domain/asset/LibSecurity.sol";
+import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
+import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
-import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
-import { LibControlList } from "../../../domain/core/LibControlList.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibClearing } from "../../../domain/asset/LibClearing.sol";
-import { LibKyc } from "../../../domain/core/LibKyc.sol";
-import { LibCompliance } from "../../../domain/core/LibCompliance.sol";
-import { LibCorporateActions } from "../../../domain/core/LibCorporateActions.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ControlListStorageWrapper } from "../../../domain/core/ControlListStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
+import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
+import { ComplianceStorageWrapper } from "../../../domain/core/ComplianceStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { IClearing } from "../../core/clearing/IClearing.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
@@ -44,8 +44,8 @@ abstract contract BondUSA is IBond, IBondUSA, TimestampProvider {
         if (_isBondInitialized()) revert AlreadyInitialized();
 
         _validateBondInitData(_bondDetailsData);
-        LibBond.initializeBond(_bondDetailsData);
-        LibSecurity.initializeSecurity(_regulationData, _additionalSecurityData);
+        BondStorageWrapper.initializeBond(_bondDetailsData);
+        SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -53,16 +53,16 @@ abstract contract BondUSA is IBond, IBondUSA, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function setCoupon(IBondRead.Coupon calldata _newCoupon) external virtual override returns (uint256 couponID_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_CORPORATE_ACTION_ROLE);
-        LibCorporateActions.validateDates(_newCoupon.startDate, _newCoupon.endDate);
-        LibCorporateActions.validateDates(_newCoupon.recordDate, _newCoupon.executionDate);
-        LibCorporateActions.validateDates(_newCoupon.fixingDate, _newCoupon.executionDate);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE);
+        CorporateActionsStorageWrapper.validateDates(_newCoupon.startDate, _newCoupon.endDate);
+        CorporateActionsStorageWrapper.validateDates(_newCoupon.recordDate, _newCoupon.executionDate);
+        CorporateActionsStorageWrapper.validateDates(_newCoupon.fixingDate, _newCoupon.executionDate);
         _requireValidTimestamp(_newCoupon.recordDate);
         _requireValidTimestamp(_newCoupon.fixingDate);
 
         bytes32 corporateActionID;
-        (corporateActionID, couponID_) = LibBond.setCoupon(_newCoupon);
+        (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(_newCoupon);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -70,12 +70,12 @@ abstract contract BondUSA is IBond, IBondUSA, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function updateMaturityDate(uint256 _newMaturityDate) external override returns (bool success_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_BOND_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_BOND_MANAGER_ROLE);
         _requireAfterCurrentMaturityDate(_newMaturityDate);
 
-        emit IBond.MaturityDateUpdated(address(this), _newMaturityDate, LibBond.getMaturityDate());
-        success_ = LibBond.setMaturityDate(_newMaturityDate);
+        emit IBond.MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
+        success_ = BondStorageWrapper.setMaturityDate(_newMaturityDate);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -85,10 +85,10 @@ abstract contract BondUSA is IBond, IBondUSA, TimestampProvider {
     function fullRedeemAtMaturity(address _tokenHolder) external override {
         _validateRedeemAtMaturity(_tokenHolder);
 
-        bytes32[] memory partitions = LibERC1410.partitionsOf(_tokenHolder);
+        bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         for (uint256 i = 0; i < partitions.length; i++) {
             bytes32 partition = partitions[i];
-            uint256 balance = LibERC1410.balanceOfByPartition(partition, _tokenHolder);
+            uint256 balance = ERC1410StorageWrapper.balanceOfByPartition(partition, _tokenHolder);
             if (balance > 0) {
                 TokenCoreOps.redeemByPartition(
                     partition,
@@ -105,7 +105,7 @@ abstract contract BondUSA is IBond, IBondUSA, TimestampProvider {
     }
 
     function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount) external override {
-        LibERC1410.checkDefaultPartitionWithSinglePartition(_partition);
+        ERC1410StorageWrapper.checkDefaultPartitionWithSinglePartition(_partition);
         _validateRedeemAtMaturity(_tokenHolder);
 
         TokenCoreOps.redeemByPartition(
@@ -125,23 +125,23 @@ abstract contract BondUSA is IBond, IBondUSA, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function _validateRedeemAtMaturity(address _tokenHolder) internal view {
-        LibPause.requireNotPaused();
-        LibERC1410.requireValidAddress(_tokenHolder);
-        LibControlList.requireListedAllowed(_tokenHolder);
-        LibAccess.checkRole(_MATURITY_REDEEMER_ROLE);
-        if (LibClearing.isClearingActivated()) revert IClearing.ClearingIsActivated();
-        LibKyc.requireValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
-        LibCompliance.requireNotRecovered(_tokenHolder);
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireValidAddress(_tokenHolder);
+        ControlListStorageWrapper.requireListedAllowed(_tokenHolder);
+        AccessStorageWrapper.checkRole(_MATURITY_REDEEMER_ROLE);
+        if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
+        KycStorageWrapper.requireValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
+        ComplianceStorageWrapper.requireNotRecovered(_tokenHolder);
         _requireAfterCurrentMaturityDate(_getBlockTimestamp());
     }
 
     function _validateBondInitData(IBondRead.BondDetailsData calldata _bondDetailsData) internal view {
-        LibCorporateActions.validateDates(_bondDetailsData.startingDate, _bondDetailsData.maturityDate);
+        CorporateActionsStorageWrapper.validateDates(_bondDetailsData.startingDate, _bondDetailsData.maturityDate);
         _requireValidTimestamp(_bondDetailsData.startingDate);
     }
 
     function _requireAfterCurrentMaturityDate(uint256 _maturityDate) internal view {
-        if (_maturityDate <= LibBond.getMaturityDate()) {
+        if (_maturityDate <= BondStorageWrapper.getMaturityDate()) {
             revert BondMaturityDateWrong();
         }
     }
@@ -157,6 +157,6 @@ abstract contract BondUSA is IBond, IBondUSA, TimestampProvider {
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function _isBondInitialized() internal view returns (bool) {
-        return LibBond.isBondInitialized();
+        return BondStorageWrapper.isBondInitialized();
     }
 }

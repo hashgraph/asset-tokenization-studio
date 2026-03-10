@@ -6,7 +6,7 @@ import {
     IScheduledCrossOrderedTasks
 } from "../../scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _SCHEDULED_TASKS_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { _SCHEDULED_TASKS_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ScheduledCrossOrderedTasksFacet is ScheduledCrossOrderedTasks, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

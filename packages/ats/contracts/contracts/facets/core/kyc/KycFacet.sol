@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { Kyc } from "./Kyc.sol";
 import { IKyc } from "../kyc/IKyc.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _KYC_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _KYC_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract KycFacet is Kyc, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

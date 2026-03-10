@@ -6,51 +6,56 @@ import { IBondRead } from "../../../bond/IBondRead.sol";
 import {
     ISustainabilityPerformanceTargetRate
 } from "../../../interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
-import { LibBond } from "../../../../../domain/asset/LibBond.sol";
-import { LibInterestRate } from "../../../../../domain/asset/LibInterestRate.sol";
-import { LibKpis } from "../../../../../domain/asset/LibKpis.sol";
-import { LibProceedRecipients } from "../../../../../domain/asset/LibProceedRecipients.sol";
+import { BondStorageWrapper } from "../../../../../domain/asset/BondStorageWrapper.sol";
+import { InterestRateStorageWrapper } from "../../../../../domain/asset/InterestRateStorageWrapper.sol";
+import { KpisStorageWrapper } from "../../../../../domain/asset/KpisStorageWrapper.sol";
+import { ProceedRecipientsStorageWrapper } from "../../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 
 abstract contract ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRate is ScheduledCrossOrderedTasks {
     function _onCouponListed(uint256 _couponID, uint256 _timestamp) internal override {
-        IBondRead.RegisteredCoupon memory registeredCoupon = LibBond.getCoupon(_couponID);
+        IBondRead.RegisteredCoupon memory registeredCoupon = BondStorageWrapper.getCoupon(_couponID);
         IBondRead.Coupon memory coupon = registeredCoupon.coupon;
 
         if (coupon.rateStatus == IBondRead.RateCalculationStatus.SET) return;
         if (coupon.fixingDate > _timestamp) return;
 
-        (uint256 startPeriod, uint256 startRate, uint8 cfgRateDecimals) = LibInterestRate.getSustainabilityRateConfig();
+        (uint256 startPeriod, uint256 startRate, uint8 cfgRateDecimals) = InterestRateStorageWrapper
+            .getSustainabilityRateConfig();
 
         if (coupon.fixingDate < startPeriod) {
-            LibBond.updateCouponRate(_couponID, coupon, startRate, cfgRateDecimals);
+            BondStorageWrapper.updateCouponRate(_couponID, coupon, startRate, cfgRateDecimals);
             return;
         }
 
-        (uint256 baseRate, uint8 decimals) = LibInterestRate.getBaseRate();
+        (uint256 baseRate, uint8 decimals) = InterestRateStorageWrapper.getBaseRate();
 
         // Get previous coupon's fixing date for period start
         uint256 periodStart;
         {
-            uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, _timestamp);
+            uint256 previousCouponId = BondStorageWrapper.getPreviousCouponInOrderedList(_couponID, _timestamp);
             if (previousCouponId != 0) {
-                periodStart = LibBond.getCoupon(previousCouponId).coupon.fixingDate;
+                periodStart = BondStorageWrapper.getCoupon(previousCouponId).coupon.fixingDate;
             }
         }
 
         // Aggregate rate adjustments from all proceed recipients
         int256 totalRateAdjustment;
         {
-            address[] memory projects = LibProceedRecipients.getProceedRecipients(
+            address[] memory projects = ProceedRecipientsStorageWrapper.getProceedRecipients(
                 0,
-                LibProceedRecipients.getProceedRecipientsCount()
+                ProceedRecipientsStorageWrapper.getProceedRecipientsCount()
             );
 
             for (uint256 i = 0; i < projects.length; ) {
                 address project = projects[i];
-                ISustainabilityPerformanceTargetRate.ImpactData memory impactData = LibInterestRate
+                ISustainabilityPerformanceTargetRate.ImpactData memory impactData = InterestRateStorageWrapper
                     .getSustainabilityImpactData(project);
-                (uint256 value, bool exists) = LibKpis.getLatestKpiData(periodStart, coupon.fixingDate, project);
-                totalRateAdjustment += LibInterestRate.calculateRateAdjustment(impactData, value, exists);
+                (uint256 value, bool exists) = KpisStorageWrapper.getLatestKpiData(
+                    periodStart,
+                    coupon.fixingDate,
+                    project
+                );
+                totalRateAdjustment += InterestRateStorageWrapper.calculateRateAdjustment(impactData, value, exists);
                 unchecked {
                     ++i;
                 }
@@ -60,6 +65,6 @@ abstract contract ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRate 
         int256 finalRate = int256(baseRate) + totalRateAdjustment;
         if (finalRate < 0) finalRate = 0;
 
-        LibBond.updateCouponRate(_couponID, coupon, uint256(finalRate), decimals);
+        BondStorageWrapper.updateCouponRate(_couponID, coupon, uint256(finalRate), decimals);
     }
 }

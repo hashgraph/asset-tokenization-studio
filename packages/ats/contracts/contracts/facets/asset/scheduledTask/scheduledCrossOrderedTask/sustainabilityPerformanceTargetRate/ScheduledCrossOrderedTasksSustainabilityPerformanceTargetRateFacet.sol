@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     _SCHEDULED_CROSS_ORDERED_TASKS_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
-} from "../../../../../constants/resolverKeys/resolverKeys.sol";
+} from "../../../../../constants/resolverKeys.sol";
 // solhint-disable-next-line max-line-length
 import {
     ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRate

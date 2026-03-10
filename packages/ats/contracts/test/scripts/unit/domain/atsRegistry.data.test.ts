@@ -150,9 +150,10 @@ describe("atsRegistry - Registry Helper Functions", () => {
   });
 
   describe("Storage wrapper registry helpers", () => {
-    it("getStorageWrapperDefinition should return undefined (storage wrappers removed in migration)", () => {
-      const wrapper = getStorageWrapperDefinition("IAccessControlStorageWrapper");
-      expect(wrapper).to.be.undefined;
+    it("getStorageWrapperDefinition should return a known storage wrapper", () => {
+      const wrapper = getStorageWrapperDefinition("AccessStorageWrapper");
+      expect(wrapper).to.not.be.undefined;
+      expect(wrapper!.name).to.equal("AccessStorageWrapper");
     });
 
     it("getStorageWrapperDefinition should return undefined for non-existent wrapper", () => {
@@ -160,14 +161,14 @@ describe("atsRegistry - Registry Helper Functions", () => {
       expect(wrapper).to.be.undefined;
     });
 
-    it("getAllStorageWrappers should return empty array (storage wrappers removed in migration)", () => {
+    it("getAllStorageWrappers should return all storage wrapper libraries", () => {
       const wrappers = getAllStorageWrappers();
       expect(wrappers).to.be.an("array");
-      expect(wrappers.length).to.equal(0);
+      expect(wrappers.length).to.be.greaterThan(0);
     });
 
-    it("hasStorageWrapper should return false (storage wrappers removed in migration)", () => {
-      expect(hasStorageWrapper("IAccessControlStorageWrapper")).to.be.false;
+    it("hasStorageWrapper should return true for existing wrapper", () => {
+      expect(hasStorageWrapper("PauseStorageWrapper")).to.be.true;
     });
 
     it("hasStorageWrapper should return false for non-existent wrapper", () => {
@@ -208,9 +209,9 @@ describe("atsRegistry - Registry Helper Functions", () => {
   });
 
   describe("STORAGE_WRAPPER_REGISTRY constant", () => {
-    it("should be an empty object (storage wrappers removed in migration)", () => {
+    it("should contain storage wrapper entries", () => {
       expect(STORAGE_WRAPPER_REGISTRY).to.be.an("object");
-      expect(Object.keys(STORAGE_WRAPPER_REGISTRY).length).to.equal(0);
+      expect(Object.keys(STORAGE_WRAPPER_REGISTRY).length).to.be.greaterThan(0);
     });
   });
 });

@@ -4,8 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IResolverProxy } from "./IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../diamond/IBusinessLogicResolver.sol";
 import { IDiamondLoupe } from "../diamond/IDiamondLoupe.sol";
-import { ResolverProxyStorage, LibResolverProxy } from "./LibResolverProxy.sol";
-import { LibAccess } from "../../domain/core/LibAccess.sol";
+import { ResolverProxyStorage, ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../domain/core/AccessStorageWrapper.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
 // The loupe functions are required by the EIP2535 ResolverProxys standard
@@ -17,7 +17,7 @@ abstract contract ResolverProxyUnstructured {
         IResolverProxy.Rbac[] memory _rbacs
     ) internal {
         _resolver.checkResolverProxyConfigurationRegistered(_resolverProxyConfigurationId, _version);
-        ResolverProxyStorage storage ds = LibResolverProxy.resolverProxyStorage();
+        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
         _updateResolver(ds, _resolver);
         _updateConfigId(ds, _resolverProxyConfigurationId);
         _updateVersion(ds, _version);
@@ -39,7 +39,7 @@ abstract contract ResolverProxyUnstructured {
     function _assignRbacRoles(IResolverProxy.Rbac[] memory _rbacs) internal {
         for (uint256 rbacIndex; rbacIndex < _rbacs.length; rbacIndex++) {
             for (uint256 memberIndex; memberIndex < _rbacs[rbacIndex].members.length; memberIndex++) {
-                LibAccess.grantRole(_rbacs[rbacIndex].role, _rbacs[rbacIndex].members[memberIndex]);
+                AccessStorageWrapper.grantRole(_rbacs[rbacIndex].role, _rbacs[rbacIndex].members[memberIndex]);
             }
         }
     }

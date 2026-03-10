@@ -6,9 +6,9 @@ import { IDiamondLoupe } from "./IDiamondLoupe.sol";
 import { IAccessControl } from "../../facets/core/accessControl/IAccessControl.sol";
 import { IPause } from "../../facets/core/pause/IPause.sol";
 import { _PAUSER_ROLE } from "../../constants/roles.sol";
-import { LibAccess } from "../../domain/core/LibAccess.sol";
-import { LibPause } from "../../domain/core/LibPause.sol";
-import { LibArrayValidation } from "../utils/LibArrayValidation.sol";
+import { AccessStorageWrapper } from "../../domain/core/AccessStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
+import { ArrayValidation } from "../utils/ArrayValidation.sol";
 
 bytes32 constant _DEFAULT_ADMIN_ROLE = bytes32(0);
 
@@ -25,10 +25,10 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function grantRole(bytes32 _role, address _account) external override returns (bool success_) {
-        LibAccess.checkRole(LibAccess.getRoleAdmin(_role));
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(AccessStorageWrapper.getRoleAdmin(_role));
+        PauseStorageWrapper.requireNotPaused();
 
-        if (!LibAccess.grantRole(_role, _account)) {
+        if (!AccessStorageWrapper.grantRole(_role, _account)) {
             revert AccountAssignedToRole(_role, _account);
         }
         emit RoleGranted(msg.sender, _account, _role);
@@ -36,10 +36,10 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
     }
 
     function revokeRole(bytes32 _role, address _account) external override returns (bool success_) {
-        LibAccess.checkRole(LibAccess.getRoleAdmin(_role));
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(AccessStorageWrapper.getRoleAdmin(_role));
+        PauseStorageWrapper.requireNotPaused();
 
-        success_ = LibAccess.revokeRole(_role, _account);
+        success_ = AccessStorageWrapper.revokeRole(_role, _account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, _account);
         }
@@ -51,11 +51,11 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
         bool[] calldata _actives,
         address _account
     ) external override returns (bool success_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkSameRolesAndActivesLength(_roles.length, _actives.length);
-        LibArrayValidation.checkUniqueValues(_roles, _actives);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkSameRolesAndActivesLength(_roles.length, _actives.length);
+        ArrayValidation.checkUniqueValues(_roles, _actives);
 
-        success_ = LibAccess.applyRoles(_roles, _actives, _account);
+        success_ = AccessStorageWrapper.applyRoles(_roles, _actives, _account);
         if (!success_) {
             revert RolesNotApplied(_roles, _actives, _account);
         }
@@ -63,10 +63,10 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
     }
 
     function renounceRole(bytes32 _role) external override returns (bool success_) {
-        LibPause.requireNotPaused();
+        PauseStorageWrapper.requireNotPaused();
 
         address account = msg.sender;
-        success_ = LibAccess.revokeRole(_role, account);
+        success_ = AccessStorageWrapper.revokeRole(_role, account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, account);
         }
@@ -78,16 +78,16 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function pause() external override returns (bool success_) {
-        LibAccess.checkRole(_PAUSER_ROLE);
-        LibPause.requireNotPaused();
-        LibPause.pause();
+        AccessStorageWrapper.checkRole(_PAUSER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        PauseStorageWrapper.pause();
         success_ = true;
     }
 
     function unpause() external override returns (bool success_) {
-        LibAccess.checkRole(_PAUSER_ROLE);
-        LibPause.requirePaused();
-        LibPause.unpause();
+        AccessStorageWrapper.checkRole(_PAUSER_ROLE);
+        PauseStorageWrapper.requirePaused();
+        PauseStorageWrapper.unpause();
         success_ = true;
     }
 
@@ -99,8 +99,8 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
     ) external override validateConfigurationId(_configurationId) {
-        LibAccess.checkRole(_DEFAULT_ADMIN_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_DEFAULT_ADMIN_ROLE);
+        PauseStorageWrapper.requireNotPaused();
         emit DiamondConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -113,8 +113,8 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
         FacetConfiguration[] calldata _facetConfigurations,
         bool _isLastBatch
     ) external override validateConfigurationId(_configurationId) {
-        LibAccess.checkRole(_DEFAULT_ADMIN_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_DEFAULT_ADMIN_ROLE);
+        PauseStorageWrapper.requireNotPaused();
         emit DiamondBatchConfigurationCreated(
             _configurationId,
             _facetConfigurations,
@@ -126,8 +126,8 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
     function cancelBatchConfiguration(
         bytes32 _configurationId
     ) external override validateConfigurationId(_configurationId) {
-        LibAccess.checkRole(_DEFAULT_ADMIN_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_DEFAULT_ADMIN_ROLE);
+        PauseStorageWrapper.requireNotPaused();
         _cancelBatchConfiguration(_configurationId);
         emit DiamondBatchConfigurationCanceled(_configurationId);
     }
@@ -137,11 +137,11 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function hasRole(bytes32 _role, address _account) external view override returns (bool) {
-        return LibAccess.hasRole(_role, _account);
+        return AccessStorageWrapper.hasRole(_role, _account);
     }
 
     function getRoleCountFor(address _account) external view override returns (uint256 roleCount_) {
-        roleCount_ = LibAccess.getRoleCountFor(_account);
+        roleCount_ = AccessStorageWrapper.getRoleCountFor(_account);
     }
 
     function getRolesFor(
@@ -149,11 +149,11 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes32[] memory roles_) {
-        roles_ = LibAccess.getRolesFor(_account, _pageIndex, _pageLength);
+        roles_ = AccessStorageWrapper.getRolesFor(_account, _pageIndex, _pageLength);
     }
 
     function getRoleMemberCount(bytes32 _role) external view override returns (uint256 memberCount_) {
-        memberCount_ = LibAccess.getRoleMemberCount(_role);
+        memberCount_ = AccessStorageWrapper.getRoleMemberCount(_role);
     }
 
     function getRoleMembers(
@@ -161,7 +161,7 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        members_ = LibAccess.getRoleMembers(_role, _pageIndex, _pageLength);
+        members_ = AccessStorageWrapper.getRoleMembers(_role, _pageIndex, _pageLength);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -169,7 +169,7 @@ abstract contract DiamondCutManager is IAccessControl, IPause, DiamondCutManager
     // ═══════════════════════════════════════════════════════════════════════════════
 
     function isPaused() external view override returns (bool) {
-        return LibPause.isPaused();
+        return PauseStorageWrapper.isPaused();
     }
 
     function resolveResolverProxyCall(

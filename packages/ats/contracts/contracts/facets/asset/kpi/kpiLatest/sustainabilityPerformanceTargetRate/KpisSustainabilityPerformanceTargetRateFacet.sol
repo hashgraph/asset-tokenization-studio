@@ -7,7 +7,7 @@ import { IStaticFunctionSelectors } from "../../../../../infrastructure/diamond/
 // solhint-disable-next-line max-line-length
 import {
     _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY
-} from "../../../../../constants/resolverKeys/resolverKeys.sol";
+} from "../../../../../constants/resolverKeys.sol";
 
 contract KpisSustainabilityPerformanceTargetRateFacet is Kpis, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

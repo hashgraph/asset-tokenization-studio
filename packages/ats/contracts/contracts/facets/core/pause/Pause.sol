@@ -3,25 +3,25 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IPause } from "../pause/IPause.sol";
 import { _PAUSER_ROLE } from "../../../constants/roles.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
 
 abstract contract Pause is IPause {
     function pause() external override returns (bool success_) {
-        LibAccess.checkRole(_PAUSER_ROLE);
-        LibPause.requireNotPaused();
-        LibPause.pause();
+        AccessStorageWrapper.checkRole(_PAUSER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        PauseStorageWrapper.pause();
         success_ = true;
     }
 
     function unpause() external override returns (bool success_) {
-        LibAccess.checkRole(_PAUSER_ROLE);
-        LibPause.requirePaused();
-        LibPause.unpause();
+        AccessStorageWrapper.checkRole(_PAUSER_ROLE);
+        PauseStorageWrapper.requirePaused();
+        PauseStorageWrapper.unpause();
         success_ = true;
     }
 
     function isPaused() external view override returns (bool) {
-        return LibPause.isPaused();
+        return PauseStorageWrapper.isPaused();
     }
 }

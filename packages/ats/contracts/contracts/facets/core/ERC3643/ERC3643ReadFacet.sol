@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ERC3643_READ_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _ERC3643_READ_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { ERC3643Read } from "./ERC3643Read.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IERC3643Read } from "../ERC3643/IERC3643Read.sol";

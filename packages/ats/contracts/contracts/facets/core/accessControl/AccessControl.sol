@@ -2,16 +2,16 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IAccessControl } from "../accessControl/IAccessControl.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
-import { LibArrayValidation } from "../../../infrastructure/utils/LibArrayValidation.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 
 abstract contract AccessControl is IAccessControl {
     function grantRole(bytes32 _role, address _account) external override returns (bool success_) {
-        LibAccess.checkRole(LibAccess.getRoleAdmin(_role));
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(AccessStorageWrapper.getRoleAdmin(_role));
+        PauseStorageWrapper.requireNotPaused();
 
-        if (!LibAccess.grantRole(_role, _account)) {
+        if (!AccessStorageWrapper.grantRole(_role, _account)) {
             revert AccountAssignedToRole(_role, _account);
         }
         emit RoleGranted(msg.sender, _account, _role);
@@ -19,10 +19,10 @@ abstract contract AccessControl is IAccessControl {
     }
 
     function revokeRole(bytes32 _role, address _account) external override returns (bool success_) {
-        LibAccess.checkRole(LibAccess.getRoleAdmin(_role));
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(AccessStorageWrapper.getRoleAdmin(_role));
+        PauseStorageWrapper.requireNotPaused();
 
-        success_ = LibAccess.revokeRole(_role, _account);
+        success_ = AccessStorageWrapper.revokeRole(_role, _account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, _account);
         }
@@ -34,11 +34,11 @@ abstract contract AccessControl is IAccessControl {
         bool[] calldata _actives,
         address _account
     ) external override returns (bool success_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkSameRolesAndActivesLength(_roles.length, _actives.length);
-        LibArrayValidation.checkUniqueValues(_roles, _actives);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkSameRolesAndActivesLength(_roles.length, _actives.length);
+        ArrayValidation.checkUniqueValues(_roles, _actives);
 
-        success_ = LibAccess.applyRoles(_roles, _actives, _account);
+        success_ = AccessStorageWrapper.applyRoles(_roles, _actives, _account);
         if (!success_) {
             revert RolesNotApplied(_roles, _actives, _account);
         }
@@ -46,10 +46,10 @@ abstract contract AccessControl is IAccessControl {
     }
 
     function renounceRole(bytes32 _role) external override returns (bool success_) {
-        LibPause.requireNotPaused();
+        PauseStorageWrapper.requireNotPaused();
 
         address account = msg.sender;
-        success_ = LibAccess.revokeRole(_role, account);
+        success_ = AccessStorageWrapper.revokeRole(_role, account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, account);
         }
@@ -57,11 +57,11 @@ abstract contract AccessControl is IAccessControl {
     }
 
     function hasRole(bytes32 _role, address _account) external view override returns (bool) {
-        return LibAccess.hasRole(_role, _account);
+        return AccessStorageWrapper.hasRole(_role, _account);
     }
 
     function getRoleCountFor(address _account) external view override returns (uint256 roleCount_) {
-        roleCount_ = LibAccess.getRoleCountFor(_account);
+        roleCount_ = AccessStorageWrapper.getRoleCountFor(_account);
     }
 
     function getRolesFor(
@@ -69,11 +69,11 @@ abstract contract AccessControl is IAccessControl {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes32[] memory roles_) {
-        roles_ = LibAccess.getRolesFor(_account, _pageIndex, _pageLength);
+        roles_ = AccessStorageWrapper.getRolesFor(_account, _pageIndex, _pageLength);
     }
 
     function getRoleMemberCount(bytes32 _role) external view override returns (uint256 memberCount_) {
-        memberCount_ = LibAccess.getRoleMemberCount(_role);
+        memberCount_ = AccessStorageWrapper.getRoleMemberCount(_role);
     }
 
     function getRoleMembers(
@@ -81,6 +81,6 @@ abstract contract AccessControl is IAccessControl {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        members_ = LibAccess.getRoleMembers(_role, _pageIndex, _pageLength);
+        members_ = AccessStorageWrapper.getRoleMembers(_role, _pageIndex, _pageLength);
     }
 }

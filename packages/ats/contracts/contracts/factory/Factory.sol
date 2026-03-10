@@ -20,7 +20,7 @@ import {
     RegulationType,
     RegulationSubType
 } from "../facets/regulation/constants/regulation.sol";
-import { LibRegulation } from "../domain/asset/LibRegulation.sol";
+import { Regulation } from "../domain/asset/Regulation.sol";
 import { IEquityUSA } from "../facets/regulation/equityUSA/IEquityUSA.sol";
 import { IBondUSA } from "../facets/regulation/bondUSA/IBondUSA.sol";
 import { IProceedRecipients } from "../facets/asset/proceedRecipient/IProceedRecipients.sol";
@@ -84,7 +84,7 @@ contract Factory is IFactory, Context {
     }
 
     modifier checkRegulation(RegulationType _regulationType, RegulationSubType _regulationSubType) {
-        LibRegulation.checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
+        Regulation.checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
         _;
     }
 
@@ -122,7 +122,7 @@ contract Factory is IFactory, Context {
 
         IEquityUSA(equityAddress_)._initialize_equityUSA(
             _equityData.equityDetails,
-            LibRegulation.buildRegulationData(
+            Regulation.buildRegulationData(
                 _factoryRegulationData.regulationType,
                 _factoryRegulationData.regulationSubType
             ),
@@ -237,7 +237,7 @@ contract Factory is IFactory, Context {
         RegulationType _regulationType,
         RegulationSubType _regulationSubType
     ) external pure override returns (RegulationData memory regulationData_) {
-        regulationData_ = LibRegulation.buildRegulationData(_regulationType, _regulationSubType);
+        regulationData_ = Regulation.buildRegulationData(_regulationType, _regulationSubType);
     }
 
     function _deployBond(
@@ -249,7 +249,7 @@ contract Factory is IFactory, Context {
 
         IBondUSA(bondAddress_)._initialize_bondUSA(
             _bondData.bondDetails,
-            LibRegulation.buildRegulationData(
+            Regulation.buildRegulationData(
                 _factoryRegulationData.regulationType,
                 _factoryRegulationData.regulationSubType
             ),

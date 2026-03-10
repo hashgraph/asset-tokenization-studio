@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ExternalKycListManagement } from "./ExternalKycListManagement.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
 import { IExternalKycListManagement } from "../externalKycList/IExternalKycListManagement.sol";
-import { _EXTERNAL_KYC_LIST_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _EXTERNAL_KYC_LIST_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract ExternalKycListManagementFacet is ExternalKycListManagement, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

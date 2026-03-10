@@ -7,15 +7,15 @@ import {
 import { ScheduledTask } from "../../scheduledTask/IScheduledTasksCommon.sol";
 import { IAdjustBalances } from "../../adjustBalances/IAdjustBalances.sol";
 import { IEquity } from "../../equity/IEquity.sol";
-import { LibPause } from "../../../../domain/core/LibPause.sol";
-import { LibCorporateActions } from "../../../../domain/core/LibCorporateActions.sol";
-import { LibCap } from "../../../../domain/core/LibCap.sol";
-import { LibScheduledTasks } from "../../../../domain/asset/LibScheduledTasks.sol";
-import { LibSnapshots } from "../../../../domain/asset/LibSnapshots.sol";
-import { LibERC1410 } from "../../../../domain/asset/LibERC1410.sol";
-import { LibERC20 } from "../../../../domain/asset/LibERC20.sol";
-import { LibABAF } from "../../../../domain/asset/LibABAF.sol";
-import { LibBond } from "../../../../domain/asset/LibBond.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../../../domain/core/CorporateActionsStorageWrapper.sol";
+import { CapStorageWrapper } from "../../../../domain/core/CapStorageWrapper.sol";
+import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/ScheduledTasksStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../../../../domain/asset/SnapshotsStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC20StorageWrapper } from "../../../../domain/asset/ERC20StorageWrapper.sol";
+import { ABAFStorageWrapper } from "../../../../domain/asset/ABAFStorageWrapper.sol";
+import { BondStorageWrapper } from "../../../../domain/asset/BondStorageWrapper.sol";
 import {
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE,
@@ -31,12 +31,12 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
     // ════════════════════════════════════════════════════════════════════════════════════
 
     function triggerPendingScheduledCrossOrderedTasks() external override returns (uint256) {
-        LibPause.requireNotPaused();
+        PauseStorageWrapper.requireNotPaused();
         return _triggerCrossOrderedTasks(0);
     }
 
     function triggerScheduledCrossOrderedTasks(uint256 _max) external override returns (uint256) {
-        LibPause.requireNotPaused();
+        PauseStorageWrapper.requireNotPaused();
         return _triggerCrossOrderedTasks(_max);
     }
 
@@ -45,14 +45,14 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
     // ════════════════════════════════════════════════════════════════════════════════════
 
     function scheduledCrossOrderedTaskCount() external view override returns (uint256) {
-        return LibScheduledTasks.getScheduledCrossOrderedTaskCount();
+        return ScheduledTasksStorageWrapper.getScheduledCrossOrderedTaskCount();
     }
 
     function getScheduledCrossOrderedTasks(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (ScheduledTask[] memory scheduledCrossOrderedTask_) {
-        return LibScheduledTasks.getScheduledCrossOrderedTasks(_pageIndex, _pageLength);
+        return ScheduledTasksStorageWrapper.getScheduledCrossOrderedTasks(_pageIndex, _pageLength);
     }
 
     // ════════════════════════════════════════════════════════════════════════════════════
@@ -69,7 +69,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
     // ════════════════════════════════════════════════════════════════════════════════════
 
     function _triggerCrossOrderedTasks(uint256 _max) private returns (uint256) {
-        uint256 count = LibScheduledTasks.getScheduledCrossOrderedTaskCount();
+        uint256 count = ScheduledTasksStorageWrapper.getScheduledCrossOrderedTaskCount();
         if (count == 0) return 0;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
@@ -77,10 +77,10 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
-            ScheduledTask memory task = LibScheduledTasks.getScheduledCrossOrderedTaskByIndex(pos);
+            ScheduledTask memory task = ScheduledTasksStorageWrapper.getScheduledCrossOrderedTaskByIndex(pos);
 
             if (task.scheduledTimestamp < timestamp) {
-                LibScheduledTasks.popScheduledCrossOrderedTask();
+                ScheduledTasksStorageWrapper.popScheduledCrossOrderedTask();
                 _dispatchTask(task);
             } else {
                 break;
@@ -102,7 +102,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
     }
 
     function _triggerSnapshots(uint256 _max) private {
-        uint256 count = LibScheduledTasks.getScheduledSnapshotCount();
+        uint256 count = ScheduledTasksStorageWrapper.getScheduledSnapshotCount();
         if (count == 0) return;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
@@ -110,14 +110,14 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
-            ScheduledTask memory task = LibScheduledTasks.getScheduledSnapshotByIndex(pos);
+            ScheduledTask memory task = ScheduledTasksStorageWrapper.getScheduledSnapshotByIndex(pos);
 
             if (task.scheduledTimestamp < timestamp) {
-                LibScheduledTasks.popScheduledSnapshot();
+                ScheduledTasksStorageWrapper.popScheduledSnapshot();
 
-                uint256 snapshotId = LibSnapshots.snapshot();
+                uint256 snapshotId = SnapshotsStorageWrapper.snapshot();
                 bytes32 actionId = abi.decode(task.data, (bytes32));
-                LibCorporateActions.updateCorporateActionResult(
+                CorporateActionsStorageWrapper.updateCorporateActionResult(
                     actionId,
                     SNAPSHOT_RESULT_ID,
                     abi.encodePacked(snapshotId)
@@ -129,7 +129,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
     }
 
     function _triggerBalanceAdjustments(uint256 _max) private {
-        uint256 count = LibScheduledTasks.getScheduledBalanceAdjustmentCount();
+        uint256 count = ScheduledTasksStorageWrapper.getScheduledBalanceAdjustmentCount();
         if (count == 0) return;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
@@ -137,26 +137,26 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
-            ScheduledTask memory task = LibScheduledTasks.getScheduledBalanceAdjustmentByIndex(pos);
+            ScheduledTask memory task = ScheduledTasksStorageWrapper.getScheduledBalanceAdjustmentByIndex(pos);
 
             if (task.scheduledTimestamp < timestamp) {
-                LibScheduledTasks.popScheduledBalanceAdjustment();
+                ScheduledTasksStorageWrapper.popScheduledBalanceAdjustment();
 
                 bytes32 actionId = abi.decode(task.data, (bytes32));
-                (, , bytes memory balanceAdjustmentData) = LibCorporateActions.getCorporateAction(actionId);
+                (, , bytes memory balanceAdjustmentData) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
                 IEquity.ScheduledBalanceAdjustment memory ba = abi.decode(
                     balanceAdjustmentData,
                     (IEquity.ScheduledBalanceAdjustment)
                 );
 
                 // Same logic as _adjustBalances: update snapshots + adjust all
-                LibSnapshots.updateDecimalsSnapshot();
-                LibSnapshots.updateAbafSnapshot();
-                LibSnapshots.updateAssetTotalSupplySnapshot();
-                LibERC1410.adjustTotalSupply(ba.factor);
-                LibERC20.adjustDecimals(ba.decimals);
-                LibCap.adjustMaxSupply(ba.factor);
-                LibABAF.updateAbaf(ba.factor);
+                SnapshotsStorageWrapper.updateDecimalsSnapshot();
+                SnapshotsStorageWrapper.updateAbafSnapshot();
+                SnapshotsStorageWrapper.updateAssetTotalSupplySnapshot();
+                ERC1410StorageWrapper.adjustTotalSupply(ba.factor);
+                ERC20StorageWrapper.adjustDecimals(ba.decimals);
+                CapStorageWrapper.adjustMaxSupply(ba.factor);
+                ABAFStorageWrapper.updateAbaf(ba.factor);
                 emit IAdjustBalances.AdjustmentBalanceSet(msg.sender, ba.factor, ba.decimals);
             } else {
                 break;
@@ -165,7 +165,7 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
     }
 
     function _triggerCouponListings(uint256 _max) private {
-        uint256 count = LibScheduledTasks.getScheduledCouponListingCount();
+        uint256 count = ScheduledTasksStorageWrapper.getScheduledCouponListingCount();
         if (count == 0) return;
 
         uint256 max = (_max > count || _max == 0) ? count : _max;
@@ -173,17 +173,17 @@ abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Tim
 
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = count - j;
-            ScheduledTask memory task = LibScheduledTasks.getScheduledCouponListingByIndex(pos);
+            ScheduledTask memory task = ScheduledTasksStorageWrapper.getScheduledCouponListingByIndex(pos);
 
             if (task.scheduledTimestamp < timestamp) {
-                LibScheduledTasks.popScheduledCouponListing();
+                ScheduledTasksStorageWrapper.popScheduledCouponListing();
 
                 bytes32 actionId = abi.decode(task.data, (bytes32));
                 uint256 couponID = uint256(actionId);
-                LibBond.addToCouponsOrderedList(couponID);
+                BondStorageWrapper.addToCouponsOrderedList(couponID);
                 _onCouponListed(couponID, timestamp);
-                uint256 listPos = LibBond.getCouponsOrderedListTotal();
-                LibCorporateActions.updateCorporateActionResult(
+                uint256 listPos = BondStorageWrapper.getCouponsOrderedListTotal();
+                CorporateActionsStorageWrapper.updateCorporateActionResult(
                     actionId,
                     COUPON_LISTING_RESULT_ID,
                     abi.encodePacked(listPos)

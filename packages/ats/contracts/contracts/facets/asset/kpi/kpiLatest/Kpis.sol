@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IKpis } from "../../kpi/kpiLatest/IKpis.sol";
-import { LibPause } from "../../../../domain/core/LibPause.sol";
-import { LibAccess } from "../../../../domain/core/LibAccess.sol";
-import { LibKpis } from "../../../../domain/asset/LibKpis.sol";
-import { LibBond } from "../../../../domain/asset/LibBond.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../../domain/core/AccessStorageWrapper.sol";
+import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.sol";
+import { BondStorageWrapper } from "../../../../domain/asset/BondStorageWrapper.sol";
 import { _KPI_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
@@ -13,8 +13,8 @@ import { TimestampProvider } from "../../../../infrastructure/utils/TimestampPro
 /// @notice Diamond facet for managing KPI data with library-based pattern
 abstract contract Kpis is IKpis, TimestampProvider {
     function addKpiData(uint256 _date, uint256 _value, address _project) external override {
-        LibAccess.checkRole(_KPI_MANAGER_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_KPI_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
 
         // Inline isValidDate modifier logic
         uint256 timestamp = _getBlockTimestamp();
@@ -22,11 +22,11 @@ abstract contract Kpis is IKpis, TimestampProvider {
         if (_date <= minDate || _date > timestamp) {
             revert InvalidDate(_date, minDate, timestamp);
         }
-        if (LibKpis.isCheckpointDate(_date, _project)) {
+        if (KpisStorageWrapper.isCheckpointDate(_date, _project)) {
             revert KpiDataAlreadyExists(_date);
         }
 
-        LibKpis.addKpiData(_date, _value, _project);
+        KpisStorageWrapper.addKpiData(_date, _value, _project);
         emit IKpis.KpiDataAdded(_project, _date, _value);
     }
 
@@ -35,7 +35,7 @@ abstract contract Kpis is IKpis, TimestampProvider {
         uint256 _to,
         address _project
     ) external view override returns (uint256 value_, bool exists_) {
-        return LibKpis.getLatestKpiData(_from, _to, _project);
+        return KpisStorageWrapper.getLatestKpiData(_from, _to, _project);
     }
 
     function getMinDate() external view override returns (uint256 minDate_) {
@@ -43,7 +43,7 @@ abstract contract Kpis is IKpis, TimestampProvider {
     }
 
     function isCheckPointDate(uint256 _date, address _project) external view override returns (bool exists_) {
-        return LibKpis.isCheckpointDate(_date, _project);
+        return KpisStorageWrapper.isCheckpointDate(_date, _project);
     }
 
     // ════════════════════════════════════════════════════════════════════════════════════
@@ -53,12 +53,12 @@ abstract contract Kpis is IKpis, TimestampProvider {
     /// @notice Gets the adjusted minimum date considering the last coupon fixing date
     /// @param _timestamp The timestamp to use for determining pending coupon listings
     function _getMinDateAdjusted(uint256 _timestamp) private view returns (uint256 minDate_) {
-        minDate_ = LibKpis.getMinDate();
-        uint256 total = LibBond.getCouponsOrderedListTotalAdjustedAt(_timestamp);
+        minDate_ = KpisStorageWrapper.getMinDate();
+        uint256 total = BondStorageWrapper.getCouponsOrderedListTotalAdjustedAt(_timestamp);
         if (total == 0) return minDate_;
 
-        uint256 couponId = LibBond.getCouponFromOrderedListAt(total - 1, _timestamp);
-        uint256 lastFixingDate = LibBond.getCoupon(couponId).coupon.fixingDate;
+        uint256 couponId = BondStorageWrapper.getCouponFromOrderedListAt(total - 1, _timestamp);
+        uint256 lastFixingDate = BondStorageWrapper.getCoupon(couponId).coupon.fixingDate;
         // Only use the coupon's fixing date as minimum if it's in the past (not a future coupon)
         // This allows adding historical KPI data before future coupons are fixed
         if (lastFixingDate <= _timestamp) {

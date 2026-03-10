@@ -6,7 +6,7 @@ import {
     IScheduledBalanceAdjustments
 } from "../../scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ScheduledBalanceAdjustmentsFacet is ScheduledBalanceAdjustments, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

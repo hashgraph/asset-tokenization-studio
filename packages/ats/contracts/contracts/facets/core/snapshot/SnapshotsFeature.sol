@@ -6,16 +6,16 @@ import { ISnapshots, Snapshots as SnapshotsStruct, PartitionSnapshots } from "..
 import {
     IScheduledCrossOrderedTasks
 } from "../../asset/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibSnapshots } from "../../../domain/asset/LibSnapshots.sol";
-import { LibABAF } from "../../../domain/asset/LibABAF.sol";
-import { LibERC1410 } from "../../../domain/asset/LibERC1410.sol";
-import { LibERC20 } from "../../../domain/asset/LibERC20.sol";
-import { LibLock } from "../../../domain/asset/LibLock.sol";
-import { LibHold } from "../../../domain/asset/LibHold.sol";
-import { LibClearing } from "../../../domain/asset/LibClearing.sol";
-import { LibFreeze } from "../../../domain/asset/LibFreeze.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
+import { ABAFStorageWrapper } from "../../../domain/asset/ABAFStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC20StorageWrapper } from "../../../domain/asset/ERC20StorageWrapper.sol";
+import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
+import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
+import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
+import { ComplianceStorageWrapper } from "../../../domain/core/ComplianceStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { _SNAPSHOT_ROLE } from "../../../constants/roles.sol";
 
@@ -25,10 +25,10 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     // ════════════════════════════════════════════════════════════════════════════════════
 
     function takeSnapshot() external override returns (uint256 snapshotID_) {
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_SNAPSHOT_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_SNAPSHOT_ROLE, msg.sender);
         IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
-        snapshotID_ = LibSnapshots.takeSnapshot();
+        snapshotID_ = SnapshotsStorageWrapper.takeSnapshot();
         emit SnapshotTaken(msg.sender, snapshotID_);
     }
 
@@ -37,8 +37,11 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     // ════════════════════════════════════════════════════════════════════════════════════
 
     function decimalsAtSnapshot(uint256 _snapshotID) external view override returns (uint8 decimals_) {
-        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(_snapshotID, LibSnapshots.getDecimalsSnapshots());
-        decimals_ = snapshotted ? uint8(value) : LibERC20.getDecimals();
+        (bool snapshotted, uint256 value) = SnapshotsStorageWrapper.valueAt(
+            _snapshotID,
+            SnapshotsStorageWrapper.getDecimalsSnapshots()
+        );
+        decimals_ = snapshotted ? uint8(value) : ERC20StorageWrapper.getDecimals();
     }
 
     function balanceOfAtSnapshot(
@@ -47,8 +50,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountBalanceSnapshots(_tokenHolder),
-            LibABAF.balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp())
+            SnapshotsStorageWrapper.getAccountBalanceSnapshots(_tokenHolder),
+            ABAFStorageWrapper.balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp())
         );
     }
 
@@ -66,11 +69,11 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
 
         for (uint256 i = 0; i < holders_.length; i++) {
             uint256 index = i + 1;
-            (bool snapshotted, address value) = LibSnapshots.addressValueAt(
+            (bool snapshotted, address value) = SnapshotsStorageWrapper.addressValueAt(
                 _snapshotID,
-                LibSnapshots.getTokenHolderSnapshots(index)
+                SnapshotsStorageWrapper.getTokenHolderSnapshots(index)
             );
-            holders_[i] = snapshotted ? value : LibERC1410.getTokenHolder(index);
+            holders_[i] = snapshotted ? value : ERC1410StorageWrapper.getTokenHolder(index);
         }
     }
 
@@ -85,8 +88,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountPartitionBalanceSnapshots(_tokenHolder, _partition),
-            LibABAF.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp())
+            SnapshotsStorageWrapper.getAccountPartitionBalanceSnapshots(_tokenHolder, _partition),
+            ABAFStorageWrapper.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp())
         );
     }
 
@@ -94,17 +97,22 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (bytes32[] memory) {
-        PartitionSnapshots storage partitionSnapshots = LibSnapshots.getAccountPartitionMetadata(_tokenHolder);
-        (bool found, uint256 index) = LibSnapshots.indexFor(_snapshotID, partitionSnapshots.ids);
+        PartitionSnapshots storage partitionSnapshots = SnapshotsStorageWrapper.getAccountPartitionMetadata(
+            _tokenHolder
+        );
+        (bool found, uint256 index) = SnapshotsStorageWrapper.indexFor(_snapshotID, partitionSnapshots.ids);
         if (!found) {
-            return LibERC1410.partitionsOf(_tokenHolder);
+            return ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         }
         return partitionSnapshots.values[index].partitions;
     }
 
     function totalSupplyAtSnapshot(uint256 _snapshotID) external view override returns (uint256 totalSupply_) {
-        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(_snapshotID, LibSnapshots.getTotalSupplySnapshots());
-        totalSupply_ = snapshotted ? value : LibERC1410.totalSupply();
+        (bool snapshotted, uint256 value) = SnapshotsStorageWrapper.valueAt(
+            _snapshotID,
+            SnapshotsStorageWrapper.getTotalSupplySnapshots()
+        );
+        totalSupply_ = snapshotted ? value : ERC1410StorageWrapper.totalSupply();
     }
 
     function totalSupplyAtSnapshotByPartition(
@@ -113,8 +121,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 totalSupply_) {
         totalSupply_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getTotalSupplyByPartitionSnapshots(_partition),
-            LibERC1410.totalSupplyByPartition(_partition)
+            SnapshotsStorageWrapper.getTotalSupplyByPartitionSnapshots(_partition),
+            ERC1410StorageWrapper.totalSupplyByPartition(_partition)
         );
     }
 
@@ -124,8 +132,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountLockedBalanceSnapshots(_tokenHolder),
-            LibLock.getLockedAmountFor(_tokenHolder)
+            SnapshotsStorageWrapper.getAccountLockedBalanceSnapshots(_tokenHolder),
+            LockStorageWrapper.getLockedAmountFor(_tokenHolder)
         );
     }
 
@@ -136,8 +144,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountPartitionLockedBalanceSnapshots(_tokenHolder, _partition),
-            LibLock.getLockedAmountForByPartition(_partition, _tokenHolder)
+            SnapshotsStorageWrapper.getAccountPartitionLockedBalanceSnapshots(_tokenHolder, _partition),
+            LockStorageWrapper.getLockedAmountForByPartition(_partition, _tokenHolder)
         );
     }
 
@@ -147,8 +155,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountHeldBalanceSnapshots(_tokenHolder),
-            LibHold.getHeldAmountFor(_tokenHolder)
+            SnapshotsStorageWrapper.getAccountHeldBalanceSnapshots(_tokenHolder),
+            HoldStorageWrapper.getHeldAmountFor(_tokenHolder)
         );
     }
 
@@ -159,8 +167,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountPartitionHeldBalanceSnapshots(_tokenHolder, _partition),
-            LibHold.getHeldAmountForByPartition(_partition, _tokenHolder)
+            SnapshotsStorageWrapper.getAccountPartitionHeldBalanceSnapshots(_tokenHolder, _partition),
+            HoldStorageWrapper.getHeldAmountForByPartition(_partition, _tokenHolder)
         );
     }
 
@@ -170,8 +178,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountClearedBalanceSnapshots(_tokenHolder),
-            LibClearing.getClearedAmount(_tokenHolder)
+            SnapshotsStorageWrapper.getAccountClearedBalanceSnapshots(_tokenHolder),
+            ClearingStorageWrapper.getClearedAmount(_tokenHolder)
         );
     }
 
@@ -182,8 +190,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountPartitionClearedBalanceSnapshots(_tokenHolder, _partition),
-            LibClearing.getClearedAmountByPartition(_partition, _tokenHolder)
+            SnapshotsStorageWrapper.getAccountPartitionClearedBalanceSnapshots(_tokenHolder, _partition),
+            ClearingStorageWrapper.getClearedAmountByPartition(_partition, _tokenHolder)
         );
     }
 
@@ -193,8 +201,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountFrozenBalanceSnapshots(_tokenHolder),
-            LibFreeze.getFrozenTokens(_tokenHolder)
+            SnapshotsStorageWrapper.getAccountFrozenBalanceSnapshots(_tokenHolder),
+            ComplianceStorageWrapper.getFrozenTokens(_tokenHolder)
         );
     }
 
@@ -205,8 +213,8 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     ) external view override returns (uint256 balance_) {
         balance_ = _queryAdjustedBalance(
             _snapshotID,
-            LibSnapshots.getAccountPartitionFrozenBalanceSnapshots(_tokenHolder, _partition),
-            LibFreeze.getFrozenTokensByPartition(_tokenHolder, _partition)
+            SnapshotsStorageWrapper.getAccountPartitionFrozenBalanceSnapshots(_tokenHolder, _partition),
+            ComplianceStorageWrapper.getFrozenTokensByPartition(_tokenHolder, _partition)
         );
     }
 
@@ -223,11 +231,11 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
         SnapshotsStruct storage snapshots,
         uint256 currentBalanceAdjusted
     ) private view returns (uint256) {
-        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(snapshotId, snapshots);
+        (bool snapshotted, uint256 value) = SnapshotsStorageWrapper.valueAt(snapshotId, snapshots);
         if (snapshotted) return value;
 
         uint256 abafAtSnap = _queryAbafAt(snapshotId);
-        uint256 abaf = LibABAF.getAbafAdjustedAt(_getBlockTimestamp());
+        uint256 abaf = ABAFStorageWrapper.getAbafAdjustedAt(_getBlockTimestamp());
 
         if (abafAtSnap == abaf) return currentBalanceAdjusted;
 
@@ -236,15 +244,18 @@ abstract contract SnapshotsFeature is ISnapshots, TimestampProvider {
     }
 
     function _queryAbafAt(uint256 snapshotId) private view returns (uint256) {
-        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(snapshotId, LibSnapshots.getAbafSnapshots());
-        return snapshotted ? LibABAF.zeroToOne(value) : LibABAF.getAbaf();
+        (bool snapshotted, uint256 value) = SnapshotsStorageWrapper.valueAt(
+            snapshotId,
+            SnapshotsStorageWrapper.getAbafSnapshots()
+        );
+        return snapshotted ? ABAFStorageWrapper.zeroToOne(value) : ABAFStorageWrapper.getAbaf();
     }
 
     function _queryTotalHolders(uint256 snapshotId) private view returns (uint256) {
-        (bool snapshotted, uint256 value) = LibSnapshots.valueAt(
+        (bool snapshotted, uint256 value) = SnapshotsStorageWrapper.valueAt(
             snapshotId,
-            LibSnapshots.getTotalTokenHoldersSnapshots()
+            SnapshotsStorageWrapper.getTotalTokenHoldersSnapshots()
         );
-        return snapshotted ? value : LibERC1410.getTotalTokenHolders();
+        return snapshotted ? value : ERC1410StorageWrapper.getTotalTokenHolders();
     }
 }

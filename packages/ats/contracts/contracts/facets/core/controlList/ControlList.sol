@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IControlList } from "../controlList/IControlList.sol";
-import { LibControlList } from "../../../domain/core/LibControlList.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
+import { ControlListStorageWrapper } from "../../../domain/core/ControlListStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { _CONTROL_LIST_ROLE } from "../../../constants/roles.sol";
 
 /**
@@ -28,10 +28,10 @@ abstract contract ControlList is IControlList {
      */
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ControlList(bool _isWhiteList) external override {
-        if (LibControlList.isControlListInitialized()) {
+        if (ControlListStorageWrapper.isControlListInitialized()) {
             revert AlreadyInitialized();
         }
-        LibControlList.initializeControlList(_isWhiteList);
+        ControlListStorageWrapper.initializeControlList(_isWhiteList);
     }
 
     /**
@@ -40,10 +40,10 @@ abstract contract ControlList is IControlList {
      * @return success_ True if the account was successfully added
      */
     function addToControlList(address _account) external override returns (bool success_) {
-        LibAccess.checkRole(_CONTROL_LIST_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_CONTROL_LIST_ROLE);
+        PauseStorageWrapper.requireNotPaused();
 
-        success_ = LibControlList.addToControlList(_account);
+        success_ = ControlListStorageWrapper.addToControlList(_account);
         if (!success_) {
             revert ListedAccount(_account);
         }
@@ -56,10 +56,10 @@ abstract contract ControlList is IControlList {
      * @return success_ True if the account was successfully removed
      */
     function removeFromControlList(address _account) external override returns (bool success_) {
-        LibAccess.checkRole(_CONTROL_LIST_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_CONTROL_LIST_ROLE);
+        PauseStorageWrapper.requireNotPaused();
 
-        success_ = LibControlList.removeFromControlList(_account);
+        success_ = ControlListStorageWrapper.removeFromControlList(_account);
         if (!success_) {
             revert UnlistedAccount(_account);
         }
@@ -76,7 +76,7 @@ abstract contract ControlList is IControlList {
      * @return True if the account is in the control list
      */
     function isInControlList(address _account) external view override returns (bool) {
-        return LibControlList.isInControlList(_account);
+        return ControlListStorageWrapper.isInControlList(_account);
     }
 
     /**
@@ -84,7 +84,7 @@ abstract contract ControlList is IControlList {
      * @return True for whitelist mode, false for blacklist mode
      */
     function getControlListType() external view override returns (bool) {
-        return LibControlList.getControlListType();
+        return ControlListStorageWrapper.getControlListType();
     }
 
     /**
@@ -92,7 +92,7 @@ abstract contract ControlList is IControlList {
      * @return controlListCount_ The number of accounts
      */
     function getControlListCount() external view override returns (uint256 controlListCount_) {
-        controlListCount_ = LibControlList.getControlListCount();
+        controlListCount_ = ControlListStorageWrapper.getControlListCount();
     }
 
     /**
@@ -105,6 +105,6 @@ abstract contract ControlList is IControlList {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        members_ = LibControlList.getControlListMembers(_pageIndex, _pageLength);
+        members_ = ControlListStorageWrapper.getControlListMembers(_pageIndex, _pageLength);
     }
 }

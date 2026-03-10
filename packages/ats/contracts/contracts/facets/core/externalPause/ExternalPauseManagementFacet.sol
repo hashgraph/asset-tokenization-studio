@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ExternalPauseManagement } from "./ExternalPauseManagement.sol";
 import { IExternalPauseManagement } from "../externalPause/IExternalPauseManagement.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _EXTERNAL_PAUSE_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _EXTERNAL_PAUSE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract ExternalPauseManagementFacet is ExternalPauseManagement, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

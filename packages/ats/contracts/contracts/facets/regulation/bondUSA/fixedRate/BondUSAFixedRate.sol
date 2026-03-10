@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSA } from "../BondUSA.sol";
 import { IBondRead } from "../../../asset/bond/IBondRead.sol";
-import { LibBond } from "../../../../domain/asset/LibBond.sol";
-import { LibInterestRate } from "../../../../domain/asset/LibInterestRate.sol";
-import { LibPause } from "../../../../domain/core/LibPause.sol";
-import { LibAccess } from "../../../../domain/core/LibAccess.sol";
-import { LibCorporateActions } from "../../../../domain/core/LibCorporateActions.sol";
+import { BondStorageWrapper } from "../../../../domain/asset/BondStorageWrapper.sol";
+import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../../domain/core/AccessStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../../../constants/roles.sol";
 
 abstract contract BondUSAFixedRate is BondUSA {
@@ -32,7 +32,7 @@ abstract contract BondUSAFixedRate is BondUSA {
         }
 
         // Get the fixed rate from storage
-        (uint256 rate_, uint8 decimals_) = LibInterestRate.getFixedRate();
+        (uint256 rate_, uint8 decimals_) = InterestRateStorageWrapper.getFixedRate();
 
         // Create a modified coupon with the fixed rate and call parent implementation
         IBondRead.Coupon memory modifiedCoupon = IBondRead.Coupon({
@@ -56,15 +56,15 @@ abstract contract BondUSAFixedRate is BondUSA {
 
     function _setCouponWithModifiedCoupon(IBondRead.Coupon memory _newCoupon) private returns (uint256 couponID_) {
         // Import the same validation as BondUSA (replicate parent logic)
-        LibPause.requireNotPaused();
-        LibAccess.checkRole(_CORPORATE_ACTION_ROLE);
-        LibCorporateActions.validateDates(_newCoupon.startDate, _newCoupon.endDate);
-        LibCorporateActions.validateDates(_newCoupon.recordDate, _newCoupon.executionDate);
-        LibCorporateActions.validateDates(_newCoupon.fixingDate, _newCoupon.executionDate);
+        PauseStorageWrapper.requireNotPaused();
+        AccessStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE);
+        CorporateActionsStorageWrapper.validateDates(_newCoupon.startDate, _newCoupon.endDate);
+        CorporateActionsStorageWrapper.validateDates(_newCoupon.recordDate, _newCoupon.executionDate);
+        CorporateActionsStorageWrapper.validateDates(_newCoupon.fixingDate, _newCoupon.executionDate);
         _requireValidTimestamp(_newCoupon.recordDate);
         _requireValidTimestamp(_newCoupon.fixingDate);
 
         bytes32 corporateActionID;
-        (corporateActionID, couponID_) = LibBond.setCoupon(_newCoupon);
+        (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(_newCoupon);
     }
 }

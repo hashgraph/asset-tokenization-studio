@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { DiamondCutManager, _DEFAULT_ADMIN_ROLE } from "./DiamondCutManager.sol";
-import { LibAccess } from "../../domain/core/LibAccess.sol";
-import { LibPause } from "../../domain/core/LibPause.sol";
+import { AccessStorageWrapper } from "../../domain/core/AccessStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();
@@ -15,7 +15,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
             revert AlreadyInitialized();
         }
 
-        LibAccess.grantRole(_DEFAULT_ADMIN_ROLE, msg.sender);
+        AccessStorageWrapper.grantRole(_DEFAULT_ADMIN_ROLE, msg.sender);
 
         _businessLogicResolverStorage().initialized = true;
         success_ = true;
@@ -24,20 +24,20 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function registerBusinessLogics(
         BusinessLogicRegistryData[] calldata _businessLogics
     ) external override onlyValidKeys(_businessLogics) {
-        LibAccess.checkRole(_DEFAULT_ADMIN_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_DEFAULT_ADMIN_ROLE);
+        PauseStorageWrapper.requireNotPaused();
         uint256 latestVersion = _registerBusinessLogics(_businessLogics);
 
         emit BusinessLogicsRegistered(_businessLogics, latestVersion);
     }
 
     function addSelectorsToBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) external override {
-        LibAccess.checkRole(_DEFAULT_ADMIN_ROLE);
+        AccessStorageWrapper.checkRole(_DEFAULT_ADMIN_ROLE);
         _addSelectorsToBlacklist(_configurationId, _selectors);
     }
 
     function removeSelectorsFromBlacklist(bytes32 _configurationId, bytes4[] calldata _selectors) external override {
-        LibAccess.checkRole(_DEFAULT_ADMIN_ROLE);
+        AccessStorageWrapper.checkRole(_DEFAULT_ADMIN_ROLE);
         _removeSelectorsFromBlacklist(_configurationId, _selectors);
     }
 

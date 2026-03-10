@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { CorporateActions } from "./CorporateActions.sol";
 import { ICorporateActions } from "../corporateAction/ICorporateActions.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _CORPORATE_ACTIONS_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _CORPORATE_ACTIONS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract CorporateActionsFacet is CorporateActions, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

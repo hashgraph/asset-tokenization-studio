@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ScheduledCouponListing } from "./ScheduledCouponListing.sol";
 import { IScheduledCouponListing } from "../../scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _SCHEDULED_COUPON_LISTING_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { _SCHEDULED_COUPON_LISTING_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ScheduledCouponListingFacet is ScheduledCouponListing, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

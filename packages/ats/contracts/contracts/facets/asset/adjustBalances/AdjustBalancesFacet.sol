@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { AdjustBalances } from "./AdjustBalances.sol";
 import { IAdjustBalances } from "./IAdjustBalances.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _BALANCE_ADJUSTMENTS_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _BALANCE_ADJUSTMENTS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract AdjustBalancesFacet is AdjustBalances, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

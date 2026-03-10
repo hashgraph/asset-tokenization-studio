@@ -2,21 +2,20 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Domain Libraries
-import { LibABAF } from "../asset/LibABAF.sol";
-import { LibERC1410 } from "../asset/LibERC1410.sol";
-import { LibERC20 } from "../asset/LibERC20.sol";
-import { LibSnapshots } from "../asset/LibSnapshots.sol";
-import { LibHold } from "../asset/LibHold.sol";
-import { LibClearing } from "../asset/LibClearing.sol";
-import { LibLock } from "../asset/LibLock.sol";
-import { LibFreeze } from "../asset/LibFreeze.sol";
+import { ABAFStorageWrapper } from "../asset/ABAFStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
+import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
+import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
+import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
+import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 
 // Core Libraries
-import { LibCompliance } from "../core/LibCompliance.sol";
-import { LibControlList } from "../core/LibControlList.sol";
-import { LibERC712 } from "../core/LibERC712.sol";
-import { LibNonce } from "../core/LibNonce.sol";
-import { LibProtectedPartitions } from "../core/LibProtectedPartitions.sol";
+import { ComplianceStorageWrapper } from "../core/ComplianceStorageWrapper.sol";
+import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
+import { ERC712 } from "../core/ERC712.sol";
+import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
+import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 
 // Interfaces
 import { IERC3643Management } from "../../facets/core/ERC3643/IERC3643Management.sol";
@@ -27,9 +26,9 @@ import { ThirdPartyType } from "../../facets/core/externalControlList/ThirdParty
 import { IControlListBase } from "../../facets/core/controlList/IControlListBase.sol";
 
 // Utilities
-import { LibLowLevelCall } from "../../infrastructure/utils/LibLowLevelCall.sol";
+import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { LibResolverProxy } from "../../infrastructure/proxy/LibResolverProxy.sol";
+import { ResolverProxyStorageWrapper } from "../../infrastructure/proxy/ResolverProxyStorageWrapper.sol";
 
 /// @title HoldOps
 /// @notice Hold operations and total balance library - deployed once and called via DELEGATECALL
@@ -38,7 +37,7 @@ import { LibResolverProxy } from "../../infrastructure/proxy/LibResolverProxy.so
 ///      - Total Balance calculations
 ///      Accepts _timestamp as parameter (dependency injection)
 library HoldOps {
-    using LibLowLevelCall for address;
+    using LowLevelCall for address;
 
     // ==========================================================================
     // ERRORS
@@ -60,21 +59,21 @@ library HoldOps {
         ThirdPartyType _thirdPartyType
     ) public returns (bool success_, uint256 holdId_) {
         // Trigger and sync all ABAF adjustments
-        LibABAF.triggerAndSyncAll(_partition, _from, address(0));
+        ABAFStorageWrapper.triggerAndSyncAll(_partition, _from, address(0));
 
         // Update total hold ABAF
         uint256 abaf = updateTotalHold(_partition, _from);
 
         // Update snapshots before balance change
-        LibSnapshots.updateAccountSnapshot(_from, _partition);
-        LibSnapshots.updateAccountHeldBalancesSnapshot(_from, _partition);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_from, _partition);
+        SnapshotsStorageWrapper.updateAccountHeldBalancesSnapshot(_from, _partition);
 
         // Reduce balance by partition
-        LibERC1410.reduceBalanceByPartition(_from, _hold.amount, _partition);
+        ERC1410StorageWrapper.reduceBalanceByPartition(_from, _hold.amount, _partition);
 
         // Create hold and set LABAF
-        holdId_ = LibHold.createHold(_partition, _from, _hold, _operatorData, _thirdPartyType);
-        LibABAF.setHeldLabafById(_partition, _from, holdId_, abaf);
+        holdId_ = HoldStorageWrapper.createHold(_partition, _from, _hold, _operatorData, _thirdPartyType);
+        ABAFStorageWrapper.setHeldLabafById(_partition, _from, holdId_, abaf);
         success_ = true;
     }
 
@@ -90,17 +89,24 @@ library HoldOps {
         _adjustHoldBalances(_holdIdentifier, _to);
 
         // Update snapshots before balance transfer
-        LibSnapshots.updateAccountSnapshot(_to, _holdIdentifier.partition);
-        LibSnapshots.updateAccountHeldBalancesSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_to, _holdIdentifier.partition);
+        SnapshotsStorageWrapper.updateAccountHeldBalancesSnapshot(
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition
+        );
 
         // Execute the hold operation
         _operateHoldByPartition(_holdIdentifier, _to, _amount, IHoldBase.OperationType.Execute, _blockTimestamp);
         partition_ = _holdIdentifier.partition;
 
         // Clean up if hold is now empty
-        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = HoldStorageWrapper.getHold(_holdIdentifier);
         if (holdData.hold.amount == 0) {
-            LibABAF.removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
+            ABAFStorageWrapper.removeLabafHold(
+                _holdIdentifier.partition,
+                _holdIdentifier.tokenHolder,
+                _holdIdentifier.holdId
+            );
         }
         success_ = true;
     }
@@ -116,11 +122,14 @@ library HoldOps {
         _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
 
         // Update snapshots before balance transfer
-        LibSnapshots.updateAccountSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
-        LibSnapshots.updateAccountHeldBalancesSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
+        SnapshotsStorageWrapper.updateAccountHeldBalancesSnapshot(
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition
+        );
 
         // Get hold data and restore allowance if needed
-        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = HoldStorageWrapper.getHold(_holdIdentifier);
         _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, _amount);
 
         // Release the hold operation
@@ -133,9 +142,13 @@ library HoldOps {
         );
 
         // Clean up if hold is now empty
-        holdData = LibHold.getHold(_holdIdentifier);
+        holdData = HoldStorageWrapper.getHold(_holdIdentifier);
         if (holdData.hold.amount == 0) {
-            LibABAF.removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
+            ABAFStorageWrapper.removeLabafHold(
+                _holdIdentifier.partition,
+                _holdIdentifier.tokenHolder,
+                _holdIdentifier.holdId
+            );
         }
         success_ = true;
     }
@@ -150,11 +163,14 @@ library HoldOps {
         _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
 
         // Update snapshots before balance transfer
-        LibSnapshots.updateAccountSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
-        LibSnapshots.updateAccountHeldBalancesSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
+        SnapshotsStorageWrapper.updateAccountSnapshot(_holdIdentifier.tokenHolder, _holdIdentifier.partition);
+        SnapshotsStorageWrapper.updateAccountHeldBalancesSnapshot(
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition
+        );
 
         // Get hold data and retrieve amount
-        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = HoldStorageWrapper.getHold(_holdIdentifier);
         amount_ = holdData.hold.amount;
         _restoreHoldAllowance(holdData.thirdPartyType, _holdIdentifier, amount_);
 
@@ -168,36 +184,40 @@ library HoldOps {
         );
 
         // Remove hold (always cleaned up for reclaim)
-        LibABAF.removeLabafHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId);
+        ABAFStorageWrapper.removeLabafHold(
+            _holdIdentifier.partition,
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.holdId
+        );
         success_ = true;
     }
 
     /// @notice Update total held amount ABAF for token holder
     function updateTotalHold(bytes32 _partition, address _tokenHolder) public returns (uint256 abaf_) {
-        abaf_ = LibABAF.getAbaf();
-        uint256 labaf = LibABAF.getTotalHeldLabaf(_tokenHolder);
-        uint256 labafByPartition = LibABAF.getTotalHeldLabafByPartition(_partition, _tokenHolder);
+        abaf_ = ABAFStorageWrapper.getAbaf();
+        uint256 labaf = ABAFStorageWrapper.getTotalHeldLabaf(_tokenHolder);
+        uint256 labafByPartition = ABAFStorageWrapper.getTotalHeldLabafByPartition(_partition, _tokenHolder);
 
         // Update total held if ABAF has changed
         if (abaf_ != labaf) {
-            uint256 factor = LibABAF.calculateFactor(abaf_, labaf);
-            LibHold.updateTotalHeldAmountAndLabaf(_tokenHolder, factor);
-            LibABAF.setTotalHeldLabaf(_tokenHolder, abaf_);
+            uint256 factor = ABAFStorageWrapper.calculateFactor(abaf_, labaf);
+            HoldStorageWrapper.updateTotalHeldAmountAndLabaf(_tokenHolder, factor);
+            ABAFStorageWrapper.setTotalHeldLabaf(_tokenHolder, abaf_);
         }
 
         // Update partition-specific held if ABAF has changed
         if (abaf_ != labafByPartition) {
-            uint256 factorByPartition = LibABAF.calculateFactor(abaf_, labafByPartition);
-            LibHold.updateTotalHeldAmountAndLabafByPartition(_partition, _tokenHolder, factorByPartition);
-            LibABAF.setTotalHeldLabafByPartition(_partition, _tokenHolder, abaf_);
+            uint256 factorByPartition = ABAFStorageWrapper.calculateFactor(abaf_, labafByPartition);
+            HoldStorageWrapper.updateTotalHeldAmountAndLabafByPartition(_partition, _tokenHolder, factorByPartition);
+            ABAFStorageWrapper.setTotalHeldLabafByPartition(_partition, _tokenHolder, abaf_);
         }
     }
 
     /// @notice Decrease allowed balance for an authorized third-party hold
     function decreaseAllowedBalanceForHold(bytes32 _partition, address _from, uint256 _amount, uint256 _holdId) public {
         address thirdPartyAddress = msg.sender;
-        LibERC20.spendAllowance(_from, thirdPartyAddress, _amount);
-        LibHold.setHoldThirdPartyByParams(_from, _partition, _holdId, thirdPartyAddress);
+        ERC20StorageWrapper.spendAllowance(_from, thirdPartyAddress, _amount);
+        HoldStorageWrapper.setHoldThirdPartyByParams(_from, _partition, _holdId, thirdPartyAddress);
     }
 
     /// @notice Create a protected hold by partition with EIP-712 signature verification
@@ -208,24 +228,24 @@ library HoldOps {
         bytes calldata _signature,
         uint256 _blockTimestamp
     ) public returns (bool success_, uint256 holdId_) {
-        LibERC712.checkNounceAndDeadline(
+        ERC712.checkNounceAndDeadline(
             _protectedHold.nonce,
             _from,
-            LibNonce.getNonceFor(_from),
+            NonceStorageWrapper.getNonceFor(_from),
             _protectedHold.deadline,
             _blockTimestamp
         );
-        LibProtectedPartitions.checkCreateHoldSignature(
+        ProtectedPartitionsStorageWrapper.checkCreateHoldSignature(
             _partition,
             _from,
             _protectedHold,
             _signature,
-            LibERC20.getName(),
-            LibResolverProxy.getVersion(),
+            ERC20StorageWrapper.getName(),
+            ResolverProxyStorageWrapper.getVersion(),
             block.chainid,
             address(this)
         );
-        LibNonce.setNonceFor(_protectedHold.nonce, _from);
+        NonceStorageWrapper.setNonceFor(_protectedHold.nonce, _from);
         return createHoldByPartition(_partition, _from, _protectedHold.hold, "", ThirdPartyType.PROTECTED);
     }
 
@@ -240,7 +260,7 @@ library HoldOps {
         uint256 timestamp
     ) public view returns (uint256 totalBalance_) {
         totalBalance_ =
-            LibABAF.balanceOfAdjustedAt(account, timestamp) +
+            ABAFStorageWrapper.balanceOfAdjustedAt(account, timestamp) +
             _getAdjustedHeldAmountByAccount(account, timestamp) +
             _getAdjustedLockedAmountByAccount(account, timestamp) +
             _getAdjustedFrozenAmount(account, timestamp) +
@@ -254,7 +274,7 @@ library HoldOps {
         uint256 timestamp
     ) public view returns (uint256 totalBalance_) {
         totalBalance_ =
-            LibABAF.balanceOfByPartitionAdjustedAt(partition, account, timestamp) +
+            ABAFStorageWrapper.balanceOfByPartitionAdjustedAt(partition, account, timestamp) +
             _getAdjustedHeldAmountByPartition(partition, account, timestamp) +
             _getAdjustedLockedAmountByPartition(partition, account, timestamp) +
             _getAdjustedFrozenAmountByPartition(partition, account, timestamp) +
@@ -285,8 +305,8 @@ library HoldOps {
     /// @notice Get held amount for token holder adjusted at timestamp
     function getHeldAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) public view returns (uint256) {
         return
-            LibHold.getHeldAmountFor(_tokenHolder) *
-            LibABAF.calculateFactorForHeldAmountAdjustedAt(_tokenHolder, _timestamp);
+            HoldStorageWrapper.getHeldAmountFor(_tokenHolder) *
+            ABAFStorageWrapper.calculateFactorForHeldAmountAdjustedAt(_tokenHolder, _timestamp);
     }
 
     /// @notice Get held amount by partition for token holder adjusted at timestamp
@@ -295,11 +315,11 @@ library HoldOps {
         address _tokenHolder,
         uint256 _timestamp
     ) public view returns (uint256) {
-        uint256 factor = LibABAF.calculateFactor(
-            LibABAF.getAbafAdjustedAt(_timestamp),
-            LibABAF.getTotalHeldLabafByPartition(_partition, _tokenHolder)
+        uint256 factor = ABAFStorageWrapper.calculateFactor(
+            ABAFStorageWrapper.getAbafAdjustedAt(_timestamp),
+            ABAFStorageWrapper.getTotalHeldLabafByPartition(_partition, _tokenHolder)
         );
-        return LibHold.getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
+        return HoldStorageWrapper.getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
     }
 
     /// @notice Get hold data by partition adjusted at timestamp
@@ -319,13 +339,24 @@ library HoldOps {
             ThirdPartyType thirdPartType_
         )
     {
-        uint256 factor = LibABAF.calculateFactor(
-            LibABAF.getAbafAdjustedAt(_timestamp),
-            LibABAF.getHeldLabafById(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _holdIdentifier.holdId)
+        uint256 factor = ABAFStorageWrapper.calculateFactor(
+            ABAFStorageWrapper.getAbafAdjustedAt(_timestamp),
+            ABAFStorageWrapper.getHeldLabafById(
+                _holdIdentifier.partition,
+                _holdIdentifier.tokenHolder,
+                _holdIdentifier.holdId
+            )
         );
 
-        (amount_, expirationTimestamp_, escrow_, destination_, data_, operatorData_, thirdPartType_) = LibHold
-            .getHoldForByPartition(_holdIdentifier);
+        (
+            amount_,
+            expirationTimestamp_,
+            escrow_,
+            destination_,
+            data_,
+            operatorData_,
+            thirdPartType_
+        ) = HoldStorageWrapper.getHoldForByPartition(_holdIdentifier);
         amount_ *= factor;
     }
 
@@ -347,7 +378,7 @@ library HoldOps {
     /// @notice Adjust hold balances and update ABAF
     function _adjustHoldBalances(IHoldBase.HoldIdentifier calldata _holdIdentifier, address _to) private {
         // Trigger and sync all ABAF adjustments
-        LibABAF.triggerAndSyncAll(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to);
+        ABAFStorageWrapper.triggerAndSyncAll(_holdIdentifier.partition, _holdIdentifier.tokenHolder, _to);
 
         // Update total hold ABAF
         uint256 abaf = updateTotalHold(_holdIdentifier.partition, _holdIdentifier.tokenHolder);
@@ -358,12 +389,12 @@ library HoldOps {
 
     /// @notice Update hold amount based on ABAF change
     function _updateHold(bytes32 _partition, uint256 _holdId, address _tokenHolder, uint256 _abaf) private {
-        uint256 holdLabaf = LibABAF.getHeldLabafById(_partition, _tokenHolder, _holdId);
+        uint256 holdLabaf = ABAFStorageWrapper.getHeldLabafById(_partition, _tokenHolder, _holdId);
 
         if (_abaf != holdLabaf) {
-            uint256 holdFactor = LibABAF.calculateFactor(_abaf, holdLabaf);
-            LibHold.updateHoldAmountById(_partition, _holdId, _tokenHolder, holdFactor);
-            LibABAF.setHeldLabafById(_partition, _tokenHolder, _holdId, _abaf);
+            uint256 holdFactor = ABAFStorageWrapper.calculateFactor(_abaf, holdLabaf);
+            HoldStorageWrapper.updateHoldAmountById(_partition, _holdId, _tokenHolder, holdFactor);
+            ABAFStorageWrapper.setHeldLabafById(_partition, _tokenHolder, _holdId, _abaf);
         }
     }
 
@@ -375,11 +406,11 @@ library HoldOps {
         IHoldBase.OperationType _operation,
         uint256 _blockTimestamp
     ) private {
-        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = HoldStorageWrapper.getHold(_holdIdentifier);
 
         // Validate execution-specific conditions
         if (_operation == IHoldBase.OperationType.Execute) {
-            if (!LibControlList.isAbleToAccess(_holdIdentifier.tokenHolder)) {
+            if (!ControlListStorageWrapper.isAbleToAccess(_holdIdentifier.tokenHolder)) {
                 revert IControlListBase.AccountIsBlocked(_holdIdentifier.tokenHolder);
             }
             if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
@@ -389,21 +420,21 @@ library HoldOps {
 
         // Check expiration and escrow for non-reclaim operations
         if (_operation != IHoldBase.OperationType.Reclaim) {
-            if (LibHold.isHoldExpired(holdData.hold, _blockTimestamp)) {
+            if (HoldStorageWrapper.isHoldExpired(holdData.hold, _blockTimestamp)) {
                 revert IHoldTokenHolder.HoldExpirationReached();
             }
-            if (!LibHold.isEscrow(holdData.hold, msg.sender)) {
+            if (!HoldStorageWrapper.isEscrow(holdData.hold, msg.sender)) {
                 revert IHoldTokenHolder.IsNotEscrow();
             }
         } else if (_operation == IHoldBase.OperationType.Reclaim) {
             // Reclaim requires hold to be expired
-            if (!LibHold.isHoldExpired(holdData.hold, _blockTimestamp)) {
+            if (!HoldStorageWrapper.isHoldExpired(holdData.hold, _blockTimestamp)) {
                 revert IHoldTokenHolder.HoldExpirationNotReached();
             }
         }
 
         // Validate hold amount
-        LibHold.checkHoldAmount(_amount, holdData);
+        HoldStorageWrapper.checkHoldAmount(_amount, holdData);
 
         // Transfer the held amount
         _transferHold(_holdIdentifier, _to, _amount);
@@ -412,24 +443,24 @@ library HoldOps {
     /// @notice Transfer held amount from hold to recipient
     function _transferHold(IHoldBase.HoldIdentifier calldata _holdIdentifier, address _to, uint256 _amount) private {
         // Decrease held amount
-        LibHold.decreaseHeldAmount(_holdIdentifier, _amount);
+        HoldStorageWrapper.decreaseHeldAmount(_holdIdentifier, _amount);
 
         // Remove hold if empty
-        IHoldBase.HoldData memory holdData = LibHold.getHold(_holdIdentifier);
+        IHoldBase.HoldData memory holdData = HoldStorageWrapper.getHold(_holdIdentifier);
         if (holdData.hold.amount == 0) {
-            LibHold.removeHold(_holdIdentifier);
+            HoldStorageWrapper.removeHold(_holdIdentifier);
         }
 
         // Increase recipient balance by partition
-        if (LibERC1410.validPartitionForReceiver(_holdIdentifier.partition, _to)) {
-            LibERC1410.increaseBalanceByPartition(_to, _amount, _holdIdentifier.partition);
+        if (ERC1410StorageWrapper.validPartitionForReceiver(_holdIdentifier.partition, _to)) {
+            ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _holdIdentifier.partition);
         } else {
-            LibERC1410.addPartitionTo(_amount, _to, _holdIdentifier.partition);
+            ERC1410StorageWrapper.addPartitionTo(_amount, _to, _holdIdentifier.partition);
         }
 
         // Notify compliance (only for cross-partition transfers in default partition)
         if (_holdIdentifier.tokenHolder != _to && _holdIdentifier.partition == _DEFAULT_PARTITION) {
-            address compliance = address(LibCompliance.getCompliance());
+            address compliance = address(ComplianceStorageWrapper.getCompliance());
             if (compliance != address(0)) {
                 compliance.functionCall(
                     abi.encodeWithSelector(ICompliance.transferred.selector, _holdIdentifier.tokenHolder, _to, _amount),
@@ -450,9 +481,9 @@ library HoldOps {
             return;
         }
 
-        address thirdParty = LibHold.getHoldThirdParty(_holdIdentifier);
+        address thirdParty = HoldStorageWrapper.getHoldThirdParty(_holdIdentifier);
 
-        LibERC20.increaseAllowance(_holdIdentifier.tokenHolder, thirdParty, _amount);
+        ERC20StorageWrapper.increaseAllowance(_holdIdentifier.tokenHolder, thirdParty, _amount);
     }
 
     // ==========================================================================
@@ -483,8 +514,8 @@ library HoldOps {
     }
 
     function _getAdjustedHeldAmountByAccount(address account, uint256 timestamp) private view returns (uint256) {
-        uint256 heldAmount = LibHold.getHeldAmountFor(account);
-        uint256 factor = LibABAF.calculateFactorForHeldAmountAdjustedAt(account, timestamp);
+        uint256 heldAmount = HoldStorageWrapper.getHeldAmountFor(account);
+        uint256 factor = ABAFStorageWrapper.calculateFactorForHeldAmountAdjustedAt(account, timestamp);
         return heldAmount * factor;
     }
 
@@ -493,14 +524,14 @@ library HoldOps {
         address account,
         uint256 timestamp
     ) private view returns (uint256) {
-        uint256 heldAmount = LibHold.getHeldAmountForByPartition(partition, account);
-        uint256 factor = LibABAF.calculateFactorForHeldAmountAdjustedAt(account, timestamp);
+        uint256 heldAmount = HoldStorageWrapper.getHeldAmountForByPartition(partition, account);
+        uint256 factor = ABAFStorageWrapper.calculateFactorForHeldAmountAdjustedAt(account, timestamp);
         return heldAmount * factor;
     }
 
     function _getAdjustedLockedAmountByAccount(address account, uint256 timestamp) private view returns (uint256) {
-        uint256 lockedAmount = LibLock.getLockedAmountFor(account);
-        uint256 factor = LibABAF.calculateFactorForLockedAmountAdjustedAt(account, timestamp);
+        uint256 lockedAmount = LockStorageWrapper.getLockedAmountFor(account);
+        uint256 factor = ABAFStorageWrapper.calculateFactorForLockedAmountAdjustedAt(account, timestamp);
         return lockedAmount * factor;
     }
 
@@ -509,14 +540,14 @@ library HoldOps {
         address account,
         uint256 timestamp
     ) private view returns (uint256) {
-        uint256 lockedAmount = LibLock.getLockedAmountForByPartition(partition, account);
-        uint256 factor = LibABAF.calculateFactorForLockedAmountAdjustedAt(account, timestamp);
+        uint256 lockedAmount = LockStorageWrapper.getLockedAmountForByPartition(partition, account);
+        uint256 factor = ABAFStorageWrapper.calculateFactorForLockedAmountAdjustedAt(account, timestamp);
         return lockedAmount * factor;
     }
 
     function _getAdjustedFrozenAmount(address account, uint256 timestamp) private view returns (uint256) {
-        uint256 frozenAmount = LibFreeze.getFrozenTokens(account);
-        uint256 factor = LibABAF.calculateFactorForFrozenAmountAdjustedAt(account, timestamp);
+        uint256 frozenAmount = ComplianceStorageWrapper.getFrozenTokens(account);
+        uint256 factor = ABAFStorageWrapper.calculateFactorForFrozenAmountAdjustedAt(account, timestamp);
         return frozenAmount * factor;
     }
 
@@ -525,14 +556,14 @@ library HoldOps {
         address account,
         uint256 timestamp
     ) private view returns (uint256) {
-        uint256 frozenAmount = LibFreeze.getFrozenTokensByPartition(account, partition);
-        uint256 factor = LibABAF.calculateFactorForFrozenAmountAdjustedAt(account, timestamp);
+        uint256 frozenAmount = ComplianceStorageWrapper.getFrozenTokensByPartition(account, partition);
+        uint256 factor = ABAFStorageWrapper.calculateFactorForFrozenAmountAdjustedAt(account, timestamp);
         return frozenAmount * factor;
     }
 
     function _getAdjustedClearedAmountByAccount(address account, uint256 timestamp) private view returns (uint256) {
-        uint256 clearedAmount = LibClearing.getClearedAmount(account);
-        uint256 factor = LibABAF.calculateFactorForClearedAmountAdjustedAt(account, timestamp);
+        uint256 clearedAmount = ClearingStorageWrapper.getClearedAmount(account);
+        uint256 factor = ABAFStorageWrapper.calculateFactorForClearedAmountAdjustedAt(account, timestamp);
         return clearedAmount * factor;
     }
 
@@ -541,8 +572,8 @@ library HoldOps {
         address account,
         uint256 timestamp
     ) private view returns (uint256) {
-        uint256 clearedAmount = LibClearing.getClearedAmountByPartition(partition, account);
-        uint256 factor = LibABAF.calculateFactorForClearedAmountAdjustedAt(account, timestamp);
+        uint256 clearedAmount = ClearingStorageWrapper.getClearedAmountByPartition(partition, account);
+        uint256 factor = ABAFStorageWrapper.calculateFactorForClearedAmountAdjustedAt(account, timestamp);
         return clearedAmount * factor;
     }
 }

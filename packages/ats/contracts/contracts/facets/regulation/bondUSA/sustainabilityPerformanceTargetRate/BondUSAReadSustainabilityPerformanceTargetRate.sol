@@ -8,11 +8,11 @@ import {
     ISustainabilityPerformanceTargetRate
 } from "../../../asset/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 // solhint-enable max-line-length
-import { LibBond } from "../../../../domain/asset/LibBond.sol";
-import { LibInterestRate } from "../../../../domain/asset/LibInterestRate.sol";
-import { LibKpis } from "../../../../domain/asset/LibKpis.sol";
-import { LibProceedRecipients } from "../../../../domain/asset/LibProceedRecipients.sol";
-import { LibCorporateActions } from "../../../../domain/core/LibCorporateActions.sol";
+import { BondStorageWrapper } from "../../../../domain/asset/BondStorageWrapper.sol";
+import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
+import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.sol";
+import { ProceedRecipientsStorageWrapper } from "../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../../constants/values.sol";
 
 abstract contract BondUSAReadSustainabilityPerformanceTargetRate is BondUSARead {
@@ -20,10 +20,10 @@ abstract contract BondUSAReadSustainabilityPerformanceTargetRate is BondUSARead 
         uint256 _couponID
     ) external view override returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
         // Validate corporate action type
-        LibCorporateActions.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+        CorporateActionsStorageWrapper.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
 
         // Get the base coupon from storage
-        registeredCoupon_ = LibBond.getCoupon(_couponID);
+        registeredCoupon_ = BondStorageWrapper.getCoupon(_couponID);
 
         // Only calculate rate if:
         // 1. Rate hasn't been set yet (PENDING status), AND
@@ -58,28 +58,33 @@ abstract contract BondUSAReadSustainabilityPerformanceTargetRate is BondUSARead 
         IBondRead.Coupon memory _coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
         {
-            (uint256 startPeriod, uint256 startRate, uint8 cfgDecimals) = LibInterestRate.getSustainabilityRateConfig();
+            (uint256 startPeriod, uint256 startRate, uint8 cfgDecimals) = InterestRateStorageWrapper
+                .getSustainabilityRateConfig();
             if (_coupon.fixingDate < startPeriod) {
                 return (startRate, cfgDecimals);
             }
         }
 
-        (uint256 baseRate, uint8 decimals) = LibInterestRate.getBaseRate();
+        (uint256 baseRate, uint8 decimals) = InterestRateStorageWrapper.getBaseRate();
         uint256 periodStart = _getPreviousFixingDate(_couponID);
 
         int256 totalRateAdjustment;
         {
-            address[] memory projects = LibProceedRecipients.getProceedRecipients(
+            address[] memory projects = ProceedRecipientsStorageWrapper.getProceedRecipients(
                 0,
-                LibProceedRecipients.getProceedRecipientsCount()
+                ProceedRecipientsStorageWrapper.getProceedRecipientsCount()
             );
 
             for (uint256 index = 0; index < projects.length; ) {
                 address project = projects[index];
-                ISustainabilityPerformanceTargetRate.ImpactData memory impactData = LibInterestRate
+                ISustainabilityPerformanceTargetRate.ImpactData memory impactData = InterestRateStorageWrapper
                     .getSustainabilityImpactData(project);
-                (uint256 value, bool exists) = LibKpis.getLatestKpiData(periodStart, _coupon.fixingDate, project);
-                totalRateAdjustment += LibInterestRate.calculateRateAdjustment(impactData, value, exists);
+                (uint256 value, bool exists) = KpisStorageWrapper.getLatestKpiData(
+                    periodStart,
+                    _coupon.fixingDate,
+                    project
+                );
+                totalRateAdjustment += InterestRateStorageWrapper.calculateRateAdjustment(impactData, value, exists);
                 unchecked {
                     ++index;
                 }
@@ -96,13 +101,13 @@ abstract contract BondUSAReadSustainabilityPerformanceTargetRate is BondUSARead 
     /// @param _couponID Current coupon ID (to find the previous one)
     /// @return fixingDate_ The previous coupon's fixing date, or 0 if no previous coupon
     function _getPreviousFixingDate(uint256 _couponID) internal view returns (uint256 fixingDate_) {
-        uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, _getBlockTimestamp());
+        uint256 previousCouponId = BondStorageWrapper.getPreviousCouponInOrderedList(_couponID, _getBlockTimestamp());
 
         if (previousCouponId == 0) {
             return 0;
         }
 
-        IBondRead.Coupon memory previousCoupon = LibBond.getCoupon(previousCouponId).coupon;
+        IBondRead.Coupon memory previousCoupon = BondStorageWrapper.getCoupon(previousCouponId).coupon;
         return previousCoupon.fixingDate;
     }
 }

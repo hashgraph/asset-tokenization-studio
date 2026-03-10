@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingRead } from "../clearing/IClearingRead.sol";
-import { LibClearing } from "../../../domain/asset/LibClearing.sol";
+import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
@@ -23,7 +23,7 @@ abstract contract ClearingRead is IClearingRead, TimestampProvider {
         address _tokenHolder,
         ClearingOperationType _clearingOperationType
     ) external view override returns (uint256 clearingCount_) {
-        return LibClearing.getClearingCount(_partition, _tokenHolder, _clearingOperationType);
+        return ClearingStorageWrapper.getClearingCount(_partition, _tokenHolder, _clearingOperationType);
     }
 
     function getClearingsIdForByPartition(
@@ -33,7 +33,14 @@ abstract contract ClearingRead is IClearingRead, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory clearingsId_) {
-        return LibClearing.getClearingIds(_partition, _tokenHolder, _clearingOperationType, _pageIndex, _pageLength);
+        return
+            ClearingStorageWrapper.getClearingIds(
+                _partition,
+                _tokenHolder,
+                _clearingOperationType,
+                _pageIndex,
+                _pageLength
+            );
     }
 
     function getClearingThirdParty(
@@ -42,6 +49,11 @@ abstract contract ClearingRead is IClearingRead, TimestampProvider {
         ClearingOperationType _clearingOpeartionType,
         uint256 _clearingId
     ) external view override returns (address thirdParty_) {
-        thirdParty_ = LibClearing.getClearingThirdParty(_partition, _tokenHolder, _clearingOpeartionType, _clearingId);
+        thirdParty_ = ClearingStorageWrapper.getClearingThirdParty(
+            _partition,
+            _tokenHolder,
+            _clearingOpeartionType,
+            _clearingId
+        );
     }
 }

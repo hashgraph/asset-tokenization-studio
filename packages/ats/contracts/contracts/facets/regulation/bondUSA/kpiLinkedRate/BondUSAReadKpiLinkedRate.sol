@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSARead } from "../BondUSARead.sol";
 import { IBondRead } from "../../../asset/bond/IBondRead.sol";
-import { LibBond } from "../../../../domain/asset/LibBond.sol";
-import { LibInterestRate } from "../../../../domain/asset/LibInterestRate.sol";
-import { LibKpis } from "../../../../domain/asset/LibKpis.sol";
-import { LibProceedRecipients } from "../../../../domain/asset/LibProceedRecipients.sol";
-import { LibCorporateActions } from "../../../../domain/core/LibCorporateActions.sol";
+import { BondStorageWrapper } from "../../../../domain/asset/BondStorageWrapper.sol";
+import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
+import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.sol";
+import { ProceedRecipientsStorageWrapper } from "../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../../../constants/values.sol";
 
 abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
@@ -15,10 +15,10 @@ abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
         uint256 _couponID
     ) external view override returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
         // Validate corporate action type
-        LibCorporateActions.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+        CorporateActionsStorageWrapper.validateMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
 
         // Get the base coupon from storage
-        registeredCoupon_ = LibBond.getCoupon(_couponID);
+        registeredCoupon_ = BondStorageWrapper.getCoupon(_couponID);
 
         // Only calculate rate if:
         // 1. Rate hasn't been set yet (PENDING status), AND
@@ -53,7 +53,7 @@ abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
         IBondRead.Coupon memory _coupon
     ) internal view returns (uint256 rate_, uint8 rateDecimals_) {
         // Check if we're before the start period
-        (uint256 startPeriod, uint256 startRate, uint8 rateDecimals, uint256 reportPeriod) = LibInterestRate
+        (uint256 startPeriod, uint256 startRate, uint8 rateDecimals, uint256 reportPeriod) = InterestRateStorageWrapper
             .getKpiLinkedRateConfig();
 
         if (_coupon.fixingDate < startPeriod) {
@@ -61,15 +61,15 @@ abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
         }
 
         // Aggregate KPI data from all proceed recipients
-        address[] memory projects = LibProceedRecipients.getProceedRecipients(
+        address[] memory projects = ProceedRecipientsStorageWrapper.getProceedRecipients(
             0,
-            LibProceedRecipients.getProceedRecipientsCount()
+            ProceedRecipientsStorageWrapper.getProceedRecipientsCount()
         );
         uint256 impactData = 0;
         bool reportFound = false;
 
         for (uint256 index = 0; index < projects.length; ) {
-            (uint256 value, bool exists) = LibKpis.getLatestKpiData(
+            (uint256 value, bool exists) = KpisStorageWrapper.getLatestKpiData(
                 _coupon.fixingDate - reportPeriod,
                 _coupon.fixingDate,
                 projects[index]
@@ -89,7 +89,13 @@ abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
         (uint256 previousRate, uint8 previousRateDecimals) = _getPreviousCouponRate(_couponID);
 
         // Calculate and return the rate
-        return LibInterestRate.calculateKpiLinkedRate(impactData, previousRate, previousRateDecimals, reportFound);
+        return
+            InterestRateStorageWrapper.calculateKpiLinkedRate(
+                impactData,
+                previousRate,
+                previousRateDecimals,
+                reportFound
+            );
     }
 
     /// @notice Get the rate and decimals of the previous coupon
@@ -97,7 +103,7 @@ abstract contract BondUSAReadKpiLinkedRate is BondUSARead {
     /// @return rate_ The previous coupon rate
     /// @return rateDecimals_ The previous coupon rate decimals
     function _getPreviousCouponRate(uint256 _couponID) internal view returns (uint256 rate_, uint8 rateDecimals_) {
-        uint256 previousCouponId = LibBond.getPreviousCouponInOrderedList(_couponID, _getBlockTimestamp());
+        uint256 previousCouponId = BondStorageWrapper.getPreviousCouponInOrderedList(_couponID, _getBlockTimestamp());
 
         if (previousCouponId == 0) {
             return (0, 0);

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { TransferAndLock } from "./TransferAndLock.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _TRANSFER_AND_LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys/resolverKeys.sol";
+import { _TRANSFER_AND_LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 
 contract TransferAndLockFacet is TransferAndLock, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

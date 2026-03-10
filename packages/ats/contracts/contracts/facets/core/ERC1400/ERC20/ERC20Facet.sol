@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ERC20 } from "./ERC20.sol";
 import { IERC20 } from "../../ERC1400/ERC20/IERC20.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _ERC20_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { _ERC20_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ERC20Facet is ERC20, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

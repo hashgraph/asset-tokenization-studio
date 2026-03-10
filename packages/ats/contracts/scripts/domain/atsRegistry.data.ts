@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-02-26T16:32:46.101Z
+ * Generated: 2026-03-10T08:31:52.581Z
  * Facets: 64
  * Infrastructure: 2
  *
@@ -4529,12 +4529,258 @@ export const TOTAL_INFRASTRUCTURE_CONTRACTS = 2 as const;
  * StorageWrappers provide internal storage and helper methods for facets.
  * They are abstract contracts inherited by facets, not deployed directly.
  */
-export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> = {};
+export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> = {
+  ABAFStorageWrapper: {
+    name: "ABAFStorageWrapper",
+    methods: [],
+  },
+
+  AccessStorageWrapper: {
+    name: "AccessStorageWrapper",
+    methods: [],
+  },
+
+  BondStorageWrapper: {
+    name: "BondStorageWrapper",
+    methods: [],
+  },
+
+  CapStorageWrapper: {
+    name: "CapStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "MaxSupplyByPartitionSet",
+        signature: "MaxSupplyByPartitionSet(address,bytes32,uint256,uint256)",
+        topic0: "0x9c0c8826170fa45c79bf64a2913df8ccc3e77407aba502d85946253332a4d749",
+      },
+      {
+        name: "MaxSupplySet",
+        signature: "MaxSupplySet(address,uint256,uint256)",
+        topic0: "0xccc3b7560f9d81f26c619129ba9fa74ded9a6edb555a04655baaeca673e0a809",
+      },
+    ],
+    errors: [
+      { name: "MaxSupplyReached", signature: "MaxSupplyReached(uint256)", selector: "0xf9f84915" },
+      {
+        name: "MaxSupplyReachedForPartition",
+        signature: "MaxSupplyReachedForPartition(bytes32,uint256)",
+        selector: "0x57c004a9",
+      },
+      {
+        name: "NewMaxSupplyByPartitionTooHigh",
+        signature: "NewMaxSupplyByPartitionTooHigh(bytes32,uint256,uint256)",
+        selector: "0x21aa64a7",
+      },
+      { name: "NewMaxSupplyCannotBeZero", signature: "NewMaxSupplyCannotBeZero()", selector: "0x76f138fb" },
+      {
+        name: "NewMaxSupplyForPartitionTooLow",
+        signature: "NewMaxSupplyForPartitionTooLow(bytes32,uint256,uint256)",
+        selector: "0x820c68a8",
+      },
+      { name: "NewMaxSupplyTooLow", signature: "NewMaxSupplyTooLow(uint256,uint256)", selector: "0x98c2b03b" },
+    ],
+  },
+
+  ClearingStorageWrapper: {
+    name: "ClearingStorageWrapper",
+    methods: [],
+  },
+
+  ComplianceStorageWrapper: {
+    name: "ComplianceStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "ComplianceAdded",
+        signature: "ComplianceAdded(address)",
+        topic0: "0x7f3a888862559648ec01d97deb7b5012bff86dc91e654a1de397170db40e35b6",
+      },
+    ],
+    errors: [
+      {
+        name: "InsufficientFrozenBalance",
+        signature: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
+        selector: "0xefafde54",
+      },
+    ],
+  },
+
+  ControlListStorageWrapper: {
+    name: "ControlListStorageWrapper",
+    methods: [],
+  },
+
+  CorporateActionsStorageWrapper: {
+    name: "CorporateActionsStorageWrapper",
+    methods: [],
+    events: [
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+    ],
+  },
+
+  EquityStorageWrapper: {
+    name: "EquityStorageWrapper",
+    methods: [],
+  },
+
+  ERC1410StorageWrapper: {
+    name: "ERC1410StorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "TransferByPartition",
+        signature: "TransferByPartition(bytes32,address,address,address,uint256,bytes,bytes)",
+        topic0: "0xff4e9a26af4eb73b8bacfaa4abd4fea03d9448e7b912dc5ff4019048875aa2d4",
+      },
+    ],
+    errors: [{ name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" }],
+  },
+
+  ERC1594StorageWrapper: {
+    name: "ERC1594StorageWrapper",
+    methods: [],
+    errors: [{ name: "NotIssuable", signature: "NotIssuable()", selector: "0xfe5bf965" }],
+  },
+
+  ERC1643StorageWrapper: {
+    name: "ERC1643StorageWrapper",
+    methods: [],
+  },
+
+  ERC1644StorageWrapper: {
+    name: "ERC1644StorageWrapper",
+    methods: [],
+  },
+
+  ERC20PermitStorageWrapper: {
+    name: "ERC20PermitStorageWrapper",
+    methods: [],
+    events: [
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+    ],
+  },
+
+  ERC20StorageWrapper: {
+    name: "ERC20StorageWrapper",
+    methods: [],
+  },
+
+  ERC20VotesStorageWrapper: {
+    name: "ERC20VotesStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "DelegateChanged",
+        signature: "DelegateChanged(address,address,address)",
+        topic0: "0x3134e8a2e6d97e929a7e54011ea5485d7d196dd5f0ba4d4ef95803e8e3fc257f",
+      },
+      {
+        name: "DelegateVotesChanged",
+        signature: "DelegateVotesChanged(address,uint256,uint256)",
+        topic0: "0xdec2bacdd2f05b59de34da9b523dff8be42e5e38e818c82fdb0bae774387a724",
+      },
+    ],
+  },
+
+  ExternalListsStorageWrapper: {
+    name: "ExternalListsStorageWrapper",
+    methods: [],
+    errors: [{ name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" }],
+  },
+
+  HoldStorageWrapper: {
+    name: "HoldStorageWrapper",
+    methods: [],
+  },
+
+  InterestRateStorageWrapper: {
+    name: "InterestRateStorageWrapper",
+    methods: [],
+  },
+
+  KpisStorageWrapper: {
+    name: "KpisStorageWrapper",
+    methods: [],
+  },
+
+  KycStorageWrapper: {
+    name: "KycStorageWrapper",
+    methods: [],
+  },
+
+  LockStorageWrapper: {
+    name: "LockStorageWrapper",
+    methods: [],
+    errors: [
+      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
+      { name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" },
+      { name: "WrongLockId", signature: "WrongLockId()", selector: "0x039be1dd" },
+    ],
+  },
+
+  NonceStorageWrapper: {
+    name: "NonceStorageWrapper",
+    methods: [],
+  },
+
+  PauseStorageWrapper: {
+    name: "PauseStorageWrapper",
+    methods: [],
+  },
+
+  ProceedRecipientsStorageWrapper: {
+    name: "ProceedRecipientsStorageWrapper",
+    methods: [],
+  },
+
+  ProtectedPartitionsStorageWrapper: {
+    name: "ProtectedPartitionsStorageWrapper",
+    methods: [],
+  },
+
+  ResolverProxyStorageWrapper: {
+    name: "ResolverProxyStorageWrapper",
+    methods: [],
+  },
+
+  ScheduledTasksStorageWrapper: {
+    name: "ScheduledTasksStorageWrapper",
+    methods: [],
+    errors: [{ name: "Selector", signature: "Selector()", selector: "0xdc45be1a" }],
+  },
+
+  SecurityStorageWrapper: {
+    name: "SecurityStorageWrapper",
+    methods: [],
+  },
+
+  SnapshotsStorageWrapper: {
+    name: "SnapshotsStorageWrapper",
+    methods: [],
+    events: [
+      { name: "ing", signature: "ing()", topic0: "0x0773c888356c6b8d36f3b63b84f8dbb3cdb7d07e77df5b7745a04c90bf501014" },
+    ],
+  },
+
+  SSIStorageWrapper: {
+    name: "SSIStorageWrapper",
+    methods: [],
+  },
+
+  TimeTravelStorageWrapper: {
+    name: "TimeTravelStorageWrapper",
+    methods: [],
+    events: [
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+    ],
+  },
+};
 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 0 as const;
+export const TOTAL_STORAGE_WRAPPERS = 32 as const;
 
 /**
  * All role identifiers extracted from contracts.

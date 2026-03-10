@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalControlListManagement } from "../externalControlList/IExternalControlListManagement.sol";
-import { LibExternalLists } from "../../../domain/core/LibExternalLists.sol";
-import { LibAccess } from "../../../domain/core/LibAccess.sol";
-import { LibPause } from "../../../domain/core/LibPause.sol";
+import { ExternalListsStorageWrapper } from "../../../domain/core/ExternalListsStorageWrapper.sol";
+import { AccessStorageWrapper } from "../../../domain/core/AccessStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { _CONTROL_LIST_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { LibArrayValidation } from "../../../infrastructure/utils/LibArrayValidation.sol";
+import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 
 abstract contract ExternalControlListManagement is IExternalControlListManagement {
     error AlreadyInitialized();
@@ -15,31 +15,34 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalControlLists(address[] calldata _controlLists) external override {
-        if (LibExternalLists.getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION) > 0) {
+        if (ExternalListsStorageWrapper.getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION) > 0) {
             revert AlreadyInitialized();
         }
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
-            LibExternalLists.requireValidAddress(_controlLists[index]);
-            LibExternalLists.addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
+            ExternalListsStorageWrapper.requireValidAddress(_controlLists[index]);
+            ExternalListsStorageWrapper.addExternalList(
+                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+                _controlLists[index]
+            );
             unchecked {
                 ++index;
             }
         }
-        LibExternalLists.setExternalListInitialized(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        ExternalListsStorageWrapper.setExternalListInitialized(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
     ) external override returns (bool success_) {
-        LibAccess.checkRole(_CONTROL_LIST_MANAGER_ROLE);
-        LibPause.requireNotPaused();
+        AccessStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
         if (_controlLists.length != _actives.length) {
             revert InconsistentArrayLengths();
         }
-        LibArrayValidation.checkUniqueValues(_controlLists, _actives);
-        success_ = LibExternalLists.updateExternalLists(
+        ArrayValidation.checkUniqueValues(_controlLists, _actives);
+        success_ = ExternalListsStorageWrapper.updateExternalLists(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
             _controlLists,
             _actives
@@ -51,10 +54,10 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     }
 
     function addExternalControlList(address _controlList) external override returns (bool success_) {
-        LibAccess.checkRole(_CONTROL_LIST_MANAGER_ROLE);
-        LibPause.requireNotPaused();
-        LibExternalLists.requireValidAddress(_controlList);
-        success_ = LibExternalLists.addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
+        AccessStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        ExternalListsStorageWrapper.requireValidAddress(_controlList);
+        success_ = ExternalListsStorageWrapper.addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
         if (!success_) {
             revert ListedControlList(_controlList);
         }
@@ -62,9 +65,12 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     }
 
     function removeExternalControlList(address _controlList) external override returns (bool success_) {
-        LibAccess.checkRole(_CONTROL_LIST_MANAGER_ROLE);
-        LibPause.requireNotPaused();
-        success_ = LibExternalLists.removeExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
+        AccessStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = ExternalListsStorageWrapper.removeExternalList(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            _controlList
+        );
         if (!success_) {
             revert UnlistedControlList(_controlList);
         }
@@ -72,11 +78,11 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     }
 
     function isExternalControlList(address _controlList) external view override returns (bool) {
-        return LibExternalLists.isExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
+        return ExternalListsStorageWrapper.isExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
     }
 
     function getExternalControlListsCount() external view override returns (uint256 externalControlListsCount_) {
-        return LibExternalLists.getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        return ExternalListsStorageWrapper.getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
     function getExternalControlListsMembers(
@@ -84,7 +90,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
         return
-            LibExternalLists.getExternalListsMembers(
+            ExternalListsStorageWrapper.getExternalListsMembers(
                 _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
                 _pageIndex,
                 _pageLength

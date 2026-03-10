@@ -2,17 +2,17 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Domain Libraries
-import { LibABAF } from "../asset/LibABAF.sol";
-import { LibERC1410 } from "../asset/LibERC1410.sol";
-import { LibERC20 } from "../asset/LibERC20.sol";
-import { LibClearing } from "../asset/LibClearing.sol";
-import { LibERC1594 } from "../asset/LibERC1594.sol";
+import { ABAFStorageWrapper } from "../asset/ABAFStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
+import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
+import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 
 // Core Libraries
-import { LibCompliance } from "../core/LibCompliance.sol";
-import { LibERC712 } from "../core/LibERC712.sol";
-import { LibNonce } from "../core/LibNonce.sol";
-import { LibProtectedPartitions } from "../core/LibProtectedPartitions.sol";
+import { ComplianceStorageWrapper } from "../core/ComplianceStorageWrapper.sol";
+import { ERC712 } from "../core/ERC712.sol";
+import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
+import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 
 // Interfaces
 import { IERC3643Management } from "../../facets/core/ERC3643/IERC3643Management.sol";
@@ -26,9 +26,9 @@ import { IClearingHoldCreation } from "../../facets/core/clearing/IClearingHoldC
 import { ThirdPartyType } from "../../facets/core/externalControlList/ThirdPartyType.sol";
 
 // Utilities
-import { LibLowLevelCall } from "../../infrastructure/utils/LibLowLevelCall.sol";
+import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
-import { LibResolverProxy } from "../../infrastructure/proxy/LibResolverProxy.sol";
+import { ResolverProxyStorageWrapper } from "../../infrastructure/proxy/ResolverProxyStorageWrapper.sol";
 
 // Orchestrator Libraries
 import { HoldOps } from "./HoldOps.sol";
@@ -41,7 +41,7 @@ import { ClearingReadOps } from "./ClearingReadOps.sol";
 ///      - EIP-712 validation is done here for protected operations
 ///      Accepts _blockTimestamp as parameter (dependency injection)
 library ClearingOps {
-    using LibLowLevelCall for address;
+    using LowLevelCall for address;
 
     // ==========================================================================
     // CLEARING CREATION OPERATIONS
@@ -62,7 +62,7 @@ library ClearingOps {
             _amount,
             IClearing.ClearingOperationType.Transfer
         );
-        LibClearing.setClearingTransferDataStruct(
+        ClearingStorageWrapper.setClearingTransferDataStruct(
             _from,
             _clearingOperation.partition,
             clearingId_,
@@ -103,7 +103,7 @@ library ClearingOps {
             _amount,
             IClearing.ClearingOperationType.Redeem
         );
-        LibClearing.setClearingRedeemDataStruct(
+        ClearingStorageWrapper.setClearingRedeemDataStruct(
             _from,
             _clearingOperation.partition,
             clearingId_,
@@ -142,7 +142,7 @@ library ClearingOps {
             _hold.amount,
             IClearing.ClearingOperationType.HoldCreation
         );
-        LibClearing.setClearingHoldCreationDataStruct(
+        ClearingStorageWrapper.setClearingHoldCreationDataStruct(
             _from,
             _clearingOperation.partition,
             clearingId_,
@@ -218,8 +218,8 @@ library ClearingOps {
         uint256 _amount
     ) public {
         address spender = msg.sender;
-        LibERC20.spendAllowance(_from, spender, _amount);
-        LibClearing.setClearingThirdParty(_partition, _clearingId, _clearingOperationType, _from, spender);
+        ERC20StorageWrapper.spendAllowance(_from, spender, _amount);
+        ClearingStorageWrapper.setClearingThirdParty(_partition, _clearingId, _clearingOperationType, _from, spender);
     }
 
     // ==========================================================================
@@ -234,24 +234,24 @@ library ClearingOps {
         bytes calldata _signature,
         uint256 _blockTimestamp
     ) public returns (bool success_, uint256 clearingId_) {
-        LibERC712.checkNounceAndDeadline(
+        ERC712.checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
-            LibNonce.getNonceFor(_protectedClearingOperation.from),
+            NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
             _blockTimestamp
         );
-        LibProtectedPartitions.checkClearingTransferSignature(
+        ProtectedPartitionsStorageWrapper.checkClearingTransferSignature(
             _protectedClearingOperation,
             _amount,
             _to,
             _signature,
-            LibERC20.getName(),
-            LibResolverProxy.getVersion(),
+            ERC20StorageWrapper.getName(),
+            ResolverProxyStorageWrapper.getVersion(),
             block.chainid,
             address(this)
         );
-        LibNonce.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
+        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
         return
             clearingTransferCreation(
                 _protectedClearingOperation.clearingOperation,
@@ -270,23 +270,23 @@ library ClearingOps {
         bytes calldata _signature,
         uint256 _blockTimestamp
     ) public returns (bool success_, uint256 clearingId_) {
-        LibERC712.checkNounceAndDeadline(
+        ERC712.checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
-            LibNonce.getNonceFor(_protectedClearingOperation.from),
+            NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
             _blockTimestamp
         );
-        LibProtectedPartitions.checkClearingRedeemSignature(
+        ProtectedPartitionsStorageWrapper.checkClearingRedeemSignature(
             _protectedClearingOperation,
             _amount,
             _signature,
-            LibERC20.getName(),
-            LibResolverProxy.getVersion(),
+            ERC20StorageWrapper.getName(),
+            ResolverProxyStorageWrapper.getVersion(),
             block.chainid,
             address(this)
         );
-        LibNonce.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
+        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
         return
             clearingRedeemCreation(
                 _protectedClearingOperation.clearingOperation,
@@ -304,23 +304,23 @@ library ClearingOps {
         bytes calldata _signature,
         uint256 _blockTimestamp
     ) public returns (bool success_, uint256 clearingId_) {
-        LibERC712.checkNounceAndDeadline(
+        ERC712.checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
-            LibNonce.getNonceFor(_protectedClearingOperation.from),
+            NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
             _blockTimestamp
         );
-        LibProtectedPartitions.checkClearingCreateHoldSignature(
+        ProtectedPartitionsStorageWrapper.checkClearingCreateHoldSignature(
             _protectedClearingOperation,
             _hold,
             _signature,
-            LibERC20.getName(),
-            LibResolverProxy.getVersion(),
+            ERC20StorageWrapper.getName(),
+            ResolverProxyStorageWrapper.getVersion(),
             block.chainid,
             address(this)
         );
-        LibNonce.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
+        NonceStorageWrapper.setNonceFor(_protectedClearingOperation.nonce, _protectedClearingOperation.from);
         return
             clearingHoldCreationCreation(
                 _protectedClearingOperation.clearingOperation,
@@ -343,13 +343,13 @@ library ClearingOps {
         IClearing.ClearingOperationType _operationType
     ) private returns (uint256 clearingId_) {
         bytes32 partition = _clearingOperation.partition;
-        clearingId_ = LibClearing.getAndIncrementNextClearingId(_from, partition, _operationType);
+        clearingId_ = ClearingStorageWrapper.getAndIncrementNextClearingId(_from, partition, _operationType);
         ClearingReadOps.beforeClearingOperation(
             _buildClearingOperationIdentifier(_from, partition, clearingId_, _operationType),
             address(0)
         );
-        LibERC1410.reduceBalanceByPartition(_from, _amount, partition);
-        LibClearing.increaseClearedAmounts(_from, partition, _amount);
+        ERC1410StorageWrapper.reduceBalanceByPartition(_from, _amount, partition);
+        ClearingStorageWrapper.increaseClearedAmounts(_from, partition, _amount);
     }
 
     /// @notice Handle clearing operation by partition (approve/cancel/reclaim)
@@ -433,25 +433,25 @@ library ClearingOps {
         uint256 _clearingId,
         IClearingActions.ClearingActionType _operation
     ) private returns (bool success_, uint256 amount_, ThirdPartyType operatorType_, bytes32 partition_) {
-        IClearingTransfer.ClearingTransferData memory ctd = LibClearing.getClearingTransferData(
+        IClearingTransfer.ClearingTransferData memory ctd = ClearingStorageWrapper.getClearingTransferData(
             _partition,
             _tokenHolder,
             _clearingId
         );
         address destination = _tokenHolder;
         if (_operation == IClearingActions.ClearingActionType.Approve) {
-            LibERC1594.checkIdentity(_tokenHolder, ctd.destination);
-            LibERC1594.checkCompliance(msg.sender, _tokenHolder, ctd.destination, false);
+            ERC1594StorageWrapper.checkIdentity(_tokenHolder, ctd.destination);
+            ERC1594StorageWrapper.checkCompliance(msg.sender, _tokenHolder, ctd.destination, false);
             destination = ctd.destination;
             partition_ = _partition;
         }
         _transferClearingBalance(_partition, destination, ctd.amount);
         if (
             _tokenHolder != destination &&
-            address(LibCompliance.getCompliance()) != address(0) &&
+            address(ComplianceStorageWrapper.getCompliance()) != address(0) &&
             _partition == _DEFAULT_PARTITION
         ) {
-            address(LibCompliance.getCompliance()).functionCall(
+            address(ComplianceStorageWrapper.getCompliance()).functionCall(
                 abi.encodeWithSelector(ICompliance.transferred.selector, _tokenHolder, destination, ctd.amount),
                 IERC3643Management.ComplianceCallFailed.selector
             );
@@ -468,14 +468,14 @@ library ClearingOps {
         uint256 _clearingId,
         IClearingActions.ClearingActionType _operation
     ) private returns (bool success_, uint256 amount_, ThirdPartyType operatorType_) {
-        IClearingRedeem.ClearingRedeemData memory crd = LibClearing.getClearingRedeemData(
+        IClearingRedeem.ClearingRedeemData memory crd = ClearingStorageWrapper.getClearingRedeemData(
             _partition,
             _tokenHolder,
             _clearingId
         );
         if (_operation == IClearingActions.ClearingActionType.Approve) {
-            LibERC1594.checkIdentity(_tokenHolder, address(0));
-            LibERC1594.checkCompliance(msg.sender, _tokenHolder, address(0), false);
+            ERC1594StorageWrapper.checkIdentity(_tokenHolder, address(0));
+            ERC1594StorageWrapper.checkCompliance(msg.sender, _tokenHolder, address(0), false);
         } else {
             _transferClearingBalance(_partition, _tokenHolder, crd.amount);
         }
@@ -491,7 +491,7 @@ library ClearingOps {
         uint256 _clearingId,
         IClearingActions.ClearingActionType _operation
     ) private returns (bool success_, uint256 amount_, ThirdPartyType operatorType_, bytes memory operationData_) {
-        IClearingHoldCreation.ClearingHoldCreationData memory chcd = LibClearing.getClearingHoldCreationData(
+        IClearingHoldCreation.ClearingHoldCreationData memory chcd = ClearingStorageWrapper.getClearingHoldCreationData(
             _partition,
             _tokenHolder,
             _clearingId
@@ -526,53 +526,53 @@ library ClearingOps {
 
     /// @notice Transfer clearing balance to recipient
     function _transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) private {
-        if (LibERC1410.validPartitionForReceiver(_partition, _to)) {
-            LibERC1410.increaseBalanceByPartition(_to, _amount, _partition);
+        if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
+            ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _partition);
             return;
         }
-        LibERC1410.addPartitionTo(_amount, _to, _partition);
+        ERC1410StorageWrapper.addPartitionTo(_amount, _to, _partition);
     }
 
     /// @notice Remove clearing operation and cleanup
     function _removeClearing(IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier) private {
-        (, uint256 amount, ) = LibClearing.getClearingBasicInfo(_clearingOperationIdentifier);
-        LibClearing.decreaseTotalClearedAmounts(
+        (, uint256 amount, ) = ClearingStorageWrapper.getClearingBasicInfo(_clearingOperationIdentifier);
+        ClearingStorageWrapper.decreaseTotalClearedAmounts(
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition,
             amount
         );
-        LibClearing.removeClearingId(
+        ClearingStorageWrapper.removeClearingId(
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.clearingOperationType,
             _clearingOperationIdentifier.clearingId
         );
-        LibClearing.deleteClearingThirdParty(
+        ClearingStorageWrapper.deleteClearingThirdParty(
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.clearingOperationType,
             _clearingOperationIdentifier.clearingId
         );
         if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
-            LibClearing.deleteClearingTransferData(
+            ClearingStorageWrapper.deleteClearingTransferData(
                 _clearingOperationIdentifier.tokenHolder,
                 _clearingOperationIdentifier.partition,
                 _clearingOperationIdentifier.clearingId
             );
         } else if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
-            LibClearing.deleteClearingRedeemData(
+            ClearingStorageWrapper.deleteClearingRedeemData(
                 _clearingOperationIdentifier.tokenHolder,
                 _clearingOperationIdentifier.partition,
                 _clearingOperationIdentifier.clearingId
             );
         } else {
-            LibClearing.deleteClearingHoldCreationData(
+            ClearingStorageWrapper.deleteClearingHoldCreationData(
                 _clearingOperationIdentifier.tokenHolder,
                 _clearingOperationIdentifier.partition,
                 _clearingOperationIdentifier.clearingId
             );
         }
-        LibABAF.removeLabafClearing(_clearingOperationIdentifier);
+        ABAFStorageWrapper.removeLabafClearing(_clearingOperationIdentifier);
     }
 
     /// @notice Restore allowance and remove clearing after operation
@@ -602,9 +602,9 @@ library ClearingOps {
     ) private {
         if (!(_operation != IClearingActions.ClearingActionType.Approve && _operatorType == ThirdPartyType.AUTHORIZED))
             return;
-        LibERC20.increaseAllowance(
+        ERC20StorageWrapper.increaseAllowance(
             _clearingOperationIdentifier.tokenHolder,
-            LibClearing.getClearingThirdParty(
+            ClearingStorageWrapper.getClearingThirdParty(
                 _clearingOperationIdentifier.partition,
                 _clearingOperationIdentifier.tokenHolder,
                 _clearingOperationIdentifier.clearingOperationType,
@@ -796,7 +796,7 @@ library ClearingOps {
 
     /// @notice Get clearing destination from identifier
     function _getClearingDestination(IClearing.ClearingOperationIdentifier memory id) private view returns (address) {
-        (, , address destination_) = LibClearing.getClearingBasicInfo(id);
+        (, , address destination_) = ClearingStorageWrapper.getClearingBasicInfo(id);
         return destination_;
     }
 

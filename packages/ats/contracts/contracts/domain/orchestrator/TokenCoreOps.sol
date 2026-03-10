@@ -2,14 +2,14 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // Domain Libraries
-import { LibABAF } from "../asset/LibABAF.sol";
-import { LibERC1410 } from "../asset/LibERC1410.sol";
-import { LibERC20 } from "../asset/LibERC20.sol";
-import { LibERC20Votes } from "../asset/LibERC20Votes.sol";
-import { LibSnapshots } from "../asset/LibSnapshots.sol";
+import { ABAFStorageWrapper } from "../asset/ABAFStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
+import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
+import { ERC20VotesStorageWrapper } from "../asset/ERC20VotesStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
 
 // Core Libraries
-import { LibCompliance } from "../core/LibCompliance.sol";
+import { ComplianceStorageWrapper } from "../core/ComplianceStorageWrapper.sol";
 
 // Interfaces
 import { IERC20 } from "../../facets/core/ERC1400/ERC20/IERC20.sol";
@@ -20,7 +20,7 @@ import { IERC3643Management } from "../../facets/core/ERC3643/IERC3643Management
 import { ICompliance } from "../../facets/core/ERC3643/ICompliance.sol";
 
 // Utilities
-import { LibLowLevelCall } from "../../infrastructure/utils/LibLowLevelCall.sol";
+import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 
 /// @title TokenCoreOps
@@ -28,7 +28,7 @@ import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 /// @dev Contains: Transfer, ERC20, Allowance, and Hooks
 ///      Accepts _timestamp and _blockNumber as parameters (dependency injection)
 library TokenCoreOps {
-    using LibLowLevelCall for address;
+    using LowLevelCall for address;
 
     // ==========================================================================
     // TRANSFER OPERATIONS
@@ -48,7 +48,14 @@ library TokenCoreOps {
     ) public returns (bytes32) {
         _beforeTokenTransfer(_partition, _from, _basicTransferInfo.to, _basicTransferInfo.value, _timestamp);
 
-        LibERC1410.transferByPartition(_from, _basicTransferInfo, _partition, _data, _operator, _operatorData);
+        ERC1410StorageWrapper.transferByPartition(
+            _from,
+            _basicTransferInfo,
+            _partition,
+            _data,
+            _operator,
+            _operatorData
+        );
 
         if (_from != _basicTransferInfo.to && _partition == _DEFAULT_PARTITION) {
             _notifyCompliance(ICompliance.transferred.selector, _from, _basicTransferInfo.to, _basicTransferInfo.value);
@@ -65,13 +72,17 @@ library TokenCoreOps {
 
         _beforeTokenTransfer(_issueData.partition, address(0), _issueData.tokenHolder, _issueData.value, _timestamp);
 
-        if (!LibERC1410.validPartitionForReceiver(_issueData.partition, _issueData.tokenHolder)) {
-            LibERC1410.addPartitionTo(_issueData.value, _issueData.tokenHolder, _issueData.partition);
+        if (!ERC1410StorageWrapper.validPartitionForReceiver(_issueData.partition, _issueData.tokenHolder)) {
+            ERC1410StorageWrapper.addPartitionTo(_issueData.value, _issueData.tokenHolder, _issueData.partition);
         } else {
-            LibERC1410.increaseBalanceByPartition(_issueData.tokenHolder, _issueData.value, _issueData.partition);
+            ERC1410StorageWrapper.increaseBalanceByPartition(
+                _issueData.tokenHolder,
+                _issueData.value,
+                _issueData.partition
+            );
         }
 
-        LibERC1410.increaseTotalSupply(_issueData.value, _issueData.partition);
+        ERC1410StorageWrapper.increaseTotalSupply(_issueData.value, _issueData.partition);
 
         if (_issueData.partition == _DEFAULT_PARTITION) {
             _notifyCompliance(ICompliance.created.selector, _issueData.tokenHolder, address(0), _issueData.value);
@@ -101,8 +112,8 @@ library TokenCoreOps {
     ) public {
         _beforeTokenTransfer(_partition, _from, address(0), _value, _timestamp);
 
-        LibERC1410.reduceBalanceByPartition(_from, _value, _partition);
-        LibERC1410.reduceTotalSupply(_value, _partition);
+        ERC1410StorageWrapper.reduceBalanceByPartition(_from, _value, _partition);
+        ERC1410StorageWrapper.reduceTotalSupply(_value, _partition);
 
         if (_partition == _DEFAULT_PARTITION) {
             _notifyCompliance(ICompliance.destroyed.selector, _from, address(0), _value);
@@ -157,7 +168,7 @@ library TokenCoreOps {
         if (_spender == address(0)) {
             revert IERC20.SpenderWithZeroAddress();
         }
-        LibERC20.setAllowance(_owner, _spender, _value);
+        ERC20StorageWrapper.setAllowance(_owner, _spender, _value);
         emit IERC20.Approval(_owner, _spender, _value);
         return true;
     }
@@ -172,8 +183,8 @@ library TokenCoreOps {
             revert IERC20.SpenderWithZeroAddress();
         }
         _beforeAllowanceUpdate(_owner, _spender);
-        LibERC20.increaseAllowance(_owner, _spender, _addedValue);
-        emit IERC20.Approval(_owner, _spender, LibERC20.getAllowance(_owner, _spender));
+        ERC20StorageWrapper.increaseAllowance(_owner, _spender, _addedValue);
+        emit IERC20.Approval(_owner, _spender, ERC20StorageWrapper.getAllowance(_owner, _spender));
         return true;
     }
 
@@ -183,23 +194,23 @@ library TokenCoreOps {
             revert IERC20.SpenderWithZeroAddress();
         }
         _beforeAllowanceUpdate(_owner, _spender);
-        uint256 currentAllowance = LibERC20.getAllowance(_owner, _spender);
+        uint256 currentAllowance = ERC20StorageWrapper.getAllowance(_owner, _spender);
         if (_subtractedValue > currentAllowance) {
             revert IERC20.InsufficientAllowance(_spender, _owner);
         }
-        LibERC20.setAllowance(_owner, _spender, currentAllowance - _subtractedValue);
-        emit IERC20.Approval(_owner, _spender, LibERC20.getAllowance(_owner, _spender));
+        ERC20StorageWrapper.setAllowance(_owner, _spender, currentAllowance - _subtractedValue);
+        emit IERC20.Approval(_owner, _spender, ERC20StorageWrapper.getAllowance(_owner, _spender));
         return true;
     }
 
     /// @notice Decrease allowance and check sufficiency (for transferFrom / burnFrom)
     function decreaseAllowedBalance(address _from, address _spender, uint256 _value) public {
         _beforeAllowanceUpdate(_from, _spender);
-        uint256 currentAllowance = LibERC20.getAllowance(_from, _spender);
+        uint256 currentAllowance = ERC20StorageWrapper.getAllowance(_from, _spender);
         if (_value > currentAllowance) {
             revert IERC20.InsufficientAllowance(_spender, _from);
         }
-        LibERC20.setAllowance(_from, _spender, currentAllowance - _value);
+        ERC20StorageWrapper.setAllowance(_from, _spender, currentAllowance - _value);
     }
 
     /// @notice transferFrom: decrease allowance + full transfer
@@ -238,44 +249,46 @@ library TokenCoreOps {
         uint256 amount,
         uint256 timestamp
     ) private {
-        LibABAF.triggerAndSyncAll(partition, from, to);
+        ABAFStorageWrapper.triggerAndSyncAll(partition, from, to);
 
         bool addTo;
         bool removeFrom;
 
         if (from == address(0)) {
             // mint / issue
-            LibSnapshots.updateAccountSnapshot(to, partition);
-            LibSnapshots.updateTotalSupplySnapshot(partition);
-            if (amount > 0 && LibERC1410.balanceOf(to) == 0) addTo = true;
+            SnapshotsStorageWrapper.updateAccountSnapshot(to, partition);
+            SnapshotsStorageWrapper.updateTotalSupplySnapshot(partition);
+            if (amount > 0 && ERC1410StorageWrapper.balanceOf(to) == 0) addTo = true;
         } else if (to == address(0)) {
             // burn / redeem
-            LibSnapshots.updateAccountSnapshot(from, partition);
-            LibSnapshots.updateTotalSupplySnapshot(partition);
-            if (amount > 0 && LibABAF.balanceOfAdjustedAt(from, timestamp) == amount) removeFrom = true;
+            SnapshotsStorageWrapper.updateAccountSnapshot(from, partition);
+            SnapshotsStorageWrapper.updateTotalSupplySnapshot(partition);
+            if (amount > 0 && ABAFStorageWrapper.balanceOfAdjustedAt(from, timestamp) == amount) removeFrom = true;
         } else {
             // transfer
-            LibSnapshots.updateAccountSnapshot(from, partition);
-            LibSnapshots.updateAccountSnapshot(to, partition);
-            if (amount > 0 && LibERC1410.balanceOf(to) == 0) addTo = true;
-            if (amount > 0 && LibABAF.balanceOfAdjustedAt(from, timestamp) == amount) removeFrom = true;
+            SnapshotsStorageWrapper.updateAccountSnapshot(from, partition);
+            SnapshotsStorageWrapper.updateAccountSnapshot(to, partition);
+            if (amount > 0 && ERC1410StorageWrapper.balanceOf(to) == 0) addTo = true;
+            if (amount > 0 && ABAFStorageWrapper.balanceOfAdjustedAt(from, timestamp) == amount) removeFrom = true;
         }
 
         if (addTo && removeFrom) {
-            LibSnapshots.updateTokenHolderSnapshot(from);
-            LibERC1410.replaceTokenHolder(to, from);
+            SnapshotsStorageWrapper.updateTokenHolderSnapshot(from);
+            ERC1410StorageWrapper.replaceTokenHolder(to, from);
             return;
         }
         if (addTo) {
-            LibSnapshots.updateTotalTokenHolderSnapshot();
-            LibERC1410.addNewTokenHolder(to);
+            SnapshotsStorageWrapper.updateTotalTokenHolderSnapshot();
+            ERC1410StorageWrapper.addNewTokenHolder(to);
             return;
         }
         if (removeFrom) {
-            LibSnapshots.updateTokenHolderSnapshot(from);
-            LibSnapshots.updateTokenHolderSnapshot(LibERC1410.getTokenHolder(LibERC1410.getTotalTokenHolders()));
-            LibSnapshots.updateTotalTokenHolderSnapshot();
-            LibERC1410.removeTokenHolder(from);
+            SnapshotsStorageWrapper.updateTokenHolderSnapshot(from);
+            SnapshotsStorageWrapper.updateTokenHolderSnapshot(
+                ERC1410StorageWrapper.getTokenHolder(ERC1410StorageWrapper.getTotalTokenHolders())
+            );
+            SnapshotsStorageWrapper.updateTotalTokenHolderSnapshot();
+            ERC1410StorageWrapper.removeTokenHolder(from);
         }
     }
 
@@ -287,18 +300,28 @@ library TokenCoreOps {
         uint256 amount,
         uint256 blockNumber
     ) private {
-        if (LibERC20Votes.isActivated()) {
-            LibERC20Votes.takeAbafCheckpoint(LibABAF.getAbaf(), blockNumber);
+        if (ERC20VotesStorageWrapper.isActivated()) {
+            ERC20VotesStorageWrapper.takeAbafCheckpoint(ABAFStorageWrapper.getAbaf(), blockNumber);
             if (from == address(0)) {
-                LibERC20Votes.writeTotalSupplyCheckpoint(true, amount, blockNumber);
-                LibERC20Votes.moveVotingPower(address(0), LibERC20Votes.getDelegate(to), amount, blockNumber);
+                ERC20VotesStorageWrapper.writeTotalSupplyCheckpoint(true, amount, blockNumber);
+                ERC20VotesStorageWrapper.moveVotingPower(
+                    address(0),
+                    ERC20VotesStorageWrapper.getDelegate(to),
+                    amount,
+                    blockNumber
+                );
             } else if (to == address(0)) {
-                LibERC20Votes.writeTotalSupplyCheckpoint(false, amount, blockNumber);
-                LibERC20Votes.moveVotingPower(LibERC20Votes.getDelegate(from), address(0), amount, blockNumber);
+                ERC20VotesStorageWrapper.writeTotalSupplyCheckpoint(false, amount, blockNumber);
+                ERC20VotesStorageWrapper.moveVotingPower(
+                    ERC20VotesStorageWrapper.getDelegate(from),
+                    address(0),
+                    amount,
+                    blockNumber
+                );
             } else {
-                LibERC20Votes.moveVotingPower(
-                    LibERC20Votes.getDelegate(from),
-                    LibERC20Votes.getDelegate(to),
+                ERC20VotesStorageWrapper.moveVotingPower(
+                    ERC20VotesStorageWrapper.getDelegate(from),
+                    ERC20VotesStorageWrapper.getDelegate(to),
                     amount,
                     blockNumber
                 );
@@ -312,22 +335,22 @@ library TokenCoreOps {
 
     /// @notice Syncs ABAF state and updates allowance LABAF before allowance changes
     function _beforeAllowanceUpdate(address _owner, address _spender) private {
-        LibABAF.triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
+        ABAFStorageWrapper.triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
 
-        uint256 abaf = LibABAF.getAbaf();
-        uint256 labaf = LibABAF.getAllowanceLabaf(_owner, _spender);
+        uint256 abaf = ABAFStorageWrapper.getAbaf();
+        uint256 labaf = ABAFStorageWrapper.getAllowanceLabaf(_owner, _spender);
 
         if (abaf == labaf) return;
 
-        uint256 factor = LibABAF.calculateFactor(abaf, labaf);
-        uint256 currentAllowance = LibERC20.getAllowance(_owner, _spender);
-        LibERC20.setAllowance(_owner, _spender, currentAllowance * factor);
-        LibABAF.updateAllowanceLabaf(_owner, _spender, abaf);
+        uint256 factor = ABAFStorageWrapper.calculateFactor(abaf, labaf);
+        uint256 currentAllowance = ERC20StorageWrapper.getAllowance(_owner, _spender);
+        ERC20StorageWrapper.setAllowance(_owner, _spender, currentAllowance * factor);
+        ABAFStorageWrapper.updateAllowanceLabaf(_owner, _spender, abaf);
     }
 
     /// @notice Calls compliance contract via low-level call
     function _notifyCompliance(bytes4 selector, address addr1, address addr2, uint256 value) private {
-        address compliance = address(LibCompliance.getCompliance());
+        address compliance = address(ComplianceStorageWrapper.getCompliance());
         if (selector == ICompliance.transferred.selector) {
             compliance.functionCall(
                 abi.encodeWithSelector(ICompliance.transferred.selector, addr1, addr2, value),

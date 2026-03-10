@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ScheduledSnapshots } from "./ScheduledSnapshots.sol";
 import { IScheduledSnapshots } from "../../scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/diamond/IStaticFunctionSelectors.sol";
-import { _SCHEDULED_SNAPSHOTS_RESOLVER_KEY } from "../../../../constants/resolverKeys/resolverKeys.sol";
+import { _SCHEDULED_SNAPSHOTS_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 
 contract ScheduledSnapshotsFacet is ScheduledSnapshots, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

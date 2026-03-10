@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
-import { LibPagination } from "../utils/LibPagination.sol";
+import { Pagination } from "../utils/Pagination.sol";
 import { EnumerableSetBytes4 } from "../utils/EnumerableSetBytes4.sol";
 import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
@@ -141,9 +141,9 @@ abstract contract BusinessLogicResolverWrapper {
     ) internal view returns (bytes32[] memory businessLogicKeys_) {
         BusinessLogicResolverDataStorage storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
-        (uint256 start, uint256 end) = LibPagination.getStartAndEnd(_pageIndex, _pageLength);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
 
-        uint256 size = LibPagination.getSize(start, end, businessLogicResolverDataStorage.activeBusinessLogics.length);
+        uint256 size = Pagination.getSize(start, end, businessLogicResolverDataStorage.activeBusinessLogics.length);
         businessLogicKeys_ = new bytes32[](size);
 
         for (uint256 index; index < size; index++) {
@@ -176,7 +176,7 @@ abstract contract BusinessLogicResolverWrapper {
         EnumerableSetBytes4.Bytes4Set storage selectorBlacklist = _businessLogicResolverStorage().selectorBlacklist[
             _configurationId
         ];
-        page_ = LibPagination.getFromSet(selectorBlacklist, _pageIndex, _pageLength);
+        page_ = Pagination.getFromSet(selectorBlacklist, _pageIndex, _pageLength);
     }
 
     function _businessLogicResolverStorage()
