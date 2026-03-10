@@ -5,7 +5,7 @@ import { _SCHEDULED_COUPON_LISTING_KPI_LINKED_RATE_RESOLVER_KEY } from "../../..
 import { ScheduledCouponListingFacetBase } from "../ScheduledCouponListingFacetBase.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract ScheduledCouponListingKpiLinkedRateFacet is ScheduledCouponListingFacetBase, CommonKpiLinkedInterestRate {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

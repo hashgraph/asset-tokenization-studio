@@ -5,7 +5,7 @@ import {
     HoldTokenHolderKpiLinkedRateFacet
 } from "../../../../layer_1/hold/kpiLinkedRate/HoldTokenHolderKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract HoldTokenHolderKpiLinkedRateFacetTimeTravel is HoldTokenHolderKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

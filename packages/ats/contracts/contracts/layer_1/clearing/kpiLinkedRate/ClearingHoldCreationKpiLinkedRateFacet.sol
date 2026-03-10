@@ -5,7 +5,7 @@ import { ClearingHoldCreationFacetBase } from "../ClearingHoldCreationFacetBase.
 import { _CLEARING_HOLDCREATION_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract ClearingHoldCreationKpiLinkedRateFacet is ClearingHoldCreationFacetBase, CommonKpiLinkedInterestRate {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

@@ -5,7 +5,7 @@ import { ExternalKycListManagementFacetBase } from "../ExternalKycListManagement
 import { _EXTERNAL_KYC_LIST_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract ExternalKycListManagementKpiLinkedRateFacet is
     ExternalKycListManagementFacetBase,

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { ThirdPartyType } from "../../../layer_0/common/types/ThirdPartyType.sol";
+import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { IHoldRead } from "./IHoldRead.sol";
 import { IHoldTokenHolder } from "./IHoldTokenHolder.sol";
 import { IHoldManagement } from "./IHoldManagement.sol";

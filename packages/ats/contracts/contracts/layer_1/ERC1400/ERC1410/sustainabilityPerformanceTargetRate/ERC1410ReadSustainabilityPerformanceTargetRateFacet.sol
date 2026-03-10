@@ -5,7 +5,7 @@ import { ERC1410ReadFacetBase } from "../ERC1410ReadFacetBase.sol";
 import { _ERC1410_READ_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract ERC1410ReadSustainabilityPerformanceTargetRateFacet is
     ERC1410ReadFacetBase,

@@ -5,7 +5,7 @@ import { _SCHEDULED_SNAPSHOTS_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../c
 import { ScheduledSnapshotsFacetBase } from "../ScheduledSnapshotsFacetBase.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract ScheduledSnapshotsKpiLinkedRateFacet is ScheduledSnapshotsFacetBase, CommonKpiLinkedInterestRate {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

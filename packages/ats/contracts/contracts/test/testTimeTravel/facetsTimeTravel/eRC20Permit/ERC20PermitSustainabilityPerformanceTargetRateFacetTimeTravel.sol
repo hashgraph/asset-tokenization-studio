@@ -7,7 +7,7 @@ import {
     ERC20PermitSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/ERC1400/ERC20Permit/sustainabilityPerformanceTargetRate/ERC20PermitSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC20PermitSustainabilityPerformanceTargetRateFacetTimeTravel is
     ERC20PermitSustainabilityPerformanceTargetRateFacet,

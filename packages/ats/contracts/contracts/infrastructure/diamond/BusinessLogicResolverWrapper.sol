@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
-import { LibCommon } from "../../layer_0/common/libraries/LibCommon.sol";
-import { EnumerableSetBytes4 } from "../../layer_0/common/libraries/EnumerableSetBytes4.sol";
+import { LibCommon } from "../../infrastructure/utils/LibCommon.sol";
+import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
 import { IBusinessLogicResolverWrapper } from "./IBusinessLogicResolverWrapper.sol";
 import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 

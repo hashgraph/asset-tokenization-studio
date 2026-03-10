@@ -5,7 +5,7 @@ import {
     ClearingReadKpiLinkedRateFacet
 } from "../../../../layer_1/clearing/kpiLinkedRate/ClearingReadKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ClearingReadKpiLinkedRateFacetTimeTravel is ClearingReadKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

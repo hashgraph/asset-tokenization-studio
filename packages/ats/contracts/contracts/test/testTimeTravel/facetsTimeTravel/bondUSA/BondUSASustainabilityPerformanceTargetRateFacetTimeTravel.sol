@@ -7,7 +7,7 @@ import {
     BondUSASustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_3/bondUSA/sustainabilityPerformanceTargetRate/BondUSASustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract BondUSASustainabilityPerformanceTargetRateFacetTimeTravel is
     BondUSASustainabilityPerformanceTargetRateFacet,

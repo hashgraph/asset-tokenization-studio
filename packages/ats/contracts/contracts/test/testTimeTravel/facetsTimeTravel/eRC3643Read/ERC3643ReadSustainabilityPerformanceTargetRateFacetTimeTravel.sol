@@ -7,7 +7,7 @@ import {
     ERC3643ReadSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/ERC3643/sustainabilityPerformanceTargetRate/ERC3643ReadSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC3643ReadSustainabilityPerformanceTargetRateFacetTimeTravel is
     ERC3643ReadSustainabilityPerformanceTargetRateFacet,

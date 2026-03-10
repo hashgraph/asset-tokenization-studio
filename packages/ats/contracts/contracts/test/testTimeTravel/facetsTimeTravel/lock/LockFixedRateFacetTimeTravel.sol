@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { LockFixedRateFacet } from "../../../../layer_1/lock/fixedRate/LockFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract LockFixedRateFacetTimeTravel is LockFixedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

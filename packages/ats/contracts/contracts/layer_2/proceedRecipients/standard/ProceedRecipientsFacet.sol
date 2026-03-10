@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ProceedRecipientsFacetBase } from "../ProceedRecipientsFacetBase.sol";
 import { _PROCEED_RECIPIENTS_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
-import { Common } from "../../../layer_0/common/Common.sol";
+import { Common } from "../../../domain/Common.sol";
 
 contract ProceedRecipientsFacet is ProceedRecipientsFacetBase, Common {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

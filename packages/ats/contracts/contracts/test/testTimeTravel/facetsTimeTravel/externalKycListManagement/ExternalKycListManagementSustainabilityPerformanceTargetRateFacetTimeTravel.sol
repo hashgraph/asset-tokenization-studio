@@ -7,7 +7,7 @@ import {
     ExternalKycListManagementSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/externalKycLists/sustainabilityPerformanceTargetRate/ExternalKycListManagementSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ExternalKycListManagementSustainabilityPerformanceTargetRateFacetTimeTravel is
     ExternalKycListManagementSustainabilityPerformanceTargetRateFacet,

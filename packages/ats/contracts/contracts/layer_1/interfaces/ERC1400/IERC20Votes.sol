@@ -4,7 +4,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC5805 } from "./IERC5805.sol";
-import { CheckpointsLib } from "../../../layer_0/common/libraries/CheckpointsLib.sol";
+import { CheckpointsLib } from "../../../infrastructure/utils/CheckpointsLib.sol";
 
 interface IERC20Votes is IERC5805 {
     error AbafChangeForBlockForbidden(uint256 blockNumber);

@@ -36,7 +36,7 @@ import { IERC3643 } from "../layer_1/interfaces/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
-import { Common } from "../layer_0/common/Common.sol";
+import { Common } from "../domain/Common.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
 import { ISustainabilityPerformanceTargetRate } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";

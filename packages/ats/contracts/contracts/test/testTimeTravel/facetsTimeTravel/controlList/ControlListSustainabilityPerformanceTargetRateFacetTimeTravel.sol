@@ -5,7 +5,7 @@ import {
     ControlListSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/controlList/sustainabilityPerformanceTargetRate/ControlListSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ControlListSustainabilityPerformanceTargetRateFacetTimeTravel is
     ControlListSustainabilityPerformanceTargetRateFacet,

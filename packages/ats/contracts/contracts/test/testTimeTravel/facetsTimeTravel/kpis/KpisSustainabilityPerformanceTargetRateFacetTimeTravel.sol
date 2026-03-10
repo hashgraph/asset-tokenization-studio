@@ -5,7 +5,7 @@ import {
     KpisSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_2/kpis/kpiLatest/sustainabilityPerformanceTargetRate/KpisSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract KpisSustainabilityPerformanceTargetRateFacetTimeTravel is
     KpisSustainabilityPerformanceTargetRateFacet,

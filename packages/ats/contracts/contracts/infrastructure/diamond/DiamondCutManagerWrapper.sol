@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../layer_0/common/libraries/LibCommon.sol";
-import { EnumerableSetBytes4 } from "../../layer_0/common/libraries/EnumerableSetBytes4.sol";
+import { LibCommon } from "../../infrastructure/utils/LibCommon.sol";
+import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
 import { IDiamondCutManager } from "./IDiamondCutManager.sol";
 import { IStaticFunctionSelectors } from "../proxy/IStaticFunctionSelectors.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";

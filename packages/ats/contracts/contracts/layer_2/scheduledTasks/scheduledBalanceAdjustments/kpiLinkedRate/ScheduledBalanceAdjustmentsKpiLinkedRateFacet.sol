@@ -5,7 +5,7 @@ import { _SCHEDULED_BALANCE_ADJUSTMENTS_KPI_LINKED_RATE_RESOLVER_KEY } from "../
 import { ScheduledBalanceAdjustmentsFacetBase } from "../ScheduledBalanceAdjustmentsFacetBase.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract ScheduledBalanceAdjustmentsKpiLinkedRateFacet is
     ScheduledBalanceAdjustmentsFacetBase,

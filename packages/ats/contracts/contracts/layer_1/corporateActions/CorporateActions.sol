@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICorporateActions } from "../interfaces/corporateActions/ICorporateActions.sol";
-import { Internals } from "../../layer_0/Internals.sol";
+import { Internals } from "../../domain/Internals.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../constants/roles.sol";
 
 abstract contract CorporateActions is ICorporateActions, Internals {

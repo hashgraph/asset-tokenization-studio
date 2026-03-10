@@ -5,7 +5,7 @@ import {
     ClearingTransferFixedRateFacet
 } from "../../../../layer_1/clearing/fixedRate/ClearingTransferFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ClearingTransferFixedRateFacetTimeTravel is ClearingTransferFixedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

@@ -7,7 +7,7 @@ import {
     ERC20VotesSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/ERC1400/ERC20Votes/sustainabilityPerformanceTargetRate/ERC20VotesSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC20VotesSustainabilityPerformanceTargetRateFacetTimeTravel is
     ERC20VotesSustainabilityPerformanceTargetRateFacet,

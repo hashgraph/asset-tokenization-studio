@@ -7,7 +7,7 @@ import {
     ERC20VotesKpiLinkedRateFacet
 } from "../../../../layer_1/ERC1400/ERC20Votes/kpiLinkedRate/ERC20VotesKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC20VotesKpiLinkedRateFacetTimeTravel is ERC20VotesKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

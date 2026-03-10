@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BasicTransferInfo } from "../../interfaces/ERC1400/IERC1410.sol";
 import { IERC1410TokenHolder } from "../../interfaces/ERC1400/IERC1410TokenHolder.sol";
-import { Internals } from "../../../layer_0/Internals.sol";
+import { Internals } from "../../../domain/Internals.sol";
 
 /**
  * @title ERC1410TokenHolder

@@ -5,7 +5,7 @@ import { _TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../consta
 import { TransferAndLockFacetBase } from "../TransferAndLockFacetBase.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract TransferAndLockKpiLinkedRateFacet is TransferAndLockFacetBase, CommonKpiLinkedInterestRate {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../layer_0/common/libraries/LibCommon.sol";
+import { LibCommon } from "../../infrastructure/utils/LibCommon.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage

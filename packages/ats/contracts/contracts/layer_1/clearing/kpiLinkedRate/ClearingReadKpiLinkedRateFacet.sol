@@ -5,7 +5,7 @@ import { ClearingReadFacetBase } from "../ClearingReadFacetBase.sol";
 import { _CLEARING_READ_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract ClearingReadKpiLinkedRateFacet is ClearingReadFacetBase, CommonKpiLinkedInterestRate {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

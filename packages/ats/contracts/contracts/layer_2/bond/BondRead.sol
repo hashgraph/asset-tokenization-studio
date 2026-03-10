@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IBondRead } from "../interfaces/bond/IBondRead.sol";
 import { COUPON_CORPORATE_ACTION_TYPE } from "../../constants/values.sol";
-import { Internals } from "../../layer_0/Internals.sol";
+import { Internals } from "../../domain/Internals.sol";
 
 abstract contract BondRead is IBondRead, Internals {
     function getBondDetails() external view override returns (BondDetailsData memory bondDetailsData_) {

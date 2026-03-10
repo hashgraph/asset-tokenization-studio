@@ -7,7 +7,7 @@ import {
     ERC1410ReadKpiLinkedRateFacet
 } from "../../../../layer_1/ERC1400/ERC1410/kpiLinkedRate/ERC1410ReadKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC1410ReadKpiLinkedRateFacetTimeTravel is ERC1410ReadKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

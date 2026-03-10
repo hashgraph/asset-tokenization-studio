@@ -7,7 +7,7 @@ import {
     ERC1594SustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/ERC1400/ERC1594/sustainabilityPerformanceTargetRate/ERC1594SustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel is
     ERC1594SustainabilityPerformanceTargetRateFacet,

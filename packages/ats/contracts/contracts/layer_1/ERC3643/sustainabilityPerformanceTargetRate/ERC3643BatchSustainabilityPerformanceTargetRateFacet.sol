@@ -5,7 +5,7 @@ import { _ERC3643_BATCH_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } fr
 import { ERC3643BatchFacetBase } from "../ERC3643BatchFacetBase.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract ERC3643BatchSustainabilityPerformanceTargetRateFacet is
     ERC3643BatchFacetBase,

@@ -5,7 +5,7 @@ import { ERC1644FacetBase } from "../ERC1644FacetBase.sol";
 import { _ERC1644_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract ERC1644KpiLinkedRateFacet is ERC1644FacetBase, CommonKpiLinkedInterestRate {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

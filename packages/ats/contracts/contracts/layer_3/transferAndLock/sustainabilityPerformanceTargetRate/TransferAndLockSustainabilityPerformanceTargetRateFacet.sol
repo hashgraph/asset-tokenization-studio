@@ -7,7 +7,7 @@ import {
 import { TransferAndLockFacetBase } from "../TransferAndLockFacetBase.sol";
 // prettier-ignore
 // solhint-disable-next-line max-line-length
-import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 
 contract TransferAndLockSustainabilityPerformanceTargetRateFacet is
     TransferAndLockFacetBase,

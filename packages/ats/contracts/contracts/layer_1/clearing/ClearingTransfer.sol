@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Internals } from "../../layer_0/Internals.sol";
+import { Internals } from "../../domain/Internals.sol";
 import { IClearingTransfer } from "../interfaces/clearing/IClearingTransfer.sol";
-import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
+import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
 
 abstract contract ClearingTransfer is IClearingTransfer, Internals {
     function clearingTransferByPartition(

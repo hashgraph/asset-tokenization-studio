@@ -5,7 +5,7 @@ import {
     ControlListKpiLinkedRateFacet
 } from "../../../../layer_1/controlList/kpiLinkedRate/ControlListKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ControlListKpiLinkedRateFacetTimeTravel is ControlListKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

@@ -2,7 +2,7 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Internals } from "../../../layer_0/Internals.sol";
+import { Internals } from "../../../domain/Internals.sol";
 import { IERC20 } from "../../interfaces/ERC1400/IERC20.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 

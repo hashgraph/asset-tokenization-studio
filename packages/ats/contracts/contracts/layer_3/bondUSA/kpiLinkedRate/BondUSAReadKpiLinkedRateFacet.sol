@@ -5,7 +5,7 @@ import { BondUSAReadFacetBase } from "../BondUSAReadFacetBase.sol";
 import { _BOND_KPI_LINKED_READ_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract BondUSAReadKpiLinkedRateFacet is BondUSAReadFacetBase, CommonKpiLinkedInterestRate {
     function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {

@@ -7,7 +7,7 @@ import {
     ERC3643BatchKpiLinkedRateFacet
 } from "../../../../layer_1/ERC3643/kpiLinkedRate/ERC3643BatchKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC3643BatchKpiLinkedRateFacetTimeTravel is ERC3643BatchKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

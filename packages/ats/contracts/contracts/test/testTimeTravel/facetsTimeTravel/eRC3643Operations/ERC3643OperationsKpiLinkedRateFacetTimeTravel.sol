@@ -7,7 +7,7 @@ import {
     ERC3643OperationsKpiLinkedRateFacet
 } from "../../../../layer_1/ERC3643/kpiLinkedRate/ERC3643OperationsKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC3643OperationsKpiLinkedRateFacetTimeTravel is
     ERC3643OperationsKpiLinkedRateFacet,

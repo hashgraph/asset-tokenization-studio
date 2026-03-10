@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { _LOCKER_ROLE } from "../../constants/roles.sol";
 import { ILock } from "../interfaces/lock/ILock.sol";
-import { Internals } from "../../layer_0/Internals.sol";
+import { Internals } from "../../domain/Internals.sol";
 
 abstract contract Lock is ILock, Internals {
     // Functions

@@ -5,7 +5,7 @@ import {
     ScheduledSnapshotsKpiLinkedRateFacet
 } from "../../../../layer_2/scheduledTasks/scheduledSnapshots/kpiLinkedRate/ScheduledSnapshotsKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ScheduledSnapshotsKpiLinkedRateFacetTimeTravel is
     ScheduledSnapshotsKpiLinkedRateFacet,

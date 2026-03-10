@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { Common } from "../../layer_0/common/Common.sol";
+import { Common } from "../../domain/Common.sol";
 
 /**
  * @dev Test facet for ERC20 storage migration testing.

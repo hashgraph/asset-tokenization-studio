@@ -5,7 +5,7 @@ import {
     ScheduledCouponListingSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_2/scheduledTasks/scheduledCouponListing/sustainabilityPerformanceTargetRate/ScheduledCouponListingSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ScheduledCouponListingSustainabilityPerformanceTargetRateFacetTimeTravel is
     ScheduledCouponListingSustainabilityPerformanceTargetRateFacet,

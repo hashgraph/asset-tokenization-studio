@@ -5,7 +5,7 @@ import {
     ClearingTransferSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/clearing/sustainabilityPerformanceTargetRate/ClearingTransferSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ClearingTransferSustainabilityPerformanceTargetRateFacetTimeTravel is
     ClearingTransferSustainabilityPerformanceTargetRateFacet,

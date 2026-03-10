@@ -5,7 +5,7 @@ import { ExternalControlListManagementFacetBase } from "../ExternalControlListMa
 import { _EXTERNAL_CONTROL_LIST_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import {
     CommonKpiLinkedInterestRate
-} from "../../../layer_0_extensions/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 
 contract ExternalControlListManagementKpiLinkedRateFacet is
     ExternalControlListManagementFacetBase,

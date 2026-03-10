@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { HoldIdentifier } from "../interfaces/hold/IHold.sol";
 import { IHoldRead } from "../interfaces/hold/IHoldRead.sol";
-import { ThirdPartyType } from "../../layer_0/common/types/ThirdPartyType.sol";
-import { Internals } from "../../layer_0/Internals.sol";
+import { ThirdPartyType } from "../../domain/asset/types/ThirdPartyType.sol";
+import { Internals } from "../../domain/Internals.sol";
 
 abstract contract HoldRead is IHoldRead, Internals {
     function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {

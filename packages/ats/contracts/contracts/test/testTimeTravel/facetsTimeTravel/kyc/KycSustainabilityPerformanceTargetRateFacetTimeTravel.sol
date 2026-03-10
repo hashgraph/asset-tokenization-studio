@@ -5,7 +5,7 @@ import {
     KycSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/kyc/sustainabilityPerformanceTargetRate/KycSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract KycSustainabilityPerformanceTargetRateFacetTimeTravel is
     KycSustainabilityPerformanceTargetRateFacet,

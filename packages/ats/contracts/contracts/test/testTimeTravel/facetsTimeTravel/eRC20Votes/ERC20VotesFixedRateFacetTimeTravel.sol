@@ -7,7 +7,7 @@ import {
     ERC20VotesFixedRateFacet
 } from "../../../../layer_1/ERC1400/ERC20Votes/fixedRate/ERC20VotesFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC20VotesFixedRateFacetTimeTravel is ERC20VotesFixedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

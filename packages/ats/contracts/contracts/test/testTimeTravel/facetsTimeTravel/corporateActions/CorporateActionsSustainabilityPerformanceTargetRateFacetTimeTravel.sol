@@ -5,7 +5,7 @@ import {
     CorporateActionsSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/corporateActions/sustainabilityPerformanceTargetRate/CorporateActionsSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract CorporateActionsSustainabilityPerformanceTargetRateFacetTimeTravel is
     CorporateActionsSustainabilityPerformanceTargetRateFacet,

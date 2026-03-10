@@ -5,7 +5,7 @@ import {
     CorporateActionsFixedRateFacet
 } from "../../../../layer_1/corporateActions/fixedRate/CorporateActionsFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract CorporateActionsFixedRateFacetTimeTravel is CorporateActionsFixedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

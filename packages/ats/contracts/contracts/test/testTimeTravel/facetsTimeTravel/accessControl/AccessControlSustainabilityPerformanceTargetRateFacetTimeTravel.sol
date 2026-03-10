@@ -5,7 +5,7 @@ import {
     AccessControlSustainabilityPerformanceTargetRateFacet
 } from "../../../../layer_1/accessControl/sustainabilityPerformanceTargetRate/AccessControlSustainabilityPerformanceTargetRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract AccessControlSustainabilityPerformanceTargetRateFacetTimeTravel is
     AccessControlSustainabilityPerformanceTargetRateFacet,
