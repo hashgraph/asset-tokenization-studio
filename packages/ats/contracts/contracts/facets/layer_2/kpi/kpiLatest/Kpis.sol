@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKpis } from "../../interfaces/kpi/kpiLatest/IKpis.sol";
+import { IKpis } from "./IKpis.sol";
 import { _KPI_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import {
     InternalsKpiInterestRate

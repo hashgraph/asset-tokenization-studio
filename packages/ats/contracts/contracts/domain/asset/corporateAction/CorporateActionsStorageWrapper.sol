@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
-} from "../../../facets/layer_1/interfaces/corporateAction/ICorporateActionsStorageWrapper.sol";
+} from "../../../domain/asset/corporateAction/ICorporateActionsStorageWrapper.sol";
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../../constants/storagePositions.sol";

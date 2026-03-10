@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IFactory } from "../interfaces/factory/IFactory.sol";
+import { IFactory } from "./IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
-import { IControlList } from "../facets/layer_1/interfaces/controlList/IControlList.sol";
-import { IERC20 } from "../facets/layer_1/interfaces/ERC1400/IERC20.sol";
-import { IERC20Votes } from "../facets/layer_1/interfaces/ERC1400/IERC20Votes.sol";
-import { IERC1644 } from "../facets/layer_1/interfaces/ERC1400/IERC1644.sol";
-import { IERC1410 } from "../facets/layer_1/interfaces/ERC1400/IERC1410.sol";
-import { ICap } from "../facets/layer_1/interfaces/cap/ICap.sol";
-import { IERC1594 } from "../facets/layer_1/interfaces/ERC1400/IERC1594.sol";
-import { IClearingActions } from "../facets/layer_1/interfaces/clearing/IClearingActions.sol";
+import { IControlList } from "../facets/layer_1/controlList/IControlList.sol";
+import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { IERC20Votes } from "../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
+import { IERC1644 } from "../facets/layer_1/ERC1400/ERC1644/IERC1644.sol";
+import { IERC1410 } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { ICap } from "../facets/layer_1/cap/ICap.sol";
+import { IERC1594 } from "../facets/layer_1/ERC1400/ERC1594/IERC1594.sol";
+import { IClearingActions } from "../facets/layer_1/clearing/IClearingActions.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
@@ -22,27 +22,25 @@ import {
     RegulationSubType,
     checkRegulationTypeAndSubType
 } from "../constants/regulation.sol";
-import { IEquityUSA } from "../facets/layer_3/interfaces/IEquityUSA.sol";
-import { IBondUSA } from "../facets/layer_3/interfaces/IBondUSA.sol";
-import { IProceedRecipients } from "../facets/layer_2/interfaces/proceedRecipient/IProceedRecipients.sol";
-import { IProtectedPartitions } from "../facets/layer_1/interfaces/protectedPartition/IProtectedPartitions.sol";
-import { IExternalPauseManagement } from "../facets/layer_1/interfaces/externalPause/IExternalPauseManagement.sol";
+import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
+import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
+import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
+import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
+import { IExternalPauseManagement } from "../facets/layer_1/externalPause/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
-} from "../facets/layer_1/interfaces/externalControlList/IExternalControlListManagement.sol";
-import {
-    IExternalKycListManagement
-} from "../facets/layer_1/interfaces/externalKycList/IExternalKycListManagement.sol";
-import { IKyc } from "../facets/layer_1/interfaces/kyc/IKyc.sol";
-import { IERC3643 } from "../facets/layer_1/interfaces/ERC3643/IERC3643.sol";
+} from "../facets/layer_1/externalControlList/IExternalControlListManagement.sol";
+import { IExternalKycListManagement } from "../facets/layer_1/externalKycList/IExternalKycListManagement.sol";
+import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
+import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
-import { IFixedRate } from "../facets/layer_2/interfaces/interestRate/fixedRate/IFixedRate.sol";
-import { IKpiLinkedRate } from "../facets/layer_2/interfaces/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
+import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Common } from "../domain/Common.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate
-} from "../facets/layer_2/interfaces/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 
 contract Factory is IFactory, Common {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ISnapshots, HolderBalance } from "../interfaces/snapshot/ISnapshots.sol";
+import { ISnapshots, HolderBalance } from "./ISnapshots.sol";
 import { Internals } from "../../../domain/Internals.sol";
 import { _SNAPSHOT_ROLE } from "../../../constants/roles.sol";
 

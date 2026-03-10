@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IKyc } from "../interfaces/kyc/IKyc.sol";
+import { IKyc } from "./IKyc.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Kyc } from "./Kyc.sol";
 

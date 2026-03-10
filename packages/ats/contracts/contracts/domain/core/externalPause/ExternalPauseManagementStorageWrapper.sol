@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ControlListStorageWrapper } from "../controlList/ControlListStorageWrapper.sol";
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IExternalPause } from "../../../facets/layer_1/interfaces/externalPause/IExternalPause.sol";
+import { IExternalPause } from "../../../facets/layer_1/externalPause/IExternalPause.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 
 abstract contract ExternalPauseManagementStorageWrapper is ControlListStorageWrapper {

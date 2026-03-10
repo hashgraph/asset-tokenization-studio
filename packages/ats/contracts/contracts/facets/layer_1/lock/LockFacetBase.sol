@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { ILock } from "../interfaces/lock/ILock.sol";
+import { ILock } from "./ILock.sol";
 import { Lock } from "./Lock.sol";
 
 abstract contract LockFacetBase is Lock, IStaticFunctionSelectors {

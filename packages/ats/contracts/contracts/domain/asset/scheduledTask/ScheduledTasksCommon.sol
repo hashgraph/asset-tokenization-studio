@@ -6,7 +6,7 @@ import { ScheduledTasksLib } from "../../../facets/layer_2/scheduledTask/Schedul
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../facets/layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);

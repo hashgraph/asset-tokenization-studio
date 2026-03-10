@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IScheduledSnapshots } from "../../interfaces/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol";
+import { IScheduledSnapshots } from "./IScheduledSnapshots.sol";
 import { ScheduledSnapshots } from "./ScheduledSnapshots.sol";
 
 abstract contract ScheduledSnapshotsFacetBase is ScheduledSnapshots, IStaticFunctionSelectors {

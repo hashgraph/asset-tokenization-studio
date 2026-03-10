@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IAccessControl } from "../interfaces/accessControl/IAccessControl.sol";
+import { IAccessControl } from "./IAccessControl.sol";
 import { AccessControl } from "./AccessControl.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 

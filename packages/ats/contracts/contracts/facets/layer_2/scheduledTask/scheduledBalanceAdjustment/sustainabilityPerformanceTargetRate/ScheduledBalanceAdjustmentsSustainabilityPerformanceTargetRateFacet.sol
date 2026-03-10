@@ -7,7 +7,6 @@ import {
 // solhint-disable-next-line max-line-length
 import { ScheduledBalanceAdjustmentsFacetBase } from "../ScheduledBalanceAdjustmentsFacetBase.sol";
 // prettier-ignore
-// solhint-disable-next-line max-line-length
 /* solhint-disable max-line-length */
 import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 /* solhint-enable max-line-length */

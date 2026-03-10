@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC3643Operations } from "../interfaces/ERC3643/IERC3643Operations.sol";
+import { IERC3643Operations } from "./IERC3643Operations.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ERC3643Operations } from "./ERC3643Operations.sol";
 

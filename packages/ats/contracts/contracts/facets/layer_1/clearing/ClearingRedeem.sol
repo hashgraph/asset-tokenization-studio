@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../domain/Internals.sol";
-import { IClearingRedeem } from "../interfaces/clearing/IClearingRedeem.sol";
+import { IClearingRedeem } from "./IClearingRedeem.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 
 abstract contract ClearingRedeem is IClearingRedeem, Internals {

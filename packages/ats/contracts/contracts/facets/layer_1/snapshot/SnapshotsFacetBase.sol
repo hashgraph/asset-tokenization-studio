@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { ISnapshots } from "../interfaces/snapshot/ISnapshots.sol";
+import { ISnapshots } from "./ISnapshots.sol";
 import { Snapshots } from "./Snapshots.sol";
 
 abstract contract SnapshotsFacetBase is Snapshots, IStaticFunctionSelectors {

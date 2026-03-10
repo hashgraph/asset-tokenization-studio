@@ -2,9 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingStorageWrapper2 } from "../clearing/ClearingStorageWrapper2.sol";
-import {
-    IAdjustBalancesStorageWrapper
-} from "../../../facets/layer_2/interfaces/adjustBalance/IAdjustBalancesStorageWrapper.sol";
+import { IAdjustBalancesStorageWrapper } from "../../../domain/asset/adjustBalance/IAdjustBalancesStorageWrapper.sol";
 
 abstract contract AdjustBalancesStorageWrapper2 is IAdjustBalancesStorageWrapper, ClearingStorageWrapper2 {
     function _adjustBalances(uint256 _factor, uint8 _decimals) internal override {

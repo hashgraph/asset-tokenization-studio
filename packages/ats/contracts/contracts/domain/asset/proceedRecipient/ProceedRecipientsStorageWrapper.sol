@@ -6,7 +6,7 @@ import {
     _PROCEED_RECIPIENTS_STORAGE_POSITION,
     _PROCEED_RECIPIENTS_DATA_STORAGE_POSITION
 } from "../../../constants/storagePositions.sol";
-import { IProceedRecipients } from "../../../facets/layer_2/interfaces/proceedRecipient/IProceedRecipients.sol";
+import { IProceedRecipients } from "../../../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
 
 abstract contract ProceedRecipientsStorageWrapper is TotalBalancesStorageWrapper {
     struct ProceedRecipientsDataStorage {

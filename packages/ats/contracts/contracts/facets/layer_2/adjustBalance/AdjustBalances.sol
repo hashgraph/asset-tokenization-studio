@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-import { IAdjustBalances } from "../interfaces/adjustBalance/IAdjustBalances.sol";
+import { IAdjustBalances } from "./IAdjustBalances.sol";
 import { Internals } from "../../../domain/Internals.sol";
 import { _ADJUSTMENT_BALANCE_ROLE } from "../../../constants/roles.sol";
 

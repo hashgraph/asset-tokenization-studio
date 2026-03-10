@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CLEARING_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { HoldStorageWrapper1 } from "../hold/HoldStorageWrapper1.sol";
-import { IClearing } from "../../../facets/layer_1/interfaces/clearing/IClearing.sol";
-import { IClearingTransfer } from "../../../facets/layer_1/interfaces/clearing/IClearingTransfer.sol";
-import { IClearingRedeem } from "../../../facets/layer_1/interfaces/clearing/IClearingRedeem.sol";
-import { IClearingHoldCreation } from "../../../facets/layer_1/interfaces/clearing/IClearingHoldCreation.sol";
+import { IClearing } from "../../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTransfer } from "../../../facets/layer_1/clearing/IClearingTransfer.sol";
+import { IClearingRedeem } from "../../../facets/layer_1/clearing/IClearingRedeem.sol";
+import { IClearingHoldCreation } from "../../../facets/layer_1/clearing/IClearingHoldCreation.sol";
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";

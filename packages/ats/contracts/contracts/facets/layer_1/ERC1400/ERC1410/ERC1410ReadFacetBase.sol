@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IERC1410Read } from "../../interfaces/ERC1400/IERC1410Read.sol";
+import { IERC1410Read } from "./IERC1410Read.sol";
 import { ERC1410Read } from "./ERC1410Read.sol";
 
 abstract contract ERC1410ReadFacetBase is IStaticFunctionSelectors, ERC1410Read {

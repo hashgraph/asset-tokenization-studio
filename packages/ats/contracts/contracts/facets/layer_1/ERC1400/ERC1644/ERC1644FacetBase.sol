@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1644 } from "../../interfaces/ERC1400/IERC1644.sol";
+import { IERC1644 } from "../ERC1644/IERC1644.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ERC1644 } from "./ERC1644.sol";
 

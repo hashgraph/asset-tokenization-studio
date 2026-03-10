@@ -2,12 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
-import { BasicTransferInfo, OperatorTransferData } from "../../interfaces/ERC1400/IERC1410.sol";
-import { IERC1410Management } from "../../interfaces/ERC1400/IERC1410Management.sol";
+import { BasicTransferInfo, OperatorTransferData } from "./IERC1410.sol";
+import { IERC1410Management } from "./IERC1410Management.sol";
 import { Internals } from "../../../../domain/Internals.sol";
 import {
     IProtectedPartitionsStorageWrapper
-} from "../../interfaces/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+} from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract ERC1410Management is IERC1410Management, Internals {
     // solhint-disable-next-line func-name-mixedcase

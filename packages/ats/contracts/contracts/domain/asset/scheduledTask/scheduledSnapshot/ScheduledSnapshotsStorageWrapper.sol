@@ -8,7 +8,7 @@ import { SNAPSHOT_RESULT_ID } from "../../../../constants/values.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../../facets/layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
     function _addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes32 _actionId) internal override {

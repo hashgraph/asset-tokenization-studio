@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../../../../../../../facets/layer_2/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../../../../../../facets/layer_2/bond/IBondRead.sol";
 // prettier-ignore
-// solhint-disable-next-line max-line-length
 /* solhint-disable max-line-length */
-import { ISustainabilityPerformanceTargetRate } from "../../../../../../../../facets/layer_2/interfaces/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { ISustainabilityPerformanceTargetRate } from "../../../../../../../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";

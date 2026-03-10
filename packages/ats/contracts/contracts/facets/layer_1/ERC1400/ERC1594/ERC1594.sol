@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ISSUER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
-import { IERC1594 } from "../../interfaces/ERC1400/IERC1594.sol";
+import { IERC1594 } from "../ERC1594/IERC1594.sol";
 import { Internals } from "../../../../domain/Internals.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 

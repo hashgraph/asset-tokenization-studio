@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
-import { IERC3643Operations } from "../interfaces/ERC3643/IERC3643Operations.sol";
+import { IERC3643Operations } from "./IERC3643Operations.sol";
 import { Internals } from "../../../domain/Internals.sol";
 
 abstract contract ERC3643Operations is IERC3643Operations, Internals {

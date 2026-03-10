@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { INonces } from "../interfaces/nonce/INonces.sol";
+import { INonces } from "./INonces.sol";
 import { Nonces } from "./Nonces.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 

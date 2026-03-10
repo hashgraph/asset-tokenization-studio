@@ -6,11 +6,11 @@ import {
 } from "../scheduledCouponListing/ScheduledCouponListingStorageWrapper.sol";
 import { ScheduledTasksLib } from "../../../../facets/layer_2/scheduledTask/ScheduledTasksLib.sol";
 import { _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
-import { IEquity } from "../../../../facets/layer_2/interfaces/equity/IEquity.sol";
+import { IEquity } from "../../../../facets/layer_2/equity/IEquity.sol";
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../../facets/layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponListingStorageWrapper {
     function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes32 _actionId) internal override {

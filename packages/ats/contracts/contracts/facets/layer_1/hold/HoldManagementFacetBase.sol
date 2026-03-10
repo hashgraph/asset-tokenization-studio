@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IHoldManagement } from "../interfaces/hold/IHoldManagement.sol";
+import { IHoldManagement } from "./IHoldManagement.sol";
 import { HoldManagement } from "./HoldManagement.sol";
 
 abstract contract HoldManagementFacetBase is IStaticFunctionSelectors, HoldManagement {

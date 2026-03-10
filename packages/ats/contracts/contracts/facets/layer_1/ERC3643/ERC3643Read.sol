@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _AGENT_ROLE } from "../../../constants/roles.sol";
-import { IERC3643Read } from "../interfaces/ERC3643/IERC3643Read.sol";
-import { ICompliance } from "../interfaces/ERC3643/ICompliance.sol";
-import { IIdentityRegistry } from "../interfaces/ERC3643/IIdentityRegistry.sol";
+import { IERC3643Read } from "./IERC3643Read.sol";
+import { ICompliance } from "./ICompliance.sol";
+import { IIdentityRegistry } from "./IIdentityRegistry.sol";
 import { Internals } from "../../../domain/Internals.sol";
 
 abstract contract ERC3643Read is IERC3643Read, Internals {

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ProceedRecipients } from "./ProceedRecipients.sol";
-import { IProceedRecipients } from "../interfaces/proceedRecipient/IProceedRecipients.sol";
+import { IProceedRecipients } from "./IProceedRecipients.sol";
 
 abstract contract ProceedRecipientsFacetBase is ProceedRecipients, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {

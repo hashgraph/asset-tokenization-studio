@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Bond } from "../../layer_2/bond/Bond.sol";
-import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
-import { IBondUSA } from "../interfaces/IBondUSA.sol";
+import { IBondRead } from "../../layer_2/bond/IBondRead.sol";
+import { IBondUSA } from "./IBondUSA.sol";
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 
 abstract contract BondUSA is IBondUSA, Bond {

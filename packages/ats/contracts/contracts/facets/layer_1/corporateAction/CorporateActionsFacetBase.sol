@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICorporateActions } from "../interfaces/corporateAction/ICorporateActions.sol";
+import { ICorporateActions } from "./ICorporateActions.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { CorporateActions } from "./CorporateActions.sol";
 

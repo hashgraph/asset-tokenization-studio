@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../domain/Internals.sol";
-import { IClearingHoldCreation } from "../interfaces/clearing/IClearingHoldCreation.sol";
-import { Hold } from "../interfaces/hold/IHold.sol";
+import { IClearingHoldCreation } from "./IClearingHoldCreation.sol";
+import { Hold } from "../hold/IHold.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 
 abstract contract ClearingHoldCreation is IClearingHoldCreation, Internals {

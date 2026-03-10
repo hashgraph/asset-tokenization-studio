@@ -3,48 +3,42 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Modifiers } from "./Modifiers.sol";
 import { CheckpointsLib } from "../infrastructure/utils/CheckpointsLib.sol";
-import { IClearing } from "../facets/layer_1/interfaces/clearing/IClearing.sol";
-import { IClearingTransfer } from "../facets/layer_1/interfaces/clearing/IClearingTransfer.sol";
-import { IClearingRedeem } from "../facets/layer_1/interfaces/clearing/IClearingRedeem.sol";
-import { IClearingHoldCreation } from "../facets/layer_1/interfaces/clearing/IClearingHoldCreation.sol";
+import { IClearing } from "../facets/layer_1/clearing/IClearing.sol";
+import { IClearingTransfer } from "../facets/layer_1/clearing/IClearingTransfer.sol";
+import { IClearingRedeem } from "../facets/layer_1/clearing/IClearingRedeem.sol";
+import { IClearingHoldCreation } from "../facets/layer_1/clearing/IClearingHoldCreation.sol";
 import { ThirdPartyType } from "./asset/types/ThirdPartyType.sol";
-import {
-    Hold,
-    HoldData,
-    HoldIdentifier,
-    OperationType,
-    ProtectedHold
-} from "../facets/layer_1/interfaces/hold/IHold.sol";
+import { Hold, HoldData, HoldIdentifier, OperationType, ProtectedHold } from "../facets/layer_1/hold/IHold.sol";
 import {
     Snapshots,
     PartitionSnapshots,
     SnapshotsAddress,
     HolderBalance
-} from "../facets/layer_1/interfaces/snapshot/ISnapshots.sol";
-import { ILock } from "../facets/layer_1/interfaces/lock/ILock.sol";
-import { ISecurity } from "../facets/layer_2/interfaces/security/ISecurity.sol";
-import { IBondRead } from "../facets/layer_2/interfaces/bond/IBondRead.sol";
+} from "../facets/layer_1/snapshot/ISnapshots.sol";
+import { ILock } from "../facets/layer_1/lock/ILock.sol";
+import { ISecurity } from "../facets/layer_2/security/ISecurity.sol";
+import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
-import { ICap } from "../facets/layer_1/interfaces/cap/ICap.sol";
-import { IERC20 } from "../facets/layer_1/interfaces/ERC1400/IERC20.sol";
-import { IEquity } from "../facets/layer_2/interfaces/equity/IEquity.sol";
-import { IKpiLinkedRate } from "../facets/layer_2/interfaces/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
-import { IKyc } from "../facets/layer_1/interfaces/kyc/IKyc.sol";
+import { ICap } from "../facets/layer_1/cap/ICap.sol";
+import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { IEquity } from "../facets/layer_2/equity/IEquity.sol";
+import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate
-} from "../facets/layer_2/interfaces/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../facets/layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
-import { IssueData, OperatorTransferData, BasicTransferInfo } from "../facets/layer_1/interfaces/ERC1400/IERC1410.sol";
-import { IIdentityRegistry } from "../facets/layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
-import { ICompliance } from "../facets/layer_1/interfaces/ERC3643/ICompliance.sol";
+} from "../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { IssueData, OperatorTransferData, BasicTransferInfo } from "../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
+import { IIdentityRegistry } from "../facets/layer_1/ERC3643/IIdentityRegistry.sol";
+import { ICompliance } from "../facets/layer_1/ERC3643/ICompliance.sol";
 import {
     IProtectedPartitionsStorageWrapper
-} from "../facets/layer_1/interfaces/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+} from "../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 
 abstract contract Internals is Modifiers {

@@ -2,9 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import {
-    IScheduledCrossOrderedTasks
-} from "../../interfaces/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+import { IScheduledCrossOrderedTasks } from "./IScheduledCrossOrderedTasks.sol";
 import { ScheduledCrossOrderedTasks } from "./ScheduledCrossOrderedTasks.sol";
 
 abstract contract ScheduledCrossOrderedTasksFacetBase is ScheduledCrossOrderedTasks, IStaticFunctionSelectors {

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../domain/Internals.sol";
-import { IClearingRead } from "../interfaces/clearing/IClearingRead.sol";
+import { IClearingRead } from "./IClearingRead.sol";
 
 abstract contract ClearingRead is IClearingRead, Internals {
     function getClearedAmountFor(address _tokenHolder) external view returns (uint256 amount_) {

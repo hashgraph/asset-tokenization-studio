@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _KPI_LINKED_RATE_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
-import { IKpiLinkedRate } from "../../../../facets/layer_2/interfaces/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IKpiLinkedRate } from "../../../../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { PauseStorageWrapper } from "../../../core/pause/PauseStorageWrapper.sol";
 
 abstract contract KpiLinkedRateStorageWrapper is PauseStorageWrapper {

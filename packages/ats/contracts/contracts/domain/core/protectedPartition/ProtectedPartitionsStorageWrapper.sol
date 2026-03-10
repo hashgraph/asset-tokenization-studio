@@ -5,9 +5,9 @@ import { _PROTECTED_PARTITIONS_PARTICIPANT_ROLE } from "../../../constants/roles
 import { _PROTECTED_PARTITIONS_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import {
     IProtectedPartitionsStorageWrapper
-} from "../../../facets/layer_1/interfaces/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
-import { IClearing } from "../../../facets/layer_1/interfaces/clearing/IClearing.sol";
-import { Hold, ProtectedHold } from "../../../facets/layer_1/interfaces/hold/IHold.sol";
+} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { IClearing } from "../../../facets/layer_1/clearing/IClearing.sol";
+import { Hold, ProtectedHold } from "../../../facets/layer_1/hold/IHold.sol";
 import { KycStorageWrapper } from "../kyc/KycStorageWrapper.sol";
 import {
     getMessageHashTransfer,

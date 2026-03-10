@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { AdjustBalancesStorageWrapper2 } from "../adjustBalance/AdjustBalancesStorageWrapper2.sol";
-import { ILock } from "../../../facets/layer_1/interfaces/lock/ILock.sol";
-import { IERC20StorageWrapper } from "../../../facets/layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
+import { ILock } from "../../../facets/layer_1/lock/ILock.sol";
+import { IERC20StorageWrapper } from "../../../domain/asset/ERC1400/ERC20/IERC20StorageWrapper.sol";
 
 abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
     using EnumerableSet for EnumerableSet.UintSet;

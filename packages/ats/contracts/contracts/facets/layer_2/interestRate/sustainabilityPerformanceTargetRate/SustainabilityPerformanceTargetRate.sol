@@ -2,13 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 // prettier-ignore
-// solhint-disable-next-line max-line-length
 /* solhint-disable max-line-length */
 import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 /* solhint-enable max-line-length */
-import {
-    ISustainabilityPerformanceTargetRate
-} from "../../interfaces/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { ISustainabilityPerformanceTargetRate } from "./ISustainabilityPerformanceTargetRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 
 contract SustainabilityPerformanceTargetRate is

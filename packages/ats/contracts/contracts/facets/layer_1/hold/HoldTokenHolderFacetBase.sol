@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IHoldTokenHolder } from "../interfaces/hold/IHoldTokenHolder.sol";
+import { IHoldTokenHolder } from "./IHoldTokenHolder.sol";
 import { HoldTokenHolder } from "./HoldTokenHolder.sol";
 
 abstract contract HoldTokenHolderFacetBase is IStaticFunctionSelectors, HoldTokenHolder {

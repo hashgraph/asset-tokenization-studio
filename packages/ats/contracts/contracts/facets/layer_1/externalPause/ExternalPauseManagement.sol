@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalPauseManagement } from "../interfaces/externalPause/IExternalPauseManagement.sol";
+import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
 import { Internals } from "../../../domain/Internals.sol";
 import { _PAUSE_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";

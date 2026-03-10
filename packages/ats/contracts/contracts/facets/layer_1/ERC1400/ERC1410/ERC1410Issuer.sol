@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _AGENT_ROLE, _ISSUER_ROLE } from "../../../../constants/roles.sol";
-import { IERC1410Issuer } from "../../interfaces/ERC1400/IERC1410Issuer.sol";
+import { IERC1410Issuer } from "./IERC1410Issuer.sol";
 import { Internals } from "../../../../domain/Internals.sol";
-import { IssueData } from "../../interfaces/ERC1400/IERC1410.sol";
+import { IssueData } from "./IERC1410.sol";
 
 abstract contract ERC1410Issuer is IERC1410Issuer, Internals {
     function issueByPartition(

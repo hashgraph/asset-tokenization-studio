@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../domain/Internals.sol";
 import { _SSI_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { ISsiManagement } from "../interfaces/ssi/ISsiManagement.sol";
+import { ISsiManagement } from "./ISsiManagement.sol";
 
 abstract contract SsiManagement is ISsiManagement, Internals {
     function setRevocationRegistryAddress(

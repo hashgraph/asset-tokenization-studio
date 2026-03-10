@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _CONTROLLER_ROLE } from "../../../constants/roles.sol";
-import { Hold, ProtectedHold } from "../interfaces/hold/IHold.sol";
-import { IHoldManagement } from "../interfaces/hold/IHoldManagement.sol";
+import { Hold, ProtectedHold } from "./IHold.sol";
+import { IHoldManagement } from "./IHoldManagement.sol";
 import { Internals } from "../../../domain/Internals.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 

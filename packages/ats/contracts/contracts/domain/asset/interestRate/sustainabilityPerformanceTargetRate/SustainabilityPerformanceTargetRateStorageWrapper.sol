@@ -5,7 +5,7 @@ import { _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION } from "../../
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate
-} from "../../../../facets/layer_2/interfaces/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+} from "../../../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 import { KpiLinkedRateStorageWrapper } from "../kpiLinkedRate/KpiLinkedRateStorageWrapper.sol";
 

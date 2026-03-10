@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { ITotalBalance } from "../interfaces/totalBalance/ITotalBalance.sol";
+import { ITotalBalance } from "./ITotalBalance.sol";
 import { TotalBalance } from "./TotalBalance.sol";
 
 abstract contract TotalBalanceFacetBase is TotalBalance, IStaticFunctionSelectors {

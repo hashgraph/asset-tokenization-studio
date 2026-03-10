@@ -2,7 +2,7 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC20 } from "../../interfaces/ERC1400/IERC20.sol";
+import { IERC20 } from "../ERC20/IERC20.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ERC20 } from "./ERC20.sol";
 

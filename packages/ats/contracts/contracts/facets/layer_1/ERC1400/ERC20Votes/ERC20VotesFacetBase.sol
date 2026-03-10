@@ -2,7 +2,7 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC20Votes } from "../../interfaces/ERC1400/IERC20Votes.sol";
+import { IERC20Votes } from "../ERC20Votes/IERC20Votes.sol";
 import { IERC5805 } from "@openzeppelin/contracts/interfaces/IERC5805.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { IVotes } from "@openzeppelin/contracts/governance/utils/IVotes.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../../../../facets/layer_2/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../../../facets/layer_2/bond/IBondRead.sol";
 import { COUPON_LISTING_TASK_TYPE } from "../../../../../constants/values.sol";
 import { LowLevelCall } from "../../../../../infrastructure/utils/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";

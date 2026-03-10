@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
-import { IERC3643Management } from "../../../../facets/layer_1/interfaces/ERC3643/IERC3643Management.sol";
-import { ICompliance } from "../../../../facets/layer_1/interfaces/ERC3643/ICompliance.sol";
-import { IssueData } from "../../../../facets/layer_1/interfaces/ERC1400/IERC1410.sol";
+import { IERC3643Management } from "../../../../facets/layer_1/ERC3643/IERC3643Management.sol";
+import { ICompliance } from "../../../../facets/layer_1/ERC3643/ICompliance.sol";
+import { IssueData } from "../../../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { LowLevelCall } from "../../../../infrastructure/utils/LowLevelCall.sol";
 import { ERC1410OperatorStorageWrapper } from "./ERC1410OperatorStorageWrapper.sol";
 

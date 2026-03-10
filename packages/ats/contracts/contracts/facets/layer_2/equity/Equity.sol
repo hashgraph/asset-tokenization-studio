@@ -7,7 +7,7 @@ import {
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from "../../../constants/values.sol";
-import { IEquity } from "../interfaces/equity/IEquity.sol";
+import { IEquity } from "./IEquity.sol";
 import { Common } from "../../../domain/Common.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 

@@ -4,9 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 import { ArrayLib } from "../../../infrastructure/utils/ArrayLib.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    IAccessControlStorageWrapper
-} from "../../../facets/layer_1/interfaces/accessControl/IAccessControlStorageWrapper.sol";
+import { IAccessControlStorageWrapper } from "../../../domain/core/accessControl/IAccessControlStorageWrapper.sol";
 import { BusinessLogicResolverWrapper } from "../../../infrastructure/diamond/BusinessLogicResolverWrapper.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ResolverProxyStorageWrapper } from "../resolverProxy/ResolverProxyStorageWrapper.sol";

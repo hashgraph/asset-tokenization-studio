@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalKycListManagement } from "../interfaces/externalKycList/IExternalKycListManagement.sol";
+import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
 import { Internals } from "../../../domain/Internals.sol";
 import { _KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { IKyc } from "../interfaces/kyc/IKyc.sol";
+import { IKyc } from "../kyc/IKyc.sol";
 
 abstract contract ExternalKycListManagement is IExternalKycListManagement, Internals {
     // solhint-disable-next-line func-name-mixedcase

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Hold, HoldIdentifier } from "../interfaces/hold/IHold.sol";
-import { IHoldTokenHolder } from "../interfaces/hold/IHoldTokenHolder.sol";
+import { Hold, HoldIdentifier } from "./IHold.sol";
+import { IHoldTokenHolder } from "./IHoldTokenHolder.sol";
 import { Internals } from "../../../domain/Internals.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 

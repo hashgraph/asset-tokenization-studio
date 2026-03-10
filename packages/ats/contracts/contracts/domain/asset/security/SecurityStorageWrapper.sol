@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { RegulationData, AdditionalSecurityData } from "../../../constants/regulation.sol";
 import { _SECURITY_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { ISecurity } from "../../../facets/layer_2/interfaces/security/ISecurity.sol";
+import { ISecurity } from "../../../facets/layer_2/security/ISecurity.sol";
 import { EquityStorageWrapper } from "../equity/EquityStorageWrapper.sol";
 
 abstract contract SecurityStorageWrapper is EquityStorageWrapper {

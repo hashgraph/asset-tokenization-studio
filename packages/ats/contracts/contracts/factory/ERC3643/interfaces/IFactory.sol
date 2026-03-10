@@ -10,7 +10,6 @@ import { FactoryRegulationData, RegulationData, RegulationType, RegulationSubTyp
 import { TRexIFixedRate as IFixedRate } from "./IFixedRate.sol";
 import { TRexIKpiLinkedRate as IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 // prettier-ignore
-// solhint-disable-next-line max-line-length
 /* solhint-disable max-line-length */
 import {TRexISustainabilityPerformanceTargetRate as ISustainabilityPerformanceTargetRate} from "./ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */

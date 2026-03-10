@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../domain/Internals.sol";
-import { IFreeze } from "../interfaces/freeze/IFreeze.sol";
+import { IFreeze } from "./IFreeze.sol";
 
 import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";

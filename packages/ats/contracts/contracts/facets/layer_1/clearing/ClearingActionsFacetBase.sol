@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IClearingActions } from "../interfaces/clearing/IClearingActions.sol";
+import { IClearingActions } from "./IClearingActions.sol";
 import { ClearingActions } from "./ClearingActions.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 

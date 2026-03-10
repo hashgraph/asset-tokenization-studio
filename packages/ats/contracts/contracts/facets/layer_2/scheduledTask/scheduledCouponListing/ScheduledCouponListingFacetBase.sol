@@ -2,9 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import {
-    IScheduledCouponListing
-} from "../../interfaces/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
+import { IScheduledCouponListing } from "./IScheduledCouponListing.sol";
 import { ScheduledCouponListing } from "./ScheduledCouponListing.sol";
 
 abstract contract ScheduledCouponListingFacetBase is ScheduledCouponListing, IStaticFunctionSelectors {

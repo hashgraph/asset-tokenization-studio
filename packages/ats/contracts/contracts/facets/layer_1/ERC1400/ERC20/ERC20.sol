@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../../domain/Internals.sol";
-import { IERC20 } from "../../interfaces/ERC1400/IERC20.sol";
+import { IERC20 } from "../ERC20/IERC20.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 
 abstract contract ERC20 is IERC20, Internals {

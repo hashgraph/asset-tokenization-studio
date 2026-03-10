@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IHoldRead } from "../interfaces/hold/IHoldRead.sol";
+import { IHoldRead } from "./IHoldRead.sol";
 import { HoldRead } from "./HoldRead.sol";
 
 abstract contract HoldReadFacetBase is IStaticFunctionSelectors, HoldRead {

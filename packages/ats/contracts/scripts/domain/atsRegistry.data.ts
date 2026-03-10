@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-09T13:47:42.627Z
+ * Generated: 2026-03-10T15:32:03.079Z
  * Facets: 196
  * Infrastructure: 2
  *
@@ -10265,7 +10265,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     name: "TimeTravelFacet",
     resolverKey: {
       name: "_TIME_TRAVEL_RESOLVER_KEY",
-      value: "0x1fbf6bf6e93e5c16e85a8c2a1deafdb80cb6bf4d893b8427cc87a97a0c897d3b",
+      value: "0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8",
     },
     inheritance: ["IStaticFunctionSelectors", "ITimeTravel", "TimeTravelStorageWrapper"],
     methods: [

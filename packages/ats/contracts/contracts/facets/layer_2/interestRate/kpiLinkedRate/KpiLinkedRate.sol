@@ -6,7 +6,7 @@ import {
     CommonKpiLinkedInterestRate
 } from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 /* solhint-enable max-line-length */
-import { IKpiLinkedRate } from "../../interfaces/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 
 contract KpiLinkedRate is IKpiLinkedRate, CommonKpiLinkedInterestRate {

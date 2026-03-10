@@ -2,9 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import {
-    IScheduledBalanceAdjustments
-} from "../../interfaces/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
+import { IScheduledBalanceAdjustments } from "./IScheduledBalanceAdjustments.sol";
 import { ScheduledBalanceAdjustments } from "./ScheduledBalanceAdjustments.sol";
 
 abstract contract ScheduledBalanceAdjustmentsFacetBase is ScheduledBalanceAdjustments, IStaticFunctionSelectors {

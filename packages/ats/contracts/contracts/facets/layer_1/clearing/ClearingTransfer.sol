@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../domain/Internals.sol";
-import { IClearingTransfer } from "../interfaces/clearing/IClearingTransfer.sol";
+import { IClearingTransfer } from "./IClearingTransfer.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 
 abstract contract ClearingTransfer is IClearingTransfer, Internals {

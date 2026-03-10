@@ -7,7 +7,7 @@ import { _SCHEDULED_COUPON_LISTING_STORAGE_POSITION } from "../../../../constant
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../../facets/layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { COUPON_LISTING_RESULT_ID } from "../../../../constants/values.sol";
 
 abstract contract ScheduledCouponListingStorageWrapper is ScheduledSnapshotsStorageWrapper {

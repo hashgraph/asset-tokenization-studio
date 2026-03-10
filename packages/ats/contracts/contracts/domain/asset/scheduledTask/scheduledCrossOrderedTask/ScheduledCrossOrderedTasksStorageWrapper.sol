@@ -10,11 +10,11 @@ import { SNAPSHOT_TASK_TYPE, BALANCE_ADJUSTMENT_TASK_TYPE } from "../../../../co
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
-} from "../../../../facets/layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+} from "../../../../facets/layer_2/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
 /* solhint-disable max-line-length */
 import {
     IScheduledCrossOrderedTasks
-} from "../../../../facets/layer_2/interfaces/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
+} from "../../../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 /* solhint-enable max-line-length */
 
 abstract contract ScheduledCrossOrderedTasksStorageWrapper is ScheduledBalanceAdjustmentsStorageWrapper {

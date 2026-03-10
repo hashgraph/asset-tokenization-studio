@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-import { IFixedRate } from "../../interfaces/interestRate/fixedRate/IFixedRate.sol";
+import { IFixedRate } from "./IFixedRate.sol";
 import { _FIXED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { FixedRate } from "./FixedRate.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IPause } from "../interfaces/pause/IPause.sol";
+import { IPause } from "./IPause.sol";
 import { _PAUSER_ROLE } from "../../../constants/roles.sol";
 import { Internals } from "../../../domain/Internals.sol";
 

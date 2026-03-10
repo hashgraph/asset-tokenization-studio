@@ -2,10 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../../domain/Internals.sol";
-import {
-    IScheduledBalanceAdjustments
-} from "../../interfaces/scheduledTask/scheduledBalanceAdjustment/IScheduledBalanceAdjustments.sol";
-import { ScheduledTask } from "../../interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { IScheduledBalanceAdjustments } from "./IScheduledBalanceAdjustments.sol";
+import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 abstract contract ScheduledBalanceAdjustments is IScheduledBalanceAdjustments, Internals {

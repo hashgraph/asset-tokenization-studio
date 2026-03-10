@@ -2,10 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../../domain/Internals.sol";
-import {
-    IScheduledCouponListing
-} from "../../interfaces/scheduledTask/scheduledCouponListing/IScheduledCouponListing.sol";
-import { ScheduledTask } from "../../interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { IScheduledCouponListing } from "./IScheduledCouponListing.sol";
+import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 abstract contract ScheduledCouponListing is IScheduledCouponListing, Internals {

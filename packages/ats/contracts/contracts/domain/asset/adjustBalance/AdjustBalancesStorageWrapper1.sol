@@ -5,10 +5,8 @@ import { _ADJUST_BALANCES_STORAGE_POSITION } from "../../../constants/storagePos
 import {
     ScheduledCrossOrderedTasksStorageWrapper
 } from "../../../domain/asset/scheduledTask/scheduledCrossOrderedTask/ScheduledCrossOrderedTasksStorageWrapper.sol";
-import {
-    IAdjustBalancesStorageWrapper
-} from "../../../facets/layer_2/interfaces/adjustBalance/IAdjustBalancesStorageWrapper.sol";
-import { IClearing } from "../../../facets/layer_1/interfaces/clearing/IClearing.sol";
+import { IAdjustBalancesStorageWrapper } from "../../../domain/asset/adjustBalance/IAdjustBalancesStorageWrapper.sol";
+import { IClearing } from "../../../facets/layer_1/clearing/IClearing.sol";
 
 abstract contract AdjustBalancesStorageWrapper1 is
     IAdjustBalancesStorageWrapper,

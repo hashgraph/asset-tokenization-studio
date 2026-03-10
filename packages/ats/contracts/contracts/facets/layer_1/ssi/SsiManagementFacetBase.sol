@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { ISsiManagement } from "../interfaces/ssi/ISsiManagement.sol";
+import { ISsiManagement } from "./ISsiManagement.sol";
 import { SsiManagement } from "./SsiManagement.sol";
 
 abstract contract SsiManagementFacetBase is SsiManagement, IStaticFunctionSelectors {

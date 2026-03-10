@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../domain/Internals.sol";
-import { IProtectedPartitions } from "../interfaces/protectedPartition/IProtectedPartitions.sol";
+import { IProtectedPartitions } from "./IProtectedPartitions.sol";
 import { _PROTECTED_PARTITIONS_ROLE } from "../../../constants/roles.sol";
 
 abstract contract ProtectedPartitions is IProtectedPartitions, Internals {

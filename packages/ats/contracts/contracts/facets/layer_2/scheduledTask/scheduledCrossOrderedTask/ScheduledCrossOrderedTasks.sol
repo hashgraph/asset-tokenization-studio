@@ -2,10 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../../domain/Internals.sol";
-import {
-    IScheduledCrossOrderedTasks
-} from "../../interfaces/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
-import { ScheduledTask } from "../../interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { IScheduledCrossOrderedTasks } from "./IScheduledCrossOrderedTasks.sol";
+import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, Internals {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IExternalKycListManagement } from "../interfaces/externalKycList/IExternalKycListManagement.sol";
+import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ExternalKycListManagement } from "./ExternalKycListManagement.sol";
 

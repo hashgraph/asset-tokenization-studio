@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ControlList } from "./ControlList.sol";
-import { IControlList } from "../interfaces/controlList/IControlList.sol";
+import { IControlList } from "./IControlList.sol";
 
 abstract contract ControlListFacetBase is ControlList, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {

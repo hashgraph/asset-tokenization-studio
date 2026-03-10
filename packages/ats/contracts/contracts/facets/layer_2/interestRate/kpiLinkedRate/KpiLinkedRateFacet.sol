@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-import { IKpiLinkedRate } from "../../interfaces/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
+import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 import { _KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { KpiLinkedRate } from "./KpiLinkedRate.sol";

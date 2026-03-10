@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondUSA } from "../interfaces/IBondUSA.sol";
-import { IBond } from "../../layer_2/interfaces/bond/IBond.sol";
+import { IBondUSA } from "./IBondUSA.sol";
+import { IBond } from "../../layer_2/bond/IBond.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { BondUSA } from "./BondUSA.sol";
 

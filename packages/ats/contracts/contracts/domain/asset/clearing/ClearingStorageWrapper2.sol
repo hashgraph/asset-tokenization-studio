@@ -2,17 +2,17 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { HoldStorageWrapper2 } from "../hold/HoldStorageWrapper2.sol";
-import { IClearing } from "../../../facets/layer_1/interfaces/clearing/IClearing.sol";
-import { IClearingActions } from "../../../facets/layer_1/interfaces/clearing/IClearingActions.sol";
-import { IClearingTransfer } from "../../../facets/layer_1/interfaces/clearing/IClearingTransfer.sol";
-import { IClearingStorageWrapper } from "../../../facets/layer_1/interfaces/clearing/IClearingStorageWrapper.sol";
-import { IERC20StorageWrapper } from "../../../facets/layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
+import { IClearing } from "../../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingActions } from "../../../facets/layer_1/clearing/IClearingActions.sol";
+import { IClearingTransfer } from "../../../facets/layer_1/clearing/IClearingTransfer.sol";
+import { IClearingStorageWrapper } from "../../../domain/asset/clearing/IClearingStorageWrapper.sol";
+import { IERC20StorageWrapper } from "../../../domain/asset/ERC1400/ERC20/IERC20StorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { checkNounceAndDeadline } from "../../../infrastructure/utils/ERC712Lib.sol";
-import { Hold } from "../../../facets/layer_1/interfaces/hold/IHold.sol";
+import { Hold } from "../../../facets/layer_1/hold/IHold.sol";
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";
-import { ICompliance } from "../../../facets/layer_1/interfaces/ERC3643/ICompliance.sol";
-import { IERC3643Management } from "../../../facets/layer_1/interfaces/ERC3643/IERC3643Management.sol";
+import { ICompliance } from "../../../facets/layer_1/ERC3643/ICompliance.sol";
+import { IERC3643Management } from "../../../facets/layer_1/ERC3643/IERC3643Management.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { LowLevelCall } from "../../../infrastructure/utils/LowLevelCall.sol";
 

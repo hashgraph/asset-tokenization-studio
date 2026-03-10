@@ -2,10 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
-import {
-    ScheduledTask,
-    ScheduledTasksDataStorage
-} from "../../layer_2/interfaces/scheduledTask/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { ScheduledTask, ScheduledTasksDataStorage } from "./scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 library ScheduledTasksLib {
     function addScheduledTask(

@@ -642,7 +642,7 @@ When creating a new asset, touch these files:
 - [ ] `workflows/deploySystemWithNewBlr.ts` - Add to deployment workflow
 - [ ] `tests/fixtures/tokens/fund.fixture.ts`
 - [ ] `tests/fixtures/index.ts`
-- [ ] `contracts/layer_3/jurisdiction/usa/FundUSAFacet.sol` - Implement custom facets (if needed)
+- [ ] `contracts/facets/layer_3/equityUSA/EquityUSAFacet.sol` - Implement custom facets (if needed)
 - [ ] `workflows/deployCompleteSystem.ts` - Add to deployment workflow (optional)
 
 ---
@@ -1679,7 +1679,7 @@ This generates TypeChain types in `build/typechain/`.
 
 **Solution**:
 
-1. Check if resolver key exists in [contracts/layer_0/constants/resolverKeys.sol](../contracts/layer_0/constants/resolverKeys.sol)
+1. Check if resolver key exists in [contracts/constants/resolverKeys.sol](../contracts/constants/resolverKeys.sol)
 2. If missing, add it:
    ```solidity
    bytes32 constant _NEW_FACET_RESOLVER_KEY = keccak256("NewFacet resolver key");

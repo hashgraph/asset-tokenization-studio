@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../../../../../facets/layer_2/interfaces/bond/IBondRead.sol";
+import { IBondRead } from "../../../../../../facets/layer_2/bond/IBondRead.sol";
 import { InternalsFixedInterestRate } from "../Internals.sol";
 import { Common } from "../../../../../../domain/Common.sol";
 import { Internals } from "../../../../../../domain/Internals.sol";

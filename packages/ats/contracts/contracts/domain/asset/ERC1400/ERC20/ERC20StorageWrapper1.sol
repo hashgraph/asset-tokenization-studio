@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC20_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
-import { IERC20 } from "../../../../facets/layer_1/interfaces/ERC1400/IERC20.sol";
-import { IERC20StorageWrapper } from "../../../../facets/layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
+import { IERC20 } from "../../../../facets/layer_1/ERC1400/ERC20/IERC20.sol";
+import { IERC20StorageWrapper } from "../../../../domain/asset/ERC1400/ERC20/IERC20StorageWrapper.sol";
 import { ERC1410BasicStorageWrapperRead } from "../ERC1410/ERC1410BasicStorageWrapperRead.sol";
-import { IFactory } from "../../../../interfaces/factory/IFactory.sol";
+import { IFactory } from "../../../../factory/IFactory.sol";
 
 abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
     struct ERC20Storage {

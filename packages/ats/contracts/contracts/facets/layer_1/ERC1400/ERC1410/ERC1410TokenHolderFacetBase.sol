@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IERC1410TokenHolder } from "../../interfaces/ERC1400/IERC1410TokenHolder.sol";
+import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
 import { ERC1410TokenHolder } from "./ERC1410TokenHolder.sol";
 
 abstract contract ERC1410TokenHolderFacetBase is IStaticFunctionSelectors, ERC1410TokenHolder {

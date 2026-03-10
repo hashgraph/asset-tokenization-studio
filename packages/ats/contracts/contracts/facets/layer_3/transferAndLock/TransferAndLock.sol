@@ -3,8 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { _LOCKER_ROLE } from "../../../constants/roles.sol";
-import { ITransferAndLock } from "../interfaces/ITransferAndLock.sol";
-import { BasicTransferInfo } from "../../layer_1/interfaces/ERC1400/IERC1410.sol";
+import { ITransferAndLock } from "./ITransferAndLock.sol";
+import { BasicTransferInfo } from "../../layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { Internals } from "../../../domain/Internals.sol";
 
 abstract contract TransferAndLock is ITransferAndLock, Internals {

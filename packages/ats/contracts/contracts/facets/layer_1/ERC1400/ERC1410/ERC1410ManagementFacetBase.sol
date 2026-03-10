@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IERC1410Management } from "../../interfaces/ERC1400/IERC1410Management.sol";
+import { IERC1410Management } from "./IERC1410Management.sol";
 import { ERC1410Management } from "./ERC1410Management.sol";
 
 /**

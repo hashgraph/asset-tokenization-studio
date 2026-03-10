@@ -4,13 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 import { _HOLD_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ERC3643StorageWrapper1 } from "../ERC3643/ERC3643StorageWrapper1.sol";
-import {
-    IHold,
-    Hold,
-    HoldData,
-    HoldIdentifier,
-    HoldDataStorage
-} from "../../../facets/layer_1/interfaces/hold/IHold.sol";
+import { IHold, Hold, HoldData, HoldIdentifier, HoldDataStorage } from "../../../facets/layer_1/hold/IHold.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";
 

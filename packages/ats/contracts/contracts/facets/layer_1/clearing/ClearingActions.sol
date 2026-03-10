@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../domain/Internals.sol";
-import { IClearingActions } from "../interfaces/clearing/IClearingActions.sol";
-import { IClearing } from "../interfaces/clearing/IClearing.sol";
+import { IClearingActions } from "./IClearingActions.sol";
+import { IClearing } from "./IClearing.sol";
 import { _CLEARING_VALIDATOR_ROLE } from "../../../constants/roles.sol";
 import { _CLEARING_ROLE } from "../../../constants/roles.sol";
 

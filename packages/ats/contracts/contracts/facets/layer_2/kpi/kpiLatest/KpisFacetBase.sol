@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
-import { IKpis } from "../../interfaces/kpi/kpiLatest/IKpis.sol";
+import { IKpis } from "./IKpis.sol";
 import { Kpis } from "./Kpis.sol";
 
 abstract contract KpisFacetBase is Kpis, IStaticFunctionSelectors {

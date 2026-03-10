@@ -3,7 +3,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../../domain/Internals.sol";
-import { IERC20Votes } from "../../interfaces/ERC1400/IERC20Votes.sol";
+import { IERC20Votes } from "../ERC20Votes/IERC20Votes.sol";
 import { CheckpointsLib } from "../../../../infrastructure/utils/CheckpointsLib.sol";
 
 abstract contract ERC20Votes is IERC20Votes, Internals {

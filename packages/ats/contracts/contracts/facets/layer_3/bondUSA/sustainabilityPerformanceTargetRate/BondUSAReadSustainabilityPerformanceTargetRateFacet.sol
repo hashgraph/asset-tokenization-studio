@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { BondUSAReadFacetBase } from "../BondUSAReadFacetBase.sol";
 // prettier-ignore
-// solhint-disable-next-line max-line-length
 /* solhint-disable max-line-length */
 import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 /* solhint-enable max-line-length */

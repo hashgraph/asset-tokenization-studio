@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IProceedRecipients } from "../interfaces/proceedRecipient/IProceedRecipients.sol";
+import { IProceedRecipients } from "./IProceedRecipients.sol";
 import { Internals } from "../../../domain/Internals.sol";
 import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
 
