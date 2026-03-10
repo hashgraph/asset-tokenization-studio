@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ClearingReadFixedRateFacet } from "../../../../layer_1/clearing/fixedRate/ClearingReadFixedRateFacet.sol";
+import {
+    ClearingReadFixedRateFacet
+} from "../../../../facets/layer_1/clearing/fixedRate/ClearingReadFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

@@ -3,9 +3,11 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+/* solhint-disable max-line-length */
 import {
     ERC3643OperationsSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_1/ERC3643/sustainabilityPerformanceTargetRate/ERC3643OperationsSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/layer_1/ERC3643/sustainabilityPerformanceTargetRate/ERC3643OperationsSustainabilityPerformanceTargetRateFacet.sol";
+/* solhint-enable max-line-length */
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

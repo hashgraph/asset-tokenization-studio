@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ExternalPauseManagementFixedRateFacet
-} from "../../../../layer_1/externalPauses/fixedRate/ExternalPauseManagementFixedRateFacet.sol";
+} from "../../../../facets/layer_1/externalPauses/fixedRate/ExternalPauseManagementFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

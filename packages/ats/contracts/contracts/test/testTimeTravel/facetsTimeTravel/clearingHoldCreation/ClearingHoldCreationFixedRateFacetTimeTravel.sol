@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ClearingHoldCreationFixedRateFacet
-} from "../../../../layer_1/clearing/fixedRate/ClearingHoldCreationFixedRateFacet.sol";
+} from "../../../../facets/layer_1/clearing/fixedRate/ClearingHoldCreationFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

@@ -3,14 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 import { _ERC1594_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
-import { IKyc } from "../../../../layer_1/interfaces/kyc/IKyc.sol";
-import { IERC1594StorageWrapper } from "../../../../layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol";
+import { IKyc } from "../../../../facets/layer_1/interfaces/kyc/IKyc.sol";
+import { IERC1594StorageWrapper } from "../../../../facets/layer_1/interfaces/ERC1400/IERC1594StorageWrapper.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 import { CapStorageWrapper2 } from "../../cap/CapStorageWrapper2.sol";
-import { IClearing } from "../../../../layer_1/interfaces/clearing/IClearing.sol";
-import { IERC3643Management } from "../../../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
-import { ICompliance } from "../../../../layer_1/interfaces/ERC3643/ICompliance.sol";
-import { IIdentityRegistry } from "../../../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
+import { IClearing } from "../../../../facets/layer_1/interfaces/clearing/IClearing.sol";
+import { IERC3643Management } from "../../../../facets/layer_1/interfaces/ERC3643/IERC3643Management.sol";
+import { ICompliance } from "../../../../facets/layer_1/interfaces/ERC3643/ICompliance.sol";
+import { IIdentityRegistry } from "../../../../facets/layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
 import { LowLevelCall } from "../../../../infrastructure/utils/LowLevelCall.sol";
 
 abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWrapper2 {

@@ -3,11 +3,11 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC3643_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { _AGENT_ROLE } from "../../../constants/roles.sol";
-import { IERC3643Management } from "../../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
-import { IAccessControl } from "../../../layer_1/interfaces/accessControl/IAccessControl.sol";
-import { IERC3643StorageWrapper } from "../../../layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol";
-import { IIdentityRegistry } from "../../../layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
-import { ICompliance } from "../../../layer_1/interfaces/ERC3643/ICompliance.sol";
+import { IERC3643Management } from "../../../facets/layer_1/interfaces/ERC3643/IERC3643Management.sol";
+import { IAccessControl } from "../../../facets/layer_1/interfaces/accessControl/IAccessControl.sol";
+import { IERC3643StorageWrapper } from "../../../facets/layer_1/interfaces/ERC3643/IERC3643StorageWrapper.sol";
+import { IIdentityRegistry } from "../../../facets/layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
+import { ICompliance } from "../../../facets/layer_1/interfaces/ERC3643/ICompliance.sol";
 import { LowLevelCall } from "../../../infrastructure/utils/LowLevelCall.sol";
 import { ProceedRecipientsStorageWrapper } from "../proceedRecipient/ProceedRecipientsStorageWrapper.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";

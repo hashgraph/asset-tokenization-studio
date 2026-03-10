@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CorporateActionsFacet } from "../../../../layer_1/corporateActions/standard/CorporateActionsFacet.sol";
+import { CorporateActionsFacet } from "../../../../facets/layer_1/corporateActions/standard/CorporateActionsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
+/* solhint-disable max-line-length */
 import {
-    _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION
-} from "../../../../constants/storagePositions.sol";
-// prettier-ignore
-// solhint-disable-next-line max-line-length
-import { ISustainabilityPerformanceTargetRate } from "../../../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+    ISustainabilityPerformanceTargetRate
+} from "../../../../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+/* solhint-enable max-line-length */
 import { KpiLinkedRateStorageWrapper } from "../kpiLinkedRate/KpiLinkedRateStorageWrapper.sol";
 
 abstract contract SustainabilityPerformanceTargetRateStorageWrapper is KpiLinkedRateStorageWrapper {

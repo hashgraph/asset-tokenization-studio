@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/* solhint-disable max-line-length */
 import {
     CapSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_1/cap/sustainabilityPerformanceTargetRate/CapSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/layer_1/cap/sustainabilityPerformanceTargetRate/CapSustainabilityPerformanceTargetRateFacet.sol";
+/* solhint-enable max-line-length */
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

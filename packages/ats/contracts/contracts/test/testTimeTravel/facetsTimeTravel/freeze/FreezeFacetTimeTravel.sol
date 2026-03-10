@@ -3,7 +3,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { FreezeFacet } from "../../../../layer_1/freeze/standard/FreezeFacet.sol";
+import { FreezeFacet } from "../../../../facets/layer_1/freeze/standard/FreezeFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

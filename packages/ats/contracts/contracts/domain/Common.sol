@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _WILD_CARD_ROLE } from "../constants/roles.sol";
-import { IClearing } from "../layer_1/interfaces/clearing/IClearing.sol";
+import { IClearing } from "../facets/layer_1/interfaces/clearing/IClearing.sol";
 import { SecurityStorageWrapper } from "./asset/security/SecurityStorageWrapper.sol";
 
 abstract contract Common is SecurityStorageWrapper {

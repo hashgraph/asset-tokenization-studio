@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ERC1643KpiLinkedRateFacet
-} from "../../../../layer_1/ERC1400/ERC1643/kpiLinkedRate/ERC1643KpiLinkedRateFacet.sol";
+} from "../../../../facets/layer_1/ERC1400/ERC1643/kpiLinkedRate/ERC1643KpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

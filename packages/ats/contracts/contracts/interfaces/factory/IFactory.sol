@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IResolverProxy } from "../../infrastructure/proxy/IResolverProxy.sol";
 import { IBusinessLogicResolver } from "../../infrastructure/diamond/IBusinessLogicResolver.sol";
-import { IERC20 } from "../../layer_1/interfaces/ERC1400/IERC20.sol";
+import { IERC20 } from "../../facets/layer_1/interfaces/ERC1400/IERC20.sol";
 import { IBondRead } from "../../layer_2/interfaces/bond/IBondRead.sol";
 import { IEquity } from "../../layer_2/interfaces/equity/IEquity.sol";
 import {

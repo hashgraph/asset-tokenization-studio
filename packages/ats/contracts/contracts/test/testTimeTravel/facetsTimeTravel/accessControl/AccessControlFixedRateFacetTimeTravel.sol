@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     AccessControlFixedRateFacet
-} from "../../../../layer_1/accessControl/fixedRate/AccessControlFixedRateFacet.sol";
+} from "../../../../facets/layer_1/accessControl/fixedRate/AccessControlFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

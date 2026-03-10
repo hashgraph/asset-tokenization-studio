@@ -3,7 +3,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC20PermitFacet } from "../../../../layer_1/ERC1400/ERC20Permit/standard/ERC20PermitFacet.sol";
+import { ERC20PermitFacet } from "../../../../facets/layer_1/ERC1400/ERC20Permit/standard/ERC20PermitFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

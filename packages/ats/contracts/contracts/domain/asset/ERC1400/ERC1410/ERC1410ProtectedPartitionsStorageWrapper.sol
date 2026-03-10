@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { BasicTransferInfo } from "../../../../layer_1/interfaces/ERC1400/IERC1410.sol";
+import { BasicTransferInfo } from "../../../../facets/layer_1/interfaces/ERC1400/IERC1410.sol";
 import { ERC1644StorageWrapper } from "../ERC1644/ERC1644StorageWrapper.sol";
 import { checkNounceAndDeadline } from "../../../../infrastructure/utils/ERC712Lib.sol";
 import {
     IProtectedPartitionsStorageWrapper
-} from "../../../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+} from "../../../../facets/layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract ERC1410ProtectedPartitionsStorageWrapper is ERC1644StorageWrapper {
     function _protectedTransferFromByPartition(

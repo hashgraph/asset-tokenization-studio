@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IExternalKycList } from "../../../layer_1/interfaces/externalKycLists/IExternalKycList.sol";
+import { IExternalKycList } from "../../../facets/layer_1/interfaces/externalKycLists/IExternalKycList.sol";
 import { ExternalListManagementStorageWrapper } from "../externalList/ExternalListManagementStorageWrapper.sol";
 import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { IKyc } from "../../../layer_1/interfaces/kyc/IKyc.sol";
+import { IKyc } from "../../../facets/layer_1/interfaces/kyc/IKyc.sol";
 
 abstract contract ExternalKycListManagementStorageWrapper is ExternalListManagementStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;

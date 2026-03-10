@@ -3,7 +3,7 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC3643OperationsFacet } from "../../../../layer_1/ERC3643/standard/ERC3643OperationsFacet.sol";
+import { ERC3643OperationsFacet } from "../../../../facets/layer_1/ERC3643/standard/ERC3643OperationsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

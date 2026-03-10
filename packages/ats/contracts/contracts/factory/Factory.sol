@@ -5,14 +5,14 @@ import { IFactory } from "../interfaces/factory/IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../constants/roles.sol";
-import { IControlList } from "../layer_1/interfaces/controlList/IControlList.sol";
-import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
-import { IERC20Votes } from "../layer_1/interfaces/ERC1400/IERC20Votes.sol";
-import { IERC1644 } from "../layer_1/interfaces/ERC1400/IERC1644.sol";
-import { IERC1410 } from "../layer_1/interfaces/ERC1400/IERC1410.sol";
-import { ICap } from "../layer_1/interfaces/cap/ICap.sol";
-import { IERC1594 } from "../layer_1/interfaces/ERC1400/IERC1594.sol";
-import { IClearingActions } from "../layer_1/interfaces/clearing/IClearingActions.sol";
+import { IControlList } from "../facets/layer_1/interfaces/controlList/IControlList.sol";
+import { IERC20 } from "../facets/layer_1/interfaces/ERC1400/IERC20.sol";
+import { IERC20Votes } from "../facets/layer_1/interfaces/ERC1400/IERC20Votes.sol";
+import { IERC1644 } from "../facets/layer_1/interfaces/ERC1400/IERC1644.sol";
+import { IERC1410 } from "../facets/layer_1/interfaces/ERC1400/IERC1410.sol";
+import { ICap } from "../facets/layer_1/interfaces/cap/ICap.sol";
+import { IERC1594 } from "../facets/layer_1/interfaces/ERC1400/IERC1594.sol";
+import { IClearingActions } from "../facets/layer_1/interfaces/clearing/IClearingActions.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
@@ -25,21 +25,25 @@ import {
 import { IEquityUSA } from "../layer_3/interfaces/IEquityUSA.sol";
 import { IBondUSA } from "../layer_3/interfaces/IBondUSA.sol";
 import { IProceedRecipients } from "../layer_2/interfaces/proceedRecipients/IProceedRecipients.sol";
-import { IProtectedPartitions } from "../layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol";
-import { IExternalPauseManagement } from "../layer_1/interfaces/externalPauses/IExternalPauseManagement.sol";
+import { IProtectedPartitions } from "../facets/layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol";
+import { IExternalPauseManagement } from "../facets/layer_1/interfaces/externalPauses/IExternalPauseManagement.sol";
 import {
     IExternalControlListManagement
-} from "../layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol";
-import { IExternalKycListManagement } from "../layer_1/interfaces/externalKycLists/IExternalKycListManagement.sol";
-import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
-import { IERC3643 } from "../layer_1/interfaces/ERC3643/IERC3643.sol";
+} from "../facets/layer_1/interfaces/externalControlLists/IExternalControlListManagement.sol";
+import {
+    IExternalKycListManagement
+} from "../facets/layer_1/interfaces/externalKycLists/IExternalKycListManagement.sol";
+import { IKyc } from "../facets/layer_1/interfaces/kyc/IKyc.sol";
+import { IERC3643 } from "../facets/layer_1/interfaces/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../layer_2/interfaces/interestRates/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Common } from "../domain/Common.sol";
-// prettier-ignore
-// solhint-disable-next-line max-line-length
-import { ISustainabilityPerformanceTargetRate } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+/* solhint-disable max-line-length */
+import {
+    ISustainabilityPerformanceTargetRate
+} from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+/* solhint-enable max-line-length */
 
 contract Factory is IFactory, Common {
     modifier checkResolver(IBusinessLogicResolver resolver) {

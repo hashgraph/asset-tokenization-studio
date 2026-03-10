@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { HoldTokenHolderFixedRateFacet } from "../../../../layer_1/hold/fixedRate/HoldTokenHolderFixedRateFacet.sol";
+import {
+    HoldTokenHolderFixedRateFacet
+} from "../../../../facets/layer_1/hold/fixedRate/HoldTokenHolderFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

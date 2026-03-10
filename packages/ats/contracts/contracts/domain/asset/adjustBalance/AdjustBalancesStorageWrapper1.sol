@@ -8,7 +8,7 @@ import {
 import {
     IAdjustBalancesStorageWrapper
 } from "../../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol";
-import { IClearing } from "../../../layer_1/interfaces/clearing/IClearing.sol";
+import { IClearing } from "../../../facets/layer_1/interfaces/clearing/IClearing.sol";
 
 abstract contract AdjustBalancesStorageWrapper1 is
     IAdjustBalancesStorageWrapper,
@@ -37,6 +37,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         mapping(address => uint256) labafClearedAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) labafClearedAmountByAccountAndPartition;
         // solhint-disable max-line-length
+        // solhint-disable-next-line max-line-length
         mapping(address => mapping(bytes32 => mapping(IClearing.ClearingOperationType => mapping(uint256 => uint256)))) labafClearedAmountByAccountPartitionTypeAndId;
         // freezeByAccountPartitionAndId
         mapping(address => uint256) labafFrozenAmountByAccount;

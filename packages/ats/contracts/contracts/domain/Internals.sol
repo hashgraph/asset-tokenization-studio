@@ -3,40 +3,48 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Modifiers } from "./Modifiers.sol";
 import { CheckpointsLib } from "../infrastructure/utils/CheckpointsLib.sol";
-import { IClearing } from "../layer_1/interfaces/clearing/IClearing.sol";
-import { IClearingTransfer } from "../layer_1/interfaces/clearing/IClearingTransfer.sol";
-import { IClearingRedeem } from "../layer_1/interfaces/clearing/IClearingRedeem.sol";
-import { IClearingHoldCreation } from "../layer_1/interfaces/clearing/IClearingHoldCreation.sol";
+import { IClearing } from "../facets/layer_1/interfaces/clearing/IClearing.sol";
+import { IClearingTransfer } from "../facets/layer_1/interfaces/clearing/IClearingTransfer.sol";
+import { IClearingRedeem } from "../facets/layer_1/interfaces/clearing/IClearingRedeem.sol";
+import { IClearingHoldCreation } from "../facets/layer_1/interfaces/clearing/IClearingHoldCreation.sol";
 import { ThirdPartyType } from "./asset/types/ThirdPartyType.sol";
-import { Hold, HoldData, HoldIdentifier, OperationType, ProtectedHold } from "../layer_1/interfaces/hold/IHold.sol";
+import {
+    Hold,
+    HoldData,
+    HoldIdentifier,
+    OperationType,
+    ProtectedHold
+} from "../facets/layer_1/interfaces/hold/IHold.sol";
 import {
     Snapshots,
     PartitionSnapshots,
     SnapshotsAddress,
     HolderBalance
-} from "../layer_1/interfaces/snapshots/ISnapshots.sol";
-import { ILock } from "../layer_1/interfaces/lock/ILock.sol";
+} from "../facets/layer_1/interfaces/snapshots/ISnapshots.sol";
+import { ILock } from "../facets/layer_1/interfaces/lock/ILock.sol";
 import { ISecurity } from "../layer_2/interfaces/security/ISecurity.sol";
 import { IBondRead } from "../layer_2/interfaces/bond/IBondRead.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
-import { ICap } from "../layer_1/interfaces/cap/ICap.sol";
-import { IERC20 } from "../layer_1/interfaces/ERC1400/IERC20.sol";
+import { ICap } from "../facets/layer_1/interfaces/cap/ICap.sol";
+import { IERC20 } from "../facets/layer_1/interfaces/ERC1400/IERC20.sol";
 import { IEquity } from "../layer_2/interfaces/equity/IEquity.sol";
 import { IKpiLinkedRate } from "../layer_2/interfaces/interestRates/kpiLinkedRate/IKpiLinkedRate.sol";
-import { IKyc } from "../layer_1/interfaces/kyc/IKyc.sol";
-// prettier-ignore
-// solhint-disable-next-line max-line-length
-import { ISustainabilityPerformanceTargetRate } from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+import { IKyc } from "../facets/layer_1/interfaces/kyc/IKyc.sol";
+/* solhint-disable max-line-length */
+import {
+    ISustainabilityPerformanceTargetRate
+} from "../layer_2/interfaces/interestRates/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
+/* solhint-enable max-line-length */
 import {
     ScheduledTask,
     ScheduledTasksDataStorage
 } from "../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
-import { IssueData, OperatorTransferData, BasicTransferInfo } from "../layer_1/interfaces/ERC1400/IERC1410.sol";
-import { IIdentityRegistry } from "../layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
-import { ICompliance } from "../layer_1/interfaces/ERC3643/ICompliance.sol";
+import { IssueData, OperatorTransferData, BasicTransferInfo } from "../facets/layer_1/interfaces/ERC1400/IERC1410.sol";
+import { IIdentityRegistry } from "../facets/layer_1/interfaces/ERC3643/IIdentityRegistry.sol";
+import { ICompliance } from "../facets/layer_1/interfaces/ERC3643/ICompliance.sol";
 import {
     IProtectedPartitionsStorageWrapper
-} from "../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+} from "../facets/layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 
 abstract contract Internals is Modifiers {

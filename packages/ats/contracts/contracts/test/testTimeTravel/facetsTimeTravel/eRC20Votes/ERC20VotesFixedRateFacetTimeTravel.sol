@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ERC20VotesFixedRateFacet
-} from "../../../../layer_1/ERC1400/ERC20Votes/fixedRate/ERC20VotesFixedRateFacet.sol";
+} from "../../../../facets/layer_1/ERC1400/ERC20Votes/fixedRate/ERC20VotesFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

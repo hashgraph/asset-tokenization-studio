@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ICapStorageWrapper } from "../../../layer_1/interfaces/cap/ICapStorageWrapper.sol";
+import { ICapStorageWrapper } from "../../../facets/layer_1/interfaces/cap/ICapStorageWrapper.sol";
 import { LockStorageWrapper2 } from "../lock/LockStorageWrapper2.sol";
 
 abstract contract CapStorageWrapper2 is ICapStorageWrapper, LockStorageWrapper2 {

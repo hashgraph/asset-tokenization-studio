@@ -14,8 +14,8 @@ import {
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH
 } from "../../constants/values.sol";
-import { Hold, ProtectedHold } from "../../layer_1/interfaces/hold/IHold.sol";
-import { IClearing } from "../../layer_1/interfaces/clearing/IClearing.sol";
+import { Hold, ProtectedHold } from "../../facets/layer_1/interfaces/hold/IHold.sol";
+import { IClearing } from "../../facets/layer_1/interfaces/clearing/IClearing.sol";
 
 error WrongSignatureLength();
 error WrongNounce(uint256 nounce, address account);

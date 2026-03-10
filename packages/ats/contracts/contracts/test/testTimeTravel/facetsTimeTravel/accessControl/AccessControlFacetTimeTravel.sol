@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { AccessControlFacet } from "../../../../layer_1/accessControl/standard/AccessControlFacet.sol";
+import { AccessControlFacet } from "../../../../facets/layer_1/accessControl/standard/AccessControlFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 

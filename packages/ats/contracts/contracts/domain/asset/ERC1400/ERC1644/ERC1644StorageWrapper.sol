@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC1644_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
-import { IERC1644StorageWrapper } from "../../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol";
+import { IERC1644StorageWrapper } from "../../../../facets/layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol";
 import { ERC3643StorageWrapper2 } from "../../ERC3643/ERC3643StorageWrapper2.sol";
 
 abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, ERC3643StorageWrapper2 {

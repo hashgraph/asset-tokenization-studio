@@ -10,7 +10,7 @@ import {
     SnapshotsAddress,
     PartitionSnapshots,
     ListOfPartitions
-} from "../../../layer_1/interfaces/snapshots/ISnapshots.sol";
+} from "../../../facets/layer_1/interfaces/snapshots/ISnapshots.sol";
 import { CorporateActionsStorageWrapper } from "../corporateAction/CorporateActionsStorageWrapper.sol";
 
 abstract contract SnapshotsStorageWrapper1 is ISnapshotsStorageWrapper, CorporateActionsStorageWrapper {
