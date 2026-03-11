@@ -71,20 +71,27 @@ GRANT ALL PRIVILEGES ON DATABASE mass_payout TO mass_payout_user;
 \q
 ```
 
-## Step 3: Build All Mass Payout Components
+## Step 3: Build All Components
 
-Build contracts, SDK, backend, and frontend:
+Mass Payout depends on ATS contracts. Build everything in dependency order:
 
 ```bash
-# Build everything with one command
-npm run mass-payout:build
+# 1. ATS contracts first (Mass Payout contracts depend on these ABIs)
+npm run ats:contracts:build
 
-# Or build individually
+# 2. Mass Payout contracts, SDK, backend, and frontend
 npm run mass-payout:contracts:build
 npm run mass-payout:sdk:build
 npm run mass-payout:backend:build
 npm run mass-payout:frontend:build
+
+# 3. ATS SDK last (depends on ATS contracts)
+npm run ats:sdk:build
 ```
+
+:::caution Build order matters
+`npm run mass-payout:build` alone is not sufficient — it skips the required ATS contracts build. Always run `ats:contracts:build` first.
+:::
 
 ## Step 4: Smart Contracts Setup
 
