@@ -113,7 +113,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorage
 
     /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
     /// BondDataStorage once all legacy tokens have been migrated.
-    function _migrateBondNominalValueIfNeeded() internal virtual override {
+    function _migrateBondNominalValue() internal virtual override {
         if (_bondStorage().DEPRECATED_nominalValue == 0) return;
         _bondStorage().DEPRECATED_nominalValue = 0;
         _bondStorage().DEPRECATED_nominalValueDecimals = 0;

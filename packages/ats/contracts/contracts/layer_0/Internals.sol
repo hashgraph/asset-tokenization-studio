@@ -580,9 +580,9 @@ abstract contract Internals is Modifiers {
     // also simplify _getNominalValue() and _getNominalValueDecimals() to return only
     // their own storage, and remove the migration calls from setNominalValue().
     /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
-    function _migrateBondNominalValueIfNeeded() internal virtual;
+    function _migrateBondNominalValue() internal virtual;
     /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
-    function _migrateEquityNominalValueIfNeeded() internal virtual;
+    function _migrateEquityNominalValue() internal virtual;
     function _storeRegulationData(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData

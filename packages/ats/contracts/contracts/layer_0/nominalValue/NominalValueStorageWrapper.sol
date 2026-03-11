@@ -23,8 +23,8 @@ abstract contract NominalValueStorageWrapper is ERC20PermitStorageWrapper {
     /// deprecated bond/equity fields to avoid double-counting in the aggregated sum.
     /// MIGRATION: Once all legacy tokens have been migrated, remove the two _migrate* calls.
     function _setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) internal virtual override {
-        _migrateBondNominalValueIfNeeded();
-        _migrateEquityNominalValueIfNeeded();
+        _migrateBondNominalValue();
+        _migrateEquityNominalValue();
         NominalValueDataStorage storage nvStorage = _nominalValueStorage();
         nvStorage.nominalValue = _nominalValue;
         nvStorage.nominalValueDecimals = _nominalValueDecimals;

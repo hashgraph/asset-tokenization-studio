@@ -159,7 +159,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
     /// EquityDataStorage once all legacy tokens have been migrated.
-    function _migrateEquityNominalValueIfNeeded() internal virtual override {
+    function _migrateEquityNominalValue() internal virtual override {
         if (_equityStorage().DEPRECATED_nominalValue == 0) return;
         _equityStorage().DEPRECATED_nominalValue = 0;
         _equityStorage().DEPRECATED_nominalValueDecimals = 0;

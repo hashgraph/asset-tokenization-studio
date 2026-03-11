@@ -46,3 +46,6 @@ bytes32 constant _WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec01
 
 // keccak256('security.token.standard.role.agent');
 bytes32 constant _AGENT_ROLE = 0xc4aed0454da9bde6defa5baf93bb49d4690626fc243d138104e12d1def783ea6;
+
+// keccak256('security.token.standard.role.nominalValue');
+bytes32 constant _NOMINAL_VALUE_ROLE = 0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102;

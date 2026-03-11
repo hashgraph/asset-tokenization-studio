@@ -5,8 +5,13 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type INominalValue, type NominalValueMigrationFacetTest } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
+import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
 import { deployBondTokenFixture, deployEquityTokenFixture } from "@test";
+
+async function grantNominalValueRole(diamond: ResolverProxy, admin: HardhatEthersSigner, account: string) {
+  const accessControl = await ethers.getContractAt("AccessControl", diamond.target, admin);
+  await accessControl.grantRole(ATS_ROLES._NOMINAL_VALUE_ROLE, account);
+}
 
 async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deployBondTokenFixture>>, configId: string) {
   const { blr, deployer, diamond: baseDiamond } = base;
@@ -249,6 +254,39 @@ describe("NominalValue Migration Tests", () => {
       await nominalValueFacet.connect(signer_A).setNominalValue(400, 4);
       expect(await nominalValueFacet.getNominalValue()).to.equal(400);
       expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(4);
+    });
+  });
+
+  describe("NominalValue Access Control", () => {
+    let diamond: ResolverProxy;
+    let signer_A: HardhatEthersSigner;
+    let signer_B: HardhatEthersSigner;
+
+    let nominalValueFacet: INominalValue;
+
+    async function deployBondFixture() {
+      const base = await deployBondTokenFixture({ useLoadFixture: false });
+
+      diamond = base.diamond;
+      signer_A = base.deployer;
+      signer_B = base.user1;
+
+      nominalValueFacet = await ethers.getContractAt("INominalValue", diamond.target, signer_A);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployBondFixture);
+    });
+
+    it("GIVEN a user with _NOMINAL_VALUE_ROLE WHEN setNominalValue THEN succeeds", async () => {
+      await nominalValueFacet.connect(signer_A).setNominalValue(500, 4);
+
+      expect(await nominalValueFacet.getNominalValue()).to.equal(500);
+      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(4);
+    });
+
+    it("GIVEN a user without _NOMINAL_VALUE_ROLE WHEN setNominalValue THEN reverts with AccountHasNoRole", async () => {
+      await expect(nominalValueFacet.connect(signer_B).setNominalValue(500, 4)).to.be.rejectedWith("AccountHasNoRole");
     });
   });
 });

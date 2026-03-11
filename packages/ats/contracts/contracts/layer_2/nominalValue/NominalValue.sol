@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { INominalValue } from "../interfaces/nominalValue/INominalValue.sol";
-import { _DEFAULT_ADMIN_ROLE } from "../../layer_0/constants/roles.sol";
+import { _NOMINAL_VALUE_ROLE } from "../../layer_0/constants/roles.sol";
 import { Internals } from "../../layer_0/Internals.sol";
 
 abstract contract NominalValue is INominalValue, Internals {
@@ -23,7 +23,7 @@ abstract contract NominalValue is INominalValue, Internals {
     function setNominalValue(
         uint256 _nominalValue,
         uint8 _nominalValueDecimals
-    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(_NOMINAL_VALUE_ROLE) {
         if (!_isNominalValueInitialized()) {
             _initialize_NominalValue(_nominalValue, _nominalValueDecimals);
         }

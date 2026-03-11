@@ -85,6 +85,10 @@ export async function deployBondSustainabilityPerformanceTargetRateFromFactory(
       role: ATS_ROLES._DEFAULT_ADMIN_ROLE,
       members: [adminAccount],
     },
+    {
+      role: ATS_ROLES._NOMINAL_VALUE_ROLE,
+      members: [adminAccount],
+    },
     ...securityDataParams.rbacs,
   ];
 
