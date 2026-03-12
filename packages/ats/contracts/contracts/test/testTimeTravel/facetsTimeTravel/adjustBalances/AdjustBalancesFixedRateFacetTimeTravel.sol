@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 import {
     AdjustBalancesFixedRateFacet
-} from "../../../../layer_2/adjustBalances/fixedRate/AdjustBalancesFixedRateFacet.sol";
+} from "../../../../facets/layer_2/adjustBalance/fixedRate/AdjustBalancesFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract AdjustBalancesFixedRateFacetTimeTravel is AdjustBalancesFixedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

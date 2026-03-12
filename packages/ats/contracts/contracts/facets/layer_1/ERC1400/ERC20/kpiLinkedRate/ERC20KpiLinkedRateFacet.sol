@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: Apache-2.0
+// Contract copy-pasted form OZ and extended
+pragma solidity >=0.8.0 <0.9.0;
+
+import { ERC20FacetBase } from "../ERC20FacetBase.sol";
+import { _ERC20_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../../constants/resolverKeys.sol";
+/* solhint-disable max-line-length */
+import {
+    CommonKpiLinkedInterestRate
+} from "../../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+/* solhint-enable max-line-length */
+
+contract ERC20KpiLinkedRateFacet is ERC20FacetBase, CommonKpiLinkedInterestRate {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
+        staticResolverKey_ = _ERC20_KPI_LINKED_RATE_RESOLVER_KEY;
+    }
+}

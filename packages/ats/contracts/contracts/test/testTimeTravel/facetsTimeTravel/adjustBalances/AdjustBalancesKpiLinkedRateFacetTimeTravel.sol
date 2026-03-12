@@ -2,9 +2,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 import {
     AdjustBalancesKpiLinkedRateFacet
-} from "../../../../layer_2/adjustBalances/kpiLinkedRate/AdjustBalancesKpiLinkedRateFacet.sol";
+} from "../../../../facets/layer_2/adjustBalance/kpiLinkedRate/AdjustBalancesKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract AdjustBalancesKpiLinkedRateFacetTimeTravel is AdjustBalancesKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
