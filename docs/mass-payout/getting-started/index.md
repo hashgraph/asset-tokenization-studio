@@ -50,6 +50,22 @@ Welcome to Mass Payout! Choose your path based on what you want to accomplish.
 
 ---
 
+## Run Your First End-to-End Test
+
+<div className="card-box card-success">
+  <h3>Testnet Walkthrough</h3>
+  <p>Build everything, run the full local stack, and execute a real distribution on Hedera Testnet using a test asset and USDC test funds.</p>
+  <ul>
+    <li>Correct build order for all components</li>
+    <li>Create a test asset via ATS staging</li>
+    <li>Fund the Distributions contract via Circle faucet</li>
+    <li>Verify on Hashscan and execute payout</li>
+  </ul>
+  <a href="./testnet-end-to-end" className="card-link">Testnet Walkthrough →</a>
+</div>
+
+---
+
 ## What's Next?
 
 After getting started, explore:

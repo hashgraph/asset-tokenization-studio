@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ExternalPauseManagementKpiLinkedRateFacet
-} from "../../../../layer_1/externalPauses/kpiLinkedRate/ExternalPauseManagementKpiLinkedRateFacet.sol";
+} from "../../../../facets/layer_1/externalPause/kpiLinkedRate/ExternalPauseManagementKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ExternalPauseManagementKpiLinkedRateFacetTimeTravel is
     ExternalPauseManagementKpiLinkedRateFacet,

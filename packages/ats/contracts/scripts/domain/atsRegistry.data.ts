@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-05T15:48:47.399Z
- * Facets: 197
+ * Generated: 2026-02-26T09:40:59.492Z
+ * Facets: 196
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data

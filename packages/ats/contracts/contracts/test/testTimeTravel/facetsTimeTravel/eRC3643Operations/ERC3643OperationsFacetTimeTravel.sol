@@ -3,9 +3,9 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC3643OperationsFacet } from "../../../../layer_1/ERC3643/standard/ERC3643OperationsFacet.sol";
+import { ERC3643OperationsFacet } from "../../../../facets/layer_1/ERC3643/standard/ERC3643OperationsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC3643OperationsFacetTimeTravel is ERC3643OperationsFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

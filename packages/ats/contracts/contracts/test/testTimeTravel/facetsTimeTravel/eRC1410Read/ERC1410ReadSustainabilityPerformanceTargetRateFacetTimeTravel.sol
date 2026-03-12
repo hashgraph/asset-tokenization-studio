@@ -3,11 +3,13 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
+/* solhint-disable max-line-length */
 import {
     ERC1410ReadSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_1/ERC1400/ERC1410/sustainabilityPerformanceTargetRate/ERC1410ReadSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/layer_1/ERC1400/ERC1410/sustainabilityPerformanceTargetRate/ERC1410ReadSustainabilityPerformanceTargetRateFacet.sol";
+/* solhint-enable max-line-length */
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC1410ReadSustainabilityPerformanceTargetRateFacetTimeTravel is
     ERC1410ReadSustainabilityPerformanceTargetRateFacet,
