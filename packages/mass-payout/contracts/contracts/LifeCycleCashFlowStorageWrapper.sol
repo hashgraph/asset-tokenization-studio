@@ -9,16 +9,14 @@ import {
 } from "@hashgraph/smart-contracts/contracts/system-contracts/hedera-token-service/HederaTokenService.sol";
 import { Pause } from "./core/Pause.sol";
 import { AccessControl } from "./core/AccessControl.sol";
-import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
+import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {
-    ISnapshots
-} from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/snapshots/ISnapshots.sol";
-import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBond.sol";
-import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/bond/IBondRead.sol";
-import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/equity/IEquity.sol";
-import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/layer_2/interfaces/security/ISecurity.sol";
+import { ISnapshots } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/snapshot/ISnapshots.sol";
+import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBond.sol";
+import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
+import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
+import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/security/ISecurity.sol";
 import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
 

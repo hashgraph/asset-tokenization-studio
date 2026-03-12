@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
-import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/interfaces/factory/IFactory.sol";
+import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/factory/IFactory.sol";
 
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
