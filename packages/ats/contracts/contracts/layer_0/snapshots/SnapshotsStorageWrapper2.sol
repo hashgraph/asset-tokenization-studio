@@ -48,10 +48,9 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
 
         uint256 balance = _balanceOfAdjustedAt(account, _blockTimestamp());
         uint256 balanceForPartition = _balanceOfByPartitionAdjustedAt(partition, account, _blockTimestamp());
-        uint256 factor = abaf / abafAtCurrentSnapshot;
 
-        balance /= factor;
-        balanceForPartition /= factor;
+        balance = (balance * abafAtCurrentSnapshot) / abaf;
+        balanceForPartition = (balanceForPartition * abafAtCurrentSnapshot) / abaf;
 
         _updateAccountSnapshot(
             _snapshotStorage().accountBalanceSnapshots[account],
@@ -364,9 +363,7 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
 
         if (abafAtSnapshot == abaf) return _currentBalanceAdjusted;
 
-        uint256 factor = abaf / abafAtSnapshot;
-
-        return _currentBalanceAdjusted / factor;
+        return (_currentBalanceAdjusted * abafAtSnapshot) / abaf;
     }
 
     /**

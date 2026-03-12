@@ -40,7 +40,9 @@ const operatorData = "0x5678";
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _PARTITION_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
 const balanceOf_A_Original = [10 * amount, 100 * amount];
-const adjustFactor = 253;
+const SCALE = 10n ** 18n;
+const adjustFactorRaw = 253;
+const adjustFactor = BigInt(adjustFactorRaw) * SCALE;
 const adjustDecimals = 2;
 const decimals_Original = 6;
 const maxSupply_Original = 1000000 * amount;
@@ -246,7 +248,7 @@ describe("ERC1410 Tests", () => {
 
   async function checkAdjustmentsAfterBalanceAdjustment(after: BalanceAdjustedValues, before: BalanceAdjustedValues) {
     // Has been adjusted 2 times
-    const factorSquared = BigInt(adjustFactor) ** 2n;
+    const factorSquared = BigInt(adjustFactorRaw) ** 2n;
     const doubleDecimals = 2 * adjustDecimals;
 
     expect(after.maxSupply).to.be.equal(before.maxSupply * factorSquared);
@@ -285,27 +287,27 @@ describe("ERC1410 Tests", () => {
   ) {
     const balanceReduction = BigInt(subtractedAmount - addedAmount);
 
-    expect(after.maxSupply).to.be.equal(before.maxSupply * BigInt(adjustFactor));
-    expect(after.maxSupply_Partition_1).to.be.equal(before.maxSupply_Partition_1 * BigInt(adjustFactor));
-    expect(after.maxSupply_Partition).to.be.equal(before.maxSupply_Partition * BigInt(adjustFactor));
+    expect(after.maxSupply).to.be.equal(before.maxSupply * BigInt(adjustFactorRaw));
+    expect(after.maxSupply_Partition_1).to.be.equal(before.maxSupply_Partition_1 * BigInt(adjustFactorRaw));
+    expect(after.maxSupply_Partition).to.be.equal(before.maxSupply_Partition * BigInt(adjustFactorRaw));
 
-    expect(after.totalSupply).to.be.equal(before.totalSupply * BigInt(adjustFactor) - balanceReduction);
+    expect(after.totalSupply).to.be.equal(before.totalSupply * BigInt(adjustFactorRaw) - balanceReduction);
     expect(after.totalSupply_Partition_1).to.be.equal(
-      before.totalSupply_Partition_1 * BigInt(adjustFactor) - balanceReduction,
+      before.totalSupply_Partition_1 * BigInt(adjustFactorRaw) - balanceReduction,
     );
-    expect(after.totalSupply_Partition).to.be.equal(before.totalSupply_Partition * BigInt(adjustFactor));
+    expect(after.totalSupply_Partition).to.be.equal(before.totalSupply_Partition * BigInt(adjustFactorRaw));
 
-    expect(after.balanceOf_A).to.be.equal(before.balanceOf_A * BigInt(adjustFactor) - BigInt(subtractedAmount));
+    expect(after.balanceOf_A).to.be.equal(before.balanceOf_A * BigInt(adjustFactorRaw) - BigInt(subtractedAmount));
     expect(after.balanceOf_A_Partition_1).to.be.equal(
-      before.balanceOf_A_Partition_1 * BigInt(adjustFactor) - BigInt(subtractedAmount),
+      before.balanceOf_A_Partition_1 * BigInt(adjustFactorRaw) - BigInt(subtractedAmount),
     );
-    expect(after.balanceOf_A_Partition).to.be.equal(before.balanceOf_A_Partition * BigInt(adjustFactor));
+    expect(after.balanceOf_A_Partition).to.be.equal(before.balanceOf_A_Partition * BigInt(adjustFactorRaw));
 
-    expect(after.balanceOf_B).to.be.equal(before.balanceOf_B * BigInt(adjustFactor) + BigInt(addedAmount));
+    expect(after.balanceOf_B).to.be.equal(before.balanceOf_B * BigInt(adjustFactorRaw) + BigInt(addedAmount));
     expect(after.balanceOf_B_Partition_1).to.be.equal(
-      before.balanceOf_B_Partition_1 * BigInt(adjustFactor) + BigInt(addedAmount),
+      before.balanceOf_B_Partition_1 * BigInt(adjustFactorRaw) + BigInt(addedAmount),
     );
-    expect(after.balanceOf_B_Partition).to.be.equal(before.balanceOf_B_Partition * BigInt(adjustFactor));
+    expect(after.balanceOf_B_Partition).to.be.equal(before.balanceOf_B_Partition * BigInt(adjustFactorRaw));
 
     expect(after.decimals).to.be.equal(before.decimals + BigInt(adjustDecimals));
     expect(after.metadata?.info?.decimals).to.be.equal(after.decimals);
@@ -1865,10 +1867,10 @@ describe("ERC1410 Tests", () => {
           );
 
           expect(balanceOf_A_After).to.be.equal(
-            balanceOf_A_Before * BigInt(adjustFactor) + BigInt(balanceOf_A_Original[0]),
+            balanceOf_A_Before * BigInt(adjustFactorRaw) + BigInt(balanceOf_A_Original[0]),
           );
           expect(balanceOf_A_Partition_1_After).to.be.equal(
-            balanceOf_A_Partition_1_Before * BigInt(adjustFactor) + BigInt(balanceOf_A_Original[0]),
+            balanceOf_A_Partition_1_Before * BigInt(adjustFactorRaw) + BigInt(balanceOf_A_Original[0]),
           );
         });
       });
@@ -1970,9 +1972,9 @@ describe("ERC1410 Tests", () => {
           // adjustBalances
           await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
-          await expect(erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount * adjustFactor, data))
+          await expect(erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount * adjustFactorRaw, data))
             .to.emit(erc1410Facet, "RedeemedByPartition")
-            .withArgs(_PARTITION_ID_1, ADDRESS_ZERO, signer_A.address, amount * adjustFactor, data, "0x");
+            .withArgs(_PARTITION_ID_1, ADDRESS_ZERO, signer_A.address, amount * adjustFactorRaw, data, "0x");
         });
 
         it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition succeeds", async () => {
@@ -2000,7 +2002,7 @@ describe("ERC1410 Tests", () => {
           // adjustBalances
           await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
-          const adjustAmount = amount * adjustFactor;
+          const adjustAmount = amount * adjustFactorRaw;
 
           // Transaction Partition 1
           await erc1410Facet.authorizeOperator(signer_A.address);
@@ -2035,7 +2037,7 @@ describe("ERC1410 Tests", () => {
           // adjustBalances
           await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
-          const adjustAmount = amount * adjustFactor;
+          const adjustAmount = amount * adjustFactorRaw;
 
           // Transaction Partition 1
           await expect(
@@ -2593,10 +2595,10 @@ describe("ERC1410 Tests", () => {
         );
 
         expect(balanceOf_A_After).to.be.equal(
-          balanceOf_A_Before * BigInt(adjustFactor) + BigInt(balanceOf_A_Original[0]),
+          balanceOf_A_Before * BigInt(adjustFactorRaw) + BigInt(balanceOf_A_Original[0]),
         );
         expect(balanceOf_A_Partition_1_After).to.be.equal(
-          balanceOf_A_Partition_1_Before * BigInt(adjustFactor) + BigInt(balanceOf_A_Original[0]),
+          balanceOf_A_Partition_1_Before * BigInt(adjustFactorRaw) + BigInt(balanceOf_A_Original[0]),
         );
       });
 
@@ -2694,7 +2696,7 @@ describe("ERC1410 Tests", () => {
         // adjustBalances
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
-        const expectedAllowance = amount * adjustFactor;
+        const expectedAllowance = amount * adjustFactorRaw;
 
         // Transaction Partition 1
         await erc1594Facet
@@ -2704,7 +2706,7 @@ describe("ERC1410 Tests", () => {
         // After Transaction Partition 1 Values
         const after = await getBalanceAdjustedValues();
 
-        expect(after.balanceOf_A).to.equal(before.balanceOf_A * BigInt(adjustFactor) - BigInt(expectedAllowance));
+        expect(after.balanceOf_A).to.equal(before.balanceOf_A * BigInt(adjustFactorRaw) - BigInt(expectedAllowance));
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransfer succeeds", async () => {
@@ -2714,7 +2716,7 @@ describe("ERC1410 Tests", () => {
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         expect(
-          await erc1594Facet.connect(signer_A).canTransfer(signer_B.address, adjustFactor * amount, "0x"),
+          await erc1594Facet.connect(signer_A).canTransfer(signer_B.address, adjustFactorRaw * amount, "0x"),
         ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
       });
 
@@ -2729,7 +2731,7 @@ describe("ERC1410 Tests", () => {
             signer_A.address,
             signer_B.address,
             _PARTITION_ID_1,
-            adjustFactor * amount,
+            adjustFactorRaw * amount,
             "0x",
             "0x",
           ),
@@ -2747,7 +2749,7 @@ describe("ERC1410 Tests", () => {
         expect(
           await erc1594Facet
             .connect(signer_A)
-            .canTransferFrom(signer_A.address, signer_B.address, adjustFactor * amount, "0x"),
+            .canTransferFrom(signer_A.address, signer_B.address, adjustFactorRaw * amount, "0x"),
         ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
       });
 
@@ -2782,7 +2784,7 @@ describe("ERC1410 Tests", () => {
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         // Transaction Partition 1 with updated balance
-        const updatedBalance = before.balanceOf_A * BigInt(adjustFactor);
+        const updatedBalance = before.balanceOf_A * BigInt(adjustFactorRaw);
 
         await erc20Facet.connect(signer_B).transferFrom(signer_A.address, signer_B.address, updatedBalance);
 
@@ -2818,7 +2820,7 @@ describe("ERC1410 Tests", () => {
         // adjustBalances
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
-        const adjustAmount = amount * adjustFactor;
+        const adjustAmount = amount * adjustFactorRaw;
 
         // Transaction Partition 1
         await expect(erc1644Facet.controllerRedeem(signer_A.address, adjustAmount, "0x", "0x"))
@@ -2851,7 +2853,7 @@ describe("ERC1410 Tests", () => {
         // adjustBalances
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
-        const adjustAmount = amount * adjustFactor;
+        const adjustAmount = amount * adjustFactorRaw;
 
         // Transaction Partition 1
         await expect(erc1594Facet.connect(signer_A).redeem(adjustAmount, "0x"))
@@ -2887,7 +2889,7 @@ describe("ERC1410 Tests", () => {
         // adjustBalances
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
-        const adjustAmount = amount * adjustFactor;
+        const adjustAmount = amount * adjustFactorRaw;
 
         // Transaction Partition 1
         await expect(erc1594Facet.connect(signer_A).redeemFrom(signer_A.address, adjustAmount, "0x"))
@@ -2909,7 +2911,7 @@ describe("ERC1410 Tests", () => {
 
         const allowance_After = await erc20Facet.connect(signer_A).allowance(signer_A.address, signer_B.address);
 
-        expect(allowance_After).to.be.equal(allowance_Before * BigInt(adjustFactor));
+        expect(allowance_After).to.be.equal(allowance_Before * BigInt(adjustFactorRaw));
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 increaseAllowance succeeds", async () => {
@@ -2928,7 +2930,7 @@ describe("ERC1410 Tests", () => {
 
         const allowance_After = await erc20Facet.connect(signer_A).allowance(signer_A.address, signer_B.address);
 
-        expect(allowance_After).to.be.equal(allowance_Before * BigInt(adjustFactor) + BigInt(amount));
+        expect(allowance_After).to.be.equal(allowance_Before * BigInt(adjustFactorRaw) + BigInt(amount));
       });
 
       it("GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 decreaseAllowance succeeds", async () => {
@@ -2948,7 +2950,7 @@ describe("ERC1410 Tests", () => {
         const allowance_After = await erc20Facet.connect(signer_A).allowance(signer_A.address, signer_B.address);
 
         expect(allowance_After).to.be.equal(
-          allowance_Before * BigInt(adjustFactor) - (allowance_Before + BigInt(amount)),
+          allowance_Before * BigInt(adjustFactorRaw) - (allowance_Before + BigInt(amount)),
         );
       });
     });

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { AdjustBalancesStorageWrapper1 } from "../adjustBalances/AdjustBalancesStorageWrapper1.sol";
 import { _CAP_STORAGE_POSITION } from "../constants/storagePositions.sol";
-import { MAX_UINT256 } from "../constants/values.sol";
+import { MAX_UINT256, SCALE } from "../constants/values.sol";
 import { ICap } from "contracts/layer_1/interfaces/cap/ICap.sol";
 
 abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
@@ -30,7 +30,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         CapDataStorage storage capStorage = _capStorage();
         uint256 limit = MAX_UINT256 / factor;
         if (capStorage.maxSupply > limit) capStorage.maxSupply = MAX_UINT256;
-        else capStorage.maxSupply *= factor;
+        else capStorage.maxSupply = (capStorage.maxSupply * factor) / SCALE;
     }
 
     function _adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal override {
@@ -38,7 +38,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         uint256 limit = MAX_UINT256 / factor;
         if (capStorage.maxSupplyByPartition[partition] > limit)
             capStorage.maxSupplyByPartition[partition] = MAX_UINT256;
-        else capStorage.maxSupplyByPartition[partition] *= factor;
+        else capStorage.maxSupplyByPartition[partition] = (capStorage.maxSupplyByPartition[partition] * factor) / SCALE;
     }
 
     function _getMaxSupplyAdjustedAt(uint256 timestamp) internal view override returns (uint256) {
@@ -50,7 +50,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
 
         if (capStorage.maxSupply > limit) return MAX_UINT256;
 
-        return capStorage.maxSupply * pendingAbaf;
+        return (capStorage.maxSupply * pendingAbaf) / SCALE;
     }
 
     function _getMaxSupplyByPartitionAdjustedAt(
@@ -65,7 +65,7 @@ abstract contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
 
         if (capStorage.maxSupplyByPartition[partition] > limit) return MAX_UINT256;
 
-        return capStorage.maxSupplyByPartition[partition] * factor;
+        return (capStorage.maxSupplyByPartition[partition] * factor) / SCALE;
     }
 
     function _isCapInitialized() internal view override returns (bool) {

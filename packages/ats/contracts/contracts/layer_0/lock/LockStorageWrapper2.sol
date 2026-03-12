@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { AdjustBalancesStorageWrapper2 } from "../adjustBalances/AdjustBalancesStorageWrapper2.sol";
+import { SCALE } from "../constants/values.sol";
 import { ILock } from "../../layer_1/interfaces/lock/ILock.sol";
 import { IERC20StorageWrapper } from "../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 
@@ -120,13 +121,17 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
         address _tokenHolder,
         uint256 _factor
     ) internal override {
-        _lockStorage().locksByAccountPartitionAndId[_tokenHolder][_partition][_lockId].amount *= _factor;
+        _lockStorage().locksByAccountPartitionAndId[_tokenHolder][_partition][_lockId].amount =
+            (_lockStorage().locksByAccountPartitionAndId[_tokenHolder][_partition][_lockId].amount * _factor) /
+            SCALE;
     }
 
     function _updateTotalLockedAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockStorage.totalLockedAmountByAccount[_tokenHolder] *= _factor;
+        lockStorage.totalLockedAmountByAccount[_tokenHolder] =
+            (lockStorage.totalLockedAmountByAccount[_tokenHolder] * _factor) /
+            SCALE;
         _setTotalLockLabaf(_tokenHolder, _abaf);
     }
 
@@ -138,7 +143,9 @@ abstract contract LockStorageWrapper2 is AdjustBalancesStorageWrapper2 {
     ) internal override {
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
+        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][_partition] =
+            (lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][_partition] * _factor) /
+            SCALE;
         _setTotalLockLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 

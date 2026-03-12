@@ -37,6 +37,7 @@ const heldAmountOf_C_Partition_1 = 6;
 const EMPTY_VC_ID = EMPTY_STRING;
 const balanceOf_B_Original = 2 * amount;
 const DECIMALS = 6;
+const SCALE = 10n ** 18n;
 
 describe("Snapshots Tests", () => {
   let diamond: ResolverProxy;
@@ -792,17 +793,17 @@ describe("Snapshots Tests", () => {
 
       const balanceAdjustmentData_1 = {
         executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
-        factor: balanceAdjustmentsFactor_1,
+        factor: BigInt(balanceAdjustmentsFactor_1) * SCALE,
         decimals: balanceAdjustmentsDecimals_1,
       };
       const balanceAdjustmentData_2 = {
         executionDate: balanceAdjustmentExecutionDateInSeconds_2.toString(),
-        factor: balanceAdjustmentsFactor_2,
+        factor: BigInt(balanceAdjustmentsFactor_2) * SCALE,
         decimals: balanceAdjustmentsDecimals_2,
       };
       const balanceAdjustmentData_3 = {
         executionDate: balanceAdjustmentExecutionDateInSeconds_3.toString(),
-        factor: balanceAdjustmentsFactor_3,
+        factor: BigInt(balanceAdjustmentsFactor_3) * SCALE,
         decimals: balanceAdjustmentsDecimals_3,
       };
       await equityFacet.connect(signer_A).setScheduledBalanceAdjustment(balanceAdjustmentData_1);

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { _DEFAULT_PARTITION } from "../constants/values.sol";
+import { _DEFAULT_PARTITION, SCALE } from "../constants/values.sol";
 import { ThirdPartyType } from "../common/types/ThirdPartyType.sol";
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
 import { IERC20StorageWrapper } from "../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
@@ -268,7 +268,9 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     }
 
     function _updateTotalHeldAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
-        _holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
+        _holdStorage().totalHeldAmountByAccount[_tokenHolder] =
+            (_holdStorage().totalHeldAmountByAccount[_tokenHolder] * _factor) /
+            SCALE;
         _setTotalHeldLabaf(_tokenHolder, _abaf);
     }
 
@@ -278,7 +280,9 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
         uint256 _factor,
         uint256 _abaf
     ) internal override {
-        _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] *= _factor;
+        _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] =
+            (_holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][_partition] * _factor) /
+            SCALE;
         _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
@@ -328,7 +332,9 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     ) internal override {
         HoldDataStorage storage holdStorage = _holdStorage();
 
-        holdStorage.holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount *= _factor;
+        holdStorage.holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount =
+            (holdStorage.holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId].hold.amount * _factor) /
+            SCALE;
     }
 
     function _getHeldAmountForAdjustedAt(
@@ -337,7 +343,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
     ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactorForHeldAmountByTokenHolderAdjustedAt(_tokenHolder, _timestamp);
 
-        return _getHeldAmountFor(_tokenHolder) * factor;
+        return (_getHeldAmountFor(_tokenHolder) * factor) / SCALE;
     }
 
     function _getTotalBalanceForByPartitionAdjustedAt(
@@ -368,7 +374,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             _getAbafAdjustedAt(_timestamp),
             _getTotalHeldLabafByPartition(_partition, _tokenHolder)
         );
-        return _getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
+        return (_getHeldAmountForByPartition(_partition, _tokenHolder) * factor) / SCALE;
     }
 
     function _getHoldForByPartitionAdjustedAt(
@@ -402,7 +408,7 @@ abstract contract HoldStorageWrapper2 is ERC1410ProtectedPartitionsStorageWrappe
             operatorData_,
             thirdPartType_
         ) = _getHoldForByPartition(_holdIdentifier);
-        amount_ *= factor;
+        amount_ = (amount_ * factor) / SCALE;
     }
 
     function _getHoldThirdParty(

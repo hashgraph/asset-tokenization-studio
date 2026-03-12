@@ -34,7 +34,9 @@ describe("ERC20Votes Tests", () => {
   let timeTravelFacet: TimeTravel;
   let equityFacet: EquityUSA;
 
-  const ABAF = 200;
+  const SCALE = 10n ** 18n;
+  const ABAF_RAW = 200;
+  const ABAF = BigInt(ABAF_RAW) * SCALE;
   const DECIMALS = 2;
   const block = 100;
 
@@ -51,9 +53,9 @@ describe("ERC20Votes Tests", () => {
     expect(votesA1).to.equal(amount);
     expect(votesA2).to.equal(0);
     expect(votesB1).to.equal(0);
-    expect(votesB2).to.equal(amount * ABAF);
+    expect(votesB2).to.equal(amount * ABAF_RAW);
     expect(totalSupplyA1).to.equal(amount);
-    expect(totalSupplyA2).to.equal(amount * ABAF);
+    expect(totalSupplyA2).to.equal(amount * ABAF_RAW);
   }
 
   async function deploySecurityFixture() {
@@ -409,9 +411,9 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN an ERC20Votes when adjusting balances twice for same block THEN fails", async () => {
-      const ABAF = 200;
-      const DECIMALS = 2;
-      await adjustBalancesFacet.adjustBalances(ABAF, DECIMALS);
+      const ABAF_LOCAL = 200n * SCALE;
+      const DECIMALS_LOCAL = 2;
+      await adjustBalancesFacet.adjustBalances(ABAF_LOCAL, DECIMALS_LOCAL);
 
       await expect(erc20VotesFacet.delegate(signer_B.address))
         .to.be.revertedWithCustomError(erc20VotesFacet, "AbafChangeForBlockForbidden")
@@ -425,9 +427,9 @@ describe("ERC20Votes Tests", () => {
 
       await expect(erc20VotesFacet.delegate(signer_B.address))
         .to.emit(erc20VotesFacet, "DelegateVotesChanged")
-        .withArgs(signer_A.address, amount * ABAF, 0)
+        .withArgs(signer_A.address, amount * ABAF_RAW, 0)
         .to.emit(erc20VotesFacet, "DelegateVotesChanged")
-        .withArgs(signer_B.address, 0, amount * ABAF);
+        .withArgs(signer_B.address, 0, amount * ABAF_RAW);
 
       await checkVotingPowerAfterAdjustment();
     });
@@ -440,12 +442,12 @@ describe("ERC20Votes Tests", () => {
       await adjustBalancesFacet.adjustBalances(ABAF, DECIMALS);
 
       await expect(
-        erc1410Facet.transferByPartition(DEFAULT_PARTITION, { to: signer_B.address, value: amount * ABAF }, "0x"),
+        erc1410Facet.transferByPartition(DEFAULT_PARTITION, { to: signer_B.address, value: amount * ABAF_RAW }, "0x"),
       )
         .to.emit(erc20VotesFacet, "DelegateVotesChanged")
-        .withArgs(signer_A.address, amount * ABAF, 0)
+        .withArgs(signer_A.address, amount * ABAF_RAW, 0)
         .to.emit(erc20VotesFacet, "DelegateVotesChanged")
-        .withArgs(signer_B.address, 0, amount * ABAF);
+        .withArgs(signer_B.address, 0, amount * ABAF_RAW);
 
       await checkVotingPowerAfterAdjustment();
     });
@@ -479,9 +481,9 @@ describe("ERC20Votes Tests", () => {
 
       await expect(erc20VotesFacet.delegate(signer_B.address))
         .to.emit(erc20VotesFacet, "DelegateVotesChanged")
-        .withArgs(signer_A.address, amount * ABAF, 0)
+        .withArgs(signer_A.address, amount * ABAF_RAW, 0)
         .to.emit(erc20VotesFacet, "DelegateVotesChanged")
-        .withArgs(signer_B.address, 0, amount * ABAF);
+        .withArgs(signer_B.address, 0, amount * ABAF_RAW);
 
       await checkVotingPowerAfterAdjustment();
     });
@@ -501,12 +503,12 @@ describe("ERC20Votes Tests", () => {
       await timeTravelFacet.changeSystemTimestamp(timestamp + 1);
 
       await expect(
-        erc1410Facet.transferByPartition(DEFAULT_PARTITION, { to: signer_B.address, value: amount * ABAF }, "0x"),
+        erc1410Facet.transferByPartition(DEFAULT_PARTITION, { to: signer_B.address, value: amount * ABAF_RAW }, "0x"),
       )
         .to.emit(erc20VotesFacet, "DelegateVotesChanged")
-        .withArgs(signer_A.address, amount * ABAF, 0)
+        .withArgs(signer_A.address, amount * ABAF_RAW, 0)
         .to.emit(erc20VotesFacet, "DelegateVotesChanged")
-        .withArgs(signer_B.address, 0, amount * ABAF);
+        .withArgs(signer_B.address, 0, amount * ABAF_RAW);
 
       await checkVotingPowerAfterAdjustment();
     });

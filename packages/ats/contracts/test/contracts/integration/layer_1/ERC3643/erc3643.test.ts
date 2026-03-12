@@ -1991,7 +1991,9 @@ describe("ERC3643 Tests", () => {
       const maxSupply_Original = 1000000 * _AMOUNT;
       const maxSupply_Partition_1_Original = 50000 * _AMOUNT;
       const balanceOf_A_Original = [10 * _AMOUNT, 100 * _AMOUNT];
-      const adjustFactor = 253;
+      const SCALE = 10n ** 18n;
+      const adjustFactorRaw = 253;
+      const adjustFactor = BigInt(adjustFactorRaw) * SCALE;
       const adjustDecimals = 2;
 
       async function setPreBalanceAdjustment() {
@@ -2055,14 +2057,20 @@ describe("ERC3643 Tests", () => {
         const balance_After = await erc1410Facet.balanceOf(signer_E.address);
         const balance_After_Partition_1 = await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address);
 
-        expect(frozen_TotalAmount_After).to.be.equal(frozen_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
-        expect(frozen_TotalAmount_After_Partition_1).to.be.equal(
-          frozen_TotalAmount_Before_Partition_1 * BigInt(adjustFactor * adjustFactor),
+        expect(frozen_TotalAmount_After).to.be.equal(
+          frozen_TotalAmount_Before * BigInt(adjustFactorRaw * adjustFactorRaw),
         );
-        expect(balance_After).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor));
-        expect(frozen_TotalAmount_After).to.be.equal(frozen_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
+        expect(frozen_TotalAmount_After_Partition_1).to.be.equal(
+          frozen_TotalAmount_Before_Partition_1 * BigInt(adjustFactorRaw * adjustFactorRaw),
+        );
+        expect(balance_After).to.be.equal(
+          (balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw * adjustFactorRaw),
+        );
+        expect(frozen_TotalAmount_After).to.be.equal(
+          frozen_TotalAmount_Before * BigInt(adjustFactorRaw * adjustFactorRaw),
+        );
         expect(balance_After_Partition_1).to.be.equal(
-          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw * adjustFactorRaw),
         );
       });
 
@@ -2085,7 +2093,7 @@ describe("ERC3643 Tests", () => {
         const frozenBefore = await freezeFacet.getFrozenTokens(signer_E.address);
 
         // Change ABAF
-        await adjustBalancesFacetA.adjustBalances(2, 1); // 2x adjustment
+        await adjustBalancesFacetA.adjustBalances(2n * SCALE, 1); // 2x adjustment
 
         // Freeze more tokens - this should trigger _updateTotalFreezeAmountAndLabaf
         await erc1410Facet.issueByPartition({
@@ -2151,7 +2159,7 @@ describe("ERC3643 Tests", () => {
 
         // Apply ABAF with factor 2 - this internally uses _getTotalBalanceForByPartitionAdjusted to calculate total balance
         const decimals = await erc20Facet.decimals();
-        await adjustBalancesFacet.connect(signer_A).adjustBalances(2, decimals);
+        await adjustBalancesFacet.connect(signer_A).adjustBalances(2n * SCALE, decimals);
 
         // Take another snapshot after ABAF to trigger _getTotalBalanceForByPartitionAdjusted again
         await snapshotFacet.connect(signer_A).takeSnapshot();

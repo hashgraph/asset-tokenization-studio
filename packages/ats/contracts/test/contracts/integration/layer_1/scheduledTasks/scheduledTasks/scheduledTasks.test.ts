@@ -22,6 +22,7 @@ import { executeRbac } from "@test";
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const INITIAL_AMOUNT = 1000;
 const DECIMALS_INIT = 6;
+const SCALE = 10n ** 18n;
 
 describe("Scheduled Tasks Tests", () => {
   let diamond: ResolverProxy;
@@ -139,12 +140,12 @@ describe("Scheduled Tasks Tests", () => {
 
     const balanceAdjustmentData_1 = {
       executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
-      factor: balanceAdjustmentsFactor_1,
+      factor: BigInt(balanceAdjustmentsFactor_1) * SCALE,
       decimals: balanceAdjustmentsDecimals_1,
     };
     const balanceAdjustmentData_2 = {
       executionDate: balanceAdjustmentExecutionDateInSeconds_2.toString(),
-      factor: balanceAdjustmentsFactor_2,
+      factor: BigInt(balanceAdjustmentsFactor_2) * SCALE,
       decimals: balanceAdjustmentsDecimals_2,
     };
 

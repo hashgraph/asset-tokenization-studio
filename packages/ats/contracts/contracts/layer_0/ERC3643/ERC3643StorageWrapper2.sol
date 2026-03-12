@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION } from "../constants/values.sol";
+import { _DEFAULT_PARTITION, SCALE } from "../constants/values.sol";
 import { SnapshotsStorageWrapper2 } from "../snapshots/SnapshotsStorageWrapper2.sol";
 import { IERC3643Management } from "../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
 import { IERC20StorageWrapper } from "../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
@@ -110,7 +110,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     }
 
     function _updateTotalFreezeAmountAndLabaf(address _tokenHolder, uint256 _factor, uint256 _abaf) internal override {
-        _erc3643Storage().frozenTokens[_tokenHolder] *= _factor;
+        _erc3643Storage().frozenTokens[_tokenHolder] = (_erc3643Storage().frozenTokens[_tokenHolder] * _factor) / SCALE;
         _setTotalFreezeLabaf(_tokenHolder, _abaf);
     }
 
@@ -120,7 +120,9 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
         uint256 _factor,
         uint256 _abaf
     ) internal override {
-        _erc3643Storage().frozenTokensByPartition[_tokenHolder][_partition] *= _factor;
+        _erc3643Storage().frozenTokensByPartition[_tokenHolder][_partition] =
+            (_erc3643Storage().frozenTokensByPartition[_tokenHolder][_partition] * _factor) /
+            SCALE;
         _setTotalFreezeLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
@@ -164,7 +166,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
     ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactorForFrozenAmountByTokenHolderAdjustedAt(_tokenHolder, _timestamp);
 
-        return _getFrozenAmountFor(_tokenHolder) * factor;
+        return (_getFrozenAmountFor(_tokenHolder) * factor) / SCALE;
     }
 
     function _getTotalBalanceForByPartitionAdjustedAt(
@@ -195,7 +197,7 @@ abstract contract ERC3643StorageWrapper2 is SnapshotsStorageWrapper2 {
             _getAbafAdjustedAt(_timestamp),
             _getTotalFrozenLabafByPartition(_partition, _tokenHolder)
         );
-        return _getFrozenAmountForByPartition(_partition, _tokenHolder) * factor;
+        return (_getFrozenAmountForByPartition(_partition, _tokenHolder) * factor) / SCALE;
     }
 
     function _canRecover(address _tokenHolder) internal view override returns (bool isEmpty_) {

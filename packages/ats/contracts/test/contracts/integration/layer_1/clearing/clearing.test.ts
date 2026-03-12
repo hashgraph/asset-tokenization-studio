@@ -37,7 +37,9 @@ type ClearingFacetCombined = any;
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
 const _PARTITION_ID_1 = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const adjustFactor = 253;
+const SCALE = 10n ** 18n;
+const adjustFactorRaw = 253;
+const adjustFactor = BigInt(adjustFactorRaw) * SCALE;
 const adjustDecimals = 2;
 const _AMOUNT = 1000;
 const _DATA = "0x1234";
@@ -2713,16 +2715,20 @@ describe("Clearing Tests", () => {
         const balance_After = await erc1410Facet.balanceOf(signer_A.address);
         const balance_After_Partition_1 = await erc1410Facet.balanceOfByPartition(_DEFAULT_PARTITION, signer_A.address);
 
-        expect(cleared_TotalAmount_After).to.be.equal(cleared_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
-        expect(cleared_TotalAmount_After_Partition_1).to.be.equal(
-          cleared_TotalAmount_Before_Partition_1 * BigInt(adjustFactor * adjustFactor),
+        expect(cleared_TotalAmount_After).to.be.equal(
+          cleared_TotalAmount_Before * BigInt(adjustFactorRaw * adjustFactorRaw),
         );
-        expect(balance_After).to.be.equal((balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor * adjustFactor));
+        expect(cleared_TotalAmount_After_Partition_1).to.be.equal(
+          cleared_TotalAmount_Before_Partition_1 * BigInt(adjustFactorRaw * adjustFactorRaw),
+        );
+        expect(balance_After).to.be.equal(
+          (balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw * adjustFactorRaw),
+        );
 
         expect(balance_After_Partition_1).to.be.equal(
-          (balance_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor * adjustFactor),
+          (balance_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw * adjustFactorRaw),
         );
-        expect(cleared_After.amount).to.be.equal(cleared_Before.amount * BigInt(adjustFactor * adjustFactor));
+        expect(cleared_After.amount).to.be.equal(cleared_Before.amount * BigInt(adjustFactorRaw * adjustFactorRaw));
       });
 
       it("GIVEN a clearing WHEN adjustBalances THEN approve succeed", async () => {
@@ -2805,27 +2811,29 @@ describe("Clearing Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Approve_A).to.be.equal((balance_Before_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor));
-        expect(balance_After_Approve_C).to.be.equal((balance_Before_C + BigInt(3 * _AMOUNT)) * BigInt(adjustFactor));
+        expect(balance_After_Approve_A).to.be.equal((balance_Before_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw));
+        expect(balance_After_Approve_C).to.be.equal((balance_Before_C + BigInt(3 * _AMOUNT)) * BigInt(adjustFactorRaw));
         expect(balance_After_Approve_Partition_1_A).to.be.equal(
-          (balance_Before_Partition_1_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
+          (balance_Before_Partition_1_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw),
         );
         expect(balance_After_Approve_Partition_1_C).to.be.equal(
-          (balance_Before_Partition_1_C + BigInt(3 * _AMOUNT)) * BigInt(adjustFactor),
+          (balance_Before_Partition_1_C + BigInt(3 * _AMOUNT)) * BigInt(adjustFactorRaw),
         );
-        expect(cleared_Amount_After).to.be.equal((cleared_Amount_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor));
+        expect(cleared_Amount_After).to.be.equal(
+          (cleared_Amount_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw),
+        );
         expect(cleared_Amount_After_Partition_1).to.be.equal(
-          (cleared_Amount_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
+          (cleared_Amount_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw),
         );
-        expect(held_Amount_After).to.be.equal((held_Amount_Before + BigInt(3 * _AMOUNT)) * BigInt(adjustFactor));
+        expect(held_Amount_After).to.be.equal((held_Amount_Before + BigInt(3 * _AMOUNT)) * BigInt(adjustFactorRaw));
         expect(held_Amount_After_Partition_1).to.be.equal(
-          (held_Amount_Before_Partition_1 + BigInt(3 * _AMOUNT)) * BigInt(adjustFactor),
+          (held_Amount_Before_Partition_1 + BigInt(3 * _AMOUNT)) * BigInt(adjustFactorRaw),
         );
         expect(balance_After_Approve_A + cleared_Amount_After).to.be.equal(
-          (balance_Before_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
+          (balance_Before_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw),
         );
         expect(balance_After_Approve_Partition_1_A + cleared_Amount_After_Partition_1).to.be.equal(
-          (balance_Before_Partition_1_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
+          (balance_Before_Partition_1_A - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw),
         );
       });
 
@@ -2909,19 +2917,21 @@ describe("Clearing Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Cancel_A).to.be.equal(balance_Before_A * BigInt(adjustFactor));
-        expect(balance_After_Cancel_C).to.be.equal(balance_Before_C * BigInt(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_A).to.be.equal(balance_Before_Partition_1_A * BigInt(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_C).to.be.equal(balance_Before_Partition_1_C * BigInt(adjustFactor));
-        expect(cleared_Amount_After).to.be.equal((cleared_Amount_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor));
-        expect(cleared_Amount_After_Partition_1).to.be.equal(
-          (cleared_Amount_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
+        expect(balance_After_Cancel_A).to.be.equal(balance_Before_A * BigInt(adjustFactorRaw));
+        expect(balance_After_Cancel_C).to.be.equal(balance_Before_C * BigInt(adjustFactorRaw));
+        expect(balance_After_Cancel_Partition_1_A).to.be.equal(balance_Before_Partition_1_A * BigInt(adjustFactorRaw));
+        expect(balance_After_Cancel_Partition_1_C).to.be.equal(balance_Before_Partition_1_C * BigInt(adjustFactorRaw));
+        expect(cleared_Amount_After).to.be.equal(
+          (cleared_Amount_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw),
         );
-        expect(held_Amount_After).to.be.equal(held_Amount_Before * BigInt(adjustFactor));
-        expect(held_Amount_After_Partition_1).to.be.equal(held_Amount_Before_Partition_1 * BigInt(adjustFactor));
-        expect(balance_After_Cancel_A + cleared_Amount_After).to.be.equal(balance_Before_A * BigInt(adjustFactor));
+        expect(cleared_Amount_After_Partition_1).to.be.equal(
+          (cleared_Amount_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw),
+        );
+        expect(held_Amount_After).to.be.equal(held_Amount_Before * BigInt(adjustFactorRaw));
+        expect(held_Amount_After_Partition_1).to.be.equal(held_Amount_Before_Partition_1 * BigInt(adjustFactorRaw));
+        expect(balance_After_Cancel_A + cleared_Amount_After).to.be.equal(balance_Before_A * BigInt(adjustFactorRaw));
         expect(balance_After_Cancel_Partition_1_A + cleared_Amount_After_Partition_1).to.be.equal(
-          balance_Before_Partition_1_A * BigInt(adjustFactor),
+          balance_Before_Partition_1_A * BigInt(adjustFactorRaw),
         );
       });
 
@@ -3007,19 +3017,21 @@ describe("Clearing Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Cancel_A).to.be.equal(balance_Before_A * BigInt(adjustFactor));
-        expect(balance_After_Cancel_C).to.be.equal(balance_Before_C * BigInt(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_A).to.be.equal(balance_Before_Partition_1_A * BigInt(adjustFactor));
-        expect(balance_After_Cancel_Partition_1_C).to.be.equal(balance_Before_Partition_1_C * BigInt(adjustFactor));
-        expect(cleared_Amount_After).to.be.equal((cleared_Amount_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor));
-        expect(cleared_Amount_After_Partition_1).to.be.equal(
-          (cleared_Amount_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor),
+        expect(balance_After_Cancel_A).to.be.equal(balance_Before_A * BigInt(adjustFactorRaw));
+        expect(balance_After_Cancel_C).to.be.equal(balance_Before_C * BigInt(adjustFactorRaw));
+        expect(balance_After_Cancel_Partition_1_A).to.be.equal(balance_Before_Partition_1_A * BigInt(adjustFactorRaw));
+        expect(balance_After_Cancel_Partition_1_C).to.be.equal(balance_Before_Partition_1_C * BigInt(adjustFactorRaw));
+        expect(cleared_Amount_After).to.be.equal(
+          (cleared_Amount_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw),
         );
-        expect(held_Amount_After).to.be.equal(held_Amount_Before * BigInt(adjustFactor));
-        expect(held_Amount_After_Partition_1).to.be.equal(held_Amount_Before_Partition_1 * BigInt(adjustFactor));
-        expect(balance_After_Cancel_A + cleared_Amount_After).to.be.equal(balance_Before_A * BigInt(adjustFactor));
+        expect(cleared_Amount_After_Partition_1).to.be.equal(
+          (cleared_Amount_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw),
+        );
+        expect(held_Amount_After).to.be.equal(held_Amount_Before * BigInt(adjustFactorRaw));
+        expect(held_Amount_After_Partition_1).to.be.equal(held_Amount_Before_Partition_1 * BigInt(adjustFactorRaw));
+        expect(balance_After_Cancel_A + cleared_Amount_After).to.be.equal(balance_Before_A * BigInt(adjustFactorRaw));
         expect(balance_After_Cancel_Partition_1_A + cleared_Amount_After_Partition_1).to.be.equal(
-          balance_Before_Partition_1_A * BigInt(adjustFactor),
+          balance_Before_Partition_1_A * BigInt(adjustFactorRaw),
         );
       });
 
@@ -3102,18 +3114,18 @@ describe("Clearing Tests", () => {
         );
 
         expect(balance_After_Clearing).to.be.equal(
-          (balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor) - BigInt(9 * _AMOUNT),
+          (balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw) - BigInt(9 * _AMOUNT),
         );
         expect(balance_After_Clearing_Partition_1).to.be.equal(
-          (balance_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor) - BigInt(9 * _AMOUNT),
+          (balance_Before_Partition_1 - BigInt(9 * _AMOUNT)) * BigInt(adjustFactorRaw) - BigInt(9 * _AMOUNT),
         );
-        expect(cleared_Amount_After).to.be.equal(cleared_Amount_Before * BigInt(adjustFactor) + BigInt(9 * _AMOUNT));
+        expect(cleared_Amount_After).to.be.equal(cleared_Amount_Before * BigInt(adjustFactorRaw) + BigInt(9 * _AMOUNT));
         expect(cleared_Amount_After_Partition_1).to.be.equal(
-          cleared_Amount_Before_Partition_1 * BigInt(adjustFactor) + BigInt(9 * _AMOUNT),
+          cleared_Amount_Before_Partition_1 * BigInt(adjustFactorRaw) + BigInt(9 * _AMOUNT),
         );
-        expect(balance_After_Clearing + cleared_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactor));
+        expect(balance_After_Clearing + cleared_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactorRaw));
         expect(balance_After_Clearing_Partition_1 + cleared_Amount_After_Partition_1).to.be.equal(
-          balance_Before_Partition_1 * BigInt(adjustFactor),
+          balance_Before_Partition_1 * BigInt(adjustFactorRaw),
         );
       });
     });

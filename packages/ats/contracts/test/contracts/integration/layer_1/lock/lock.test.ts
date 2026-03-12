@@ -37,7 +37,9 @@ const ONE_SECOND = 1;
 const EMPTY_VC_ID = EMPTY_STRING;
 const balanceOf_A_Original = [10 * _AMOUNT, 100 * _AMOUNT];
 const balanceOf_B_Original = [20 * _AMOUNT, 200 * _AMOUNT];
-const adjustFactor = 253;
+const SCALE = 10n ** 18n;
+const adjustFactorRaw = 253;
+const adjustFactor = BigInt(adjustFactorRaw) * SCALE;
 const adjustDecimals = 2;
 
 describe("Lock Tests", () => {
@@ -428,16 +430,18 @@ describe("Lock Tests", () => {
         const balance_After = await erc1410Facet.balanceOf(signer_A.address);
         const balance_After_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
-        expect(lock_TotalAmount_After).to.be.equal(lock_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
+        expect(lock_TotalAmount_After).to.be.equal(lock_TotalAmount_Before * BigInt(adjustFactorRaw * adjustFactorRaw));
         expect(lock_TotalAmount_After_Partition_1).to.be.equal(
-          lock_TotalAmount_Before_Partition_1 * BigInt(adjustFactor * adjustFactor),
+          lock_TotalAmount_Before_Partition_1 * BigInt(adjustFactorRaw * adjustFactorRaw),
         );
-        expect(balance_After).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor));
-        expect(lock_TotalAmount_After).to.be.equal(lock_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
+        expect(balance_After).to.be.equal(
+          (balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw * adjustFactorRaw),
+        );
+        expect(lock_TotalAmount_After).to.be.equal(lock_TotalAmount_Before * BigInt(adjustFactorRaw * adjustFactorRaw));
         expect(balance_After_Partition_1).to.be.equal(
-          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor * adjustFactor),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw * adjustFactorRaw),
         );
-        expect(lock_After.amount_).to.be.equal(lock_Before.amount_ * BigInt(adjustFactor * adjustFactor));
+        expect(lock_After.amount_).to.be.equal(lock_Before.amount_ * BigInt(adjustFactorRaw * adjustFactorRaw));
       });
 
       it("GIVEN a lock WHEN adjustBalances THEN release succeeds", async () => {
@@ -481,17 +485,17 @@ describe("Lock Tests", () => {
           signer_A.address,
         );
 
-        expect(balance_After_Release).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor));
+        expect(balance_After_Release).to.be.equal((balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw));
         expect(balance_After_Release_Partition_1).to.be.equal(
-          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw),
         );
-        expect(locked_Amount_After).to.be.equal((locked_Amount_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor));
+        expect(locked_Amount_After).to.be.equal((locked_Amount_Before - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw));
         expect(locked_Amount_After_Partition_1).to.be.equal(
-          (locked_Amount_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor),
+          (locked_Amount_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw),
         );
-        expect(balance_After_Release + locked_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactor));
+        expect(balance_After_Release + locked_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactorRaw));
         expect(balance_After_Release_Partition_1 + locked_Amount_After_Partition_1).to.be.equal(
-          balance_Before_Partition_1 * BigInt(adjustFactor),
+          balance_Before_Partition_1 * BigInt(adjustFactorRaw),
         );
       });
 
@@ -533,18 +537,18 @@ describe("Lock Tests", () => {
         );
 
         expect(balance_After_Lock).to.be.equal(
-          (balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactor) - BigInt(_AMOUNT),
+          (balance_Before - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw) - BigInt(_AMOUNT),
         );
         expect(balance_After_Lock_Partition_1).to.be.equal(
-          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactor) - BigInt(_AMOUNT),
+          (balance_Before_Partition_1 - BigInt(_AMOUNT)) * BigInt(adjustFactorRaw) - BigInt(_AMOUNT),
         );
-        expect(locked_Amount_After).to.be.equal(locked_Amount_Before * BigInt(adjustFactor) + BigInt(_AMOUNT));
+        expect(locked_Amount_After).to.be.equal(locked_Amount_Before * BigInt(adjustFactorRaw) + BigInt(_AMOUNT));
         expect(locked_Amount_After_Partition_1).to.be.equal(
-          locked_Amount_Before_Partition_1 * BigInt(adjustFactor) + BigInt(_AMOUNT),
+          locked_Amount_Before_Partition_1 * BigInt(adjustFactorRaw) + BigInt(_AMOUNT),
         );
-        expect(balance_After_Lock + locked_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactor));
+        expect(balance_After_Lock + locked_Amount_After).to.be.equal(balance_Before * BigInt(adjustFactorRaw));
         expect(balance_After_Lock_Partition_1 + locked_Amount_After_Partition_1).to.be.equal(
-          balance_Before_Partition_1 * BigInt(adjustFactor),
+          balance_Before_Partition_1 * BigInt(adjustFactorRaw),
         );
       });
     });

@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { SCALE } from "../../constants/values.sol";
 import { IERC20 } from "../../../layer_1/interfaces/ERC1400/IERC20.sol";
 import { IERC20StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 import { ERC1410BasicStorageWrapperRead } from "../ERC1410/ERC1410BasicStorageWrapperRead.sol";
@@ -38,14 +39,14 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
 
     function _adjustTotalSupply(uint256 factor) internal override {
         _migrateTotalSupplyIfNeeded();
-        _erc20Storage().totalSupply *= factor;
+        _erc20Storage().totalSupply = (_erc20Storage().totalSupply * factor) / SCALE;
     }
 
     function _adjustTotalBalanceFor(uint256 abaf, address account) internal override {
         _migrateBalanceIfNeeded(account);
         uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
         uint256 oldBalance = _erc20Storage().balances[account];
-        uint256 newBalance = oldBalance * factor;
+        uint256 newBalance = (oldBalance * factor) / SCALE;
         if (newBalance != oldBalance) {
             _erc20Storage().balances[account] = newBalance;
             unchecked {
@@ -122,7 +123,7 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         uint256 _timestamp
     ) internal view override returns (uint256) {
         uint256 factor = _calculateFactor(_getAbafAdjustedAt(_timestamp), _getAllowanceLabaf(_owner, _spender));
-        return _allowance(_owner, _spender) * factor;
+        return (_allowance(_owner, _spender) * factor) / SCALE;
     }
 
     function _getERC20MetadataAdjustedAt(

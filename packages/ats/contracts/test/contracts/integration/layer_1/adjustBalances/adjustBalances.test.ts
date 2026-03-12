@@ -21,10 +21,11 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, dateToUnixTimestamp, EQUITY_CONFIG_ID } from "@scripts";
 import { deployEquityTokenFixture, MAX_UINT256, executeRbac } from "@test";
 
+const SCALE = 10n ** 18n;
 const amount = 1;
 const balanceOf_B_Original = [20 * amount, 200 * amount];
 const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
-const adjustFactor = 253;
+const adjustFactor = 253n * SCALE;
 const adjustDecimals = 2;
 const EMPTY_VC_ID = "";
 
@@ -172,7 +173,7 @@ describe("Adjust Balances Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1 + 1);
 
     // balance adjustment
-    await adjustBalancesFacet.connect(signer_A).adjustBalances(1, 0);
+    await adjustBalancesFacet.connect(signer_A).adjustBalances(SCALE, 0);
 
     const tasks_count_After = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
 
@@ -292,7 +293,7 @@ describe("Adjust Balances Tests", () => {
       expect(await migrationFacet.getNewBalance(signer_B.address)).to.equal(0n);
 
       // Call adjustBalances - triggers _adjustTotalSupply which calls _migrateTotalSupplyIfNeeded
-      await adjustBalancesFacet.connect(signer_A).adjustBalances(1, 0);
+      await adjustBalancesFacet.connect(signer_A).adjustBalances(SCALE, 0);
 
       // Verify totalSupply has been migrated from legacy to new storage
       expect(await migrationFacet.getLegacyTotalSupply()).to.equal(0n);

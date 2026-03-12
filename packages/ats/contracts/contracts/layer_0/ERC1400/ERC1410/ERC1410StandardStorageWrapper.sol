@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _DEFAULT_PARTITION, SCALE } from "../../constants/values.sol";
 import { IERC3643Management } from "../../../layer_1/interfaces/ERC3643/IERC3643Management.sol";
 import { ICompliance } from "../../../layer_1/interfaces/ERC3643/ICompliance.sol";
 import { IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
@@ -166,7 +166,7 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
 
     function _totalSupplyAdjustedAt(uint256 _timestamp) internal view override returns (uint256) {
         (uint256 pendingABAF, ) = _getPendingScheduledBalanceAdjustmentsAt(_timestamp);
-        return _totalSupply() * pendingABAF;
+        return (_totalSupply() * pendingABAF) / SCALE;
     }
 
     function _totalSupplyByPartitionAdjustedAt(
@@ -174,12 +174,12 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
         uint256 _timestamp
     ) internal view override returns (uint256) {
         uint256 factor = _calculateFactor(_getAbafAdjustedAt(_timestamp), _getLabafByPartition(_partition));
-        return _totalSupplyByPartition(_partition) * factor;
+        return (_totalSupplyByPartition(_partition) * factor) / SCALE;
     }
 
     function _balanceOfAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view override returns (uint256) {
         uint256 factor = _calculateFactor(_getAbafAdjustedAt(_timestamp), _getLabafByUser(_tokenHolder));
-        return _balanceOf(_tokenHolder) * factor;
+        return (_balanceOf(_tokenHolder) * factor) / SCALE;
     }
 
     function _balanceOfByPartitionAdjustedAt(
@@ -191,7 +191,7 @@ abstract contract ERC1410StandardStorageWrapper is ERC1410OperatorStorageWrapper
             _getAbafAdjustedAt(_timestamp),
             _getLabafByUserAndPartition(_partition, _tokenHolder)
         );
-        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
+        return (_balanceOfByPartition(_partition, _tokenHolder) * factor) / SCALE;
     }
 
     function _getTotalBalanceForAdjustedAt(

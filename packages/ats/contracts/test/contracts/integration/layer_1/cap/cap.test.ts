@@ -27,10 +27,11 @@ const issueAmount = 2;
 const _PARTITION_ID_2 = "0x0000000000000000000000000000000000000000000000000000000000000002";
 const TIME = 6000;
 const EMPTY_VC_ID = EMPTY_STRING;
+const SCALE = 10n ** 18n;
 
 interface Adjustment {
   executionDate: string;
-  factor: number;
+  factor: number | bigint;
   decimals: number;
 }
 
@@ -248,7 +249,7 @@ describe("Cap Tests", () => {
     const createAdjustmentData = (
       currentTime: number,
       intervals: number[],
-      factors: number[],
+      factors: (number | bigint)[],
       decimals: number[],
     ): Adjustment[] => {
       return intervals.map((interval, index) => ({
@@ -273,8 +274,8 @@ describe("Cap Tests", () => {
       const currentMaxSupplyByPartition_1 = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1);
 
       const adjustmentFactor = expectedFactors.reduce((acc, val) => acc * val, 1);
-      expect(currentMaxSupply).to.equal(maxSupply * adjustmentFactor);
-      expect(currentMaxSupplyByPartition_1).to.equal(maxSupplyByPartition * adjustmentFactor);
+      expect(currentMaxSupply).to.equal(BigInt(maxSupply) * BigInt(adjustmentFactor));
+      expect(currentMaxSupplyByPartition_1).to.equal(BigInt(maxSupplyByPartition) * BigInt(adjustmentFactor));
     };
 
     async function setPreBalanceAdjustment() {
@@ -299,7 +300,7 @@ describe("Cap Tests", () => {
       const adjustments = createAdjustmentData(
         dateToUnixTimestamp("2030-01-01T00:00:00Z"),
         [TIME / 1000, (2 * TIME) / 1000, (3 * TIME) / 1000],
-        [5, 6, 7],
+        [5n * SCALE, 6n * SCALE, 7n * SCALE],
         [2, 0, 1],
       );
       const currentMaxSupplyByPartition_2 = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_2);
@@ -309,7 +310,7 @@ describe("Cap Tests", () => {
 
     it("GIVEN a token WHEN setMaxSupply THEN balance adjustments are included", async () => {
       const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`);
-      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [5], [0]);
+      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [5n * SCALE], [0]);
 
       await setupScheduledBalanceAdjustments(adjustments);
 
@@ -322,7 +323,7 @@ describe("Cap Tests", () => {
     it("GIVEN a token WHEN max supply and partition max supply are set THEN balance adjustments occur and resetting partition max supply fails with NewMaxSupplyForPartitionTooLow", async () => {
       // scheduled balance adjustments
       const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`);
-      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [5], [0]);
+      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [5n * SCALE], [0]);
 
       await setupScheduledBalanceAdjustments(adjustments);
       //-------------------------
@@ -344,7 +345,7 @@ describe("Cap Tests", () => {
 
       // First adjustment
       const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`);
-      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [Number(adjustmentFactor + 1n)], [0]);
+      const adjustments = createAdjustmentData(currentTime, [TIME / 1000], [(adjustmentFactor + 1n) * SCALE], [0]);
       await setupScheduledBalanceAdjustments(adjustments);
 
       await timeTravelFacet.changeSystemTimestamp(adjustments[0].executionDate + 1);
@@ -354,7 +355,7 @@ describe("Cap Tests", () => {
 
       // Second adjustment
       const currentTime_2 = parseInt(adjustments[0].executionDate + 2);
-      const adjustments_2 = createAdjustmentData(currentTime_2, [TIME / 1000], [5], [1]);
+      const adjustments_2 = createAdjustmentData(currentTime_2, [TIME / 1000], [5n * SCALE], [1]);
       await setupScheduledBalanceAdjustments(adjustments_2);
 
       await timeTravelFacet.changeSystemTimestamp(adjustments_2[0].executionDate + 1);

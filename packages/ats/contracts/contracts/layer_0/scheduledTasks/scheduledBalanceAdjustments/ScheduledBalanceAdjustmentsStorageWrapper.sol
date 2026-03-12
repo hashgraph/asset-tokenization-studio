@@ -11,6 +11,7 @@ import {
     ScheduledTask,
     ScheduledTasksDataStorage
 } from "../../../layer_2/interfaces/scheduledTasks/scheduledTasksCommon/IScheduledTasksCommon.sol";
+import { SCALE } from "../../constants/values.sol";
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponListingStorageWrapper {
     function _addScheduledBalanceAdjustment(uint256 _newScheduledTimestamp, bytes32 _actionId) internal override {
@@ -61,7 +62,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
         uint256 _timestamp
     ) internal view override returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
         // * Initialization
-        pendingABAF_ = 1;
+        pendingABAF_ = SCALE;
         pendingDecimals_ = 0;
 
         ScheduledTasksDataStorage storage scheduledBalanceAdjustments = _scheduledBalanceAdjustmentStorage();
@@ -85,7 +86,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
                     balanceAdjustmentData,
                     (IEquity.ScheduledBalanceAdjustment)
                 );
-                pendingABAF_ *= balanceAdjustment.factor;
+                pendingABAF_ = (pendingABAF_ * balanceAdjustment.factor) / SCALE;
                 pendingDecimals_ += balanceAdjustment.decimals;
             } else {
                 break;

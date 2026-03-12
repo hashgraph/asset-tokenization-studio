@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _ADJUST_BALANCES_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { SCALE } from "../constants/values.sol";
 import {
     ScheduledCrossOrderedTasksStorageWrapper
 } from "../../layer_0/scheduledTasks/scheduledCrossOrderedTasks/ScheduledCrossOrderedTasksStorageWrapper.sol";
@@ -49,7 +50,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _updateAbaf(uint256 factor) internal override {
-        _adjustBalancesStorage().abaf = _getAbaf() * factor;
+        _adjustBalancesStorage().abaf = (_getAbaf() * factor) / SCALE;
     }
 
     function _updateLabafByPartition(bytes32 partition) internal override {
@@ -214,7 +215,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     function _getAbafAdjustedAt(uint256 _timestamp) internal view override returns (uint256) {
         uint256 abaf = _getAbaf();
         (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(_timestamp);
-        return abaf * pendingAbaf;
+        return (abaf * pendingAbaf) / SCALE;
     }
 
     function _getLabafByUser(address _account) internal view override returns (uint256) {
@@ -309,11 +310,11 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _calculateFactor(uint256 _abaf, uint256 _labaf) internal pure override returns (uint256 factor_) {
-        factor_ = _abaf / _labaf;
+        factor_ = (_abaf * SCALE) / _labaf;
     }
 
     function _zeroToOne(uint256 _input) internal pure override returns (uint256) {
-        return _input == 0 ? 1 : _input;
+        return _input == 0 ? SCALE : _input;
     }
 
     function _adjustBalancesStorage() internal pure returns (AdjustBalancesStorage storage adjustBalancesStorage_) {

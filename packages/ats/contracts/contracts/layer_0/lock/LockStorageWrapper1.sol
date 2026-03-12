@@ -5,6 +5,7 @@ import { LibCommon } from "../common/libraries/LibCommon.sol";
 import { _LOCK_STORAGE_POSITION } from "../constants/storagePositions.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { CapStorageWrapper1 } from "../cap/CapStorageWrapper1.sol";
+import { SCALE } from "../constants/values.sol";
 import { ILock } from "../../layer_1/interfaces/lock/ILock.sol";
 
 abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
@@ -84,7 +85,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         );
 
         (amount_, expirationTimestamp_) = _getLockForByPartition(_partition, _tokenHolder, _lockId);
-        amount_ *= factor;
+        amount_ = (amount_ * factor) / SCALE;
     }
 
     function _getLockedAmountFor(address _tokenHolder) internal view override returns (uint256 amount_) {
@@ -97,7 +98,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         uint256 timestamp
     ) internal view override returns (uint256 amount_) {
         uint256 factor = _calculateFactorForLockedAmountByTokenHolderAdjustedAt(tokenHolder, timestamp);
-        return _getLockedAmountFor(tokenHolder) * factor;
+        return (_getLockedAmountFor(tokenHolder) * factor) / SCALE;
     }
 
     function _getTotalBalanceForByPartitionAdjustedAt(
@@ -128,7 +129,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
             _getAbafAdjustedAt(_timestamp),
             _getTotalLockLabafByPartition(_partition, _tokenHolder)
         );
-        return _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
+        return (_getLockedAmountForByPartition(_partition, _tokenHolder) * factor) / SCALE;
     }
 
     function _getLock(

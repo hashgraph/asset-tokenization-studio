@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // solhint-disable max-line-length
 uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+uint256 constant SCALE = 1e18;
 address constant ZERO_ADDRESS = address(0);
 bytes32 constant EMPTY_BYTES32 = bytes32(0);
 bytes constant EMPTY_BYTES = bytes("");

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION } from "../../../layer_0/constants/values.sol";
+import { _DEFAULT_PARTITION, SCALE } from "../../../layer_0/constants/values.sol";
 import { IERC20StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol";
 import { BasicTransferInfo, IssueData } from "../../../layer_1/interfaces/ERC1400/IERC1410.sol";
 import { ERC1410StandardStorageWrapper } from "../ERC1410/ERC1410StandardStorageWrapper.sol";
@@ -21,7 +21,7 @@ abstract contract ERC20StorageWrapper2 is IERC20StorageWrapper, ERC1410StandardS
 
         uint256 factor = _calculateFactor(abaf, labaf);
 
-        _erc20Storage().allowed[_owner][_spender] *= factor;
+        _erc20Storage().allowed[_owner][_spender] = (_erc20Storage().allowed[_owner][_spender] * factor) / SCALE;
         _updateAllowanceLabaf(_owner, _spender, abaf);
     }
 

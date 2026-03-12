@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { _DEFAULT_PARTITION, SCALE } from "../../constants/values.sol";
 import { _ERC1410_BASIC_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IERC1410StorageWrapper } from "../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol";
 import { LockStorageWrapper1 } from "../../lock/LockStorageWrapper1.sol";
@@ -97,7 +97,9 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
     }
 
     function _adjustTotalSupplyByPartition(bytes32 _partition, uint256 _factor) internal override {
-        _erc1410BasicStorage().totalSupplyByPartition[_partition] *= _factor;
+        _erc1410BasicStorage().totalSupplyByPartition[_partition] =
+            (_erc1410BasicStorage().totalSupplyByPartition[_partition] * _factor) /
+            SCALE;
     }
 
     function _adjustTotalBalanceAndPartitionBalanceFor(bytes32 partition, address account) internal override {
@@ -243,7 +245,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         if (partitionsIndex == 0) return;
         uint256 factor = _calculateFactorByTokenHolderAndPartitionIndex(abaf, account, partitionsIndex);
         uint256 oldAmount = basicStorage.partitions[account][partitionsIndex - 1].amount;
-        uint256 newAmount = oldAmount * factor;
+        uint256 newAmount = (oldAmount * factor) / SCALE;
         if (newAmount != oldAmount) {
             basicStorage.partitions[account][partitionsIndex - 1].amount = newAmount;
             unchecked {
