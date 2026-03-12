@@ -136,7 +136,7 @@ describe("Security operations", () => {
 
           await expect(
             lifeCycleCashFlow.initialize(await asset_A.getAddress(), await stablecoin.getAddress(), rbacList),
-          ).to.be.revertedWith("Initializable: contract is already initialized");
+          ).to.be.revertedWithCustomError(lifeCycleCashFlow, "InvalidInitialization");
         });
       });
 
