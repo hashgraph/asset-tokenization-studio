@@ -79,8 +79,7 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
     }
 
     function _isCorporateActionDisabled(bytes32 _actionId) internal view override returns (bool) {
-        (, , , bool isDisabled) = _getCorporateAction(_actionId);
-        return isDisabled;
+        return _corporateActionsStorage().actionsData[_actionId].isDisabled;
     }
 
     function _getCorporateAction(
