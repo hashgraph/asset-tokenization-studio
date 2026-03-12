@@ -7,8 +7,8 @@ import { ERC20PermitStorageWrapper } from "../ERC1400/ERC20Permit/ERC20PermitSto
 abstract contract NominalValueStorageWrapper is ERC20PermitStorageWrapper {
     struct NominalValueDataStorage {
         uint256 nominalValue;
-        bool initialized;
         uint8 nominalValueDecimals;
+        bool initialized;
     }
 
     /// @dev Initializes the nominal value in the new dedicated storage.
