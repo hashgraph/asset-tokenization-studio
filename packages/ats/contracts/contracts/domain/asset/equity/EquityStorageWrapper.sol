@@ -62,10 +62,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     ) internal override returns (bool success_, bytes32 corporateActionId_) {
         IEquity.RegisteredDividend memory registeredDividend;
         (registeredDividend, corporateActionId_, ) = _getDividend(_dividendId);
-        if (
-            registeredDividend.dividend.executionDate != 0 &&
-            registeredDividend.dividend.executionDate <= _blockTimestamp()
-        ) {
+        if (registeredDividend.dividend.executionDate <= _blockTimestamp()) {
             revert IEquityStorageWrapper.DividendAlreadyExecuted(corporateActionId_, _dividendId);
         }
         _cancelCorporateAction(corporateActionId_);
@@ -97,7 +94,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     function _cancelVoting(uint256 _voteId) internal override returns (bool success_, bytes32 corporateActionId_) {
         IEquity.RegisteredVoting memory registeredVoting;
         (registeredVoting, corporateActionId_, ) = _getVoting(_voteId);
-        if (registeredVoting.voting.recordDate != 0 && registeredVoting.voting.recordDate <= _blockTimestamp()) {
+        if (registeredVoting.voting.recordDate <= _blockTimestamp()) {
             revert IEquityStorageWrapper.VotingAlreadyRecorded(corporateActionId_, _voteId);
         }
         _cancelCorporateAction(corporateActionId_);
@@ -134,7 +131,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     ) internal override returns (bool success_, bytes32 corporateActionId_) {
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment;
         (balanceAdjustment, corporateActionId_, ) = _getScheduledBalanceAdjustment(_balanceAdjustmentId);
-        if (balanceAdjustment.executionDate != 0 && balanceAdjustment.executionDate <= _blockTimestamp()) {
+        if (balanceAdjustment.executionDate <= _blockTimestamp()) {
             revert IEquityStorageWrapper.BalanceAdjustmentAlreadyExecuted(corporateActionId_, _balanceAdjustmentId);
         }
         _cancelCorporateAction(corporateActionId_);

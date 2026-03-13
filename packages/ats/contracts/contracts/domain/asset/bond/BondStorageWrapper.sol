@@ -69,7 +69,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     function _cancelCoupon(uint256 _couponId) internal override returns (bool success_, bytes32 corporateActionId_) {
         IBondRead.RegisteredCoupon memory registeredCoupon;
         (registeredCoupon, corporateActionId_, ) = _getCoupon(_couponId);
-        if (registeredCoupon.coupon.executionDate != 0 && registeredCoupon.coupon.executionDate <= _blockTimestamp()) {
+        if (registeredCoupon.coupon.executionDate <= _blockTimestamp()) {
             revert IBondStorageWrapper.CouponAlreadyExecuted(corporateActionId_, _couponId);
         }
         _cancelCorporateAction(corporateActionId_);
