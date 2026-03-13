@@ -5,9 +5,9 @@ import { CommandBus } from "@core/command/CommandBus";
 import {
   CreateEquityRequest,
   GetEquityDetailsRequest,
-  SetDividendsRequest,
-  GetDividendsForRequest,
-  GetDividendsRequest,
+  SetDividendRequest,
+  GetDividendForRequest,
+  GetDividendRequest,
   GetAllDividendsRequest,
   SetVotingRightsRequest,
   CancelVotingRequest,
@@ -49,8 +49,8 @@ import {
   GetAllScheduledBalanceAdjustmentsRequestFixture,
   GetAllVotingRightsRequestFixture,
   GetDividendHoldersRequestFixture,
-  GetDividendsForRequestFixture,
-  GetDividendsRequestFixture,
+  GetDividendForRequestFixture,
+  GetDividendRequestFixture,
   GetEquityDetailsRequestFixture,
   GetScheduledBalanceAdjustmentCountRequestFixture,
   GetScheduledBalanceAdjustmentRequestFixture,
@@ -60,14 +60,13 @@ import {
   GetVotingRightsForRequestFixture,
   GetVotingRightsRequestFixture,
   ScheduledBalanceAdjustmentFixture,
-  SetDividendsRequestFixture,
+  SetDividendRequestFixture,
   CancelDividendRequestFixture,
   SetScheduledBalanceAdjustmentRequestFixture,
   CancelScheduledBalanceAdjustmentRequestFixture,
   SetVotingRightsRequestFixture,
   VotingRightsFixture,
   CancelVotingRequestFixture,
-  CancelVotingCommandFixture,
 } from "@test/fixtures/equity/EquityFixture";
 import { CreateEquityCommand } from "@command/equity/create/CreateEquityCommand";
 import { CastDividendType } from "@domain/context/equity/DividendType";
@@ -77,10 +76,10 @@ import { CancelVotingCommand } from "@command/equity/votingRights/cancel/CancelV
 import { GetVotingForQuery } from "@query/equity/votingRights/getVotingFor/GetVotingForQuery";
 import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQuery";
 import { GetVotingCountQuery } from "@query/equity/votingRights/getVotingCount/GetVotingCountQuery";
-import { SetDividendsCommand } from "@command/equity/dividends/set/SetDividendsCommand";
+import { SetDividendCommand } from "@command/equity/dividends/set/SetDividendCommand";
 import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
-import { GetDividendsForQuery } from "@query/equity/dividends/getDividendsFor/GetDividendsForQuery";
-import { GetDividendsQuery } from "@query/equity/dividends/getDividends/GetDividendsQuery";
+import { GetDividendForQuery } from "@query/equity/dividends/getDividendFor/GetDividendForQuery";
+import { GetDividendQuery } from "@query/equity/dividends/getDividend/GetDividendQuery";
 import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCount/GetDividendsCountQuery";
 import { SetScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand";
 import { GetScheduledBalanceAdjustmentQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery";
@@ -99,9 +98,9 @@ describe("Equity", () => {
 
   let createEquityRequest: CreateEquityRequest;
   let getEquityDetailsRequest: GetEquityDetailsRequest;
-  let setDividendsRequest: SetDividendsRequest;
-  let getDividendsForRequest: GetDividendsForRequest;
-  let getDividendsRequest: GetDividendsRequest;
+  let setDividendRequest: SetDividendRequest;
+  let getDividendForRequest: GetDividendForRequest;
+  let getDividendRequest: GetDividendRequest;
   let getAllDividendsRequest: GetAllDividendsRequest;
   let setVotingRightsRequest: SetVotingRightsRequest;
   let cancelVotingRequest: CancelVotingRequest;
@@ -757,8 +756,8 @@ describe("Equity", () => {
     });
   });
 
-  describe("setDividends", () => {
-    setDividendsRequest = new SetDividendsRequest(SetDividendsRequestFixture.create());
+  describe("setDividend", () => {
+    setDividendRequest = new SetDividendRequest(SetDividendRequestFixture.create());
     it("should set dividends successfully", async () => {
       const expectedResponse = {
         payload: 1,
@@ -767,18 +766,18 @@ describe("Equity", () => {
 
       commandBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.setDividends(setDividendsRequest);
+      const result = await EquityToken.setDividend(setDividendRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("SetDividendsRequest", setDividendsRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith("SetDividendRequest", setDividendRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new SetDividendsCommand(
-          setDividendsRequest.securityId,
-          setDividendsRequest.recordTimestamp,
-          setDividendsRequest.executionTimestamp,
-          setDividendsRequest.amountPerUnitOfSecurity,
+        new SetDividendCommand(
+          setDividendRequest.securityId,
+          setDividendRequest.recordTimestamp,
+          setDividendRequest.executionTimestamp,
+          setDividendRequest.amountPerUnitOfSecurity,
         ),
       );
 
@@ -789,56 +788,56 @@ describe("Equity", () => {
       const error = new Error("Command execution failed");
       commandBusMock.execute.mockRejectedValue(error);
 
-      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow("Command execution failed");
+      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow("Command execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("SetDividendsRequest", setDividendsRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith("SetDividendRequest", setDividendRequest);
 
       expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new SetDividendsCommand(
-          setDividendsRequest.securityId,
-          setDividendsRequest.recordTimestamp,
-          setDividendsRequest.executionTimestamp,
-          setDividendsRequest.amountPerUnitOfSecurity,
+        new SetDividendCommand(
+          setDividendRequest.securityId,
+          setDividendRequest.recordTimestamp,
+          setDividendRequest.executionTimestamp,
+          setDividendRequest.amountPerUnitOfSecurity,
         ),
       );
     });
 
     it("should throw error if securityId is invalid", async () => {
-      setDividendsRequest = new SetDividendsRequest({
-        ...SetDividendsRequestFixture.create(),
+      setDividendRequest = new SetDividendRequest({
+        ...SetDividendRequestFixture.create(),
         securityId: "invalid",
       });
 
-      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow(ValidationError);
     });
 
     it("should throw error if recordTimestamp is invalid", async () => {
-      setDividendsRequest = new SetDividendsRequest({
-        ...SetDividendsRequestFixture.create(),
+      setDividendRequest = new SetDividendRequest({
+        ...SetDividendRequestFixture.create(),
         recordTimestamp: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
       });
 
-      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow(ValidationError);
     });
 
     it("should throw error if executionTimestamp is invalid", async () => {
       const time = Math.ceil(new Date().getTime() / 1000);
-      setDividendsRequest = new SetDividendsRequest({
-        ...SetDividendsRequestFixture.create(),
+      setDividendRequest = new SetDividendRequest({
+        ...SetDividendRequestFixture.create(),
         recordTimestamp: time.toString(),
         executionTimestamp: (time - 100).toString(),
       });
 
-      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow(ValidationError);
     });
 
     it("should throw error if amountPerUnitOfSecurity is invalid", async () => {
-      setDividendsRequest = new SetDividendsRequest({
-        ...SetDividendsRequestFixture.create(),
+      setDividendRequest = new SetDividendRequest({
+        ...SetDividendRequestFixture.create(),
         amountPerUnitOfSecurity: "invalid",
       });
 
-      await expect(EquityToken.setDividends(setDividendsRequest)).rejects.toThrow(ValidationError);
+      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow(ValidationError);
     });
   });
 
@@ -885,8 +884,8 @@ describe("Equity", () => {
     });
   });
 
-  describe("getDividendsFor", () => {
-    getDividendsForRequest = new GetDividendsForRequest(GetDividendsForRequestFixture.create());
+  describe("getDividendFor", () => {
+    getDividendForRequest = new GetDividendForRequest(GetDividendForRequestFixture.create());
     it("should get dividends for successfully", async () => {
       const expectedResponse = {
         tokenBalance: new BigDecimal(BigInt(10)),
@@ -896,17 +895,17 @@ describe("Equity", () => {
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getDividendsFor(getDividendsForRequest);
+      const result = await EquityToken.getDividendFor(getDividendForRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendsForRequest", getDividendsForRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendForRequest", getDividendForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendsForQuery(
-          getDividendsForRequest.targetId,
-          getDividendsForRequest.securityId,
-          getDividendsForRequest.dividendId,
+        new GetDividendForQuery(
+          getDividendForRequest.targetId,
+          getDividendForRequest.securityId,
+          getDividendForRequest.dividendId,
         ),
       );
 
@@ -923,49 +922,49 @@ describe("Equity", () => {
       const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(EquityToken.getDividendsFor(getDividendsForRequest)).rejects.toThrow("Query execution failed");
+      await expect(EquityToken.getDividendFor(getDividendForRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendsForRequest", getDividendsForRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendForRequest", getDividendForRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendsForQuery(
-          getDividendsForRequest.targetId,
-          getDividendsForRequest.securityId,
-          getDividendsForRequest.dividendId,
+        new GetDividendForQuery(
+          getDividendForRequest.targetId,
+          getDividendForRequest.securityId,
+          getDividendForRequest.dividendId,
         ),
       );
     });
 
     it("should throw error if targetId is invalid", async () => {
-      getDividendsForRequest = new GetDividendsForRequest({
-        ...GetDividendsForRequestFixture.create(),
+      getDividendForRequest = new GetDividendForRequest({
+        ...GetDividendForRequestFixture.create(),
         targetId: "invalid",
       });
 
-      await expect(EquityToken.getDividendsFor(getDividendsForRequest)).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendFor(getDividendForRequest)).rejects.toThrow(ValidationError);
     });
 
     it("should throw error if securityId is invalid", async () => {
-      getDividendsForRequest = new GetDividendsForRequest({
-        ...GetDividendsForRequestFixture.create(),
+      getDividendForRequest = new GetDividendForRequest({
+        ...GetDividendForRequestFixture.create(),
         securityId: "invalid",
       });
 
-      await expect(EquityToken.getDividendsFor(getDividendsForRequest)).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendFor(getDividendForRequest)).rejects.toThrow(ValidationError);
     });
 
     it("should throw error if dividendId is invalid", async () => {
-      getDividendsForRequest = new GetDividendsForRequest({
-        ...GetDividendsForRequestFixture.create(),
+      getDividendForRequest = new GetDividendForRequest({
+        ...GetDividendForRequestFixture.create(),
         dividendId: 0,
       });
 
-      await expect(EquityToken.getDividendsFor(getDividendsForRequest)).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividendFor(getDividendForRequest)).rejects.toThrow(ValidationError);
     });
   });
 
-  describe("getDividends", () => {
-    getDividendsRequest = new GetDividendsRequest(GetDividendsRequestFixture.create());
+  describe("getDividend", () => {
+    getDividendRequest = new GetDividendRequest(GetDividendRequestFixture.create());
     it("should get dividends successfully", async () => {
       const expectedResponse = {
         dividend: DividendFixture.create(),
@@ -973,19 +972,19 @@ describe("Equity", () => {
 
       queryBusMock.execute.mockResolvedValue(expectedResponse);
 
-      const result = await EquityToken.getDividends(getDividendsRequest);
+      const result = await EquityToken.getDividend(getDividendRequest);
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendsRequest", getDividendsRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendRequest", getDividendRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendsQuery(getDividendsRequest.securityId, getDividendsRequest.dividendId),
+        new GetDividendQuery(getDividendRequest.securityId, getDividendRequest.dividendId),
       );
 
       expect(result).toEqual(
         expect.objectContaining({
-          dividendId: getDividendsRequest.dividendId,
+          dividendId: getDividendRequest.dividendId,
           amountPerUnitOfSecurity: expectedResponse.dividend.amountPerUnitOfSecurity.toString(),
           recordDate: new Date(expectedResponse.dividend.recordTimeStamp * ONE_THOUSAND),
           executionDate: new Date(expectedResponse.dividend.executionTimeStamp * ONE_THOUSAND),
@@ -998,31 +997,31 @@ describe("Equity", () => {
       const error = new Error("Query execution failed");
       queryBusMock.execute.mockRejectedValue(error);
 
-      await expect(EquityToken.getDividends(getDividendsRequest)).rejects.toThrow("Query execution failed");
+      await expect(EquityToken.getDividend(getDividendRequest)).rejects.toThrow("Query execution failed");
 
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendsRequest", getDividendsRequest);
+      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendRequest", getDividendRequest);
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendsQuery(getDividendsRequest.securityId, getDividendsRequest.dividendId),
+        new GetDividendQuery(getDividendRequest.securityId, getDividendRequest.dividendId),
       );
     });
 
     it("should throw error if securityId is invalid", async () => {
-      getDividendsRequest = new GetDividendsRequest({
-        ...GetDividendsRequestFixture.create(),
+      getDividendRequest = new GetDividendRequest({
+        ...GetDividendRequestFixture.create(),
         securityId: "invalid",
       });
 
-      await expect(EquityToken.getDividends(getDividendsRequest)).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividend(getDividendRequest)).rejects.toThrow(ValidationError);
     });
 
     it("should throw error if dividendId is invalid", async () => {
-      getDividendsRequest = new GetDividendsRequest({
-        ...GetDividendsRequestFixture.create(),
+      getDividendRequest = new GetDividendRequest({
+        ...GetDividendRequestFixture.create(),
         dividendId: -1,
       });
 
-      await expect(EquityToken.getDividends(getDividendsRequest)).rejects.toThrow(ValidationError);
+      await expect(EquityToken.getDividend(getDividendRequest)).rejects.toThrow(ValidationError);
     });
   });
 
@@ -1052,7 +1051,7 @@ describe("Equity", () => {
 
       expect(queryBusMock.execute).toHaveBeenNthCalledWith(
         2,
-        new GetDividendsQuery(getAllDividendsRequest.securityId, 1),
+        new GetDividendQuery(getAllDividendsRequest.securityId, 1),
       );
 
       expect(result).toEqual(

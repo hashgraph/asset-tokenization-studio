@@ -18,8 +18,8 @@ import PauseRequest from "./security/operations/pause/PauseRequest";
 import ControlListRequest from "./security/operations/controlList/ControlListRequest";
 import GetControlListCountRequest from "./security/operations/controlList/GetControlListCountRequest";
 import GetControlListMembersRequest from "./security/operations/controlList/GetControlListMembersRequest";
-import GetDividendsForRequest from "./equity/GetDividendsForRequest";
-import GetDividendsRequest from "./equity/GetDividendsRequest";
+import GetDividendForRequest from "./equity/GetDividendForRequest";
+import GetDividendRequest from "./equity/GetDividendRequest";
 import GetAllDividendsRequest from "./equity/GetAllDividendsRequest";
 import GetVotingRightsForRequest from "./equity/GetVotingRightsForRequest";
 import GetVotingRightsRequest from "./equity/GetVotingRightsRequest";
@@ -34,7 +34,7 @@ import GetRolesForRequest from "./security/roles/GetRolesForRequest";
 import GetRoleMemberCountRequest from "./security/roles/GetRoleMemberCountRequest";
 import GetRoleMembersRequest from "./security/roles/GetRoleMembersRequest";
 import GetSecurityDetailsRequest from "./security/GetSecurityDetailsRequest";
-import SetDividendsRequest from "./equity/SetDividendsRequest";
+import SetDividendRequest from "./equity/SetDividendRequest";
 import CancelDividendRequest from "./equity/CancelDividendRequest";
 import SetCouponRequest from "./bond/SetCouponRequest";
 import SetVotingRightsRequest from "./equity/SetVotingRightsRequest";
@@ -243,8 +243,8 @@ export {
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
-  GetDividendsForRequest,
-  GetDividendsRequest,
+  GetDividendForRequest,
+  GetDividendRequest,
   GetAllDividendsRequest,
   GetVotingRightsForRequest,
   GetVotingRightsRequest,
@@ -260,7 +260,7 @@ export {
   GetRolesForRequest,
   GetRoleMemberCountRequest,
   GetRoleMembersRequest,
-  SetDividendsRequest,
+  SetDividendRequest,
   CancelDividendRequest,
   SetCouponRequest,
   SetVotingRightsRequest,

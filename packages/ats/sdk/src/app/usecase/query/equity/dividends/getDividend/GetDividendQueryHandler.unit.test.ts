@@ -6,14 +6,14 @@ import { ErrorCode } from "@core/error/BaseError";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import ContractService from "@service/contract/ContractService";
-import { DividendFixture, GetDividendsQueryFixture } from "@test/fixtures/equity/EquityFixture";
-import { GetDividendsQueryHandler } from "./GetDividendsQueryHandler";
-import { GetDividendsQuery, GetDividendsQueryResponse } from "./GetDividendsQuery";
-import { GetDividendsQueryError } from "./error/GetDividendsQueryError";
+import { DividendFixture, GetDividendQueryFixture } from "@test/fixtures/equity/EquityFixture";
+import { GetDividendQueryHandler } from "./GetDividendQueryHandler";
+import { GetDividendQuery, GetDividendQueryResponse } from "./GetDividendQuery";
+import { GetDividendQueryError } from "./error/GetDividendQueryError";
 
-describe("GetDividendsQueryHandler", () => {
-  let handler: GetDividendsQueryHandler;
-  let query: GetDividendsQuery;
+describe("GetDividendQueryHandler", () => {
+  let handler: GetDividendQueryHandler;
+  let query: GetDividendQuery;
 
   const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
   const contractServiceMock = createMock<ContractService>();
@@ -24,8 +24,8 @@ describe("GetDividendsQueryHandler", () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new GetDividendsQueryHandler(queryAdapterServiceMock, contractServiceMock);
-    query = GetDividendsQueryFixture.create();
+    handler = new GetDividendQueryHandler(queryAdapterServiceMock, contractServiceMock);
+    query = GetDividendQueryFixture.create();
   });
 
   afterEach(() => {
@@ -33,31 +33,31 @@ describe("GetDividendsQueryHandler", () => {
   });
 
   describe("execute", () => {
-    it("throws GetDividendsQueryError when query fails with uncaught error", async () => {
+    it("throws GetDividendQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
       const resultPromise = handler.execute(query);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(GetDividendsQueryError);
+      await expect(resultPromise).rejects.toBeInstanceOf(GetDividendQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(`An error occurred while querying dividends: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
-    it("should successfully get dividends", async () => {
+    it("should successfully get dividend", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
-      queryAdapterServiceMock.getDividends.mockResolvedValue(dividend);
+      queryAdapterServiceMock.getDividend.mockResolvedValue(dividend);
 
       const result = await handler.execute(query);
 
-      expect(result).toBeInstanceOf(GetDividendsQueryResponse);
+      expect(result).toBeInstanceOf(GetDividendQueryResponse);
       expect(result.dividend).toBe(dividend);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
-      expect(queryAdapterServiceMock.getDividends).toHaveBeenCalledWith(evmAddress, query.dividendId);
+      expect(queryAdapterServiceMock.getDividend).toHaveBeenCalledWith(evmAddress, query.dividendId);
     });
   });
 });

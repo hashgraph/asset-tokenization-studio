@@ -200,7 +200,7 @@ interface ITransactionAdapter {
   pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   takeSnapshot(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
-  setDividends(
+  setDividend(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
@@ -1130,7 +1130,7 @@ export default abstract class TransactionAdapter
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract getAccount(): Account;
-  abstract setDividends(
+  abstract setDividend(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,

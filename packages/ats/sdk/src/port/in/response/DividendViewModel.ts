@@ -2,7 +2,7 @@
 
 import { QueryResponse } from "@core/query/QueryResponse";
 
-export default interface DividendsViewModel extends QueryResponse {
+export default interface DividendViewModel extends QueryResponse {
   dividendId: number;
   amountPerUnitOfSecurity: string;
   amountDecimals: number;
