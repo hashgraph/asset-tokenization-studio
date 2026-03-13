@@ -182,7 +182,9 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   private async deployLifeCycleCashFlow(bytecode: string): Promise<string> {
-    const fileCreateTransaction = new FileCreateTransaction().setKeys([]).setMaxTransactionFee(new Hbar(5));
+    const fileCreateTransaction = new FileCreateTransaction()
+      .setKeys([this.getAccount().publicKey.toHederaKey()])
+      .setMaxTransactionFee(new Hbar(5));
 
     const fileCreateReceipt: TransactionReceipt | undefined =
       await this.signAndSendTransactionForDeployment(fileCreateTransaction);

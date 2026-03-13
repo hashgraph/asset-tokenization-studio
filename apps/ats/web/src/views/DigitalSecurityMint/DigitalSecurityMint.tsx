@@ -7,7 +7,7 @@ import { Text, InputController, InputNumberController, Button } from "io-bricks-
 import { SubmitHandler, useForm } from "react-hook-form";
 import { required, min } from "../../utils/rules";
 import { CancelButton } from "../../components/CancelButton";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { IssueRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useMintSecurity } from "../../hooks/queries/useMintSecurity";
 import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
