@@ -37,7 +37,7 @@ import { validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { Common } from "../domain/Common.sol";
-import { INominalValue } from "../layer_2/interfaces/nominalValue/INominalValue.sol";
+import { INominalValue } from "../facets/layer_2/nominalValue/INominalValue.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate

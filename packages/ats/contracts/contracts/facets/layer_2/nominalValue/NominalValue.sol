@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { INominalValue } from "../interfaces/nominalValue/INominalValue.sol";
-import { _NOMINAL_VALUE_ROLE } from "../../layer_0/constants/roles.sol";
-import { Internals } from "../../layer_0/Internals.sol";
+import { INominalValue } from "./INominalValue.sol";
+import { _NOMINAL_VALUE_ROLE } from "../../../constants/roles.sol";
+import { Internals } from "../../../domain/Internals.sol";
 
 abstract contract NominalValue is INominalValue, Internals {
     // solhint-disable-next-line func-name-mixedcase

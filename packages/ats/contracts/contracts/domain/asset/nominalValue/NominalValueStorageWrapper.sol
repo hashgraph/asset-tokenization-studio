@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
-
-import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../layer_2/constants/storagePositions.sol";
+import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ERC20PermitStorageWrapper } from "../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol";
 
 abstract contract NominalValueStorageWrapper is ERC20PermitStorageWrapper {

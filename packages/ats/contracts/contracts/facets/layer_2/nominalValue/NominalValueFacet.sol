@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { NominalValue } from "./NominalValue.sol";
-import { INominalValue } from "../interfaces/nominalValue/INominalValue.sol";
-import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import { _NOMINAL_VALUE_RESOLVER_KEY } from "../constants/resolverKeys.sol";
-import { Common } from "../../layer_0/common/Common.sol";
+import { INominalValue } from "./INominalValue.sol";
+import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
+import { _NOMINAL_VALUE_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
+import { Common } from "../../../domain/Common.sol";
 
 contract NominalValueFacet is NominalValue, Common, IStaticFunctionSelectors {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
