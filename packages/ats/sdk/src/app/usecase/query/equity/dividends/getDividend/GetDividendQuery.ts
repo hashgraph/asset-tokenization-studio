@@ -4,11 +4,11 @@ import { Query } from "@core/query/Query";
 import { QueryResponse } from "@core/query/QueryResponse";
 import { Dividend } from "@domain/context/equity/Dividend";
 
-export class GetDividendsQueryResponse implements QueryResponse {
+export class GetDividendQueryResponse implements QueryResponse {
   constructor(public readonly dividend: Dividend) {}
 }
 
-export class GetDividendsQuery extends Query<GetDividendsQueryResponse> {
+export class GetDividendQuery extends Query<GetDividendQueryResponse> {
   constructor(
     public readonly securityId: string,
     public readonly dividendId: number,

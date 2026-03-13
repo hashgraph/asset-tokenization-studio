@@ -4,7 +4,7 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import SDKService from "../../services/SDKService";
 import {
   BalanceViewModel,
-  DividendsViewModel,
+  DividendViewModel,
   GetAccountBalanceRequest,
   GetAllDividendsRequest,
   GetSecurityDetailsRequest,
@@ -102,9 +102,9 @@ export const useGetSecurityRolesFor = <TError, TData = string[]>(
   );
 };
 
-export const useGetAllDividends = <TError, TData = DividendsViewModel[]>(
+export const useGetAllDividends = <TError, TData = DividendViewModel[]>(
   request: GetAllDividendsRequest,
-  options?: UseQueryOptions<DividendsViewModel[], TError, TData, [string]>,
+  options?: UseQueryOptions<DividendViewModel[], TError, TData, [string]>,
 ) => {
   return useQuery([GET_SECURITY_DIVIDENS(request.securityId)], () => SDKService.getAllDividends(request), options);
 };

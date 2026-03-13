@@ -5,7 +5,7 @@ import FormatValidation from "../FormatValidation";
 
 import { SecurityDate } from "@domain/context/shared/SecurityDate";
 
-export default class SetDividendsRequest extends ValidatedRequest<SetDividendsRequest> {
+export default class SetDividendRequest extends ValidatedRequest<SetDividendRequest> {
   securityId: string;
   amountPerUnitOfSecurity: string;
   recordTimestamp: string;

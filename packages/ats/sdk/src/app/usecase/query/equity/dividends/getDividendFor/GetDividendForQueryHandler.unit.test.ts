@@ -6,15 +6,15 @@ import { ErrorCode } from "@core/error/BaseError";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import ContractService from "@service/contract/ContractService";
-import { DividendForFixture, GetDividendsForQueryFixture } from "@test/fixtures/equity/EquityFixture";
-import { GetDividendsForQueryHandler } from "./GetDividendsForQueryHandler";
-import { GetDividendsForQuery, GetDividendsForQueryResponse } from "./GetDividendsForQuery";
+import { DividendForFixture, GetDividendForQueryFixture } from "@test/fixtures/equity/EquityFixture";
+import { GetDividendForQueryHandler } from "./GetDividendForQueryHandler";
+import { GetDividendForQuery, GetDividendForQueryResponse } from "./GetDividendForQuery";
 import AccountService from "@service/account/AccountService";
-import { GetDividendsForQueryError } from "./error/GetDividendsForQueryError";
+import { GetDividendForQueryError } from "./error/GetDividendForQueryError";
 
-describe("GetDividendsForQueryHandler", () => {
-  let handler: GetDividendsForQueryHandler;
-  let query: GetDividendsForQuery;
+describe("GetDividendForQueryHandler", () => {
+  let handler: GetDividendForQueryHandler;
+  let query: GetDividendForQuery;
 
   const queryAdapterServiceMock = createMock<RPCQueryAdapter>();
   const accountServiceMock = createMock<AccountService>();
@@ -27,8 +27,8 @@ describe("GetDividendsForQueryHandler", () => {
   const errorMsg = ErrorMsgFixture.create().msg;
 
   beforeEach(() => {
-    handler = new GetDividendsForQueryHandler(queryAdapterServiceMock, accountServiceMock, contractServiceMock);
-    query = GetDividendsForQueryFixture.create();
+    handler = new GetDividendForQueryHandler(queryAdapterServiceMock, accountServiceMock, contractServiceMock);
+    query = GetDividendForQueryFixture.create();
   });
 
   afterEach(() => {
@@ -36,28 +36,28 @@ describe("GetDividendsForQueryHandler", () => {
   });
 
   describe("execute", () => {
-    it("throws GetDividendsForQueryError when query fails with uncaught error", async () => {
+    it("throws GetDividendForQueryError when query fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
       contractServiceMock.getContractEvmAddress.mockRejectedValue(fakeError);
 
       const resultPromise = handler.execute(query);
 
-      await expect(resultPromise).rejects.toBeInstanceOf(GetDividendsForQueryError);
+      await expect(resultPromise).rejects.toBeInstanceOf(GetDividendForQueryError);
 
       await expect(resultPromise).rejects.toMatchObject({
         message: expect.stringContaining(`An error occurred while querying account's dividends: ${errorMsg}`),
         errorCode: ErrorCode.UncaughtQueryError,
       });
     });
-    it("should successfully get dividends for", async () => {
+    it("should successfully get dividend for", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
-      queryAdapterServiceMock.getDividendsFor.mockResolvedValue(dividendFor);
+      queryAdapterServiceMock.getDividendFor.mockResolvedValue(dividendFor);
 
       const result = await handler.execute(query);
 
-      expect(result).toBeInstanceOf(GetDividendsForQueryResponse);
+      expect(result).toBeInstanceOf(GetDividendForQueryResponse);
       expect(result.tokenBalance).toBe(dividendFor.tokenBalance);
       expect(result.decimals).toBe(dividendFor.decimals);
       expect(result.isDisabled).toBe(dividendFor.isDisabled);
@@ -65,7 +65,7 @@ describe("GetDividendsForQueryHandler", () => {
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledWith(query.targetId);
-      expect(queryAdapterServiceMock.getDividendsFor).toHaveBeenCalledWith(
+      expect(queryAdapterServiceMock.getDividendFor).toHaveBeenCalledWith(
         evmAddress,
         targetEvmAddress,
         query.dividendId,

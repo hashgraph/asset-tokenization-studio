@@ -683,8 +683,8 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityOps.updateProceedRecipientData(...args);
   }
 
-  async setDividends(...args: Parameters<SecurityOperations["setDividends"]>): Promise<TransactionResponse> {
-    return this.securityOps.setDividends(...args);
+  async setDividend(...args: Parameters<SecurityOperations["setDividend"]>): Promise<TransactionResponse> {
+    return this.securityOps.setDividend(...args);
   }
 
   async cancelDividend(...args: Parameters<SecurityOperations["cancelDividend"]>): Promise<TransactionResponse> {
@@ -695,7 +695,7 @@ export abstract class BaseHederaTransactionAdapter extends TransactionAdapter im
     return this.securityOps.setVotingRights(...args);
   }
 
-  async cancelVotingRights(...args: Parameters<SecurityOperations["cancelVoting"]>): Promise<TransactionResponse> {
+  async cancelVoting(...args: Parameters<SecurityOperations["cancelVoting"]>): Promise<TransactionResponse> {
     return this.securityOps.cancelVoting(...args);
   }
 

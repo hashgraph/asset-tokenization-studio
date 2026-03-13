@@ -2,15 +2,15 @@
 
 import { ICommandHandler } from "@core/command/CommandHandler";
 import { CommandHandler } from "@core/decorator/CommandHandlerDecorator";
-import { SetDividendsCommand, SetDividendsCommandResponse } from "./SetDividendsCommand";
+import { SetDividendCommand, SetDividendCommandResponse } from "./SetDividendCommand";
 import TransactionService from "@service/transaction/TransactionService";
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import ContractService from "@service/contract/ContractService";
-import { SetDividendsCommandError } from "./error/SetDividendsCommandError";
+import { SetDividendCommandError } from "./error/SetDividendCommandError";
 
-@CommandHandler(SetDividendsCommand)
-export class SetDividendsCommandHandler implements ICommandHandler<SetDividendsCommand> {
+@CommandHandler(SetDividendCommand)
+export class SetDividendCommandHandler implements ICommandHandler<SetDividendCommand> {
   constructor(
     @lazyInject(TransactionService)
     private readonly transactionService: TransactionService,
@@ -18,13 +18,13 @@ export class SetDividendsCommandHandler implements ICommandHandler<SetDividendsC
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(command: SetDividendsCommand): Promise<SetDividendsCommandResponse> {
+  async execute(command: SetDividendCommand): Promise<SetDividendCommandResponse> {
     try {
       const { address, recordDate, executionDate, amount } = command;
       const handler = this.transactionService.getHandler();
 
       const securityEvmAddress = await this.contractService.getContractEvmAddress(address);
-      const res = await handler.setDividends(
+      const res = await handler.setDividend(
         securityEvmAddress,
         BigDecimal.fromString(recordDate),
         BigDecimal.fromString(executionDate),
@@ -35,14 +35,14 @@ export class SetDividendsCommandHandler implements ICommandHandler<SetDividendsC
       const dividendId = await this.transactionService.getTransactionResult({
         res,
         result: res.response?.dividendID,
-        className: SetDividendsCommandHandler.name,
+        className: SetDividendCommandHandler.name,
         position: 0,
         numberOfResultsItems: 1,
       });
 
-      return Promise.resolve(new SetDividendsCommandResponse(parseInt(dividendId, 16), res.id!));
+      return Promise.resolve(new SetDividendCommandResponse(parseInt(dividendId, 16), res.id!));
     } catch (error) {
-      throw new SetDividendsCommandError(error as Error);
+      throw new SetDividendCommandError(error as Error);
     }
   }
 }

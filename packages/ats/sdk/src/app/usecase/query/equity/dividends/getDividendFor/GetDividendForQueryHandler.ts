@@ -3,15 +3,15 @@
 import { IQueryHandler } from "@core/query/QueryHandler";
 import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
-import { GetDividendsForQuery, GetDividendsForQueryResponse } from "./GetDividendsForQuery";
+import { GetDividendForQuery, GetDividendForQueryResponse } from "./GetDividendForQuery";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import AccountService from "@service/account/AccountService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import ContractService from "@service/contract/ContractService";
-import { GetDividendsForQueryError } from "./error/GetDividendsForQueryError";
+import { GetDividendForQueryError } from "./error/GetDividendForQueryError";
 
-@QueryHandler(GetDividendsForQuery)
-export class GetDividendsForQueryHandler implements IQueryHandler<GetDividendsForQuery> {
+@QueryHandler(GetDividendForQuery)
+export class GetDividendForQueryHandler implements IQueryHandler<GetDividendForQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
@@ -21,18 +21,18 @@ export class GetDividendsForQueryHandler implements IQueryHandler<GetDividendsFo
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(query: GetDividendsForQuery): Promise<GetDividendsForQueryResponse> {
+  async execute(query: GetDividendForQuery): Promise<GetDividendForQueryResponse> {
     try {
       const { targetId, securityId, dividendId } = query;
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
       const targetEvmAddress: EvmAddress = await this.accountService.getAccountEvmAddress(targetId);
 
-      const res = await this.queryAdapter.getDividendsFor(securityEvmAddress, targetEvmAddress, dividendId);
+      const res = await this.queryAdapter.getDividendFor(securityEvmAddress, targetEvmAddress, dividendId);
 
-      return new GetDividendsForQueryResponse(res.tokenBalance, res.decimals, res.isDisabled);
+      return new GetDividendForQueryResponse(res.tokenBalance, res.decimals, res.isDisabled);
     } catch (error) {
-      throw new GetDividendsForQueryError(error as Error);
+      throw new GetDividendForQueryError(error as Error);
     }
   }
 }

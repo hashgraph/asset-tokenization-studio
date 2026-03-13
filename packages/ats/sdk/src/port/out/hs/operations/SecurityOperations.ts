@@ -231,7 +231,7 @@ export class SecurityOperations {
     );
   }
 
-  async setDividends(
+  async setDividend(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,

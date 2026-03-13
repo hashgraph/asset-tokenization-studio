@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { SetDividendsCommand } from "@command/equity/dividends/set/SetDividendsCommand";
+import { SetDividendCommand } from "@command/equity/dividends/set/SetDividendCommand";
 import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
-import { GetDividendsQuery } from "@query/equity/dividends/getDividends/GetDividendsQuery";
+import { GetDividendQuery } from "@query/equity/dividends/getDividend/GetDividendQuery";
 import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCount/GetDividendsCountQuery";
-import { GetDividendsForQuery } from "@query/equity/dividends/getDividendsFor/GetDividendsForQuery";
+import { GetDividendForQuery } from "@query/equity/dividends/getDividendFor/GetDividendForQuery";
 import { GetDividendAmountForQuery } from "@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQuery";
 import { SetVotingRightsCommand } from "@command/equity/votingRights/set/SetVotingRightsCommand";
 import { CancelVotingCommand } from "@command/equity/votingRights/cancel/CancelVotingCommand";
@@ -20,12 +20,12 @@ import { QueryBus } from "@core/query/QueryBus";
 import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import GetDividendsForRequest from "../request/equity/GetDividendsForRequest";
-import GetDividendsRequest from "../request/equity/GetDividendsRequest";
+import GetDividendForRequest from "../request/equity/GetDividendForRequest";
+import GetDividendRequest from "../request/equity/GetDividendRequest";
 import GetAllDividendsRequest from "../request/equity/GetAllDividendsRequest";
-import SetDividendsRequest from "../request/equity/SetDividendsRequest";
-import DividendsForViewModel from "../response/DividendsForViewModel";
-import DividendsViewModel from "../response/DividendsViewModel";
+import SetDividendRequest from "../request/equity/SetDividendRequest";
+import DividendForViewModel from "../response/DividendForViewModel";
+import DividendViewModel from "../response/DividendViewModel";
 import SetVotingRightsRequest from "../request/equity/SetVotingRightsRequest";
 import GetVotingRightsForRequest from "../request/equity/GetVotingRightsForRequest";
 import GetVotingRightsRequest from "../request/equity/GetVotingRightsRequest";
@@ -73,12 +73,12 @@ interface IEquityInPort {
     transactionId: string;
   }>;
   getEquityDetails(request: GetEquityDetailsRequest): Promise<EquityDetailsViewModel>;
-  setDividends(request: SetDividendsRequest): Promise<{ payload: number; transactionId: string }>;
+  setDividend(request: SetDividendRequest): Promise<{ payload: number; transactionId: string }>;
   cancelDividend(request: CancelDividendRequest): Promise<{ payload: boolean; transactionId: string }>;
-  getDividendsFor(request: GetDividendsForRequest): Promise<DividendsForViewModel>;
-  getDividendAmountFor(request: GetDividendsForRequest): Promise<DividendAmountForViewModel>;
-  getDividends(request: GetDividendsRequest): Promise<DividendsViewModel>;
-  getAllDividends(request: GetAllDividendsRequest): Promise<DividendsViewModel[]>;
+  getDividendFor(request: GetDividendForRequest): Promise<DividendForViewModel>;
+  getDividendAmountFor(request: GetDividendForRequest): Promise<DividendAmountForViewModel>;
+  getDividend(request: GetDividendRequest): Promise<DividendViewModel>;
+  getAllDividends(request: GetAllDividendsRequest): Promise<DividendViewModel[]>;
   setVotingRights(request: SetVotingRightsRequest): Promise<{ payload: number; transactionId: string }>;
   cancelVoting(request: CancelVotingRequest): Promise<{ payload: boolean; transactionId: string }>;
   getVotingRightsFor(request: GetVotingRightsForRequest): Promise<VotingRightsForViewModel>;
@@ -370,12 +370,12 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
-  async setDividends(request: SetDividendsRequest): Promise<{ payload: number; transactionId: string }> {
+  async setDividend(request: SetDividendRequest): Promise<{ payload: number; transactionId: string }> {
     const { amountPerUnitOfSecurity, recordTimestamp, executionTimestamp, securityId } = request;
-    ValidatedRequest.handleValidation("SetDividendsRequest", request);
+    ValidatedRequest.handleValidation("SetDividendRequest", request);
 
     return await this.commandBus.execute(
-      new SetDividendsCommand(securityId, recordTimestamp, executionTimestamp, amountPerUnitOfSecurity),
+      new SetDividendCommand(securityId, recordTimestamp, executionTimestamp, amountPerUnitOfSecurity),
     );
   }
 
@@ -388,14 +388,14 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
-  async getDividendsFor(request: GetDividendsForRequest): Promise<DividendsForViewModel> {
-    ValidatedRequest.handleValidation("GetDividendsForRequest", request);
+  async getDividendFor(request: GetDividendForRequest): Promise<DividendForViewModel> {
+    ValidatedRequest.handleValidation("GetDividendForRequest", request);
 
     const res = await this.queryBus.execute(
-      new GetDividendsForQuery(request.targetId, request.securityId, request.dividendId),
+      new GetDividendForQuery(request.targetId, request.securityId, request.dividendId),
     );
 
-    const dividendsFor: DividendsForViewModel = {
+    const dividendsFor: DividendForViewModel = {
       tokenBalance: res.tokenBalance.toString(),
       decimals: res.decimals.toString(),
       isDisabled: res.isDisabled,
@@ -405,7 +405,7 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
-  async getDividendAmountFor(request: GetDividendsForRequest): Promise<DividendAmountForViewModel> {
+  async getDividendAmountFor(request: GetDividendForRequest): Promise<DividendAmountForViewModel> {
     ValidatedRequest.handleValidation("GetDividendForRequest", request);
 
     const res = await this.queryBus.execute(
@@ -422,12 +422,12 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
-  async getDividends(request: GetDividendsRequest): Promise<DividendsViewModel> {
-    ValidatedRequest.handleValidation("GetDividendsRequest", request);
+  async getDividend(request: GetDividendRequest): Promise<DividendViewModel> {
+    ValidatedRequest.handleValidation("GetDividendRequest", request);
 
-    const res = await this.queryBus.execute(new GetDividendsQuery(request.securityId, request.dividendId));
+    const res = await this.queryBus.execute(new GetDividendQuery(request.securityId, request.dividendId));
 
-    const dividend: DividendsViewModel = {
+    const dividend: DividendViewModel = {
       dividendId: request.dividendId,
       amountPerUnitOfSecurity: res.dividend.amountPerUnitOfSecurity.toString(),
       amountDecimals: res.dividend.amountDecimals,
@@ -440,19 +440,19 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
-  async getAllDividends(request: GetAllDividendsRequest): Promise<DividendsViewModel[]> {
+  async getAllDividends(request: GetAllDividendsRequest): Promise<DividendViewModel[]> {
     ValidatedRequest.handleValidation("GetAllDividendsRequest", request);
 
     const count = await this.queryBus.execute(new GetDividendsCountQuery(request.securityId));
 
     if (count.payload == 0) return [];
 
-    const dividends: DividendsViewModel[] = [];
+    const dividends: DividendViewModel[] = [];
 
     for (let i = 1; i <= count.payload; i++) {
-      const res = await this.queryBus.execute(new GetDividendsQuery(request.securityId, i));
+      const res = await this.queryBus.execute(new GetDividendQuery(request.securityId, i));
 
-      const dividend: DividendsViewModel = {
+      const dividend: DividendViewModel = {
         dividendId: i,
         amountPerUnitOfSecurity: res.dividend.amountPerUnitOfSecurity.toString(),
         amountDecimals: res.dividend.amountDecimals,

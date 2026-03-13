@@ -246,7 +246,7 @@ Creates a new coupon for the bond.
   - TransactionId:
     Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
-### setDividends
+### setDividend
 
 Creates a new dividend for the equity.
 

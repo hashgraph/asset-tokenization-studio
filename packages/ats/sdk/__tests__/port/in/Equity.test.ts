@@ -10,13 +10,13 @@ import {
   RoleRequest,
   Role,
   Equity,
-  SetDividendsRequest,
-  GetDividendsRequest,
+  SetDividendRequest,
+  GetDividendRequest,
   GetAllDividendsRequest,
   SetVotingRightsRequest,
   GetVotingRightsRequest,
   GetAllVotingRightsRequest,
-  GetDividendsForRequest,
+  GetDividendForRequest,
   GetVotingRightsForRequest,
   CancelVotingRequest,
   SetScheduledBalanceAdjustmentRequest,
@@ -181,8 +181,8 @@ describe("🧪 Equity test", () => {
     const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
     const executionTimestamp = recordTimestamp + 1000;
 
-    await Equity.setDividends(
-      new SetDividendsRequest({
+    await Equity.setDividend(
+      new SetDividendRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         amountPerUnitOfSecurity: amount,
         recordTimestamp: recordTimestamp.toString(),
@@ -190,8 +190,8 @@ describe("🧪 Equity test", () => {
       }),
     );
 
-    const dividend = await Equity.getDividends(
-      new GetDividendsRequest({
+    const dividend = await Equity.getDividend(
+      new GetDividendRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         dividendId: 1,
       }),
@@ -203,8 +203,8 @@ describe("🧪 Equity test", () => {
       }),
     );
 
-    const dividendFor = await Equity.getDividendsFor(
-      new GetDividendsForRequest({
+    const dividendFor = await Equity.getDividendFor(
+      new GetDividendForRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
         dividendId: 1,
