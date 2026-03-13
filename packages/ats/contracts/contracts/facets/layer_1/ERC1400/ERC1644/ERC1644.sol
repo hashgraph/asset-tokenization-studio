@@ -1,14 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1644 } from "../ERC1644/IERC1644.sol";
+import { IERC1644 } from "./IERC1644.sol";
+import { IERC1644StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1644/IERC1644StorageWrapper.sol";
 import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
-import { Internals } from "../../../../domain/Internals.sol";
+import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWrapper.sol";
+import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
-abstract contract ERC1644 is IERC1644, Internals {
+abstract contract ERC1644 is IERC1644 {
+    error AlreadyInitialized();
+
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1644(bool _controllable) external override onlyUninitialized(_isERC1644Initialized()) {
-        _initialize_ERC1644(_controllable);
+    function initialize_ERC1644(bool _controllable) external override {
+        if (ERC1644StorageWrapper.isERC1644Initialized()) revert AlreadyInitialized();
+        ERC1644StorageWrapper.initialize_ERC1644(_controllable);
     }
 
     function controllerTransfer(
@@ -17,14 +25,18 @@ abstract contract ERC1644 is IERC1644, Internals {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused onlyWithoutMultiPartition onlyControllable {
+    ) external override {
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
-        _controllerTransfer(_from, _to, _value, _data, _operatorData);
+        TokenCoreOps.transfer(_from, _to, _value);
+        emit IERC1644StorageWrapper.ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
     }
 
     function controllerRedeem(
@@ -32,21 +44,27 @@ abstract contract ERC1644 is IERC1644, Internals {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused onlyWithoutMultiPartition onlyControllable {
+    ) external override {
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
-        _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
+        TokenCoreOps.burn(_tokenHolder, _value);
+        emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 
-    function finalizeControllable() external override onlyRole(_DEFAULT_ADMIN_ROLE) onlyControllable {
-        _finalizeControllable();
+    function finalizeControllable() external override {
+        AccessControlStorageWrapper.checkRole(_DEFAULT_ADMIN_ROLE, msg.sender);
+        ERC1644StorageWrapper.requireControllable();
+        ERC1644StorageWrapper.finalizeControllable();
     }
 
     function isControllable() external view override returns (bool) {
-        return _isControllable();
+        return ERC1644StorageWrapper.isControllable();
     }
 }

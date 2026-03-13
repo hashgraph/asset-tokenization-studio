@@ -1,30 +1,40 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
-import { Internals } from "../../../domain/Internals.sol";
+import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Batch } from "./IERC3643Batch.sol";
+import { IClearing } from "../clearing/IClearing.sol";
+import { IERC1644StorageWrapper } from "../../../domain/asset/ERC1400/ERC1644/IERC1644StorageWrapper.sol";
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
+import { ERC1644StorageWrapper } from "../../../domain/asset/ERC1644StorageWrapper.sol";
+import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
+import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC3643Batch is IERC3643Batch, Internals {
-    function batchTransfer(
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-        onlyUnpaused
-        onlyClearingDisabled
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyIdentified(_msgSender(), address(0))
-        onlyCompliant(_msgSender(), address(0), false)
-    {
+abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider {
+    function batchTransfer(address[] calldata _toList, uint256[] calldata _amounts) external {
+        ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_toList, _amounts);
+        PauseStorageWrapper.requireNotPaused();
+        if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        _requireUnProtectedPartitionsOrWildCardRole();
+        ERC1594StorageWrapper.requireIdentified(msg.sender, address(0));
+        ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
         for (uint256 i = 0; i < _toList.length; i++) {
-            _checkIdentity(address(0), _toList[i]);
-            _checkCompliance(address(0), _toList[i], false);
+            ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
+            ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
-            _transfer(_msgSender(), _toList[i], _amounts[i]);
+            TokenCoreOps.transfer(msg.sender, _toList[i], _amounts[i]);
         }
     }
 
@@ -32,63 +42,67 @@ abstract contract ERC3643Batch is IERC3643Batch, Internals {
         address[] calldata _fromList,
         address[] calldata _toList,
         uint256[] calldata _amounts
-    )
-        external
-        onlyWithoutMultiPartition
-        onlyControllable
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_fromList, _amounts)
-        onlyValidInputAmountsArrayLength(_toList, _amounts)
-    {
+    ) external {
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        ERC1644StorageWrapper.requireControllable();
+        PauseStorageWrapper.requireNotPaused();
+        ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_fromList, _amounts);
+        ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_toList, _amounts);
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         for (uint256 i = 0; i < _fromList.length; i++) {
-            _controllerTransfer(_fromList[i], _toList[i], _amounts[i], "", "");
+            TokenCoreOps.transfer(_fromList[i], _toList[i], _amounts[i]);
+            emit IERC1644StorageWrapper.ControllerTransfer(msg.sender, _fromList[i], _toList[i], _amounts[i], "", "");
         }
     }
 
-    function batchMint(
-        address[] calldata _toList,
-        uint256[] calldata _amounts
-    ) external onlyValidInputAmountsArrayLength(_toList, _amounts) onlyUnpaused onlyWithoutMultiPartition {
+    function batchMint(address[] calldata _toList, uint256[] calldata _amounts) external {
+        ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_toList, _amounts);
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         for (uint256 i = 0; i < _toList.length; i++) {
-            _checkIdentity(address(0), _toList[i]);
-            _checkCompliance(address(0), _toList[i], false);
-            _checkWithinMaxSupply(_amounts[i]);
+            ERC1594StorageWrapper.checkIdentity(address(0), _toList[i]);
+            ERC1594StorageWrapper.checkCompliance(address(0), _toList[i], false);
+            CapStorageWrapper.requireWithinMaxSupply(_amounts[i], _getBlockTimestamp());
         }
         for (uint256 i = 0; i < _toList.length; i++) {
-            _issue(_toList[i], _amounts[i], "");
+            ERC1594StorageWrapper.issue(_toList[i], _amounts[i], "");
         }
     }
 
-    function batchBurn(
-        address[] calldata _userAddresses,
-        uint256[] calldata _amounts
-    )
-        external
-        onlyUnpaused
-        onlyValidInputAmountsArrayLength(_userAddresses, _amounts)
-        onlyControllable
-        onlyWithoutMultiPartition
-    {
+    function batchBurn(address[] calldata _userAddresses, uint256[] calldata _amounts) external {
+        PauseStorageWrapper.requireNotPaused();
+        ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_userAddresses, _amounts);
+        ERC1644StorageWrapper.requireControllable();
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         for (uint256 i = 0; i < _userAddresses.length; i++) {
-            _controllerRedeem(_userAddresses[i], _amounts[i], "", "");
+            TokenCoreOps.burn(_userAddresses[i], _amounts[i]);
+            emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _userAddresses[i], _amounts[i], "", "");
+        }
+    }
+
+    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
+        if (
+            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
+            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
+        ) {
+            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
         }
     }
 }

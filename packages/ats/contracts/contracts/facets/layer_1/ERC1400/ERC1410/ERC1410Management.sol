@@ -1,18 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
+import { _CONTROLLER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 import { BasicTransferInfo, OperatorTransferData } from "./IERC1410.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";
-import { Internals } from "../../../../domain/Internals.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
+import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWrapper.sol";
+import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
-abstract contract ERC1410Management is IERC1410Management, Internals {
+abstract contract ERC1410Management is IERC1410Management {
+    error AlreadyInitialized();
+
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410(bool _multiPartition) external override onlyUninitialized(_isERC1410Initialized()) {
-        _initialize_ERC1410(_multiPartition);
+    function initialize_ERC1410(bool _multiPartition) external override {
+        if (ERC1410StorageWrapper.isERC1410Initialized()) revert AlreadyInitialized();
+        ERC1410StorageWrapper.initialize_ERC1410(_multiPartition);
     }
 
     function controllerTransferByPartition(
@@ -22,22 +31,25 @@ abstract contract ERC1410Management is IERC1410Management, Internals {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyControllable
-        returns (bytes32)
-    {
+    ) external override returns (bytes32) {
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+        ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         return
-            _transferByPartition(_from, BasicTransferInfo(_to, _value), _partition, _data, _msgSender(), _operatorData);
+            TokenCoreOps.transferByPartition(
+                _from,
+                BasicTransferInfo(_to, _value),
+                _partition,
+                _data,
+                msg.sender,
+                _operatorData
+            );
     }
 
     function controllerRedeemByPartition(
@@ -46,36 +58,33 @@ abstract contract ERC1410Management is IERC1410Management, Internals {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override onlyUnpaused onlyDefaultPartitionWithSinglePartition(_partition) onlyControllable {
+    ) external override {
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+        ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
-        _redeemByPartition(_partition, _tokenHolder, _msgSender(), _value, _data, _operatorData);
+        TokenCoreOps.redeemByPartition(_partition, _tokenHolder, msg.sender, _value, _data, _operatorData);
     }
 
     function operatorTransferByPartition(
         OperatorTransferData calldata _operatorTransferData
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
-        onlyOperator(_operatorTransferData.partition, _operatorTransferData.from)
-        onlyUnProtectedPartitionsOrWildCardRole
-        validateAddress(_operatorTransferData.to)
-        onlyCanTransferFromByPartition(
+    ) external override returns (bytes32) {
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_operatorTransferData.partition);
+        ERC1410StorageWrapper.requireOperator(_operatorTransferData.partition, _operatorTransferData.from);
+        _requireUnProtectedPartitionsOrWildCardRole();
+        ERC1410StorageWrapper.requireValidAddress(_operatorTransferData.to);
+        ERC1594StorageWrapper.requireCanTransferFromByPartition(
             _operatorTransferData.from,
             _operatorTransferData.to,
             _operatorTransferData.partition,
-            _operatorTransferData.value,
-            _operatorTransferData.data,
-            _operatorTransferData.operatorData
-        )
-        returns (bytes32)
-    {
-        return _operatorTransferByPartition(_operatorTransferData);
+            _operatorTransferData.value
+        );
+        return TokenCoreOps.operatorTransferByPartition(_operatorTransferData);
     }
 
     function operatorRedeemByPartition(
@@ -84,17 +93,12 @@ abstract contract ERC1410Management is IERC1410Management, Internals {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyOperator(_partition, _tokenHolder)
-        onlyUnProtectedPartitionsOrWildCardRole
-    {
-        {
-            _checkCanRedeemFromByPartition(_tokenHolder, _partition, _value, _data, _operatorData);
-        }
-        _redeemByPartition(_partition, _tokenHolder, _msgSender(), _value, _data, _operatorData);
+    ) external override {
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+        ERC1410StorageWrapper.requireOperator(_partition, _tokenHolder);
+        _requireUnProtectedPartitionsOrWildCardRole();
+        ERC1594StorageWrapper.requireCanRedeemFromByPartition(_tokenHolder, _partition, _value);
+        TokenCoreOps.redeemByPartition(_partition, _tokenHolder, msg.sender, _value, _data, _operatorData);
     }
 
     function protectedTransferFromByPartition(
@@ -103,15 +107,14 @@ abstract contract ERC1410Management is IERC1410Management, Internals {
         address _to,
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    )
-        external
-        override
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyProtectedPartitions
-        onlyCanTransferFromByPartition(_from, _to, _partition, _amount, "", "")
-        returns (bytes32)
-    {
-        return _protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
+    ) external override returns (bytes32) {
+        AccessControlStorageWrapper.checkRole(
+            ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
+            msg.sender
+        );
+        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
+        ERC1594StorageWrapper.requireCanTransferFromByPartition(_from, _to, _partition, _amount);
+        return TokenCoreOps.protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
     }
 
     function protectedRedeemFromByPartition(
@@ -119,13 +122,22 @@ abstract contract ERC1410Management is IERC1410Management, Internals {
         address _from,
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    )
-        external
-        override
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyProtectedPartitions
-        onlyCanRedeemFromByPartition(_from, _partition, _amount, "", "")
-    {
-        _protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
+    ) external override {
+        AccessControlStorageWrapper.checkRole(
+            ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
+            msg.sender
+        );
+        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
+        ERC1594StorageWrapper.requireCanRedeemFromByPartition(_from, _partition, _amount);
+        TokenCoreOps.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);
+    }
+
+    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
+        if (
+            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
+            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
+        ) {
+            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
+        }
     }
 }

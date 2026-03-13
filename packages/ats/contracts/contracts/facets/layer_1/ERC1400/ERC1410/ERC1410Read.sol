@@ -2,40 +2,37 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC1410Read } from "./IERC1410Read.sol";
-import { Internals } from "../../../../domain/Internals.sol";
+import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
+import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-/**
- * @title ERC1410Read
- * @dev Facet containing all read-only operations for ERC1410 functionality
- * @notice This facet handles balance queries, partition queries, operator queries, and validation queries
- */
-abstract contract ERC1410Read is IERC1410Read, Internals {
+abstract contract ERC1410Read is IERC1410Read, TimestampProvider {
     function balanceOf(address _tokenHolder) external view returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
+        return ERC1410StorageWrapper.balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp());
     }
 
     function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
+        return ERC1410StorageWrapper.balanceOfAdjustedAt(_tokenHolder, _timestamp);
     }
 
     function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256) {
-        return _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
+        return ERC1410StorageWrapper.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
     }
 
     function totalSupply() external view returns (uint256) {
-        return _totalSupplyAdjustedAt(_blockTimestamp());
+        return ERC1410StorageWrapper.totalSupplyAdjustedAt(_getBlockTimestamp());
     }
 
     function totalSupplyByPartition(bytes32 _partition) external view returns (uint256) {
-        return _totalSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
+        return ERC1410StorageWrapper.totalSupplyByPartitionAdjustedAt(_partition, _getBlockTimestamp());
     }
 
     function partitionsOf(address _tokenHolder) external view returns (bytes32[] memory) {
-        return _partitionsOf(_tokenHolder);
+        return ERC1410StorageWrapper.partitionsOf(_tokenHolder);
     }
 
     function isMultiPartition() external view returns (bool) {
-        return _isMultiPartition();
+        return ERC1410StorageWrapper.isMultiPartition();
     }
 
     function canTransferByPartition(
@@ -46,7 +43,7 @@ abstract contract ERC1410Read is IERC1410Read, Internals {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view returns (bool, bytes1, bytes32) {
-        (bool status, bytes1 statusCode, bytes32 reason, ) = _isAbleToTransferFromByPartition(
+        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             _from,
             _to,
             _partition,
@@ -64,7 +61,7 @@ abstract contract ERC1410Read is IERC1410Read, Internals {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view override returns (bool, bytes1, bytes32) {
-        (bool status, bytes1 code, bytes32 reason, ) = _isAbleToRedeemFromByPartition(
+        (bool status, bytes1 code, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToRedeemFromByPartition(
             _from,
             _partition,
             _value,
@@ -75,7 +72,7 @@ abstract contract ERC1410Read is IERC1410Read, Internals {
     }
 
     function isOperator(address _operator, address _tokenHolder) public view returns (bool) {
-        return _isOperator(_operator, _tokenHolder);
+        return ERC1410StorageWrapper.isOperator(_operator, _tokenHolder);
     }
 
     function isOperatorForPartition(
@@ -83,6 +80,6 @@ abstract contract ERC1410Read is IERC1410Read, Internals {
         address _operator,
         address _tokenHolder
     ) public view returns (bool) {
-        return _isOperatorForPartition(_partition, _operator, _tokenHolder);
+        return ERC1410StorageWrapper.isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 }

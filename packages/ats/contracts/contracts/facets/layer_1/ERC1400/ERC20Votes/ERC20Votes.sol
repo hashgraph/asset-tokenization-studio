@@ -1,58 +1,62 @@
 // SPDX-License-Identifier: Apache-2.0
-// Contract copy-pasted form OZ and extended
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Internals } from "../../../../domain/Internals.sol";
-import { IERC20Votes } from "../ERC20Votes/IERC20Votes.sol";
+import { IERC20Votes } from "./IERC20Votes.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
 
-abstract contract ERC20Votes is IERC20Votes, Internals {
+abstract contract ERC20Votes is IERC20Votes {
+    error AlreadyInitialized();
+
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20Votes(bool _activated) external override onlyUninitialized(_isERC20VotesInitialized()) {
-        _initialize_ERC20Votes(_activated);
+    function initialize_ERC20Votes(bool _activated) external override {
+        if (ERC20VotesStorageWrapper.isERC20VotesInitialized()) revert AlreadyInitialized();
+        ERC20VotesStorageWrapper.initialize_ERC20Votes(_activated);
     }
 
-    function delegate(address _delegatee) external override onlyUnpaused {
-        _delegate(_delegatee);
+    function delegate(address _delegatee) external override {
+        PauseStorageWrapper.requireNotPaused();
+        ERC20VotesStorageWrapper.delegate(_delegatee);
     }
 
     function clock() external view override returns (uint48) {
-        return _clock();
+        return ERC20VotesStorageWrapper.clock();
     }
 
     // solhint-disable-next-line func-name-mixedcase
     function CLOCK_MODE() external view override returns (string memory) {
-        return _CLOCK_MODE();
+        return ERC20VotesStorageWrapper.CLOCK_MODE();
     }
 
     function getVotes(address _account) external view override returns (uint256) {
-        return _getVotes(_account);
+        return ERC20VotesStorageWrapper.getVotes(_account);
     }
 
     function getPastVotes(address _account, uint256 _timepoint) external view override returns (uint256) {
-        return _getPastVotes(_account, _timepoint);
+        return ERC20VotesStorageWrapper.getPastVotes(_account, _timepoint);
     }
 
     function getPastTotalSupply(uint256 _timepoint) external view override returns (uint256) {
-        return _getPastTotalSupply(_timepoint);
+        return ERC20VotesStorageWrapper.getPastTotalSupply(_timepoint);
     }
 
     function delegates(address _account) external view override returns (address) {
-        return _delegates(_account);
+        return ERC20VotesStorageWrapper.delegates(_account);
     }
 
     function checkpoints(
         address _account,
         uint256 _pos
     ) external view override returns (Checkpoints.Checkpoint memory) {
-        return _checkpoints(_account, _pos);
+        return ERC20VotesStorageWrapper.checkpoints(_account, _pos);
     }
 
     function numCheckpoints(address _account) external view override returns (uint256) {
-        return _numCheckpoints(_account);
+        return ERC20VotesStorageWrapper.numCheckpoints(_account);
     }
 
     function isActivated() external view returns (bool) {
-        return _isActivated();
+        return ERC20VotesStorageWrapper.isActivated();
     }
 }

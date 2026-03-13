@@ -1,19 +1,25 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Internals } from "../../../domain/Internals.sol";
 import { IClearingRead } from "./IClearingRead.sol";
+import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ClearingRead is IClearingRead, Internals {
+abstract contract ClearingRead is IClearingRead, TimestampProvider {
     function getClearedAmountFor(address _tokenHolder) external view returns (uint256 amount_) {
-        return _getClearedAmountForAdjustedAt(_tokenHolder, _blockTimestamp());
+        return ClearingStorageWrapper.getClearedAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
     }
 
     function getClearedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 amount_) {
-        return _getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _blockTimestamp());
+        return
+            ClearingStorageWrapper.getClearedAmountForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _getBlockTimestamp()
+            );
     }
 
     function getClearingCountForByPartition(
@@ -21,7 +27,7 @@ abstract contract ClearingRead is IClearingRead, Internals {
         address _tokenHolder,
         ClearingOperationType _clearingOperationType
     ) external view override returns (uint256 clearingCount_) {
-        return _getClearingCountForByPartition(_partition, _tokenHolder, _clearingOperationType);
+        return ClearingStorageWrapper.getClearingCountForByPartition(_partition, _tokenHolder, _clearingOperationType);
     }
 
     function getClearingsIdForByPartition(
@@ -31,7 +37,14 @@ abstract contract ClearingRead is IClearingRead, Internals {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory clearingsId_) {
-        return _getClearingsIdForByPartition(_partition, _tokenHolder, _clearingOperationType, _pageIndex, _pageLength);
+        return
+            ClearingStorageWrapper.getClearingsIdForByPartition(
+                _partition,
+                _tokenHolder,
+                _clearingOperationType,
+                _pageIndex,
+                _pageLength
+            );
     }
 
     function getClearingThirdParty(
@@ -40,6 +53,11 @@ abstract contract ClearingRead is IClearingRead, Internals {
         ClearingOperationType _clearingOpeartionType,
         uint256 _clearingId
     ) external view override returns (address thirdParty_) {
-        thirdParty_ = _getClearingThirdParty(_partition, _tokenHolder, _clearingOpeartionType, _clearingId);
+        thirdParty_ = ClearingStorageWrapper.getClearingThirdParty(
+            _partition,
+            _tokenHolder,
+            _clearingOpeartionType,
+            _clearingId
+        );
     }
 }

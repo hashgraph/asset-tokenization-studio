@@ -1,55 +1,62 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Internals } from "../../../domain/Internals.sol";
-import { _SSI_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { ISsiManagement } from "./ISsiManagement.sol";
+import { _SSI_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
 
-abstract contract SsiManagement is ISsiManagement, Internals {
+abstract contract SsiManagement is ISsiManagement {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
-    ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
-        address oldRevocationRegistryAddress = _getRevocationRegistryAddress();
-        success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
-        emit RevocationRegistryUpdated(oldRevocationRegistryAddress, _getRevocationRegistryAddress());
+    ) external override returns (bool success_) {
+        AccessControlStorageWrapper.checkRole(_SSI_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        address oldRevocationRegistryAddress = SsiManagementStorageWrapper.getRevocationRegistryAddress();
+        success_ = SsiManagementStorageWrapper.setRevocationRegistryAddress(_revocationRegistryAddress);
+        emit RevocationRegistryUpdated(
+            oldRevocationRegistryAddress,
+            SsiManagementStorageWrapper.getRevocationRegistryAddress()
+        );
     }
 
-    function addIssuer(
-        address _issuer
-    ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
-        success_ = _addIssuer(_issuer);
+    function addIssuer(address _issuer) external override returns (bool success_) {
+        AccessControlStorageWrapper.checkRole(_SSI_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = SsiManagementStorageWrapper.addIssuer(_issuer);
         if (!success_) {
             revert ListedIssuer(_issuer);
         }
-        emit AddedToIssuerList(_msgSender(), _issuer);
+        emit AddedToIssuerList(msg.sender, _issuer);
     }
 
-    function removeIssuer(
-        address _issuer
-    ) external override onlyRole(_SSI_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
-        success_ = _removeIssuer(_issuer);
+    function removeIssuer(address _issuer) external override returns (bool success_) {
+        AccessControlStorageWrapper.checkRole(_SSI_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = SsiManagementStorageWrapper.removeIssuer(_issuer);
         if (!success_) {
             revert UnlistedIssuer(_issuer);
         }
-        emit RemovedFromIssuerList(_msgSender(), _issuer);
+        emit RemovedFromIssuerList(msg.sender, _issuer);
     }
 
     function getRevocationRegistryAddress() external view override returns (address revocationRegistryAddress_) {
-        return _getRevocationRegistryAddress();
+        return SsiManagementStorageWrapper.getRevocationRegistryAddress();
     }
 
     function isIssuer(address _issuer) external view override returns (bool) {
-        return _isIssuer(_issuer);
+        return SsiManagementStorageWrapper.isIssuer(_issuer);
     }
 
     function getIssuerListCount() external view override returns (uint256 issuerListCount_) {
-        return _getIssuerListCount();
+        return SsiManagementStorageWrapper.getIssuerListCount();
     }
 
     function getIssuerListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return _getIssuerListMembers(_pageIndex, _pageLength);
+        return SsiManagementStorageWrapper.getIssuerListMembers(_pageIndex, _pageLength);
     }
 }

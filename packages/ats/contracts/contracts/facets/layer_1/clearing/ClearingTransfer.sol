@@ -1,33 +1,40 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { Internals } from "../../../domain/Internals.sol";
+import { _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { IClearingTransfer } from "./IClearingTransfer.sol";
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
+import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
+import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ClearingTransfer is IClearingTransfer, Internals {
+abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
         address _to
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
-        validateAddress(_to)
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(_to)
-        onlyClearingActivated
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = _clearingTransferCreation(
+    ) external override returns (bool success_, uint256 clearingId_) {
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
+        _requireUnProtectedPartitionsOrWildCardRole();
+        LockStorageWrapper.requireValidExpirationTimestamp(_clearingOperation.expirationTimestamp);
+        ERC1410StorageWrapper.requireValidAddress(_to);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+        ClearingStorageWrapper.requireClearingActivated();
+        (success_, clearingId_) = ClearingStorageWrapper.clearingTransferCreation(
             _clearingOperation,
             _amount,
             _to,
-            _msgSender(),
+            msg.sender,
             "",
             ThirdPartyType.NULL
         );
@@ -37,24 +44,24 @@ abstract contract ClearingTransfer is IClearingTransfer, Internals {
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        onlyClearingActivated
-        returns (bool success_, uint256 clearingId_)
-    {
+    ) external override returns (bool success_, uint256 clearingId_) {
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        );
+        _requireUnProtectedPartitionsOrWildCardRole();
+        LockStorageWrapper.requireValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        );
+        ClearingStorageWrapper.requireClearingActivated();
         {
-            _checkValidAddress(_clearingOperationFrom.from);
-            _checkValidAddress(_to);
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_to);
-            _checkRecoveredAddress(_clearingOperationFrom.from);
+            ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
+            ERC1410StorageWrapper.requireValidAddress(_to);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         }
-        (success_, clearingId_) = _clearingTransferCreation(
+        (success_, clearingId_) = ClearingStorageWrapper.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
@@ -62,7 +69,7 @@ abstract contract ClearingTransfer is IClearingTransfer, Internals {
             _clearingOperationFrom.operatorData,
             ThirdPartyType.AUTHORIZED
         );
-        _decreaseAllowedBalanceForClearing(
+        ClearingStorageWrapper.decreaseAllowedBalanceForClearing(
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
             ClearingOperationType.Transfer,
@@ -75,26 +82,29 @@ abstract contract ClearingTransfer is IClearingTransfer, Internals {
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_clearingOperationFrom.clearingOperation.partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
-        onlyClearingActivated
-        returns (bool success_, uint256 clearingId_)
-    {
+    ) external override returns (bool success_, uint256 clearingId_) {
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        );
+        _requireUnProtectedPartitionsOrWildCardRole();
+        LockStorageWrapper.requireValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        );
+        ClearingStorageWrapper.requireClearingActivated();
         {
-            _checkValidAddress(_clearingOperationFrom.from);
-            _checkValidAddress(_to);
-            _checkOperator(_clearingOperationFrom.clearingOperation.partition, _clearingOperationFrom.from);
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_to);
-            _checkRecoveredAddress(_clearingOperationFrom.from);
+            ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
+            ERC1410StorageWrapper.requireValidAddress(_to);
+            ERC1410StorageWrapper.requireOperator(
+                _clearingOperationFrom.clearingOperation.partition,
+                _clearingOperationFrom.from
+            );
+            ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         }
 
-        (success_, clearingId_) = _clearingTransferCreation(
+        (success_, clearingId_) = ClearingStorageWrapper.clearingTransferCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _to,
@@ -109,21 +119,24 @@ abstract contract ClearingTransfer is IClearingTransfer, Internals {
         uint256 _amount,
         address _to,
         bytes calldata _signature
-    )
-        external
-        override
-        onlyUnpaused
-        onlyProtectedPartitions
-        validateAddress(_protectedClearingOperation.from)
-        validateAddress(_to)
-        onlyUnrecoveredAddress(_protectedClearingOperation.from)
-        onlyUnrecoveredAddress(_to)
-        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
-        onlyRole(_protectedPartitionsRole(_protectedClearingOperation.clearingOperation.partition))
-        onlyClearingActivated
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = _protectedClearingTransferByPartition(
+    ) external override returns (bool success_, uint256 clearingId_) {
+        PauseStorageWrapper.requireNotPaused();
+        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
+        ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
+        ERC1410StorageWrapper.requireValidAddress(_to);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_protectedClearingOperation.from);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+        LockStorageWrapper.requireValidExpirationTimestamp(
+            _protectedClearingOperation.clearingOperation.expirationTimestamp
+        );
+        AccessControlStorageWrapper.checkRole(
+            ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            ),
+            msg.sender
+        );
+        ClearingStorageWrapper.requireClearingActivated();
+        (success_, clearingId_) = ClearingStorageWrapper.protectedClearingTransferByPartition(
             _protectedClearingOperation,
             _amount,
             _to,
@@ -136,6 +149,21 @@ abstract contract ClearingTransfer is IClearingTransfer, Internals {
         address _tokenHolder,
         uint256 _clearingId
     ) external view override returns (ClearingTransferData memory clearingTransferData_) {
-        return _getClearingTransferForByPartitionAdjustedAt(_partition, _tokenHolder, _clearingId, _blockTimestamp());
+        return
+            ClearingStorageWrapper.getClearingTransferForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _clearingId,
+                _getBlockTimestamp()
+            );
+    }
+
+    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
+        if (
+            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
+            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
+        ) {
+            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
+        }
     }
 }

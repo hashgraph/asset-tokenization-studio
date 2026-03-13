@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IERC1643 } from "../ERC1643/IERC1643.sol";
+import { IERC1643 } from "./IERC1643.sol";
 import { _DOCUMENTER_ROLE } from "../../../../constants/roles.sol";
 import { _ERC1643_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
-import { Internals } from "../../../../domain/Internals.sol";
+import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC1643 is IERC1643, Internals {
-    function setDocument(
-        bytes32 _name,
-        string calldata _uri,
-        bytes32 _documentHash
-    ) external override onlyRole(_DOCUMENTER_ROLE) onlyUnpaused {
+abstract contract ERC1643 is IERC1643, TimestampProvider {
+    function setDocument(bytes32 _name, string calldata _uri, bytes32 _documentHash) external override {
+        AccessControlStorageWrapper.checkRole(_DOCUMENTER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
         if (_name == bytes32(0)) {
             revert EmptyName();
         }
@@ -26,11 +26,13 @@ abstract contract ERC1643 is IERC1643, Internals {
             erc1643Storage.docNames.push(_name);
             erc1643Storage.docIndexes[_name] = erc1643Storage.docNames.length;
         }
-        erc1643Storage.documents[_name] = Document(_documentHash, _blockTimestamp(), _uri);
+        erc1643Storage.documents[_name] = Document(_documentHash, _getBlockTimestamp(), _uri);
         emit DocumentUpdated(_name, _uri, _documentHash);
     }
 
-    function removeDocument(bytes32 _name) external override onlyRole(_DOCUMENTER_ROLE) onlyUnpaused {
+    function removeDocument(bytes32 _name) external override {
+        AccessControlStorageWrapper.checkRole(_DOCUMENTER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
         ERC1643Storage storage erc1643Storage = _erc1643Storage();
         if (erc1643Storage.documents[_name].lastModified == uint256(0)) {
             revert DocumentDoesNotExist(_name);

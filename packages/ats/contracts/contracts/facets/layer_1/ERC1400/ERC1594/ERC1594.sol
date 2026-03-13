@@ -1,117 +1,95 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { _ISSUER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
-import { IERC1594 } from "../ERC1594/IERC1594.sol";
-import { Internals } from "../../../../domain/Internals.sol";
+import { _ISSUER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
+import { IERC1594 } from "./IERC1594.sol";
+import {
+    IProtectedPartitionsStorageWrapper
+} from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { CapStorageWrapper } from "../../../../domain/core/CapStorageWrapper.sol";
+import { ERC3643StorageWrapper } from "../../../../domain/core/ERC3643StorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
+import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
+import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC1594 is IERC1594, Internals {
+abstract contract ERC1594 is IERC1594, TimestampProvider {
+    error AlreadyInitialized();
+
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external override onlyUninitialized(_isERC1594Initialized()) {
-        _initialize_ERC1594();
+    function initialize_ERC1594() external override {
+        if (ERC1594StorageWrapper.isERC1594Initialized()) revert AlreadyInitialized();
+        ERC1594StorageWrapper.initialize();
     }
 
-    function transferWithData(
-        address _to,
-        uint256 _value,
-        bytes calldata _data // ignored in the current implementation
-    )
-        external
-        override
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(_msgSender(), _to, _DEFAULT_PARTITION, _value, "", "")
-    {
-        // Add a function to validate the `_data` parameter
-        _transfer(_msgSender(), _to, _value);
-        emit TransferWithData(_msgSender(), _to, _value, _data);
+    function transferWithData(address _to, uint256 _value, bytes calldata _data) external override {
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        _requireUnProtectedPartitionsOrWildCardRole();
+        ERC1594StorageWrapper.requireCanTransferFromByPartition(msg.sender, _to, _DEFAULT_PARTITION, _value);
+        TokenCoreOps.transfer(msg.sender, _to, _value);
+        emit TransferWithData(msg.sender, _to, _value, _data);
     }
 
-    function transferFromWithData(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data // ignored in the current implementation
-    )
-        external
-        override
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value, "", "")
-    {
+    function transferFromWithData(address _from, address _to, uint256 _value, bytes calldata _data) external override {
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        _requireUnProtectedPartitionsOrWildCardRole();
+        ERC1594StorageWrapper.requireCanTransferFromByPartition(_from, _to, _DEFAULT_PARTITION, _value);
         {
-            _checkRecoveredAddress(_msgSender());
-            _checkRecoveredAddress(_to);
-            _checkRecoveredAddress(_from);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
         }
-        // Add a function to validate the `_data` parameter
-        _transferFrom(_msgSender(), _from, _to, _value);
-        emit TransferFromWithData(_msgSender(), _from, _to, _value, _data);
+        TokenCoreOps.transferFrom(msg.sender, _from, _to, _value);
+        emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
     }
 
-    function issue(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyWithoutMultiPartition
-        onlyWithinMaxSupply(_value)
-        onlyIdentified(address(0), _tokenHolder)
-        onlyCompliant(address(0), _tokenHolder, false)
-        onlyUnpaused
-    {
+    function issue(address _tokenHolder, uint256 _value, bytes calldata _data) external override {
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        CapStorageWrapper.requireWithinMaxSupply(_value, _getBlockTimestamp());
+        ERC1594StorageWrapper.requireIdentified(address(0), _tokenHolder);
+        ERC1594StorageWrapper.requireCompliant(address(0), _tokenHolder, false);
+        PauseStorageWrapper.requireNotPaused();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
-            _checkAnyRole(roles, _msgSender());
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
-        _issue(_tokenHolder, _value, _data);
+        ERC1594StorageWrapper.issue(_tokenHolder, _value, _data);
     }
 
-    function redeem(
-        uint256 _value,
-        bytes memory _data
-    )
-        external
-        override
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(_msgSender(), _DEFAULT_PARTITION, _value, _data, "")
-    {
-        _redeem(_value, _data);
+    function redeem(uint256 _value, bytes memory _data) external override {
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        _requireUnProtectedPartitionsOrWildCardRole();
+        ERC1594StorageWrapper.requireCanRedeemFromByPartition(msg.sender, _DEFAULT_PARTITION, _value);
+        ERC1594StorageWrapper.redeem(_value, _data);
     }
 
-    function redeemFrom(
-        address _tokenHolder,
-        uint256 _value,
-        bytes memory _data
-    )
-        external
-        override
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value, _data, "")
-        onlyUnrecoveredAddress(_msgSender())
-        onlyUnrecoveredAddress(_tokenHolder)
-    {
-        _redeemFrom(_tokenHolder, _value, _data);
+    function redeemFrom(address _tokenHolder, uint256 _value, bytes memory _data) external override {
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        _requireUnProtectedPartitionsOrWildCardRole();
+        ERC1594StorageWrapper.requireCanRedeemFromByPartition(_tokenHolder, _DEFAULT_PARTITION, _value);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
+        ERC1594StorageWrapper.redeemFrom(_tokenHolder, _value, _data);
     }
 
     function isIssuable() external view override returns (bool) {
-        return _isIssuable();
+        return ERC1594StorageWrapper.isIssuable();
     }
 
     function canTransfer(
         address _to,
         uint256 _value,
         bytes memory _data
-    ) external view override onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
-        (bool status, bytes1 statusCode, bytes32 reason, ) = _isAbleToTransferFromByPartition(
-            _msgSender(),
+    ) external view override returns (bool, bytes1, bytes32) {
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
+            msg.sender,
             _to,
             _DEFAULT_PARTITION,
             _value,
@@ -126,8 +104,9 @@ abstract contract ERC1594 is IERC1594, Internals {
         address _to,
         uint256 _value,
         bytes memory _data
-    ) external view onlyWithoutMultiPartition returns (bool, bytes1, bytes32) {
-        (bool status, bytes1 statusCode, bytes32 reason, ) = _isAbleToTransferFromByPartition(
+    ) external view returns (bool, bytes1, bytes32) {
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             _from,
             _to,
             _DEFAULT_PARTITION,
@@ -136,5 +115,14 @@ abstract contract ERC1594 is IERC1594, Internals {
             ""
         );
         return (status, statusCode, reason);
+    }
+
+    function _requireUnProtectedPartitionsOrWildCardRole() internal view {
+        if (
+            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
+            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
+        ) {
+            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
+        }
     }
 }

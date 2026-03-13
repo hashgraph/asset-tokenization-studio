@@ -2,75 +2,88 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalControlListManagement } from "./IExternalControlListManagement.sol";
-import { Internals } from "../../../domain/Internals.sol";
 import { _CONTROL_LIST_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
+import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
+import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 
-abstract contract ExternalControlListManagement is IExternalControlListManagement, Internals {
+abstract contract ExternalControlListManagement is IExternalControlListManagement {
+    error AlreadyInitialized();
+
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalControlLists(
-        address[] calldata _controlLists
-    ) external override onlyUninitialized(_isExternalControlListInitialized()) {
-        _initialize_ExternalControlLists(_controlLists);
+    function initialize_ExternalControlLists(address[] calldata _controlLists) external override {
+        if (ExternalListManagementStorageWrapper.isExternalControlListInitialized()) revert AlreadyInitialized();
+        ExternalListManagementStorageWrapper.initialize_ExternalControlLists(_controlLists);
     }
 
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
-    )
-        external
-        override
-        onlyRole(_CONTROL_LIST_MANAGER_ROLE)
-        onlyUnpaused
-        onlyConsistentActivations(_controlLists, _actives)
-        returns (bool success_)
-    {
-        success_ = _updateExternalLists(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists, _actives);
+    ) external override returns (bool success_) {
+        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        ArrayValidation.checkUniqueValues(_controlLists, _actives);
+        success_ = ExternalListManagementStorageWrapper.updateExternalLists(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            _controlLists,
+            _actives
+        );
         if (!success_) {
             revert ExternalControlListsNotUpdated(_controlLists, _actives);
         }
-        emit ExternalControlListsUpdated(_msgSender(), _controlLists, _actives);
+        emit ExternalControlListsUpdated(msg.sender, _controlLists, _actives);
     }
 
-    function addExternalControlList(
-        address _controlList
-    )
-        external
-        override
-        onlyRole(_CONTROL_LIST_MANAGER_ROLE)
-        onlyUnpaused
-        validateAddress(_controlList)
-        returns (bool success_)
-    {
-        success_ = _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
+    function addExternalControlList(address _controlList) external override returns (bool success_) {
+        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        ExternalListManagementStorageWrapper.checkValidAddress(_controlList);
+        success_ = ExternalListManagementStorageWrapper.addExternalList(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            _controlList
+        );
         if (!success_) {
             revert ListedControlList(_controlList);
         }
-        emit AddedToExternalControlLists(_msgSender(), _controlList);
+        emit AddedToExternalControlLists(msg.sender, _controlList);
     }
 
-    function removeExternalControlList(
-        address _controlList
-    ) external override onlyRole(_CONTROL_LIST_MANAGER_ROLE) onlyUnpaused returns (bool success_) {
-        success_ = _removeExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
+    function removeExternalControlList(address _controlList) external override returns (bool success_) {
+        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = ExternalListManagementStorageWrapper.removeExternalList(
+            _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+            _controlList
+        );
         if (!success_) {
             revert UnlistedControlList(_controlList);
         }
-        emit RemovedFromExternalControlLists(_msgSender(), _controlList);
+        emit RemovedFromExternalControlLists(msg.sender, _controlList);
     }
 
     function isExternalControlList(address _controlList) external view override returns (bool) {
-        return _isExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlList);
+        return
+            ExternalListManagementStorageWrapper.isExternalList(
+                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+                _controlList
+            );
     }
 
     function getExternalControlListsCount() external view override returns (uint256 externalControlListsCount_) {
-        return _getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        return ExternalListManagementStorageWrapper.getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
     function getExternalControlListsMembers(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return _getExternalListsMembers(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _pageIndex, _pageLength);
+        return
+            ExternalListManagementStorageWrapper.getExternalListsMembers(
+                _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
+                _pageIndex,
+                _pageLength
+            );
     }
 }

@@ -2,18 +2,23 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ISnapshots, HolderBalance } from "./ISnapshots.sol";
-import { Internals } from "../../../domain/Internals.sol";
 import { _SNAPSHOT_ROLE } from "../../../constants/roles.sol";
+import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
+import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
-abstract contract Snapshots is ISnapshots, Internals {
-    function takeSnapshot() external override onlyUnpaused onlyRole(_SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
-        _callTriggerPendingScheduledCrossOrderedTasks();
-        snapshotID_ = _takeSnapshot();
-        emit SnapshotTaken(_msgSender(), snapshotID_);
+abstract contract Snapshots is ISnapshots {
+    function takeSnapshot() external override returns (uint256 snapshotID_) {
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_SNAPSHOT_ROLE, msg.sender);
+        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        snapshotID_ = SnapshotsStorageWrapper.takeSnapshot();
+        emit SnapshotTaken(msg.sender, snapshotID_);
     }
 
     function decimalsAtSnapshot(uint256 _snapshotID) external view returns (uint8 decimals_) {
-        decimals_ = _decimalsAtSnapshot(_snapshotID);
+        decimals_ = SnapshotsStorageWrapper.decimalsAtSnapshot(_snapshotID);
     }
 
     function balancesOfAtSnapshot(
@@ -21,14 +26,14 @@ abstract contract Snapshots is ISnapshots, Internals {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (HolderBalance[] memory balances_) {
-        balances_ = _balancesOfAtSnapshot(_snapshotID, _pageIndex, _pageLength);
+        balances_ = SnapshotsStorageWrapper.balancesOfAtSnapshot(_snapshotID, _pageIndex, _pageLength);
     }
 
     function balanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (uint256 balance_) {
-        balance_ = _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.balanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function getTokenHoldersAtSnapshot(
@@ -36,11 +41,11 @@ abstract contract Snapshots is ISnapshots, Internals {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (address[] memory holders_) {
-        return _tokenHoldersAt(_snapshotID, _pageIndex, _pageLength);
+        return SnapshotsStorageWrapper.tokenHoldersAt(_snapshotID, _pageIndex, _pageLength);
     }
 
     function getTotalTokenHoldersAtSnapshot(uint256 _snapshotID) external view returns (uint256) {
-        return _totalTokenHoldersAt(_snapshotID);
+        return SnapshotsStorageWrapper.totalTokenHoldersAt(_snapshotID);
     }
 
     function balanceOfAtSnapshotByPartition(
@@ -48,32 +53,32 @@ abstract contract Snapshots is ISnapshots, Internals {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (uint256 balance_) {
-        balance_ = _balanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.balanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function partitionsOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
+        return SnapshotsStorageWrapper.partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function totalSupplyAtSnapshot(uint256 _snapshotID) external view override returns (uint256 totalSupply_) {
-        totalSupply_ = _totalSupplyAtSnapshot(_snapshotID);
+        totalSupply_ = SnapshotsStorageWrapper.totalSupplyAtSnapshot(_snapshotID);
     }
 
     function totalSupplyAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID
     ) external view override returns (uint256 totalSupply_) {
-        totalSupply_ = _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
+        totalSupply_ = SnapshotsStorageWrapper.totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
     }
 
     function lockedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (uint256 balance_) {
-        balance_ = _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function lockedBalanceOfAtSnapshotByPartition(
@@ -81,14 +86,14 @@ abstract contract Snapshots is ISnapshots, Internals {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view override returns (uint256 balance_) {
-        balance_ = _lockedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.lockedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function heldBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function heldBalanceOfAtSnapshotByPartition(
@@ -96,14 +101,14 @@ abstract contract Snapshots is ISnapshots, Internals {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _heldBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.heldBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function clearedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _clearedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.clearedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function clearedBalanceOfAtSnapshotByPartition(
@@ -111,14 +116,14 @@ abstract contract Snapshots is ISnapshots, Internals {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _clearedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.clearedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 
     function frozenBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _frozenBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.frozenBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function frozenBalanceOfAtSnapshotByPartition(
@@ -126,6 +131,6 @@ abstract contract Snapshots is ISnapshots, Internals {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_) {
-        balance_ = _frozenBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
+        balance_ = SnapshotsStorageWrapper.frozenBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
     }
 }
