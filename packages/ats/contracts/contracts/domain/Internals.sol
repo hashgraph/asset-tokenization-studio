@@ -732,10 +732,7 @@ abstract contract Internals is Modifiers {
     function _checkUnpaused() internal view virtual;
     function _checkValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view virtual;
     function _checkWithinMaxSupply(uint256 _amount) internal view virtual;
-    function _checkpoints(
-        address account,
-        uint256 pos
-    ) internal view virtual returns (Checkpoints.Checkpoint memory);
+    function _checkpoints(address account, uint256 pos) internal view virtual returns (Checkpoints.Checkpoint memory);
     function _clearedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
