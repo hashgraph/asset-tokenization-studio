@@ -3,9 +3,9 @@
 import { QueryError } from "@query/error/QueryError";
 import BaseError from "@core/error/BaseError";
 
-export class GetDividendsForQueryError extends QueryError {
+export class GetDividendQueryError extends QueryError {
   constructor(error: Error) {
-    const msg = `An error occurred while querying account's dividends: ${error.message}`;
+    const msg = `An error occurred while querying dividends: ${error.message}`;
     super(msg, error instanceof BaseError ? error.errorCode : undefined);
   }
 }

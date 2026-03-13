@@ -13,9 +13,9 @@ import { HederaId } from "@domain/context/shared/HederaId";
 import { GetScheduledBalanceAdjustmentQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery";
 import { faker } from "@faker-js/faker/.";
 import GetEquityDetailsRequest from "@port/in/request/equity/GetEquityDetailsRequest";
-import SetDividendsRequest from "@port/in/request/equity/SetDividendsRequest";
-import GetDividendsForRequest from "@port/in/request/equity/GetDividendsForRequest";
-import GetDividendsRequest from "@port/in/request/equity/GetDividendsRequest";
+import SetDividendRequest from "@port/in/request/equity/SetDividendRequest";
+import GetDividendForRequest from "@port/in/request/equity/GetDividendForRequest";
+import GetDividendRequest from "@port/in/request/equity/GetDividendRequest";
 import GetAllDividendsRequest from "@port/in/request/equity/GetAllDividendsRequest";
 import SetVotingRightsRequest from "@port/in/request/equity/SetVotingRightsRequest";
 import GetVotingRightsForRequest from "@port/in/request/equity/GetVotingRightsForRequest";
@@ -29,8 +29,8 @@ import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBala
 import { GetScheduledBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery";
 import { Dividend } from "@domain/context/equity/Dividend";
 import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCount/GetDividendsCountQuery";
-import { GetDividendsQuery } from "@query/equity/dividends/getDividends/GetDividendsQuery";
-import { GetDividendsForQuery } from "@query/equity/dividends/getDividendsFor/GetDividendsForQuery";
+import { GetDividendQuery } from "@query/equity/dividends/getDividend/GetDividendQuery";
+import { GetDividendForQuery } from "@query/equity/dividends/getDividendFor/GetDividendForQuery";
 import { GetDividendAmountForQuery } from "@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQuery";
 import { DividendFor } from "@domain/context/equity/DividendFor";
 import { GetEquityDetailsQuery } from "@query/equity/get/getEquityDetails/GetEquityDetailsQuery";
@@ -47,7 +47,7 @@ import { SetScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdj
 import CancelScheduledBalanceAdjustmentRequest from "@port/in/request/equity/CancelScheduledBalanceAdjustmentRequest";
 import { CancelScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/cancelScheduledBalanceAdjustment/CancelScheduledBalanceAdjustmentCommand";
 import { CreateEquityCommand } from "@command/equity/create/CreateEquityCommand";
-import { SetDividendsCommand } from "@command/equity/dividends/set/SetDividendsCommand";
+import { SetDividendCommand } from "@command/equity/dividends/set/SetDividendCommand";
 import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
 import CancelDividendRequest from "@port/in/request/equity/CancelDividendRequest";
 import { SetVotingRightsCommand } from "@command/equity/votingRights/set/SetVotingRightsCommand";
@@ -130,20 +130,20 @@ export const GetEquityDetailsRequestFixture = createFixture<GetEquityDetailsRequ
   request.equityId.as(() => HederaIdPropsFixture.create().value);
 });
 
-export const SetDividendsRequestFixture = createFixture<SetDividendsRequest>((request) => {
+export const SetDividendRequestFixture = createFixture<SetDividendRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
   request.amountPerUnitOfSecurity.faker((faker) => faker.number.int({ min: 1, max: 12 }).toString());
   request.recordTimestamp.faker((faker) => faker.date.past().getTime().toString());
   request.executionTimestamp.faker((faker) => faker.date.future().getTime().toString());
 });
 
-export const GetDividendsForRequestFixture = createFixture<GetDividendsForRequest>((request) => {
+export const GetDividendForRequestFixture = createFixture<GetDividendForRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
   request.targetId.as(() => HederaIdPropsFixture.create().value);
   request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
 });
 
-export const GetDividendsRequestFixture = createFixture<GetDividendsRequest>((request) => {
+export const GetDividendRequestFixture = createFixture<GetDividendRequest>((request) => {
   request.securityId.as(() => HederaIdPropsFixture.create().value);
   request.dividendId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
 });
@@ -239,7 +239,7 @@ export const GetDividendsCountQueryFixture = createFixture<GetDividendsCountQuer
   query.securityId.as(() => new HederaId(HederaIdPropsFixture.create().value));
 });
 
-export const GetDividendsForQueryFixture = createFixture<GetDividendsForQuery>((query) => {
+export const GetDividendForQueryFixture = createFixture<GetDividendForQuery>((query) => {
   query.securityId.as(() => new HederaId(HederaIdPropsFixture.create().value));
   query.targetId.as(() => new HederaId(HederaIdPropsFixture.create().value));
   query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
@@ -251,7 +251,7 @@ export const GetDividendAmountForQueryFixture = createFixture<GetDividendAmountF
   query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
 });
 
-export const GetDividendsQueryFixture = createFixture<GetDividendsQuery>((query) => {
+export const GetDividendQueryFixture = createFixture<GetDividendQuery>((query) => {
   query.securityId.as(() => new HederaId(HederaIdPropsFixture.create().value));
   query.dividendId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
 });
@@ -404,7 +404,7 @@ export const CancelScheduledBalanceAdjustmentRequestFixture = createFixture<Canc
   },
 );
 
-export const SetDividendsCommandFixture = createFixture<SetDividendsCommand>((command) => {
+export const SetDividendCommandFixture = createFixture<SetDividendCommand>((command) => {
   command.address.as(() => HederaIdPropsFixture.create().value);
   let recordDate: Date;
   command.recordDate.faker((faker) => {

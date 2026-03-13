@@ -5,12 +5,12 @@ import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
 import { IQueryHandler } from "@core/query/QueryHandler";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
-import { GetDividendsQuery, GetDividendsQueryResponse } from "./GetDividendsQuery";
+import { GetDividendQuery, GetDividendQueryResponse } from "./GetDividendQuery";
 import ContractService from "@service/contract/ContractService";
-import { GetDividendsQueryError } from "./error/GetDividendsQueryError";
+import { GetDividendQueryError } from "./error/GetDividendQueryError";
 
-@QueryHandler(GetDividendsQuery)
-export class GetDividendsQueryHandler implements IQueryHandler<GetDividendsQuery> {
+@QueryHandler(GetDividendQuery)
+export class GetDividendQueryHandler implements IQueryHandler<GetDividendQuery> {
   constructor(
     @lazyInject(RPCQueryAdapter)
     private readonly queryAdapter: RPCQueryAdapter,
@@ -18,16 +18,16 @@ export class GetDividendsQueryHandler implements IQueryHandler<GetDividendsQuery
     private readonly contractService: ContractService,
   ) {}
 
-  async execute(query: GetDividendsQuery): Promise<GetDividendsQueryResponse> {
+  async execute(query: GetDividendQuery): Promise<GetDividendQueryResponse> {
     try {
       const { securityId, dividendId } = query;
 
       const securityEvmAddress: EvmAddress = await this.contractService.getContractEvmAddress(securityId);
-      const res = await this.queryAdapter.getDividends(securityEvmAddress, dividendId);
+      const res = await this.queryAdapter.getDividend(securityEvmAddress, dividendId);
 
-      return Promise.resolve(new GetDividendsQueryResponse(res));
+      return Promise.resolve(new GetDividendQueryResponse(res));
     } catch (error) {
-      throw new GetDividendsQueryError(error as Error);
+      throw new GetDividendQueryError(error as Error);
     }
   }
 }

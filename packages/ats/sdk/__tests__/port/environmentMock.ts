@@ -568,7 +568,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return controlList.findIndex((item) => item == account) !== -1;
   });
 
-  singletonInstance.getDividendsFor = jest.fn(async (address: EvmAddress, target: EvmAddress, dividend: number) => {
+  singletonInstance.getDividendFor = jest.fn(async (address: EvmAddress, target: EvmAddress, dividend: number) => {
     const dividendsBalances = dividendsFor.get(dividend);
 
     if (!dividendsBalances)
@@ -580,7 +580,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return new DividendFor(BigDecimal.fromString("0", securityInfo.decimals), securityInfo.decimals);
   });
 
-  singletonInstance.getDividends = jest.fn(async (address: EvmAddress, dividend: number) => {
+  singletonInstance.getDividend = jest.fn(async (address: EvmAddress, dividend: number) => {
     if (dividend > dividends.length) return undefined;
     return dividends[dividend - 1];
   });

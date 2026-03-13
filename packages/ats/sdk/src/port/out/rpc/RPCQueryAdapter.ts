@@ -368,7 +368,7 @@ export class RPCQueryAdapter {
     return await this.connect(ControlListFacet__factory, address.toString()).isInControlList(target.toString());
   }
 
-  async getDividendsFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendFor> {
+  async getDividendFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendFor> {
     LogService.logTrace(`Getting dividends for`);
 
     const dividendFor = await this.connect(Equity__factory, address.toString()).getDividendFor(
@@ -398,7 +398,7 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getDividends(address: EvmAddress, dividend: number): Promise<Dividend> {
+  async getDividend(address: EvmAddress, dividend: number): Promise<Dividend> {
     LogService.logTrace(`Getting dividends`);
 
     const { registeredDividend_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getDividend(
