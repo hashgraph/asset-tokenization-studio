@@ -59,6 +59,8 @@
     "release:mp": "changeset version --ignore '@hashgraph/asset-tokenization-*'",
     "release:preview": "changeset status",
     "docs:start": "npm run start --workspace=apps/docs",
+    "docs:build": "npm run build --workspace=apps/docs",
+    "docs:serve": "npm run serve --workspace=apps/docs",
     "ats:setup": "npm ci && npm run ats:build",
     "ats:setup:clean": "npm run ats:clean && npm install && npm run ats:build",
     "ats:build": "npm run ats:contracts:build && npm run ats:sdk:build && npm run ats:web:build",
