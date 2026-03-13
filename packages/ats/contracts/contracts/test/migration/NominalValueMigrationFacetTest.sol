@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IStaticFunctionSelectors } from "../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { Common } from "../../domain/Common.sol";
+import { _NOMINAL_VALUE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 /**
  * @dev Test facet for NominalValue storage migration testing.
@@ -22,6 +23,17 @@ contract NominalValueMigrationFacetTest is Common, IStaticFunctionSelectors {
     function setLegacyEquityNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals) external {
         _equityStorage().DEPRECATED_nominalValue = _nominalValue;
         _equityStorage().DEPRECATED_nominalValueDecimals = _nominalValueDecimals;
+    }
+
+    /// @dev Resets the NominalValue initialized flag and clears stored values.
+    /// nominalValue is at slot `position`, nominalValueDecimals + initialized are packed at `position + 1`.
+    function resetNominalValueInitialized() external {
+        bytes32 position = _NOMINAL_VALUE_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            sstore(position, 0)
+            sstore(add(position, 1), 0)
+        }
     }
 
     // ========================================
@@ -55,7 +67,7 @@ contract NominalValueMigrationFacetTest is Common, IStaticFunctionSelectors {
     // ========================================
 
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
-        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_ = new bytes4[](7);
         uint256 selectorIndex;
         staticFunctionSelectors_[selectorIndex++] = this.setLegacyBondNominalValue.selector;
         staticFunctionSelectors_[selectorIndex++] = this.setLegacyEquityNominalValue.selector;
@@ -63,6 +75,7 @@ contract NominalValueMigrationFacetTest is Common, IStaticFunctionSelectors {
         staticFunctionSelectors_[selectorIndex++] = this.getLegacyEquityNominalValue.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getAggregatedNominalValue.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getAggregatedNominalValueDecimals.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.resetNominalValueInitialized.selector;
     }
 
     function getStaticInterfaceIds() external pure override returns (bytes4[] memory staticInterfaceIds_) {

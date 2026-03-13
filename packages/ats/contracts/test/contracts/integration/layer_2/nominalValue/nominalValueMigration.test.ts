@@ -257,6 +257,76 @@ describe("NominalValue Migration Tests", () => {
     });
   });
 
+  describe("NominalValue Initialization", () => {
+    let diamond: ResolverProxy;
+    let signer_A: HardhatEthersSigner;
+
+    let nominalValueFacet: INominalValue;
+    let migrationFacet: NominalValueMigrationFacetTest;
+
+    async function deployBondWithMigrationFacet() {
+      const base = await deployBondTokenFixture({ useLoadFixture: false });
+      await addMigrationFacetToDiamond(base, BOND_CONFIG_ID);
+
+      diamond = base.diamond;
+      signer_A = base.deployer;
+
+      nominalValueFacet = await ethers.getContractAt("INominalValue", diamond.target, signer_A);
+      migrationFacet = await ethers.getContractAt("NominalValueMigrationFacetTest", diamond.target, signer_A);
+    }
+
+    beforeEach(async () => {
+      await loadFixture(deployBondWithMigrationFacet);
+    });
+
+    it("GIVEN an already initialized nominalValue WHEN initialize_NominalValue is called THEN reverts with AlreadyInitialized", async () => {
+      await expect(nominalValueFacet.initialize_NominalValue(200, 4)).to.be.revertedWithCustomError(
+        { interface: (await ethers.getContractFactory("NominalValueFacet")).interface } as any,
+        "AlreadyInitialized",
+      );
+    });
+
+    it("GIVEN an uninitialized nominalValue WHEN setNominalValue is called THEN it initializes and sets value", async () => {
+      // Reset initialized flag to simulate a legacy token
+      await migrationFacet.resetNominalValueInitialized();
+
+      // setNominalValue should trigger _initialize_NominalValue internally
+      await nominalValueFacet.connect(signer_A).setNominalValue(600, 5);
+
+      expect(await nominalValueFacet.getNominalValue()).to.equal(600);
+      expect(await nominalValueFacet.getNominalValueDecimals()).to.equal(5);
+    });
+  });
+
+  describe("NominalValueFacet Static Selectors", () => {
+    it("GIVEN the NominalValueFacet WHEN getStaticFunctionSelectors is called THEN returns 4 selectors", async () => {
+      const factory = await ethers.getContractFactory("NominalValueFacet");
+      const facet = await factory.deploy();
+      await facet.waitForDeployment();
+
+      const selectors = await facet.getStaticFunctionSelectors();
+      expect(selectors.length).to.equal(4);
+    });
+
+    it("GIVEN the NominalValueFacet WHEN getStaticInterfaceIds is called THEN returns 1 interface id", async () => {
+      const factory = await ethers.getContractFactory("NominalValueFacet");
+      const facet = await factory.deploy();
+      await facet.waitForDeployment();
+
+      const interfaceIds = await facet.getStaticInterfaceIds();
+      expect(interfaceIds.length).to.equal(1);
+    });
+
+    it("GIVEN the NominalValueFacet WHEN getStaticResolverKey is called THEN returns the correct key", async () => {
+      const factory = await ethers.getContractFactory("NominalValueFacet");
+      const facet = await factory.deploy();
+      await facet.waitForDeployment();
+
+      const resolverKey = await facet.getStaticResolverKey();
+      expect(resolverKey).to.not.equal(ethers.ZeroHash);
+    });
+  });
+
   describe("NominalValue Access Control", () => {
     let diamond: ResolverProxy;
     let signer_A: HardhatEthersSigner;
