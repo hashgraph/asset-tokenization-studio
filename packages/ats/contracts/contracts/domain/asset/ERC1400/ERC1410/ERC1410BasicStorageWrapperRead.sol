@@ -5,7 +5,7 @@ import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 import { _ERC1410_BASIC_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
 import { IERC1410StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1410/IERC1410StorageWrapper.sol";
 import { LockStorageWrapper1 } from "../../lock/LockStorageWrapper1.sol";
-import { LibCommon } from "../../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../../infrastructure/utils/Pagination.sol";
 
 abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, LockStorageWrapper1 {
     // Represents a fungible set of tokens.
@@ -146,9 +146,9 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view override returns (address[] memory holders_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
 
-        holders_ = new address[](LibCommon.getSize(start, end, _getTotalTokenHolders()));
+        holders_ = new address[](Pagination.getSize(start, end, _getTotalTokenHolders()));
 
         start++; // because tokenHolders starts from 1
 

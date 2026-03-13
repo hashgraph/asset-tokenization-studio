@@ -5,13 +5,13 @@ import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
 } from "../../../domain/asset/corporateAction/ICorporateActionsStorageWrapper.sol";
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ClearingStorageWrapper1 } from "../clearing/ClearingStorageWrapper1.sol";
 
 abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
-    using LibCommon for EnumerableSet.Bytes32Set;
+    using Pagination for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     modifier validateDates(uint256 _firstDate, uint256 _secondDate) override {
@@ -113,9 +113,11 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view override returns (bytes32[] memory corporateActionIds_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
 
-        corporateActionIds_ = new bytes32[](LibCommon.getSize(start, end, _getCorporateActionCountByType(_actionType)));
+        corporateActionIds_ = new bytes32[](
+            Pagination.getSize(start, end, _getCorporateActionCountByType(_actionType))
+        );
 
         CorporateActionDataStorage storage corporateActions = _corporateActionsStorage();
 

@@ -5,11 +5,11 @@ import { _ERC20VOTES_STORAGE_POSITION } from "../../../../constants/storagePosit
 import { ERC1594StorageWrapper } from "../ERC1594/ERC1594StorageWrapper.sol";
 import { IERC20Votes } from "../../../../facets/layer_1/ERC1400/ERC20Votes/IERC20Votes.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { CheckpointsLib } from "../../../../infrastructure/utils/CheckpointsLib.sol";
+import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 
 // solhint-disable custom-errors
 abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
-    using CheckpointsLib for CheckpointsLib.Checkpoint[];
+    using Checkpoints for Checkpoints.Checkpoint[];
 
     struct ERC20VotesStorage {
         bool activated;
@@ -18,9 +18,9 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
         // solhint-disable-next-line var-name-mixedcase
         string DEPRECATED_contractVersion;
         mapping(address => address) delegates;
-        mapping(address => CheckpointsLib.Checkpoint[]) checkpoints;
-        CheckpointsLib.Checkpoint[] totalSupplyCheckpoints;
-        CheckpointsLib.Checkpoint[] abafCheckpoints;
+        mapping(address => Checkpoints.Checkpoint[]) checkpoints;
+        Checkpoints.Checkpoint[] totalSupplyCheckpoints;
+        Checkpoints.Checkpoint[] abafCheckpoints;
         bool initialized;
     }
 
@@ -57,7 +57,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
                 return;
             }
 
-        _erc20VotesStorage().abafCheckpoints.push(CheckpointsLib.Checkpoint({ from: _clock(), value: abaf }));
+        _erc20VotesStorage().abafCheckpoints.push(Checkpoints.Checkpoint({ from: _clock(), value: abaf }));
     }
 
     function _afterTokenTransfer(
@@ -128,14 +128,14 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     }
 
     function _writeCheckpoint(
-        CheckpointsLib.Checkpoint[] storage ckpts,
+        Checkpoints.Checkpoint[] storage ckpts,
         function(uint256, uint256) view returns (uint256) op,
         uint256 delta
     ) internal returns (uint256 oldWeight, uint256 newWeight) {
         uint256 pos = ckpts.length;
 
         unchecked {
-            CheckpointsLib.Checkpoint memory oldCkpt = pos == 0 ? CheckpointsLib.Checkpoint(0, 0) : ckpts[pos - 1];
+            Checkpoints.Checkpoint memory oldCkpt = pos == 0 ? Checkpoints.Checkpoint(0, 0) : ckpts[pos - 1];
 
             oldWeight = oldCkpt.value * _calculateFactorBetween(oldCkpt.from, _clock());
             newWeight = op(oldWeight, delta);
@@ -143,7 +143,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
             if (pos > 0 && oldCkpt.from == _clock()) {
                 ckpts[pos - 1].value = newWeight;
             } else {
-                ckpts.push(CheckpointsLib.Checkpoint({ from: _clock(), value: newWeight }));
+                ckpts.push(Checkpoints.Checkpoint({ from: _clock(), value: newWeight }));
             }
         }
     }
@@ -162,7 +162,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
     function _checkpoints(
         address account,
         uint256 pos
-    ) internal view virtual override returns (CheckpointsLib.Checkpoint memory) {
+    ) internal view virtual override returns (Checkpoints.Checkpoint memory) {
         return _erc20VotesStorage().checkpoints[account][pos];
     }
 
@@ -190,7 +190,7 @@ abstract contract ERC20VotesStorageWrapper is ERC1594StorageWrapper {
 
     function _getVotesAdjustedAt(
         uint256 timepoint,
-        CheckpointsLib.Checkpoint[] storage ckpts
+        Checkpoints.Checkpoint[] storage ckpts
     ) internal view override returns (uint256) {
         (uint256 blockNumber, uint256 votes) = ckpts.checkpointsLookup(timepoint);
 

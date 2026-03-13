@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSetBytes4 } from "../../infrastructure/utils/EnumerableSetBytes4.sol";
 import { IDiamondCutManager } from "./IDiamondCutManager.sol";
 import { IStaticFunctionSelectors } from "../proxy/IStaticFunctionSelectors.sol";
@@ -230,8 +230,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         bytes32[] memory facetIds = _dcms.facetIds[
             _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version))
         ];
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
-        uint256 size = LibCommon.getSize(start, end, facetIds.length);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
+        uint256 size = Pagination.getSize(start, end, facetIds.length);
         facets_ = new IDiamondLoupe.Facet[](size);
         uint256 version = _resolveVersion(_dcms, _configurationId, _version);
         for (uint256 index; index < size; ) {
@@ -298,8 +298,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         bytes32[] memory facetIds = _dcms.facetIds[
             _buildHash(_configurationId, _resolveVersion(_dcms, _configurationId, _version))
         ];
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
-        uint256 size = LibCommon.getSize(start, end, facetIds.length);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
+        uint256 size = Pagination.getSize(start, end, facetIds.length);
         facetAddresses_ = new address[](size);
         for (uint256 index; index < size; ) {
             facetAddresses_[index] = _dcms.addr[
@@ -494,8 +494,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _pageIndex,
         uint256 _pageLength
     ) private pure returns (bytes32[] memory page_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
-        uint256 size = LibCommon.getSize(start, end, _source.length);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
+        uint256 size = Pagination.getSize(start, end, _source.length);
         page_ = new bytes32[](size);
         for (uint256 index; index < size; ) {
             page_[index] = _source[start];
@@ -511,8 +511,8 @@ abstract contract DiamondCutManagerWrapper is IDiamondCutManager, BusinessLogicR
         uint256 _pageIndex,
         uint256 _pageLength
     ) private pure returns (bytes4[] memory page_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
-        uint256 size = LibCommon.getSize(start, end, _source.length);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
+        uint256 size = Pagination.getSize(start, end, _source.length);
         page_ = new bytes4[](size);
         for (uint256 index; index < size; ) {
             page_[index] = _source[start];

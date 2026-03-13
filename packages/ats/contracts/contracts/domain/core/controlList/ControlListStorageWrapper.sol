@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IControlListStorageWrapper } from "../../../domain/core/controlList/IControlListStorageWrapper.sol";
 import { _CONTROL_LIST_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
@@ -10,7 +10,7 @@ import {
 } from "../externalControlList/ExternalControlListManagementStorageWrapper.sol";
 
 abstract contract ControlListStorageWrapper is IControlListStorageWrapper, ExternalControlListManagementStorageWrapper {
-    using LibCommon for EnumerableSet.AddressSet;
+    using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     struct ControlListStorage {

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { SsiManagementStorageWrapper } from "../ssi/SsiManagementStorageWrapper.sol";
 
 abstract contract ExternalListManagementStorageWrapper is SsiManagementStorageWrapper {
-    using LibCommon for EnumerableSet.AddressSet;
+    using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     struct ExternalListDataStorage {

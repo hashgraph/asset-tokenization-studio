@@ -7,12 +7,12 @@ import { IClearing } from "../../../facets/layer_1/clearing/IClearing.sol";
 import { IClearingTransfer } from "../../../facets/layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../../../facets/layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "../../../facets/layer_1/clearing/IClearingHoldCreation.sol";
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";
 
 abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
-    using LibCommon for EnumerableSet.UintSet;
+    using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
     modifier onlyWithValidClearingId(IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier)

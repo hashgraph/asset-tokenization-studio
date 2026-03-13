@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { _HOLD_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { ERC3643StorageWrapper1 } from "../ERC3643/ERC3643StorageWrapper1.sol";
 import { IHold, Hold, HoldData, HoldIdentifier, HoldDataStorage } from "../../../facets/layer_1/hold/IHold.sol";
@@ -9,7 +9,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { ThirdPartyType } from "../types/ThirdPartyType.sol";
 
 abstract contract HoldStorageWrapper1 is ERC3643StorageWrapper1 {
-    using LibCommon for EnumerableSet.UintSet;
+    using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
     modifier onlyWithValidHoldId(HoldIdentifier calldata _holdIdentifier) override {

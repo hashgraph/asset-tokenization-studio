@@ -7,7 +7,7 @@ import { IBondRead } from "../../../facets/layer_2/bond/IBondRead.sol";
 import { IBondStorageWrapper } from "../../../domain/asset/bond/IBondStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ERC20PermitStorageWrapper } from "../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol";
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 
 abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -123,10 +123,10 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view override returns (uint256[] memory couponIDs_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
 
         couponIDs_ = new uint256[](
-            LibCommon.getSize(start, end, _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp()))
+            Pagination.getSize(start, end, _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp()))
         );
 
         for (uint256 i = 0; i < couponIDs_.length; i++) {

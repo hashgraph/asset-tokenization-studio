@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalKycList } from "../../../facets/layer_1/externalKycList/IExternalKycList.sol";
 import { ExternalListManagementStorageWrapper } from "../externalList/ExternalListManagementStorageWrapper.sol";
@@ -9,7 +9,7 @@ import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePosi
 import { IKyc } from "../../../facets/layer_1/kyc/IKyc.sol";
 
 abstract contract ExternalKycListManagementStorageWrapper is ExternalListManagementStorageWrapper {
-    using LibCommon for EnumerableSet.AddressSet;
+    using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     // solhint-disable-next-line func-name-mixedcase

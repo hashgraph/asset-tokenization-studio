@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { ScheduledTask, ScheduledTasksDataStorage } from "./scheduledTasksCommon/IScheduledTasksCommon.sol";
 
 library ScheduledTasksLib {
@@ -62,9 +62,9 @@ library ScheduledTasksLib {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (ScheduledTask[] memory scheduledTask_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
 
-        scheduledTask_ = new ScheduledTask[](LibCommon.getSize(start, end, getScheduledTaskCount(_scheduledTasks)));
+        scheduledTask_ = new ScheduledTask[](Pagination.getSize(start, end, getScheduledTaskCount(_scheduledTasks)));
 
         for (uint256 i = 0; i < scheduledTask_.length; i++) {
             scheduledTask_[i] = getScheduledTasksByIndex(_scheduledTasks, start + i);

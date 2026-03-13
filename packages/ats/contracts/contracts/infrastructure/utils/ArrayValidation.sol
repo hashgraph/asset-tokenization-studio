@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-library ArrayLib {
+library ArrayValidation {
     error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
 
     function checkUniqueValues(address[] memory _addresses, bool[] memory _bools) internal pure {

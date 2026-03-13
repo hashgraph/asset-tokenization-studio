@@ -2,11 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Context } from "@openzeppelin/contracts/utils/Context.sol";
-import { ArrayLib } from "./ArrayLib.sol";
+import { ArrayValidation } from "./ArrayValidation.sol";
 
 abstract contract LocalContext is Context {
     modifier onlyConsistentActivations(address[] calldata _controlLists, bool[] calldata _actives) {
-        ArrayLib.checkUniqueValues(_controlLists, _actives);
+        ArrayValidation.checkUniqueValues(_controlLists, _actives);
         _;
     }
 

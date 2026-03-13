@@ -4,7 +4,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC5805 } from "./IERC5805.sol";
-import { CheckpointsLib } from "../../../../infrastructure/utils/CheckpointsLib.sol";
+import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 
 interface IERC20Votes is IERC5805 {
     error AbafChangeForBlockForbidden(uint256 blockNumber);
@@ -14,7 +14,7 @@ interface IERC20Votes is IERC5805 {
 
     function isActivated() external view returns (bool);
 
-    function checkpoints(address _account, uint256 _pos) external view returns (CheckpointsLib.Checkpoint memory);
+    function checkpoints(address _account, uint256 _pos) external view returns (Checkpoints.Checkpoint memory);
 
     function numCheckpoints(address _account) external view returns (uint256);
 }

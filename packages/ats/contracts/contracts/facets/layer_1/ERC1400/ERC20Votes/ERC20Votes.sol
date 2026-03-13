@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Internals } from "../../../../domain/Internals.sol";
 import { IERC20Votes } from "../ERC20Votes/IERC20Votes.sol";
-import { CheckpointsLib } from "../../../../infrastructure/utils/CheckpointsLib.sol";
+import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 
 abstract contract ERC20Votes is IERC20Votes, Internals {
     // solhint-disable-next-line func-name-mixedcase
@@ -44,7 +44,7 @@ abstract contract ERC20Votes is IERC20Votes, Internals {
     function checkpoints(
         address _account,
         uint256 _pos
-    ) external view override returns (CheckpointsLib.Checkpoint memory) {
+    ) external view override returns (Checkpoints.Checkpoint memory) {
         return _checkpoints(_account, _pos);
     }
 

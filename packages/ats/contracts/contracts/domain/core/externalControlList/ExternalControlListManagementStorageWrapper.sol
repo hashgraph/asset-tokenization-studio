@@ -2,13 +2,13 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ProtectedPartitionsStorageWrapper } from "../protectedPartition/ProtectedPartitionsStorageWrapper.sol";
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalControlList } from "../../../facets/layer_1/externalControlList/IExternalControlList.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 
 abstract contract ExternalControlListManagementStorageWrapper is ProtectedPartitionsStorageWrapper {
-    using LibCommon for EnumerableSet.AddressSet;
+    using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     // solhint-disable-next-line func-name-mixedcase

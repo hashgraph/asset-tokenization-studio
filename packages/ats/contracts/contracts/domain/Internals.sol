@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { Modifiers } from "./Modifiers.sol";
-import { CheckpointsLib } from "../infrastructure/utils/CheckpointsLib.sol";
+import { Checkpoints } from "../infrastructure/utils/Checkpoints.sol";
 import { IClearing } from "../facets/layer_1/clearing/IClearing.sol";
 import { IClearingTransfer } from "../facets/layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../facets/layer_1/clearing/IClearingRedeem.sol";
@@ -735,7 +735,7 @@ abstract contract Internals is Modifiers {
     function _checkpoints(
         address account,
         uint256 pos
-    ) internal view virtual returns (CheckpointsLib.Checkpoint memory);
+    ) internal view virtual returns (Checkpoints.Checkpoint memory);
     function _clearedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
@@ -1204,7 +1204,7 @@ abstract contract Internals is Modifiers {
     function _getVotes(address account) internal view virtual returns (uint256);
     function _getVotesAdjustedAt(
         uint256 timepoint,
-        CheckpointsLib.Checkpoint[] storage ckpts
+        Checkpoints.Checkpoint[] storage ckpts
     ) internal view virtual returns (uint256);
     function _getVoting(
         uint256 _voteID

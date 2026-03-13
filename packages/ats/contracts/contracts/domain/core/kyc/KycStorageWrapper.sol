@@ -6,12 +6,12 @@ import {
     ExternalKycListManagementStorageWrapper
 } from "../externalKycList/ExternalKycListManagementStorageWrapper.sol";
 import { _KYC_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IRevocationList } from "../../../facets/layer_1/kyc/IRevocationList.sol";
 
 abstract contract KycStorageWrapper is ExternalKycListManagementStorageWrapper {
-    using LibCommon for EnumerableSet.AddressSet;
+    using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     struct KycStorage {

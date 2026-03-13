@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
-import { ArrayLib } from "../../../infrastructure/utils/ArrayLib.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
+import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IAccessControlStorageWrapper } from "../../../domain/core/accessControl/IAccessControlStorageWrapper.sol";
 import { BusinessLogicResolverWrapper } from "../../../infrastructure/diamond/BusinessLogicResolverWrapper.sol";
@@ -14,8 +14,8 @@ abstract contract AccessControlStorageWrapper is
     ResolverProxyStorageWrapper,
     BusinessLogicResolverWrapper
 {
-    using LibCommon for EnumerableSet.AddressSet;
-    using LibCommon for EnumerableSet.Bytes32Set;
+    using Pagination for EnumerableSet.AddressSet;
+    using Pagination for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -40,7 +40,7 @@ abstract contract AccessControlStorageWrapper is
     }
 
     modifier onlyConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) override {
-        ArrayLib.checkUniqueValues(_roles, _actives);
+        ArrayValidation.checkUniqueValues(_roles, _actives);
         _;
     }
 

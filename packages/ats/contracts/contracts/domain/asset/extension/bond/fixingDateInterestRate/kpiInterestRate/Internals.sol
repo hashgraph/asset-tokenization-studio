@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CheckpointsLib } from "../../../../../../infrastructure/utils/CheckpointsLib.sol";
+import { Checkpoints } from "../../../../../../infrastructure/utils/Checkpoints.sol";
 import { ModifiersKpiInterestRate } from "./Modifiers.sol";
 
 abstract contract InternalsKpiInterestRate is ModifiersKpiInterestRate {
     // ===== KPIs Methods =====
     function _addKpiData(uint256 _date, uint256 _value, address _project) internal virtual;
-    function _pushKpiData(CheckpointsLib.Checkpoint[] storage _ckpt, uint256 _date, uint256 _value) internal virtual;
+    function _pushKpiData(Checkpoints.Checkpoint[] storage _ckpt, uint256 _date, uint256 _value) internal virtual;
     function _overwriteKpiData(
-        CheckpointsLib.Checkpoint[] storage _ckpt,
+        Checkpoints.Checkpoint[] storage _ckpt,
         uint256 _date,
         uint256 _value,
         uint256 _pos

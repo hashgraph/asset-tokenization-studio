@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
-library CheckpointsLib {
+library Checkpoints {
     struct Checkpoint {
         uint256 from;
         uint256 value;

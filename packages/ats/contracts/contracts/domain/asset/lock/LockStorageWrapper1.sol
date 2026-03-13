@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 import { _LOCK_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { CapStorageWrapper1 } from "../cap/CapStorageWrapper1.sol";
 import { ILock } from "../../../facets/layer_1/lock/ILock.sol";
 
 abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
-    using LibCommon for EnumerableSet.UintSet;
+    using Pagination for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
     struct LockDataStorage {

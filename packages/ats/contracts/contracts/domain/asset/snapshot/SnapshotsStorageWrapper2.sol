@@ -8,7 +8,7 @@ import {
     HolderBalance
 } from "../../../facets/layer_1/snapshot/ISnapshots.sol";
 import { ERC20StorageWrapper2 } from "../ERC1400/ERC20/ERC20StorageWrapper2.sol";
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { Pagination } from "../../../infrastructure/utils/Pagination.sol";
 
 abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20StorageWrapper2 {
     function _updateAbafSnapshot() internal override {
@@ -224,9 +224,9 @@ abstract contract SnapshotsStorageWrapper2 is ISnapshotsStorageWrapper, ERC20Sto
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual override returns (address[] memory) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
 
-        address[] memory tk = new address[](LibCommon.getSize(start, end, _totalTokenHoldersAt(snapshotId)));
+        address[] memory tk = new address[](Pagination.getSize(start, end, _totalTokenHoldersAt(snapshotId)));
         uint256 length = tk.length;
         for (uint256 i = 0; i < length; ) {
             uint256 index = i + 1;

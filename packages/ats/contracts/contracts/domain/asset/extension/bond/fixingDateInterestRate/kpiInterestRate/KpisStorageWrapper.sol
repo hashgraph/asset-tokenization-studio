@@ -3,17 +3,17 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _KPIS_STORAGE_POSITION } from "../../../../../../constants/storagePositions.sol";
 import { IKpis } from "../../../../../../facets/layer_2/kpi/kpiLatest/IKpis.sol";
-import { CheckpointsLib } from "../../../../../../infrastructure/utils/CheckpointsLib.sol";
+import { Checkpoints } from "../../../../../../infrastructure/utils/Checkpoints.sol";
 import { InternalsKpiInterestRate } from "./Internals.sol";
 import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "../../../../../../domain/Internals.sol";
 import { BondStorageWrapper } from "../../../../../../domain/asset/bond/BondStorageWrapper.sol";
 
 abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWrapperFixingDateInterestRate {
-    using CheckpointsLib for CheckpointsLib.Checkpoint[];
+    using Checkpoints for Checkpoints.Checkpoint[];
 
     struct KpisDataStorage {
-        mapping(address => CheckpointsLib.Checkpoint[]) checkpointsByProject;
+        mapping(address => Checkpoints.Checkpoint[]) checkpointsByProject;
         mapping(address => mapping(uint256 => bool)) checkpointsDatesByProject;
         uint256 minDate;
     }
@@ -33,7 +33,7 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
         assert(_isCheckpointDate(_date, _project) == false);
         _setCheckpointDate(_date, _project);
 
-        CheckpointsLib.Checkpoint[] storage ckpt = _kpisDataStorage().checkpointsByProject[_project];
+        Checkpoints.Checkpoint[] storage ckpt = _kpisDataStorage().checkpointsByProject[_project];
         uint256 length = ckpt.length;
 
         if (length == 0 || ckpt[length - 1].from < _date) {
@@ -62,12 +62,12 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
         emit IKpis.KpiDataAdded(_project, _date, _value);
     }
 
-    function _pushKpiData(CheckpointsLib.Checkpoint[] storage _ckpt, uint256 _date, uint256 _value) internal override {
-        _ckpt.push(CheckpointsLib.Checkpoint({ from: _date, value: _value }));
+    function _pushKpiData(Checkpoints.Checkpoint[] storage _ckpt, uint256 _date, uint256 _value) internal override {
+        _ckpt.push(Checkpoints.Checkpoint({ from: _date, value: _value }));
     }
 
     function _overwriteKpiData(
-        CheckpointsLib.Checkpoint[] storage _ckpt,
+        Checkpoints.Checkpoint[] storage _ckpt,
         uint256 _date,
         uint256 _value,
         uint256 _pos
