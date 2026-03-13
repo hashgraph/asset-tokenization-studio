@@ -10,8 +10,8 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
-import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
+import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 
 struct BondDataStorage {
     bytes3 currency;
@@ -214,7 +214,7 @@ library BondStorageWrapper {
 
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
                 ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, account)
-                : AdjustBalancesStorageWrapper.balanceOfAdjustedAt(account, block.timestamp);
+                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, block.timestamp);
 
             couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(block.timestamp);
         }
@@ -244,7 +244,7 @@ library BondStorageWrapper {
         IBondRead.BondDetailsData memory bondDetails = getBondDetails();
 
         principalFor_.numerator =
-            AdjustBalancesStorageWrapper.balanceOfAdjustedAt(account, block.timestamp) *
+            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, block.timestamp) *
             bondDetails.nominalValue;
         principalFor_.denominator =
             10 ** (ERC20StorageWrapper.decimalsAdjustedAt(block.timestamp) + bondDetails.nominalValueDecimals);

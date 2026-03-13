@@ -5,14 +5,15 @@ import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {
     ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage,
-    ActionData
+    CorporateActionDataStorage
 } from "../asset/corporateAction/ICorporateActionsStorageWrapper.sol";
 import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 library CorporateActionsStorageWrapper {
     using Pagination for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    // --- Storage accessor (pure) ---
 
     function corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
         bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
@@ -24,12 +25,7 @@ library CorporateActionsStorageWrapper {
 
     // --- Guard functions ---
 
-    function requireValidDates(uint256 _firstDate, uint256 _secondDate) internal pure {
-        if (_secondDate < _firstDate) {
-            revert ICorporateActionsStorageWrapper.WrongDates(_firstDate, _secondDate);
-        }
-    }
-
+    // solhint-disable-next-line ordering
     function requireMatchingActionType(bytes32 _actionType, uint256 _index) internal view {
         if (getCorporateActionCountByType(_actionType) <= _index)
             revert ICorporateActionsStorageWrapper.WrongIndexForAction(_index, _actionType);
@@ -66,11 +62,7 @@ library CorporateActionsStorageWrapper {
         corporateActionsStorage().actionsData[_actionId].data = _newData;
     }
 
-    function updateCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId,
-        bytes memory newResult
-    ) internal {
+    function updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal {
         CorporateActionDataStorage storage ca = corporateActionsStorage();
         bytes[] memory results = ca.actionsData[actionId].results;
 
@@ -108,9 +100,7 @@ library CorporateActionsStorageWrapper {
         corporateActionIds_ = corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
     }
 
-    function getCorporateActionCountByType(
-        bytes32 _actionType
-    ) internal view returns (uint256 corporateActionCount_) {
+    function getCorporateActionCountByType(bytes32 _actionType) internal view returns (uint256 corporateActionCount_) {
         return corporateActionsStorage().actionsByType[_actionType].length;
     }
 
@@ -128,9 +118,7 @@ library CorporateActionsStorageWrapper {
     ) internal view returns (bytes32[] memory corporateActionIds_) {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
 
-        corporateActionIds_ = new bytes32[](
-            Pagination.getSize(start, end, getCorporateActionCountByType(_actionType))
-        );
+        corporateActionIds_ = new bytes32[](Pagination.getSize(start, end, getCorporateActionCountByType(_actionType)));
 
         CorporateActionDataStorage storage ca = corporateActionsStorage();
 
@@ -139,10 +127,7 @@ library CorporateActionsStorageWrapper {
         }
     }
 
-    function getCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view returns (bytes memory result_) {
+    function getCorporateActionResult(bytes32 actionId, uint256 resultId) internal view returns (bytes memory result_) {
         if (getCorporateActionResultCount(actionId) > resultId)
             result_ = corporateActionsStorage().actionsData[actionId].results[resultId];
     }
@@ -172,5 +157,11 @@ library CorporateActionsStorageWrapper {
 
     function actionContentHashExists(bytes32 _contentHash) internal view returns (bool) {
         return corporateActionsStorage().actionsContentHashes[_contentHash];
+    }
+
+    function requireValidDates(uint256 _firstDate, uint256 _secondDate) internal pure {
+        if (_secondDate < _firstDate) {
+            revert ICorporateActionsStorageWrapper.WrongDates(_firstDate, _secondDate);
+        }
     }
 }

@@ -20,6 +20,8 @@ library KycStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    // --- Storage accessor (pure) ---
+
     function kycStorage() internal pure returns (KycStorage storage kyc_) {
         bytes32 position = _KYC_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -30,10 +32,7 @@ library KycStorageWrapper {
 
     // --- Guard functions ---
 
-    function requireValidDates(uint256 _validFrom, uint256 _validTo, uint256 _timestamp) internal pure {
-        if (_validFrom > _validTo || _validTo < _timestamp) revert IKyc.InvalidDates();
-    }
-
+    // solhint-disable-next-line ordering
     function requireValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view {
         if (!verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
     }
@@ -94,9 +93,7 @@ library KycStorageWrapper {
         return kycStorage().kyc[_account];
     }
 
-    function getKycAccountsCount(
-        IKyc.KycStatus _kycStatus
-    ) internal view returns (uint256 kycAccountsCount_) {
+    function getKycAccountsCount(IKyc.KycStatus _kycStatus) internal view returns (uint256 kycAccountsCount_) {
         kycAccountsCount_ = kycStorage().kycAddressesByStatus[_kycStatus].length();
     }
 
@@ -120,8 +117,7 @@ library KycStorageWrapper {
 
     function verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view returns (bool) {
         KycStorage storage ks = kycStorage();
-        bool internalKycValid = !ks.internalKycActivated ||
-            getKycStatusFor(_account, block.timestamp) == _kycStatus;
+        bool internalKycValid = !ks.internalKycActivated || getKycStatusFor(_account, block.timestamp) == _kycStatus;
         return internalKycValid && ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
     }
 
@@ -131,5 +127,9 @@ library KycStorageWrapper {
 
     function isKycInitialized() internal view returns (bool) {
         return kycStorage().initialized;
+    }
+
+    function requireValidDates(uint256 _validFrom, uint256 _validTo, uint256 _timestamp) internal pure {
+        if (_validFrom > _validTo || _validTo < _timestamp) revert IKyc.InvalidDates();
     }
 }

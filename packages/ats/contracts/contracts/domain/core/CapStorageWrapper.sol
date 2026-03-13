@@ -16,6 +16,8 @@ struct CapDataStorage {
 }
 
 library CapStorageWrapper {
+    // --- Storage accessor (pure) ---
+
     function capStorage() internal pure returns (CapDataStorage storage cap_) {
         bytes32 position = _CAP_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -24,8 +26,13 @@ library CapStorageWrapper {
         }
     }
 
+    function isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure returns (bool) {
+        return (_maxSupply == 0) || (_amount <= _maxSupply);
+    }
+
     // --- Guard functions ---
 
+    // solhint-disable-next-line ordering
     function requireWithinMaxSupply(uint256 _amount, uint256 _timestamp) internal view {
         uint256 maxSupply = getMaxSupplyAdjustedAt(_timestamp);
         if (!isCorrectMaxSupply(ERC1410StorageWrapper.totalSupply() + _amount, maxSupply)) {
@@ -119,8 +126,7 @@ library CapStorageWrapper {
     function adjustMaxSupplyByPartition(bytes32 partition, uint256 factor) internal {
         CapDataStorage storage cs = capStorage();
         uint256 limit = MAX_UINT256 / factor;
-        if (cs.maxSupplyByPartition[partition] > limit)
-            cs.maxSupplyByPartition[partition] = MAX_UINT256;
+        if (cs.maxSupplyByPartition[partition] > limit) cs.maxSupplyByPartition[partition] = MAX_UINT256;
         else cs.maxSupplyByPartition[partition] *= factor;
     }
 
@@ -135,10 +141,7 @@ library CapStorageWrapper {
         return cs.maxSupply * pendingAbaf;
     }
 
-    function getMaxSupplyByPartitionAdjustedAt(
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view returns (uint256) {
+    function getMaxSupplyByPartitionAdjustedAt(bytes32 partition, uint256 timestamp) internal view returns (uint256) {
         CapDataStorage storage cs = capStorage();
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(
             AdjustBalancesStorageWrapper.getAbafAdjustedAt(timestamp),
@@ -152,9 +155,5 @@ library CapStorageWrapper {
 
     function isCapInitialized() internal view returns (bool) {
         return capStorage().initialized;
-    }
-
-    function isCorrectMaxSupply(uint256 _amount, uint256 _maxSupply) internal pure returns (bool) {
-        return (_maxSupply == 0) || (_amount <= _maxSupply);
     }
 }

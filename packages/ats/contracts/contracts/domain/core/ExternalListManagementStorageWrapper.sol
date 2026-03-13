@@ -23,7 +23,7 @@ library ExternalListManagementStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    // --- Storage accessor ---
+    // --- Storage accessor (pure) ---
 
     function externalListStorage(
         bytes32 _position
@@ -36,12 +36,9 @@ library ExternalListManagementStorageWrapper {
 
     // --- Validation ---
 
-    function checkValidAddress(address _addr) internal pure {
-        if (_addr == address(0)) revert IExternalControlListManagement.ZeroAddressNotAllowed();
-    }
-
     // --- Generic external list operations ---
 
+    // solhint-disable-next-line ordering
     function updateExternalLists(
         bytes32 _position,
         address[] calldata _lists,
@@ -146,9 +143,7 @@ library ExternalListManagementStorageWrapper {
     }
 
     function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) internal view returns (bool) {
-        ExternalListDataStorage storage externalKycListStorage = externalListStorage(
-            _KYC_MANAGEMENT_STORAGE_POSITION
-        );
+        ExternalListDataStorage storage externalKycListStorage = externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION);
         uint256 length = getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
         for (uint256 index; index < length; ) {
             if (IExternalKycList(externalKycListStorage.list.at(index)).getKycStatus(_account) != _kycStatus)
@@ -162,5 +157,9 @@ library ExternalListManagementStorageWrapper {
 
     function isKycExternalInitialized() internal view returns (bool) {
         return externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized;
+    }
+
+    function checkValidAddress(address _addr) internal pure {
+        if (_addr == address(0)) revert IExternalControlListManagement.ZeroAddressNotAllowed();
     }
 }

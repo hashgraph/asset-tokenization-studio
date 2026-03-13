@@ -5,13 +5,18 @@ import { _PAUSE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IPauseStorageWrapper } from "./pause/IPauseStorageWrapper.sol";
 import { IExternalPause } from "../../facets/layer_1/externalPause/IExternalPause.sol";
-import { ExternalListManagementStorageWrapper, ExternalListDataStorage } from "./ExternalListManagementStorageWrapper.sol";
+import {
+    ExternalListManagementStorageWrapper,
+    ExternalListDataStorage
+} from "./ExternalListManagementStorageWrapper.sol";
 
 struct PauseDataStorage {
     bool paused;
 }
 
 library PauseStorageWrapper {
+    // --- Storage accessor (pure) ---
+
     function pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
         bytes32 position = _PAUSE_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -20,6 +25,9 @@ library PauseStorageWrapper {
         }
     }
 
+    // --- State-changing functions ---
+
+    // solhint-disable-next-line ordering
     function setPause(bool _paused) internal {
         pauseStorage().paused = _paused;
         if (_paused) {
@@ -63,9 +71,7 @@ library PauseStorageWrapper {
     function isExternallyPaused() internal view returns (bool) {
         ExternalListDataStorage storage externalPauseDataStorage = ExternalListManagementStorageWrapper
             .externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION);
-        uint256 length = ExternalListManagementStorageWrapper.getExternalListsCount(
-            _PAUSE_MANAGEMENT_STORAGE_POSITION
-        );
+        uint256 length = ExternalListManagementStorageWrapper.getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
         for (uint256 index = 0; index < length; ) {
             if (IExternalPause(externalPauseDataStorage.list.at(index)).isPaused()) return true;
             unchecked {
@@ -76,9 +82,6 @@ library PauseStorageWrapper {
     }
 
     function isExternalPauseInitialized() internal view returns (bool) {
-        return
-            ExternalListManagementStorageWrapper
-                .externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION)
-                .initialized;
+        return ExternalListManagementStorageWrapper.externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 }

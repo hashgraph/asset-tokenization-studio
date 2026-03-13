@@ -16,8 +16,8 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
-import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
+import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 
 struct EquityDataStorage {
     bool votingRight;
@@ -341,7 +341,7 @@ library EquityStorageWrapper {
 
             balance_ = (snapshotId != 0)
                 ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(snapshotId, account)
-                : AdjustBalancesStorageWrapper.balanceOfAdjustedAt(account, date);
+                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, date);
 
             decimals_ = (snapshotId != 0)
                 ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)

@@ -22,42 +22,11 @@ import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrap
 import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
+// Phase 5 orchestrator for cross-library balance aggregation
+import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 
 library ERC3643StorageWrapper {
     using LowLevelCall for address;
-
-    function erc3643Storage() internal pure returns (IERC3643Management.ERC3643Storage storage erc3643Storage_) {
-        bytes32 position = _ERC3643_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc3643Storage_.slot := position
-        }
-    }
-
-    // --- Guard functions ---
-
-    function requireUnrecoveredAddress(address _account) internal view {
-        if (isRecovered(_account)) revert IERC3643Management.WalletRecovered();
-    }
-
-    function requireEmptyWallet(address _tokenHolder) internal view {
-        if (!canRecover(_tokenHolder)) revert IERC3643Management.CannotRecoverWallet();
-    }
-
-    function requireValidInputAmountsArrayLength(
-        address[] memory _addresses,
-        uint256[] memory _amounts
-    ) internal pure {
-        if (_addresses.length != _amounts.length) {
-            revert IERC3643Management.InputAmountsArrayLengthMismatch();
-        }
-    }
-
-    function requireValidInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) internal pure {
-        if (_addresses.length != _status.length) {
-            revert IERC3643Management.InputBoolArrayLengthMismatch();
-        }
-    }
 
     // --- Initialization ---
 
@@ -148,7 +117,7 @@ library ERC3643StorageWrapper {
     }
 
     function unfreezeTokens(address _account, uint256 _amount, uint256 _timestamp) internal {
-        checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount, _timestamp);
+        _checkUnfreezeAmount(_DEFAULT_PARTITION, _account, _amount, _timestamp);
         unfreezeTokensByPartition(_DEFAULT_PARTITION, _account, _amount);
     }
 
@@ -239,16 +208,23 @@ library ERC3643StorageWrapper {
         return true;
     }
 
+    // --- Guard functions ---
+
+    function requireUnrecoveredAddress(address _account) internal view {
+        if (isRecovered(_account)) revert IERC3643Management.WalletRecovered();
+    }
+
+    function requireEmptyWallet(address _tokenHolder) internal view {
+        if (!canRecover(_tokenHolder)) revert IERC3643Management.CannotRecoverWallet();
+    }
+
     // --- Read functions ---
 
     function getFrozenAmountFor(address _userAddress) internal view returns (uint256) {
         return erc3643Storage().frozenTokens[_userAddress];
     }
 
-    function getFrozenAmountForByPartition(
-        bytes32 _partition,
-        address _userAddress
-    ) internal view returns (uint256) {
+    function getFrozenAmountForByPartition(bytes32 _partition, address _userAddress) internal view returns (uint256) {
         return erc3643Storage().frozenTokensByPartition[_userAddress][_partition];
     }
 
@@ -263,16 +239,10 @@ library ERC3643StorageWrapper {
                     // solhint-disable quotes
                     "{",
                     '"Resolver": "',
-                    Strings.toHexString(
-                        uint160(address(ResolverProxyStorageWrapper.getBusinessLogicResolver())),
-                        20
-                    ),
+                    Strings.toHexString(uint160(address(ResolverProxyStorageWrapper.getBusinessLogicResolver())), 20),
                     '", ',
                     '"Config ID": "',
-                    Strings.toHexString(
-                        uint256(ResolverProxyStorageWrapper.getResolverProxyConfigurationId()),
-                        32
-                    ),
+                    Strings.toHexString(uint256(ResolverProxyStorageWrapper.getResolverProxyConfigurationId()), 32),
                     '", ',
                     '"Version": "',
                     Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
@@ -299,10 +269,7 @@ library ERC3643StorageWrapper {
         return erc3643Storage().initialized;
     }
 
-    function getFrozenAmountForAdjustedAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) internal view returns (uint256) {
+    function getFrozenAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactorForFrozenAmountByTokenHolderAdjustedAt(
             _tokenHolder,
             _timestamp
@@ -328,16 +295,13 @@ library ERC3643StorageWrapper {
         uint256 _timestamp
     ) internal view returns (uint256) {
         return
-            ERC1410StorageWrapper.getTotalBalanceForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
+            TokenCoreOps.getTotalBalanceForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
             getFrozenAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
     }
 
-    function getTotalBalanceForAdjustedAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) internal view returns (uint256) {
+    function getTotalBalanceForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
         return
-            ERC1410StorageWrapper.getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) +
+            TokenCoreOps.getTotalBalanceForAdjustedAt(_tokenHolder, _timestamp) +
             getFrozenAmountForAdjustedAt(_tokenHolder, _timestamp);
     }
 
@@ -349,9 +313,31 @@ library ERC3643StorageWrapper {
             0;
     }
 
+    // --- Pure functions (before private helpers per solhint ordering) ---
+
+    function erc3643Storage() internal pure returns (IERC3643Management.ERC3643Storage storage erc3643Storage_) {
+        bytes32 position = _ERC3643_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc3643Storage_.slot := position
+        }
+    }
+
+    function requireValidInputAmountsArrayLength(address[] memory _addresses, uint256[] memory _amounts) internal pure {
+        if (_addresses.length != _amounts.length) {
+            revert IERC3643Management.InputAmountsArrayLengthMismatch();
+        }
+    }
+
+    function requireValidInputBoolArrayLength(address[] memory _addresses, bool[] memory _status) internal pure {
+        if (_addresses.length != _status.length) {
+            revert IERC3643Management.InputBoolArrayLengthMismatch();
+        }
+    }
+
     // --- Private helpers ---
 
-    function checkUnfreezeAmount(
+    function _checkUnfreezeAmount(
         bytes32 _partition,
         address _userAddress,
         uint256 _amount,
