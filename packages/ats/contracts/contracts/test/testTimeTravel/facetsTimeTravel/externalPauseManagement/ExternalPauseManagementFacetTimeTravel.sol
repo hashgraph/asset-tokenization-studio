@@ -3,16 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ExternalPauseManagementFacet
-} from "../../../../facets/layer_1/externalPause/standard/ExternalPauseManagementFacet.sol";
+} from "../../../../facets/layer_1/externalPause/ExternalPauseManagementFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
-contract ExternalPauseManagementFacetTimeTravel is ExternalPauseManagementFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+contract ExternalPauseManagementFacetTimeTravel is ExternalPauseManagementFacet, TimeTravelStorageWrapper {}

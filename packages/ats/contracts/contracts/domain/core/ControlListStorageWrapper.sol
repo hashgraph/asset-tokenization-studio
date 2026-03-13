@@ -17,7 +17,7 @@ library ControlListStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    function controlListStorage() internal pure returns (ControlListStorage storage controlList_) {
+    function _controlListStorage() internal pure returns (ControlListStorage storage controlList_) {
         bytes32 position = _CONTROL_LIST_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -27,8 +27,8 @@ library ControlListStorageWrapper {
 
     // --- Guard functions ---
 
-    function requireListedAllowed(address _account) internal view {
-        if (!isAbleToAccess(_account)) {
+    function _requireListedAllowed(address _account) internal view {
+        if (!_isAbleToAccess(_account)) {
             revert IControlListStorageWrapper.AccountIsBlocked(_account);
         }
     }
@@ -36,49 +36,49 @@ library ControlListStorageWrapper {
     // --- Initialization ---
 
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ControlList(bool _isWhiteList) internal {
-        ControlListStorage storage cls = controlListStorage();
+    function _initialize_ControlList(bool _isWhiteList) internal {
+        ControlListStorage storage cls = _controlListStorage();
         cls.isWhiteList = _isWhiteList;
         cls.initialized = true;
     }
 
     // --- State-changing functions ---
 
-    function addToControlList(address _account) internal returns (bool success_) {
-        success_ = controlListStorage().list.add(_account);
+    function _addToControlList(address _account) internal returns (bool success_) {
+        success_ = _controlListStorage().list.add(_account);
     }
 
-    function removeFromControlList(address _account) internal returns (bool success_) {
-        success_ = controlListStorage().list.remove(_account);
+    function _removeFromControlList(address _account) internal returns (bool success_) {
+        success_ = _controlListStorage().list.remove(_account);
     }
 
     // --- Read functions ---
 
-    function getControlListType() internal view returns (bool) {
-        return controlListStorage().isWhiteList;
+    function _getControlListType() internal view returns (bool) {
+        return _controlListStorage().isWhiteList;
     }
 
-    function getControlListCount() internal view returns (uint256 controlListCount_) {
-        controlListCount_ = controlListStorage().list.length();
+    function _getControlListCount() internal view returns (uint256 controlListCount_) {
+        controlListCount_ = _controlListStorage().list.length();
     }
 
-    function getControlListMembers(
+    function _getControlListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
-        return controlListStorage().list.getFromSet(_pageIndex, _pageLength);
+        return _controlListStorage().list.getFromSet(_pageIndex, _pageLength);
     }
 
-    function isInControlList(address _account) internal view returns (bool) {
-        return controlListStorage().list.contains(_account);
+    function _isInControlList(address _account) internal view returns (bool) {
+        return _controlListStorage().list.contains(_account);
     }
 
-    function isAbleToAccess(address _account) internal view returns (bool) {
-        return (getControlListType() == isInControlList(_account) &&
-            ExternalListManagementStorageWrapper.isExternallyAuthorized(_account));
+    function _isAbleToAccess(address _account) internal view returns (bool) {
+        return (_getControlListType() == _isInControlList(_account) &&
+            ExternalListManagementStorageWrapper._isExternallyAuthorized(_account));
     }
 
-    function isControlListInitialized() internal view returns (bool) {
-        return controlListStorage().initialized;
+    function _isControlListInitialized() internal view returns (bool) {
+        return _controlListStorage().initialized;
     }
 }

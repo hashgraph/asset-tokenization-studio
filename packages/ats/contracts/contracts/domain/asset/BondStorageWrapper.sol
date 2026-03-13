@@ -26,11 +26,11 @@ struct BondDataStorage {
 library BondStorageWrapper {
     // --- Guard functions ---
 
-    function requireValidMaturityDate(uint256 maturityDate) internal view {
-        if (maturityDate <= getMaturityDate()) revert IBondStorageWrapper.BondMaturityDateWrong();
+    function _requireValidMaturityDate(uint256 maturityDate) internal view {
+        if (maturityDate <= _getMaturityDate()) revert IBondStorageWrapper.BondMaturityDateWrong();
     }
 
-    function bondStorage() internal pure returns (BondDataStorage storage bondData_) {
+    function _bondStorage() internal pure returns (BondDataStorage storage bondData_) {
         bytes32 position = _BOND_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -39,10 +39,10 @@ library BondStorageWrapper {
     }
 
     // solhint-disable-next-line ordering,func-name-mixedcase
-    function initialize_bond(IBondRead.BondDetailsData calldata bondDetailsData) internal {
-        BondDataStorage storage bs = bondStorage();
+    function _initialize_bond(IBondRead.BondDetailsData calldata bondDetailsData) internal {
+        BondDataStorage storage bs = _bondStorage();
         bs.initialized = true;
-        storeBondDetails(
+        _storeBondDetails(
             IBondRead.BondDetailsData({
                 currency: bondDetailsData.currency,
                 nominalValue: bondDetailsData.nominalValue,
@@ -53,8 +53,8 @@ library BondStorageWrapper {
         );
     }
 
-    function storeBondDetails(IBondRead.BondDetailsData memory bondDetails) internal {
-        BondDataStorage storage bs = bondStorage();
+    function _storeBondDetails(IBondRead.BondDetailsData memory bondDetails) internal {
+        BondDataStorage storage bs = _bondStorage();
         bs.currency = bondDetails.currency;
         bs.nominalValue = bondDetails.nominalValue;
         bs.nominalValueDecimals = bondDetails.nominalValueDecimals;
@@ -62,46 +62,46 @@ library BondStorageWrapper {
         bs.maturityDate = bondDetails.maturityDate;
     }
 
-    function setCoupon(
+    function _setCoupon(
         IBondRead.Coupon memory newCoupon
     ) internal returns (bytes32 corporateActionId_, uint256 couponID_) {
         bytes memory data = abi.encode(newCoupon);
 
-        (corporateActionId_, couponID_) = CorporateActionsStorageWrapper.addCorporateAction(
+        (corporateActionId_, couponID_) = CorporateActionsStorageWrapper._addCorporateAction(
             COUPON_CORPORATE_ACTION_TYPE,
             data
         );
 
-        initCoupon(corporateActionId_, newCoupon);
+        _initCoupon(corporateActionId_, newCoupon);
 
         emit IBondStorageWrapper.CouponSet(corporateActionId_, couponID_, msg.sender, newCoupon);
     }
 
-    function initCoupon(bytes32 actionId, IBondRead.Coupon memory newCoupon) internal {
+    function _initCoupon(bytes32 actionId, IBondRead.Coupon memory newCoupon) internal {
         if (actionId == bytes32(0)) {
             revert IBondStorageWrapper.CouponCreationFailed();
         }
 
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
-        ScheduledTasksStorageWrapper.addScheduledSnapshot(newCoupon.recordDate, actionId);
+        ScheduledTasksStorageWrapper._addScheduledCrossOrderedTask(newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
+        ScheduledTasksStorageWrapper._addScheduledSnapshot(newCoupon.recordDate, actionId);
     }
 
-    function setMaturityDate(uint256 maturityDate) internal returns (bool success_) {
-        bondStorage().maturityDate = maturityDate;
+    function _setMaturityDate(uint256 maturityDate) internal returns (bool success_) {
+        _bondStorage().maturityDate = maturityDate;
         return true;
     }
 
-    function addToCouponsOrderedList(uint256 couponID) internal {
-        bondStorage().couponsOrderedListByIds.push(couponID);
+    function _addToCouponsOrderedList(uint256 couponID) internal {
+        _bondStorage().couponsOrderedListByIds.push(couponID);
     }
 
-    function updateCouponRate(
+    function _updateCouponRate(
         uint256 couponID,
         IBondRead.Coupon memory coupon,
         uint256 rate,
         uint8 rateDecimals
     ) internal {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+        bytes32 actionId = CorporateActionsStorageWrapper._getCorporateActionIdByTypeIndex(
             COUPON_CORPORATE_ACTION_TYPE,
             couponID - 1
         );
@@ -110,69 +110,69 @@ library BondStorageWrapper {
         coupon.rateDecimals = rateDecimals;
         coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
 
-        CorporateActionsStorageWrapper.updateCorporateActionData(actionId, abi.encode(coupon));
+        CorporateActionsStorageWrapper._updateCorporateActionData(actionId, abi.encode(coupon));
     }
 
-    function getCouponFromOrderedListAt(uint256 pos) internal view returns (uint256 couponID_) {
-        if (pos >= getCouponsOrderedListTotalAdjustedAt(block.timestamp)) return 0;
+    function _getCouponFromOrderedListAt(uint256 pos) internal view returns (uint256 couponID_) {
+        if (pos >= _getCouponsOrderedListTotalAdjustedAt(block.timestamp)) return 0;
 
-        uint256 actualOrderedListLengthTotal = getCouponsOrderedListTotal();
+        uint256 actualOrderedListLengthTotal = _getCouponsOrderedListTotal();
 
-        if (pos < actualOrderedListLengthTotal) return bondStorage().couponsOrderedListByIds[pos];
+        if (pos < actualOrderedListLengthTotal) return _bondStorage().couponsOrderedListByIds[pos];
 
         uint256 pendingIndexOffset = pos - actualOrderedListLengthTotal;
 
-        uint256 index = ScheduledTasksStorageWrapper.getScheduledCouponListingCount() - 1 - pendingIndexOffset;
+        uint256 index = ScheduledTasksStorageWrapper._getScheduledCouponListingCount() - 1 - pendingIndexOffset;
 
-        return ScheduledTasksStorageWrapper.getScheduledCouponListingIdAtIndex(index);
+        return ScheduledTasksStorageWrapper._getScheduledCouponListingIdAtIndex(index);
     }
 
-    function getCouponsOrderedList(
+    function _getCouponsOrderedList(
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (uint256[] memory couponIDs_) {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
 
         couponIDs_ = new uint256[](
-            Pagination.getSize(start, end, getCouponsOrderedListTotalAdjustedAt(block.timestamp))
+            Pagination.getSize(start, end, _getCouponsOrderedListTotalAdjustedAt(block.timestamp))
         );
 
         for (uint256 i = 0; i < couponIDs_.length; i++) {
-            couponIDs_[i] = getCouponFromOrderedListAt(start + i);
+            couponIDs_[i] = _getCouponFromOrderedListAt(start + i);
         }
     }
 
-    function getCouponsOrderedListTotalAdjustedAt(uint256 timestamp) internal view returns (uint256 total_) {
+    function _getCouponsOrderedListTotalAdjustedAt(uint256 timestamp) internal view returns (uint256 total_) {
         return
-            getCouponsOrderedListTotal() +
-            ScheduledTasksStorageWrapper.getPendingScheduledCouponListingTotalAt(timestamp);
+            _getCouponsOrderedListTotal() +
+            ScheduledTasksStorageWrapper._getPendingScheduledCouponListingTotalAt(timestamp);
     }
 
-    function getCouponsOrderedListTotal() internal view returns (uint256 total_) {
-        return bondStorage().couponsOrderedListByIds.length;
+    function _getCouponsOrderedListTotal() internal view returns (uint256 total_) {
+        return _bondStorage().couponsOrderedListByIds.length;
     }
 
-    function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
-        uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(block.timestamp);
+    function _getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
+        uint256 orderedListLength = _getCouponsOrderedListTotalAdjustedAt(block.timestamp);
 
         if (orderedListLength < 2) return (0);
 
-        if (getCouponFromOrderedListAt(0) == couponID) return (0);
+        if (_getCouponFromOrderedListAt(0) == couponID) return (0);
 
         orderedListLength--;
         uint256 previousCouponId;
 
         for (uint256 index = 0; index < orderedListLength; index++) {
-            previousCouponId = getCouponFromOrderedListAt(index);
-            uint256 couponIdAtNext = getCouponFromOrderedListAt(index + 1);
+            previousCouponId = _getCouponFromOrderedListAt(index);
+            uint256 couponIdAtNext = _getCouponFromOrderedListAt(index + 1);
             if (couponIdAtNext == couponID) break;
         }
 
         return previousCouponId;
     }
 
-    function getBondDetails() internal view returns (IBondRead.BondDetailsData memory bondDetails_) {
-        BondDataStorage storage bs = bondStorage();
+    function _getBondDetails() internal view returns (IBondRead.BondDetailsData memory bondDetails_) {
+        BondDataStorage storage bs = _bondStorage();
         bondDetails_ = IBondRead.BondDetailsData({
             currency: bs.currency,
             nominalValue: bs.nominalValue,
@@ -182,30 +182,30 @@ library BondStorageWrapper {
         });
     }
 
-    function getMaturityDate() internal view returns (uint256 maturityDate_) {
-        return bondStorage().maturityDate;
+    function _getMaturityDate() internal view returns (uint256 maturityDate_) {
+        return _bondStorage().maturityDate;
     }
 
-    function getCoupon(uint256 couponID) internal view returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+    function _getCoupon(uint256 couponID) internal view returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
+        bytes32 actionId = CorporateActionsStorageWrapper._getCorporateActionIdByTypeIndex(
             COUPON_CORPORATE_ACTION_TYPE,
             couponID - 1
         );
 
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        (, , bytes memory data) = CorporateActionsStorageWrapper._getCorporateAction(actionId);
 
         if (data.length > 0) {
             (registeredCoupon_.coupon) = abi.decode(data, (IBondRead.Coupon));
         }
 
-        registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredCoupon_.snapshotId = CorporateActionsStorageWrapper._getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
 
-    function getCouponFor(
+    function _getCouponFor(
         uint256 couponID,
         address account
     ) internal view returns (IBondRead.CouponFor memory couponFor_) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = getCoupon(couponID);
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(couponID);
 
         couponFor_.coupon = registeredCoupon.coupon;
 
@@ -213,22 +213,22 @@ library BondStorageWrapper {
             couponFor_.recordDateReached = true;
 
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, account)
-                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, block.timestamp);
+                ? SnapshotsStorageWrapper._getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, account)
+                : ERC3643StorageWrapper._getTotalBalanceForAdjustedAt(account, block.timestamp);
 
-            couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(block.timestamp);
+            couponFor_.decimals = ERC20StorageWrapper._decimalsAdjustedAt(block.timestamp);
         }
     }
 
-    function getCouponAmountFor(
+    function _getCouponAmountFor(
         uint256 couponID,
         address account
     ) internal view returns (IBondRead.CouponAmountFor memory couponAmountFor_) {
-        IBondRead.CouponFor memory couponFor = getCouponFor(couponID, account);
+        IBondRead.CouponFor memory couponFor = _getCouponFor(couponID, account);
 
         if (!couponFor.recordDateReached) return couponAmountFor_;
 
-        IBondRead.BondDetailsData memory bondDetails = getBondDetails();
+        IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
 
         couponAmountFor_.recordDateReached = true;
 
@@ -240,47 +240,47 @@ library BondStorageWrapper {
             365 days;
     }
 
-    function getPrincipalFor(address account) internal view returns (IBondRead.PrincipalFor memory principalFor_) {
-        IBondRead.BondDetailsData memory bondDetails = getBondDetails();
+    function _getPrincipalFor(address account) internal view returns (IBondRead.PrincipalFor memory principalFor_) {
+        IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
 
         principalFor_.numerator =
-            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, block.timestamp) *
+            ERC3643StorageWrapper._getTotalBalanceForAdjustedAt(account, block.timestamp) *
             bondDetails.nominalValue;
         principalFor_.denominator =
-            10 ** (ERC20StorageWrapper.decimalsAdjustedAt(block.timestamp) + bondDetails.nominalValueDecimals);
+            10 ** (ERC20StorageWrapper._decimalsAdjustedAt(block.timestamp) + bondDetails.nominalValueDecimals);
     }
 
-    function getCouponCount() internal view returns (uint256 couponCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
+    function _getCouponCount() internal view returns (uint256 couponCount_) {
+        return CorporateActionsStorageWrapper._getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }
 
-    function getCouponHolders(
+    function _getCouponHolders(
         uint256 couponID,
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (address[] memory holders_) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = getCoupon(couponID);
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(couponID);
 
         if (registeredCoupon.coupon.recordDate >= block.timestamp) return new address[](0);
 
         if (registeredCoupon.snapshotId != 0)
-            return SnapshotsStorageWrapper.tokenHoldersAt(registeredCoupon.snapshotId, pageIndex, pageLength);
+            return SnapshotsStorageWrapper._tokenHoldersAt(registeredCoupon.snapshotId, pageIndex, pageLength);
 
-        return ERC1410StorageWrapper.getTokenHolders(pageIndex, pageLength);
+        return ERC1410StorageWrapper._getTokenHolders(pageIndex, pageLength);
     }
 
-    function getTotalCouponHolders(uint256 couponID) internal view returns (uint256) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = getCoupon(couponID);
+    function _getTotalCouponHolders(uint256 couponID) internal view returns (uint256) {
+        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(couponID);
 
         if (registeredCoupon.coupon.recordDate >= block.timestamp) return 0;
 
         if (registeredCoupon.snapshotId != 0)
-            return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredCoupon.snapshotId);
+            return SnapshotsStorageWrapper._totalTokenHoldersAt(registeredCoupon.snapshotId);
 
-        return ERC1410StorageWrapper.getTotalTokenHolders();
+        return ERC1410StorageWrapper._getTotalTokenHolders();
     }
 
-    function isBondInitialized() internal view returns (bool) {
-        return bondStorage().initialized;
+    function _isBondInitialized() internal view returns (bool) {
+        return _bondStorage().initialized;
     }
 }

@@ -25,7 +25,7 @@ library ClearingOps {
         ThirdPartyType _thirdPartyType
     ) public returns (bool success_, uint256 clearingId_) {
         return
-            ClearingStorageWrapper.clearingTransferCreation(
+            ClearingStorageWrapper._clearingTransferCreation(
                 _clearingOperation,
                 _amount,
                 _to,
@@ -44,7 +44,7 @@ library ClearingOps {
         ThirdPartyType _thirdPartyType
     ) public returns (bool success_, uint256 clearingId_) {
         return
-            ClearingStorageWrapper.clearingRedeemCreation(
+            ClearingStorageWrapper._clearingRedeemCreation(
                 _clearingOperation,
                 _amount,
                 _from,
@@ -62,7 +62,7 @@ library ClearingOps {
         ThirdPartyType _thirdPartyType
     ) public returns (bool success_, uint256 clearingId_) {
         return
-            ClearingStorageWrapper.clearingHoldCreationCreation(
+            ClearingStorageWrapper._clearingHoldCreationCreation(
                 _clearingOperation,
                 _from,
                 _hold,
@@ -79,21 +79,21 @@ library ClearingOps {
     function approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public returns (bool success_, bytes memory operationData_, bytes32 partition_) {
-        return ClearingStorageWrapper.approveClearingOperationByPartition(_clearingOperationIdentifier);
+        return ClearingStorageWrapper._approveClearingOperationByPartition(_clearingOperationIdentifier);
     }
 
     /// @notice Cancel a clearing operation — returns tokens to holder
     function cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public returns (bool success_) {
-        return ClearingStorageWrapper.cancelClearingOperationByPartition(_clearingOperationIdentifier);
+        return ClearingStorageWrapper._cancelClearingOperationByPartition(_clearingOperationIdentifier);
     }
 
     /// @notice Reclaim an expired clearing operation — returns tokens to holder
     function reclaimClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public returns (bool success_) {
-        return ClearingStorageWrapper.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
+        return ClearingStorageWrapper._reclaimClearingOperationByPartition(_clearingOperationIdentifier);
     }
 
     // ============================================================================
@@ -108,7 +108,7 @@ library ClearingOps {
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
         return
-            ClearingStorageWrapper.protectedClearingTransferByPartition(
+            ClearingStorageWrapper._protectedClearingTransferByPartition(
                 _protectedClearingOperation,
                 _amount,
                 _to,
@@ -123,7 +123,11 @@ library ClearingOps {
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
         return
-            ClearingStorageWrapper.protectedClearingRedeemByPartition(_protectedClearingOperation, _amount, _signature);
+            ClearingStorageWrapper._protectedClearingRedeemByPartition(
+                _protectedClearingOperation,
+                _amount,
+                _signature
+            );
     }
 
     /// @notice Protected clearing hold creation with EIP-712 signature verification
@@ -133,7 +137,7 @@ library ClearingOps {
         bytes calldata _signature
     ) public returns (bool success_, uint256 clearingId_) {
         return
-            ClearingStorageWrapper.protectedClearingCreateHoldByPartition(
+            ClearingStorageWrapper._protectedClearingCreateHoldByPartition(
                 _protectedClearingOperation,
                 _hold,
                 _signature
@@ -152,7 +156,7 @@ library ClearingOps {
         address _from,
         uint256 _amount
     ) public {
-        ClearingStorageWrapper.decreaseAllowedBalanceForClearing(
+        ClearingStorageWrapper._decreaseAllowedBalanceForClearing(
             _partition,
             _clearingId,
             _clearingOperationType,

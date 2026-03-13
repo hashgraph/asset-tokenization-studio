@@ -14,21 +14,21 @@ abstract contract Kyc is IKyc, TimestampProvider {
     error AlreadyInitialized();
 
     function initializeInternalKyc(bool _internalKycActivated) external {
-        if (KycStorageWrapper.isKycInitialized()) revert AlreadyInitialized();
-        KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
+        if (KycStorageWrapper._isKycInitialized()) revert AlreadyInitialized();
+        KycStorageWrapper._initializeInternalKyc(_internalKycActivated);
     }
 
     function activateInternalKyc() external returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_INTERNAL_KYC_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        success_ = KycStorageWrapper.setInternalKyc(true);
+        AccessControlStorageWrapper._checkRole(_INTERNAL_KYC_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        success_ = KycStorageWrapper._setInternalKyc(true);
         emit InternalKycStatusUpdated(msg.sender, true);
     }
 
     function deactivateInternalKyc() external returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_INTERNAL_KYC_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        success_ = KycStorageWrapper.setInternalKyc(false);
+        AccessControlStorageWrapper._checkRole(_INTERNAL_KYC_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        success_ = KycStorageWrapper._setInternalKyc(false);
         emit InternalKycStatusUpdated(msg.sender, false);
     }
 
@@ -39,36 +39,36 @@ abstract contract Kyc is IKyc, TimestampProvider {
         uint256 _validTo,
         address _issuer
     ) external virtual override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_KYC_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        ERC1410StorageWrapper.requireValidAddress(_account);
-        KycStorageWrapper.requireValidKycStatus(KycStatus.NOT_GRANTED, _account);
-        KycStorageWrapper.requireValidDates(_validFrom, _validTo, _getBlockTimestamp());
-        SsiManagementStorageWrapper.requireIssuer(_issuer);
-        success_ = KycStorageWrapper.grantKyc(_account, _vcId, _validFrom, _validTo, _issuer);
+        AccessControlStorageWrapper._checkRole(_KYC_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1410StorageWrapper._requireValidAddress(_account);
+        KycStorageWrapper._requireValidKycStatus(KycStatus.NOT_GRANTED, _account);
+        KycStorageWrapper._requireValidDates(_validFrom, _validTo, _getBlockTimestamp());
+        SsiManagementStorageWrapper._requireIssuer(_issuer);
+        success_ = KycStorageWrapper._grantKyc(_account, _vcId, _validFrom, _validTo, _issuer);
         emit KycGranted(_account, msg.sender);
     }
 
     function revokeKyc(address _account) external virtual override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_KYC_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        ERC1410StorageWrapper.requireValidAddress(_account);
-        success_ = KycStorageWrapper.revokeKyc(_account);
+        AccessControlStorageWrapper._checkRole(_KYC_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1410StorageWrapper._requireValidAddress(_account);
+        success_ = KycStorageWrapper._revokeKyc(_account);
         emit KycRevoked(_account, msg.sender);
     }
 
     function getKycStatusFor(address _account) external view virtual override returns (KycStatus kycStatus_) {
-        kycStatus_ = KycStorageWrapper.getKycStatusFor(_account, _getBlockTimestamp());
+        kycStatus_ = KycStorageWrapper._getKycStatusFor(_account, _getBlockTimestamp());
     }
 
     function getKycFor(address _account) external view virtual override returns (KycData memory kyc_) {
-        kyc_ = KycStorageWrapper.getKycFor(_account);
+        kyc_ = KycStorageWrapper._getKycFor(_account);
     }
 
     function getKycAccountsCount(
         KycStatus _kycStatus
     ) external view virtual override returns (uint256 kycAccountsCount_) {
-        kycAccountsCount_ = KycStorageWrapper.getKycAccountsCount(_kycStatus);
+        kycAccountsCount_ = KycStorageWrapper._getKycAccountsCount(_kycStatus);
     }
 
     function getKycAccountsData(
@@ -76,10 +76,10 @@ abstract contract Kyc is IKyc, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view virtual override returns (address[] memory accounts_, KycData[] memory kycData_) {
-        (accounts_, kycData_) = KycStorageWrapper.getKycAccountsData(_kycStatus, _pageIndex, _pageLength);
+        (accounts_, kycData_) = KycStorageWrapper._getKycAccountsData(_kycStatus, _pageIndex, _pageLength);
     }
 
     function isInternalKycActivated() external view virtual override returns (bool) {
-        return KycStorageWrapper.isInternalKycActivated();
+        return KycStorageWrapper._isInternalKycActivated();
     }
 }

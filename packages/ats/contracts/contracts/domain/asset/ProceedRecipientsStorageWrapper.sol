@@ -13,7 +13,7 @@ struct ProceedRecipientsDataStorage {
 }
 
 library ProceedRecipientsStorageWrapper {
-    function proceedRecipientsDataStorage()
+    function _proceedRecipientsDataStorage()
         internal
         pure
         returns (ProceedRecipientsDataStorage storage proceedRecipientsDataStorage_)
@@ -28,14 +28,14 @@ library ProceedRecipientsStorageWrapper {
     // --- Guard functions ---
 
     // solhint-disable-next-line ordering
-    function requireProceedRecipient(address _proceedRecipient) internal view {
-        if (!isProceedRecipient(_proceedRecipient)) {
+    function _requireProceedRecipient(address _proceedRecipient) internal view {
+        if (!_isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientNotFound(_proceedRecipient);
         }
     }
 
-    function requireNotProceedRecipient(address _proceedRecipient) internal view {
-        if (isProceedRecipient(_proceedRecipient)) {
+    function _requireNotProceedRecipient(address _proceedRecipient) internal view {
+        if (_isProceedRecipient(_proceedRecipient)) {
             revert IProceedRecipients.ProceedRecipientAlreadyExists(_proceedRecipient);
         }
     }
@@ -43,78 +43,78 @@ library ProceedRecipientsStorageWrapper {
     // --- Initialization ---
 
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
+    function _initialize_ProceedRecipients(address[] calldata _proceedRecipients, bytes[] calldata _data) internal {
         uint256 length = _proceedRecipients.length;
         for (uint256 index; index < length; ) {
-            ExternalListManagementStorageWrapper.checkValidAddress(_proceedRecipients[index]);
-            ExternalListManagementStorageWrapper.addExternalList(
+            ExternalListManagementStorageWrapper._checkValidAddress(_proceedRecipients[index]);
+            ExternalListManagementStorageWrapper._addExternalList(
                 _PROCEED_RECIPIENTS_STORAGE_POSITION,
                 _proceedRecipients[index]
             );
-            setProceedRecipientData(_proceedRecipients[index], _data[index]);
+            _setProceedRecipientData(_proceedRecipients[index], _data[index]);
             unchecked {
                 ++index;
             }
         }
 
-        ExternalListManagementStorageWrapper.setExternalListInitialized(_PROCEED_RECIPIENTS_STORAGE_POSITION);
+        ExternalListManagementStorageWrapper._setExternalListInitialized(_PROCEED_RECIPIENTS_STORAGE_POSITION);
     }
 
     // --- State-changing functions ---
 
-    function addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal {
-        ExternalListManagementStorageWrapper.addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
-        setProceedRecipientData(_proceedRecipient, _data);
+    function _addProceedRecipient(address _proceedRecipient, bytes calldata _data) internal {
+        ExternalListManagementStorageWrapper._addExternalList(_PROCEED_RECIPIENTS_STORAGE_POSITION, _proceedRecipient);
+        _setProceedRecipientData(_proceedRecipient, _data);
     }
 
-    function removeProceedRecipient(address _proceedRecipient) internal {
-        ExternalListManagementStorageWrapper.removeExternalList(
+    function _removeProceedRecipient(address _proceedRecipient) internal {
+        ExternalListManagementStorageWrapper._removeExternalList(
             _PROCEED_RECIPIENTS_STORAGE_POSITION,
             _proceedRecipient
         );
-        removeProceedRecipientData(_proceedRecipient);
+        _removeProceedRecipientData(_proceedRecipient);
     }
 
-    function setProceedRecipientData(address _proceedRecipient, bytes calldata _data) internal {
-        proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient] = _data;
+    function _setProceedRecipientData(address _proceedRecipient, bytes calldata _data) internal {
+        _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient] = _data;
     }
 
-    function removeProceedRecipientData(address _proceedRecipient) internal {
-        delete proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
+    function _removeProceedRecipientData(address _proceedRecipient) internal {
+        delete _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
     }
 
     // --- Read functions ---
 
-    function getProceedRecipientData(address _proceedRecipient) internal view returns (bytes memory) {
-        return proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
+    function _getProceedRecipientData(address _proceedRecipient) internal view returns (bytes memory) {
+        return _proceedRecipientsDataStorage().proceedRecipientData[_proceedRecipient];
     }
 
-    function isProceedRecipient(address _proceedRecipient) internal view returns (bool) {
+    function _isProceedRecipient(address _proceedRecipient) internal view returns (bool) {
         return
-            ExternalListManagementStorageWrapper.isExternalList(
+            ExternalListManagementStorageWrapper._isExternalList(
                 _PROCEED_RECIPIENTS_STORAGE_POSITION,
                 _proceedRecipient
             );
     }
 
-    function getProceedRecipientsCount() internal view returns (uint256) {
-        return ExternalListManagementStorageWrapper.getExternalListsCount(_PROCEED_RECIPIENTS_STORAGE_POSITION);
+    function _getProceedRecipientsCount() internal view returns (uint256) {
+        return ExternalListManagementStorageWrapper._getExternalListsCount(_PROCEED_RECIPIENTS_STORAGE_POSITION);
     }
 
-    function getProceedRecipients(
+    function _getProceedRecipients(
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory proceedRecipients_) {
         return
-            ExternalListManagementStorageWrapper.getExternalListsMembers(
+            ExternalListManagementStorageWrapper._getExternalListsMembers(
                 _PROCEED_RECIPIENTS_STORAGE_POSITION,
                 _pageIndex,
                 _pageLength
             );
     }
 
-    function isProceedRecipientsInitialized() internal view returns (bool) {
+    function _isProceedRecipientsInitialized() internal view returns (bool) {
         return
-            ExternalListManagementStorageWrapper.externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized;
+            ExternalListManagementStorageWrapper._externalListStorage(_PROCEED_RECIPIENTS_STORAGE_POSITION).initialized;
     }
 }

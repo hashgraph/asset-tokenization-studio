@@ -35,7 +35,7 @@ struct EquityDataStorage {
 }
 
 library EquityStorageWrapper {
-    function equityStorage() internal pure returns (EquityDataStorage storage equityData_) {
+    function _equityStorage() internal pure returns (EquityDataStorage storage equityData_) {
         bytes32 position = _EQUITY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -44,82 +44,82 @@ library EquityStorageWrapper {
     }
 
     // solhint-disable-next-line ordering
-    function storeEquityDetails(IEquity.EquityDetailsData memory equityDetailsData) internal {
-        equityStorage().votingRight = equityDetailsData.votingRight;
-        equityStorage().informationRight = equityDetailsData.informationRight;
-        equityStorage().liquidationRight = equityDetailsData.liquidationRight;
-        equityStorage().subscriptionRight = equityDetailsData.subscriptionRight;
-        equityStorage().conversionRight = equityDetailsData.conversionRight;
-        equityStorage().redemptionRight = equityDetailsData.redemptionRight;
-        equityStorage().putRight = equityDetailsData.putRight;
-        equityStorage().dividendRight = equityDetailsData.dividendRight;
-        equityStorage().currency = equityDetailsData.currency;
-        equityStorage().nominalValue = equityDetailsData.nominalValue;
-        equityStorage().nominalValueDecimals = equityDetailsData.nominalValueDecimals;
+    function _storeEquityDetails(IEquity.EquityDetailsData memory equityDetailsData) internal {
+        _equityStorage().votingRight = equityDetailsData.votingRight;
+        _equityStorage().informationRight = equityDetailsData.informationRight;
+        _equityStorage().liquidationRight = equityDetailsData.liquidationRight;
+        _equityStorage().subscriptionRight = equityDetailsData.subscriptionRight;
+        _equityStorage().conversionRight = equityDetailsData.conversionRight;
+        _equityStorage().redemptionRight = equityDetailsData.redemptionRight;
+        _equityStorage().putRight = equityDetailsData.putRight;
+        _equityStorage().dividendRight = equityDetailsData.dividendRight;
+        _equityStorage().currency = equityDetailsData.currency;
+        _equityStorage().nominalValue = equityDetailsData.nominalValue;
+        _equityStorage().nominalValueDecimals = equityDetailsData.nominalValueDecimals;
     }
 
-    function setDividends(
+    function _setDividends(
         IEquity.Dividend calldata newDividend
     ) internal returns (bytes32 corporateActionId_, uint256 dividendId_) {
         bytes memory data = abi.encode(newDividend);
 
-        (corporateActionId_, dividendId_) = CorporateActionsStorageWrapper.addCorporateAction(
+        (corporateActionId_, dividendId_) = CorporateActionsStorageWrapper._addCorporateAction(
             DIVIDEND_CORPORATE_ACTION_TYPE,
             data
         );
 
-        initDividend(corporateActionId_, data);
+        _initDividend(corporateActionId_, data);
     }
 
-    function initDividend(bytes32 actionId, bytes memory data) internal {
+    function _initDividend(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
             revert IEquityStorageWrapper.DividendCreationFailed();
         }
 
         IEquity.Dividend memory newDividend = abi.decode(data, (IEquity.Dividend));
 
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newDividend.recordDate, SNAPSHOT_TASK_TYPE);
-        ScheduledTasksStorageWrapper.addScheduledSnapshot(newDividend.recordDate, actionId);
+        ScheduledTasksStorageWrapper._addScheduledCrossOrderedTask(newDividend.recordDate, SNAPSHOT_TASK_TYPE);
+        ScheduledTasksStorageWrapper._addScheduledSnapshot(newDividend.recordDate, actionId);
     }
 
-    function setVoting(
+    function _setVoting(
         IEquity.Voting calldata newVoting
     ) internal returns (bytes32 corporateActionId_, uint256 voteID_) {
         bytes memory data = abi.encode(newVoting);
 
-        (corporateActionId_, voteID_) = CorporateActionsStorageWrapper.addCorporateAction(
+        (corporateActionId_, voteID_) = CorporateActionsStorageWrapper._addCorporateAction(
             VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
             data
         );
 
-        initVotingRights(corporateActionId_, data);
+        _initVotingRights(corporateActionId_, data);
     }
 
-    function initVotingRights(bytes32 actionId, bytes memory data) internal {
+    function _initVotingRights(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
             revert IEquityStorageWrapper.VotingRightsCreationFailed();
         }
 
         IEquity.Voting memory newVoting = abi.decode(data, (IEquity.Voting));
 
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newVoting.recordDate, SNAPSHOT_TASK_TYPE);
-        ScheduledTasksStorageWrapper.addScheduledSnapshot(newVoting.recordDate, actionId);
+        ScheduledTasksStorageWrapper._addScheduledCrossOrderedTask(newVoting.recordDate, SNAPSHOT_TASK_TYPE);
+        ScheduledTasksStorageWrapper._addScheduledSnapshot(newVoting.recordDate, actionId);
     }
 
-    function setScheduledBalanceAdjustment(
+    function _setScheduledBalanceAdjustment(
         IEquity.ScheduledBalanceAdjustment calldata newBalanceAdjustment
     ) internal returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_) {
         bytes memory data = abi.encode(newBalanceAdjustment);
 
-        (corporateActionId_, balanceAdjustmentID_) = CorporateActionsStorageWrapper.addCorporateAction(
+        (corporateActionId_, balanceAdjustmentID_) = CorporateActionsStorageWrapper._addCorporateAction(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             data
         );
 
-        initBalanceAdjustment(corporateActionId_, data);
+        _initBalanceAdjustment(corporateActionId_, data);
     }
 
-    function initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
+    function _initBalanceAdjustment(bytes32 actionId, bytes memory data) internal {
         if (actionId == bytes32(0)) {
             revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
         }
@@ -129,26 +129,26 @@ library EquityStorageWrapper {
             (IEquity.ScheduledBalanceAdjustment)
         );
 
-        ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(
+        ScheduledTasksStorageWrapper._addScheduledCrossOrderedTask(
             newBalanceAdjustment.executionDate,
             BALANCE_ADJUSTMENT_TASK_TYPE
         );
-        ScheduledTasksStorageWrapper.addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, actionId);
+        ScheduledTasksStorageWrapper._addScheduledBalanceAdjustment(newBalanceAdjustment.executionDate, actionId);
     }
 
-    function getEquityDetails() internal view returns (IEquity.EquityDetailsData memory equityDetails_) {
+    function _getEquityDetails() internal view returns (IEquity.EquityDetailsData memory equityDetails_) {
         equityDetails_ = IEquity.EquityDetailsData({
-            votingRight: equityStorage().votingRight,
-            informationRight: equityStorage().informationRight,
-            liquidationRight: equityStorage().liquidationRight,
-            subscriptionRight: equityStorage().subscriptionRight,
-            conversionRight: equityStorage().conversionRight,
-            redemptionRight: equityStorage().redemptionRight,
-            putRight: equityStorage().putRight,
-            dividendRight: equityStorage().dividendRight,
-            currency: equityStorage().currency,
-            nominalValue: equityStorage().nominalValue,
-            nominalValueDecimals: equityStorage().nominalValueDecimals
+            votingRight: _equityStorage().votingRight,
+            informationRight: _equityStorage().informationRight,
+            liquidationRight: _equityStorage().liquidationRight,
+            subscriptionRight: _equityStorage().subscriptionRight,
+            conversionRight: _equityStorage().conversionRight,
+            redemptionRight: _equityStorage().redemptionRight,
+            putRight: _equityStorage().putRight,
+            dividendRight: _equityStorage().dividendRight,
+            currency: _equityStorage().currency,
+            nominalValue: _equityStorage().nominalValue,
+            nominalValueDecimals: _equityStorage().nominalValueDecimals
         });
     }
 
@@ -157,20 +157,20 @@ library EquityStorageWrapper {
      *
      * @param dividendID The dividend Id
      */
-    function getDividends(
+    function _getDividends(
         uint256 dividendID
     ) internal view returns (IEquity.RegisteredDividend memory registeredDividend_) {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+        bytes32 actionId = CorporateActionsStorageWrapper._getCorporateActionIdByTypeIndex(
             DIVIDEND_CORPORATE_ACTION_TYPE,
             dividendID - 1
         );
 
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        (, , bytes memory data) = CorporateActionsStorageWrapper._getCorporateAction(actionId);
 
         assert(data.length > 0);
         (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
 
-        registeredDividend_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredDividend_.snapshotId = CorporateActionsStorageWrapper._getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
 
     /**
@@ -179,11 +179,11 @@ library EquityStorageWrapper {
      * @param dividendID The dividend Id
      * @param account The account
      */
-    function getDividendsFor(
+    function _getDividendsFor(
         uint256 dividendID,
         address account
     ) internal view returns (IEquity.DividendFor memory dividendFor_) {
-        IEquity.RegisteredDividend memory registeredDividend = getDividends(dividendID);
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(dividendID);
 
         dividendFor_.amount = registeredDividend.dividend.amount;
         dividendFor_.amountDecimals = registeredDividend.dividend.amountDecimals;
@@ -194,18 +194,18 @@ library EquityStorageWrapper {
             dividendFor_.tokenBalance,
             dividendFor_.decimals,
             dividendFor_.recordDateReached
-        ) = getSnapshotBalanceForIfDateReached(
+        ) = _getSnapshotBalanceForIfDateReached(
             registeredDividend.dividend.recordDate,
             registeredDividend.snapshotId,
             account
         );
     }
 
-    function getDividendAmountFor(
+    function _getDividendAmountFor(
         uint256 dividendID,
         address account
     ) internal view returns (IEquity.DividendAmountFor memory dividendAmountFor_) {
-        IEquity.DividendFor memory dividendFor = getDividendsFor(dividendID, account);
+        IEquity.DividendFor memory dividendFor = _getDividendsFor(dividendID, account);
 
         if (!dividendFor.recordDateReached) return dividendAmountFor_;
 
@@ -216,48 +216,48 @@ library EquityStorageWrapper {
         dividendAmountFor_.denominator = 10 ** (dividendFor.decimals + dividendFor.amountDecimals);
     }
 
-    function getDividendsCount() internal view returns (uint256 dividendCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
+    function _getDividendsCount() internal view returns (uint256 dividendCount_) {
+        return CorporateActionsStorageWrapper._getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
     }
 
-    function getDividendHolders(
+    function _getDividendHolders(
         uint256 dividendID,
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (address[] memory holders_) {
-        IEquity.RegisteredDividend memory registeredDividend = getDividends(dividendID);
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(dividendID);
 
         if (registeredDividend.dividend.recordDate >= block.timestamp) return new address[](0);
 
         if (registeredDividend.snapshotId != 0)
-            return SnapshotsStorageWrapper.tokenHoldersAt(registeredDividend.snapshotId, pageIndex, pageLength);
+            return SnapshotsStorageWrapper._tokenHoldersAt(registeredDividend.snapshotId, pageIndex, pageLength);
 
-        return ERC1410StorageWrapper.getTokenHolders(pageIndex, pageLength);
+        return ERC1410StorageWrapper._getTokenHolders(pageIndex, pageLength);
     }
 
-    function getTotalDividendHolders(uint256 dividendID) internal view returns (uint256) {
-        IEquity.RegisteredDividend memory registeredDividend = getDividends(dividendID);
+    function _getTotalDividendHolders(uint256 dividendID) internal view returns (uint256) {
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(dividendID);
 
         if (registeredDividend.dividend.recordDate >= block.timestamp) return 0;
 
         if (registeredDividend.snapshotId != 0)
-            return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredDividend.snapshotId);
+            return SnapshotsStorageWrapper._totalTokenHoldersAt(registeredDividend.snapshotId);
 
-        return ERC1410StorageWrapper.getTotalTokenHolders();
+        return ERC1410StorageWrapper._getTotalTokenHolders();
     }
 
-    function getVoting(uint256 voteID) internal view returns (IEquity.RegisteredVoting memory registeredVoting_) {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+    function _getVoting(uint256 voteID) internal view returns (IEquity.RegisteredVoting memory registeredVoting_) {
+        bytes32 actionId = CorporateActionsStorageWrapper._getCorporateActionIdByTypeIndex(
             VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
             voteID - 1
         );
 
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        (, , bytes memory data) = CorporateActionsStorageWrapper._getCorporateAction(actionId);
 
         assert(data.length > 0);
         (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
 
-        registeredVoting_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredVoting_.snapshotId = CorporateActionsStorageWrapper._getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
     }
 
     /**
@@ -266,8 +266,11 @@ library EquityStorageWrapper {
      * @param voteID The vote Id
      * @param account The account
      */
-    function getVotingFor(uint256 voteID, address account) internal view returns (IEquity.VotingFor memory votingFor_) {
-        IEquity.RegisteredVoting memory registeredVoting = getVoting(voteID);
+    function _getVotingFor(
+        uint256 voteID,
+        address account
+    ) internal view returns (IEquity.VotingFor memory votingFor_) {
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(voteID);
 
         votingFor_.recordDate = registeredVoting.voting.recordDate;
         votingFor_.data = registeredVoting.voting.data;
@@ -276,62 +279,62 @@ library EquityStorageWrapper {
             votingFor_.tokenBalance,
             votingFor_.decimals,
             votingFor_.recordDateReached
-        ) = getSnapshotBalanceForIfDateReached(
+        ) = _getSnapshotBalanceForIfDateReached(
             registeredVoting.voting.recordDate,
             registeredVoting.snapshotId,
             account
         );
     }
 
-    function getVotingCount() internal view returns (uint256 votingCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+    function _getVotingCount() internal view returns (uint256 votingCount_) {
+        return CorporateActionsStorageWrapper._getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
     }
 
-    function getVotingHolders(
+    function _getVotingHolders(
         uint256 voteID,
         uint256 pageIndex,
         uint256 pageLength
     ) internal view returns (address[] memory holders_) {
-        IEquity.RegisteredVoting memory registeredVoting = getVoting(voteID);
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(voteID);
 
         if (registeredVoting.voting.recordDate >= block.timestamp) return new address[](0);
 
         if (registeredVoting.snapshotId != 0)
-            return SnapshotsStorageWrapper.tokenHoldersAt(registeredVoting.snapshotId, pageIndex, pageLength);
+            return SnapshotsStorageWrapper._tokenHoldersAt(registeredVoting.snapshotId, pageIndex, pageLength);
 
-        return ERC1410StorageWrapper.getTokenHolders(pageIndex, pageLength);
+        return ERC1410StorageWrapper._getTokenHolders(pageIndex, pageLength);
     }
 
-    function getTotalVotingHolders(uint256 voteID) internal view returns (uint256) {
-        IEquity.RegisteredVoting memory registeredVoting = getVoting(voteID);
+    function _getTotalVotingHolders(uint256 voteID) internal view returns (uint256) {
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(voteID);
 
         if (registeredVoting.voting.recordDate >= block.timestamp) return 0;
 
         if (registeredVoting.snapshotId != 0)
-            return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredVoting.snapshotId);
+            return SnapshotsStorageWrapper._totalTokenHoldersAt(registeredVoting.snapshotId);
 
-        return ERC1410StorageWrapper.getTotalTokenHolders();
+        return ERC1410StorageWrapper._getTotalTokenHolders();
     }
 
-    function getScheduledBalanceAdjustment(
+    function _getScheduledBalanceAdjustment(
         uint256 balanceAdjustmentID
     ) internal view returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        bytes32 actionId = CorporateActionsStorageWrapper.getCorporateActionIdByTypeIndex(
+        bytes32 actionId = CorporateActionsStorageWrapper._getCorporateActionIdByTypeIndex(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             balanceAdjustmentID - 1
         );
 
-        (, , bytes memory data) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+        (, , bytes memory data) = CorporateActionsStorageWrapper._getCorporateAction(actionId);
 
         assert(data.length > 0);
         (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));
     }
 
-    function getScheduledBalanceAdjustmentsCount() internal view returns (uint256 balanceAdjustmentCount_) {
-        return CorporateActionsStorageWrapper.getCorporateActionCountByType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE);
+    function _getScheduledBalanceAdjustmentsCount() internal view returns (uint256 balanceAdjustmentCount_) {
+        return CorporateActionsStorageWrapper._getCorporateActionCountByType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE);
     }
 
-    function getSnapshotBalanceForIfDateReached(
+    function _getSnapshotBalanceForIfDateReached(
         uint256 date,
         uint256 snapshotId,
         address account
@@ -340,12 +343,12 @@ library EquityStorageWrapper {
             dateReached_ = true;
 
             balance_ = (snapshotId != 0)
-                ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(snapshotId, account)
-                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, date);
+                ? SnapshotsStorageWrapper._getTotalBalanceOfAtSnapshot(snapshotId, account)
+                : ERC3643StorageWrapper._getTotalBalanceForAdjustedAt(account, date);
 
             decimals_ = (snapshotId != 0)
-                ? SnapshotsStorageWrapper.decimalsAtSnapshot(snapshotId)
-                : ERC20StorageWrapper.decimalsAdjustedAt(date);
+                ? SnapshotsStorageWrapper._decimalsAtSnapshot(snapshotId)
+                : ERC20StorageWrapper._decimalsAdjustedAt(date);
         }
     }
 }

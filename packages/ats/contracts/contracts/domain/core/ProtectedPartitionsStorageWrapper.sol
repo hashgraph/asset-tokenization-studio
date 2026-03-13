@@ -30,7 +30,7 @@ struct ProtectedPartitionsDataStorage {
 }
 
 library ProtectedPartitionsStorageWrapper {
-    function protectedPartitionsStorage()
+    function _protectedPartitionsStorage()
         internal
         pure
         returns (ProtectedPartitionsDataStorage storage protectedPartitions_)
@@ -44,15 +44,15 @@ library ProtectedPartitionsStorageWrapper {
 
     // --- Guard functions ---
 
-    function requireProtectedPartitions() internal view {
-        if (!arePartitionsProtected()) revert IProtectedPartitionsStorageWrapper.PartitionsAreUnProtected();
+    function _requireProtectedPartitions() internal view {
+        if (!_arePartitionsProtected()) revert IProtectedPartitionsStorageWrapper.PartitionsAreUnProtected();
     }
 
     // --- Initialization ---
 
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
-        ProtectedPartitionsDataStorage storage pps = protectedPartitionsStorage();
+    function _initialize_ProtectedPartitions(bool _protectPartitions) internal returns (bool success_) {
+        ProtectedPartitionsDataStorage storage pps = _protectedPartitionsStorage();
         pps.arePartitionsProtected = _protectPartitions;
         pps.initialized = true;
         success_ = true;
@@ -60,8 +60,8 @@ library ProtectedPartitionsStorageWrapper {
 
     // --- State-changing functions ---
 
-    function setProtectedPartitions(bool _protected) internal {
-        protectedPartitionsStorage().arePartitionsProtected = _protected;
+    function _setProtectedPartitions(bool _protected) internal {
+        _protectedPartitionsStorage().arePartitionsProtected = _protected;
         if (_protected) {
             emit IProtectedPartitionsStorageWrapper.PartitionsProtected(msg.sender);
             return;
@@ -71,25 +71,25 @@ library ProtectedPartitionsStorageWrapper {
 
     // --- Read functions ---
 
-    function arePartitionsProtected() internal view returns (bool) {
-        return protectedPartitionsStorage().arePartitionsProtected;
+    function _arePartitionsProtected() internal view returns (bool) {
+        return _protectedPartitionsStorage().arePartitionsProtected;
     }
 
-    function isProtectedPartitionInitialized() internal view returns (bool) {
-        return protectedPartitionsStorage().initialized;
+    function _isProtectedPartitionInitialized() internal view returns (bool) {
+        return _protectedPartitionsStorage().initialized;
     }
 
-    function protectedPartitionsRole(bytes32 _partition) internal pure returns (bytes32) {
+    function _protectedPartitionsRole(bytes32 _partition) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _partition));
     }
 
-    function calculateRoleForPartition(bytes32 partition) internal pure returns (bytes32 role) {
+    function _calculateRoleForPartition(bytes32 partition) internal pure returns (bytes32 role) {
         role = keccak256(abi.encode(_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partition));
     }
 
     // --- Signature verification ---
 
-    function checkTransferSignature(
+    function _checkTransferSignature(
         bytes32 _partition,
         address _from,
         address _to,
@@ -97,11 +97,11 @@ library ProtectedPartitionsStorageWrapper {
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view {
-        if (!isTransferSignatureValid(_partition, _from, _to, _amount, _protectionData, _name))
+        if (!_isTransferSignatureValid(_partition, _from, _to, _amount, _protectionData, _name))
             revert IProtectedPartitionsStorageWrapper.WrongSignature();
     }
 
-    function isTransferSignatureValid(
+    function _isTransferSignatureValid(
         bytes32 _partition,
         address _from,
         address _to,
@@ -123,24 +123,24 @@ library ProtectedPartitionsStorageWrapper {
                 functionHash,
                 _protectionData.signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper._getResolverProxyVersion()),
                 block.chainid,
                 address(this)
             );
     }
 
-    function checkRedeemSignature(
+    function _checkRedeemSignature(
         bytes32 _partition,
         address _from,
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData,
         string memory _name
     ) internal view {
-        if (!isRedeemSignatureValid(_partition, _from, _amount, _protectionData, _name))
+        if (!_isRedeemSignatureValid(_partition, _from, _amount, _protectionData, _name))
             revert IProtectedPartitionsStorageWrapper.WrongSignature();
     }
 
-    function isRedeemSignatureValid(
+    function _isRedeemSignatureValid(
         bytes32 _partition,
         address _from,
         uint256 _amount,
@@ -160,24 +160,24 @@ library ProtectedPartitionsStorageWrapper {
                 functionHash,
                 _protectionData.signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper._getResolverProxyVersion()),
                 block.chainid,
                 address(this)
             );
     }
 
-    function checkCreateHoldSignature(
+    function _checkCreateHoldSignature(
         bytes32 _partition,
         address _from,
         ProtectedHold memory _protectedHold,
         bytes calldata _signature,
         string memory _name
     ) internal view {
-        if (!isCreateHoldSignatureValid(_partition, _from, _protectedHold, _signature, _name))
+        if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold, _signature, _name))
             revert IProtectedPartitionsStorageWrapper.WrongSignature();
     }
 
-    function isCreateHoldSignatureValid(
+    function _isCreateHoldSignatureValid(
         bytes32 _partition,
         address _from,
         ProtectedHold memory _protectedHold,
@@ -191,23 +191,23 @@ library ProtectedPartitionsStorageWrapper {
                 functionHash,
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper._getResolverProxyVersion()),
                 block.chainid,
                 address(this)
             );
     }
 
-    function checkClearingCreateHoldSignature(
+    function _checkClearingCreateHoldSignature(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
         Hold memory _hold,
         bytes calldata _signature,
         string memory _name
     ) internal view {
-        if (!isClearingCreateHoldSignatureValid(_protectedClearingOperation, _hold, _signature, _name))
+        if (!_isClearingCreateHoldSignatureValid(_protectedClearingOperation, _hold, _signature, _name))
             revert IProtectedPartitionsStorageWrapper.WrongSignature();
     }
 
-    function isClearingCreateHoldSignatureValid(
+    function _isClearingCreateHoldSignatureValid(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
         Hold memory _hold,
         bytes calldata _signature,
@@ -220,24 +220,24 @@ library ProtectedPartitionsStorageWrapper {
                 functionHash,
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper._getResolverProxyVersion()),
                 block.chainid,
                 address(this)
             );
     }
 
-    function checkClearingTransferSignature(
+    function _checkClearingTransferSignature(
         IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         address _to,
         bytes calldata _signature,
         string memory _name
     ) internal view {
-        if (!isClearingTransferSignatureValid(_protectedClearingOperation, _to, _amount, _signature, _name))
+        if (!_isClearingTransferSignatureValid(_protectedClearingOperation, _to, _amount, _signature, _name))
             revert IProtectedPartitionsStorageWrapper.WrongSignature();
     }
 
-    function isClearingTransferSignatureValid(
+    function _isClearingTransferSignatureValid(
         IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         address _to,
         uint256 _amount,
@@ -251,23 +251,23 @@ library ProtectedPartitionsStorageWrapper {
                 functionHash,
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper._getResolverProxyVersion()),
                 block.chainid,
                 address(this)
             );
     }
 
-    function checkClearingRedeemSignature(
+    function _checkClearingRedeemSignature(
         IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature,
         string memory _name
     ) internal view {
-        if (!isClearingRedeemSignatureValid(_protectedClearingOperation, _amount, _signature, _name))
+        if (!_isClearingRedeemSignatureValid(_protectedClearingOperation, _amount, _signature, _name))
             revert IProtectedPartitionsStorageWrapper.WrongSignature();
     }
 
-    function isClearingRedeemSignatureValid(
+    function _isClearingRedeemSignatureValid(
         IClearing.ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature,
@@ -280,7 +280,7 @@ library ProtectedPartitionsStorageWrapper {
                 functionHash,
                 _signature,
                 _name,
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                Strings.toString(ResolverProxyStorageWrapper._getResolverProxyVersion()),
                 block.chainid,
                 address(this)
             );

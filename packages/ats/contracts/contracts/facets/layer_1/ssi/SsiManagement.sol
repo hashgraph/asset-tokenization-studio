@@ -11,20 +11,20 @@ abstract contract SsiManagement is ISsiManagement {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
     ) external override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_SSI_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        address oldRevocationRegistryAddress = SsiManagementStorageWrapper.getRevocationRegistryAddress();
-        success_ = SsiManagementStorageWrapper.setRevocationRegistryAddress(_revocationRegistryAddress);
+        AccessControlStorageWrapper._checkRole(_SSI_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        address oldRevocationRegistryAddress = SsiManagementStorageWrapper._getRevocationRegistryAddress();
+        success_ = SsiManagementStorageWrapper._setRevocationRegistryAddress(_revocationRegistryAddress);
         emit RevocationRegistryUpdated(
             oldRevocationRegistryAddress,
-            SsiManagementStorageWrapper.getRevocationRegistryAddress()
+            SsiManagementStorageWrapper._getRevocationRegistryAddress()
         );
     }
 
     function addIssuer(address _issuer) external override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_SSI_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        success_ = SsiManagementStorageWrapper.addIssuer(_issuer);
+        AccessControlStorageWrapper._checkRole(_SSI_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        success_ = SsiManagementStorageWrapper._addIssuer(_issuer);
         if (!success_) {
             revert ListedIssuer(_issuer);
         }
@@ -32,9 +32,9 @@ abstract contract SsiManagement is ISsiManagement {
     }
 
     function removeIssuer(address _issuer) external override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_SSI_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        success_ = SsiManagementStorageWrapper.removeIssuer(_issuer);
+        AccessControlStorageWrapper._checkRole(_SSI_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        success_ = SsiManagementStorageWrapper._removeIssuer(_issuer);
         if (!success_) {
             revert UnlistedIssuer(_issuer);
         }
@@ -42,21 +42,21 @@ abstract contract SsiManagement is ISsiManagement {
     }
 
     function getRevocationRegistryAddress() external view override returns (address revocationRegistryAddress_) {
-        return SsiManagementStorageWrapper.getRevocationRegistryAddress();
+        return SsiManagementStorageWrapper._getRevocationRegistryAddress();
     }
 
     function isIssuer(address _issuer) external view override returns (bool) {
-        return SsiManagementStorageWrapper.isIssuer(_issuer);
+        return SsiManagementStorageWrapper._isIssuer(_issuer);
     }
 
     function getIssuerListCount() external view override returns (uint256 issuerListCount_) {
-        return SsiManagementStorageWrapper.getIssuerListCount();
+        return SsiManagementStorageWrapper._getIssuerListCount();
     }
 
     function getIssuerListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        return SsiManagementStorageWrapper.getIssuerListMembers(_pageIndex, _pageLength);
+        return SsiManagementStorageWrapper._getIssuerListMembers(_pageIndex, _pageLength);
     }
 }

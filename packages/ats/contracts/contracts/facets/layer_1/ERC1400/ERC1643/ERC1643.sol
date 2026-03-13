@@ -10,8 +10,8 @@ import { TimestampProvider } from "../../../../infrastructure/utils/TimestampPro
 
 abstract contract ERC1643 is IERC1643, TimestampProvider {
     function setDocument(bytes32 _name, string calldata _uri, bytes32 _documentHash) external override {
-        AccessControlStorageWrapper.checkRole(_DOCUMENTER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_DOCUMENTER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
         if (_name == bytes32(0)) {
             revert EmptyName();
         }
@@ -31,8 +31,8 @@ abstract contract ERC1643 is IERC1643, TimestampProvider {
     }
 
     function removeDocument(bytes32 _name) external override {
-        AccessControlStorageWrapper.checkRole(_DOCUMENTER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_DOCUMENTER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
         ERC1643Storage storage erc1643Storage = _erc1643Storage();
         if (erc1643Storage.documents[_name].lastModified == uint256(0)) {
             revert DocumentDoesNotExist(_name);

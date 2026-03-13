@@ -1,16 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { SnapshotsFacet } from "../../../../facets/layer_1/snapshot/standard/SnapshotsFacet.sol";
+import { SnapshotsFacet } from "../../../../facets/layer_1/snapshot/SnapshotsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
-contract SnapshotsFacetTimeTravel is SnapshotsFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+contract SnapshotsFacetTimeTravel is SnapshotsFacet, TimeTravelStorageWrapper {}

@@ -8,31 +8,31 @@ import { TimestampProvider } from "../../../../infrastructure/utils/TimestampPro
 
 abstract contract ERC1410Read is IERC1410Read, TimestampProvider {
     function balanceOf(address _tokenHolder) external view returns (uint256) {
-        return ERC1410StorageWrapper.balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp());
+        return ERC1410StorageWrapper._balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp());
     }
 
     function balanceOfAt(address _tokenHolder, uint256 _timestamp) external view returns (uint256) {
-        return ERC1410StorageWrapper.balanceOfAdjustedAt(_tokenHolder, _timestamp);
+        return ERC1410StorageWrapper._balanceOfAdjustedAt(_tokenHolder, _timestamp);
     }
 
     function balanceOfByPartition(bytes32 _partition, address _tokenHolder) external view returns (uint256) {
-        return ERC1410StorageWrapper.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
+        return ERC1410StorageWrapper._balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
     }
 
     function totalSupply() external view returns (uint256) {
-        return ERC1410StorageWrapper.totalSupplyAdjustedAt(_getBlockTimestamp());
+        return ERC1410StorageWrapper._totalSupplyAdjustedAt(_getBlockTimestamp());
     }
 
     function totalSupplyByPartition(bytes32 _partition) external view returns (uint256) {
-        return ERC1410StorageWrapper.totalSupplyByPartitionAdjustedAt(_partition, _getBlockTimestamp());
+        return ERC1410StorageWrapper._totalSupplyByPartitionAdjustedAt(_partition, _getBlockTimestamp());
     }
 
     function partitionsOf(address _tokenHolder) external view returns (bytes32[] memory) {
-        return ERC1410StorageWrapper.partitionsOf(_tokenHolder);
+        return ERC1410StorageWrapper._partitionsOf(_tokenHolder);
     }
 
     function isMultiPartition() external view returns (bool) {
-        return ERC1410StorageWrapper.isMultiPartition();
+        return ERC1410StorageWrapper._isMultiPartition();
     }
 
     function canTransferByPartition(
@@ -43,7 +43,7 @@ abstract contract ERC1410Read is IERC1410Read, TimestampProvider {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view returns (bool, bytes1, bytes32) {
-        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
+        (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper._isAbleToTransferFromByPartition(
             _from,
             _to,
             _partition,
@@ -61,7 +61,7 @@ abstract contract ERC1410Read is IERC1410Read, TimestampProvider {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external view override returns (bool, bytes1, bytes32) {
-        (bool status, bytes1 code, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToRedeemFromByPartition(
+        (bool status, bytes1 code, bytes32 reason, ) = ERC1594StorageWrapper._isAbleToRedeemFromByPartition(
             _from,
             _partition,
             _value,
@@ -72,7 +72,7 @@ abstract contract ERC1410Read is IERC1410Read, TimestampProvider {
     }
 
     function isOperator(address _operator, address _tokenHolder) public view returns (bool) {
-        return ERC1410StorageWrapper.isOperator(_operator, _tokenHolder);
+        return ERC1410StorageWrapper._isOperator(_operator, _tokenHolder);
     }
 
     function isOperatorForPartition(
@@ -80,6 +80,6 @@ abstract contract ERC1410Read is IERC1410Read, TimestampProvider {
         address _operator,
         address _tokenHolder
     ) public view returns (bool) {
-        return ERC1410StorageWrapper.isOperatorForPartition(_partition, _operator, _tokenHolder);
+        return ERC1410StorageWrapper._isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 }

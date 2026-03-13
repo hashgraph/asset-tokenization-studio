@@ -13,50 +13,50 @@ abstract contract ERC3643Management is IERC3643Management {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) external {
-        if (ERC3643StorageWrapper.isERC3643Initialized()) revert AlreadyInitialized();
-        ERC3643StorageWrapper.initialize_ERC3643(_compliance, _identityRegistry);
+        if (ERC3643StorageWrapper._isERC3643Initialized()) revert AlreadyInitialized();
+        ERC3643StorageWrapper._initialize_ERC3643(_compliance, _identityRegistry);
     }
 
     function setName(string calldata _name) external override {
-        PauseStorageWrapper.requireNotPaused();
-        AccessControlStorageWrapper.checkRole(_TREX_OWNER_ROLE, msg.sender);
-        ERC3643StorageWrapper.setName(_name);
+        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_TREX_OWNER_ROLE, msg.sender);
+        ERC3643StorageWrapper._setName(_name);
     }
 
     function setSymbol(string calldata _symbol) external override {
-        PauseStorageWrapper.requireNotPaused();
-        AccessControlStorageWrapper.checkRole(_TREX_OWNER_ROLE, msg.sender);
-        ERC3643StorageWrapper.setSymbol(_symbol);
+        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_TREX_OWNER_ROLE, msg.sender);
+        ERC3643StorageWrapper._setSymbol(_symbol);
     }
 
     function setOnchainID(address _onchainID) external override {
-        PauseStorageWrapper.requireNotPaused();
-        AccessControlStorageWrapper.checkRole(_TREX_OWNER_ROLE, msg.sender);
-        ERC3643StorageWrapper.setOnchainID(_onchainID);
+        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_TREX_OWNER_ROLE, msg.sender);
+        ERC3643StorageWrapper._setOnchainID(_onchainID);
     }
 
     function setIdentityRegistry(address _identityRegistry) external override {
-        PauseStorageWrapper.requireNotPaused();
-        AccessControlStorageWrapper.checkRole(_TREX_OWNER_ROLE, msg.sender);
-        ERC3643StorageWrapper.setIdentityRegistry(_identityRegistry);
+        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_TREX_OWNER_ROLE, msg.sender);
+        ERC3643StorageWrapper._setIdentityRegistry(_identityRegistry);
     }
 
     function setCompliance(address _compliance) external override {
-        PauseStorageWrapper.requireNotPaused();
-        AccessControlStorageWrapper.checkRole(_TREX_OWNER_ROLE, msg.sender);
-        ERC3643StorageWrapper.setCompliance(_compliance);
+        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_TREX_OWNER_ROLE, msg.sender);
+        ERC3643StorageWrapper._setCompliance(_compliance);
     }
 
     function addAgent(address _agent) external {
-        AccessControlStorageWrapper.checkRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE), msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        ERC3643StorageWrapper.addAgent(_agent);
+        AccessControlStorageWrapper._checkRole(AccessControlStorageWrapper._getRoleAdmin(_AGENT_ROLE), msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        ERC3643StorageWrapper._addAgent(_agent);
     }
 
     function removeAgent(address _agent) external {
-        AccessControlStorageWrapper.checkRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE), msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        ERC3643StorageWrapper.removeAgent(_agent);
+        AccessControlStorageWrapper._checkRole(AccessControlStorageWrapper._getRoleAdmin(_AGENT_ROLE), msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        ERC3643StorageWrapper._removeAgent(_agent);
     }
 
     function recoveryAddress(
@@ -64,10 +64,10 @@ abstract contract ERC3643Management is IERC3643Management {
         address _newWallet,
         address _investorOnchainID
     ) external returns (bool success_) {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_lostWallet);
-        AccessControlStorageWrapper.checkRole(_AGENT_ROLE, msg.sender);
-        ERC3643StorageWrapper.requireEmptyWallet(_lostWallet);
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
-        success_ = ERC3643StorageWrapper.recoveryAddress(_lostWallet, _newWallet, _investorOnchainID);
+        ERC3643StorageWrapper._requireUnrecoveredAddress(_lostWallet);
+        AccessControlStorageWrapper._checkRole(_AGENT_ROLE, msg.sender);
+        ERC3643StorageWrapper._requireEmptyWallet(_lostWallet);
+        ERC1410StorageWrapper._requireWithoutMultiPartition();
+        success_ = ERC3643StorageWrapper._recoveryAddress(_lostWallet, _newWallet, _investorOnchainID);
     }
 }

@@ -20,7 +20,7 @@ struct ERC20PermitStorage {
 }
 
 library ERC20PermitStorageWrapper {
-    function permit(
+    function _permit(
         address owner,
         address spender,
         uint256 value,
@@ -33,25 +33,25 @@ library ERC20PermitStorageWrapper {
             revert IERC20Permit.ERC2612ExpiredSignature(deadline);
         }
 
-        uint256 currentNonce = NonceStorageWrapper.getNonceFor(owner);
+        uint256 currentNonce = NonceStorageWrapper._getNonceFor(owner);
 
         bytes32 structHash = keccak256(abi.encode(ERC20PERMIT_TYPEHASH, owner, spender, value, currentNonce, deadline));
-        NonceStorageWrapper.setNonceFor(currentNonce + 1, owner);
+        NonceStorageWrapper._setNonceFor(currentNonce + 1, owner);
         // solhint-disable-next-line func-name-mixedcase
         address signer = ECDSA.recover(ECDSA.toTypedDataHash(DOMAIN_SEPARATOR(), structHash), v, r, s);
 
         if (signer != owner) {
             revert IERC20Permit.ERC2612InvalidSigner(signer, owner);
         }
-        ERC20StorageWrapper.approve(owner, spender, value);
+        ERC20StorageWrapper._approve(owner, spender, value);
     }
 
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() internal view returns (bytes32) {
         return
             getDomainHash(
-                ERC20StorageWrapper.getName(),
-                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
+                ERC20StorageWrapper._getName(),
+                Strings.toString(ResolverProxyStorageWrapper._getResolverProxyVersion()),
                 block.chainid,
                 address(this)
             );

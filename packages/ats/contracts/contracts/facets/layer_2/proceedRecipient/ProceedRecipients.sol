@@ -2,77 +2,66 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients } from "./IProceedRecipients.sol";
-import { Internals } from "../../../domain/Internals.sol";
 import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
+import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 
-abstract contract ProceedRecipients is IProceedRecipients, Internals {
+abstract contract ProceedRecipients is IProceedRecipients {
+    error AlreadyInitialized();
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
-    ) external override onlyUninitialized(_isProceedRecipientsInitialized()) {
-        _initialize_ProceedRecipients(_proceedRecipients, _data);
+    ) external override {
+        if (ProceedRecipientsStorageWrapper._isProceedRecipientsInitialized()) revert AlreadyInitialized();
+        ProceedRecipientsStorageWrapper._initialize_ProceedRecipients(_proceedRecipients, _data);
     }
 
-    function addProceedRecipient(
-        address _proceedRecipient,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
-        validateAddress(_proceedRecipient)
-        onlyIfNotProceedRecipient(_proceedRecipient)
-    {
-        _addProceedRecipient(_proceedRecipient, _data);
-        emit ProceedRecipientAdded(_msgSender(), _proceedRecipient, _data);
+    function addProceedRecipient(address _proceedRecipient, bytes calldata _data) external override {
+        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
+        ERC1410StorageWrapper._requireValidAddress(_proceedRecipient);
+        ProceedRecipientsStorageWrapper._requireNotProceedRecipient(_proceedRecipient);
+        ProceedRecipientsStorageWrapper._addProceedRecipient(_proceedRecipient, _data);
+        emit ProceedRecipientAdded(msg.sender, _proceedRecipient, _data);
     }
 
-    function removeProceedRecipient(
-        address _proceedRecipient
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
-        onlyIfProceedRecipient(_proceedRecipient)
-    {
-        _removeProceedRecipient(_proceedRecipient);
-        emit ProceedRecipientRemoved(_msgSender(), _proceedRecipient);
+    function removeProceedRecipient(address _proceedRecipient) external override {
+        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
+        ProceedRecipientsStorageWrapper._requireProceedRecipient(_proceedRecipient);
+        ProceedRecipientsStorageWrapper._removeProceedRecipient(_proceedRecipient);
+        emit ProceedRecipientRemoved(msg.sender, _proceedRecipient);
     }
 
-    function updateProceedRecipientData(
-        address _proceedRecipient,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE)
-        validateAddress(_proceedRecipient)
-        onlyIfProceedRecipient(_proceedRecipient)
-    {
-        _setProceedRecipientData(_proceedRecipient, _data);
-        emit ProceedRecipientDataUpdated(_msgSender(), _proceedRecipient, _data);
+    function updateProceedRecipientData(address _proceedRecipient, bytes calldata _data) external override {
+        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
+        ERC1410StorageWrapper._requireValidAddress(_proceedRecipient);
+        ProceedRecipientsStorageWrapper._requireProceedRecipient(_proceedRecipient);
+        ProceedRecipientsStorageWrapper._setProceedRecipientData(_proceedRecipient, _data);
+        emit ProceedRecipientDataUpdated(msg.sender, _proceedRecipient, _data);
     }
 
     function isProceedRecipient(address _proceedRecipient) external view override returns (bool) {
-        return _isProceedRecipient(_proceedRecipient);
+        return ProceedRecipientsStorageWrapper._isProceedRecipient(_proceedRecipient);
     }
 
     function getProceedRecipientData(address _proceedRecipient) external view override returns (bytes memory) {
-        return _getProceedRecipientData(_proceedRecipient);
+        return ProceedRecipientsStorageWrapper._getProceedRecipientData(_proceedRecipient);
     }
 
     function getProceedRecipientsCount() external view override returns (uint256) {
-        return _getProceedRecipientsCount();
+        return ProceedRecipientsStorageWrapper._getProceedRecipientsCount();
     }
 
     function getProceedRecipients(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory proceedRecipients_) {
-        return _getProceedRecipients(_pageIndex, _pageLength);
+        return ProceedRecipientsStorageWrapper._getProceedRecipients(_pageIndex, _pageLength);
     }
 }

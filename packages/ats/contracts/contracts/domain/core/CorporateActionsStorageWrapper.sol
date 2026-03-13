@@ -15,7 +15,7 @@ library CorporateActionsStorageWrapper {
 
     // --- Storage accessor (pure) ---
 
-    function corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
+    function _corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
         bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -26,18 +26,18 @@ library CorporateActionsStorageWrapper {
     // --- Guard functions ---
 
     // solhint-disable-next-line ordering
-    function requireMatchingActionType(bytes32 _actionType, uint256 _index) internal view {
-        if (getCorporateActionCountByType(_actionType) <= _index)
+    function _requireMatchingActionType(bytes32 _actionType, uint256 _index) internal view {
+        if (_getCorporateActionCountByType(_actionType) <= _index)
             revert ICorporateActionsStorageWrapper.WrongIndexForAction(_index, _actionType);
     }
 
     // --- State-changing functions ---
 
-    function addCorporateAction(
+    function _addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
     ) internal returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
-        CorporateActionDataStorage storage ca = corporateActionsStorage();
+        CorporateActionDataStorage storage ca = _corporateActionsStorage();
 
         bytes32 contentHash = keccak256(abi.encode(_actionType, _data));
         if (ca.actionsContentHashes[contentHash]) {
@@ -51,19 +51,19 @@ library CorporateActionsStorageWrapper {
 
         ca.actionsByType[_actionType].push(corporateActionId_);
 
-        corporateActionIdByType_ = getCorporateActionCountByType(_actionType);
+        corporateActionIdByType_ = _getCorporateActionCountByType(_actionType);
 
         ca.actionsData[corporateActionId_].actionType = _actionType;
         ca.actionsData[corporateActionId_].data = _data;
         ca.actionsData[corporateActionId_].actionIdByType = corporateActionIdByType_;
     }
 
-    function updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal {
-        corporateActionsStorage().actionsData[_actionId].data = _newData;
+    function _updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal {
+        _corporateActionsStorage().actionsData[_actionId].data = _newData;
     }
 
-    function updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal {
-        CorporateActionDataStorage storage ca = corporateActionsStorage();
+    function _updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal {
+        CorporateActionDataStorage storage ca = _corporateActionsStorage();
         bytes[] memory results = ca.actionsData[actionId].results;
 
         if (results.length > resultId) {
@@ -80,68 +80,73 @@ library CorporateActionsStorageWrapper {
 
     // --- Read functions ---
 
-    function getCorporateAction(
+    function _getCorporateAction(
         bytes32 _corporateActionId
     ) internal view returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_) {
-        CorporateActionDataStorage storage ca = corporateActionsStorage();
+        CorporateActionDataStorage storage ca = _corporateActionsStorage();
         actionType_ = ca.actionsData[_corporateActionId].actionType;
         data_ = ca.actionsData[_corporateActionId].data;
         actionTypeId_ = ca.actionsData[_corporateActionId].actionIdByType;
     }
 
-    function getCorporateActionCount() internal view returns (uint256 corporateActionCount_) {
-        return corporateActionsStorage().actions.length();
+    function _getCorporateActionCount() internal view returns (uint256 corporateActionCount_) {
+        return _corporateActionsStorage().actions.length();
     }
 
-    function getCorporateActionIds(
+    function _getCorporateActionIds(
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
+        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
     }
 
-    function getCorporateActionCountByType(bytes32 _actionType) internal view returns (uint256 corporateActionCount_) {
-        return corporateActionsStorage().actionsByType[_actionType].length;
+    function _getCorporateActionCountByType(bytes32 _actionType) internal view returns (uint256 corporateActionCount_) {
+        return _corporateActionsStorage().actionsByType[_actionType].length;
     }
 
-    function getCorporateActionIdByTypeIndex(
+    function _getCorporateActionIdByTypeIndex(
         bytes32 _actionType,
         uint256 _typeIndex
     ) internal view returns (bytes32 corporateActionId_) {
-        return corporateActionsStorage().actionsByType[_actionType][_typeIndex];
+        return _corporateActionsStorage().actionsByType[_actionType][_typeIndex];
     }
 
-    function getCorporateActionIdsByType(
+    function _getCorporateActionIdsByType(
         bytes32 _actionType,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory corporateActionIds_) {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(_pageIndex, _pageLength);
 
-        corporateActionIds_ = new bytes32[](Pagination.getSize(start, end, getCorporateActionCountByType(_actionType)));
+        corporateActionIds_ = new bytes32[](
+            Pagination.getSize(start, end, _getCorporateActionCountByType(_actionType))
+        );
 
-        CorporateActionDataStorage storage ca = corporateActionsStorage();
+        CorporateActionDataStorage storage ca = _corporateActionsStorage();
 
         for (uint256 i = 0; i < corporateActionIds_.length; i++) {
             corporateActionIds_[i] = ca.actionsByType[_actionType][start + i];
         }
     }
 
-    function getCorporateActionResult(bytes32 actionId, uint256 resultId) internal view returns (bytes memory result_) {
-        if (getCorporateActionResultCount(actionId) > resultId)
-            result_ = corporateActionsStorage().actionsData[actionId].results[resultId];
+    function _getCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId
+    ) internal view returns (bytes memory result_) {
+        if (_getCorporateActionResultCount(actionId) > resultId)
+            result_ = _corporateActionsStorage().actionsData[actionId].results[resultId];
     }
 
-    function getCorporateActionResultCount(bytes32 actionId) internal view returns (uint256) {
-        return corporateActionsStorage().actionsData[actionId].results.length;
+    function _getCorporateActionResultCount(bytes32 actionId) internal view returns (uint256) {
+        return _corporateActionsStorage().actionsData[actionId].results.length;
     }
 
-    function getCorporateActionData(bytes32 actionId) internal view returns (bytes memory) {
-        return corporateActionsStorage().actionsData[actionId].data;
+    function _getCorporateActionData(bytes32 actionId) internal view returns (bytes memory) {
+        return _corporateActionsStorage().actionsData[actionId].data;
     }
 
-    function getUintResultAt(bytes32 _actionId, uint256 resultId) internal view returns (uint256) {
-        bytes memory data = getCorporateActionResult(_actionId, resultId);
+    function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view returns (uint256) {
+        bytes memory data = _getCorporateActionResult(_actionId, resultId);
 
         uint256 bytesLength = data.length;
         if (bytesLength < 32) return 0;
@@ -155,11 +160,11 @@ library CorporateActionsStorageWrapper {
         return value;
     }
 
-    function actionContentHashExists(bytes32 _contentHash) internal view returns (bool) {
-        return corporateActionsStorage().actionsContentHashes[_contentHash];
+    function _actionContentHashExists(bytes32 _contentHash) internal view returns (bool) {
+        return _corporateActionsStorage().actionsContentHashes[_contentHash];
     }
 
-    function requireValidDates(uint256 _firstDate, uint256 _secondDate) internal pure {
+    function _requireValidDates(uint256 _firstDate, uint256 _secondDate) internal pure {
         if (_secondDate < _firstDate) {
             revert ICorporateActionsStorageWrapper.WrongDates(_firstDate, _secondDate);
         }

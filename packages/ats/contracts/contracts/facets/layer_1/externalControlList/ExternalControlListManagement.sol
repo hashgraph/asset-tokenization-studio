@@ -14,18 +14,18 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalControlLists(address[] calldata _controlLists) external override {
-        if (ExternalListManagementStorageWrapper.isExternalControlListInitialized()) revert AlreadyInitialized();
-        ExternalListManagementStorageWrapper.initialize_ExternalControlLists(_controlLists);
+        if (ExternalListManagementStorageWrapper._isExternalControlListInitialized()) revert AlreadyInitialized();
+        ExternalListManagementStorageWrapper._initialize_ExternalControlLists(_controlLists);
     }
 
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
     ) external override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper._checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
         ArrayValidation.checkUniqueValues(_controlLists, _actives);
-        success_ = ExternalListManagementStorageWrapper.updateExternalLists(
+        success_ = ExternalListManagementStorageWrapper._updateExternalLists(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
             _controlLists,
             _actives
@@ -37,10 +37,10 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     }
 
     function addExternalControlList(address _controlList) external override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        ExternalListManagementStorageWrapper.checkValidAddress(_controlList);
-        success_ = ExternalListManagementStorageWrapper.addExternalList(
+        AccessControlStorageWrapper._checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        ExternalListManagementStorageWrapper._checkValidAddress(_controlList);
+        success_ = ExternalListManagementStorageWrapper._addExternalList(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
             _controlList
         );
@@ -51,9 +51,9 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     }
 
     function removeExternalControlList(address _controlList) external override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        success_ = ExternalListManagementStorageWrapper.removeExternalList(
+        AccessControlStorageWrapper._checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        success_ = ExternalListManagementStorageWrapper._removeExternalList(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
             _controlList
         );
@@ -65,14 +65,14 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
 
     function isExternalControlList(address _controlList) external view override returns (bool) {
         return
-            ExternalListManagementStorageWrapper.isExternalList(
+            ExternalListManagementStorageWrapper._isExternalList(
                 _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
                 _controlList
             );
     }
 
     function getExternalControlListsCount() external view override returns (uint256 externalControlListsCount_) {
-        return ExternalListManagementStorageWrapper.getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        return ExternalListManagementStorageWrapper._getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
     function getExternalControlListsMembers(
@@ -80,7 +80,7 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
         return
-            ExternalListManagementStorageWrapper.getExternalListsMembers(
+            ExternalListManagementStorageWrapper._getExternalListsMembers(
                 _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
                 _pageIndex,
                 _pageLength

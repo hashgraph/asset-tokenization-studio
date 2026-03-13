@@ -15,43 +15,43 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 
 abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider {
     function burn(address _userAddress, uint256 _amount) external {
-        PauseStorageWrapper.requireNotPaused();
-        ERC1644StorageWrapper.requireControllable();
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        PauseStorageWrapper._requireNotPaused();
+        ERC1644StorageWrapper._requireControllable();
+        ERC1410StorageWrapper._requireWithoutMultiPartition();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper._checkAnyRole(roles, msg.sender);
         }
         TokenCoreOps.burn(_userAddress, _amount);
         emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _userAddress, _amount, "", "");
     }
 
     function mint(address _to, uint256 _amount) external {
-        PauseStorageWrapper.requireNotPaused();
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
-        CapStorageWrapper.requireWithinMaxSupply(_amount, _getBlockTimestamp());
-        ERC1594StorageWrapper.requireIdentified(address(0), _to);
-        ERC1594StorageWrapper.requireCompliant(address(0), _to, false);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1410StorageWrapper._requireWithoutMultiPartition();
+        CapStorageWrapper._requireWithinMaxSupply(_amount, _getBlockTimestamp());
+        ERC1594StorageWrapper._requireIdentified(address(0), _to);
+        ERC1594StorageWrapper._requireCompliant(address(0), _to, false);
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper._checkAnyRole(roles, msg.sender);
         }
-        ERC1594StorageWrapper.issue(_to, _amount, "");
+        ERC1594StorageWrapper._issue(_to, _amount, "");
     }
 
     function forcedTransfer(address _from, address _to, uint256 _amount) external returns (bool) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
-        ERC1644StorageWrapper.requireControllable();
-        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper._requireWithoutMultiPartition();
+        ERC1644StorageWrapper._requireControllable();
+        PauseStorageWrapper._requireNotPaused();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper._checkAnyRole(roles, msg.sender);
         }
         TokenCoreOps.transfer(_from, _to, _amount);
         emit IERC1644StorageWrapper.ControllerTransfer(msg.sender, _from, _to, _amount, "", "");

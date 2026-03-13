@@ -7,11 +7,11 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 
 abstract contract TotalBalance is ITotalBalance, TimestampProvider {
     function getTotalBalanceFor(address _account) external view returns (uint256) {
-        return ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(_account, _getBlockTimestamp());
+        return ERC3643StorageWrapper._getTotalBalanceForAdjustedAt(_account, _getBlockTimestamp());
     }
 
     function getTotalBalanceForByPartition(bytes32 _partition, address _account) external view returns (uint256) {
         return
-            ERC3643StorageWrapper.getTotalBalanceForByPartitionAdjustedAt(_partition, _account, _getBlockTimestamp());
+            ERC3643StorageWrapper._getTotalBalanceForByPartitionAdjustedAt(_partition, _account, _getBlockTimestamp());
     }
 }

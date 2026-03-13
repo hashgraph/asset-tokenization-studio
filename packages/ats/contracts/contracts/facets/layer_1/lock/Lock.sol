@@ -18,12 +18,12 @@ abstract contract Lock is ILock, TimestampProvider {
         address _tokenHolder,
         uint256 _expirationTimestamp
     ) external override returns (bool success_, uint256 lockId_) {
-        PauseStorageWrapper.requireNotPaused();
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
-        AccessControlStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
-        (success_, lockId_) = LockStorageWrapper.lockByPartition(
+        PauseStorageWrapper._requireNotPaused();
+        ERC3643StorageWrapper._requireUnrecoveredAddress(_tokenHolder);
+        AccessControlStorageWrapper._checkRole(_LOCKER_ROLE, msg.sender);
+        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_partition);
+        LockStorageWrapper._requireValidExpirationTimestamp(_expirationTimestamp);
+        (success_, lockId_) = LockStorageWrapper._lockByPartition(
             _partition,
             _amount,
             _tokenHolder,
@@ -38,11 +38,11 @@ abstract contract Lock is ILock, TimestampProvider {
         uint256 _lockId,
         address _tokenHolder
     ) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        LockStorageWrapper.requireValidLockId(_partition, _tokenHolder, _lockId);
-        LockStorageWrapper.requireLockedExpirationTimestamp(_partition, _tokenHolder, _lockId);
-        success_ = LockStorageWrapper.releaseByPartition(_partition, _lockId, _tokenHolder, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_partition);
+        LockStorageWrapper._requireValidLockId(_partition, _tokenHolder, _lockId);
+        LockStorageWrapper._requireLockedExpirationTimestamp(_partition, _tokenHolder, _lockId);
+        success_ = LockStorageWrapper._releaseByPartition(_partition, _lockId, _tokenHolder, msg.sender);
         emit LockByPartitionReleased(msg.sender, _tokenHolder, _partition, _lockId);
     }
 
@@ -51,12 +51,12 @@ abstract contract Lock is ILock, TimestampProvider {
         address _tokenHolder,
         uint256 _expirationTimestamp
     ) external override returns (bool success_, uint256 lockId_) {
-        PauseStorageWrapper.requireNotPaused();
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
-        AccessControlStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
-        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
-        (success_, lockId_) = LockStorageWrapper.lockByPartition(
+        PauseStorageWrapper._requireNotPaused();
+        ERC3643StorageWrapper._requireUnrecoveredAddress(_tokenHolder);
+        AccessControlStorageWrapper._checkRole(_LOCKER_ROLE, msg.sender);
+        ERC1410StorageWrapper._requireWithoutMultiPartition();
+        LockStorageWrapper._requireValidExpirationTimestamp(_expirationTimestamp);
+        (success_, lockId_) = LockStorageWrapper._lockByPartition(
             _DEFAULT_PARTITION,
             _amount,
             _tokenHolder,
@@ -67,11 +67,11 @@ abstract contract Lock is ILock, TimestampProvider {
     }
 
     function release(uint256 _lockId, address _tokenHolder) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
-        LockStorageWrapper.requireValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId);
-        LockStorageWrapper.requireLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId);
-        success_ = LockStorageWrapper.releaseByPartition(_DEFAULT_PARTITION, _lockId, _tokenHolder, msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1410StorageWrapper._requireWithoutMultiPartition();
+        LockStorageWrapper._requireValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId);
+        LockStorageWrapper._requireLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId);
+        success_ = LockStorageWrapper._releaseByPartition(_DEFAULT_PARTITION, _lockId, _tokenHolder, msg.sender);
         emit LockByPartitionReleased(msg.sender, _tokenHolder, _DEFAULT_PARTITION, _lockId);
     }
 
@@ -80,14 +80,14 @@ abstract contract Lock is ILock, TimestampProvider {
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
         return
-            LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
+            LockStorageWrapper._getLockedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
     }
 
     function getLockCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 lockCount_) {
-        return LockStorageWrapper.getLockCountForByPartition(_partition, _tokenHolder);
+        return LockStorageWrapper._getLockCountForByPartition(_partition, _tokenHolder);
     }
 
     function getLocksIdForByPartition(
@@ -96,7 +96,7 @@ abstract contract Lock is ILock, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory locksId_) {
-        return LockStorageWrapper.getLocksIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
+        return LockStorageWrapper._getLocksIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
     }
 
     function getLockForByPartition(
@@ -105,12 +105,17 @@ abstract contract Lock is ILock, TimestampProvider {
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
         return
-            LockStorageWrapper.getLockForByPartitionAdjustedAt(_partition, _tokenHolder, _lockId, _getBlockTimestamp());
+            LockStorageWrapper._getLockForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _lockId,
+                _getBlockTimestamp()
+            );
     }
 
     function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
         return
-            LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
+            LockStorageWrapper._getLockedAmountForByPartitionAdjustedAt(
                 _DEFAULT_PARTITION,
                 _tokenHolder,
                 _getBlockTimestamp()
@@ -118,7 +123,7 @@ abstract contract Lock is ILock, TimestampProvider {
     }
 
     function getLockCountFor(address _tokenHolder) external view override returns (uint256 lockCount_) {
-        return LockStorageWrapper.getLockCountForByPartition(_DEFAULT_PARTITION, _tokenHolder);
+        return LockStorageWrapper._getLockCountForByPartition(_DEFAULT_PARTITION, _tokenHolder);
     }
 
     function getLocksIdFor(
@@ -126,7 +131,7 @@ abstract contract Lock is ILock, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory locksId_) {
-        return LockStorageWrapper.getLocksIdForByPartition(_DEFAULT_PARTITION, _tokenHolder, _pageIndex, _pageLength);
+        return LockStorageWrapper._getLocksIdForByPartition(_DEFAULT_PARTITION, _tokenHolder, _pageIndex, _pageLength);
     }
 
     function getLockFor(
@@ -134,7 +139,7 @@ abstract contract Lock is ILock, TimestampProvider {
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
         return
-            LockStorageWrapper.getLockForByPartitionAdjustedAt(
+            LockStorageWrapper._getLockForByPartitionAdjustedAt(
                 _DEFAULT_PARTITION,
                 _tokenHolder,
                 _lockId,

@@ -7,9 +7,9 @@ import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.so
 
 abstract contract AccessControl is IAccessControl {
     function grantRole(bytes32 _role, address _account) external override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(AccessControlStorageWrapper.getRoleAdmin(_role), msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        if (!AccessControlStorageWrapper.grantRole(_role, _account)) {
+        AccessControlStorageWrapper._checkRole(AccessControlStorageWrapper._getRoleAdmin(_role), msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        if (!AccessControlStorageWrapper._grantRole(_role, _account)) {
             revert AccountAssignedToRole(_role, _account);
         }
         emit RoleGranted(msg.sender, _account, _role);
@@ -17,9 +17,9 @@ abstract contract AccessControl is IAccessControl {
     }
 
     function revokeRole(bytes32 _role, address _account) external override returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(AccessControlStorageWrapper.getRoleAdmin(_role), msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        success_ = AccessControlStorageWrapper.revokeRole(_role, _account);
+        AccessControlStorageWrapper._checkRole(AccessControlStorageWrapper._getRoleAdmin(_role), msg.sender);
+        PauseStorageWrapper._requireNotPaused();
+        success_ = AccessControlStorageWrapper._revokeRole(_role, _account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, _account);
         }
@@ -31,10 +31,10 @@ abstract contract AccessControl is IAccessControl {
         bool[] calldata _actives,
         address _account
     ) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
-        AccessControlStorageWrapper.checkSameRolesAndActivesLength(_roles.length, _actives.length);
-        AccessControlStorageWrapper.checkConsistentRoles(_roles, _actives);
-        success_ = AccessControlStorageWrapper.applyRoles(_roles, _actives, _account);
+        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper._checkSameRolesAndActivesLength(_roles.length, _actives.length);
+        AccessControlStorageWrapper._checkConsistentRoles(_roles, _actives);
+        success_ = AccessControlStorageWrapper._applyRoles(_roles, _actives, _account);
         if (!success_) {
             revert RolesNotApplied(_roles, _actives, _account);
         }
@@ -43,8 +43,8 @@ abstract contract AccessControl is IAccessControl {
 
     function renounceRole(bytes32 _role) external override returns (bool success_) {
         address account = msg.sender;
-        PauseStorageWrapper.requireNotPaused();
-        success_ = AccessControlStorageWrapper.revokeRole(_role, account);
+        PauseStorageWrapper._requireNotPaused();
+        success_ = AccessControlStorageWrapper._revokeRole(_role, account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, account);
         }
@@ -52,11 +52,11 @@ abstract contract AccessControl is IAccessControl {
     }
 
     function hasRole(bytes32 _role, address _account) external view override returns (bool) {
-        return AccessControlStorageWrapper.hasRole(_role, _account);
+        return AccessControlStorageWrapper._hasRole(_role, _account);
     }
 
     function getRoleCountFor(address _account) external view override returns (uint256 roleCount_) {
-        roleCount_ = AccessControlStorageWrapper.getRoleCountFor(_account);
+        roleCount_ = AccessControlStorageWrapper._getRoleCountFor(_account);
     }
 
     function getRolesFor(
@@ -64,11 +64,11 @@ abstract contract AccessControl is IAccessControl {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (bytes32[] memory roles_) {
-        roles_ = AccessControlStorageWrapper.getRolesFor(_account, _pageIndex, _pageLength);
+        roles_ = AccessControlStorageWrapper._getRolesFor(_account, _pageIndex, _pageLength);
     }
 
     function getRoleMemberCount(bytes32 _role) external view override returns (uint256 memberCount_) {
-        memberCount_ = AccessControlStorageWrapper.getRoleMemberCount(_role);
+        memberCount_ = AccessControlStorageWrapper._getRoleMemberCount(_role);
     }
 
     function getRoleMembers(
@@ -76,6 +76,6 @@ abstract contract AccessControl is IAccessControl {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        members_ = AccessControlStorageWrapper.getRoleMembers(_role, _pageIndex, _pageLength);
+        members_ = AccessControlStorageWrapper._getRoleMembers(_role, _pageIndex, _pageLength);
     }
 }

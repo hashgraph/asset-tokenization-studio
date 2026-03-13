@@ -15,22 +15,22 @@ import { TimestampProvider } from "../../../../infrastructure/utils/TimestampPro
 
 abstract contract ERC1410Issuer is IERC1410Issuer, TimestampProvider {
     function issueByPartition(IssueData calldata _issueData) external {
-        PauseStorageWrapper.requireNotPaused();
-        CapStorageWrapper.requireWithinMaxSupply(_issueData.value, _getBlockTimestamp());
-        CapStorageWrapper.requireWithinMaxSupplyByPartition(
+        PauseStorageWrapper._requireNotPaused();
+        CapStorageWrapper._requireWithinMaxSupply(_issueData.value, _getBlockTimestamp());
+        CapStorageWrapper._requireWithinMaxSupplyByPartition(
             _issueData.partition,
             _issueData.value,
             _getBlockTimestamp()
         );
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_issueData.partition);
-        ERC1594StorageWrapper.requireIdentified(address(0), _issueData.tokenHolder);
-        ERC1594StorageWrapper.requireCompliant(address(0), _issueData.tokenHolder, false);
+        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_issueData.partition);
+        ERC1594StorageWrapper._requireIdentified(address(0), _issueData.tokenHolder);
+        ERC1594StorageWrapper._requireCompliant(address(0), _issueData.tokenHolder, false);
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+            AccessControlStorageWrapper._checkAnyRole(roles, msg.sender);
+            ERC3643StorageWrapper._requireUnrecoveredAddress(msg.sender);
         }
         TokenCoreOps.issueByPartition(_issueData);
     }

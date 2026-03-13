@@ -3,19 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ProceedRecipientsKpiLinkedRateFacet
-} from "../../../../facets/layer_2/proceedRecipient/kpiLinkedRate/ProceedRecipientsKpiLinkedRateFacet.sol";
+} from "../../../../facets/layer_2/proceedRecipient/ProceedRecipientsKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ProceedRecipientsKpiLinkedRateFacetTimeTravel is
     ProceedRecipientsKpiLinkedRateFacet,
     TimeTravelStorageWrapper
-{
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
-}
+{}

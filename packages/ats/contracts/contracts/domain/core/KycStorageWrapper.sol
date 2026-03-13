@@ -22,7 +22,7 @@ library KycStorageWrapper {
 
     // --- Storage accessor (pure) ---
 
-    function kycStorage() internal pure returns (KycStorage storage kyc_) {
+    function _kycStorage() internal pure returns (KycStorage storage kyc_) {
         bytes32 position = _KYC_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -33,53 +33,53 @@ library KycStorageWrapper {
     // --- Guard functions ---
 
     // solhint-disable-next-line ordering
-    function requireValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view {
-        if (!verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
+    function _requireValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view {
+        if (!_verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
     }
 
     // --- Initialization ---
 
-    function initializeInternalKyc(bool _internalKycActivated) internal {
-        KycStorage storage ks = kycStorage();
+    function _initializeInternalKyc(bool _internalKycActivated) internal {
+        KycStorage storage ks = _kycStorage();
         ks.initialized = true;
         ks.internalKycActivated = _internalKycActivated;
     }
 
-    function setInternalKyc(bool _activated) internal returns (bool success_) {
-        kycStorage().internalKycActivated = _activated;
+    function _setInternalKyc(bool _activated) internal returns (bool success_) {
+        _kycStorage().internalKycActivated = _activated;
         success_ = true;
     }
 
     // --- State-changing functions ---
 
-    function grantKyc(
+    function _grantKyc(
         address _account,
         string memory _vcId,
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
     ) internal returns (bool success_) {
-        kycStorage().kyc[_account] = IKyc.KycData(_validFrom, _validTo, _vcId, _issuer, IKyc.KycStatus.GRANTED);
-        kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(_account);
+        _kycStorage().kyc[_account] = IKyc.KycData(_validFrom, _validTo, _vcId, _issuer, IKyc.KycStatus.GRANTED);
+        _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(_account);
         success_ = true;
     }
 
-    function revokeKyc(address _account) internal returns (bool success_) {
-        delete kycStorage().kyc[_account];
-        kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(_account);
+    function _revokeKyc(address _account) internal returns (bool success_) {
+        delete _kycStorage().kyc[_account];
+        _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(_account);
         success_ = true;
     }
 
     // --- Read functions ---
 
-    function getKycStatusFor(address _account, uint256 _timestamp) internal view returns (IKyc.KycStatus) {
-        IKyc.KycData memory kycFor = getKycFor(_account);
+    function _getKycStatusFor(address _account, uint256 _timestamp) internal view returns (IKyc.KycStatus) {
+        IKyc.KycData memory kycFor = _getKycFor(_account);
 
         if (kycFor.validTo < _timestamp) return IKyc.KycStatus.NOT_GRANTED;
         if (kycFor.validFrom > _timestamp) return IKyc.KycStatus.NOT_GRANTED;
-        if (!SsiManagementStorageWrapper.isIssuer(kycFor.issuer)) return IKyc.KycStatus.NOT_GRANTED;
+        if (!SsiManagementStorageWrapper._isIssuer(kycFor.issuer)) return IKyc.KycStatus.NOT_GRANTED;
 
-        address revocationListAddress = SsiManagementStorageWrapper.getRevocationRegistryAddress();
+        address revocationListAddress = SsiManagementStorageWrapper._getRevocationRegistryAddress();
 
         if (
             revocationListAddress != address(0) &&
@@ -89,47 +89,47 @@ library KycStorageWrapper {
         return kycFor.status;
     }
 
-    function getKycFor(address _account) internal view returns (IKyc.KycData memory) {
-        return kycStorage().kyc[_account];
+    function _getKycFor(address _account) internal view returns (IKyc.KycData memory) {
+        return _kycStorage().kyc[_account];
     }
 
-    function getKycAccountsCount(IKyc.KycStatus _kycStatus) internal view returns (uint256 kycAccountsCount_) {
-        kycAccountsCount_ = kycStorage().kycAddressesByStatus[_kycStatus].length();
+    function _getKycAccountsCount(IKyc.KycStatus _kycStatus) internal view returns (uint256 kycAccountsCount_) {
+        kycAccountsCount_ = _kycStorage().kycAddressesByStatus[_kycStatus].length();
     }
 
-    function getKycAccountsData(
+    function _getKycAccountsData(
         IKyc.KycStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory accounts_, IKyc.KycData[] memory kycData_) {
-        accounts_ = kycStorage().kycAddressesByStatus[_kycStatus].getFromSet(_pageIndex, _pageLength);
+        accounts_ = _kycStorage().kycAddressesByStatus[_kycStatus].getFromSet(_pageIndex, _pageLength);
 
         uint256 totalAccounts = accounts_.length;
         kycData_ = new IKyc.KycData[](totalAccounts);
 
         for (uint256 index; index < totalAccounts; ) {
-            kycData_[index] = getKycFor(accounts_[index]);
+            kycData_[index] = _getKycFor(accounts_[index]);
             unchecked {
                 ++index;
             }
         }
     }
 
-    function verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view returns (bool) {
-        KycStorage storage ks = kycStorage();
-        bool internalKycValid = !ks.internalKycActivated || getKycStatusFor(_account, block.timestamp) == _kycStatus;
-        return internalKycValid && ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
+    function _verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view returns (bool) {
+        KycStorage storage ks = _kycStorage();
+        bool internalKycValid = !ks.internalKycActivated || _getKycStatusFor(_account, block.timestamp) == _kycStatus;
+        return internalKycValid && ExternalListManagementStorageWrapper._isExternallyGranted(_account, _kycStatus);
     }
 
-    function isInternalKycActivated() internal view returns (bool) {
-        return kycStorage().internalKycActivated;
+    function _isInternalKycActivated() internal view returns (bool) {
+        return _kycStorage().internalKycActivated;
     }
 
-    function isKycInitialized() internal view returns (bool) {
-        return kycStorage().initialized;
+    function _isKycInitialized() internal view returns (bool) {
+        return _kycStorage().initialized;
     }
 
-    function requireValidDates(uint256 _validFrom, uint256 _validTo, uint256 _timestamp) internal pure {
+    function _requireValidDates(uint256 _validFrom, uint256 _validTo, uint256 _timestamp) internal pure {
         if (_validFrom > _validTo || _validTo < _timestamp) revert IKyc.InvalidDates();
     }
 }

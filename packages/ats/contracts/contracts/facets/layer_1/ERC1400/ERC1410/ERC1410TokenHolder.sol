@@ -21,8 +21,8 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder {
         bytes memory _data
     ) external override returns (bytes32) {
         _requireUnProtectedPartitionsOrWildCardRole();
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        ERC1594StorageWrapper.requireCanTransferFromByPartition(
+        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_partition);
+        ERC1594StorageWrapper._requireCanTransferFromByPartition(
             msg.sender,
             _basicTransferInfo.to,
             _partition,
@@ -32,47 +32,47 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder {
     }
 
     function redeemByPartition(bytes32 _partition, uint256 _value, bytes calldata _data) external override {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_partition);
         _requireUnProtectedPartitionsOrWildCardRole();
-        ERC1594StorageWrapper.requireCanRedeemFromByPartition(msg.sender, _partition, _value);
+        ERC1594StorageWrapper._requireCanRedeemFromByPartition(msg.sender, _partition, _value);
         TokenCoreOps.redeemByPartition(_partition, msg.sender, address(0), _value, _data, "");
     }
 
     function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external {
-        PauseStorageWrapper.requireNotPaused();
-        ERC1410StorageWrapper.triggerAndSyncAll(_partition, _from, _to);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1410StorageWrapper._triggerAndSyncAll(_partition, _from, _to);
     }
 
     function authorizeOperator(address _operator) external override {
-        PauseStorageWrapper.requireNotPaused();
-        ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
-        ERC1410StorageWrapper.authorizeOperator(_operator);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1594StorageWrapper._requireCompliant(msg.sender, _operator, false);
+        ERC1410StorageWrapper._authorizeOperator(_operator);
     }
 
     function revokeOperator(address _operator) external override {
-        PauseStorageWrapper.requireNotPaused();
-        ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
-        ERC1410StorageWrapper.revokeOperator(_operator);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1594StorageWrapper._requireCompliant(msg.sender, address(0), false);
+        ERC1410StorageWrapper._revokeOperator(_operator);
     }
 
     function authorizeOperatorByPartition(bytes32 _partition, address _operator) external override {
-        PauseStorageWrapper.requireNotPaused();
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
-        ERC1410StorageWrapper.authorizeOperatorByPartition(_partition, _operator);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_partition);
+        ERC1594StorageWrapper._requireCompliant(msg.sender, _operator, false);
+        ERC1410StorageWrapper._authorizeOperatorByPartition(_partition, _operator);
     }
 
     function revokeOperatorByPartition(bytes32 _partition, address _operator) external override {
-        PauseStorageWrapper.requireNotPaused();
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
-        ERC1410StorageWrapper.revokeOperatorByPartition(_partition, _operator);
+        PauseStorageWrapper._requireNotPaused();
+        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_partition);
+        ERC1594StorageWrapper._requireCompliant(msg.sender, address(0), false);
+        ERC1410StorageWrapper._revokeOperatorByPartition(_partition, _operator);
     }
 
     function _requireUnProtectedPartitionsOrWildCardRole() internal view {
         if (
-            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
+            ProtectedPartitionsStorageWrapper._arePartitionsProtected() &&
+            !AccessControlStorageWrapper._hasRole(_WILD_CARD_ROLE, msg.sender)
         ) {
             revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
         }
