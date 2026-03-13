@@ -66,7 +66,7 @@ Operations available for all token types:
 Operations specific to equity tokens:
 
 - **`Equity.create()`** - Create equity token
-- **`Equity.setDividends()`** - Schedule dividend distribution
+- **`Equity.setDividend()`** - Schedule dividend distribution
 - **`Equity.getAllDividends()`** - Query all scheduled dividends
 - **`Equity.setVotingRights()`** - Schedule voting event
 - **`Equity.setScheduledBalanceAdjustment()`** - Schedule stock split or reverse split
@@ -222,7 +222,7 @@ const dividendRequest = new SetDividendsRequest({
   paymentDate: Math.floor(Date.now() / 1000) + 172800, // 2 days from now
 });
 
-await Equity.setDividends(dividendRequest);
+await Equity.setDividend(dividendRequest);
 ```
 
 ### Setting Coupon Payments

@@ -7,6 +7,7 @@ contract MockBond is IBondRead {
     // --- Storage ---
     BondDetailsData private _bondDetails;
     mapping(uint256 => RegisteredCoupon) private _coupons;
+    mapping(uint256 => bool) private _isDisabled;
     mapping(uint256 => mapping(address => CouponFor)) private _couponFor;
     mapping(uint256 => mapping(address => CouponAmountFor)) private _couponAmountFor;
     mapping(address => PrincipalFor) private _principalFor;
@@ -24,6 +25,9 @@ contract MockBond is IBondRead {
     }
     function mock__setCoupon(uint256 id, RegisteredCoupon calldata data) external {
         _coupons[id] = data;
+    }
+    function mock__setIsCouponDisabled(uint256 id, bool isDisabled) external {
+        _isDisabled[id] = isDisabled;
     }
     function mock__setCouponFor(uint256 id, address account, CouponFor calldata data) external {
         _couponFor[id][account] = data;
@@ -51,8 +55,8 @@ contract MockBond is IBondRead {
     function getBondDetails() external view override returns (BondDetailsData memory) {
         return _bondDetails;
     }
-    function getCoupon(uint256 id) external view override returns (RegisteredCoupon memory) {
-        return _coupons[id];
+    function getCoupon(uint256 id) external view override returns (RegisteredCoupon memory, bool) {
+        return (_coupons[id], _isDisabled[id]);
     }
     function getCouponFor(uint256 id, address account) external view override returns (CouponFor memory) {
         return _couponFor[id][account];

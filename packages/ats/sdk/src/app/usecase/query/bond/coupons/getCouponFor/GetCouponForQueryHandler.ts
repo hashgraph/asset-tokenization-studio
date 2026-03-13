@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 import { IQueryHandler } from "@core/query/QueryHandler";
 import { QueryHandler } from "@core/decorator/QueryHandlerDecorator";
@@ -30,7 +30,7 @@ export class GetCouponForQueryHandler implements IQueryHandler<GetCouponForQuery
 
       const res = await this.queryAdapter.getCouponFor(securityEvmAddress, targetEvmAddress, couponId);
 
-      return new GetCouponForQueryResponse(res.tokenBalance || "0", res.decimals);
+      return new GetCouponForQueryResponse(res.tokenBalance || "0", res.decimals, res.isDisabled);
     } catch (error) {
       throw new GetCouponForQueryError(error as Error);
     }

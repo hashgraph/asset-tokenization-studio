@@ -7,6 +7,10 @@
 import { CommandBus } from "@core/command/CommandBus";
 import {
   _PARTITION_ID_1,
+  CANCEL_COUPON_EVENT,
+  CANCEL_DIVIDEND_EVENT,
+  CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+  CANCEL_VOTING_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
   SET_COUPON_EVENT,
@@ -17,18 +21,20 @@ import {
 import { lazyInject } from "@core/decorator/LazyInjectDecorator";
 import Account from "@domain/context/account/Account";
 import { BondDetails } from "@domain/context/bond/BondDetails";
-import { BondFixedRateDetails } from '@domain/context/bond/BondFixedRateDetails';
+import { BondFixedRateDetails } from "@domain/context/bond/BondFixedRateDetails";
 import { BondKpiLinkedRateDetails } from "@domain/context/bond/BondKpiLinkedRateDetails";
-import { CastRateStatus, RateStatus } from '@domain/context/bond/RateStatus';
+import { CastRateStatus, RateStatus } from "@domain/context/bond/RateStatus";
 import EvmAddress from "@domain/context/contract/EvmAddress";
 import { EquityDetails } from "@domain/context/equity/EquityDetails";
 import { BasicTransferInfo, IssueData, OperatorTransferData } from "@domain/context/factory/ERC1410Metadata";
 import { Factories } from "@domain/context/factory/Factories";
 import {
   FactoryBondFixedRateToken,
-  FactoryBondKpiLinkedRateToken, FactoryBondToken, FactoryEquityToken
+  FactoryBondKpiLinkedRateToken,
+  FactoryBondToken,
+  FactoryEquityToken,
 } from "@domain/context/factory/FactorySecurityToken";
-import { ProtectionData } from '@domain/context/factory/ProtectionData';
+import { ProtectionData } from "@domain/context/factory/ProtectionData";
 import { Resolvers } from "@domain/context/factory/Resolvers";
 import { SecurityData } from "@domain/context/factory/SecurityData";
 import { JsonRpcRelays } from "@domain/context/network/JsonRpcRelay";
@@ -40,13 +46,13 @@ import {
   ClearingOperationIdentifier,
   ClearingOperationType,
   ProtectedClearingOperation,
-} from '@domain/context/security/Clearing';
+} from "@domain/context/security/Clearing";
 import { Hold, HoldIdentifier, ProtectedHold } from "@domain/context/security/Hold";
 import { Security } from "@domain/context/security/Security";
 import { SecurityRole } from "@domain/context/security/SecurityRole";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import TransactionResponse from "@domain/context/transaction/TransactionResponse";
-import { SecurityDataBuilder } from '@domain/context/util/SecurityDataBuilder';
+import { SecurityDataBuilder } from "@domain/context/util/SecurityDataBuilder";
 import {
   AccessControlFacet__factory,
   Bond__factory,
@@ -90,7 +96,7 @@ import {
   SnapshotsFacet__factory,
   SsiManagementFacet__factory,
   TransferAndLockFacet__factory,
-  TREXFactoryAts__factory
+  TREXFactoryAts__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -239,100 +245,100 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         ),
       "deployBond",
       GAS.CREATE_BOND_ST,
-      'BondDeployed',
+      "BondDeployed",
       compliance,
       identityRegistryAddress,
     );
   }
 
   async createBondFixedRate(
-      securityInfo: Security,
-      bondFixedRateDetails: BondFixedRateDetails,
-      factory: EvmAddress,
-      resolver: EvmAddress,
-      configId: string,
-      configVersion: number,
-      compliance: EvmAddress,
-      identityRegistryAddress: EvmAddress,
-      externalPauses?: EvmAddress[],
-      externalControlLists?: EvmAddress[],
-      externalKycLists?: EvmAddress[],
-      diamondOwnerAccount?: EvmAddress,
-      proceedRecipients: EvmAddress[] = [],
-      proceedRecipientsData: string[] = [],
-      factoryId?: ContractId | string,
-    ): Promise<TransactionResponse> {
-      return this.createSecurity(
-        securityInfo,
-        {
-          bondDetails: SecurityDataBuilder.buildBondFixedRateDetails(bondFixedRateDetails),
-        },
-        factory,
-        resolver,
-        configId,
-        configVersion,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-        diamondOwnerAccount!,
-        (security, details) =>
-          new FactoryBondFixedRateToken(
-            security,
-            details.bondDetails,
-            proceedRecipients.map((addr) => addr.toString()),
-            proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
-          ),
-        'deployBondFixedRate',
-        GAS.CREATE_BOND_ST,
-        'BondFixedRateDeployed',
-        compliance,
-        identityRegistryAddress,
-      );
+    securityInfo: Security,
+    bondFixedRateDetails: BondFixedRateDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients: EvmAddress[] = [],
+    proceedRecipientsData: string[] = [],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    return this.createSecurity(
+      securityInfo,
+      {
+        bondDetails: SecurityDataBuilder.buildBondFixedRateDetails(bondFixedRateDetails),
+      },
+      factory,
+      resolver,
+      configId,
+      configVersion,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+      diamondOwnerAccount!,
+      (security, details) =>
+        new FactoryBondFixedRateToken(
+          security,
+          details.bondDetails,
+          proceedRecipients.map((addr) => addr.toString()),
+          proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
+        ),
+      "deployBondFixedRate",
+      GAS.CREATE_BOND_ST,
+      "BondFixedRateDeployed",
+      compliance,
+      identityRegistryAddress,
+    );
   }
 
   async createBondKpiLinkedRate(
-      securityInfo: Security,
-      bondKpiLinkedRateDetails: BondKpiLinkedRateDetails,
-      factory: EvmAddress,
-      resolver: EvmAddress,
-      configId: string,
-      configVersion: number,
-      compliance: EvmAddress,
-      identityRegistryAddress: EvmAddress,
-      externalPauses?: EvmAddress[],
-      externalControlLists?: EvmAddress[],
-      externalKycLists?: EvmAddress[],
-      diamondOwnerAccount?: EvmAddress,
-      proceedRecipients: EvmAddress[] = [],
-      proceedRecipientsData: string[] = [],
-      factoryId?: ContractId | string,
-    ): Promise<TransactionResponse> {
-      return this.createSecurity(
-        securityInfo,
-        {
-          bondDetails: SecurityDataBuilder.buildBondKpiLinkedRateDetails(bondKpiLinkedRateDetails),
-        },
-        factory,
-        resolver,
-        configId,
-        configVersion,
-        externalPauses,
-        externalControlLists,
-        externalKycLists,
-        diamondOwnerAccount!,
-        (security, details) =>
-          new FactoryBondKpiLinkedRateToken(
-            security,
-            details.bondDetails,
-            proceedRecipients.map((addr) => addr.toString()),
-            proceedRecipientsData.map((data) => (data == '' ? '0x' : data)),
-          ),
-        'deployBondKpiLinkedRate',
-        GAS.CREATE_BOND_ST,
-        'BondKpiLinkedRateDeployed',
-        compliance,
-        identityRegistryAddress,
-      );
+    securityInfo: Security,
+    bondKpiLinkedRateDetails: BondKpiLinkedRateDetails,
+    factory: EvmAddress,
+    resolver: EvmAddress,
+    configId: string,
+    configVersion: number,
+    compliance: EvmAddress,
+    identityRegistryAddress: EvmAddress,
+    externalPauses?: EvmAddress[],
+    externalControlLists?: EvmAddress[],
+    externalKycLists?: EvmAddress[],
+    diamondOwnerAccount?: EvmAddress,
+    proceedRecipients: EvmAddress[] = [],
+    proceedRecipientsData: string[] = [],
+    factoryId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    return this.createSecurity(
+      securityInfo,
+      {
+        bondDetails: SecurityDataBuilder.buildBondKpiLinkedRateDetails(bondKpiLinkedRateDetails),
+      },
+      factory,
+      resolver,
+      configId,
+      configVersion,
+      externalPauses,
+      externalControlLists,
+      externalKycLists,
+      diamondOwnerAccount!,
+      (security, details) =>
+        new FactoryBondKpiLinkedRateToken(
+          security,
+          details.bondDetails,
+          proceedRecipients.map((addr) => addr.toString()),
+          proceedRecipientsData.map((data) => (data == "" ? "0x" : data)),
+        ),
+      "deployBondKpiLinkedRate",
+      GAS.CREATE_BOND_ST,
+      "BondKpiLinkedRateDeployed",
+      compliance,
+      identityRegistryAddress,
+    );
   }
 
   async transfer(security: EvmAddress, targetId: EvmAddress, amount: BigDecimal): Promise<TransactionResponse> {
@@ -559,7 +565,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async setDividends(
+  async setDividend(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
@@ -580,10 +586,20 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     return this.executeTransaction(
       Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
-      "setDividends",
+      "setDividend",
       [dividendStruct],
       GAS.SET_DIVIDENDS,
       SET_DIVIDEND_EVENT,
+    );
+  }
+
+  async cancelDividend(security: EvmAddress, dividendId: number): Promise<TransactionResponse> {
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelDividend",
+      [dividendId],
+      GAS.CANCEL_DIVIDEND,
+      CANCEL_DIVIDEND_EVENT,
     );
   }
 
@@ -644,6 +660,30 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       [couponStruct],
       GAS.SET_COUPON,
       SET_COUPON_EVENT,
+    );
+  }
+
+  async cancelCoupon(security: EvmAddress, couponId: number): Promise<TransactionResponse> {
+    LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
+
+    return this.executeTransaction(
+      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelCoupon",
+      [couponId],
+      GAS.CANCEL_COUPON,
+      CANCEL_COUPON_EVENT,
+    );
+  }
+
+  async cancelVoting(security: EvmAddress, votingId: number): Promise<TransactionResponse> {
+    LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
+
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelVoting",
+      [votingId],
+      GAS.CANCEL_VOTING,
+      CANCEL_VOTING_EVENT,
     );
   }
 
@@ -2586,7 +2626,12 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  setRate(security: EvmAddress, rate: BigDecimal, rateDecimals: number, securityId?: ContractId | string): Promise<TransactionResponse> {
+  setRate(
+    security: EvmAddress,
+    rate: BigDecimal,
+    rateDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Setting Rate ${rate.toString()} with decimals ${rateDecimals} for security ${security.toString()}`,
     );
@@ -2610,22 +2655,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     rateDecimals: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
-    LogService.logTrace(
-      `Setting Interest Rate for security ${security.toString()}`,
-    );
+    LogService.logTrace(`Setting Interest Rate for security ${security.toString()}`);
     return this.executeTransaction(
       KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setInterestRate",
-      [{
-        maxRate: maxRate.toBigInt(),
-        baseRate: baseRate.toBigInt(),
-        minRate: minRate.toBigInt(),
-        startPeriod: startPeriod.toBigInt(),
-        startRate: startRate.toBigInt(),
-        missedPenalty: missedPenalty.toBigInt(),
-        reportPeriod: reportPeriod.toBigInt(),
-        rateDecimals: rateDecimals,
-      }],
+      [
+        {
+          maxRate: maxRate.toBigInt(),
+          baseRate: baseRate.toBigInt(),
+          minRate: minRate.toBigInt(),
+          startPeriod: startPeriod.toBigInt(),
+          startRate: startRate.toBigInt(),
+          missedPenalty: missedPenalty.toBigInt(),
+          reportPeriod: reportPeriod.toBigInt(),
+          rateDecimals: rateDecimals,
+        },
+      ],
       GAS.SET_INTEREST_RATE,
     );
   }
@@ -2639,19 +2684,19 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     adjustmentPrecision: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
-    LogService.logTrace(
-      `Setting Impact Data for security ${security.toString()}`,
-    );
+    LogService.logTrace(`Setting Impact Data for security ${security.toString()}`);
     return this.executeTransaction(
       KpiLinkedRate__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setImpactData",
-      [{
-        maxDeviationCap: maxDeviationCap.toBigInt(),
-        baseLine: baseLine.toBigInt(),
-        maxDeviationFloor: maxDeviationFloor.toBigInt(),
-        impactDataDecimals: impactDataDecimals,
-        adjustmentPrecision: adjustmentPrecision.toBigInt(),
-      }],
+      [
+        {
+          maxDeviationCap: maxDeviationCap.toBigInt(),
+          baseLine: baseLine.toBigInt(),
+          maxDeviationFloor: maxDeviationFloor.toBigInt(),
+          impactDataDecimals: impactDataDecimals,
+          adjustmentPrecision: adjustmentPrecision.toBigInt(),
+        },
+      ],
       GAS.SET_IMPACT_DATA,
     );
   }
@@ -2671,6 +2716,16 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       "addKpiData",
       [date, value, project.toString()],
       GAS.ADD_KPI_DATA,
+    );
+  }
+
+  async cancelScheduledBalanceAdjustment(security: EvmAddress, balanceAdjustmentId: number): Promise<TransactionResponse> {
+    return this.executeTransaction(
+      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "cancelScheduledBalanceAdjustment",
+      [balanceAdjustmentId],
+      GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
+      CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
     );
   }
 }

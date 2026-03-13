@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
+import { CancelCouponCommand } from "@command/bond/coupon/cancel/CancelCouponCommand";
 import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
 import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
 import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
@@ -34,6 +35,7 @@ import UpdateMaturityDateRequest from "@port/in/request/bond/UpdateMaturityDateR
 
 import RedeemAtMaturityByPartitionRequest from "@port/in/request/bond/RedeemAtMaturityByPartitionRequest";
 import RemoveProceedRecipientRequest from "@port/in/request/bond/RemoveProceedRecipientRequest";
+import CancelCouponRequest from "@port/in/request/bond/CancelCouponRequest";
 import SetCouponRequest from "@port/in/request/bond/SetCouponRequest";
 import UpdateProceedRecipientDataRequest from "@port/in/request/bond/UpdateProceedRecipientDataRequest";
 import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
@@ -137,6 +139,11 @@ export const FullRedeemAtMaturityCommandFixture = createFixture<FullRedeemAtMatu
   command.sourceId.as(() => HederaIdPropsFixture.create().value);
 });
 
+export const CancelCouponCommandFixture = createFixture<CancelCouponCommand>((command) => {
+  command.securityId.as(() => HederaIdPropsFixture.create().value);
+  command.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
 export const BondDetailsFixture = createFixture<BondDetails>((props) => {
   props.currency.faker((faker) => faker.finance.currencyCode());
   props.nominalValue.faker((faker) => faker.finance.amount({ min: 1, max: 10, dec: 2 }));
@@ -201,6 +208,7 @@ export const CouponFixture = createFixture<Coupon>((props) => {
   props.endTimeStamp.faker((faker) => faker.date.past().getTime().toString());
   props.fixingTimeStamp.faker((faker) => faker.date.past().getTime().toString());
   props.rateStatus.faker((faker) => faker.helpers.arrayElement(Object.values(RateStatus)));
+  props.isDisabled.faker((faker) => faker.datatype.boolean());
 });
 
 export const GetCouponHoldersRequestFixture = createFixture<GetCouponHoldersRequest>((request) => {
@@ -281,6 +289,11 @@ export const CreateBondRequestFixture = createFixture<CreateBondRequest>((reques
 
 export const GetBondDetailsRequestFixture = createFixture<GetBondDetailsRequest>((request) => {
   request.bondId.as(() => HederaIdPropsFixture.create().value);
+});
+
+export const CancelCouponRequestFixture = createFixture<CancelCouponRequest>((request) => {
+  request.securityId.as(() => HederaIdPropsFixture.create().value);
+  request.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
 });
 
 export const SetCouponRequestFixture = createFixture<SetCouponRequest>((request) => {
