@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
+import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 import commonjs from "@rollup/plugin-commonjs";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -71,6 +72,7 @@ export default {
           process: true,
           buffer: true,
         }),
+        NodeModulesPolyfillPlugin(),
       ],
     },
   },
