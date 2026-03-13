@@ -27,7 +27,7 @@ abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
     ) internal override {
         bytes memory data = _scheduledTask.data;
         bytes32 actionId = abi.decode(data, (bytes32));
-				if (_isCorporateActionDisabled(actionId)) {
+        if (_isCorporateActionDisabled(actionId)) {
             return;
         }
         uint256 newSnapShotID = _takeSnapshot();

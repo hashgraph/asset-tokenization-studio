@@ -57,18 +57,14 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _initDividend(corporateActionId_, data);
     }
 
-    function _cancelDividend(
-        uint256 _dividendId
-    ) internal override returns (bool success_, bytes32 corporateActionId_) {
+    function _cancelDividend(uint256 _dividendId) internal override returns (bool success_) {
         IEquity.RegisteredDividend memory registeredDividend;
-        (registeredDividend, corporateActionId_, ) = _getDividend(_dividendId);
-        if (
-            registeredDividend.dividend.executionDate != 0 &&
-            registeredDividend.dividend.executionDate <= _blockTimestamp()
-        ) {
-            revert IEquityStorageWrapper.DividendAlreadyExecuted(corporateActionId_, _dividendId);
+        bytes32 corporateActionId;
+        (registeredDividend, corporateActionId, ) = _getDividend(_dividendId);
+        if (registeredDividend.dividend.executionDate <= _blockTimestamp()) {
+            revert IEquityStorageWrapper.DividendAlreadyExecuted(corporateActionId, _dividendId);
         }
-        _cancelCorporateAction(corporateActionId_);
+        _cancelCorporateAction(corporateActionId);
         success_ = true;
         emit DividendCancelled(_dividendId, _msgSender());
     }
@@ -94,13 +90,14 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _initVotingRights(corporateActionId_, data);
     }
 
-    function _cancelVoting(uint256 _voteId) internal override returns (bool success_, bytes32 corporateActionId_) {
+    function _cancelVoting(uint256 _voteId) internal override returns (bool success_) {
         IEquity.RegisteredVoting memory registeredVoting;
-        (registeredVoting, corporateActionId_, ) = _getVoting(_voteId);
-        if (registeredVoting.voting.recordDate != 0 && registeredVoting.voting.recordDate <= _blockTimestamp()) {
-            revert IEquityStorageWrapper.VotingAlreadyRecorded(corporateActionId_, _voteId);
+        bytes32 corporateActionId;
+        (registeredVoting, corporateActionId, ) = _getVoting(_voteId);
+        if (registeredVoting.voting.recordDate <= _blockTimestamp()) {
+            revert IEquityStorageWrapper.VotingAlreadyRecorded(corporateActionId, _voteId);
         }
-        _cancelCorporateAction(corporateActionId_);
+        _cancelCorporateAction(corporateActionId);
         success_ = true;
         emit VotingCancelled(_voteId, _msgSender());
     }
@@ -129,15 +126,14 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _initBalanceAdjustment(corporateActionId_, data);
     }
 
-    function _cancelScheduledBalanceAdjustment(
-        uint256 _balanceAdjustmentId
-    ) internal override returns (bool success_, bytes32 corporateActionId_) {
+    function _cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) internal override returns (bool success_) {
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment;
-        (balanceAdjustment, corporateActionId_, ) = _getScheduledBalanceAdjustment(_balanceAdjustmentId);
-        if (balanceAdjustment.executionDate != 0 && balanceAdjustment.executionDate <= _blockTimestamp()) {
-            revert IEquityStorageWrapper.BalanceAdjustmentAlreadyExecuted(corporateActionId_, _balanceAdjustmentId);
+        bytes32 corporateActionId;
+        (balanceAdjustment, corporateActionId, ) = _getScheduledBalanceAdjustment(_balanceAdjustmentId);
+        if (balanceAdjustment.executionDate <= _blockTimestamp()) {
+            revert IEquityStorageWrapper.BalanceAdjustmentAlreadyExecuted(corporateActionId, _balanceAdjustmentId);
         }
-        _cancelCorporateAction(corporateActionId_);
+        _cancelCorporateAction(corporateActionId);
         success_ = true;
         emit ScheduledBalanceAdjustmentCancelled(_balanceAdjustmentId, _msgSender());
     }

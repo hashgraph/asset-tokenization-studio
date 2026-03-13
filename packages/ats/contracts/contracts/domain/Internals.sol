@@ -509,11 +509,11 @@ abstract contract Internals is Modifiers {
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
     ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_);
-    function _cancelCoupon(uint256 _couponId) internal virtual returns (bool success_, bytes32 corporateActionId_);
+    function _cancelCoupon(uint256 _couponId) internal virtual returns (bool success_);
     function _setDividend(
         IEquity.Dividend calldata _newDividend
     ) internal virtual returns (bytes32 corporateActionId_, uint256 dividendId_);
-    function _cancelDividend(uint256 _dividendId) internal virtual returns (bool success_, bytes32 corporateActionId_);
+    function _cancelDividend(uint256 _dividendId) internal virtual returns (bool success_);
     function _setHeldLabafById(
         bytes32 _partition,
         address _tokenHolder,
@@ -549,9 +549,7 @@ abstract contract Internals is Modifiers {
     function _setScheduledBalanceAdjustment(
         IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) internal virtual returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_);
-    function _cancelScheduledBalanceAdjustment(
-        uint256 _balanceAdjustmentId
-    ) internal virtual returns (bool success_, bytes32 corporateActionId_);
+    function _cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) internal virtual returns (bool success_);
     function _setTotalClearedLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
     function _setTotalClearedLabafByPartition(
         bytes32 _partition,
@@ -567,7 +565,7 @@ abstract contract Internals is Modifiers {
     function _setVoting(
         IEquity.Voting calldata _newVoting
     ) internal virtual returns (bytes32 corporateActionId_, uint256 voteID_);
-    function _cancelVoting(uint256 _voteId) internal virtual returns (bool success_, bytes32 corporateActionId_);
+    function _cancelVoting(uint256 _voteId) internal virtual returns (bool success_);
     function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal virtual;
     function _storeEquityDetails(IEquity.EquityDetailsData memory _equityDetailsData) internal virtual;
     function _storeRegulationData(

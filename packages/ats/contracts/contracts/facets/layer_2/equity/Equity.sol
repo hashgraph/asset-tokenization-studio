@@ -41,19 +41,19 @@ abstract contract Equity is IEquity, Common {
     function cancelDividend(
         uint256 _dividendId
     ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
-        (success_, ) = _cancelDividend(_dividendId);
+        (success_) = _cancelDividend(_dividendId);
     }
 
     function cancelVoting(
         uint256 _voteId
     ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
-        (success_, ) = _cancelVoting(_voteId);
+        (success_) = _cancelVoting(_voteId);
     }
 
     function cancelScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentId
     ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
-        (success_, ) = _cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
+        (success_) = _cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
     }
 
     function setVoting(

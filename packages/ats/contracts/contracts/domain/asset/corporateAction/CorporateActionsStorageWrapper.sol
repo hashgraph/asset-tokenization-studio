@@ -175,10 +175,13 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         datas_ = new bytes[](totalCorporateActions);
         isDisabled_ = new bool[](totalCorporateActions);
 
-        for (uint256 i = 0; i < totalCorporateActions; i++) {
+        for (uint256 i = 0; i < totalCorporateActions; ) {
             (actionTypes_[i], actionTypeIds_[i], datas_[i], isDisabled_[i]) = _getCorporateAction(
                 corporateActionIds[i]
             );
+            unchecked {
+                ++i;
+            }
         }
     }
 
@@ -205,10 +208,13 @@ abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
         datas_ = new bytes[](totalCorporateActions);
         isDisabled_ = new bool[](totalCorporateActions);
 
-        for (uint256 i = 0; i < totalCorporateActions; i++) {
+        for (uint256 i = 0; i < totalCorporateActions; ) {
             (actionTypes_[i], actionTypeIds_[i], datas_[i], isDisabled_[i]) = _getCorporateAction(
                 corporateActionIds[i]
             );
+            unchecked {
+                ++i;
+            }
         }
     }
 
