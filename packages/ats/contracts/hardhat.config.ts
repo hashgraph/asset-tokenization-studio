@@ -118,6 +118,8 @@ const config: HardhatUserConfig = {
       "@tokenysolutions/t-rex/contracts/compliance/legacy/DefaultCompliance.sol",
       "@onchain-id/solidity/contracts/Identity.sol",
       "@onchain-id/solidity/contracts/ClaimIssuer.sol",
+      "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol",
+      "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol",
     ],
   },
   dodoc: {
@@ -125,7 +127,7 @@ const config: HardhatUserConfig = {
     outputDir: "./docs/api",
     freshOutput: true,
     include: ["contracts"],
-    exclude: ["contracts/test", "contracts/mocks", "node_modules"],
+    exclude: ["contracts/test", "contracts/test/mocks", "node_modules"],
   },
 };
 

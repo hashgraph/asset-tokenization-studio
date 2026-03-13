@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
+
+/* solhint-disable max-line-length */
 import {
     ExternalPauseManagementSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_1/externalPauses/sustainabilityPerformanceTargetRate/ExternalPauseManagementSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/layer_1/externalPause/sustainabilityPerformanceTargetRate/ExternalPauseManagementSustainabilityPerformanceTargetRateFacet.sol";
+/* solhint-enable max-line-length */
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ExternalPauseManagementSustainabilityPerformanceTargetRateFacetTimeTravel is
     ExternalPauseManagementSustainabilityPerformanceTargetRateFacet,

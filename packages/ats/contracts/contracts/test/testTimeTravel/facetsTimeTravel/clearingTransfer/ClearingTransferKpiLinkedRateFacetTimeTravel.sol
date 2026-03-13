@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ClearingTransferKpiLinkedRateFacet
-} from "../../../../layer_1/clearing/kpiLinkedRate/ClearingTransferKpiLinkedRateFacet.sol";
+} from "../../../../facets/layer_1/clearing/kpiLinkedRate/ClearingTransferKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ClearingTransferKpiLinkedRateFacetTimeTravel is ClearingTransferKpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

@@ -142,7 +142,7 @@
     "ats:sdk:build": "npm run build --workspace=packages/ats/sdk",
     "ats:sdk:test": "npm run test --workspace=packages/ats/sdk",
     "ats:sdk:test:coverage": "npm run test:coverage --workspace=packages/ats/sdk",
-    "ats:sdk:test:ci": "npm run test:ci --workspace=packages/ats/sdk --if-present || npm run test --workspace=packages/ats/sdk",
+    "ats:sdk:test:ci": "npm run test:ci --workspace=packages/ats/sdk || npm run test --workspace=packages/ats/sdk",
     "ats:sdk:clean": "npm run clean --workspace=packages/ats/sdk",
     "ats:sdk:publish": "npm run publish --workspace=packages/ats/sdk",
     "ats:web:build": "NODE_OPTIONS='--max-old-space-size=8192' npm run build --workspace=apps/ats/web",
@@ -216,8 +216,10 @@
     "@typescript-eslint/scope-manager": "8.19.0",
     "@typescript-eslint/visitor-keys": "8.19.0",
     "webpack-sources": "3.3.3",
-    "@aws-sdk/client-kms": "3.901.0",
-    "@aws-sdk/util-endpoints": "3.901.0"
+    "@aws-sdk/client-kms": "3.1005.0",
+    "@aws-sdk/util-endpoints": "3.996.4",
+    "vite": "4.5.5",
+    "react-router-dom": "6.30.3"
   },
   "lint-staged": {
     "*.sol": ["node check-license.js", "npm run lint:staged:sol --", "npm run format:staged --"],

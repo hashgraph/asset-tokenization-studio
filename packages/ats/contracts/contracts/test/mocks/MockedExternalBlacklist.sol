@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { IExternalControlList } from "../../facets/layer_1/externalControlList/IExternalControlList.sol";
+
+contract MockedBlacklist is IExternalControlList {
+    mapping(address => bool) private _blacklist;
+
+    event AddedToBlacklist(address indexed account);
+    event RemovedFromBlacklist(address indexed account);
+
+    function addToBlacklist(address account) external {
+        _blacklist[account] = true;
+        emit AddedToBlacklist(account);
+    }
+
+    function removeFromBlacklist(address account) external {
+        _blacklist[account] = false;
+        emit RemovedFromBlacklist(account);
+    }
+
+    function isAuthorized(address account) external view returns (bool) {
+        return !_blacklist[account];
+    }
+}

@@ -46,6 +46,7 @@ typechain-types
 
 #Slither
 Slither/*
+slither.db.json
 
 # Deployment output files - ignore local/test networks
 deployments/*hardhat*.json
