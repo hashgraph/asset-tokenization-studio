@@ -12,7 +12,7 @@ import {
   PhosphorIcon,
 } from "io-bricks-ui";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { Info } from "@phosphor-icons/react";
 import { UnfreezePartialTokensRequest, FreezePartialTokensRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useSecurityStore } from "../../../../store/securityStore";
