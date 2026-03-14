@@ -4,4 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { KycFacet } from "../../../../facets/layer_1/kyc/KycFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract KycFacetTimeTravel is KycFacet, TimeTravelStorageWrapper {}
+contract KycFacetTimeTravel is KycFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

@@ -6,4 +6,6 @@ import {
 } from "../../../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/ScheduledCrossOrderedTasksFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract ScheduledTasksFacetTimeTravel is ScheduledCrossOrderedTasksFacet, TimeTravelStorageWrapper {}
+contract ScheduledTasksFacetTimeTravel is ScheduledCrossOrderedTasksFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

@@ -6,4 +6,6 @@ import {
 } from "../../../../facets/layer_1/externalKycList/ExternalKycListManagementFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract ExternalKycListManagementFacetTimeTravel is ExternalKycListManagementFacet, TimeTravelStorageWrapper {}
+contract ExternalKycListManagementFacetTimeTravel is ExternalKycListManagementFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

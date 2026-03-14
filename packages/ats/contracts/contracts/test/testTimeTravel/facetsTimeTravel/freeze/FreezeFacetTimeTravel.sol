@@ -6,4 +6,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { FreezeFacet } from "../../../../facets/layer_1/freeze/FreezeFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract FreezeFacetTimeTravel is FreezeFacet, TimeTravelStorageWrapper {}
+contract FreezeFacetTimeTravel is FreezeFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

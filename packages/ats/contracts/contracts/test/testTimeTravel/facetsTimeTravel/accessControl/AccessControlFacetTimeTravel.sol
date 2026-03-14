@@ -4,4 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { AccessControlFacet } from "../../../../facets/layer_1/accessControl/AccessControlFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract AccessControlFacetTimeTravel is AccessControlFacet, TimeTravelStorageWrapper {}
+contract AccessControlFacetTimeTravel is AccessControlFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

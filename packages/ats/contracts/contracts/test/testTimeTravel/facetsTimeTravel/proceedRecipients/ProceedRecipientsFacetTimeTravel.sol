@@ -4,4 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ProceedRecipientsFacet } from "../../../../facets/layer_2/proceedRecipient/ProceedRecipientsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract ProceedRecipientsFacetTimeTravel is ProceedRecipientsFacet, TimeTravelStorageWrapper {}
+contract ProceedRecipientsFacetTimeTravel is ProceedRecipientsFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

@@ -5,14 +5,7 @@ import {
     BondUSAReadKpiLinkedRateFacet
 } from "../../../../facets/layer_3/bondUSA/kpiLinkedRate/BondUSAReadKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract BondUSAReadKpiLinkedRateFacetTimeTravel is BondUSAReadKpiLinkedRateFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
+    // solhint-disable-previous-line no-empty-blocks
 }

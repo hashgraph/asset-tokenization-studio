@@ -6,4 +6,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ERC3643BatchFacet } from "../../../../facets/layer_1/ERC3643/ERC3643BatchFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract ERC3643BatchFacetTimeTravel is ERC3643BatchFacet, TimeTravelStorageWrapper {}
+contract ERC3643BatchFacetTimeTravel is ERC3643BatchFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

@@ -4,4 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 import { HoldManagementFacet } from "../../../../facets/layer_1/hold/HoldManagementFacet.sol";
 
-contract HoldManagementFacetTimeTravel is HoldManagementFacet, TimeTravelStorageWrapper {}
+contract HoldManagementFacetTimeTravel is HoldManagementFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

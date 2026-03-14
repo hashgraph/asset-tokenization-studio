@@ -6,4 +6,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ERC20PermitFacet } from "../../../../facets/layer_1/ERC1400/ERC20Permit/ERC20PermitFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract ERC20PermitFacetTimeTravel is ERC20PermitFacet, TimeTravelStorageWrapper {}
+contract ERC20PermitFacetTimeTravel is ERC20PermitFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

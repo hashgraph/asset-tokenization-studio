@@ -6,4 +6,6 @@ import {
 } from "../../../../facets/layer_2/scheduledTask/scheduledCouponListing/ScheduledCouponListingFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract ScheduledCouponListingFacetTimeTravel is ScheduledCouponListingFacet, TimeTravelStorageWrapper {}
+contract ScheduledCouponListingFacetTimeTravel is ScheduledCouponListingFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

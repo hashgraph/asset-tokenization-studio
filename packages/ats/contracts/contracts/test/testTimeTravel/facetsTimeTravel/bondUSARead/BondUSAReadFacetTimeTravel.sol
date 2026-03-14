@@ -3,14 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSAReadFacet } from "../../../../facets/layer_3/bondUSA/variableRate/BondUSAReadFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract BondUSAReadFacetTimeTravel is BondUSAReadFacet, TimeTravelStorageWrapper {
-    function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
-
-    function _blockNumber() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {
-        return TimeTravelStorageWrapper._blockNumber();
-    }
+    // solhint-disable-previous-line no-empty-blocks
 }

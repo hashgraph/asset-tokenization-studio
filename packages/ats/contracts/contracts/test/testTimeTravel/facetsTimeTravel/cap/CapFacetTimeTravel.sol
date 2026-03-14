@@ -4,4 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { CapFacet } from "../../../../facets/layer_1/cap/CapFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract CapFacetTimeTravel is CapFacet, TimeTravelStorageWrapper {}
+contract CapFacetTimeTravel is CapFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

@@ -6,4 +6,6 @@ import {
 } from "../../../../facets/layer_1/externalPause/ExternalPauseManagementFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract ExternalPauseManagementFacetTimeTravel is ExternalPauseManagementFacet, TimeTravelStorageWrapper {}
+contract ExternalPauseManagementFacetTimeTravel is ExternalPauseManagementFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

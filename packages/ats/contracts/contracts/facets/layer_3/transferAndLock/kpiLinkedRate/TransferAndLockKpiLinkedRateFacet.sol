@@ -3,13 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { TransferAndLockFacetBase } from "../TransferAndLockFacetBase.sol";
-/* solhint-disable max-line-length */
-import {
-    CommonKpiLinkedInterestRate
-} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
-/* solhint-enable max-line-length */
 
-contract TransferAndLockKpiLinkedRateFacet is TransferAndLockFacetBase, CommonKpiLinkedInterestRate {
+contract TransferAndLockKpiLinkedRateFacet is TransferAndLockFacetBase {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _TRANSFER_AND_LOCK_KPI_LINKED_RATE_RESOLVER_KEY;
     }

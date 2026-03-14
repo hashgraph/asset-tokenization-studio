@@ -3,9 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _TRANSFER_AND_LOCK_FIXED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
 import { TransferAndLockFacetBase } from "../TransferAndLockFacetBase.sol";
-import { CommonFixedInterestRate } from "../../../../domain/asset/extension/bond/fixedInterestRate/Common.sol";
 
-contract TransferAndLockFixedRateFacet is TransferAndLockFacetBase, CommonFixedInterestRate {
+contract TransferAndLockFixedRateFacet is TransferAndLockFacetBase {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
         staticResolverKey_ = _TRANSFER_AND_LOCK_FIXED_RATE_RESOLVER_KEY;
     }

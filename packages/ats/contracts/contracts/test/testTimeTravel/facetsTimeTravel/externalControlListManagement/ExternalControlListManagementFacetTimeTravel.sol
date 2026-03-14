@@ -6,4 +6,6 @@ import {
 } from "../../../../facets/layer_1/externalControlList/ExternalControlListManagementFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract ExternalControlListManagementFacetTimeTravel is ExternalControlListManagementFacet, TimeTravelStorageWrapper {}
+contract ExternalControlListManagementFacetTimeTravel is ExternalControlListManagementFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}

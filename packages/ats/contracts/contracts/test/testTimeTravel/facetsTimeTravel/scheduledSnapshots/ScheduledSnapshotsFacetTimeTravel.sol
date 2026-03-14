@@ -6,4 +6,6 @@ import {
 } from "../../../../facets/layer_2/scheduledTask/scheduledSnapshot/ScheduledSnapshotsFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
 
-contract ScheduledSnapshotsFacetTimeTravel is ScheduledSnapshotsFacet, TimeTravelStorageWrapper {}
+contract ScheduledSnapshotsFacetTimeTravel is ScheduledSnapshotsFacet, TimeTravelStorageWrapper {
+    // solhint-disable-previous-line no-empty-blocks
+}
