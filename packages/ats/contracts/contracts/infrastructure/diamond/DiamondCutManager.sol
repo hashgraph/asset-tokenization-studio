@@ -6,9 +6,20 @@ import { Pause } from "../../facets/layer_1/pause/Pause.sol";
 import { AccessControl } from "../../facets/layer_1/accessControl/AccessControl.sol";
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
-import { Common } from "../../domain/Common.sol";
+import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 
-abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper, Common {
+abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper {
+    modifier onlyRole(bytes32 _role) {
+        AccessControlStorageWrapper._checkRole(_role, msg.sender);
+        _;
+    }
+
+    modifier onlyUnpaused() {
+        PauseStorageWrapper._requireNotPaused();
+        _;
+    }
+
     modifier validateConfigurationId(bytes32 _configurationId) {
         _checkConfigurationId(_configurationId);
         _;

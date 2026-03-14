@@ -36,14 +36,14 @@ import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
 import { validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
-import { Common } from "../domain/Common.sol";
+import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageWrapper.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate
 } from "../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
 
-contract Factory is IFactory, Common {
+contract Factory is IFactory {
     modifier checkResolver(IBusinessLogicResolver resolver) {
         if (address(resolver) == address(0)) {
             revert EmptyResolver(resolver);
@@ -91,6 +91,16 @@ contract Factory is IFactory, Common {
         _;
     }
 
+    modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
+        InterestRateStorageWrapper._requireValidInterestRate(_newInterestRate);
+        _;
+    }
+
+    modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
+        InterestRateStorageWrapper._requireValidImpactData(_newImpactData);
+        _;
+    }
+
     function deployEquity(
         EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
@@ -110,7 +120,7 @@ contract Factory is IFactory, Common {
             _factoryRegulationData.additionalSecurityData
         );
 
-        emit EquityDeployed(_msgSender(), equityAddress_, _equityData, _factoryRegulationData);
+        emit EquityDeployed(msg.sender, equityAddress_, _equityData, _factoryRegulationData);
     }
 
     function deployBond(
@@ -126,7 +136,7 @@ contract Factory is IFactory, Common {
     {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
 
-        emit BondDeployed(_msgSender(), bondAddress_, _bondData, _factoryRegulationData);
+        emit BondDeployed(msg.sender, bondAddress_, _bondData, _factoryRegulationData);
     }
 
     function deployBondFixedRate(
@@ -150,7 +160,7 @@ contract Factory is IFactory, Common {
 
         IFixedRate(bondAddress_).initialize_FixedRate(_bondFixedRateData.fixedRateData);
 
-        emit BondFixedRateDeployed(_msgSender(), bondAddress_, _bondFixedRateData);
+        emit BondFixedRateDeployed(msg.sender, bondAddress_, _bondFixedRateData);
     }
 
     function deployBondKpiLinkedRate(
@@ -179,7 +189,7 @@ contract Factory is IFactory, Common {
             _bondKpiLinkedRateData.impactData
         );
 
-        emit BondKpiLinkedRateDeployed(_msgSender(), bondAddress_, _bondKpiLinkedRateData);
+        emit BondKpiLinkedRateDeployed(msg.sender, bondAddress_, _bondKpiLinkedRateData);
     }
 
     function deployBondSustainabilityPerformanceTargetRate(
@@ -208,7 +218,7 @@ contract Factory is IFactory, Common {
         );
 
         emit BondSustainabilityPerformanceTargetRateDeployed(
-            _msgSender(),
+            msg.sender,
             bondAddress_,
             _bondSustainabilityPerformanceTargetRateData
         );

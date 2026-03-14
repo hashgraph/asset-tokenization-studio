@@ -5,10 +5,16 @@ import { IDiamondCut } from "../proxy/IDiamondCut.sol";
 import { ResolverProxyUnstructured } from "../proxy/ResolverProxyUnstructured.sol";
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { ResolverProxyStorageWrapper, ResolverProxyStorage } from "../../domain/core/ResolverProxyStorageWrapper.sol";
 
 abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
+    modifier onlyRole(bytes32 _role) {
+        AccessControlStorageWrapper._checkRole(_role, msg.sender);
+        _;
+    }
     function updateConfigVersion(uint256 _newVersion) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorage storage ds = _resolverProxyStorage();
+        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper._resolverProxyStorage();
         ds.resolver.checkResolverProxyConfigurationRegistered(ds.resolverProxyConfigurationId, _newVersion);
         _updateVersion(ds, _newVersion);
     }
@@ -17,7 +23,7 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         bytes32 _newConfigurationId,
         uint256 _newVersion
     ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorage storage ds = _resolverProxyStorage();
+        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper._resolverProxyStorage();
         ds.resolver.checkResolverProxyConfigurationRegistered(_newConfigurationId, _newVersion);
         _updateConfigId(ds, _newConfigurationId);
         _updateVersion(ds, _newVersion);
@@ -29,14 +35,14 @@ abstract contract DiamondCut is IDiamondCut, ResolverProxyUnstructured {
         uint256 _newVersion
     ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
         _newResolver.checkResolverProxyConfigurationRegistered(_newConfigurationId, _newVersion);
-        ResolverProxyStorage storage ds = _resolverProxyStorage();
+        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper._resolverProxyStorage();
         _updateResolver(ds, _newResolver);
         _updateConfigId(ds, _newConfigurationId);
         _updateVersion(ds, _newVersion);
     }
 
     function getConfigInfo() external view returns (address resolver_, bytes32 configurationId_, uint256 version_) {
-        ResolverProxyStorage storage ds = _resolverProxyStorage();
+        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper._resolverProxyStorage();
         return (address(ds.resolver), ds.resolverProxyConfigurationId, ds.version);
     }
 }

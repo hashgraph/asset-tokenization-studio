@@ -4,9 +4,16 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { DiamondCutManager } from "./DiamondCutManager.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
+import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
 
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();
+    error AlreadyInitialized();
+
+    modifier onlyUninitialized(bool _initialized) {
+        if (_initialized) revert AlreadyInitialized();
+        _;
+    }
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_BusinessLogicResolver()
@@ -15,7 +22,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         onlyUninitialized(_businessLogicResolverStorage().initialized)
         returns (bool success_)
     {
-        _grantRole(_DEFAULT_ADMIN_ROLE, _msgSender());
+        AccessControlStorageWrapper._grantRole(_DEFAULT_ADMIN_ROLE, msg.sender);
 
         _businessLogicResolverStorage().initialized = true;
         success_ = true;
