@@ -91,6 +91,9 @@ const BOND_FACETS = [
   "SsiManagementFacet",
   "TransferAndLockFacet",
 
+  // Nominal Value (1)
+  "NominalValueFacet",
+
   // Jurisdiction-Specific
   "BondUSAFacet",
   "BondUSAReadFacet",

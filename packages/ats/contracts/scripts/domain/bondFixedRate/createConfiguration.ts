@@ -93,6 +93,9 @@ const BOND_FIXED_RATE_FACETS = [
   //Interest Rate
   "FixedRateFacet",
 
+  // Nominal Value (1)
+  "NominalValueFacet",
+
   // Jurisdiction-Specific
   "BondUSAFixedRateFacet",
   "BondUSAReadFixedRateFacet",

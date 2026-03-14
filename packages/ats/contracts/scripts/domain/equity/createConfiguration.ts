@@ -89,6 +89,9 @@ const EQUITY_FACETS = [
   "SsiManagementFacet",
   "TransferAndLockFacet",
 
+  // Nominal Value (1)
+  "NominalValueFacet",
+
   // Jurisdiction-Specific (1)
   "EquityUSAFacet",
 ] as const;
