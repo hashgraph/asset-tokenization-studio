@@ -17,7 +17,7 @@ import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWr
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC20 is IERC20, TimestampProvider {
+abstract contract ERC20 is IERC20, TimestampProvider, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -26,8 +26,7 @@ abstract contract ERC20 is IERC20, TimestampProvider {
         ERC20StorageWrapper.initializeERC20(erc20Metadata);
     }
 
-    function approve(address spender, uint256 value) external override returns (bool) {
-        PauseStorageWrapper.requireNotPaused();
+    function approve(address spender, uint256 value) external override onlyUnpaused returns (bool) {
         ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC3643StorageWrapper.requireUnrecoveredAddress(spender);
@@ -49,15 +48,13 @@ abstract contract ERC20 is IERC20, TimestampProvider {
         return TokenCoreOps.transferFrom(msg.sender, from, to, amount);
     }
 
-    function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
-        PauseStorageWrapper.requireNotPaused();
+    function increaseAllowance(address spender, uint256 addedValue) external onlyUnpaused returns (bool) {
         ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         return ERC20StorageWrapper.increaseAllowance(spender, addedValue);
     }
 
-    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
-        PauseStorageWrapper.requireNotPaused();
+    function decreaseAllowance(address spender, uint256 subtractedValue) external onlyUnpaused returns (bool) {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
         return ERC20StorageWrapper.decreaseAllowance(spender, subtractedValue);

@@ -9,7 +9,7 @@ import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.so
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 
-abstract contract ExternalControlListManagement is IExternalControlListManagement {
+abstract contract ExternalControlListManagement is IExternalControlListManagement, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -21,9 +21,8 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
     function updateExternalControlLists(
         address[] calldata _controlLists,
         bool[] calldata _actives
-    ) external override returns (bool success_) {
+    ) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         ArrayValidation.checkUniqueValues(_controlLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
@@ -36,9 +35,8 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         emit ExternalControlListsUpdated(msg.sender, _controlLists, _actives);
     }
 
-    function addExternalControlList(address _controlList) external override returns (bool success_) {
+    function addExternalControlList(address _controlList) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         ExternalListManagementStorageWrapper.checkValidAddress(_controlList);
         success_ = ExternalListManagementStorageWrapper.addExternalList(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
@@ -50,9 +48,8 @@ abstract contract ExternalControlListManagement is IExternalControlListManagemen
         emit AddedToExternalControlLists(msg.sender, _controlList);
     }
 
-    function removeExternalControlList(address _controlList) external override returns (bool success_) {
+    function removeExternalControlList(address _controlList) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_CONTROL_LIST_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         success_ = ExternalListManagementStorageWrapper.removeExternalList(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION,
             _controlList

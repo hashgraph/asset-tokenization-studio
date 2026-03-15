@@ -6,14 +6,12 @@ import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
-abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
-    function triggerPendingScheduledCrossOrderedTasks() external override returns (uint256) {
-        PauseStorageWrapper.requireNotPaused();
+abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, PauseStorageWrapper {
+    function triggerPendingScheduledCrossOrderedTasks() external override onlyUnpaused returns (uint256) {
         return ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
     }
 
-    function triggerScheduledCrossOrderedTasks(uint256 _max) external override returns (uint256) {
-        PauseStorageWrapper.requireNotPaused();
+    function triggerScheduledCrossOrderedTasks(uint256 _max) external override onlyUnpaused returns (uint256) {
         return ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(_max);
     }
 

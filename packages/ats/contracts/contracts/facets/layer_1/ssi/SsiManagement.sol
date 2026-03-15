@@ -7,12 +7,11 @@ import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlS
 import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
 
-abstract contract SsiManagement is ISsiManagement {
+abstract contract SsiManagement is ISsiManagement, PauseStorageWrapper {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
-    ) external override returns (bool success_) {
+    ) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_SSI_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         address oldRevocationRegistryAddress = SsiManagementStorageWrapper.getRevocationRegistryAddress();
         success_ = SsiManagementStorageWrapper.setRevocationRegistryAddress(_revocationRegistryAddress);
         emit RevocationRegistryUpdated(
@@ -21,9 +20,8 @@ abstract contract SsiManagement is ISsiManagement {
         );
     }
 
-    function addIssuer(address _issuer) external override returns (bool success_) {
+    function addIssuer(address _issuer) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_SSI_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         success_ = SsiManagementStorageWrapper.addIssuer(_issuer);
         if (!success_) {
             revert ListedIssuer(_issuer);
@@ -31,9 +29,8 @@ abstract contract SsiManagement is ISsiManagement {
         emit AddedToIssuerList(msg.sender, _issuer);
     }
 
-    function removeIssuer(address _issuer) external override returns (bool success_) {
+    function removeIssuer(address _issuer) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_SSI_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         success_ = SsiManagementStorageWrapper.removeIssuer(_issuer);
         if (!success_) {
             revert UnlistedIssuer(_issuer);

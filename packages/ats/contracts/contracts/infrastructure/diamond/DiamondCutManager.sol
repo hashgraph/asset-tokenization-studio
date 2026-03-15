@@ -15,11 +15,6 @@ abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWr
         _;
     }
 
-    modifier onlyUnpaused() {
-        PauseStorageWrapper.requireNotPaused();
-        _;
-    }
-
     modifier validateConfigurationId(bytes32 _configurationId) {
         _checkConfigurationId(_configurationId);
         _;

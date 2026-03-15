@@ -16,9 +16,8 @@ import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTas
 import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/EquityStorageWrapper.sol";
 import { IEquityStorageWrapper } from "../../../domain/asset/equity/IEquityStorageWrapper.sol";
 
-abstract contract Equity is IEquity {
-    function setDividends(Dividend calldata _newDividend) external override returns (uint256 dividendID_) {
-        PauseStorageWrapper.requireNotPaused();
+abstract contract Equity is IEquity, PauseStorageWrapper {
+    function setDividends(Dividend calldata _newDividend) external override onlyUnpaused returns (uint256 dividendID_) {
         AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
         CorporateActionsStorageWrapper.requireValidDates(_newDividend.recordDate, _newDividend.executionDate);
         ScheduledTasksStorageWrapper.requireValidTimestamp(_newDividend.recordDate);
@@ -35,8 +34,7 @@ abstract contract Equity is IEquity {
         );
     }
 
-    function setVoting(Voting calldata _newVoting) external override returns (uint256 voteID_) {
-        PauseStorageWrapper.requireNotPaused();
+    function setVoting(Voting calldata _newVoting) external override onlyUnpaused returns (uint256 voteID_) {
         AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
         ScheduledTasksStorageWrapper.requireValidTimestamp(_newVoting.recordDate);
         bytes32 corporateActionID;
@@ -52,8 +50,7 @@ abstract contract Equity is IEquity {
 
     function setScheduledBalanceAdjustment(
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) external override returns (uint256 balanceAdjustmentID_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (uint256 balanceAdjustmentID_) {
         AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
         ScheduledTasksStorageWrapper.requireValidTimestamp(_newBalanceAdjustment.executionDate);
         AdjustBalancesStorageWrapper.requireValidFactor(_newBalanceAdjustment.factor);

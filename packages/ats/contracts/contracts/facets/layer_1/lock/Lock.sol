@@ -11,14 +11,13 @@ import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapp
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract Lock is ILock, TimestampProvider {
+abstract contract Lock is ILock, TimestampProvider, PauseStorageWrapper {
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) external override returns (bool success_, uint256 lockId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 lockId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
         AccessControlStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
@@ -37,8 +36,7 @@ abstract contract Lock is ILock, TimestampProvider {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         LockStorageWrapper.requireValidLockId(_partition, _tokenHolder, _lockId);
         LockStorageWrapper.requireLockedExpirationTimestamp(_partition, _tokenHolder, _lockId);
@@ -50,8 +48,7 @@ abstract contract Lock is ILock, TimestampProvider {
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) external override returns (bool success_, uint256 lockId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 lockId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
         AccessControlStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
         ERC1410StorageWrapper.requireWithoutMultiPartition();
@@ -66,8 +63,7 @@ abstract contract Lock is ILock, TimestampProvider {
         emit LockedByPartition(msg.sender, _tokenHolder, _DEFAULT_PARTITION, lockId_, _amount, _expirationTimestamp);
     }
 
-    function release(uint256 _lockId, address _tokenHolder) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    function release(uint256 _lockId, address _tokenHolder) external override onlyUnpaused returns (bool success_) {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         LockStorageWrapper.requireValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId);
         LockStorageWrapper.requireLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId);

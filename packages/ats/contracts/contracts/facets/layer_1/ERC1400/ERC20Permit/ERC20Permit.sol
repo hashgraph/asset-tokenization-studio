@@ -8,7 +8,7 @@ import { ERC3643StorageWrapper } from "../../../../domain/core/ERC3643StorageWra
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC20PermitStorageWrapper } from "../../../../domain/asset/ERC20PermitStorageWrapper.sol";
 
-abstract contract ERC20Permit is IERC20Permit {
+abstract contract ERC20Permit is IERC20Permit, PauseStorageWrapper {
     function permit(
         address owner,
         address spender,
@@ -17,8 +17,7 @@ abstract contract ERC20Permit is IERC20Permit {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external override {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused {
         ERC1410StorageWrapper.requireValidAddress(owner);
         ERC1410StorageWrapper.requireValidAddress(spender);
         ControlListStorageWrapper.requireListedAllowed(owner);

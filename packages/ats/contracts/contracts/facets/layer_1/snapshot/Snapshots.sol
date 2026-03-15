@@ -8,9 +8,8 @@ import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.so
 import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
-abstract contract Snapshots is ISnapshots {
-    function takeSnapshot() external override returns (uint256 snapshotID_) {
-        PauseStorageWrapper.requireNotPaused();
+abstract contract Snapshots is ISnapshots, PauseStorageWrapper {
+    function takeSnapshot() external override onlyUnpaused returns (uint256 snapshotID_) {
         AccessControlStorageWrapper.checkRole(_SNAPSHOT_ROLE, msg.sender);
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         snapshotID_ = SnapshotsStorageWrapper.takeSnapshot();

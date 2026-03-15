@@ -8,7 +8,7 @@ import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.so
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 
-abstract contract ProceedRecipients is IProceedRecipients {
+abstract contract ProceedRecipients is IProceedRecipients, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -20,8 +20,7 @@ abstract contract ProceedRecipients is IProceedRecipients {
         ProceedRecipientsStorageWrapper.initialize_ProceedRecipients(_proceedRecipients, _data);
     }
 
-    function addProceedRecipient(address _proceedRecipient, bytes calldata _data) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function addProceedRecipient(address _proceedRecipient, bytes calldata _data) external override onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
         ERC1410StorageWrapper.requireValidAddress(_proceedRecipient);
         ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
@@ -29,16 +28,17 @@ abstract contract ProceedRecipients is IProceedRecipients {
         emit ProceedRecipientAdded(msg.sender, _proceedRecipient, _data);
     }
 
-    function removeProceedRecipient(address _proceedRecipient) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function removeProceedRecipient(address _proceedRecipient) external override onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
         ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.removeProceedRecipient(_proceedRecipient);
         emit ProceedRecipientRemoved(msg.sender, _proceedRecipient);
     }
 
-    function updateProceedRecipientData(address _proceedRecipient, bytes calldata _data) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function updateProceedRecipientData(
+        address _proceedRecipient,
+        bytes calldata _data
+    ) external override onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
         ERC1410StorageWrapper.requireValidAddress(_proceedRecipient);
         ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);

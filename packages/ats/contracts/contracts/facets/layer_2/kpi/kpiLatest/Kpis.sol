@@ -7,10 +7,9 @@ import { AccessControlStorageWrapper } from "../../../../domain/core/AccessContr
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.sol";
 
-abstract contract Kpis is IKpis {
-    function addKpiData(uint256 _date, uint256 _value, address _project) external {
+abstract contract Kpis is IKpis, PauseStorageWrapper {
+    function addKpiData(uint256 _date, uint256 _value, address _project) external onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_KPI_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         KpisStorageWrapper.requireValidDate(_date, _project);
         KpisStorageWrapper.addKpiData(_date, _value, _project);
     }

@@ -8,7 +8,7 @@ import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 
-contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRate {
+contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRate, PauseStorageWrapper {
     error AlreadyInitialized();
     // solhint-disable-next-line func-name-mixedcase
     function initialize_SustainabilityPerformanceTargetRate(
@@ -28,16 +28,14 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
         );
     }
 
-    function setInterestRate(InterestRate calldata _newInterestRate) external {
+    function setInterestRate(InterestRate calldata _newInterestRate) external onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         InterestRateStorageWrapper.setSPTInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
     }
 
-    function setImpactData(ImpactData[] calldata _newImpactData, address[] calldata _projects) external {
+    function setImpactData(ImpactData[] calldata _newImpactData, address[] calldata _projects) external onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         InterestRateStorageWrapper.requireEqualLength(_newImpactData.length, _projects.length);
         for (uint256 index = 0; index < _newImpactData.length; index++) {
             if (!ProceedRecipientsStorageWrapper.isProceedRecipient(_projects[index])) {

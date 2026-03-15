@@ -8,9 +8,8 @@ import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.so
 import { AdjustBalancesStorageWrapper } from "../../../domain/asset/AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
-abstract contract AdjustBalances is IAdjustBalances {
-    function adjustBalances(uint256 factor, uint8 decimals) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+abstract contract AdjustBalances is IAdjustBalances, PauseStorageWrapper {
+    function adjustBalances(uint256 factor, uint8 decimals) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_ADJUSTMENT_BALANCE_ROLE, msg.sender);
         AdjustBalancesStorageWrapper.requireValidFactor(factor);
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();

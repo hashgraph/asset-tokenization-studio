@@ -9,6 +9,7 @@ import {
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { IPauseStorageWrapper } from "../../../../domain/core/pause/IPauseStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { CapStorageWrapper } from "../../../../domain/core/CapStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../../../domain/core/ERC3643StorageWrapper.sol";
@@ -16,8 +17,9 @@ import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWr
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
+import { Eip1066 } from "../../../../constants/eip1066.sol";
 
-abstract contract ERC1594 is IERC1594, TimestampProvider {
+abstract contract ERC1594 is IERC1594, TimestampProvider, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -47,12 +49,11 @@ abstract contract ERC1594 is IERC1594, TimestampProvider {
         emit TransferFromWithData(msg.sender, _from, _to, _value, _data);
     }
 
-    function issue(address _tokenHolder, uint256 _value, bytes calldata _data) external override {
+    function issue(address _tokenHolder, uint256 _value, bytes calldata _data) external override onlyUnpaused {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         CapStorageWrapper.requireWithinMaxSupply(_value, _getBlockTimestamp());
         ERC1594StorageWrapper.requireIdentified(address(0), _tokenHolder);
         ERC1594StorageWrapper.requireCompliant(address(0), _tokenHolder, false);
-        PauseStorageWrapper.requireNotPaused();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _ISSUER_ROLE;
@@ -87,6 +88,9 @@ abstract contract ERC1594 is IERC1594, TimestampProvider {
         uint256 _value,
         bytes memory _data
     ) external view override returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
+        }
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             msg.sender,
@@ -105,6 +109,9 @@ abstract contract ERC1594 is IERC1594, TimestampProvider {
         uint256 _value,
         bytes memory _data
     ) external view returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
+        }
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         (bool status, bytes1 statusCode, bytes32 reason, ) = ERC1594StorageWrapper.isAbleToTransferFromByPartition(
             _from,

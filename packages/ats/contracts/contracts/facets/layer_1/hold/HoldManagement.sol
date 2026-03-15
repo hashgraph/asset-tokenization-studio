@@ -19,14 +19,13 @@ import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 
-abstract contract HoldManagement is IHoldManagement {
+abstract contract HoldManagement is IHoldManagement, PauseStorageWrapper {
     function operatorCreateHoldByPartition(
         bytes32 _partition,
         address _from,
         Hold calldata _hold,
         bytes calldata _operatorData
-    ) external override returns (bool success_, uint256 holdId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 holdId_) {
         if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
         ERC1410StorageWrapper.requireValidAddress(_from);
         ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
@@ -55,8 +54,7 @@ abstract contract HoldManagement is IHoldManagement {
         address _from,
         Hold calldata _hold,
         bytes calldata _operatorData
-    ) external override returns (bool success_, uint256 holdId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 holdId_) {
         ERC1410StorageWrapper.requireValidAddress(_from);
         ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
@@ -79,8 +77,7 @@ abstract contract HoldManagement is IHoldManagement {
         address _from,
         ProtectedHold memory _protectedHold,
         bytes calldata _signature
-    ) external override returns (bool success_, uint256 holdId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 holdId_) {
         if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
         ERC1410StorageWrapper.requireValidAddress(_from);
         ERC1410StorageWrapper.requireValidAddress(_protectedHold.hold.escrow);

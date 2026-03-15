@@ -10,7 +10,7 @@ import { ExternalListManagementStorageWrapper } from "../../../domain/core/Exter
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 import { IKyc } from "../kyc/IKyc.sol";
 
-abstract contract ExternalKycListManagement is IExternalKycListManagement {
+abstract contract ExternalKycListManagement is IExternalKycListManagement, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -22,9 +22,8 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement {
     function updateExternalKycLists(
         address[] calldata _kycLists,
         bool[] calldata _actives
-    ) external override returns (bool success_) {
+    ) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_KYC_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         ArrayValidation.checkUniqueValues(_kycLists, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _KYC_MANAGEMENT_STORAGE_POSITION,
@@ -37,9 +36,8 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement {
         emit ExternalKycListsUpdated(msg.sender, _kycLists, _actives);
     }
 
-    function addExternalKycList(address _kycLists) external override returns (bool success_) {
+    function addExternalKycList(address _kycLists) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_KYC_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         ExternalListManagementStorageWrapper.checkValidAddress(_kycLists);
         success_ = ExternalListManagementStorageWrapper.addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
@@ -48,9 +46,8 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement {
         emit AddedToExternalKycLists(msg.sender, _kycLists);
     }
 
-    function removeExternalKycList(address _kycLists) external override returns (bool success_) {
+    function removeExternalKycList(address _kycLists) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_KYC_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         success_ = ExternalListManagementStorageWrapper.removeExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert UnlistedKycList(_kycLists);

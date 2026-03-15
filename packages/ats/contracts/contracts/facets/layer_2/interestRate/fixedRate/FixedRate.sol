@@ -7,7 +7,7 @@ import { AccessControlStorageWrapper } from "../../../../domain/core/AccessContr
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 
-contract FixedRate is IFixedRate {
+contract FixedRate is IFixedRate, PauseStorageWrapper {
     error AlreadyInitialized();
     // solhint-disable-next-line func-name-mixedcase
     function initialize_FixedRate(FixedRateData calldata _initData) external override {
@@ -16,9 +16,8 @@ contract FixedRate is IFixedRate {
         InterestRateStorageWrapper.fixedRateStorage().initialized = true;
     }
 
-    function setRate(uint256 _newRate, uint8 _newRateDecimals) external override {
+    function setRate(uint256 _newRate, uint8 _newRateDecimals) external override onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         InterestRateStorageWrapper.setRate(_newRate, _newRateDecimals);
         emit RateUpdated(msg.sender, _newRate, _newRateDecimals);
     }

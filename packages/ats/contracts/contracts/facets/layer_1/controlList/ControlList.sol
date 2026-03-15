@@ -7,7 +7,7 @@ import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlS
 import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../../../domain/core/ControlListStorageWrapper.sol";
 
-abstract contract ControlList is IControlList {
+abstract contract ControlList is IControlList, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -16,9 +16,8 @@ abstract contract ControlList is IControlList {
         ControlListStorageWrapper.initialize_ControlList(_isWhiteList);
     }
 
-    function addToControlList(address _account) external override returns (bool success_) {
+    function addToControlList(address _account) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_CONTROL_LIST_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         success_ = ControlListStorageWrapper.addToControlList(_account);
         if (!success_) {
             revert ListedAccount(_account);
@@ -26,9 +25,8 @@ abstract contract ControlList is IControlList {
         emit AddedToControlList(msg.sender, _account);
     }
 
-    function removeFromControlList(address _account) external override returns (bool success_) {
+    function removeFromControlList(address _account) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_CONTROL_LIST_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         success_ = ControlListStorageWrapper.removeFromControlList(_account);
         if (!success_) {
             revert UnlistedAccount(_account);

@@ -7,7 +7,7 @@ import { AccessControlStorageWrapper } from "../../../../domain/core/AccessContr
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 
-contract KpiLinkedRate is IKpiLinkedRate {
+contract KpiLinkedRate is IKpiLinkedRate, PauseStorageWrapper {
     error AlreadyInitialized();
     // solhint-disable-next-line func-name-mixedcase
     function initialize_KpiLinkedRate(
@@ -20,17 +20,15 @@ contract KpiLinkedRate is IKpiLinkedRate {
         InterestRateStorageWrapper.kpiLinkedRateStorage().initialized = true;
     }
 
-    function setInterestRate(InterestRate calldata _newInterestRate) external {
+    function setInterestRate(InterestRate calldata _newInterestRate) external onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
         InterestRateStorageWrapper.setInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
     }
 
-    function setImpactData(ImpactData calldata _newImpactData) external {
+    function setImpactData(ImpactData calldata _newImpactData) external onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
         InterestRateStorageWrapper.setImpactData(_newImpactData);
         emit ImpactDataUpdated(msg.sender, _newImpactData);

@@ -16,12 +16,11 @@ import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWra
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 
-abstract contract ClearingHoldCreation is IClearingHoldCreation {
+abstract contract ClearingHoldCreation is IClearingHoldCreation, PauseStorageWrapper {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         Hold calldata _hold
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
         ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
@@ -42,8 +41,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation {
     function clearingCreateHoldFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         Hold calldata _hold
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
@@ -81,8 +79,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation {
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         Hold calldata _hold
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
@@ -117,8 +114,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation {
         ProtectedClearingOperation calldata _protectedClearingOperation,
         Hold calldata _hold,
         bytes calldata _signature
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_protectedClearingOperation.from);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
         ProtectedPartitionsStorageWrapper.requireProtectedPartitions();

@@ -19,12 +19,11 @@ import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 
-abstract contract HoldTokenHolder is IHoldTokenHolder {
+abstract contract HoldTokenHolder is IHoldTokenHolder, PauseStorageWrapper {
     function createHoldByPartition(
         bytes32 _partition,
         Hold calldata _hold
-    ) external override returns (bool success_, uint256 holdId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 holdId_) {
         ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
@@ -48,8 +47,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         address _from,
         Hold calldata _hold,
         bytes calldata _operatorData
-    ) external override returns (bool success_, uint256 holdId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 holdId_) {
         if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
         ERC1410StorageWrapper.requireValidAddress(_from);
         ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
@@ -78,8 +76,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) external override returns (bool success_, bytes32 partition_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, bytes32 partition_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
         ERC1594StorageWrapper.requireIdentified(_holdIdentifier.tokenHolder, _to);
         ERC1594StorageWrapper.requireCompliant(address(0), _to, false);
@@ -98,8 +95,7 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
     function releaseHoldByPartition(
         HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
-    ) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
         HoldStorageWrapper.requireValidHoldId(_holdIdentifier);
         success_ = HoldStorageWrapper.releaseHoldByPartition(_holdIdentifier, _amount);
@@ -111,8 +107,9 @@ abstract contract HoldTokenHolder is IHoldTokenHolder {
         );
     }
 
-    function reclaimHoldByPartition(HoldIdentifier calldata _holdIdentifier) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    function reclaimHoldByPartition(
+        HoldIdentifier calldata _holdIdentifier
+    ) external override onlyUnpaused returns (bool success_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
         HoldStorageWrapper.requireValidHoldId(_holdIdentifier);
         uint256 amount;

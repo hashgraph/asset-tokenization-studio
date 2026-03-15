@@ -18,9 +18,8 @@ import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWra
 import { IClearing } from "../../layer_1/clearing/IClearing.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract Bond is IBond, TimestampProvider {
-    function fullRedeemAtMaturity(address _tokenHolder) external override {
-        PauseStorageWrapper.requireNotPaused();
+abstract contract Bond is IBond, TimestampProvider, PauseStorageWrapper {
+    function fullRedeemAtMaturity(address _tokenHolder) external override onlyUnpaused {
         ERC1410StorageWrapper.requireValidAddress(_tokenHolder);
         ControlListStorageWrapper.requireListedAllowed(_tokenHolder);
         AccessControlStorageWrapper.checkRole(_MATURITY_REDEEMER_ROLE, msg.sender);
@@ -37,8 +36,11 @@ abstract contract Bond is IBond, TimestampProvider {
         }
     }
 
-    function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function redeemAtMaturityByPartition(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _amount
+    ) external override onlyUnpaused {
         ERC1410StorageWrapper.requireValidAddress(_tokenHolder);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         ControlListStorageWrapper.requireListedAllowed(_tokenHolder);
@@ -50,8 +52,9 @@ abstract contract Bond is IBond, TimestampProvider {
         ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, msg.sender, _amount, "", "");
     }
 
-    function setCoupon(IBondRead.Coupon calldata _newCoupon) external override returns (uint256 couponID_) {
-        PauseStorageWrapper.requireNotPaused();
+    function setCoupon(
+        IBondRead.Coupon calldata _newCoupon
+    ) external override onlyUnpaused returns (uint256 couponID_) {
         AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
         CorporateActionsStorageWrapper.requireValidDates(_newCoupon.startDate, _newCoupon.endDate);
         CorporateActionsStorageWrapper.requireValidDates(_newCoupon.recordDate, _newCoupon.executionDate);
@@ -62,8 +65,7 @@ abstract contract Bond is IBond, TimestampProvider {
         (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(_newCoupon);
     }
 
-    function updateMaturityDate(uint256 _newMaturityDate) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    function updateMaturityDate(uint256 _newMaturityDate) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_BOND_MANAGER_ROLE, msg.sender);
         BondStorageWrapper.requireValidMaturityDate(_newMaturityDate);
         emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());

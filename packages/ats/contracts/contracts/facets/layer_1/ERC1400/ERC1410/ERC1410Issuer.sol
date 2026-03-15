@@ -13,9 +13,8 @@ import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWr
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC1410Issuer is IERC1410Issuer, TimestampProvider {
-    function issueByPartition(IssueData calldata _issueData) external {
-        PauseStorageWrapper.requireNotPaused();
+abstract contract ERC1410Issuer is IERC1410Issuer, TimestampProvider, PauseStorageWrapper {
+    function issueByPartition(IssueData calldata _issueData) external onlyUnpaused {
         CapStorageWrapper.requireWithinMaxSupply(_issueData.value, _getBlockTimestamp());
         CapStorageWrapper.requireWithinMaxSupplyByPartition(
             _issueData.partition,

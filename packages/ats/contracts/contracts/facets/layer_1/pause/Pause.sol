@@ -6,22 +6,20 @@ import { _PAUSER_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 
-abstract contract Pause is IPause {
-    function pause() external override returns (bool success_) {
+abstract contract Pause is IPause, PauseStorageWrapper {
+    function pause() external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_PAUSER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
-        PauseStorageWrapper.setPause(true);
+        _setPause(true);
         success_ = true;
     }
 
-    function unpause() external override returns (bool success_) {
+    function unpause() external override onlyPaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_PAUSER_ROLE, msg.sender);
-        PauseStorageWrapper.requirePaused();
-        PauseStorageWrapper.setPause(false);
+        _setPause(false);
         success_ = true;
     }
 
     function isPaused() external view override returns (bool) {
-        return PauseStorageWrapper.isPaused();
+        return _isPaused();
     }
 }

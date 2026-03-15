@@ -14,16 +14,15 @@ import {
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 
-abstract contract TransferAndLock is ITransferAndLock {
+abstract contract TransferAndLock is ITransferAndLock, PauseStorageWrapper {
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,
         uint256 _amount,
         bytes calldata _data,
         uint256 _expirationTimestamp
-    ) external override returns (bool success_, uint256 lockId_) {
+    ) external override onlyUnpaused returns (bool success_, uint256 lockId_) {
         AccessControlStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();
@@ -50,9 +49,8 @@ abstract contract TransferAndLock is ITransferAndLock {
         uint256 _amount,
         bytes calldata _data,
         uint256 _expirationTimestamp
-    ) external override returns (bool success_, uint256 lockId_) {
+    ) external override onlyUnpaused returns (bool success_, uint256 lockId_) {
         AccessControlStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();

@@ -6,7 +6,7 @@ import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
 
-abstract contract ERC20Votes is IERC20Votes {
+abstract contract ERC20Votes is IERC20Votes, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -15,8 +15,7 @@ abstract contract ERC20Votes is IERC20Votes {
         ERC20VotesStorageWrapper.initialize_ERC20Votes(_activated);
     }
 
-    function delegate(address _delegatee) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function delegate(address _delegatee) external override onlyUnpaused {
         ERC20VotesStorageWrapper.delegate(_delegatee);
     }
 

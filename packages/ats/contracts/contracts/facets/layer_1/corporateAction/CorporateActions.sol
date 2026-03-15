@@ -7,12 +7,11 @@ import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlS
 import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
 
-abstract contract CorporateActions is ICorporateActions {
+abstract contract CorporateActions is ICorporateActions, PauseStorageWrapper {
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
-    ) external override returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
         AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
         (corporateActionId_, corporateActionIdByType_) = CorporateActionsStorageWrapper.addCorporateAction(
             _actionType,

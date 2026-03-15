@@ -7,7 +7,7 @@ import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlS
 import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 
-abstract contract ProtectedPartitions is IProtectedPartitions {
+abstract contract ProtectedPartitions is IProtectedPartitions, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -16,15 +16,13 @@ abstract contract ProtectedPartitions is IProtectedPartitions {
         success_ = ProtectedPartitionsStorageWrapper.initialize_ProtectedPartitions(_protectPartitions);
     }
 
-    function protectPartitions() external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    function protectPartitions() external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_PROTECTED_PARTITIONS_ROLE, msg.sender);
         ProtectedPartitionsStorageWrapper.setProtectedPartitions(true);
         success_ = true;
     }
 
-    function unprotectPartitions() external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    function unprotectPartitions() external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_PROTECTED_PARTITIONS_ROLE, msg.sender);
         ProtectedPartitionsStorageWrapper.setProtectedPartitions(false);
         success_ = true;

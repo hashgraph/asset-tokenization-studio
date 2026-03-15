@@ -20,10 +20,9 @@ import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWra
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider {
-    function batchTransfer(address[] calldata _toList, uint256[] calldata _amounts) external {
+abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, PauseStorageWrapper {
+    function batchTransfer(address[] calldata _toList, uint256[] calldata _amounts) external onlyUnpaused {
         ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_toList, _amounts);
-        PauseStorageWrapper.requireNotPaused();
         if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         _requireUnProtectedPartitionsOrWildCardRole();
@@ -42,10 +41,9 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider {
         address[] calldata _fromList,
         address[] calldata _toList,
         uint256[] calldata _amounts
-    ) external {
+    ) external onlyUnpaused {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC1644StorageWrapper.requireControllable();
-        PauseStorageWrapper.requireNotPaused();
         ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_fromList, _amounts);
         ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_toList, _amounts);
         {
@@ -60,9 +58,8 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider {
         }
     }
 
-    function batchMint(address[] calldata _toList, uint256[] calldata _amounts) external {
+    function batchMint(address[] calldata _toList, uint256[] calldata _amounts) external onlyUnpaused {
         ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_toList, _amounts);
-        PauseStorageWrapper.requireNotPaused();
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -80,8 +77,7 @@ abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider {
         }
     }
 
-    function batchBurn(address[] calldata _userAddresses, uint256[] calldata _amounts) external {
-        PauseStorageWrapper.requireNotPaused();
+    function batchBurn(address[] calldata _userAddresses, uint256[] calldata _amounts) external onlyUnpaused {
         ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_userAddresses, _amounts);
         ERC1644StorageWrapper.requireControllable();
         ERC1410StorageWrapper.requireWithoutMultiPartition();

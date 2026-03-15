@@ -10,9 +10,8 @@ import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrappe
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract Freeze is IFreeze, TimestampProvider {
-    function setAddressFrozen(address _userAddress, bool _freezStatus) external override {
-        PauseStorageWrapper.requireNotPaused();
+abstract contract Freeze is IFreeze, TimestampProvider, PauseStorageWrapper {
+    function setAddressFrozen(address _userAddress, bool _freezStatus) external override onlyUnpaused {
         ERC1410StorageWrapper.requireValidAddress(_userAddress);
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -24,8 +23,7 @@ abstract contract Freeze is IFreeze, TimestampProvider {
         emit AddressFrozen(_userAddress, _freezStatus, msg.sender);
     }
 
-    function freezePartialTokens(address _userAddress, uint256 _amount) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function freezePartialTokens(address _userAddress, uint256 _amount) external override onlyUnpaused {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddress);
         ERC1410StorageWrapper.requireValidAddress(_userAddress);
         ERC1410StorageWrapper.requireWithoutMultiPartition();
@@ -39,8 +37,7 @@ abstract contract Freeze is IFreeze, TimestampProvider {
         emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
-    function unfreezePartialTokens(address _userAddress, uint256 _amount) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function unfreezePartialTokens(address _userAddress, uint256 _amount) external override onlyUnpaused {
         ERC1410StorageWrapper.requireValidAddress(_userAddress);
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         {
@@ -53,8 +50,7 @@ abstract contract Freeze is IFreeze, TimestampProvider {
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
-    function batchSetAddressFrozen(address[] calldata _userAddresses, bool[] calldata _freeze) external {
-        PauseStorageWrapper.requireNotPaused();
+    function batchSetAddressFrozen(address[] calldata _userAddresses, bool[] calldata _freeze) external onlyUnpaused {
         ERC3643StorageWrapper.requireValidInputBoolArrayLength(_userAddresses, _freeze);
         {
             bytes32[] memory roles = new bytes32[](2);
@@ -69,8 +65,10 @@ abstract contract Freeze is IFreeze, TimestampProvider {
         }
     }
 
-    function batchFreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external {
-        PauseStorageWrapper.requireNotPaused();
+    function batchFreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external onlyUnpaused {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_userAddresses, _amounts);
         {
@@ -88,8 +86,10 @@ abstract contract Freeze is IFreeze, TimestampProvider {
         }
     }
 
-    function batchUnfreezePartialTokens(address[] calldata _userAddresses, uint256[] calldata _amounts) external {
-        PauseStorageWrapper.requireNotPaused();
+    function batchUnfreezePartialTokens(
+        address[] calldata _userAddresses,
+        uint256[] calldata _amounts
+    ) external onlyUnpaused {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC3643StorageWrapper.requireValidInputAmountsArrayLength(_userAddresses, _amounts);
         {

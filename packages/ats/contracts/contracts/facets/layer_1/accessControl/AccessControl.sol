@@ -5,10 +5,9 @@ import { IAccessControl } from "./IAccessControl.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 
-abstract contract AccessControl is IAccessControl {
-    function grantRole(bytes32 _role, address _account) external override returns (bool success_) {
+abstract contract AccessControl is IAccessControl, PauseStorageWrapper {
+    function grantRole(bytes32 _role, address _account) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(AccessControlStorageWrapper.getRoleAdmin(_role), msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         if (!AccessControlStorageWrapper.grantRole(_role, _account)) {
             revert AccountAssignedToRole(_role, _account);
         }
@@ -16,9 +15,8 @@ abstract contract AccessControl is IAccessControl {
         return true;
     }
 
-    function revokeRole(bytes32 _role, address _account) external override returns (bool success_) {
+    function revokeRole(bytes32 _role, address _account) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(AccessControlStorageWrapper.getRoleAdmin(_role), msg.sender);
-        PauseStorageWrapper.requireNotPaused();
         success_ = AccessControlStorageWrapper.revokeRole(_role, _account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, _account);
@@ -30,8 +28,7 @@ abstract contract AccessControl is IAccessControl {
         bytes32[] calldata _roles,
         bool[] calldata _actives,
         address _account
-    ) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkSameRolesAndActivesLength(_roles.length, _actives.length);
         AccessControlStorageWrapper.checkConsistentRoles(_roles, _actives);
         success_ = AccessControlStorageWrapper.applyRoles(_roles, _actives, _account);
@@ -41,9 +38,8 @@ abstract contract AccessControl is IAccessControl {
         emit RolesApplied(_roles, _actives, _account);
     }
 
-    function renounceRole(bytes32 _role) external override returns (bool success_) {
+    function renounceRole(bytes32 _role) external override onlyUnpaused returns (bool success_) {
         address account = msg.sender;
-        PauseStorageWrapper.requireNotPaused();
         success_ = AccessControlStorageWrapper.revokeRole(_role, account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, account);

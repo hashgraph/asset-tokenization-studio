@@ -14,7 +14,7 @@ import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWr
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
-abstract contract ERC1410TokenHolder is IERC1410TokenHolder {
+abstract contract ERC1410TokenHolder is IERC1410TokenHolder, PauseStorageWrapper {
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,
@@ -38,32 +38,27 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder {
         TokenCoreOps.redeemByPartition(_partition, msg.sender, address(0), _value, _data, "");
     }
 
-    function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external {
-        PauseStorageWrapper.requireNotPaused();
+    function triggerAndSyncAll(bytes32 _partition, address _from, address _to) external onlyUnpaused {
         ERC1410StorageWrapper.triggerAndSyncAll(_partition, _from, _to);
     }
 
-    function authorizeOperator(address _operator) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function authorizeOperator(address _operator) external override onlyUnpaused {
         ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
         ERC1410StorageWrapper.authorizeOperator(_operator);
     }
 
-    function revokeOperator(address _operator) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function revokeOperator(address _operator) external override onlyUnpaused {
         ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
         ERC1410StorageWrapper.revokeOperator(_operator);
     }
 
-    function authorizeOperatorByPartition(bytes32 _partition, address _operator) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function authorizeOperatorByPartition(bytes32 _partition, address _operator) external override onlyUnpaused {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
         ERC1410StorageWrapper.authorizeOperatorByPartition(_partition, _operator);
     }
 
-    function revokeOperatorByPartition(bytes32 _partition, address _operator) external override {
-        PauseStorageWrapper.requireNotPaused();
+    function revokeOperatorByPartition(bytes32 _partition, address _operator) external override onlyUnpaused {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
         ERC1410StorageWrapper.revokeOperatorByPartition(_partition, _operator);

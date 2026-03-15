@@ -19,8 +19,6 @@ import { ClearingStorageWrapper } from "./ClearingStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IControlListStorageWrapper } from "../core/controlList/IControlListStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
-import { PauseStorageWrapper } from "../core/PauseStorageWrapper.sol";
-import { IPauseStorageWrapper } from "../core/pause/IPauseStorageWrapper.sol";
 import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
@@ -243,11 +241,6 @@ library ERC1594StorageWrapper {
     // --- Private helper functions ---
 
     function genericChecks() private view returns (bool, bytes1, bytes32, bytes memory) {
-        // Application specific checks
-        if (PauseStorageWrapper.isPaused()) {
-            return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector, EMPTY_BYTES);
-        }
-
         if (ClearingStorageWrapper.isClearingActivated()) {
             return (false, Eip1066.UNAVAILABLE, IClearing.ClearingIsActivated.selector, EMPTY_BYTES);
         }

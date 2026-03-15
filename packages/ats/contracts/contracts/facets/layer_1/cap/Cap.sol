@@ -8,7 +8,7 @@ import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.so
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract Cap is ICap, TimestampProvider {
+abstract contract Cap is ICap, TimestampProvider, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -18,16 +18,17 @@ abstract contract Cap is ICap, TimestampProvider {
         CapStorageWrapper.initialize_Cap(maxSupply, partitionCap);
     }
 
-    function setMaxSupply(uint256 _maxSupply) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    function setMaxSupply(uint256 _maxSupply) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_CAP_ROLE, msg.sender);
         CapStorageWrapper.requireValidNewMaxSupply(_maxSupply, _getBlockTimestamp());
         CapStorageWrapper.setMaxSupply(_maxSupply, _getBlockTimestamp());
         success_ = true;
     }
 
-    function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) external override returns (bool success_) {
-        PauseStorageWrapper.requireNotPaused();
+    function setMaxSupplyByPartition(
+        bytes32 _partition,
+        uint256 _maxSupply
+    ) external override onlyUnpaused returns (bool success_) {
         AccessControlStorageWrapper.checkRole(_CAP_ROLE, msg.sender);
         CapStorageWrapper.requireValidNewMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp());
         CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp());

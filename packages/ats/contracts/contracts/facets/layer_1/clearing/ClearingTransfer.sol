@@ -16,13 +16,12 @@ import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
+abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, PauseStorageWrapper {
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
         address _to
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         LockStorageWrapper.requireValidExpirationTimestamp(_clearingOperation.expirationTimestamp);
@@ -44,8 +43,7 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
@@ -82,8 +80,7 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
@@ -119,8 +116,7 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider {
         uint256 _amount,
         address _to,
         bytes calldata _signature
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
         ERC1410StorageWrapper.requireValidAddress(_to);

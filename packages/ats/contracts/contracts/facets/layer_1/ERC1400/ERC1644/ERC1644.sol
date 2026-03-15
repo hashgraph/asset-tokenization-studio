@@ -10,7 +10,7 @@ import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWr
 import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
-abstract contract ERC1644 is IERC1644 {
+abstract contract ERC1644 is IERC1644, PauseStorageWrapper {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -25,8 +25,7 @@ abstract contract ERC1644 is IERC1644 {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC1644StorageWrapper.requireControllable();
         {
@@ -44,8 +43,7 @@ abstract contract ERC1644 is IERC1644 {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external override {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC1644StorageWrapper.requireControllable();
         {

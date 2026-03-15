@@ -16,12 +16,11 @@ import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
+abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, PauseStorageWrapper {
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
@@ -39,8 +38,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
     function clearingRedeemFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
@@ -71,8 +69,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
     function operatorClearingRedeemByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
@@ -104,8 +101,7 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider {
         ProtectedClearingOperation calldata _protectedClearingOperation,
         uint256 _amount,
         bytes calldata _signature
-    ) external override returns (bool success_, uint256 clearingId_) {
-        PauseStorageWrapper.requireNotPaused();
+    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
         ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
         LockStorageWrapper.requireValidExpirationTimestamp(
