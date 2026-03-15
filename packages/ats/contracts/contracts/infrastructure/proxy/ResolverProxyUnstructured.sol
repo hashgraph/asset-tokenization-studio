@@ -17,7 +17,7 @@ abstract contract ResolverProxyUnstructured {
         IResolverProxy.Rbac[] memory _rbacs
     ) internal {
         _resolver.checkResolverProxyConfigurationRegistered(_resolverProxyConfigurationId, _version);
-        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper._resolverProxyStorage();
+        ResolverProxyStorage storage ds = ResolverProxyStorageWrapper.resolverProxyStorage();
         _updateResolver(ds, _resolver);
         _updateConfigId(ds, _resolverProxyConfigurationId);
         _updateVersion(ds, _version);
@@ -39,7 +39,7 @@ abstract contract ResolverProxyUnstructured {
     function _assignRbacRoles(IResolverProxy.Rbac[] memory _rbacs) internal {
         for (uint256 rbacIndex; rbacIndex < _rbacs.length; rbacIndex++) {
             for (uint256 memberIndex; memberIndex < _rbacs[rbacIndex].members.length; memberIndex++) {
-                AccessControlStorageWrapper._grantRole(_rbacs[rbacIndex].role, _rbacs[rbacIndex].members[memberIndex]);
+                AccessControlStorageWrapper.grantRole(_rbacs[rbacIndex].role, _rbacs[rbacIndex].members[memberIndex]);
             }
         }
     }

@@ -15,18 +15,18 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalKycLists(address[] calldata _kycLists) external override {
-        if (ExternalListManagementStorageWrapper._isKycExternalInitialized()) revert AlreadyInitialized();
-        ExternalListManagementStorageWrapper._initialize_ExternalKycLists(_kycLists);
+        if (ExternalListManagementStorageWrapper.isKycExternalInitialized()) revert AlreadyInitialized();
+        ExternalListManagementStorageWrapper.initialize_ExternalKycLists(_kycLists);
     }
 
     function updateExternalKycLists(
         address[] calldata _kycLists,
         bool[] calldata _actives
     ) external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_KYC_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_KYC_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
         ArrayValidation.checkUniqueValues(_kycLists, _actives);
-        success_ = ExternalListManagementStorageWrapper._updateExternalLists(
+        success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _KYC_MANAGEMENT_STORAGE_POSITION,
             _kycLists,
             _actives
@@ -38,10 +38,10 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement {
     }
 
     function addExternalKycList(address _kycLists) external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_KYC_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        ExternalListManagementStorageWrapper._checkValidAddress(_kycLists);
-        success_ = ExternalListManagementStorageWrapper._addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
+        AccessControlStorageWrapper.checkRole(_KYC_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        ExternalListManagementStorageWrapper.checkValidAddress(_kycLists);
+        success_ = ExternalListManagementStorageWrapper.addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert ListedKycList(_kycLists);
         }
@@ -49,12 +49,9 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement {
     }
 
     function removeExternalKycList(address _kycLists) external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_KYC_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        success_ = ExternalListManagementStorageWrapper._removeExternalList(
-            _KYC_MANAGEMENT_STORAGE_POSITION,
-            _kycLists
-        );
+        AccessControlStorageWrapper.checkRole(_KYC_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = ExternalListManagementStorageWrapper.removeExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists);
         if (!success_) {
             revert UnlistedKycList(_kycLists);
         }
@@ -62,15 +59,15 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement {
     }
 
     function isExternalKycList(address _kycList) external view override returns (bool) {
-        return ExternalListManagementStorageWrapper._isExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycList);
+        return ExternalListManagementStorageWrapper.isExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycList);
     }
 
     function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) external view override returns (bool) {
-        return ExternalListManagementStorageWrapper._isExternallyGranted(_account, _kycStatus);
+        return ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
     }
 
     function getExternalKycListsCount() external view override returns (uint256 externalKycListsCount_) {
-        return ExternalListManagementStorageWrapper._getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
+        return ExternalListManagementStorageWrapper.getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
     }
 
     function getExternalKycListsMembers(
@@ -78,7 +75,7 @@ abstract contract ExternalKycListManagement is IExternalKycListManagement {
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
         return
-            ExternalListManagementStorageWrapper._getExternalListsMembers(
+            ExternalListManagementStorageWrapper.getExternalListsMembers(
                 _KYC_MANAGEMENT_STORAGE_POSITION,
                 _pageIndex,
                 _pageLength

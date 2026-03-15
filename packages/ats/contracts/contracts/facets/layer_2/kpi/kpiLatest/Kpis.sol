@@ -9,10 +9,10 @@ import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.
 
 abstract contract Kpis is IKpis {
     function addKpiData(uint256 _date, uint256 _value, address _project) external {
-        AccessControlStorageWrapper._checkRole(_KPI_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        KpisStorageWrapper._requireValidDate(_date, _project);
-        KpisStorageWrapper._addKpiData(_date, _value, _project);
+        AccessControlStorageWrapper.checkRole(_KPI_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        KpisStorageWrapper.requireValidDate(_date, _project);
+        KpisStorageWrapper.addKpiData(_date, _value, _project);
     }
 
     function getLatestKpiData(
@@ -20,14 +20,14 @@ abstract contract Kpis is IKpis {
         uint256 _to,
         address _project
     ) external view returns (uint256 value_, bool exists_) {
-        return KpisStorageWrapper._getLatestKpiData(_from, _to, _project);
+        return KpisStorageWrapper.getLatestKpiData(_from, _to, _project);
     }
 
     function getMinDate() external view returns (uint256 minDate_) {
-        return KpisStorageWrapper._getMinDateAdjusted();
+        return KpisStorageWrapper.getMinDateAdjusted();
     }
 
     function isCheckPointDate(uint256 _date, address _project) external view returns (bool exists_) {
-        return KpisStorageWrapper._isCheckpointDate(_date, _project);
+        return KpisStorageWrapper.isCheckpointDate(_date, _project);
     }
 }

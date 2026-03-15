@@ -21,7 +21,7 @@ library ClearingReadOps {
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         address _to
     ) public {
-        ClearingStorageWrapper._beforeClearingOperation(_clearingOperationIdentifier, _to);
+        ClearingStorageWrapper.beforeClearingOperation(_clearingOperationIdentifier, _to);
     }
 
     // ============================================================================
@@ -30,7 +30,7 @@ library ClearingReadOps {
 
     /// @notice Get cleared amount for token holder adjusted at timestamp
     function getClearedAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) public view returns (uint256) {
-        return ClearingStorageWrapper._getClearedAmountForAdjustedAt(_tokenHolder, _timestamp);
+        return ClearingStorageWrapper.getClearedAmountForAdjustedAt(_tokenHolder, _timestamp);
     }
 
     /// @notice Get cleared amount by partition adjusted at timestamp
@@ -39,7 +39,7 @@ library ClearingReadOps {
         address _tokenHolder,
         uint256 _timestamp
     ) public view returns (uint256) {
-        return ClearingStorageWrapper._getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
+        return ClearingStorageWrapper.getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
     }
 
     /// @notice Get clearing transfer data adjusted at timestamp
@@ -50,7 +50,7 @@ library ClearingReadOps {
         uint256 _timestamp
     ) public view returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_) {
         return
-            ClearingStorageWrapper._getClearingTransferForByPartitionAdjustedAt(
+            ClearingStorageWrapper.getClearingTransferForByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
                 _clearingId,
@@ -66,7 +66,7 @@ library ClearingReadOps {
         uint256 _timestamp
     ) public view returns (IClearingRedeem.ClearingRedeemData memory clearingRedeemData_) {
         return
-            ClearingStorageWrapper._getClearingRedeemForByPartitionAdjustedAt(
+            ClearingStorageWrapper.getClearingRedeemForByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
                 _clearingId,
@@ -82,7 +82,7 @@ library ClearingReadOps {
         uint256 _timestamp
     ) public view returns (IClearingHoldCreation.ClearingHoldCreationData memory clearingHoldCreationData_) {
         return
-            ClearingStorageWrapper._getClearingHoldCreationForByPartitionAdjustedAt(
+            ClearingStorageWrapper.getClearingHoldCreationForByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
                 _clearingId,
@@ -98,12 +98,12 @@ library ClearingReadOps {
     function requireValidClearingId(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public view {
-        ClearingStorageWrapper._requireValidClearingId(_clearingOperationIdentifier);
+        ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
     }
 
     /// @notice Require clearing feature is activated
     function requireClearingActivated() public view {
-        ClearingStorageWrapper._requireClearingActivated();
+        ClearingStorageWrapper.requireClearingActivated();
     }
 
     /// @notice Require clearing operation expiration timestamp meets condition
@@ -111,6 +111,6 @@ library ClearingReadOps {
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired
     ) public view {
-        ClearingStorageWrapper._requireExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);
+        ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);
     }
 }

@@ -12,14 +12,14 @@ abstract contract ControlList is IControlList {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ControlList(bool _isWhiteList) external override {
-        if (ControlListStorageWrapper._isControlListInitialized()) revert AlreadyInitialized();
-        ControlListStorageWrapper._initialize_ControlList(_isWhiteList);
+        if (ControlListStorageWrapper.isControlListInitialized()) revert AlreadyInitialized();
+        ControlListStorageWrapper.initialize_ControlList(_isWhiteList);
     }
 
     function addToControlList(address _account) external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_CONTROL_LIST_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        success_ = ControlListStorageWrapper._addToControlList(_account);
+        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = ControlListStorageWrapper.addToControlList(_account);
         if (!success_) {
             revert ListedAccount(_account);
         }
@@ -27,9 +27,9 @@ abstract contract ControlList is IControlList {
     }
 
     function removeFromControlList(address _account) external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_CONTROL_LIST_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        success_ = ControlListStorageWrapper._removeFromControlList(_account);
+        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = ControlListStorageWrapper.removeFromControlList(_account);
         if (!success_) {
             revert UnlistedAccount(_account);
         }
@@ -37,21 +37,21 @@ abstract contract ControlList is IControlList {
     }
 
     function getControlListType() external view override returns (bool) {
-        return ControlListStorageWrapper._getControlListType();
+        return ControlListStorageWrapper.getControlListType();
     }
 
     function isInControlList(address _account) external view override returns (bool) {
-        return ControlListStorageWrapper._isInControlList(_account);
+        return ControlListStorageWrapper.isInControlList(_account);
     }
 
     function getControlListCount() external view override returns (uint256 controlListCount_) {
-        controlListCount_ = ControlListStorageWrapper._getControlListCount();
+        controlListCount_ = ControlListStorageWrapper.getControlListCount();
     }
 
     function getControlListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
-        members_ = ControlListStorageWrapper._getControlListMembers(_pageIndex, _pageLength);
+        members_ = ControlListStorageWrapper.getControlListMembers(_pageIndex, _pageLength);
     }
 }

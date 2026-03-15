@@ -10,11 +10,11 @@ import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTas
 
 abstract contract AdjustBalances is IAdjustBalances {
     function adjustBalances(uint256 factor, uint8 decimals) external override returns (bool success_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_ADJUSTMENT_BALANCE_ROLE, msg.sender);
-        AdjustBalancesStorageWrapper._requireValidFactor(factor);
-        ScheduledTasksStorageWrapper._callTriggerPendingScheduledCrossOrderedTasks();
-        AdjustBalancesStorageWrapper._adjustBalances(factor, decimals);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_ADJUSTMENT_BALANCE_ROLE, msg.sender);
+        AdjustBalancesStorageWrapper.requireValidFactor(factor);
+        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        AdjustBalancesStorageWrapper.adjustBalances(factor, decimals);
         success_ = true;
     }
 }

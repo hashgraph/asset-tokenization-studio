@@ -23,41 +23,25 @@ library ExternalListManagementStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    // --- Storage accessor (pure) ---
-
-    function _externalListStorage(
-        bytes32 _position
-    ) internal pure returns (ExternalListDataStorage storage externalList_) {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            externalList_.slot := _position
-        }
-    }
-
-    // --- Validation ---
-
-    // --- Generic external list operations ---
-
-    // solhint-disable-next-line ordering
-    function _updateExternalLists(
+    function updateExternalLists(
         bytes32 _position,
         address[] calldata _lists,
         bool[] calldata _actives
     ) internal returns (bool success_) {
         uint256 length = _lists.length;
         for (uint256 index; index < length; ) {
-            _checkValidAddress(_lists[index]);
+            checkValidAddress(_lists[index]);
             if (_actives[index]) {
-                if (!_isExternalList(_position, _lists[index])) {
-                    _addExternalList(_position, _lists[index]);
+                if (!isExternalList(_position, _lists[index])) {
+                    addExternalList(_position, _lists[index]);
                 }
                 unchecked {
                     ++index;
                 }
                 continue;
             }
-            if (_isExternalList(_position, _lists[index])) {
-                _removeExternalList(_position, _lists[index]);
+            if (isExternalList(_position, _lists[index])) {
+                removeExternalList(_position, _lists[index]);
             }
             unchecked {
                 ++index;
@@ -66,54 +50,65 @@ library ExternalListManagementStorageWrapper {
         success_ = true;
     }
 
-    function _addExternalList(bytes32 _position, address _list) internal returns (bool success_) {
-        success_ = _externalListStorage(_position).list.add(_list);
+    function addExternalList(bytes32 _position, address _list) internal returns (bool success_) {
+        success_ = externalListStorage(_position).list.add(_list);
     }
 
-    function _removeExternalList(bytes32 _position, address _list) internal returns (bool success_) {
-        success_ = _externalListStorage(_position).list.remove(_list);
+    function removeExternalList(bytes32 _position, address _list) internal returns (bool success_) {
+        success_ = externalListStorage(_position).list.remove(_list);
     }
 
-    function _setExternalListInitialized(bytes32 _position) internal {
-        _externalListStorage(_position).initialized = true;
+    function setExternalListInitialized(bytes32 _position) internal {
+        externalListStorage(_position).initialized = true;
     }
-
-    function _isExternalList(bytes32 _position, address _list) internal view returns (bool) {
-        return _externalListStorage(_position).list.contains(_list);
-    }
-
-    function _getExternalListsCount(bytes32 _position) internal view returns (uint256 count_) {
-        count_ = _externalListStorage(_position).list.length();
-    }
-
-    function _getExternalListsMembers(
-        bytes32 _position,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
-        members_ = _externalListStorage(_position).list.getFromSet(_pageIndex, _pageLength);
-    }
-
-    // --- External Control List Management ---
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ExternalControlLists(address[] calldata _controlLists) internal {
+    function initialize_ExternalControlLists(address[] calldata _controlLists) internal {
         uint256 length = _controlLists.length;
         for (uint256 index; index < length; ) {
-            _checkValidAddress(_controlLists[index]);
-            _addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
+            checkValidAddress(_controlLists[index]);
+            addExternalList(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION, _controlLists[index]);
             unchecked {
                 ++index;
             }
         }
-        _setExternalListInitialized(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        setExternalListInitialized(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
     }
 
-    function _isExternallyAuthorized(address _account) internal view returns (bool) {
-        ExternalListDataStorage storage externalControlListStorage = _externalListStorage(
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ExternalKycLists(address[] calldata _kycLists) internal {
+        uint256 length = _kycLists.length;
+        for (uint256 index; index < length; ) {
+            checkValidAddress(_kycLists[index]);
+            addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
+            unchecked {
+                ++index;
+            }
+        }
+        setExternalListInitialized(_KYC_MANAGEMENT_STORAGE_POSITION);
+    }
+
+    function isExternalList(bytes32 _position, address _list) internal view returns (bool) {
+        return externalListStorage(_position).list.contains(_list);
+    }
+
+    function getExternalListsCount(bytes32 _position) internal view returns (uint256 count_) {
+        count_ = externalListStorage(_position).list.length();
+    }
+
+    function getExternalListsMembers(
+        bytes32 _position,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory members_) {
+        members_ = externalListStorage(_position).list.getFromSet(_pageIndex, _pageLength);
+    }
+
+    function isExternallyAuthorized(address _account) internal view returns (bool) {
+        ExternalListDataStorage storage externalControlListStorage = externalListStorage(
             _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION
         );
-        uint256 length = _getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
+        uint256 length = getExternalListsCount(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION);
         for (uint256 index; index < length; ) {
             if (!IExternalControlList(externalControlListStorage.list.at(index)).isAuthorized(_account)) return false;
             unchecked {
@@ -123,28 +118,13 @@ library ExternalListManagementStorageWrapper {
         return true;
     }
 
-    function _isExternalControlListInitialized() internal view returns (bool) {
-        return _externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION).initialized;
+    function isExternalControlListInitialized() internal view returns (bool) {
+        return externalListStorage(_CONTROL_LIST_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 
-    // --- External KYC List Management ---
-
-    // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ExternalKycLists(address[] calldata _kycLists) internal {
-        uint256 length = _kycLists.length;
-        for (uint256 index; index < length; ) {
-            _checkValidAddress(_kycLists[index]);
-            _addExternalList(_KYC_MANAGEMENT_STORAGE_POSITION, _kycLists[index]);
-            unchecked {
-                ++index;
-            }
-        }
-        _setExternalListInitialized(_KYC_MANAGEMENT_STORAGE_POSITION);
-    }
-
-    function _isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) internal view returns (bool) {
-        ExternalListDataStorage storage externalKycListStorage = _externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION);
-        uint256 length = _getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
+    function isExternallyGranted(address _account, IKyc.KycStatus _kycStatus) internal view returns (bool) {
+        ExternalListDataStorage storage externalKycListStorage = externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION);
+        uint256 length = getExternalListsCount(_KYC_MANAGEMENT_STORAGE_POSITION);
         for (uint256 index; index < length; ) {
             if (IExternalKycList(externalKycListStorage.list.at(index)).getKycStatus(_account) != _kycStatus)
                 return false;
@@ -155,11 +135,20 @@ library ExternalListManagementStorageWrapper {
         return true;
     }
 
-    function _isKycExternalInitialized() internal view returns (bool) {
-        return _externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized;
+    function isKycExternalInitialized() internal view returns (bool) {
+        return externalListStorage(_KYC_MANAGEMENT_STORAGE_POSITION).initialized;
     }
 
-    function _checkValidAddress(address _addr) internal pure {
+    function checkValidAddress(address _addr) internal pure {
         if (_addr == address(0)) revert IExternalControlListManagement.ZeroAddressNotAllowed();
+    }
+
+    function externalListStorage(
+        bytes32 _position
+    ) internal pure returns (ExternalListDataStorage storage externalList_) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            externalList_.slot := _position
+        }
     }
 }

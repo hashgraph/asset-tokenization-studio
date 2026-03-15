@@ -6,40 +6,41 @@ import { _SECURITY_STORAGE_POSITION } from "../../constants/storagePositions.sol
 import { ISecurity } from "../../facets/layer_2/security/ISecurity.sol";
 
 library SecurityStorageWrapper {
-    function _securityStorage() internal pure returns (ISecurity.SecurityRegulationData storage securityStorage_) {
+    // --- State-changing functions ---
+
+    function initializeSecurity(
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
+    ) internal {
+        storeRegulationData(_regulationData, _additionalSecurityData);
+    }
+
+    function storeRegulationData(
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
+    ) internal {
+        ISecurity.SecurityRegulationData storage data = securityStorage();
+        data.regulationData = _regulationData;
+        data.additionalSecurityData = _additionalSecurityData;
+    }
+
+    // --- View functions ---
+
+    function getSecurityRegulationData()
+        internal
+        view
+        returns (ISecurity.SecurityRegulationData memory securityRegulationData_)
+    {
+        securityRegulationData_ = securityStorage();
+    }
+
+    // --- Pure functions ---
+
+    function securityStorage() internal pure returns (ISecurity.SecurityRegulationData storage securityStorage_) {
         bytes32 position = _SECURITY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             securityStorage_.slot := position
         }
-    }
-
-    // --- State-changing functions ---
-
-    // solhint-disable-next-line ordering
-    function _initializeSecurity(
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) internal {
-        _storeRegulationData(_regulationData, _additionalSecurityData);
-    }
-
-    function _storeRegulationData(
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) internal {
-        ISecurity.SecurityRegulationData storage data = _securityStorage();
-        data.regulationData = _regulationData;
-        data.additionalSecurityData = _additionalSecurityData;
-    }
-
-    // --- Read functions ---
-
-    function _getSecurityRegulationData()
-        internal
-        pure
-        returns (ISecurity.SecurityRegulationData memory securityRegulationData_)
-    {
-        securityRegulationData_ = _securityStorage();
     }
 }

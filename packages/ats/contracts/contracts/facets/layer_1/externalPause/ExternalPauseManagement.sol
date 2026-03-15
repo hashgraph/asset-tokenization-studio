@@ -14,18 +14,18 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(address[] calldata _pauses) external override {
-        if (PauseStorageWrapper._isExternalPauseInitialized()) revert AlreadyInitialized();
-        PauseStorageWrapper._initialize_ExternalPauses(_pauses);
+        if (PauseStorageWrapper.isExternalPauseInitialized()) revert AlreadyInitialized();
+        PauseStorageWrapper.initialize_ExternalPauses(_pauses);
     }
 
     function updateExternalPauses(
         address[] calldata _pauses,
         bool[] calldata _actives
     ) external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_PAUSE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_PAUSE_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
         ArrayValidation.checkUniqueValues(_pauses, _actives);
-        success_ = ExternalListManagementStorageWrapper._updateExternalLists(
+        success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _PAUSE_MANAGEMENT_STORAGE_POSITION,
             _pauses,
             _actives
@@ -37,10 +37,10 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement {
     }
 
     function addExternalPause(address _pause) external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_PAUSE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        ExternalListManagementStorageWrapper._checkValidAddress(_pause);
-        success_ = ExternalListManagementStorageWrapper._addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
+        AccessControlStorageWrapper.checkRole(_PAUSE_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        ExternalListManagementStorageWrapper.checkValidAddress(_pause);
+        success_ = ExternalListManagementStorageWrapper.addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert ListedPause(_pause);
         }
@@ -48,9 +48,9 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement {
     }
 
     function removeExternalPause(address _pause) external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_PAUSE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        success_ = ExternalListManagementStorageWrapper._removeExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
+        AccessControlStorageWrapper.checkRole(_PAUSE_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        success_ = ExternalListManagementStorageWrapper.removeExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert UnlistedPause(_pause);
         }
@@ -58,11 +58,11 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement {
     }
 
     function isExternalPause(address _pause) external view override returns (bool) {
-        return ExternalListManagementStorageWrapper._isExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
+        return ExternalListManagementStorageWrapper.isExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
     }
 
     function getExternalPausesCount() external view override returns (uint256 externalPausesCount_) {
-        return ExternalListManagementStorageWrapper._getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
+        return ExternalListManagementStorageWrapper.getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
     }
 
     function getExternalPausesMembers(
@@ -70,7 +70,7 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement {
         uint256 _pageLength
     ) external view override returns (address[] memory members_) {
         return
-            ExternalListManagementStorageWrapper._getExternalListsMembers(
+            ExternalListManagementStorageWrapper.getExternalListsMembers(
                 _PAUSE_MANAGEMENT_STORAGE_POSITION,
                 _pageIndex,
                 _pageLength

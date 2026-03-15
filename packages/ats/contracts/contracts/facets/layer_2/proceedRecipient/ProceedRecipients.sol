@@ -16,52 +16,52 @@ abstract contract ProceedRecipients is IProceedRecipients {
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
     ) external override {
-        if (ProceedRecipientsStorageWrapper._isProceedRecipientsInitialized()) revert AlreadyInitialized();
-        ProceedRecipientsStorageWrapper._initialize_ProceedRecipients(_proceedRecipients, _data);
+        if (ProceedRecipientsStorageWrapper.isProceedRecipientsInitialized()) revert AlreadyInitialized();
+        ProceedRecipientsStorageWrapper.initialize_ProceedRecipients(_proceedRecipients, _data);
     }
 
     function addProceedRecipient(address _proceedRecipient, bytes calldata _data) external override {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
-        ERC1410StorageWrapper._requireValidAddress(_proceedRecipient);
-        ProceedRecipientsStorageWrapper._requireNotProceedRecipient(_proceedRecipient);
-        ProceedRecipientsStorageWrapper._addProceedRecipient(_proceedRecipient, _data);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
+        ERC1410StorageWrapper.requireValidAddress(_proceedRecipient);
+        ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
+        ProceedRecipientsStorageWrapper.addProceedRecipient(_proceedRecipient, _data);
         emit ProceedRecipientAdded(msg.sender, _proceedRecipient, _data);
     }
 
     function removeProceedRecipient(address _proceedRecipient) external override {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
-        ProceedRecipientsStorageWrapper._requireProceedRecipient(_proceedRecipient);
-        ProceedRecipientsStorageWrapper._removeProceedRecipient(_proceedRecipient);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
+        ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
+        ProceedRecipientsStorageWrapper.removeProceedRecipient(_proceedRecipient);
         emit ProceedRecipientRemoved(msg.sender, _proceedRecipient);
     }
 
     function updateProceedRecipientData(address _proceedRecipient, bytes calldata _data) external override {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
-        ERC1410StorageWrapper._requireValidAddress(_proceedRecipient);
-        ProceedRecipientsStorageWrapper._requireProceedRecipient(_proceedRecipient);
-        ProceedRecipientsStorageWrapper._setProceedRecipientData(_proceedRecipient, _data);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
+        ERC1410StorageWrapper.requireValidAddress(_proceedRecipient);
+        ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
+        ProceedRecipientsStorageWrapper.setProceedRecipientData(_proceedRecipient, _data);
         emit ProceedRecipientDataUpdated(msg.sender, _proceedRecipient, _data);
     }
 
     function isProceedRecipient(address _proceedRecipient) external view override returns (bool) {
-        return ProceedRecipientsStorageWrapper._isProceedRecipient(_proceedRecipient);
+        return ProceedRecipientsStorageWrapper.isProceedRecipient(_proceedRecipient);
     }
 
     function getProceedRecipientData(address _proceedRecipient) external view override returns (bytes memory) {
-        return ProceedRecipientsStorageWrapper._getProceedRecipientData(_proceedRecipient);
+        return ProceedRecipientsStorageWrapper.getProceedRecipientData(_proceedRecipient);
     }
 
     function getProceedRecipientsCount() external view override returns (uint256) {
-        return ProceedRecipientsStorageWrapper._getProceedRecipientsCount();
+        return ProceedRecipientsStorageWrapper.getProceedRecipientsCount();
     }
 
     function getProceedRecipients(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (address[] memory proceedRecipients_) {
-        return ProceedRecipientsStorageWrapper._getProceedRecipients(_pageIndex, _pageLength);
+        return ProceedRecipientsStorageWrapper.getProceedRecipients(_pageIndex, _pageLength);
     }
 }

@@ -22,7 +22,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         onlyUninitialized(_businessLogicResolverStorage().initialized)
         returns (bool success_)
     {
-        AccessControlStorageWrapper._grantRole(_DEFAULT_ADMIN_ROLE, msg.sender);
+        AccessControlStorageWrapper.grantRole(_DEFAULT_ADMIN_ROLE, msg.sender);
 
         _businessLogicResolverStorage().initialized = true;
         success_ = true;

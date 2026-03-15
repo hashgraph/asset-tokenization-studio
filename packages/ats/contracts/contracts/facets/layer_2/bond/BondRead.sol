@@ -9,36 +9,36 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 
 abstract contract BondRead is IBondRead, TimestampProvider {
     function getBondDetails() external view override returns (BondDetailsData memory bondDetailsData_) {
-        return BondStorageWrapper._getBondDetails();
+        return BondStorageWrapper.getBondDetails();
     }
 
     function getCoupon(uint256 _couponID) external view override returns (RegisteredCoupon memory registeredCoupon_) {
-        CorporateActionsStorageWrapper._requireMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
-        return BondStorageWrapper._getCoupon(_couponID);
+        CorporateActionsStorageWrapper.requireMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+        return BondStorageWrapper.getCoupon(_couponID);
     }
 
     function getCouponFor(
         uint256 _couponID,
         address _account
     ) external view override returns (CouponFor memory couponFor_) {
-        CorporateActionsStorageWrapper._requireMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
-        return BondStorageWrapper._getCouponFor(_couponID, _account);
+        CorporateActionsStorageWrapper.requireMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+        return BondStorageWrapper.getCouponFor(_couponID, _account);
     }
 
     function getCouponAmountFor(
         uint256 _couponID,
         address _account
     ) external view override returns (CouponAmountFor memory couponAmountFor_) {
-        CorporateActionsStorageWrapper._requireMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
-        return BondStorageWrapper._getCouponAmountFor(_couponID, _account);
+        CorporateActionsStorageWrapper.requireMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+        return BondStorageWrapper.getCouponAmountFor(_couponID, _account);
     }
 
     function getPrincipalFor(address _account) external view override returns (PrincipalFor memory principalFor_) {
-        return BondStorageWrapper._getPrincipalFor(_account);
+        return BondStorageWrapper.getPrincipalFor(_account);
     }
 
     function getCouponCount() external view override returns (uint256 couponCount_) {
-        return BondStorageWrapper._getCouponCount();
+        return BondStorageWrapper.getCouponCount();
     }
 
     function getCouponHolders(
@@ -46,25 +46,25 @@ abstract contract BondRead is IBondRead, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (address[] memory holders_) {
-        return BondStorageWrapper._getCouponHolders(_couponID, _pageIndex, _pageLength);
+        return BondStorageWrapper.getCouponHolders(_couponID, _pageIndex, _pageLength);
     }
 
     function getTotalCouponHolders(uint256 _couponID) external view returns (uint256) {
-        return BondStorageWrapper._getTotalCouponHolders(_couponID);
+        return BondStorageWrapper.getTotalCouponHolders(_couponID);
     }
 
     function getCouponFromOrderedListAt(uint256 _pos) external view returns (uint256 couponID_) {
-        return BondStorageWrapper._getCouponFromOrderedListAt(_pos);
+        return BondStorageWrapper.getCouponFromOrderedListAt(_pos);
     }
 
     function getCouponsOrderedList(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (uint256[] memory couponIDs_) {
-        return BondStorageWrapper._getCouponsOrderedList(_pageIndex, _pageLength);
+        return BondStorageWrapper.getCouponsOrderedList(_pageIndex, _pageLength);
     }
 
     function getCouponsOrderedListTotal() external view returns (uint256 total_) {
-        return BondStorageWrapper._getCouponsOrderedListTotalAdjustedAt(_getBlockTimestamp());
+        return BondStorageWrapper.getCouponsOrderedListTotalAdjustedAt(_getBlockTimestamp());
     }
 }

@@ -7,14 +7,14 @@ import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/Scheduled
 
 abstract contract ScheduledBalanceAdjustments is IScheduledBalanceAdjustments {
     function scheduledBalanceAdjustmentCount() external view override returns (uint256) {
-        return ScheduledTasksStorageWrapper._getScheduledBalanceAdjustmentCount();
+        return ScheduledTasksStorageWrapper.getScheduledBalanceAdjustmentCount();
     }
 
     function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (ScheduledTask[] memory scheduledBalanceAdjustment_) {
-        scheduledBalanceAdjustment_ = ScheduledTasksStorageWrapper._getScheduledBalanceAdjustments(
+        scheduledBalanceAdjustment_ = ScheduledTasksStorageWrapper.getScheduledBalanceAdjustments(
             _pageIndex,
             _pageLength
         );

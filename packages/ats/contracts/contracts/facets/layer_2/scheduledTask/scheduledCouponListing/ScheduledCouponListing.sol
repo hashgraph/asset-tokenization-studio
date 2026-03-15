@@ -7,13 +7,13 @@ import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/Scheduled
 
 abstract contract ScheduledCouponListing is IScheduledCouponListing {
     function scheduledCouponListingCount() external view override returns (uint256) {
-        return ScheduledTasksStorageWrapper._getScheduledCouponListingCount();
+        return ScheduledTasksStorageWrapper.getScheduledCouponListingCount();
     }
 
     function getScheduledCouponListing(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (ScheduledTask[] memory scheduledCouponListing_) {
-        scheduledCouponListing_ = ScheduledTasksStorageWrapper._getScheduledCouponListing(_pageIndex, _pageLength);
+        scheduledCouponListing_ = ScheduledTasksStorageWrapper.getScheduledCouponListing(_pageIndex, _pageLength);
     }
 }

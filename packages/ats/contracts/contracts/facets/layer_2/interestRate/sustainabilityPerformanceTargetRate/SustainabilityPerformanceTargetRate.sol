@@ -16,42 +16,43 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
         ImpactData[] calldata _impactData,
         address[] calldata _projects
     ) external override {
-        if (InterestRateStorageWrapper._isSustainabilityPerformanceTargetRateInitialized()) {
+        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
             revert AlreadyInitialized();
         }
-        InterestRateStorageWrapper._requireEqualLength(_impactData.length, _projects.length);
-        InterestRateStorageWrapper._initialize_SustainabilityPerformanceTargetRate(
+        InterestRateStorageWrapper.requireEqualLength(_impactData.length, _projects.length);
+        InterestRateStorageWrapper.initialize_SustainabilityPerformanceTargetRate(
             _interestRate,
             _impactData,
-            _projects
+            _projects,
+            ProceedRecipientsStorageWrapper.isProceedRecipient
         );
     }
 
     function setInterestRate(InterestRate calldata _newInterestRate) external {
-        AccessControlStorageWrapper._checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        InterestRateStorageWrapper._setSPTInterestRate(_newInterestRate);
+        AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        InterestRateStorageWrapper.setSPTInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
     }
 
     function setImpactData(ImpactData[] calldata _newImpactData, address[] calldata _projects) external {
-        AccessControlStorageWrapper._checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        InterestRateStorageWrapper._requireEqualLength(_newImpactData.length, _projects.length);
+        AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        InterestRateStorageWrapper.requireEqualLength(_newImpactData.length, _projects.length);
         for (uint256 index = 0; index < _newImpactData.length; index++) {
-            if (!ProceedRecipientsStorageWrapper._isProceedRecipient(_projects[index])) {
+            if (!ProceedRecipientsStorageWrapper.isProceedRecipient(_projects[index])) {
                 revert NotExistingProject(_projects[index]);
             }
-            InterestRateStorageWrapper._setSPTImpactData(_newImpactData[index], _projects[index]);
+            InterestRateStorageWrapper.setSPTImpactData(_newImpactData[index], _projects[index]);
         }
         emit ImpactDataUpdated(msg.sender, _newImpactData, _projects);
     }
 
     function getInterestRate() external view returns (InterestRate memory interestRate_) {
-        interestRate_ = InterestRateStorageWrapper._getSPTInterestRate();
+        interestRate_ = InterestRateStorageWrapper.getSPTInterestRate();
     }
 
     function getImpactDataFor(address _project) external view returns (ImpactData memory impactData_) {
-        impactData_ = InterestRateStorageWrapper._getSPTImpactDataFor(_project);
+        impactData_ = InterestRateStorageWrapper.getSPTImpactDataFor(_project);
     }
 }

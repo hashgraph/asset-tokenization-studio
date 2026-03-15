@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC20Permit } from "../../facets/layer_1/ERC1400/ERC20Permit/IERC20Permit.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { ERC20PERMIT_TYPEHASH } from "../../constants/values.sol";
-import { getDomainHash } from "../../infrastructure/utils/ERC712Lib.sol";
+import { _getDomainHash } from "../../infrastructure/utils/ERC712.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
@@ -20,7 +20,9 @@ struct ERC20PermitStorage {
 }
 
 library ERC20PermitStorageWrapper {
-    function _permit(
+    // --- State-changing functions ---
+
+    function permit(
         address owner,
         address spender,
         uint256 value,
@@ -33,25 +35,27 @@ library ERC20PermitStorageWrapper {
             revert IERC20Permit.ERC2612ExpiredSignature(deadline);
         }
 
-        uint256 currentNonce = NonceStorageWrapper._getNonceFor(owner);
+        uint256 currentNonce = NonceStorageWrapper.getNonceFor(owner);
 
         bytes32 structHash = keccak256(abi.encode(ERC20PERMIT_TYPEHASH, owner, spender, value, currentNonce, deadline));
-        NonceStorageWrapper._setNonceFor(currentNonce + 1, owner);
+        NonceStorageWrapper.setNonceFor(currentNonce + 1, owner);
         // solhint-disable-next-line func-name-mixedcase
         address signer = ECDSA.recover(ECDSA.toTypedDataHash(DOMAIN_SEPARATOR(), structHash), v, r, s);
 
         if (signer != owner) {
             revert IERC20Permit.ERC2612InvalidSigner(signer, owner);
         }
-        ERC20StorageWrapper._approve(owner, spender, value);
+        ERC20StorageWrapper.approve(owner, spender, value);
     }
+
+    // --- Internal view functions ---
 
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() internal view returns (bytes32) {
         return
-            getDomainHash(
-                ERC20StorageWrapper._getName(),
-                Strings.toString(ResolverProxyStorageWrapper._getResolverProxyVersion()),
+            _getDomainHash(
+                ERC20StorageWrapper.getName(),
+                Strings.toString(ResolverProxyStorageWrapper.getResolverProxyVersion()),
                 block.chainid,
                 address(this)
             );

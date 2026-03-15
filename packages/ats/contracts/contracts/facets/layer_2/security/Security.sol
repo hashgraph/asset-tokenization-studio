@@ -10,19 +10,19 @@ abstract contract Security is ISecurity {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (address[] memory holders_) {
-        return ERC1410StorageWrapper._getTokenHolders(_pageIndex, _pageLength);
+        return ERC1410StorageWrapper.getTokenHolders(_pageIndex, _pageLength);
     }
 
     function getTotalSecurityHolders() external view returns (uint256) {
-        return ERC1410StorageWrapper._getTotalTokenHolders();
+        return ERC1410StorageWrapper.getTotalTokenHolders();
     }
 
     function getSecurityRegulationData()
         external
-        pure
+        view
         override
         returns (SecurityRegulationData memory securityRegulationData_)
     {
-        securityRegulationData_ = SecurityStorageWrapper._getSecurityRegulationData();
+        securityRegulationData_ = SecurityStorageWrapper.getSecurityRegulationData();
     }
 }

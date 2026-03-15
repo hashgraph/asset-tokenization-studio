@@ -10,26 +10,26 @@ import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrappe
 
 abstract contract ERC3643Read is IERC3643Read {
     function isAgent(address _agent) external view returns (bool) {
-        return AccessControlStorageWrapper._hasRole(_AGENT_ROLE, _agent);
+        return AccessControlStorageWrapper.hasRole(_AGENT_ROLE, _agent);
     }
 
     function identityRegistry() external view override returns (IIdentityRegistry) {
-        return ERC3643StorageWrapper._getIdentityRegistry();
+        return ERC3643StorageWrapper.getIdentityRegistry();
     }
 
     function onchainID() external view override returns (address) {
-        return ERC3643StorageWrapper._getOnchainID();
+        return ERC3643StorageWrapper.getOnchainID();
     }
 
     function compliance() external view override returns (ICompliance) {
-        return ERC3643StorageWrapper._getCompliance();
+        return ERC3643StorageWrapper.getCompliance();
     }
 
     function isAddressRecovered(address _wallet) external view returns (bool) {
-        return ERC3643StorageWrapper._isRecovered(_wallet);
+        return ERC3643StorageWrapper.isRecovered(_wallet);
     }
 
     function version() external view returns (string memory) {
-        return ERC3643StorageWrapper._version();
+        return ERC3643StorageWrapper.version();
     }
 }

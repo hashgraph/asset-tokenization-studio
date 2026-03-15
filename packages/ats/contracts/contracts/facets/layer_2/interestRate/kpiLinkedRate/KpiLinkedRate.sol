@@ -14,33 +14,33 @@ contract KpiLinkedRate is IKpiLinkedRate {
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData
     ) external override {
-        if (InterestRateStorageWrapper._kpiLinkedRateStorage().initialized) revert AlreadyInitialized();
-        InterestRateStorageWrapper._setInterestRate(_interestRate);
-        InterestRateStorageWrapper._setImpactData(_impactData);
-        InterestRateStorageWrapper._kpiLinkedRateStorage().initialized = true;
+        if (InterestRateStorageWrapper.kpiLinkedRateStorage().initialized) revert AlreadyInitialized();
+        InterestRateStorageWrapper.setInterestRate(_interestRate);
+        InterestRateStorageWrapper.setImpactData(_impactData);
+        InterestRateStorageWrapper.kpiLinkedRateStorage().initialized = true;
     }
 
     function setInterestRate(InterestRate calldata _newInterestRate) external {
-        AccessControlStorageWrapper._checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        InterestRateStorageWrapper._requireValidInterestRate(_newInterestRate);
-        InterestRateStorageWrapper._setInterestRate(_newInterestRate);
+        AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
+        InterestRateStorageWrapper.setInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
     }
 
     function setImpactData(ImpactData calldata _newImpactData) external {
-        AccessControlStorageWrapper._checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        InterestRateStorageWrapper._requireValidImpactData(_newImpactData);
-        InterestRateStorageWrapper._setImpactData(_newImpactData);
+        AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
+        InterestRateStorageWrapper.setImpactData(_newImpactData);
         emit ImpactDataUpdated(msg.sender, _newImpactData);
     }
 
     function getInterestRate() external view returns (InterestRate memory interestRate_) {
-        interestRate_ = InterestRateStorageWrapper._getInterestRate();
+        interestRate_ = InterestRateStorageWrapper.getInterestRate();
     }
 
     function getImpactData() external view returns (ImpactData memory impactData_) {
-        impactData_ = InterestRateStorageWrapper._getImpactData();
+        impactData_ = InterestRateStorageWrapper.getImpactData();
     }
 }

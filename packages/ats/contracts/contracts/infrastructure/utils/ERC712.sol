@@ -21,7 +21,7 @@ error WrongSignatureLength();
 error WrongNounce(uint256 nounce, address account);
 error ExpiredDeadline(uint256 deadline);
 
-function getDomainHash(
+function _getDomainHash(
     string memory _contractName,
     string memory _contractVersion,
     uint256 _chainId,
@@ -40,7 +40,7 @@ function getDomainHash(
 }
 
 // function hashes
-function getMessageHashTransfer(
+function _getMessageHashTransfer(
     bytes32 _partition,
     address _from,
     address _to,
@@ -54,7 +54,7 @@ function getMessageHashTransfer(
         );
 }
 
-function getMessageHashRedeem(
+function _getMessageHashRedeem(
     bytes32 _partition,
     address _from,
     uint256 _amount,
@@ -67,7 +67,7 @@ function getMessageHashRedeem(
         );
 }
 
-function getMessageHashCreateHold(
+function _getMessageHashCreateHold(
     bytes32 _partition,
     address _from,
     ProtectedHold memory _protectedHold
@@ -99,7 +99,7 @@ function getMessageHashCreateHold(
         );
 }
 
-function getMessageHashClearingTransfer(
+function _getMessageHashClearingTransfer(
     IClearing.ProtectedClearingOperation memory _protectedClearing,
     address _to,
     uint256 _amount
@@ -130,7 +130,7 @@ function getMessageHashClearingTransfer(
         );
 }
 
-function getMessageHashClearingCreateHold(
+function _getMessageHashClearingCreateHold(
     IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
     Hold memory _hold
 ) pure returns (bytes32) {
@@ -168,7 +168,7 @@ function getMessageHashClearingCreateHold(
         );
 }
 
-function getMessageHashClearingRedeem(
+function _getMessageHashClearingRedeem(
     IClearing.ProtectedClearingOperation memory _protectedClearing,
     uint256 _amount
 ) pure returns (bytes32) {
@@ -198,31 +198,31 @@ function getMessageHashClearingRedeem(
 }
 
 // checks
-function checkNounceAndDeadline(
+function _checkNounceAndDeadline(
     uint256 _nounce,
     address _account,
     uint256 _currentNounce,
     uint256 _deadline,
     uint256 _blockTimestamp
 ) pure {
-    if (!isDeadlineValid(_deadline, _blockTimestamp)) revert ExpiredDeadline(_deadline);
-    if (!isNounceValid(_nounce, _currentNounce)) revert WrongNounce(_nounce, _account);
+    if (!_isDeadlineValid(_deadline, _blockTimestamp)) revert ExpiredDeadline(_deadline);
+    if (!_isNounceValid(_nounce, _currentNounce)) revert WrongNounce(_nounce, _account);
 }
 
-function isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
+function _isDeadlineValid(uint256 _deadline, uint256 _blockTimestamp) pure returns (bool) {
     return _deadline >= _blockTimestamp;
 }
 
-function isNounceValid(uint256 _nounce, uint256 _currentNounce) pure returns (bool) {
+function _isNounceValid(uint256 _nounce, uint256 _currentNounce) pure returns (bool) {
     return _currentNounce < _nounce;
 }
 
-function recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {
-    (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
+function _recoverSigner(bytes32 _prefixedHash, bytes memory _signature) pure returns (address) {
+    (bytes32 r, bytes32 s, uint8 v) = _splitSignature(_signature);
     return ecrecover(_prefixedHash, v, r, s);
 }
 
-function splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, uint8 v) {
+function _splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, uint8 v) {
     if (sig.length != 65) revert WrongSignatureLength();
     // solhint-disable-next-line no-inline-assembly
     assembly {
@@ -236,7 +236,7 @@ function splitSignature(bytes memory sig) pure returns (bytes32 r, bytes32 s, ui
     // implicitly return (r, s, v)
 }
 
-function verify(
+function _verify(
     address _signer,
     bytes32 _functionHash,
     bytes memory _signature,
@@ -245,7 +245,7 @@ function verify(
     uint256 _chainid,
     address _contractAddress
 ) pure returns (bool) {
-    bytes32 domainHash = getDomainHash(_contractName, _contractVersion, _chainid, _contractAddress);
+    bytes32 domainHash = _getDomainHash(_contractName, _contractVersion, _chainid, _contractAddress);
     bytes32 prefixedHash = keccak256(abi.encodePacked(_SALT, domainHash, _functionHash));
-    return (recoverSigner(prefixedHash, _signature) == _signer);
+    return (_recoverSigner(prefixedHash, _signature) == _signer);
 }

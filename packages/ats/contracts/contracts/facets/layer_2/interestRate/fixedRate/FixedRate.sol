@@ -11,19 +11,19 @@ contract FixedRate is IFixedRate {
     error AlreadyInitialized();
     // solhint-disable-next-line func-name-mixedcase
     function initialize_FixedRate(FixedRateData calldata _initData) external override {
-        if (InterestRateStorageWrapper._fixedRateStorage().initialized) revert AlreadyInitialized();
-        InterestRateStorageWrapper._setRate(_initData.rate, _initData.rateDecimals);
-        InterestRateStorageWrapper._fixedRateStorage().initialized = true;
+        if (InterestRateStorageWrapper.fixedRateStorage().initialized) revert AlreadyInitialized();
+        InterestRateStorageWrapper.setRate(_initData.rate, _initData.rateDecimals);
+        InterestRateStorageWrapper.fixedRateStorage().initialized = true;
     }
 
     function setRate(uint256 _newRate, uint8 _newRateDecimals) external override {
-        AccessControlStorageWrapper._checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        InterestRateStorageWrapper._setRate(_newRate, _newRateDecimals);
+        AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        InterestRateStorageWrapper.setRate(_newRate, _newRateDecimals);
         emit RateUpdated(msg.sender, _newRate, _newRateDecimals);
     }
 
     function getRate() external view override returns (uint256 rate_, uint8 decimals_) {
-        return InterestRateStorageWrapper._getRate();
+        return InterestRateStorageWrapper.getRate();
     }
 }

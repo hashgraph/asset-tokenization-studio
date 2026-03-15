@@ -15,8 +15,8 @@ abstract contract ERC1644 is IERC1644 {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1644(bool _controllable) external override {
-        if (ERC1644StorageWrapper._isERC1644Initialized()) revert AlreadyInitialized();
-        ERC1644StorageWrapper._initialize_ERC1644(_controllable);
+        if (ERC1644StorageWrapper.isERC1644Initialized()) revert AlreadyInitialized();
+        ERC1644StorageWrapper.initialize_ERC1644(_controllable);
     }
 
     function controllerTransfer(
@@ -26,14 +26,14 @@ abstract contract ERC1644 is IERC1644 {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external override {
-        PauseStorageWrapper._requireNotPaused();
-        ERC1410StorageWrapper._requireWithoutMultiPartition();
-        ERC1644StorageWrapper._requireControllable();
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper._checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         TokenCoreOps.transfer(_from, _to, _value);
         emit IERC1644StorageWrapper.ControllerTransfer(msg.sender, _from, _to, _value, _data, _operatorData);
@@ -45,26 +45,26 @@ abstract contract ERC1644 is IERC1644 {
         bytes calldata _data,
         bytes calldata _operatorData
     ) external override {
-        PauseStorageWrapper._requireNotPaused();
-        ERC1410StorageWrapper._requireWithoutMultiPartition();
-        ERC1644StorageWrapper._requireControllable();
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        ERC1644StorageWrapper.requireControllable();
         {
             bytes32[] memory roles = new bytes32[](2);
             roles[0] = _CONTROLLER_ROLE;
             roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper._checkAnyRole(roles, msg.sender);
+            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         }
         TokenCoreOps.burn(_tokenHolder, _value);
         emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 
     function finalizeControllable() external override {
-        AccessControlStorageWrapper._checkRole(_DEFAULT_ADMIN_ROLE, msg.sender);
-        ERC1644StorageWrapper._requireControllable();
-        ERC1644StorageWrapper._finalizeControllable();
+        AccessControlStorageWrapper.checkRole(_DEFAULT_ADMIN_ROLE, msg.sender);
+        ERC1644StorageWrapper.requireControllable();
+        ERC1644StorageWrapper.finalizeControllable();
     }
 
     function isControllable() external view override returns (bool) {
-        return ERC1644StorageWrapper._isControllable();
+        return ERC1644StorageWrapper.isControllable();
     }
 }

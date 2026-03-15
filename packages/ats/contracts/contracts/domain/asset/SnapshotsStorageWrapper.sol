@@ -65,80 +65,460 @@ library SnapshotsStorageWrapper {
     using ArraysUpgradeable for uint256[];
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
-    // --- Storage Access ---
+    // --- Snapshot Creation and Update (state-changing functions) ---
 
-    function _snapshotStorage() internal pure returns (SnapshotStorage storage snapshotStorage_) {
-        bytes32 position = _SNAPSHOT_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            snapshotStorage_.slot := position
-        }
+    function takeSnapshot() internal returns (uint256 snapshotID_) {
+        snapshotStorage().currentSnapshotId.increment();
+        return getCurrentSnapshotId();
     }
 
-    // --- Snapshot Creation and Update (from SnapshotsStorageWrapper1) ---
-
-    // solhint-disable-next-line ordering
-    function _takeSnapshot() internal returns (uint256 snapshotID_) {
-        _snapshotStorage().currentSnapshotId.increment();
-        return _getCurrentSnapshotId();
-    }
-
-    function _updateSnapshot(Snapshots storage snapshots, uint256 currentValue) internal {
-        uint256 currentId = _getCurrentSnapshotId();
-        if (_lastSnapshotId(snapshots.ids) < currentId) {
+    function updateSnapshot(Snapshots storage snapshots, uint256 currentValue) internal {
+        uint256 currentId = getCurrentSnapshotId();
+        if (lastSnapshotId(snapshots.ids) < currentId) {
             snapshots.ids.push(currentId);
             snapshots.values.push(currentValue);
         }
     }
 
-    function _updateSnapshotAddress(SnapshotsAddress storage snapshots, address currentValue) internal {
-        uint256 currentId = _getCurrentSnapshotId();
-        if (_lastSnapshotId(snapshots.ids) < currentId) {
+    function updateSnapshotAddress(SnapshotsAddress storage snapshots, address currentValue) internal {
+        uint256 currentId = getCurrentSnapshotId();
+        if (lastSnapshotId(snapshots.ids) < currentId) {
             snapshots.ids.push(currentId);
             snapshots.values.push(currentValue);
         }
     }
 
-    function _updateSnapshotPartitions(
+    function updateSnapshotPartitions(
         Snapshots storage snapshots,
         PartitionSnapshots storage partitionSnapshots,
         uint256 currentValueForPartition,
         bytes32[] memory partitionIds
     ) internal {
-        uint256 currentId = _getCurrentSnapshotId();
-        if (_lastSnapshotId(snapshots.ids) < currentId) {
+        uint256 currentId = getCurrentSnapshotId();
+        if (lastSnapshotId(snapshots.ids) < currentId) {
             snapshots.ids.push(currentId);
             snapshots.values.push(currentValueForPartition);
         }
-        if (_lastSnapshotId(partitionSnapshots.ids) < currentId) {
+        if (lastSnapshotId(partitionSnapshots.ids) < currentId) {
             partitionSnapshots.ids.push(currentId);
             ListOfPartitions memory listOfPartitions = ListOfPartitions(partitionIds);
             partitionSnapshots.values.push(listOfPartitions);
         }
     }
 
-    function _getCurrentSnapshotId() internal view returns (uint256) {
-        return _snapshotStorage().currentSnapshotId.current();
+    // --- Snapshot Updates for Balance Types ---
+
+    function updateAbafSnapshot() internal {
+        updateSnapshot(snapshotStorage().abafSnapshots, AdjustBalancesStorageWrapper.getAbaf());
     }
 
-    function _valueAt(uint256 snapshotId, Snapshots storage snapshots) internal view returns (bool, uint256) {
-        (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
+    function updateDecimalsSnapshot() internal {
+        updateSnapshot(snapshotStorage().decimals, ERC20StorageWrapper.decimals());
+    }
+
+    function updateAssetTotalSupplySnapshot() internal {
+        updateSnapshot(snapshotStorage().totalSupplySnapshots, ERC20StorageWrapper.totalSupply());
+    }
+
+    /**
+     * @dev Update balance and/or total supply snapshots before the values are modified. This is implemented
+     * in the _beforeTokenTransfer hook, which is executed for _mint, _burn, and _transfer operations.
+     */
+    function updateAccountSnapshot(address account, bytes32 partition) internal {
+        uint256 currentSnapshotId = getCurrentSnapshotId();
+
+        if (currentSnapshotId == 0) return;
+
+        uint256 abafAtCurrentSnapshot = abafAtSnapshot(currentSnapshotId);
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(block.timestamp);
+
+        if (abaf == abafAtCurrentSnapshot) {
+            updateAccountSnapshot(
+                snapshotStorage().accountBalanceSnapshots[account],
+                ERC20StorageWrapper.balanceOf(account),
+                snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
+                snapshotStorage().accountPartitionMetadata[account],
+                ERC1410StorageWrapper.balanceOfByPartition(partition, account),
+                ERC1410StorageWrapper.partitionsOf(account)
+            );
+            return;
+        }
+
+        uint256 balance = AdjustBalancesStorageWrapper.balanceOfAdjustedAt(account, block.timestamp);
+        uint256 balanceForPartition = AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(
+            partition,
+            account,
+            block.timestamp
+        );
+        uint256 factor = abaf / abafAtCurrentSnapshot;
+
+        balance /= factor;
+        balanceForPartition /= factor;
+
+        updateAccountSnapshot(
+            snapshotStorage().accountBalanceSnapshots[account],
+            balance,
+            snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
+            snapshotStorage().accountPartitionMetadata[account],
+            balanceForPartition,
+            ERC1410StorageWrapper.partitionsOf(account)
+        );
+    }
+
+    function updateAccountSnapshot(
+        Snapshots storage balanceSnapshots,
+        uint256 currentValue,
+        Snapshots storage partitionBalanceSnapshots,
+        PartitionSnapshots storage partitionSnapshots,
+        uint256 currentValueForPartition,
+        bytes32[] memory partitionIds
+    ) internal {
+        updateSnapshot(balanceSnapshots, currentValue);
+        updateSnapshotPartitions(partitionBalanceSnapshots, partitionSnapshots, currentValueForPartition, partitionIds);
+    }
+
+    function updateAccountLockedBalancesSnapshot(address account, bytes32 partition) internal {
+        updateSnapshot(
+            snapshotStorage().accountLockedBalanceSnapshots[account],
+            LockStorageWrapper.getLockedAmountFor(account)
+        );
+        updateSnapshot(
+            snapshotStorage().accountPartitionLockedBalanceSnapshots[account][partition],
+            LockStorageWrapper.getLockedAmountForByPartition(partition, account)
+        );
+    }
+
+    function updateAccountHeldBalancesSnapshot(address account, bytes32 partition) internal {
+        updateSnapshot(
+            snapshotStorage().accountHeldBalanceSnapshots[account],
+            HoldStorageWrapper.getHeldAmountFor(account)
+        );
+        updateSnapshot(
+            snapshotStorage().accountPartitionHeldBalanceSnapshots[account][partition],
+            HoldStorageWrapper.getHeldAmountForByPartition(partition, account)
+        );
+    }
+
+    function updateAccountFrozenBalancesSnapshot(address account, bytes32 partition) internal {
+        updateSnapshot(
+            snapshotStorage().accountFrozenBalanceSnapshots[account],
+            ERC3643StorageWrapper.getFrozenAmountFor(account)
+        );
+        updateSnapshot(
+            snapshotStorage().accountPartitionFrozenBalanceSnapshots[account][partition],
+            ERC3643StorageWrapper.getFrozenAmountForByPartition(partition, account)
+        );
+    }
+
+    function updateAccountClearedBalancesSnapshot(address account, bytes32 partition) internal {
+        updateSnapshot(
+            snapshotStorage().accountClearedBalanceSnapshots[account],
+            ClearingStorageWrapper.getClearedAmountFor(account)
+        );
+        updateSnapshot(
+            snapshotStorage().accountPartitionClearedBalanceSnapshots[account][partition],
+            ClearingStorageWrapper.getClearedAmountForByPartition(partition, account)
+        );
+    }
+
+    function updateTotalSupplySnapshot(bytes32 partition) internal {
+        updateSnapshot(snapshotStorage().totalSupplySnapshots, ERC20StorageWrapper.totalSupply());
+        updateSnapshot(
+            snapshotStorage().totalSupplyByPartitionSnapshots[partition],
+            ERC1410StorageWrapper.totalSupplyByPartition(partition)
+        );
+    }
+
+    function updateTokenHolderSnapshot(address account) internal {
+        updateSnapshotAddress(
+            snapshotStorage().tokenHoldersSnapshots[ERC1410StorageWrapper.getTokenHolderIndex(account)],
+            account
+        );
+    }
+
+    function updateTotalTokenHolderSnapshot() internal {
+        updateSnapshot(snapshotStorage().totalTokenHoldersSnapshots, ERC1410StorageWrapper.getTotalTokenHolders());
+    }
+
+    // --- Snapshot Value Queries ---
+
+    function abafAtSnapshot(uint256 snapshotID) internal view returns (uint256 abaf_) {
+        (bool snapshotted, uint256 value) = valueAt(snapshotID, snapshotStorage().abafSnapshots);
+        return snapshotted ? value : AdjustBalancesStorageWrapper.getAbafAdjustedAt(block.timestamp);
+    }
+
+    function decimalsAtSnapshot(uint256 snapshotID) internal view returns (uint8 decimals_) {
+        (bool snapshotted, uint256 value) = valueAt(snapshotID, snapshotStorage().decimals);
+        return snapshotted ? uint8(value) : ERC20StorageWrapper.decimalsAdjustedAt(block.timestamp);
+    }
+
+    function balanceOfAtSnapshot(uint256 snapshotID, address tokenHolder) internal view returns (uint256 balance_) {
+        return balanceOfAt(tokenHolder, snapshotID);
+    }
+
+    function balancesOfAtSnapshot(
+        uint256 snapshotID,
+        uint256 pageIndex,
+        uint256 pageLength
+    ) internal view returns (HolderBalance[] memory balances_) {
+        address[] memory tokenHolders = tokenHoldersAt(snapshotID, pageIndex, pageLength);
+        uint256 length = tokenHolders.length;
+        balances_ = new HolderBalance[](length);
+        for (uint256 i = 0; i < length; ) {
+            address tokenHolder = tokenHolders[i];
+            balances_[i] = HolderBalance({
+                holder: tokenHolder,
+                balance: balanceOfAtSnapshot(snapshotID, tokenHolder)
+            });
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function getTotalBalanceOfAtSnapshot(uint256 snapshotId, address tokenHolder) internal view returns (uint256) {
+        unchecked {
+            return
+                balanceOfAtSnapshot(snapshotId, tokenHolder) +
+                clearedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
+                heldBalanceOfAtSnapshot(snapshotId, tokenHolder) +
+                lockedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
+                frozenBalanceOfAtSnapshot(snapshotId, tokenHolder);
+        }
+    }
+
+    function balanceOfAtSnapshotByPartition(
+        bytes32 partition,
+        uint256 snapshotID,
+        address tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return balanceOfAtByPartition(partition, tokenHolder, snapshotID);
+    }
+
+    function partitionsOfAtSnapshot(uint256 snapshotID, address tokenHolder) internal view returns (bytes32[] memory) {
+        PartitionSnapshots storage partitionSnapshots = snapshotStorage().accountPartitionMetadata[tokenHolder];
+
+        (bool found, uint256 index) = indexFor(snapshotID, partitionSnapshots.ids);
+
+        if (!found) {
+            return ERC1410StorageWrapper.partitionsOf(tokenHolder);
+        }
+
+        return partitionSnapshots.values[index].partitions;
+    }
+
+    function totalSupplyAtSnapshot(uint256 snapshotID) internal view returns (uint256 totalSupply_) {
+        return totalSupplyAt(snapshotID);
+    }
+
+    function balanceOfAt(address tokenHolder, uint256 snapshotId) internal view returns (uint256) {
+        return
+            balanceOfAtAdjusted(
+                snapshotId,
+                snapshotStorage().accountBalanceSnapshots[tokenHolder],
+                AdjustBalancesStorageWrapper.balanceOfAdjustedAt(tokenHolder, block.timestamp)
+            );
+    }
+
+    function tokenHoldersAt(
+        uint256 snapshotId,
+        uint256 pageIndex,
+        uint256 pageLength
+    ) internal view returns (address[] memory) {
+        (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
+
+        address[] memory tk = new address[](Pagination.getSize(start, end, totalTokenHoldersAt(snapshotId)));
+        uint256 length = tk.length;
+        for (uint256 i = 0; i < length; ) {
+            uint256 index = i + 1;
+            (bool snapshotted, address value) = addressValueAt(
+                snapshotId,
+                snapshotStorage().tokenHoldersSnapshots[index]
+            );
+
+            tk[i] = snapshotted ? value : ERC1410StorageWrapper.getTokenHolder(index);
+            unchecked {
+                ++i;
+            }
+        }
+
+        return tk;
+    }
+
+    function totalTokenHoldersAt(uint256 snapshotId) internal view returns (uint256) {
+        (bool snapshotted, uint256 value) = valueAt(snapshotId, snapshotStorage().totalTokenHoldersSnapshots);
+        return snapshotted ? value : ERC1410StorageWrapper.getTotalTokenHolders();
+    }
+
+    function balanceOfAtByPartition(
+        bytes32 partition,
+        address account,
+        uint256 snapshotId
+    ) internal view returns (uint256) {
+        return
+            balanceOfAtAdjusted(
+                snapshotId,
+                snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
+                AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(partition, account, block.timestamp)
+            );
+    }
+
+    function totalSupplyAtSnapshotByPartition(
+        bytes32 partition,
+        uint256 snapshotID
+    ) internal view returns (uint256 totalSupply_) {
+        return
+            balanceOfAtAdjusted(
+                snapshotID,
+                snapshotStorage().totalSupplyByPartitionSnapshots[partition],
+                AdjustBalancesStorageWrapper.totalSupplyByPartitionAdjustedAt(partition, block.timestamp)
+            );
+    }
+
+    function lockedBalanceOfAtSnapshot(
+        uint256 snapshotID,
+        address tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            balanceOfAtAdjusted(
+                snapshotID,
+                snapshotStorage().accountLockedBalanceSnapshots[tokenHolder],
+                LockStorageWrapper.getLockedAmountForAdjustedAt(tokenHolder, block.timestamp)
+            );
+    }
+
+    function lockedBalanceOfAtSnapshotByPartition(
+        bytes32 partition,
+        uint256 snapshotID,
+        address tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            balanceOfAtAdjusted(
+                snapshotID,
+                snapshotStorage().accountPartitionLockedBalanceSnapshots[tokenHolder][partition],
+                LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(partition, tokenHolder, block.timestamp)
+            );
+    }
+
+    function heldBalanceOfAtSnapshot(uint256 snapshotID, address tokenHolder) internal view returns (uint256 balance_) {
+        return
+            balanceOfAtAdjusted(
+                snapshotID,
+                snapshotStorage().accountHeldBalanceSnapshots[tokenHolder],
+                HoldStorageWrapper.getHeldAmountForAdjustedAt(tokenHolder, block.timestamp)
+            );
+    }
+
+    function heldBalanceOfAtSnapshotByPartition(
+        bytes32 partition,
+        uint256 snapshotID,
+        address tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            balanceOfAtAdjusted(
+                snapshotID,
+                snapshotStorage().accountPartitionHeldBalanceSnapshots[tokenHolder][partition],
+                HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(partition, tokenHolder, block.timestamp)
+            );
+    }
+
+    function frozenBalanceOfAtSnapshot(
+        uint256 snapshotID,
+        address tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            balanceOfAtAdjusted(
+                snapshotID,
+                snapshotStorage().accountFrozenBalanceSnapshots[tokenHolder],
+                ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(tokenHolder, block.timestamp)
+            );
+    }
+
+    function frozenBalanceOfAtSnapshotByPartition(
+        bytes32 partition,
+        uint256 snapshotID,
+        address tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            balanceOfAtAdjusted(
+                snapshotID,
+                snapshotStorage().accountPartitionFrozenBalanceSnapshots[tokenHolder][partition],
+                ERC3643StorageWrapper.getFrozenAmountForByPartitionAdjustedAt(partition, tokenHolder, block.timestamp)
+            );
+    }
+
+    function clearedBalanceOfAtSnapshot(
+        uint256 snapshotID,
+        address tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            balanceOfAtAdjusted(
+                snapshotID,
+                snapshotStorage().accountClearedBalanceSnapshots[tokenHolder],
+                ClearingStorageWrapper.getClearedAmountForAdjustedAt(tokenHolder, block.timestamp)
+            );
+    }
+
+    function clearedBalanceOfAtSnapshotByPartition(
+        bytes32 partition,
+        uint256 snapshotID,
+        address tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            balanceOfAtAdjusted(
+                snapshotID,
+                snapshotStorage().accountPartitionClearedBalanceSnapshots[tokenHolder][partition],
+                ClearingStorageWrapper.getClearedAmountForByPartitionAdjustedAt(partition, tokenHolder, block.timestamp)
+            );
+    }
+
+    function balanceOfAtAdjusted(
+        uint256 snapshotId,
+        Snapshots storage snapshots,
+        uint256 currentBalanceAdjusted
+    ) internal view returns (uint256) {
+        (bool snapshotted, uint256 value) = valueAt(snapshotId, snapshots);
+        if (snapshotted) return value;
+
+        uint256 abafAtSnapshot = abafAtSnapshot(snapshotId);
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(block.timestamp);
+
+        if (abafAtSnapshot == abaf) return currentBalanceAdjusted;
+
+        uint256 factor = abaf / abafAtSnapshot;
+
+        return currentBalanceAdjusted / factor;
+    }
+
+    function totalSupplyAt(uint256 snapshotId) internal view returns (uint256) {
+        (bool snapshotted, uint256 value) = valueAt(snapshotId, snapshotStorage().totalSupplySnapshots);
+        return snapshotted ? value : ERC20StorageWrapper.totalSupply();
+    }
+
+    // --- Snapshot ID and Lookup Helpers ---
+
+    function getCurrentSnapshotId() internal view returns (uint256) {
+        return snapshotStorage().currentSnapshotId.current();
+    }
+
+    function valueAt(uint256 snapshotId, Snapshots storage snapshots) internal view returns (bool, uint256) {
+        (bool found, uint256 index) = indexFor(snapshotId, snapshots.ids);
         return (found, found ? snapshots.values[index] : 0);
     }
 
-    function _addressValueAt(
+    function addressValueAt(
         uint256 snapshotId,
         SnapshotsAddress storage snapshots
     ) internal view returns (bool, address) {
-        (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
+        (bool found, uint256 index) = indexFor(snapshotId, snapshots.ids);
         return (found, found ? snapshots.values[index] : address(0));
     }
 
-    function _indexFor(uint256 snapshotId, uint256[] storage ids) internal view returns (bool, uint256) {
+    function indexFor(uint256 snapshotId, uint256[] storage ids) internal view returns (bool, uint256) {
         if (snapshotId == 0) {
             revert ISnapshotsStorageWrapper.SnapshotIdNull();
         }
-        if (snapshotId > _getCurrentSnapshotId()) {
+        if (snapshotId > getCurrentSnapshotId()) {
             revert ISnapshotsStorageWrapper.SnapshotIdDoesNotExists(snapshotId);
         }
 
@@ -151,7 +531,7 @@ library SnapshotsStorageWrapper {
         }
     }
 
-    function _lastSnapshotId(uint256[] storage ids) internal view returns (uint256) {
+    function lastSnapshotId(uint256[] storage ids) internal view returns (uint256) {
         if (ids.length == 0) {
             return 0;
         } else {
@@ -159,408 +539,13 @@ library SnapshotsStorageWrapper {
         }
     }
 
-    // --- Snapshot Updates for Balance Types (from SnapshotsStorageWrapper2) ---
+    // --- Storage Access (pure function - must come last) ---
 
-    function _updateAbafSnapshot() internal {
-        _updateSnapshot(_snapshotStorage().abafSnapshots, AdjustBalancesStorageWrapper._getAbaf());
-    }
-
-    function _updateDecimalsSnapshot() internal {
-        _updateSnapshot(_snapshotStorage().decimals, ERC20StorageWrapper._decimals());
-    }
-
-    function _updateAssetTotalSupplySnapshot() internal {
-        _updateSnapshot(_snapshotStorage().totalSupplySnapshots, ERC20StorageWrapper._totalSupply());
-    }
-
-    /**
-     * @dev Update balance and/or total supply snapshots before the values are modified. This is implemented
-     * in the _beforeTokenTransfer hook, which is executed for _mint, _burn, and _transfer operations.
-     */
-    function _updateAccountSnapshot(address account, bytes32 partition) internal {
-        uint256 currentSnapshotId = _getCurrentSnapshotId();
-
-        if (currentSnapshotId == 0) return;
-
-        uint256 abafAtCurrentSnapshot = _abafAtSnapshot(currentSnapshotId);
-        uint256 abaf = AdjustBalancesStorageWrapper._getAbafAdjustedAt(block.timestamp);
-
-        if (abaf == abafAtCurrentSnapshot) {
-            _updateAccountSnapshot(
-                _snapshotStorage().accountBalanceSnapshots[account],
-                ERC20StorageWrapper._balanceOf(account),
-                _snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
-                _snapshotStorage().accountPartitionMetadata[account],
-                ERC1410StorageWrapper._balanceOfByPartition(partition, account),
-                ERC1410StorageWrapper._partitionsOf(account)
-            );
-            return;
+    function snapshotStorage() internal pure returns (SnapshotStorage storage snapshotStorage_) {
+        bytes32 position = _SNAPSHOT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            snapshotStorage_.slot := position
         }
-
-        uint256 balance = AdjustBalancesStorageWrapper._balanceOfAdjustedAt(account, block.timestamp);
-        uint256 balanceForPartition = AdjustBalancesStorageWrapper._balanceOfByPartitionAdjustedAt(
-            partition,
-            account,
-            block.timestamp
-        );
-        uint256 factor = abaf / abafAtCurrentSnapshot;
-
-        balance /= factor;
-        balanceForPartition /= factor;
-
-        _updateAccountSnapshot(
-            _snapshotStorage().accountBalanceSnapshots[account],
-            balance,
-            _snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
-            _snapshotStorage().accountPartitionMetadata[account],
-            balanceForPartition,
-            ERC1410StorageWrapper._partitionsOf(account)
-        );
-    }
-
-    function _updateAccountSnapshot(
-        Snapshots storage balanceSnapshots,
-        uint256 currentValue,
-        Snapshots storage partitionBalanceSnapshots,
-        PartitionSnapshots storage partitionSnapshots,
-        uint256 currentValueForPartition,
-        bytes32[] memory partitionIds
-    ) internal {
-        _updateSnapshot(balanceSnapshots, currentValue);
-        _updateSnapshotPartitions(
-            partitionBalanceSnapshots,
-            partitionSnapshots,
-            currentValueForPartition,
-            partitionIds
-        );
-    }
-
-    function _updateAccountLockedBalancesSnapshot(address account, bytes32 partition) internal {
-        _updateSnapshot(
-            _snapshotStorage().accountLockedBalanceSnapshots[account],
-            LockStorageWrapper._getLockedAmountFor(account)
-        );
-        _updateSnapshot(
-            _snapshotStorage().accountPartitionLockedBalanceSnapshots[account][partition],
-            LockStorageWrapper._getLockedAmountForByPartition(partition, account)
-        );
-    }
-
-    function _updateAccountHeldBalancesSnapshot(address account, bytes32 partition) internal {
-        _updateSnapshot(
-            _snapshotStorage().accountHeldBalanceSnapshots[account],
-            HoldStorageWrapper._getHeldAmountFor(account)
-        );
-        _updateSnapshot(
-            _snapshotStorage().accountPartitionHeldBalanceSnapshots[account][partition],
-            HoldStorageWrapper._getHeldAmountForByPartition(partition, account)
-        );
-    }
-
-    function _updateAccountFrozenBalancesSnapshot(address account, bytes32 partition) internal {
-        _updateSnapshot(
-            _snapshotStorage().accountFrozenBalanceSnapshots[account],
-            ERC3643StorageWrapper._getFrozenAmountFor(account)
-        );
-        _updateSnapshot(
-            _snapshotStorage().accountPartitionFrozenBalanceSnapshots[account][partition],
-            ERC3643StorageWrapper._getFrozenAmountForByPartition(partition, account)
-        );
-    }
-
-    function _updateAccountClearedBalancesSnapshot(address account, bytes32 partition) internal {
-        _updateSnapshot(
-            _snapshotStorage().accountClearedBalanceSnapshots[account],
-            ClearingStorageWrapper._getClearedAmountFor(account)
-        );
-        _updateSnapshot(
-            _snapshotStorage().accountPartitionClearedBalanceSnapshots[account][partition],
-            ClearingStorageWrapper._getClearedAmountForByPartition(partition, account)
-        );
-    }
-
-    function _updateTotalSupplySnapshot(bytes32 partition) internal {
-        _updateSnapshot(_snapshotStorage().totalSupplySnapshots, ERC20StorageWrapper._totalSupply());
-        _updateSnapshot(
-            _snapshotStorage().totalSupplyByPartitionSnapshots[partition],
-            ERC1410StorageWrapper._totalSupplyByPartition(partition)
-        );
-    }
-
-    function _updateTokenHolderSnapshot(address account) internal {
-        _updateSnapshotAddress(
-            _snapshotStorage().tokenHoldersSnapshots[ERC1410StorageWrapper._getTokenHolderIndex(account)],
-            account
-        );
-    }
-
-    function _updateTotalTokenHolderSnapshot() internal {
-        _updateSnapshot(_snapshotStorage().totalTokenHoldersSnapshots, ERC1410StorageWrapper._getTotalTokenHolders());
-    }
-
-    // --- Snapshot Value Queries ---
-
-    function _abafAtSnapshot(uint256 snapshotID) internal view returns (uint256 abaf_) {
-        (bool snapshotted, uint256 value) = _valueAt(snapshotID, _snapshotStorage().abafSnapshots);
-        return snapshotted ? value : AdjustBalancesStorageWrapper._getAbafAdjustedAt(block.timestamp);
-    }
-
-    function _decimalsAtSnapshot(uint256 snapshotID) internal view returns (uint8 decimals_) {
-        (bool snapshotted, uint256 value) = _valueAt(snapshotID, _snapshotStorage().decimals);
-        return snapshotted ? uint8(value) : ERC20StorageWrapper._decimalsAdjustedAt(block.timestamp);
-    }
-
-    function _balanceOfAtSnapshot(uint256 snapshotID, address tokenHolder) internal view returns (uint256 balance_) {
-        return _balanceOfAt(tokenHolder, snapshotID);
-    }
-
-    function _balancesOfAtSnapshot(
-        uint256 snapshotID,
-        uint256 pageIndex,
-        uint256 pageLength
-    ) internal view returns (HolderBalance[] memory balances_) {
-        address[] memory tokenHolders = _tokenHoldersAt(snapshotID, pageIndex, pageLength);
-        uint256 length = tokenHolders.length;
-        balances_ = new HolderBalance[](length);
-        for (uint256 i = 0; i < length; ) {
-            address tokenHolder = tokenHolders[i];
-            balances_[i] = HolderBalance({
-                holder: tokenHolder,
-                balance: _balanceOfAtSnapshot(snapshotID, tokenHolder)
-            });
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    function _getTotalBalanceOfAtSnapshot(uint256 snapshotId, address tokenHolder) internal view returns (uint256) {
-        // Use unchecked block since we're dealing with token balances that shouldn't overflow
-        unchecked {
-            return
-                _balanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _clearedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _heldBalanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _lockedBalanceOfAtSnapshot(snapshotId, tokenHolder) +
-                _frozenBalanceOfAtSnapshot(snapshotId, tokenHolder);
-        }
-    }
-
-    function _balanceOfAtSnapshotByPartition(
-        bytes32 partition,
-        uint256 snapshotID,
-        address tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return _balanceOfAtByPartition(partition, tokenHolder, snapshotID);
-    }
-
-    function _partitionsOfAtSnapshot(uint256 snapshotID, address tokenHolder) internal view returns (bytes32[] memory) {
-        PartitionSnapshots storage partitionSnapshots = _snapshotStorage().accountPartitionMetadata[tokenHolder];
-
-        (bool found, uint256 index) = _indexFor(snapshotID, partitionSnapshots.ids);
-
-        if (!found) {
-            return ERC1410StorageWrapper._partitionsOf(tokenHolder);
-        }
-
-        return partitionSnapshots.values[index].partitions;
-    }
-
-    function _totalSupplyAtSnapshot(uint256 snapshotID) internal view returns (uint256 totalSupply_) {
-        return _totalSupplyAt(snapshotID);
-    }
-
-    function _balanceOfAt(address tokenHolder, uint256 snapshotId) internal view returns (uint256) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotId,
-                _snapshotStorage().accountBalanceSnapshots[tokenHolder],
-                AdjustBalancesStorageWrapper._balanceOfAdjustedAt(tokenHolder, block.timestamp)
-            );
-    }
-
-    function _tokenHoldersAt(
-        uint256 snapshotId,
-        uint256 pageIndex,
-        uint256 pageLength
-    ) internal view returns (address[] memory) {
-        (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
-
-        address[] memory tk = new address[](Pagination.getSize(start, end, _totalTokenHoldersAt(snapshotId)));
-        uint256 length = tk.length;
-        for (uint256 i = 0; i < length; ) {
-            uint256 index = i + 1;
-            (bool snapshotted, address value) = _addressValueAt(
-                snapshotId,
-                _snapshotStorage().tokenHoldersSnapshots[index]
-            );
-
-            tk[i] = snapshotted ? value : ERC1410StorageWrapper._getTokenHolder(index);
-            unchecked {
-                ++i;
-            }
-        }
-
-        return tk;
-    }
-
-    function _totalTokenHoldersAt(uint256 snapshotId) internal view returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(snapshotId, _snapshotStorage().totalTokenHoldersSnapshots);
-        return snapshotted ? value : ERC1410StorageWrapper._getTotalTokenHolders();
-    }
-
-    function _balanceOfAtByPartition(
-        bytes32 partition,
-        address account,
-        uint256 snapshotId
-    ) internal view returns (uint256) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotId,
-                _snapshotStorage().accountPartitionBalanceSnapshots[account][partition],
-                AdjustBalancesStorageWrapper._balanceOfByPartitionAdjustedAt(partition, account, block.timestamp)
-            );
-    }
-
-    function _totalSupplyAtSnapshotByPartition(
-        bytes32 partition,
-        uint256 snapshotID
-    ) internal view returns (uint256 totalSupply_) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotID,
-                _snapshotStorage().totalSupplyByPartitionSnapshots[partition],
-                AdjustBalancesStorageWrapper._totalSupplyByPartitionAdjustedAt(partition, block.timestamp)
-            );
-    }
-
-    function _lockedBalanceOfAtSnapshot(
-        uint256 snapshotID,
-        address tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotID,
-                _snapshotStorage().accountLockedBalanceSnapshots[tokenHolder],
-                LockStorageWrapper._getLockedAmountForAdjustedAt(tokenHolder, block.timestamp)
-            );
-    }
-
-    function _lockedBalanceOfAtSnapshotByPartition(
-        bytes32 partition,
-        uint256 snapshotID,
-        address tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotID,
-                _snapshotStorage().accountPartitionLockedBalanceSnapshots[tokenHolder][partition],
-                LockStorageWrapper._getLockedAmountForByPartitionAdjustedAt(partition, tokenHolder, block.timestamp)
-            );
-    }
-
-    function _heldBalanceOfAtSnapshot(
-        uint256 snapshotID,
-        address tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotID,
-                _snapshotStorage().accountHeldBalanceSnapshots[tokenHolder],
-                HoldStorageWrapper._getHeldAmountForAdjustedAt(tokenHolder, block.timestamp)
-            );
-    }
-
-    function _heldBalanceOfAtSnapshotByPartition(
-        bytes32 partition,
-        uint256 snapshotID,
-        address tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotID,
-                _snapshotStorage().accountPartitionHeldBalanceSnapshots[tokenHolder][partition],
-                HoldStorageWrapper._getHeldAmountForByPartitionAdjustedAt(partition, tokenHolder, block.timestamp)
-            );
-    }
-
-    function _frozenBalanceOfAtSnapshot(
-        uint256 snapshotID,
-        address tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotID,
-                _snapshotStorage().accountFrozenBalanceSnapshots[tokenHolder],
-                ERC3643StorageWrapper._getFrozenAmountForAdjustedAt(tokenHolder, block.timestamp)
-            );
-    }
-
-    function _frozenBalanceOfAtSnapshotByPartition(
-        bytes32 partition,
-        uint256 snapshotID,
-        address tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotID,
-                _snapshotStorage().accountPartitionFrozenBalanceSnapshots[tokenHolder][partition],
-                ERC3643StorageWrapper._getFrozenAmountForByPartitionAdjustedAt(partition, tokenHolder, block.timestamp)
-            );
-    }
-
-    function _clearedBalanceOfAtSnapshot(
-        uint256 snapshotID,
-        address tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotID,
-                _snapshotStorage().accountClearedBalanceSnapshots[tokenHolder],
-                ClearingStorageWrapper._getClearedAmountForAdjustedAt(tokenHolder, block.timestamp)
-            );
-    }
-
-    function _clearedBalanceOfAtSnapshotByPartition(
-        bytes32 partition,
-        uint256 snapshotID,
-        address tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return
-            _balanceOfAtAdjusted(
-                snapshotID,
-                _snapshotStorage().accountPartitionClearedBalanceSnapshots[tokenHolder][partition],
-                ClearingStorageWrapper._getClearedAmountForByPartitionAdjustedAt(
-                    partition,
-                    tokenHolder,
-                    block.timestamp
-                )
-            );
-    }
-
-    function _balanceOfAtAdjusted(
-        uint256 snapshotId,
-        Snapshots storage snapshots,
-        uint256 currentBalanceAdjusted
-    ) internal view returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(snapshotId, snapshots);
-        if (snapshotted) return value;
-
-        uint256 abafAtSnapshot = _abafAtSnapshot(snapshotId);
-        uint256 abaf = AdjustBalancesStorageWrapper._getAbafAdjustedAt(block.timestamp);
-
-        if (abafAtSnapshot == abaf) return currentBalanceAdjusted;
-
-        uint256 factor = abaf / abafAtSnapshot;
-
-        return currentBalanceAdjusted / factor;
-    }
-
-    /**
-     * @dev Retrieves the total supply at the time `snapshotId` was created.
-     */
-    function _totalSupplyAt(uint256 snapshotId) internal view returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(snapshotId, _snapshotStorage().totalSupplySnapshots);
-        return snapshotted ? value : ERC20StorageWrapper._totalSupply();
     }
 }

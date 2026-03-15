@@ -18,15 +18,15 @@ abstract contract ERC20Permit is IERC20Permit {
         bytes32 r,
         bytes32 s
     ) external override {
-        PauseStorageWrapper._requireNotPaused();
-        ERC1410StorageWrapper._requireValidAddress(owner);
-        ERC1410StorageWrapper._requireValidAddress(spender);
-        ControlListStorageWrapper._requireListedAllowed(owner);
-        ControlListStorageWrapper._requireListedAllowed(spender);
-        ERC3643StorageWrapper._requireUnrecoveredAddress(owner);
-        ERC3643StorageWrapper._requireUnrecoveredAddress(spender);
-        ERC1410StorageWrapper._requireWithoutMultiPartition();
-        ERC20PermitStorageWrapper._permit(owner, spender, value, deadline, v, r, s);
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireValidAddress(owner);
+        ERC1410StorageWrapper.requireValidAddress(spender);
+        ControlListStorageWrapper.requireListedAllowed(owner);
+        ControlListStorageWrapper.requireListedAllowed(spender);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(owner);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(spender);
+        ERC1410StorageWrapper.requireWithoutMultiPartition();
+        ERC20PermitStorageWrapper.permit(owner, spender, value, deadline, v, r, s);
     }
 
     // solhint-disable-next-line func-name-mixedcase

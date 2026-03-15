@@ -14,16 +14,17 @@ import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateAc
 import { AdjustBalancesStorageWrapper } from "../../../domain/asset/AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/EquityStorageWrapper.sol";
+import { IEquityStorageWrapper } from "../../../domain/asset/equity/IEquityStorageWrapper.sol";
 
 abstract contract Equity is IEquity {
     function setDividends(Dividend calldata _newDividend) external override returns (uint256 dividendID_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
-        CorporateActionsStorageWrapper._requireValidDates(_newDividend.recordDate, _newDividend.executionDate);
-        ScheduledTasksStorageWrapper._requireValidTimestamp(_newDividend.recordDate);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
+        CorporateActionsStorageWrapper.requireValidDates(_newDividend.recordDate, _newDividend.executionDate);
+        ScheduledTasksStorageWrapper.requireValidTimestamp(_newDividend.recordDate);
         bytes32 corporateActionID;
-        (corporateActionID, dividendID_) = EquityStorageWrapper._setDividends(_newDividend);
-        emit DividendSet(
+        (corporateActionID, dividendID_) = EquityStorageWrapper.setDividends(_newDividend);
+        emit IEquityStorageWrapper.DividendSet(
             corporateActionID,
             dividendID_,
             msg.sender,
@@ -35,26 +36,32 @@ abstract contract Equity is IEquity {
     }
 
     function setVoting(Voting calldata _newVoting) external override returns (uint256 voteID_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
-        ScheduledTasksStorageWrapper._requireValidTimestamp(_newVoting.recordDate);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
+        ScheduledTasksStorageWrapper.requireValidTimestamp(_newVoting.recordDate);
         bytes32 corporateActionID;
-        (corporateActionID, voteID_) = EquityStorageWrapper._setVoting(_newVoting);
-        emit VotingSet(corporateActionID, voteID_, msg.sender, _newVoting.recordDate, _newVoting.data);
+        (corporateActionID, voteID_) = EquityStorageWrapper.setVoting(_newVoting);
+        emit IEquityStorageWrapper.VotingSet(
+            corporateActionID,
+            voteID_,
+            msg.sender,
+            _newVoting.recordDate,
+            _newVoting.data
+        );
     }
 
     function setScheduledBalanceAdjustment(
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) external override returns (uint256 balanceAdjustmentID_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
-        ScheduledTasksStorageWrapper._requireValidTimestamp(_newBalanceAdjustment.executionDate);
-        AdjustBalancesStorageWrapper._requireValidFactor(_newBalanceAdjustment.factor);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
+        ScheduledTasksStorageWrapper.requireValidTimestamp(_newBalanceAdjustment.executionDate);
+        AdjustBalancesStorageWrapper.requireValidFactor(_newBalanceAdjustment.factor);
         bytes32 corporateActionID;
-        (corporateActionID, balanceAdjustmentID_) = EquityStorageWrapper._setScheduledBalanceAdjustment(
+        (corporateActionID, balanceAdjustmentID_) = EquityStorageWrapper.setScheduledBalanceAdjustment(
             _newBalanceAdjustment
         );
-        emit ScheduledBalanceAdjustmentSet(
+        emit IEquityStorageWrapper.ScheduledBalanceAdjustmentSet(
             corporateActionID,
             balanceAdjustmentID_,
             msg.sender,
@@ -65,34 +72,34 @@ abstract contract Equity is IEquity {
     }
 
     function getEquityDetails() external view override returns (EquityDetailsData memory equityDetailsData_) {
-        return EquityStorageWrapper._getEquityDetails();
+        return EquityStorageWrapper.getEquityDetails();
     }
 
     function getDividends(
         uint256 _dividendID
     ) external view override returns (RegisteredDividend memory registeredDividend_) {
-        CorporateActionsStorageWrapper._requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
-        return EquityStorageWrapper._getDividends(_dividendID);
+        CorporateActionsStorageWrapper.requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
+        return EquityStorageWrapper.getDividends(_dividendID);
     }
 
     function getDividendsFor(
         uint256 _dividendID,
         address _account
     ) external view override returns (DividendFor memory dividendFor_) {
-        CorporateActionsStorageWrapper._requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
-        return EquityStorageWrapper._getDividendsFor(_dividendID, _account);
+        CorporateActionsStorageWrapper.requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
+        return EquityStorageWrapper.getDividendsFor(_dividendID, _account);
     }
 
     function getDividendAmountFor(
         uint256 _dividendID,
         address _account
     ) external view override returns (DividendAmountFor memory dividendAmountFor_) {
-        CorporateActionsStorageWrapper._requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
-        return EquityStorageWrapper._getDividendAmountFor(_dividendID, _account);
+        CorporateActionsStorageWrapper.requireMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
+        return EquityStorageWrapper.getDividendAmountFor(_dividendID, _account);
     }
 
     function getDividendsCount() external view override returns (uint256 dividendCount_) {
-        return EquityStorageWrapper._getDividendsCount();
+        return EquityStorageWrapper.getDividendsCount();
     }
 
     function getDividendHolders(
@@ -100,28 +107,28 @@ abstract contract Equity is IEquity {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (address[] memory holders_) {
-        return EquityStorageWrapper._getDividendHolders(_dividendID, _pageIndex, _pageLength);
+        return EquityStorageWrapper.getDividendHolders(_dividendID, _pageIndex, _pageLength);
     }
 
     function getTotalDividendHolders(uint256 _dividendID) external view returns (uint256) {
-        return EquityStorageWrapper._getTotalDividendHolders(_dividendID);
+        return EquityStorageWrapper.getTotalDividendHolders(_dividendID);
     }
 
     function getVoting(uint256 _voteID) external view override returns (RegisteredVoting memory registeredVoting_) {
-        CorporateActionsStorageWrapper._requireMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
-        return EquityStorageWrapper._getVoting(_voteID);
+        CorporateActionsStorageWrapper.requireMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
+        return EquityStorageWrapper.getVoting(_voteID);
     }
 
     function getVotingFor(
         uint256 _voteID,
         address _account
     ) external view override returns (VotingFor memory votingFor_) {
-        CorporateActionsStorageWrapper._requireMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
-        return EquityStorageWrapper._getVotingFor(_voteID, _account);
+        CorporateActionsStorageWrapper.requireMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
+        return EquityStorageWrapper.getVotingFor(_voteID, _account);
     }
 
     function getVotingCount() external view override returns (uint256 votingCount_) {
-        return EquityStorageWrapper._getVotingCount();
+        return EquityStorageWrapper.getVotingCount();
     }
 
     function getVotingHolders(
@@ -129,31 +136,31 @@ abstract contract Equity is IEquity {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (address[] memory holders_) {
-        return EquityStorageWrapper._getVotingHolders(_voteID, _pageIndex, _pageLength);
+        return EquityStorageWrapper.getVotingHolders(_voteID, _pageIndex, _pageLength);
     }
 
     function getTotalVotingHolders(uint256 _voteID) external view returns (uint256) {
-        return EquityStorageWrapper._getTotalVotingHolders(_voteID);
+        return EquityStorageWrapper.getTotalVotingHolders(_voteID);
     }
 
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
     ) external view override returns (ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        CorporateActionsStorageWrapper._requireMatchingActionType(
+        CorporateActionsStorageWrapper.requireMatchingActionType(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             _balanceAdjustmentID - 1
         );
-        return EquityStorageWrapper._getScheduledBalanceAdjustment(_balanceAdjustmentID);
+        return EquityStorageWrapper.getScheduledBalanceAdjustment(_balanceAdjustmentID);
     }
 
     function getScheduledBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {
-        return EquityStorageWrapper._getScheduledBalanceAdjustmentsCount();
+        return EquityStorageWrapper.getScheduledBalanceAdjustmentsCount();
     }
 
     // solhint-disable-next-line func-name-mixedcase
     function _initializeEquity(EquityDetailsData calldata _equityDetailsData) internal {
-        EquityDataStorage storage equityStorage = EquityStorageWrapper._equityStorage();
+        EquityDataStorage storage equityStorage = EquityStorageWrapper.equityStorage();
         equityStorage.initialized = true;
-        EquityStorageWrapper._storeEquityDetails(_equityDetailsData);
+        EquityStorageWrapper.storeEquityDetails(_equityDetailsData);
     }
 }

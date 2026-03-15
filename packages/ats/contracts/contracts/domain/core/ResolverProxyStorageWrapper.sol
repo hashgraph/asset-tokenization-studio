@@ -11,23 +11,23 @@ struct ResolverProxyStorage {
 }
 
 library ResolverProxyStorageWrapper {
-    function _resolverProxyStorage() internal pure returns (ResolverProxyStorage storage ds) {
+    function getBusinessLogicResolver() internal view returns (IBusinessLogicResolver) {
+        return resolverProxyStorage().resolver;
+    }
+
+    function getResolverProxyConfigurationId() internal view returns (bytes32) {
+        return resolverProxyStorage().resolverProxyConfigurationId;
+    }
+
+    function getResolverProxyVersion() internal view returns (uint256) {
+        return resolverProxyStorage().version;
+    }
+
+    function resolverProxyStorage() internal pure returns (ResolverProxyStorage storage ds) {
         bytes32 position = _RESOLVER_PROXY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ds.slot := position
         }
-    }
-
-    function _getBusinessLogicResolver() internal view returns (IBusinessLogicResolver) {
-        return _resolverProxyStorage().resolver;
-    }
-
-    function _getResolverProxyConfigurationId() internal view returns (bytes32) {
-        return _resolverProxyStorage().resolverProxyConfigurationId;
-    }
-
-    function _getResolverProxyVersion() internal view returns (uint256) {
-        return _resolverProxyStorage().version;
     }
 }

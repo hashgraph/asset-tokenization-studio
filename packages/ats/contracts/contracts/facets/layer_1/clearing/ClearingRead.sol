@@ -7,7 +7,7 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 
 abstract contract ClearingRead is IClearingRead, TimestampProvider {
     function getClearedAmountFor(address _tokenHolder) external view returns (uint256 amount_) {
-        return ClearingStorageWrapper._getClearedAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
+        return ClearingStorageWrapper.getClearedAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
     }
 
     function getClearedAmountForByPartition(
@@ -15,7 +15,7 @@ abstract contract ClearingRead is IClearingRead, TimestampProvider {
         address _tokenHolder
     ) external view returns (uint256 amount_) {
         return
-            ClearingStorageWrapper._getClearedAmountForByPartitionAdjustedAt(
+            ClearingStorageWrapper.getClearedAmountForByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
                 _getBlockTimestamp()
@@ -27,7 +27,7 @@ abstract contract ClearingRead is IClearingRead, TimestampProvider {
         address _tokenHolder,
         ClearingOperationType _clearingOperationType
     ) external view override returns (uint256 clearingCount_) {
-        return ClearingStorageWrapper._getClearingCountForByPartition(_partition, _tokenHolder, _clearingOperationType);
+        return ClearingStorageWrapper.getClearingCountForByPartition(_partition, _tokenHolder, _clearingOperationType);
     }
 
     function getClearingsIdForByPartition(
@@ -38,7 +38,7 @@ abstract contract ClearingRead is IClearingRead, TimestampProvider {
         uint256 _pageLength
     ) external view override returns (uint256[] memory clearingsId_) {
         return
-            ClearingStorageWrapper._getClearingsIdForByPartition(
+            ClearingStorageWrapper.getClearingsIdForByPartition(
                 _partition,
                 _tokenHolder,
                 _clearingOperationType,
@@ -53,7 +53,7 @@ abstract contract ClearingRead is IClearingRead, TimestampProvider {
         ClearingOperationType _clearingOpeartionType,
         uint256 _clearingId
     ) external view override returns (address thirdParty_) {
-        thirdParty_ = ClearingStorageWrapper._getClearingThirdParty(
+        thirdParty_ = ClearingStorageWrapper.getClearingThirdParty(
             _partition,
             _tokenHolder,
             _clearingOpeartionType,

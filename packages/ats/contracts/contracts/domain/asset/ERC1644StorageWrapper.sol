@@ -10,43 +10,42 @@ struct ERC1644Storage {
 }
 
 library ERC1644StorageWrapper {
-    function _erc1644Storage() internal pure returns (ERC1644Storage storage erc1644Storage_) {
+    // --- Initialization ---
+
+    // solhint-disable-next-line func-name-mixedcase
+    function initialize_ERC1644(bool _controllable) internal {
+        erc1644Storage().isControllable = _controllable;
+        erc1644Storage().initialized = true;
+    }
+
+    // --- State-changing functions ---
+
+    function finalizeControllable() internal {
+        erc1644Storage().isControllable = false;
+        emit IERC1644StorageWrapper.FinalizedControllerFeature(msg.sender);
+    }
+
+    // --- View functions ---
+
+    function requireControllable() internal view {
+        if (!isControllable()) revert IERC1644StorageWrapper.TokenIsNotControllable();
+    }
+
+    function isControllable() internal view returns (bool) {
+        return erc1644Storage().isControllable;
+    }
+
+    function isERC1644Initialized() internal view returns (bool) {
+        return erc1644Storage().initialized;
+    }
+
+    // --- Pure functions ---
+
+    function erc1644Storage() internal pure returns (ERC1644Storage storage erc1644Storage_) {
         bytes32 position = _ERC1644_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             erc1644Storage_.slot := position
         }
-    }
-
-    // --- Guard functions ---
-
-    // solhint-disable-next-line ordering
-    function _requireControllable() internal view {
-        if (!_isControllable()) revert IERC1644StorageWrapper.TokenIsNotControllable();
-    }
-
-    // --- Initialization ---
-
-    // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC1644(bool _controllable) internal {
-        _erc1644Storage().isControllable = _controllable;
-        _erc1644Storage().initialized = true;
-    }
-
-    // --- State-changing functions ---
-
-    function _finalizeControllable() internal {
-        _erc1644Storage().isControllable = false;
-        emit IERC1644StorageWrapper.FinalizedControllerFeature(msg.sender);
-    }
-
-    // --- Read functions ---
-
-    function _isControllable() internal view returns (bool) {
-        return _erc1644Storage().isControllable;
-    }
-
-    function _isERC1644Initialized() internal view returns (bool) {
-        return _erc1644Storage().initialized;
     }
 }

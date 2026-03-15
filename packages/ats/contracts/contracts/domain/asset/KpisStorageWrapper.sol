@@ -15,63 +15,56 @@ struct KpisDataStorage {
 library KpisStorageWrapper {
     using Checkpoints for Checkpoints.Checkpoint[];
 
-    function _kpisDataStorage() internal pure returns (KpisDataStorage storage kpisDataStorage_) {
-        bytes32 position = _KPIS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            kpisDataStorage_.slot := position
-        }
-    }
+    // --- State-changing functions ---
 
-    // solhint-disable-next-line ordering
-    function _requireValidDate(uint256 date, address project) internal view {
-        uint256 minDate = _getMinDateAdjusted();
-        if (date <= minDate || date > block.timestamp) {
-            revert IKpis.InvalidDate(date, minDate, block.timestamp);
-        }
-        if (_isCheckpointDate(date, project)) {
-            revert IKpis.KpiDataAlreadyExists(date);
-        }
-    }
+    function addKpiData(uint256 date, uint256 value, address project) internal {
+        assert(!isCheckpointDate(date, project));
+        setCheckpointDate(date, project);
 
-    function _addKpiData(uint256 date, uint256 value, address project) internal {
-        assert(!_isCheckpointDate(date, project));
-        _setCheckpointDate(date, project);
-
-        Checkpoints.Checkpoint[] storage ckpt = _kpisDataStorage().checkpointsByProject[project];
+        Checkpoints.Checkpoint[] storage ckpt = kpisDataStorage().checkpointsByProject[project];
         uint256 length = ckpt.length;
 
         if (length == 0 || ckpt[length - 1].from < date) {
-            _pushKpiData(ckpt, date, value);
+            pushKpiData(ckpt, date, value);
             emit IKpis.KpiDataAdded(project, date, value);
             return;
         }
 
-        _pushKpiData(ckpt, ckpt[length - 1].from, ckpt[length - 1].value);
+        pushKpiData(ckpt, ckpt[length - 1].from, ckpt[length - 1].value);
 
         for (uint256 index = length - 1; index >= 0; index--) {
             if (index == 0) {
-                _overwriteKpiData(ckpt, date, value, index);
+                overwriteKpiData(ckpt, date, value, index);
                 break;
             }
 
             assert(ckpt[index - 1].from != date);
 
             if (ckpt[index - 1].from < date) {
-                _overwriteKpiData(ckpt, date, value, index);
+                overwriteKpiData(ckpt, date, value, index);
                 break;
             }
-            _overwriteKpiData(ckpt, ckpt[index - 1].from, ckpt[index - 1].value, index);
+            overwriteKpiData(ckpt, ckpt[index - 1].from, ckpt[index - 1].value, index);
         }
 
         emit IKpis.KpiDataAdded(project, date, value);
     }
 
-    function _pushKpiData(Checkpoints.Checkpoint[] storage ckpt, uint256 date, uint256 value) internal {
+    function addToCouponsOrderedList(uint256 couponID) internal {
+        BondStorageWrapper.addToCouponsOrderedList(couponID);
+
+        uint256 lastFixingDate = BondStorageWrapper.getCoupon(couponID).coupon.fixingDate;
+
+        assert(lastFixingDate >= kpisDataStorage().minDate);
+
+        setMinDate(lastFixingDate);
+    }
+
+    function pushKpiData(Checkpoints.Checkpoint[] storage ckpt, uint256 date, uint256 value) internal {
         ckpt.push(Checkpoints.Checkpoint({ from: date, value: value }));
     }
 
-    function _overwriteKpiData(
+    function overwriteKpiData(
         Checkpoints.Checkpoint[] storage ckpt,
         uint256 date,
         uint256 value,
@@ -81,45 +74,45 @@ library KpisStorageWrapper {
         ckpt[pos].value = value;
     }
 
-    function _setMinDate(uint256 date) internal {
-        _kpisDataStorage().minDate = date;
+    function setMinDate(uint256 date) internal {
+        kpisDataStorage().minDate = date;
     }
 
-    function _setCheckpointDate(uint256 date, address project) internal {
-        _kpisDataStorage().checkpointsDatesByProject[project][date] = true;
+    function setCheckpointDate(uint256 date, address project) internal {
+        kpisDataStorage().checkpointsDatesByProject[project][date] = true;
     }
 
-    function _addToCouponsOrderedList(uint256 couponID) internal {
-        BondStorageWrapper._addToCouponsOrderedList(couponID);
+    // --- View functions ---
 
-        uint256 lastFixingDate = BondStorageWrapper._getCoupon(couponID).coupon.fixingDate;
-
-        assert(lastFixingDate >= _kpisDataStorage().minDate);
-
-        _setMinDate(lastFixingDate);
+    function requireValidDate(uint256 date, address project) internal view {
+        uint256 minDate = getMinDateAdjusted();
+        if (date <= minDate || date > block.timestamp) {
+            revert IKpis.InvalidDate(date, minDate, block.timestamp);
+        }
+        if (isCheckpointDate(date, project)) {
+            revert IKpis.KpiDataAlreadyExists(date);
+        }
     }
 
-    function _getLatestKpiData(
+    function getLatestKpiData(
         uint256 from,
         uint256 to,
         address project
     ) internal view returns (uint256 value_, bool exists_) {
-        (uint256 checkpointFrom, uint256 value) = _kpisDataStorage().checkpointsByProject[project].checkpointsLookup(
-            to
-        );
+        (uint256 checkpointFrom, uint256 value) = kpisDataStorage().checkpointsByProject[project].checkpointsLookup(to);
         if (checkpointFrom <= from) return (0, false);
         return (value, true);
     }
 
-    function _getMinDateAdjusted() internal view returns (uint256 minDate_) {
-        minDate_ = _kpisDataStorage().minDate;
+    function getMinDateAdjusted() internal view returns (uint256 minDate_) {
+        minDate_ = kpisDataStorage().minDate;
 
-        uint256 total = BondStorageWrapper._getCouponsOrderedListTotalAdjustedAt(block.timestamp);
+        uint256 total = BondStorageWrapper.getCouponsOrderedListTotalAdjustedAt(block.timestamp);
 
         if (total == 0) return minDate_;
 
         uint256 lastFixingDate = BondStorageWrapper
-            .getCoupon(BondStorageWrapper._getCouponFromOrderedListAt(total - 1))
+            .getCoupon(BondStorageWrapper.getCouponFromOrderedListAt(total - 1))
             .coupon
             .fixingDate;
 
@@ -128,7 +121,17 @@ library KpisStorageWrapper {
         minDate_ = lastFixingDate;
     }
 
-    function _isCheckpointDate(uint256 date, address project) internal view returns (bool) {
-        return _kpisDataStorage().checkpointsDatesByProject[project][date];
+    function isCheckpointDate(uint256 date, address project) internal view returns (bool) {
+        return kpisDataStorage().checkpointsDatesByProject[project][date];
+    }
+
+    // --- Pure functions ---
+
+    function kpisDataStorage() internal pure returns (KpisDataStorage storage kpisDataStorage_) {
+        bytes32 position = _KPIS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            kpisDataStorage_.slot := position
+        }
     }
 }

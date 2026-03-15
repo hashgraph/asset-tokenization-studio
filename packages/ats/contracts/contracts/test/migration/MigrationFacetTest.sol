@@ -21,7 +21,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
      * @param _value The totalSupply value to set in legacy storage
      */
     function setLegacyTotalSupply(uint256 _value) external {
-        ERC1410StorageWrapper._erc1410BasicStorage().DEPRECATED_totalSupply = _value;
+        ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_totalSupply = _value;
     }
 
     /**
@@ -30,7 +30,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
      * @param _value The balance value to set in legacy storage
      */
     function setLegacyBalance(address _tokenHolder, uint256 _value) external {
-        ERC1410StorageWrapper._erc1410BasicStorage().DEPRECATED_balances[_tokenHolder] = _value;
+        ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_balances[_tokenHolder] = _value;
     }
 
     // ========================================
@@ -41,7 +41,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
      * @dev Migrates the totalSupply from legacy to new storage (manually trigger for testing).
      */
     function migrateTotalSupply() external {
-        ERC20StorageWrapper._migrateTotalSupplyIfNeeded();
+        ERC20StorageWrapper.migrateTotalSupplyIfNeeded();
     }
 
     /**
@@ -49,25 +49,25 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
      * @param _tokenHolder The address of the token holder
      */
     function migrateBalance(address _tokenHolder) external {
-        ERC20StorageWrapper._migrateBalanceIfNeeded(_tokenHolder);
+        ERC20StorageWrapper.migrateBalanceIfNeeded(_tokenHolder);
     }
 
     /**
      * @dev Migrates all balances for all token holders from legacy to new storage.
      */
     function migrateAll() external {
-        ERC1410BasicStorage storage $ = ERC1410StorageWrapper._erc1410BasicStorage();
+        ERC1410BasicStorage storage $ = ERC1410StorageWrapper.erc1410BasicStorage();
 
         // Migrate total supply
         if ($.DEPRECATED_totalSupply != 0) {
-            ERC20StorageWrapper._migrateTotalSupplyIfNeeded();
+            ERC20StorageWrapper.migrateTotalSupplyIfNeeded();
         }
 
         // Migrate all balances
         uint256 totalTokenHolders = $.totalTokenHolders;
         for (uint256 i = 1; i <= totalTokenHolders; i++) {
             address holder = $.tokenHolders[i];
-            ERC20StorageWrapper._migrateBalanceIfNeeded(holder);
+            ERC20StorageWrapper.migrateBalanceIfNeeded(holder);
         }
     }
 
@@ -80,7 +80,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
      * @return legacyTotalSupply_ The totalSupply in legacy storage
      */
     function getLegacyTotalSupply() external view returns (uint256 legacyTotalSupply_) {
-        legacyTotalSupply_ = ERC1410StorageWrapper._erc1410BasicStorage().DEPRECATED_totalSupply;
+        legacyTotalSupply_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_totalSupply;
     }
 
     /**
@@ -89,7 +89,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
      * @return legacyBalance_ The balance in legacy storage
      */
     function getLegacyBalance(address _tokenHolder) external view returns (uint256 legacyBalance_) {
-        legacyBalance_ = ERC1410StorageWrapper._erc1410BasicStorage().DEPRECATED_balances[_tokenHolder];
+        legacyBalance_ = ERC1410StorageWrapper.erc1410BasicStorage().DEPRECATED_balances[_tokenHolder];
     }
 
     // ========================================
@@ -101,7 +101,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
      * @return newTotalSupply_ The totalSupply in new storage
      */
     function getNewTotalSupply() external view returns (uint256 newTotalSupply_) {
-        newTotalSupply_ = ERC20StorageWrapper._erc20Storage().totalSupply;
+        newTotalSupply_ = ERC20StorageWrapper.erc20Storage().totalSupply;
     }
 
     /**
@@ -110,7 +110,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
      * @return newBalance_ The balance in new storage
      */
     function getNewBalance(address _tokenHolder) external view returns (uint256 newBalance_) {
-        newBalance_ = ERC20StorageWrapper._erc20Storage().balances[_tokenHolder];
+        newBalance_ = ERC20StorageWrapper.erc20Storage().balances[_tokenHolder];
     }
 
     /**
@@ -118,7 +118,7 @@ contract MigrationFacetTest is IStaticFunctionSelectors {
      * @return isMigrated_ True if migrated, false otherwise
      */
     function isMigrated() external view returns (bool isMigrated_) {
-        ERC1410BasicStorage storage $ = ERC1410StorageWrapper._erc1410BasicStorage();
+        ERC1410BasicStorage storage $ = ERC1410StorageWrapper.erc1410BasicStorage();
 
         // Check totalSupply migration
         if ($.DEPRECATED_totalSupply != 0) {

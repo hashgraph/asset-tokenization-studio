@@ -20,54 +20,54 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 
 abstract contract Bond is IBond, TimestampProvider {
     function fullRedeemAtMaturity(address _tokenHolder) external override {
-        PauseStorageWrapper._requireNotPaused();
-        ERC1410StorageWrapper._requireValidAddress(_tokenHolder);
-        ControlListStorageWrapper._requireListedAllowed(_tokenHolder);
-        AccessControlStorageWrapper._checkRole(_MATURITY_REDEEMER_ROLE, msg.sender);
-        if (ClearingStorageWrapper._isClearingActivated()) revert IClearing.ClearingIsActivated();
-        KycStorageWrapper._requireValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
-        ERC3643StorageWrapper._requireUnrecoveredAddress(_tokenHolder);
-        BondStorageWrapper._requireValidMaturityDate(_getBlockTimestamp());
-        bytes32[] memory partitions = ERC1410StorageWrapper._partitionsOf(_tokenHolder);
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireValidAddress(_tokenHolder);
+        ControlListStorageWrapper.requireListedAllowed(_tokenHolder);
+        AccessControlStorageWrapper.checkRole(_MATURITY_REDEEMER_ROLE, msg.sender);
+        if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
+        KycStorageWrapper.requireValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
+        BondStorageWrapper.requireValidMaturityDate(_getBlockTimestamp());
+        bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         for (uint256 i = 0; i < partitions.length; i++) {
             bytes32 partition = partitions[i];
-            uint256 balance = ERC1410StorageWrapper._balanceOfByPartition(partition, _tokenHolder);
+            uint256 balance = ERC1410StorageWrapper.balanceOfByPartition(partition, _tokenHolder);
             assert(balance > 0);
-            ERC1410StorageWrapper._redeemByPartition(partition, _tokenHolder, msg.sender, balance, "", "");
+            ERC1410StorageWrapper.redeemByPartition(partition, _tokenHolder, msg.sender, balance, "", "");
         }
     }
 
     function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount) external override {
-        PauseStorageWrapper._requireNotPaused();
-        ERC1410StorageWrapper._requireValidAddress(_tokenHolder);
-        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_partition);
-        ControlListStorageWrapper._requireListedAllowed(_tokenHolder);
-        AccessControlStorageWrapper._checkRole(_MATURITY_REDEEMER_ROLE, msg.sender);
-        if (ClearingStorageWrapper._isClearingActivated()) revert IClearing.ClearingIsActivated();
-        KycStorageWrapper._requireValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
-        ERC3643StorageWrapper._requireUnrecoveredAddress(_tokenHolder);
-        BondStorageWrapper._requireValidMaturityDate(_getBlockTimestamp());
-        ERC1410StorageWrapper._redeemByPartition(_partition, _tokenHolder, msg.sender, _amount, "", "");
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireValidAddress(_tokenHolder);
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+        ControlListStorageWrapper.requireListedAllowed(_tokenHolder);
+        AccessControlStorageWrapper.checkRole(_MATURITY_REDEEMER_ROLE, msg.sender);
+        if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
+        KycStorageWrapper.requireValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
+        BondStorageWrapper.requireValidMaturityDate(_getBlockTimestamp());
+        ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, msg.sender, _amount, "", "");
     }
 
     function setCoupon(IBondRead.Coupon calldata _newCoupon) external override returns (uint256 couponID_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
-        CorporateActionsStorageWrapper._requireValidDates(_newCoupon.startDate, _newCoupon.endDate);
-        CorporateActionsStorageWrapper._requireValidDates(_newCoupon.recordDate, _newCoupon.executionDate);
-        CorporateActionsStorageWrapper._requireValidDates(_newCoupon.fixingDate, _newCoupon.executionDate);
-        ScheduledTasksStorageWrapper._requireValidTimestamp(_newCoupon.recordDate);
-        ScheduledTasksStorageWrapper._requireValidTimestamp(_newCoupon.fixingDate);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
+        CorporateActionsStorageWrapper.requireValidDates(_newCoupon.startDate, _newCoupon.endDate);
+        CorporateActionsStorageWrapper.requireValidDates(_newCoupon.recordDate, _newCoupon.executionDate);
+        CorporateActionsStorageWrapper.requireValidDates(_newCoupon.fixingDate, _newCoupon.executionDate);
+        ScheduledTasksStorageWrapper.requireValidTimestamp(_newCoupon.recordDate);
+        ScheduledTasksStorageWrapper.requireValidTimestamp(_newCoupon.fixingDate);
         bytes32 corporateActionID;
-        (corporateActionID, couponID_) = BondStorageWrapper._setCoupon(_newCoupon);
+        (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(_newCoupon);
     }
 
     function updateMaturityDate(uint256 _newMaturityDate) external override returns (bool success_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_BOND_MANAGER_ROLE, msg.sender);
-        BondStorageWrapper._requireValidMaturityDate(_newMaturityDate);
-        emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper._getMaturityDate());
-        success_ = BondStorageWrapper._setMaturityDate(_newMaturityDate);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_BOND_MANAGER_ROLE, msg.sender);
+        BondStorageWrapper.requireValidMaturityDate(_newMaturityDate);
+        emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
+        success_ = BondStorageWrapper.setMaturityDate(_newMaturityDate);
         return success_;
     }
 }

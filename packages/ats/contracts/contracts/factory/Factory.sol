@@ -16,11 +16,11 @@ import { IClearingActions } from "../facets/layer_1/clearing/IClearingActions.so
 import { IBusinessLogicResolver } from "../infrastructure/diamond/IBusinessLogicResolver.sol";
 import {
     FactoryRegulationData,
-    buildRegulationData,
+    _buildRegulationData,
     RegulationData,
     RegulationType,
     RegulationSubType,
-    checkRegulationTypeAndSubType
+    _checkRegulationTypeAndSubType
 } from "../constants/regulation.sol";
 import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
 import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
@@ -87,17 +87,17 @@ contract Factory is IFactory {
     }
 
     modifier checkRegulation(RegulationType _regulationType, RegulationSubType _regulationSubType) {
-        checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
+        _checkRegulationTypeAndSubType(_regulationType, _regulationSubType);
         _;
     }
 
     modifier checkInterestRate(IKpiLinkedRate.InterestRate calldata _newInterestRate) {
-        InterestRateStorageWrapper._requireValidInterestRate(_newInterestRate);
+        InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
         _;
     }
 
     modifier checkImpactData(IKpiLinkedRate.ImpactData calldata _newImpactData) {
-        InterestRateStorageWrapper._requireValidImpactData(_newImpactData);
+        InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
         _;
     }
 
@@ -116,7 +116,7 @@ contract Factory is IFactory {
 
         IEquityUSA(equityAddress_)._initialize_equityUSA(
             _equityData.equityDetails,
-            buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
+            _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
         );
 
@@ -228,7 +228,7 @@ contract Factory is IFactory {
         RegulationType _regulationType,
         RegulationSubType _regulationSubType
     ) external pure override returns (RegulationData memory regulationData_) {
-        regulationData_ = buildRegulationData(_regulationType, _regulationSubType);
+        regulationData_ = _buildRegulationData(_regulationType, _regulationSubType);
     }
 
     function _deployBond(
@@ -240,7 +240,7 @@ contract Factory is IFactory {
 
         IBondUSA(bondAddress_)._initialize_bondUSA(
             _bondData.bondDetails,
-            buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
+            _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
         );
 

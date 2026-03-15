@@ -47,4 +47,6 @@ interface IERC1410StorageWrapper {
     error InvalidPartition(address account, bytes32 partition);
     error InsufficientBalance(address account, uint256 balance, uint256 value, bytes32 partition);
     error Unauthorized(address operator, address tokenHolder, bytes32 partition);
+    error ZeroAddressNotAllowed();
+    error InsufficientAllowance(address spender, address from);
 }

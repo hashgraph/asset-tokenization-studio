@@ -8,24 +8,24 @@ import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/Scheduled
 
 abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks {
     function triggerPendingScheduledCrossOrderedTasks() external override returns (uint256) {
-        PauseStorageWrapper._requireNotPaused();
-        return ScheduledTasksStorageWrapper._triggerScheduledCrossOrderedTasks(0);
+        PauseStorageWrapper.requireNotPaused();
+        return ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
     }
 
     function triggerScheduledCrossOrderedTasks(uint256 _max) external override returns (uint256) {
-        PauseStorageWrapper._requireNotPaused();
-        return ScheduledTasksStorageWrapper._triggerScheduledCrossOrderedTasks(_max);
+        PauseStorageWrapper.requireNotPaused();
+        return ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(_max);
     }
 
     function scheduledCrossOrderedTaskCount() external view override returns (uint256) {
-        return ScheduledTasksStorageWrapper._getScheduledCrossOrderedTaskCount();
+        return ScheduledTasksStorageWrapper.getScheduledCrossOrderedTaskCount();
     }
 
     function getScheduledCrossOrderedTasks(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (ScheduledTask[] memory scheduledCrossOrderedTask_) {
-        scheduledCrossOrderedTask_ = ScheduledTasksStorageWrapper._getScheduledCrossOrderedTasks(
+        scheduledCrossOrderedTask_ = ScheduledTasksStorageWrapper.getScheduledCrossOrderedTasks(
             _pageIndex,
             _pageLength
         );

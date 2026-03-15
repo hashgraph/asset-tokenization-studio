@@ -8,20 +8,20 @@ import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.so
 
 abstract contract Pause is IPause {
     function pause() external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_PAUSER_ROLE, msg.sender);
-        PauseStorageWrapper._requireNotPaused();
-        PauseStorageWrapper._setPause(true);
+        AccessControlStorageWrapper.checkRole(_PAUSER_ROLE, msg.sender);
+        PauseStorageWrapper.requireNotPaused();
+        PauseStorageWrapper.setPause(true);
         success_ = true;
     }
 
     function unpause() external override returns (bool success_) {
-        AccessControlStorageWrapper._checkRole(_PAUSER_ROLE, msg.sender);
-        PauseStorageWrapper._requirePaused();
-        PauseStorageWrapper._setPause(false);
+        AccessControlStorageWrapper.checkRole(_PAUSER_ROLE, msg.sender);
+        PauseStorageWrapper.requirePaused();
+        PauseStorageWrapper.setPause(false);
         success_ = true;
     }
 
     function isPaused() external view override returns (bool) {
-        return PauseStorageWrapper._isPaused();
+        return PauseStorageWrapper.isPaused();
     }
 }

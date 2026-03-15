@@ -6,6 +6,6 @@ import { NonceStorageWrapper } from "../../../domain/core/NonceStorageWrapper.so
 
 abstract contract Nonces is INonces {
     function nonces(address owner) external view returns (uint256) {
-        return NonceStorageWrapper._getNonceFor(owner);
+        return NonceStorageWrapper.getNonceFor(owner);
     }
 }

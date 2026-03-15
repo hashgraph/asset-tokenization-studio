@@ -13,32 +13,32 @@ abstract contract Cap is ICap, TimestampProvider {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external override {
-        if (CapStorageWrapper._isCapInitialized()) revert AlreadyInitialized();
-        CapStorageWrapper._requireValidNewMaxSupply(maxSupply, _getBlockTimestamp());
-        CapStorageWrapper._initialize_Cap(maxSupply, partitionCap);
+        if (CapStorageWrapper.isCapInitialized()) revert AlreadyInitialized();
+        CapStorageWrapper.requireValidNewMaxSupply(maxSupply, _getBlockTimestamp());
+        CapStorageWrapper.initialize_Cap(maxSupply, partitionCap);
     }
 
     function setMaxSupply(uint256 _maxSupply) external override returns (bool success_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_CAP_ROLE, msg.sender);
-        CapStorageWrapper._requireValidNewMaxSupply(_maxSupply, _getBlockTimestamp());
-        CapStorageWrapper._setMaxSupply(_maxSupply);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_CAP_ROLE, msg.sender);
+        CapStorageWrapper.requireValidNewMaxSupply(_maxSupply, _getBlockTimestamp());
+        CapStorageWrapper.setMaxSupply(_maxSupply, _getBlockTimestamp());
         success_ = true;
     }
 
     function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply) external override returns (bool success_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_CAP_ROLE, msg.sender);
-        CapStorageWrapper._requireValidNewMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp());
-        CapStorageWrapper._setMaxSupplyByPartition(_partition, _maxSupply);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_CAP_ROLE, msg.sender);
+        CapStorageWrapper.requireValidNewMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp());
+        CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp());
         success_ = true;
     }
 
     function getMaxSupply() external view override returns (uint256 maxSupply_) {
-        return CapStorageWrapper._getMaxSupplyAdjustedAt(_getBlockTimestamp());
+        return CapStorageWrapper.getMaxSupplyAdjustedAt(_getBlockTimestamp());
     }
 
     function getMaxSupplyByPartition(bytes32 _partition) external view override returns (uint256 maxSupply_) {
-        return CapStorageWrapper._getMaxSupplyByPartitionAdjustedAt(_partition, _getBlockTimestamp());
+        return CapStorageWrapper.getMaxSupplyByPartitionAdjustedAt(_partition, _getBlockTimestamp());
     }
 }

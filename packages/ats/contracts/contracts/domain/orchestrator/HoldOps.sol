@@ -21,7 +21,7 @@ library HoldOps {
         bytes memory _operatorData,
         ThirdPartyType _thirdPartyType
     ) public returns (bool success_, uint256 holdId_) {
-        return HoldStorageWrapper._createHoldByPartition(_partition, _from, _hold, _operatorData, _thirdPartyType);
+        return HoldStorageWrapper.createHoldByPartition(_partition, _from, _hold, _operatorData, _thirdPartyType);
     }
 
     /// @notice Create a protected hold with EIP-712 signature verification
@@ -31,7 +31,7 @@ library HoldOps {
         ProtectedHold memory _protectedHold,
         bytes calldata _signature
     ) public returns (bool success_, uint256 holdId_) {
-        return HoldStorageWrapper._protectedCreateHoldByPartition(_partition, _from, _protectedHold, _signature);
+        return HoldStorageWrapper.protectedCreateHoldByPartition(_partition, _from, _protectedHold, _signature);
     }
 
     // ============================================================================
@@ -44,7 +44,7 @@ library HoldOps {
         address _to,
         uint256 _amount
     ) public returns (bool success_, bytes32 partition_) {
-        return HoldStorageWrapper._executeHoldByPartition(_holdIdentifier, _to, _amount);
+        return HoldStorageWrapper.executeHoldByPartition(_holdIdentifier, _to, _amount);
     }
 
     /// @notice Release a hold — return held amount to token holder
@@ -52,14 +52,14 @@ library HoldOps {
         HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) public returns (bool success_) {
-        return HoldStorageWrapper._releaseHoldByPartition(_holdIdentifier, _amount);
+        return HoldStorageWrapper.releaseHoldByPartition(_holdIdentifier, _amount);
     }
 
     /// @notice Reclaim an expired hold — return full held amount to token holder
     function reclaimHoldByPartition(
         HoldIdentifier calldata _holdIdentifier
     ) public returns (bool success_, uint256 amount_) {
-        return HoldStorageWrapper._reclaimHoldByPartition(_holdIdentifier);
+        return HoldStorageWrapper.reclaimHoldByPartition(_holdIdentifier);
     }
 
     // ============================================================================
@@ -68,6 +68,6 @@ library HoldOps {
 
     /// @notice Decrease allowed balance for an authorized third-party hold
     function decreaseAllowedBalanceForHold(bytes32 _partition, address _from, uint256 _amount, uint256 _holdId) public {
-        HoldStorageWrapper._decreaseAllowedBalanceForHold(_partition, _from, _amount, _holdId);
+        HoldStorageWrapper.decreaseAllowedBalanceForHold(_partition, _from, _amount, _holdId);
     }
 }

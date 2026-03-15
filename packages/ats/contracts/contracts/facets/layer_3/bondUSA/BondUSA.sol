@@ -18,8 +18,8 @@ abstract contract BondUSA is IBondUSA, Bond {
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
     ) external override {
-        if (BondStorageWrapper._isBondInitialized()) revert AlreadyInitialized();
-        BondStorageWrapper._initialize_bond(_bondDetailsData);
-        SecurityStorageWrapper._initializeSecurity(_regulationData, _additionalSecurityData);
+        if (BondStorageWrapper.isBondInitialized()) revert AlreadyInitialized();
+        BondStorageWrapper.initialize_bond(_bondDetailsData);
+        SecurityStorageWrapper.initializeSecurity(_regulationData, _additionalSecurityData);
     }
 }

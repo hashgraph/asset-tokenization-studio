@@ -26,20 +26,20 @@ abstract contract HoldManagement is IHoldManagement {
         Hold calldata _hold,
         bytes calldata _operatorData
     ) external override returns (bool success_, uint256 holdId_) {
-        PauseStorageWrapper._requireNotPaused();
-        if (ClearingStorageWrapper._isClearingActivated()) revert IClearing.ClearingIsActivated();
-        ERC1410StorageWrapper._requireValidAddress(_from);
-        ERC1410StorageWrapper._requireValidAddress(_hold.escrow);
-        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_partition);
-        ERC1410StorageWrapper._requireOperator(_partition, _from);
-        LockStorageWrapper._requireValidExpirationTimestamp(_hold.expirationTimestamp);
+        PauseStorageWrapper.requireNotPaused();
+        if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
+        ERC1410StorageWrapper.requireValidAddress(_from);
+        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+        ERC1410StorageWrapper.requireOperator(_partition, _from);
+        LockStorageWrapper.requireValidExpirationTimestamp(_hold.expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();
         {
-            ERC3643StorageWrapper._requireUnrecoveredAddress(msg.sender);
-            ERC3643StorageWrapper._requireUnrecoveredAddress(_hold.to);
-            ERC3643StorageWrapper._requireUnrecoveredAddress(_from);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
         }
-        (success_, holdId_) = HoldStorageWrapper._createHoldByPartition(
+        (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
             _from,
             _hold,
@@ -56,14 +56,14 @@ abstract contract HoldManagement is IHoldManagement {
         Hold calldata _hold,
         bytes calldata _operatorData
     ) external override returns (bool success_, uint256 holdId_) {
-        PauseStorageWrapper._requireNotPaused();
-        ERC1410StorageWrapper._requireValidAddress(_from);
-        ERC1410StorageWrapper._requireValidAddress(_hold.escrow);
-        ERC1410StorageWrapper._requireDefaultPartitionWithSinglePartition(_partition);
-        AccessControlStorageWrapper._checkRole(_CONTROLLER_ROLE, msg.sender);
-        LockStorageWrapper._requireValidExpirationTimestamp(_hold.expirationTimestamp);
-        ERC1644StorageWrapper._requireControllable();
-        (success_, holdId_) = HoldStorageWrapper._createHoldByPartition(
+        PauseStorageWrapper.requireNotPaused();
+        ERC1410StorageWrapper.requireValidAddress(_from);
+        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
+        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+        AccessControlStorageWrapper.checkRole(_CONTROLLER_ROLE, msg.sender);
+        LockStorageWrapper.requireValidExpirationTimestamp(_hold.expirationTimestamp);
+        ERC1644StorageWrapper.requireControllable();
+        (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
             _partition,
             _from,
             _hold,
@@ -80,19 +80,19 @@ abstract contract HoldManagement is IHoldManagement {
         ProtectedHold memory _protectedHold,
         bytes calldata _signature
     ) external override returns (bool success_, uint256 holdId_) {
-        PauseStorageWrapper._requireNotPaused();
-        if (ClearingStorageWrapper._isClearingActivated()) revert IClearing.ClearingIsActivated();
-        ERC1410StorageWrapper._requireValidAddress(_from);
-        ERC1410StorageWrapper._requireValidAddress(_protectedHold.hold.escrow);
-        ERC3643StorageWrapper._requireUnrecoveredAddress(_from);
-        ERC3643StorageWrapper._requireUnrecoveredAddress(_protectedHold.hold.to);
-        AccessControlStorageWrapper._checkRole(
-            ProtectedPartitionsStorageWrapper._protectedPartitionsRole(_partition),
+        PauseStorageWrapper.requireNotPaused();
+        if (ClearingStorageWrapper.isClearingActivated()) revert IClearing.ClearingIsActivated();
+        ERC1410StorageWrapper.requireValidAddress(_from);
+        ERC1410StorageWrapper.requireValidAddress(_protectedHold.hold.escrow);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_from);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(_protectedHold.hold.to);
+        AccessControlStorageWrapper.checkRole(
+            ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
             msg.sender
         );
-        LockStorageWrapper._requireValidExpirationTimestamp(_protectedHold.hold.expirationTimestamp);
-        ProtectedPartitionsStorageWrapper._requireProtectedPartitions();
-        (success_, holdId_) = HoldStorageWrapper._protectedCreateHoldByPartition(
+        LockStorageWrapper.requireValidExpirationTimestamp(_protectedHold.hold.expirationTimestamp);
+        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
+        (success_, holdId_) = HoldStorageWrapper.protectedCreateHoldByPartition(
             _partition,
             _from,
             _protectedHold,
@@ -104,8 +104,8 @@ abstract contract HoldManagement is IHoldManagement {
 
     function _requireUnProtectedPartitionsOrWildCardRole() internal view {
         if (
-            ProtectedPartitionsStorageWrapper._arePartitionsProtected() &&
-            !AccessControlStorageWrapper._hasRole(_WILD_CARD_ROLE, msg.sender)
+            ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
+            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
         ) {
             revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
         }

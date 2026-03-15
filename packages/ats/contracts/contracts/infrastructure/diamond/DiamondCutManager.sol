@@ -11,12 +11,12 @@ import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
 
 abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper {
     modifier onlyRole(bytes32 _role) {
-        AccessControlStorageWrapper._checkRole(_role, msg.sender);
+        AccessControlStorageWrapper.checkRole(_role, msg.sender);
         _;
     }
 
     modifier onlyUnpaused() {
-        PauseStorageWrapper._requireNotPaused();
+        PauseStorageWrapper.requireNotPaused();
         _;
     }
 

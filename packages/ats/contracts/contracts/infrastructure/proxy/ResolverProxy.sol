@@ -30,7 +30,7 @@ contract ResolverProxy is ResolverProxyUnstructured {
     // solhint-disable-next-line no-complex-fallback
     fallback() external payable {
         // get facet from function selector
-        address facet = _getFacetAddress(ResolverProxyStorageWrapper._resolverProxyStorage(), msg.sig);
+        address facet = _getFacetAddress(ResolverProxyStorageWrapper.resolverProxyStorage(), msg.sig);
         if (facet == address(0)) {
             revert IResolverProxy.FunctionNotFound(msg.sig);
         }

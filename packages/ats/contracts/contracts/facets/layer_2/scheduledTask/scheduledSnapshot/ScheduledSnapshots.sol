@@ -7,13 +7,13 @@ import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/Scheduled
 
 abstract contract ScheduledSnapshots is IScheduledSnapshots {
     function scheduledSnapshotCount() external view override returns (uint256) {
-        return ScheduledTasksStorageWrapper._getScheduledSnapshotCount();
+        return ScheduledTasksStorageWrapper.getScheduledSnapshotCount();
     }
 
     function getScheduledSnapshots(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (ScheduledTask[] memory scheduledSnapshot_) {
-        scheduledSnapshot_ = ScheduledTasksStorageWrapper._getScheduledSnapshots(_pageIndex, _pageLength);
+        scheduledSnapshot_ = ScheduledTasksStorageWrapper.getScheduledSnapshots(_pageIndex, _pageLength);
     }
 }

@@ -9,22 +9,21 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 
 abstract contract HoldRead is IHoldRead, TimestampProvider {
     function getHeldAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        return HoldStorageWrapper._getHeldAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
+        return HoldStorageWrapper.getHeldAmountForAdjustedAt(_tokenHolder, _getBlockTimestamp());
     }
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        return
-            HoldStorageWrapper._getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
+        return HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _getBlockTimestamp());
     }
 
     function getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 holdCount_) {
-        return HoldStorageWrapper._getHoldCountForByPartition(_partition, _tokenHolder);
+        return HoldStorageWrapper.getHoldCountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldsIdForByPartition(
@@ -33,7 +32,7 @@ abstract contract HoldRead is IHoldRead, TimestampProvider {
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (uint256[] memory holdsId_) {
-        return HoldStorageWrapper._getHoldsIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
+        return HoldStorageWrapper.getHoldsIdForByPartition(_partition, _tokenHolder, _pageIndex, _pageLength);
     }
 
     function getHoldForByPartition(
@@ -52,10 +51,10 @@ abstract contract HoldRead is IHoldRead, TimestampProvider {
             ThirdPartyType thirdPartyType_
         )
     {
-        return HoldStorageWrapper._getHoldForByPartitionAdjustedAt(_holdIdentifier, _getBlockTimestamp());
+        return HoldStorageWrapper.getHoldForByPartitionAdjustedAt(_holdIdentifier, _getBlockTimestamp());
     }
 
     function getHoldThirdParty(HoldIdentifier calldata _holdIdentifier) external view override returns (address) {
-        return HoldStorageWrapper._getHoldThirdParty(_holdIdentifier);
+        return HoldStorageWrapper.getHoldThirdParty(_holdIdentifier);
     }
 }

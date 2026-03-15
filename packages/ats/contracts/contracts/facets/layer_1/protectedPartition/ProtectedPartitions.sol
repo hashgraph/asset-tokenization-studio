@@ -12,29 +12,29 @@ abstract contract ProtectedPartitions is IProtectedPartitions {
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProtectedPartitions(bool _protectPartitions) external override returns (bool success_) {
-        if (ProtectedPartitionsStorageWrapper._isProtectedPartitionInitialized()) revert AlreadyInitialized();
-        success_ = ProtectedPartitionsStorageWrapper._initialize_ProtectedPartitions(_protectPartitions);
+        if (ProtectedPartitionsStorageWrapper.isProtectedPartitionInitialized()) revert AlreadyInitialized();
+        success_ = ProtectedPartitionsStorageWrapper.initialize_ProtectedPartitions(_protectPartitions);
     }
 
     function protectPartitions() external override returns (bool success_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_PROTECTED_PARTITIONS_ROLE, msg.sender);
-        ProtectedPartitionsStorageWrapper._setProtectedPartitions(true);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_PROTECTED_PARTITIONS_ROLE, msg.sender);
+        ProtectedPartitionsStorageWrapper.setProtectedPartitions(true);
         success_ = true;
     }
 
     function unprotectPartitions() external override returns (bool success_) {
-        PauseStorageWrapper._requireNotPaused();
-        AccessControlStorageWrapper._checkRole(_PROTECTED_PARTITIONS_ROLE, msg.sender);
-        ProtectedPartitionsStorageWrapper._setProtectedPartitions(false);
+        PauseStorageWrapper.requireNotPaused();
+        AccessControlStorageWrapper.checkRole(_PROTECTED_PARTITIONS_ROLE, msg.sender);
+        ProtectedPartitionsStorageWrapper.setProtectedPartitions(false);
         success_ = true;
     }
 
     function arePartitionsProtected() external view override returns (bool) {
-        return ProtectedPartitionsStorageWrapper._arePartitionsProtected();
+        return ProtectedPartitionsStorageWrapper.arePartitionsProtected();
     }
 
     function calculateRoleForPartition(bytes32 partition) external pure override returns (bytes32 role) {
-        role = ProtectedPartitionsStorageWrapper._calculateRoleForPartition(partition);
+        role = ProtectedPartitionsStorageWrapper.calculateRoleForPartition(partition);
     }
 }
