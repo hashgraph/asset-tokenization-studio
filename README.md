@@ -121,6 +121,18 @@ You can also run the documentation site locally:
 npm run docs:start
 ```
 
+If you want to deploy documentation to Github Pages or Netlify you need to build the static content using the following command:
+
+```bash
+npm run docs:build
+```
+
+To test documentation ready for deployment run the following command:
+
+```bash
+npm run docs:serve
+```
+
 ## Architecture
 
 ### High-Level Overview

@@ -10,7 +10,7 @@ import { HederaId } from "../shared/HederaId";
 import LogService from "@service/log/LogService";
 
 export default class ContractId extends HederaId {
-  public readonly value: string;
+  declare public readonly value: string;
 
   constructor(value: string) {
     if (value.length == 42 && value.startsWith("0x")) {
