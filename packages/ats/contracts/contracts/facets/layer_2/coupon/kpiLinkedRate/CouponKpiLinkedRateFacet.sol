@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+// solhint-disable max-line-length
+import { CouponFacetBase } from "../CouponFacetBase.sol";
+import { _COUPON_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
+import {
+    CommonKpiLinkedInterestRate
+} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+
+contract CouponKpiLinkedRateFacet is CouponFacetBase, CommonKpiLinkedInterestRate {
+    function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {
+        staticResolverKey_ = _COUPON_KPI_LINKED_RATE_RESOLVER_KEY;
+    }
+}

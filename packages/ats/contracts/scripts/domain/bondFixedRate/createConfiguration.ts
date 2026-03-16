@@ -90,6 +90,8 @@ const BOND_FIXED_RATE_FACETS = [
   "SsiManagementFixedRateFacet",
   "TransferAndLockFixedRateFacet",
 
+  "CouponFixedRateFacet",
+
   //Interest Rate
   "FixedRateFacet",
 

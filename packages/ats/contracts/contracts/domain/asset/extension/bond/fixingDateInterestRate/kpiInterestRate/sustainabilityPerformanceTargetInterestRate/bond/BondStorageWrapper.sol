@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../../../../../../../facets/layer_2/bond/IBondRead.sol";
+import { ICoupon } from "../../../../../../../../facets/layer_2/coupon/ICoupon.sol";
 // prettier-ignore
 /* solhint-disable max-line-length */
 import { ISustainabilityPerformanceTargetRate } from "../../../../../../../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
@@ -10,7 +10,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";
 import { InternalsSustainabilityPerformanceTargetInterestRate } from "../Internals.sol";
 import { Internals } from "../../../../../../../../domain/Internals.sol";
-import { BondStorageWrapper } from "../../../../../../../../domain/asset/bond/BondStorageWrapper.sol";
+import { CouponStorageWrapper } from "../../../../../../../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { KpisStorageWrapper } from "../../KpisStorageWrapper.sol";
 
 abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is
@@ -22,8 +22,13 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
     error InterestRateIsSustainabilityPerformanceTarget();
 
     function _setCoupon(
-        IBondRead.Coupon memory _newCoupon
-    ) internal virtual override(Internals, BondStorageWrapper) returns (bytes32 corporateActionId_, uint256 couponID_) {
+        ICoupon.Coupon memory _newCoupon
+    )
+        internal
+        virtual
+        override(Internals, CouponStorageWrapper)
+        returns (bytes32 corporateActionId_, uint256 couponID_)
+    {
         _checkCoupon(_newCoupon, InterestRateIsSustainabilityPerformanceTarget.selector, "");
 
         return super._setCoupon(_newCoupon);
@@ -35,8 +40,8 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
     }
 
     function _setSustainabilityPerformanceTargetInterestRate(uint256 _couponID) internal override {
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
-        IBondRead.Coupon memory coupon = registeredCoupon.coupon;
+        (ICoupon.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
+        ICoupon.Coupon memory coupon = registeredCoupon.coupon;
 
         (uint256 rate, uint8 rateDecimals) = _calculateSustainabilityPerformanceTargetInterestRate(_couponID, coupon);
 
@@ -49,8 +54,8 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
         internal
         view
         virtual
-        override(Internals, BondStorageWrapper)
-        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
+        override(Internals, CouponStorageWrapper)
+        returns (ICoupon.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
     {
         return
             _getCouponAdjustedAt(_couponID, _calculateSustainabilityPerformanceTargetInterestRate, _blockTimestamp());
@@ -58,7 +63,7 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
 
     function _calculateSustainabilityPerformanceTargetInterestRate(
         uint256 _couponID,
-        IBondRead.Coupon memory _coupon
+        ICoupon.Coupon memory _coupon
     ) internal view override returns (uint256 rate_, uint8 rateDecimals_) {
         SustainabilityPerformanceTargetRateDataStorage
             storage sustainabilityPerformanceTargetRateStorage = _sustainabilityPerformanceTargetRateStorage();
@@ -136,8 +141,8 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
             return 0;
         }
 
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(previousCouponId);
-        IBondRead.Coupon memory previousCoupon = registeredCoupon.coupon;
+        (ICoupon.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(previousCouponId);
+        ICoupon.Coupon memory previousCoupon = registeredCoupon.coupon;
 
         return previousCoupon.fixingDate;
     }
