@@ -538,6 +538,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
         HederaChainDefinition.EVM.Testnet,
         HederaChainDefinition.EVM.Mainnet,
       ],
+      enableReconnect: false,
       features: {
         analytics: true,
         socials: false,

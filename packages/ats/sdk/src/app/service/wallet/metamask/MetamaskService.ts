@@ -98,9 +98,12 @@ export default class MetamaskService extends Service {
         wallet: SupportedWallets.METAMASK,
         name: SupportedWallets.METAMASK,
       });
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       pair && (await this.pairWallet());
-      const browserProvider = new BrowserProvider(ethereum as any);
-      this.signerOrProvider = await browserProvider.getSigner();
+      if (pair) {
+        const browserProvider = new BrowserProvider(ethereum as any);
+        this.signerOrProvider = await browserProvider.getSigner();
+      }
     } catch (error: any) {
       if ("code" in error && error.code === 4001) throw new WalletConnectRejectedError(SupportedWallets.METAMASK);
       if (error instanceof WalletConnectError) throw error;
