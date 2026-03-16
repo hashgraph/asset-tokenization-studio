@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ModifiersSustainabilityPerformanceTargetInterestRate } from "./Modifiers.sol";
-import { IBondRead } from "../../../../../../../facets/layer_2/bond/IBondRead.sol";
+import { ICoupon } from "../../../../../../../facets/layer_2/coupon/ICoupon.sol";
 
 abstract contract InternalsSustainabilityPerformanceTargetInterestRate is
     ModifiersSustainabilityPerformanceTargetInterestRate
@@ -12,6 +12,6 @@ abstract contract InternalsSustainabilityPerformanceTargetInterestRate is
 
     function _calculateSustainabilityPerformanceTargetInterestRate(
         uint256 _couponID,
-        IBondRead.Coupon memory _coupon
+        ICoupon.Coupon memory _coupon
     ) internal view virtual returns (uint256 rate_, uint8 rateDecimals);
 }
