@@ -7,8 +7,8 @@ import { CheckpointsLib } from "../../../../../../infrastructure/utils/Checkpoin
 import { InternalsKpiInterestRate } from "./Internals.sol";
 import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "../../../../../../domain/Internals.sol";
-import { BondStorageWrapper } from "../../../../../../domain/asset/bond/BondStorageWrapper.sol";
-import { IBondRead } from "../../../../../../facets/layer_2/bond/IBondRead.sol";
+import { CouponStorageWrapper } from "../../../../coupon/CouponStorageWrapper.sol";
+import { ICoupon } from "../../../../../../facets/layer_2/coupon/ICoupon.sol";
 
 abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWrapperFixingDateInterestRate {
     using CheckpointsLib for CheckpointsLib.Checkpoint[];
@@ -85,10 +85,10 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
         _kpisDataStorage().checkpointsDatesByProject[_project][_date] = true;
     }
 
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, BondStorageWrapper) {
+    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, CouponStorageWrapper) {
         super._addToCouponsOrderedList(_couponID);
 
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
+        (ICoupon.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
         uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
         assert(lastFixingDate >= _kpisDataStorage().minDate);
@@ -113,7 +113,7 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
 
         if (total == 0) return minDate_;
 
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_getCouponFromOrderedListAt(total - 1));
+        (ICoupon.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_getCouponFromOrderedListAt(total - 1));
         uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
         assert(lastFixingDate >= minDate_);

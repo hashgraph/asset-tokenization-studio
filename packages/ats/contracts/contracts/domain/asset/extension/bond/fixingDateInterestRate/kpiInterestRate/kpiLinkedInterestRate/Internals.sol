@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../../../../../../facets/layer_2/bond/IBondRead.sol";
+import { ICoupon } from "../../../../../../../facets/layer_2/coupon/ICoupon.sol";
 import { ModifiersKpiLinkedInterestRate } from "./Modifiers.sol";
 
 abstract contract InternalsKpiLinkedInterestRate is ModifiersKpiLinkedInterestRate {
@@ -10,6 +10,6 @@ abstract contract InternalsKpiLinkedInterestRate is ModifiersKpiLinkedInterestRa
 
     function _calculateKpiLinkedInterestRate(
         uint256 _couponID,
-        IBondRead.Coupon memory _coupon
+        ICoupon.Coupon memory _coupon
     ) internal view virtual returns (uint256 rate_, uint8 rateDecimals);
 }

@@ -90,6 +90,8 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "SsiManagementKpiLinkedRateFacet",
   "TransferAndLockKpiLinkedRateFacet",
 
+  "CouponKpiLinkedRateFacet",
+
   //Interest Rate
   "KpiLinkedRateFacet",
   "KpisKpiLinkedRateFacet",

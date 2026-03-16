@@ -2,16 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _BOND_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
-import { COUPON_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } from "../../../constants/values.sol";
 import { IBondRead } from "../../../facets/layer_2/bond/IBondRead.sol";
 import { IBondStorageWrapper } from "../../../domain/asset/bond/IBondStorageWrapper.sol";
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { ERC20PermitStorageWrapper } from "../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol";
-import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { CouponStorageWrapper } from "../coupon/CouponStorageWrapper.sol";
 
-abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageWrapper {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
+abstract contract BondStorageWrapper is IBondStorageWrapper, CouponStorageWrapper {
     struct BondDataStorage {
         bytes3 currency;
         uint256 nominalValue;
@@ -19,7 +14,8 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         uint256 maturityDate;
         bool initialized;
         uint8 nominalValueDecimals;
-        uint256[] couponsOrderedListByIds;
+        // solhint-disable-next-line var-name-mixedcase
+        uint256[] DEPRECATED_couponsOrderedListByIds;
     }
 
     /**
@@ -55,38 +51,6 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         _bondStorage().maturityDate = _bondDetails.maturityDate;
     }
 
-    function _setCoupon(
-        IBondRead.Coupon memory _newCoupon
-    ) internal virtual override returns (bytes32 corporateActionId_, uint256 couponID_) {
-        bytes memory data = abi.encode(_newCoupon);
-
-        (corporateActionId_, couponID_) = _addCorporateAction(COUPON_CORPORATE_ACTION_TYPE, data);
-
-        _initCoupon(corporateActionId_, _newCoupon);
-
-        emit CouponSet(corporateActionId_, couponID_, _msgSender(), _newCoupon);
-    }
-    function _cancelCoupon(uint256 _couponId) internal override returns (bool success_) {
-        IBondRead.RegisteredCoupon memory registeredCoupon;
-        bytes32 corporateActionId;
-        (registeredCoupon, corporateActionId, ) = _getCoupon(_couponId);
-        if (registeredCoupon.coupon.executionDate <= _blockTimestamp()) {
-            revert IBondStorageWrapper.CouponAlreadyExecuted(corporateActionId, _couponId);
-        }
-        _cancelCorporateAction(corporateActionId);
-        success_ = true;
-        emit CouponCancelled(_couponId, _msgSender());
-    }
-
-    function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual override {
-        if (_actionId == bytes32(0)) {
-            revert IBondStorageWrapper.CouponCreationFailed();
-        }
-
-        _addScheduledCrossOrderedTask(_newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
-        _addScheduledSnapshot(_newCoupon.recordDate, _actionId);
-    }
-
     /**
      * @dev Internal function to set the maturity date of the bond.
      * @param _maturityDate The new maturity date to be set.
@@ -95,83 +59,6 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     function _setMaturityDate(uint256 _maturityDate) internal override returns (bool success_) {
         _bondStorage().maturityDate = _maturityDate;
         return true;
-    }
-
-    function _addToCouponsOrderedList(uint256 _couponID) internal virtual override {
-        _bondStorage().couponsOrderedListByIds.push(_couponID);
-    }
-
-    function _updateCouponRate(
-        uint256 _couponID,
-        IBondRead.Coupon memory _coupon,
-        uint256 _rate,
-        uint8 _rateDecimals
-    ) internal virtual override {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
-
-        _coupon.rate = _rate;
-        _coupon.rateDecimals = _rateDecimals;
-        _coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
-
-        _updateCorporateActionData(actionId, abi.encode(_coupon));
-    }
-
-    function _getCouponFromOrderedListAt(uint256 _pos) internal view override returns (uint256 couponID_) {
-        if (_pos >= _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp())) return 0;
-
-        uint256 actualOrderedListLengthTotal = _getCouponsOrderedListTotal();
-
-        if (_pos < actualOrderedListLengthTotal) return _bondStorage().couponsOrderedListByIds[_pos];
-
-        uint256 pendingIndexOffset = _pos - actualOrderedListLengthTotal;
-
-        uint256 index = _getScheduledCouponListingCount() - 1 - pendingIndexOffset;
-
-        return _getScheduledCouponListingIdAtIndex(index);
-    }
-
-    function _getCouponsOrderedList(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view override returns (uint256[] memory couponIDs_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
-
-        couponIDs_ = new uint256[](
-            LibCommon.getSize(start, end, _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp()))
-        );
-
-        for (uint256 i = 0; i < couponIDs_.length; i++) {
-            couponIDs_[i] = _getCouponFromOrderedListAt(start + i);
-        }
-    }
-
-    function _getCouponsOrderedListTotalAdjustedAt(uint256 _timestamp) internal view override returns (uint256 total_) {
-        return _getCouponsOrderedListTotal() + _getPendingScheduledCouponListingTotalAt(_timestamp);
-    }
-
-    function _getCouponsOrderedListTotal() internal view override returns (uint256 total_) {
-        return _bondStorage().couponsOrderedListByIds.length;
-    }
-
-    function _getPreviousCouponInOrderedList(
-        uint256 _couponID
-    ) internal view override returns (uint256 previousCouponID_) {
-        uint256 orderedListLength = _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp());
-
-        if (orderedListLength < 2) return (0);
-
-        if (_getCouponFromOrderedListAt(0) == _couponID) return (0);
-
-        orderedListLength--;
-        uint256 previousCouponId;
-
-        for (uint256 index = 0; index < orderedListLength; index++) {
-            previousCouponId = _getCouponFromOrderedListAt(index);
-            uint256 couponId = _getCouponFromOrderedListAt(index + 1);
-            if (couponId == _couponID) break;
-        }
-
-        return previousCouponId;
     }
 
     function _getBondDetails() internal view override returns (IBondRead.BondDetailsData memory bondDetails_) {
@@ -188,66 +75,6 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         return _bondStorage().maturityDate;
     }
 
-    function _getCoupon(
-        uint256 _couponID
-    )
-        internal
-        view
-        virtual
-        override
-        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
-    {
-        corporateActionId_ = _getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
-
-        bytes memory data;
-        (, , data, isDisabled_) = _getCorporateAction(corporateActionId_);
-
-        assert(data.length > 0);
-        (registeredCoupon_.coupon) = abi.decode(data, (IBondRead.Coupon));
-
-        registeredCoupon_.snapshotId = _getUintResultAt(corporateActionId_, SNAPSHOT_RESULT_ID);
-    }
-
-    function _getCouponFor(
-        uint256 _couponID,
-        address _account
-    ) internal view override returns (IBondRead.CouponFor memory couponFor_) {
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , bool isDisabled) = _getCoupon(_couponID);
-
-        couponFor_.coupon = registeredCoupon.coupon;
-        couponFor_.isDisabled = isDisabled;
-
-        if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
-            couponFor_.recordDateReached = true;
-
-            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? _getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
-                : _getTotalBalanceForAdjustedAt(_account, _blockTimestamp());
-
-            couponFor_.decimals = _decimalsAdjustedAt(_blockTimestamp());
-        }
-    }
-
-    function _getCouponAmountFor(
-        uint256 _couponID,
-        address _account
-    ) internal view override returns (IBondRead.CouponAmountFor memory couponAmountFor_) {
-        IBondRead.CouponFor memory couponFor = _getCouponFor(_couponID, _account);
-
-        if (!couponFor.recordDateReached) return couponAmountFor_;
-
-        IBondRead.BondDetailsData memory bondDetails = _getBondDetails();
-
-        couponAmountFor_.recordDateReached = true;
-
-        uint256 period = couponFor.coupon.endDate - couponFor.coupon.startDate;
-
-        couponAmountFor_.numerator = couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period;
-        couponAmountFor_.denominator =
-            10 ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
-            365 days;
-    }
-
     function _getPrincipalFor(
         address _account
     ) internal view override returns (IBondRead.PrincipalFor memory principalFor_) {
@@ -257,37 +84,18 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         principalFor_.denominator = 10 ** (_decimalsAdjustedAt(_blockTimestamp()) + bondDetails.nominalValueDecimals);
     }
 
-    function _getCouponCount() internal view override returns (uint256 couponCount_) {
-        return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
-    }
-
-    function _getCouponHolders(
-        uint256 _couponID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view override returns (address[] memory holders_) {
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
-
-        if (registeredCoupon.coupon.recordDate >= _blockTimestamp()) return new address[](0);
-
-        if (registeredCoupon.snapshotId != 0)
-            return _tokenHoldersAt(registeredCoupon.snapshotId, _pageIndex, _pageLength);
-
-        return _getTokenHolders(_pageIndex, _pageLength);
-    }
-
-    function _getTotalCouponHolders(uint256 _couponID) internal view override returns (uint256) {
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
-
-        if (registeredCoupon.coupon.recordDate >= _blockTimestamp()) return 0;
-
-        if (registeredCoupon.snapshotId != 0) return _totalTokenHoldersAt(registeredCoupon.snapshotId);
-
-        return _getTotalTokenHolders();
-    }
-
     function _isBondInitialized() internal view override returns (bool) {
         return _bondStorage().initialized;
+    }
+    // solhint-disable-next-line func-name-mixedcase
+    function _DEPRECATED_BOND_getCouponsOrderedListTotal() internal view override returns (uint256 total_) {
+        return _bondStorage().DEPRECATED_couponsOrderedListByIds.length;
+    }
+    // solhint-disable-next-line func-name-mixedcase
+    function _DEPRECATED_BOND_getCouponsOrderedListByPosition(
+        uint256 _position
+    ) internal view override returns (uint256 total_) {
+        return _bondStorage().DEPRECATED_couponsOrderedListByIds[_position];
     }
 
     function _bondStorage() internal pure returns (BondDataStorage storage bondData_) {

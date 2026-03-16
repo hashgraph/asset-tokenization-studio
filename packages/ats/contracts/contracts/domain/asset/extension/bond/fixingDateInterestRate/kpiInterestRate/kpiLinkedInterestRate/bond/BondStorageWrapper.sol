@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../../../../../../../facets/layer_2/bond/IBondRead.sol";
 import { LowLevelCall } from "../../../../../../../../infrastructure/utils/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { DecimalsLib } from "../../../../../../../../infrastructure/utils/DecimalsLib.sol";
 import { InternalsKpiLinkedInterestRate } from "../Internals.sol";
 import { Internals } from "../../../../../../../../domain/Internals.sol";
-import { BondStorageWrapper } from "../../../../../../../../domain/asset/bond/BondStorageWrapper.sol";
+import { CouponStorageWrapper } from "../../../../../../../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRecipientsStorageWrapper.sol";
 import { KpisStorageWrapper } from "../../KpisStorageWrapper.sol";
+import { ICoupon } from "../../../../../../../../facets/layer_2/coupon/ICoupon.sol";
 
 abstract contract BondStorageWrapperKpiLinkedInterestRate is
     InternalsKpiLinkedInterestRate,
@@ -21,8 +21,13 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
     error InterestRateIsKpiLinked();
 
     function _setCoupon(
-        IBondRead.Coupon memory _newCoupon
-    ) internal virtual override(Internals, BondStorageWrapper) returns (bytes32 corporateActionId_, uint256 couponID_) {
+        ICoupon.Coupon memory _newCoupon
+    )
+        internal
+        virtual
+        override(Internals, CouponStorageWrapper)
+        returns (bytes32 corporateActionId_, uint256 couponID_)
+    {
         _checkCoupon(_newCoupon, InterestRateIsKpiLinked.selector, "");
 
         return super._setCoupon(_newCoupon);
@@ -34,8 +39,8 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
     }
 
     function _setKpiLinkedInterestRate(uint256 _couponID) internal override {
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
-        IBondRead.Coupon memory coupon = registeredCoupon.coupon;
+        (ICoupon.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
+        ICoupon.Coupon memory coupon = registeredCoupon.coupon;
 
         (uint256 rate, uint8 rateDecimals) = _calculateKpiLinkedInterestRate(_couponID, coupon);
 
@@ -48,15 +53,15 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
         internal
         view
         virtual
-        override(Internals, BondStorageWrapper)
-        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
+        override(Internals, CouponStorageWrapper)
+        returns (ICoupon.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
     {
         return _getCouponAdjustedAt(_couponID, _calculateKpiLinkedInterestRate, _blockTimestamp());
     }
 
     function _calculateKpiLinkedInterestRate(
         uint256 _couponID,
-        IBondRead.Coupon memory _coupon
+        ICoupon.Coupon memory _coupon
     ) internal view override returns (uint256 rate_, uint8 rateDecimals) {
         KpiLinkedRateDataStorage memory kpiLinkedRateStorage = _kpiLinkedRateStorage();
 
@@ -134,10 +139,10 @@ abstract contract BondStorageWrapperKpiLinkedInterestRate is
             return (0, 0);
         }
 
-        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(previousCouponId);
-        IBondRead.Coupon memory previousCoupon = registeredCoupon.coupon;
+        (ICoupon.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(previousCouponId);
+        ICoupon.Coupon memory previousCoupon = registeredCoupon.coupon;
 
-        assert(previousCoupon.rateStatus == IBondRead.RateCalculationStatus.SET);
+        assert(previousCoupon.rateStatus == ICoupon.RateCalculationStatus.SET);
 
         return (previousCoupon.rate, previousCoupon.rateDecimals);
     }

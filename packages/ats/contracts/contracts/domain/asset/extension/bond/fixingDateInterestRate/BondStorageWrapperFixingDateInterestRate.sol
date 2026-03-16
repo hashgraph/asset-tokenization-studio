@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { IBondRead } from "../../../../../facets/layer_2/bond/IBondRead.sol";
+import { ICoupon } from "../../../../../facets/layer_2/coupon/ICoupon.sol";
 import { COUPON_LISTING_TASK_TYPE } from "../../../../../constants/values.sol";
 import { LowLevelCall } from "../../../../../infrastructure/utils/LowLevelCall.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -16,18 +16,18 @@ abstract contract BondStorageWrapperFixingDateInterestRate is
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function _checkCoupon(
-        IBondRead.Coupon memory _newCoupon,
+        ICoupon.Coupon memory _newCoupon,
         bytes4 _reasonCode,
         bytes memory _details
     ) internal virtual {
         if (
-            _newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING ||
+            _newCoupon.rateStatus != ICoupon.RateCalculationStatus.PENDING ||
             _newCoupon.rate != 0 ||
             _newCoupon.rateDecimals != 0
         ) LowLevelCall.revertWithData(_reasonCode, _details);
     }
 
-    function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual override {
+    function _initCoupon(bytes32 _actionId, ICoupon.Coupon memory _newCoupon) internal virtual override {
         super._initCoupon(_actionId, _newCoupon);
 
         _addScheduledCrossOrderedTask(_newCoupon.fixingDate, COUPON_LISTING_TASK_TYPE);
@@ -36,17 +36,17 @@ abstract contract BondStorageWrapperFixingDateInterestRate is
 
     function _getCouponAdjustedAt(
         uint256 _couponID,
-        function(uint256, IBondRead.Coupon memory) internal view returns (uint256, uint8) _calculateRate,
+        function(uint256, ICoupon.Coupon memory) internal view returns (uint256, uint8) _calculateRate,
         uint256 _timestamp
     )
         internal
         view
         virtual
-        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
+        returns (ICoupon.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
     {
         (registeredCoupon_, corporateActionId_, isDisabled_) = super._getCoupon(_couponID);
 
-        if (registeredCoupon_.coupon.rateStatus == IBondRead.RateCalculationStatus.SET)
+        if (registeredCoupon_.coupon.rateStatus == ICoupon.RateCalculationStatus.SET)
             return (registeredCoupon_, corporateActionId_, isDisabled_);
 
         if (registeredCoupon_.coupon.fixingDate > _timestamp)
@@ -56,6 +56,6 @@ abstract contract BondStorageWrapperFixingDateInterestRate is
             _couponID,
             registeredCoupon_.coupon
         );
-        registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
+        registeredCoupon_.coupon.rateStatus = ICoupon.RateCalculationStatus.SET;
     }
 }
