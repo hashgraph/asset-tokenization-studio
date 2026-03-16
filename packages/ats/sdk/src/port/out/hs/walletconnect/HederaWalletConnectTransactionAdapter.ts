@@ -39,15 +39,21 @@ let HederaProvider: any;
 let base64StringToSignatureMap: any;
 let createAppKit: any;
 
-if (typeof window !== "undefined") {
-  const hwc = require("@hashgraph/hedera-wallet-connect");
+let _hwcDepsLoaded = false;
+async function loadHWCDeps(): Promise<void> {
+  if (_hwcDepsLoaded || typeof window === "undefined") return;
+  _hwcDepsLoaded = true;
+  type HWC = typeof import("@hashgraph/hedera-wallet-connect");
+  type AppKit = typeof import("@reown/appkit");
+  const [hwc, appkit]: [HWC, AppKit] = await Promise.all([
+    import("@hashgraph/hedera-wallet-connect"),
+    import("@reown/appkit"),
+  ]);
   HederaAdapter = hwc.HederaAdapter;
   HederaChainDefinition = hwc.HederaChainDefinition;
   hederaNamespace = hwc.hederaNamespace;
   HederaProvider = hwc.HederaProvider;
   base64StringToSignatureMap = hwc.base64StringToSignatureMap;
-
-  const appkit = require("@reown/appkit");
   createAppKit = appkit.createAppKit;
 }
 
@@ -433,6 +439,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
   // ===== Private helpers =====
 
   private async initAdaptersAndProvider(currentNetwork: string): Promise<void> {
+    await loadHWCDeps();
     const isTest = currentNetwork === testnet;
 
     const nativeNetworks = isTest
@@ -531,6 +538,7 @@ export class HederaWalletConnectTransactionAdapter extends BaseHederaTransaction
         HederaChainDefinition.EVM.Testnet,
         HederaChainDefinition.EVM.Mainnet,
       ],
+      enableReconnect: false,
       features: {
         analytics: true,
         socials: false,
