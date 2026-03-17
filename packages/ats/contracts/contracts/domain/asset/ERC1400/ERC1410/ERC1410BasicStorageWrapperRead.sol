@@ -200,12 +200,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper, Lock
     }
 
     function _validPartition(bytes32 _partition, address _holder) internal view override returns (bool) {
-        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
-        if (erc1410Storage.partitionToIndex[_holder][_partition] == 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return _validPartitionForReceiver(_partition, _holder);
     }
 
     function _validPartitionForReceiver(bytes32 _partition, address _to) internal view override returns (bool) {
