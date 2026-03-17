@@ -30,7 +30,15 @@ export class GetCouponForQueryHandler implements IQueryHandler<GetCouponForQuery
 
       const res = await this.queryAdapter.getCouponFor(securityEvmAddress, targetEvmAddress, couponId);
 
-      return new GetCouponForQueryResponse(res.tokenBalance || "0", res.decimals, res.isDisabled);
+      return new GetCouponForQueryResponse(
+        res.tokenBalance,
+        res.nominalValue,
+        res.decimals,
+        res.recordDateReached,
+        res.coupon,
+        res.couponAmount,
+        res.isDisabled,
+      );
     } catch (error) {
       throw new GetCouponForQueryError(error as Error);
     }
