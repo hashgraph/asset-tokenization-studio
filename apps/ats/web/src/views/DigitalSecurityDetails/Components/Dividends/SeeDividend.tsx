@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
@@ -14,8 +14,8 @@ import { Info } from "@phosphor-icons/react";
 import { isValidHederaId, min, required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useGetDividends, useGetDividendsFor, useGetDividendsAmountFor } from "../../../../hooks/queries/useDividends";
-import { GetDividendsForRequest, GetDividendsRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useGetDividend, useGetDividendFor, useGetDividendsAmountFor } from "../../../../hooks/queries/useDividends";
+import { GetDividendForRequest, GetDividendRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { formatDate, formatNumberLocale } from "../../../../utils/format";
@@ -26,18 +26,18 @@ interface SeeDividendFormValues {
   targetId: string;
 }
 
-const defaultDividendsForRequest = new GetDividendsForRequest({
+const defaultDividendsForRequest = new GetDividendForRequest({
   securityId: "",
   dividendId: 0,
   targetId: "",
 });
 
-const defaultDividendsRequest = new GetDividendsRequest({
+const defaultDividendsRequest = new GetDividendRequest({
   securityId: "",
   dividendId: 0,
 });
 
-const defaultDividendsAmountForRequest = new GetDividendsForRequest({
+const defaultDividendsAmountForRequest = new GetDividendForRequest({
   securityId: "",
   dividendId: 0,
   targetId: "",
@@ -59,9 +59,9 @@ export const SeeDividend = () => {
   });
   const { t: tGlobal } = useTranslation("globals");
   const { id: securityId = "" } = useParams();
-  const [dividendsRequest, setDividendsRequest] = useState<GetDividendsRequest>();
-  const [dividendsForRequest, setDividendsForRequest] = useState<GetDividendsForRequest>();
-  const [dividendsAmountForRequest, setDividendsAmountForRequest] = useState<GetDividendsForRequest>();
+  const [dividendsRequest, setDividendsRequest] = useState<GetDividendRequest>();
+  const [dividendsForRequest, setDividendsForRequest] = useState<GetDividendForRequest>();
+  const [dividendsAmountForRequest, setDividendsAmountForRequest] = useState<GetDividendForRequest>();
   const [isDividendsForLoading, setIsDivididendForLoading] = useState<boolean>(false);
   const [isDividendsLoading, setIsDivididendLoading] = useState<boolean>(false);
   const [isDividendsAmountForLoading, setIsDivididendAmountForLoading] = useState<boolean>(false);
@@ -70,7 +70,7 @@ export const SeeDividend = () => {
     keyPrefix: "details.dividends.see.error",
   });
 
-  const { data: dividendsFor, refetch: refetchDividendsFor } = useGetDividendsFor(
+  const { data: dividendsFor, refetch: refetchDividendsFor } = useGetDividendFor(
     dividendsForRequest ?? defaultDividendsForRequest,
     {
       enabled: false,
@@ -88,7 +88,7 @@ export const SeeDividend = () => {
     },
   );
 
-  const { data: dividends, refetch: refetchDividends } = useGetDividends(dividendsRequest ?? defaultDividendsRequest, {
+  const { data: dividends, refetch: refetchDividends } = useGetDividend(dividendsRequest ?? defaultDividendsRequest, {
     enabled: false,
     onSuccess: () => {
       setIsDivididendLoading(false);
@@ -148,20 +148,20 @@ export const SeeDividend = () => {
     setIsDivididendLoading(true);
     setIsDivididendAmountForLoading(true);
 
-    const dividendsForReq = new GetDividendsForRequest({
+    const dividendsForReq = new GetDividendForRequest({
       dividendId,
       targetId,
       securityId,
     });
     setDividendsForRequest(dividendsForReq);
 
-    const dividendsReq = new GetDividendsRequest({
+    const dividendsReq = new GetDividendRequest({
       securityId,
       dividendId,
     });
     setDividendsRequest(dividendsReq);
 
-    const dividendsAmountForReq = new GetDividendsForRequest({
+    const dividendsAmountForReq = new GetDividendForRequest({
       dividendId,
       targetId,
       securityId,

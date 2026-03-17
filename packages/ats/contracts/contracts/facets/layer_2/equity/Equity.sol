@@ -14,7 +14,7 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 abstract contract Equity is IEquity, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    function setDividends(
+    function setDividend(
         Dividend calldata _newDividend
     )
         external
@@ -26,7 +26,7 @@ abstract contract Equity is IEquity, Common {
         returns (uint256 dividendID_)
     {
         bytes32 corporateActionID;
-        (corporateActionID, dividendID_) = _setDividends(_newDividend);
+        (corporateActionID, dividendID_) = _setDividend(_newDividend);
         emit DividendSet(
             corporateActionID,
             dividendID_,
@@ -36,6 +36,24 @@ abstract contract Equity is IEquity, Common {
             _newDividend.amount,
             _newDividend.amountDecimals
         );
+    }
+
+    function cancelDividend(
+        uint256 _dividendId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_) = _cancelDividend(_dividendId);
+    }
+
+    function cancelVoting(
+        uint256 _voteId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_) = _cancelVoting(_voteId);
+    }
+
+    function cancelScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentId
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
+        (success_) = _cancelScheduledBalanceAdjustment(_balanceAdjustmentId);
     }
 
     function setVoting(
@@ -80,19 +98,19 @@ abstract contract Equity is IEquity, Common {
         return _getEquityDetails();
     }
 
-    function getDividends(
+    function getDividend(
         uint256 _dividendID
     )
         external
         view
         override
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (RegisteredDividend memory registeredDividend_)
+        returns (RegisteredDividend memory registeredDividend_, bool isDisabled_)
     {
-        return _getDividends(_dividendID);
+        (registeredDividend_, , isDisabled_) = _getDividend(_dividendID);
     }
 
-    function getDividendsFor(
+    function getDividendFor(
         uint256 _dividendID,
         address _account
     )
@@ -102,7 +120,7 @@ abstract contract Equity is IEquity, Common {
         onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
         returns (DividendFor memory dividendFor_)
     {
-        return _getDividendsFor(_dividendID, _account);
+        return _getDividendFor(_dividendID, _account);
     }
 
     function getDividendAmountFor(
@@ -141,9 +159,9 @@ abstract contract Equity is IEquity, Common {
         view
         override
         onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
-        returns (RegisteredVoting memory registeredVoting_)
+        returns (RegisteredVoting memory registeredVoting_, bool isDisabled_)
     {
-        return _getVoting(_voteID);
+        (registeredVoting_, , isDisabled_) = _getVoting(_voteID);
     }
 
     function getVotingFor(
@@ -182,9 +200,9 @@ abstract contract Equity is IEquity, Common {
         view
         override
         onlyMatchingActionType(BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE, _balanceAdjustmentID - 1)
-        returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_)
     {
-        return _getScheduledBalanceAdjustment(_balanceAdjustmentID);
+        (balanceAdjustment_, , isDisabled_) = _getScheduledBalanceAdjustment(_balanceAdjustmentID);
     }
 
     function getScheduledBalanceAdjustmentCount() external view override returns (uint256 balanceAdjustmentCount_) {

@@ -8,6 +8,7 @@ import { InternalsKpiInterestRate } from "./Internals.sol";
 import { BondStorageWrapperFixingDateInterestRate } from "../BondStorageWrapperFixingDateInterestRate.sol";
 import { Internals } from "../../../../../../domain/Internals.sol";
 import { BondStorageWrapper } from "../../../../../../domain/asset/bond/BondStorageWrapper.sol";
+import { IBondRead } from "../../../../../../facets/layer_2/bond/IBondRead.sol";
 
 abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWrapperFixingDateInterestRate {
     using CheckpointsLib for CheckpointsLib.Checkpoint[];
@@ -87,7 +88,8 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
     function _addToCouponsOrderedList(uint256 _couponID) internal virtual override(Internals, BondStorageWrapper) {
         super._addToCouponsOrderedList(_couponID);
 
-        uint256 lastFixingDate = _getCoupon(_couponID).coupon.fixingDate;
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
+        uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
         assert(lastFixingDate >= _kpisDataStorage().minDate);
 
@@ -111,7 +113,8 @@ abstract contract KpisStorageWrapper is InternalsKpiInterestRate, BondStorageWra
 
         if (total == 0) return minDate_;
 
-        uint256 lastFixingDate = _getCoupon(_getCouponFromOrderedListAt(total - 1)).coupon.fixingDate;
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_getCouponFromOrderedListAt(total - 1));
+        uint256 lastFixingDate = registeredCoupon.coupon.fixingDate;
 
         assert(lastFixingDate >= minDate_);
 
