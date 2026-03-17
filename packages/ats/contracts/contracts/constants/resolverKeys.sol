@@ -620,6 +620,9 @@ bytes32 constant _KPIS_LATEST_KPI_LINKED_RATE_RESOLVER_KEY = 0x9a05806c3d9c062df
 // keccak256('security.token.standard.kpis.latest.SustainabilityPerformanceTarget.rate.resolverKey');
 bytes32 constant _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0xb668a0e99ee4bce486604d5a7097a4e5d837d1736e0cf43b190b56d0adea78b9;
 
+// keccak256('security.token.standard.nominalValue.resolverKey');
+bytes32 constant _NOMINAL_VALUE_RESOLVER_KEY = 0x48903d4da8b1f0a5e9a9874be74ec5d2f8043d4d5b65cc093173c3dae103df8f;
+
 // Layer 3 Resolver Keys
 
 // keccak256("security.token.standard.transferAndLock.resolverKey")

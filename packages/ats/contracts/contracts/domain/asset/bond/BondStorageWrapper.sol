@@ -6,19 +6,23 @@ import { COUPON_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } 
 import { IBondRead } from "../../../facets/layer_2/bond/IBondRead.sol";
 import { IBondStorageWrapper } from "../../../domain/asset/bond/IBondStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { ERC20PermitStorageWrapper } from "../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol";
+import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 
-abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageWrapper {
+abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct BondDataStorage {
         bytes3 currency;
-        uint256 nominalValue;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
+        // solhint-disable-next-line var-name-mixedcase
+        uint256 DEPRECATED_nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
         bool initialized;
-        uint8 nominalValueDecimals;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
+        // solhint-disable-next-line var-name-mixedcase
+        uint8 DEPRECATED_nominalValueDecimals;
         uint256[] couponsOrderedListByIds;
     }
 
@@ -44,15 +48,17 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     {
         BondDataStorage storage bondStorage = _bondStorage();
         bondStorage.initialized = true;
-        _storeBondDetails(_bondDetailsData);
+        _setCurrency(_bondDetailsData.currency);
+        _setStartingDate(_bondDetailsData.startingDate);
+        _setMaturityDate(_bondDetailsData.maturityDate);
     }
 
-    function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal override {
-        _bondStorage().currency = _bondDetails.currency;
-        _bondStorage().nominalValue = _bondDetails.nominalValue;
-        _bondStorage().nominalValueDecimals = _bondDetails.nominalValueDecimals;
-        _bondStorage().startingDate = _bondDetails.startingDate;
-        _bondStorage().maturityDate = _bondDetails.maturityDate;
+    function _setCurrency(bytes3 _currency) internal override {
+        _bondStorage().currency = _currency;
+    }
+
+    function _setStartingDate(uint256 _startingDate) internal override {
+        _bondStorage().startingDate = _startingDate;
     }
 
     function _setCoupon(
@@ -116,6 +122,14 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
         _updateCorporateActionData(actionId, abi.encode(_coupon));
     }
 
+    /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
+    /// BondDataStorage once all legacy tokens have been migrated.
+    function _migrateBondNominalValue() internal virtual override {
+        if (_bondStorage().DEPRECATED_nominalValue == 0) return;
+        _bondStorage().DEPRECATED_nominalValue = 0;
+        _bondStorage().DEPRECATED_nominalValueDecimals = 0;
+    }
+
     function _getCouponFromOrderedListAt(uint256 _pos) internal view override returns (uint256 couponID_) {
         if (_pos >= _getCouponsOrderedListTotalAdjustedAt(_blockTimestamp())) return 0;
 
@@ -177,8 +191,8 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
     function _getBondDetails() internal view override returns (IBondRead.BondDetailsData memory bondDetails_) {
         bondDetails_ = IBondRead.BondDetailsData({
             currency: _bondStorage().currency,
-            nominalValue: _bondStorage().nominalValue,
-            nominalValueDecimals: _bondStorage().nominalValueDecimals,
+            nominalValue: _getNominalValue(),
+            nominalValueDecimals: _getNominalValueDecimals(),
             startingDate: _bondStorage().startingDate,
             maturityDate: _bondStorage().maturityDate
         });
@@ -288,6 +302,16 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, ERC20PermitStorageW
 
     function _isBondInitialized() internal view override returns (bool) {
         return _bondStorage().initialized;
+    }
+
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
+    function _bondNominalValue() internal view virtual override returns (uint256) {
+        return _bondStorage().DEPRECATED_nominalValue;
+    }
+
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
+    function _bondNominalValueDecimals() internal view virtual override returns (uint8) {
+        return _bondStorage().DEPRECATED_nominalValueDecimals;
     }
 
     function _bondStorage() internal pure returns (BondDataStorage storage bondData_) {
