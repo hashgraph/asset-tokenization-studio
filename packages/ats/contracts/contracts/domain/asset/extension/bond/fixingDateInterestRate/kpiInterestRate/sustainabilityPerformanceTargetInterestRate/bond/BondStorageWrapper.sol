@@ -35,7 +35,8 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
     }
 
     function _setSustainabilityPerformanceTargetInterestRate(uint256 _couponID) internal override {
-        IBondRead.Coupon memory coupon = _getCoupon(_couponID).coupon;
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
+        IBondRead.Coupon memory coupon = registeredCoupon.coupon;
 
         (uint256 rate, uint8 rateDecimals) = _calculateSustainabilityPerformanceTargetInterestRate(_couponID, coupon);
 
@@ -49,7 +50,7 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
         view
         virtual
         override(Internals, BondStorageWrapper)
-        returns (IBondRead.RegisteredCoupon memory registeredCoupon_)
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
     {
         return
             _getCouponAdjustedAt(_couponID, _calculateSustainabilityPerformanceTargetInterestRate, _blockTimestamp());
@@ -135,7 +136,8 @@ abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate 
             return 0;
         }
 
-        IBondRead.Coupon memory previousCoupon = _getCoupon(previousCouponId).coupon;
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(previousCouponId);
+        IBondRead.Coupon memory previousCoupon = registeredCoupon.coupon;
 
         return previousCoupon.fixingDate;
     }

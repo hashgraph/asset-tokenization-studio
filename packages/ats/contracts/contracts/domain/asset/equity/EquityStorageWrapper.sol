@@ -88,7 +88,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         _setEquityCurrency(_equityDetailsData.currency);
     }
 
-    function _setDividends(
+    function _setDividend(
         IEquity.Dividend calldata _newDividend
     ) internal override returns (bytes32 corporateActionId_, uint256 dividendId_) {
         bytes memory data = abi.encode(_newDividend);
@@ -96,6 +96,18 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         (corporateActionId_, dividendId_) = _addCorporateAction(DIVIDEND_CORPORATE_ACTION_TYPE, data);
 
         _initDividend(corporateActionId_, data);
+    }
+
+    function _cancelDividend(uint256 _dividendId) internal override returns (bool success_) {
+        IEquity.RegisteredDividend memory registeredDividend;
+        bytes32 corporateActionId;
+        (registeredDividend, corporateActionId, ) = _getDividend(_dividendId);
+        if (registeredDividend.dividend.executionDate <= _blockTimestamp()) {
+            revert IEquityStorageWrapper.DividendAlreadyExecuted(corporateActionId, _dividendId);
+        }
+        _cancelCorporateAction(corporateActionId);
+        success_ = true;
+        emit DividendCancelled(_dividendId, _msgSender());
     }
 
     function _initDividend(bytes32 _actionId, bytes memory _data) internal override {
@@ -117,6 +129,18 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         (corporateActionId_, voteID_) = _addCorporateAction(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, data);
 
         _initVotingRights(corporateActionId_, data);
+    }
+
+    function _cancelVoting(uint256 _voteId) internal override returns (bool success_) {
+        IEquity.RegisteredVoting memory registeredVoting;
+        bytes32 corporateActionId;
+        (registeredVoting, corporateActionId, ) = _getVoting(_voteId);
+        if (registeredVoting.voting.recordDate <= _blockTimestamp()) {
+            revert IEquityStorageWrapper.VotingAlreadyRecorded(corporateActionId, _voteId);
+        }
+        _cancelCorporateAction(corporateActionId);
+        success_ = true;
+        emit VotingCancelled(_voteId, _msgSender());
     }
 
     function _initVotingRights(bytes32 _actionId, bytes memory _data) internal override {
@@ -141,6 +165,18 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         );
 
         _initBalanceAdjustment(corporateActionId_, data);
+    }
+
+    function _cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) internal override returns (bool success_) {
+        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment;
+        bytes32 corporateActionId;
+        (balanceAdjustment, corporateActionId, ) = _getScheduledBalanceAdjustment(_balanceAdjustmentId);
+        if (balanceAdjustment.executionDate <= _blockTimestamp()) {
+            revert IEquityStorageWrapper.BalanceAdjustmentAlreadyExecuted(corporateActionId, _balanceAdjustmentId);
+        }
+        _cancelCorporateAction(corporateActionId);
+        success_ = true;
+        emit ScheduledBalanceAdjustmentCancelled(_balanceAdjustmentId, _msgSender());
     }
 
     function _initBalanceAdjustment(bytes32 _actionId, bytes memory _data) internal override {
@@ -185,19 +221,24 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
      * @dev returns the properties and related snapshots (if any) of a dividend.
      *
      * @param _dividendID The dividend Id
-     * @param _dividendID The dividend Id
      */
-    function _getDividends(
+    function _getDividend(
         uint256 _dividendID
-    ) internal view override returns (IEquity.RegisteredDividend memory registeredDividend_) {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
+    )
+        internal
+        view
+        override
+        returns (IEquity.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_)
+    {
+        corporateActionId_ = _getCorporateActionIdByTypeIndex(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
 
-        (, , bytes memory data) = _getCorporateAction(actionId);
+        bytes memory data;
+        (, , data, isDisabled_) = _getCorporateAction(corporateActionId_);
 
         assert(data.length > 0);
         (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
 
-        registeredDividend_.snapshotId = _getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredDividend_.snapshotId = _getUintResultAt(corporateActionId_, SNAPSHOT_RESULT_ID);
     }
 
     /**
@@ -206,16 +247,17 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
      * @param _dividendID The dividend Id
      * @param _account The account
      */
-    function _getDividendsFor(
+    function _getDividendFor(
         uint256 _dividendID,
         address _account
     ) internal view override returns (IEquity.DividendFor memory dividendFor_) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
+        (IEquity.RegisteredDividend memory registeredDividend, , bool isDisabled) = _getDividend(_dividendID);
 
         dividendFor_.amount = registeredDividend.dividend.amount;
         dividendFor_.amountDecimals = registeredDividend.dividend.amountDecimals;
         dividendFor_.recordDate = registeredDividend.dividend.recordDate;
         dividendFor_.executionDate = registeredDividend.dividend.executionDate;
+        dividendFor_.isDisabled = isDisabled;
 
         (
             dividendFor_.tokenBalance,
@@ -232,7 +274,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint256 _dividendID,
         address _account
     ) internal view override returns (IEquity.DividendAmountFor memory dividendAmountFor_) {
-        IEquity.DividendFor memory dividendFor = _getDividendsFor(_dividendID, _account);
+        IEquity.DividendFor memory dividendFor = _getDividendFor(_dividendID, _account);
 
         if (!dividendFor.recordDateReached) return dividendAmountFor_;
 
@@ -252,7 +294,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view override returns (address[] memory holders_) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
+        IEquity.RegisteredDividend memory registeredDividend;
+        (registeredDividend, , ) = _getDividend(_dividendID);
 
         if (registeredDividend.dividend.recordDate >= _blockTimestamp()) return new address[](0);
 
@@ -263,7 +306,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     }
 
     function _getTotalDividendHolders(uint256 _dividendID) internal view override returns (uint256) {
-        IEquity.RegisteredDividend memory registeredDividend = _getDividends(_dividendID);
+        IEquity.RegisteredDividend memory registeredDividend;
+        (registeredDividend, , ) = _getDividend(_dividendID);
 
         if (registeredDividend.dividend.recordDate >= _blockTimestamp()) return 0;
 
@@ -274,15 +318,21 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _getVoting(
         uint256 _voteID
-    ) internal view override returns (IEquity.RegisteredVoting memory registeredVoting_) {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
+    )
+        internal
+        view
+        override
+        returns (IEquity.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_)
+    {
+        corporateActionId_ = _getCorporateActionIdByTypeIndex(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
 
-        (, , bytes memory data) = _getCorporateAction(actionId);
+        bytes memory data;
+        (, , data, isDisabled_) = _getCorporateAction(corporateActionId_);
 
         assert(data.length > 0);
         (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
 
-        registeredVoting_.snapshotId = _getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredVoting_.snapshotId = _getUintResultAt(corporateActionId_, SNAPSHOT_RESULT_ID);
     }
 
     /**
@@ -296,10 +346,11 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint256 _voteID,
         address _account
     ) internal view override returns (IEquity.VotingFor memory votingFor_) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+        (IEquity.RegisteredVoting memory registeredVoting, , bool isDisabled_) = _getVoting(_voteID);
 
         votingFor_.recordDate = registeredVoting.voting.recordDate;
         votingFor_.data = registeredVoting.voting.data;
+        votingFor_.isDisabled = isDisabled_;
 
         (
             votingFor_.tokenBalance,
@@ -321,7 +372,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view override returns (address[] memory holders_) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+        IEquity.RegisteredVoting memory registeredVoting;
+        (registeredVoting, , ) = _getVoting(_voteID);
 
         if (registeredVoting.voting.recordDate >= _blockTimestamp()) return new address[](0);
 
@@ -332,7 +384,8 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
     }
 
     function _getTotalVotingHolders(uint256 _voteID) internal view override returns (uint256) {
-        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+        IEquity.RegisteredVoting memory registeredVoting;
+        (registeredVoting, , ) = _getVoting(_voteID);
 
         if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
 
@@ -343,13 +396,23 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
     function _getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) internal view override returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_) {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(
+    )
+        internal
+        view
+        override
+        returns (
+            IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_,
+            bytes32 corporateActionId_,
+            bool isDisabled_
+        )
+    {
+        corporateActionId_ = _getCorporateActionIdByTypeIndex(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             _balanceAdjustmentID - 1
         );
 
-        (, , bytes memory data) = _getCorporateAction(actionId);
+        bytes memory data;
+        (, , data, isDisabled_) = _getCorporateAction(corporateActionId_);
 
         assert(data.length > 0);
         (balanceAdjustment_) = abi.decode(data, (IEquity.ScheduledBalanceAdjustment));

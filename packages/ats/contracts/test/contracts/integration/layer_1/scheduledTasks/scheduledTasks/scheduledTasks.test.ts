@@ -127,8 +127,8 @@ describe("Scheduled Tasks Tests", () => {
       amount: dividendsAmountPerEquity,
       amountDecimals: dividendsAmountDecimalsPerEquity,
     };
-    await equityFacet.connect(signer_C).setDividends(dividendData_2);
-    await equityFacet.connect(signer_C).setDividends(dividendData_1);
+    await equityFacet.connect(signer_C).setDividend(dividendData_2);
+    await equityFacet.connect(signer_C).setDividend(dividendData_1);
 
     const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:16Z");
     const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp("2030-01-01T00:00:31Z");
@@ -171,8 +171,8 @@ describe("Scheduled Tasks Tests", () => {
     await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1 + 1);
 
     // Checking dividends For before triggering from the queue
-    const BalanceOf_A_Dividend_1 = await equityFacet.getDividendsFor(2, signer_A.address);
-    let BalanceOf_A_Dividend_2 = await equityFacet.getDividendsFor(1, signer_A.address);
+    const BalanceOf_A_Dividend_1 = await equityFacet.getDividendFor(2, signer_A.address);
+    let BalanceOf_A_Dividend_2 = await equityFacet.getDividendFor(1, signer_A.address);
 
     expect(BalanceOf_A_Dividend_1.tokenBalance).to.equal(INITIAL_AMOUNT);
     expect(BalanceOf_A_Dividend_2.tokenBalance).to.equal(0);
@@ -195,7 +195,7 @@ describe("Scheduled Tasks Tests", () => {
     // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
     await timeTravelFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2 + 1);
     // Checking dividends For before triggering from the queue
-    BalanceOf_A_Dividend_2 = await equityFacet.getDividendsFor(1, signer_A.address);
+    BalanceOf_A_Dividend_2 = await equityFacet.getDividendFor(1, signer_A.address);
 
     expect(BalanceOf_A_Dividend_2.tokenBalance).to.equal(INITIAL_AMOUNT * balanceAdjustmentsFactor_1);
     expect(BalanceOf_A_Dividend_2.decimals).to.equal(DECIMALS_INIT + balanceAdjustmentsDecimals_1);

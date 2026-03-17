@@ -47,6 +47,8 @@ abstract contract Internals is Modifiers {
         bytes32 _actionType,
         bytes memory _data
     ) internal virtual returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_);
+    function _cancelCorporateAction(bytes32 _actionId) internal virtual;
+
     function _addExternalList(bytes32 _position, address _list) internal virtual returns (bool success_);
     function _addIssuer(address _issuer) internal virtual returns (bool success_);
     function _addNewTokenHolder(address tokenHolder) internal virtual;
@@ -509,9 +511,11 @@ abstract contract Internals is Modifiers {
     function _setCoupon(
         IBondRead.Coupon memory _newCoupon
     ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_);
-    function _setDividends(
+    function _cancelCoupon(uint256 _couponId) internal virtual returns (bool success_);
+    function _setDividend(
         IEquity.Dividend calldata _newDividend
     ) internal virtual returns (bytes32 corporateActionId_, uint256 dividendId_);
+    function _cancelDividend(uint256 _dividendId) internal virtual returns (bool success_);
     function _setHeldLabafById(
         bytes32 _partition,
         address _tokenHolder,
@@ -547,6 +551,7 @@ abstract contract Internals is Modifiers {
     function _setScheduledBalanceAdjustment(
         IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) internal virtual returns (bytes32 corporateActionId_, uint256 balanceAdjustmentID_);
+    function _cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) internal virtual returns (bool success_);
     function _setTotalClearedLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
     function _setTotalClearedLabafByPartition(
         bytes32 _partition,
@@ -562,6 +567,7 @@ abstract contract Internals is Modifiers {
     function _setVoting(
         IEquity.Voting calldata _newVoting
     ) internal virtual returns (bytes32 corporateActionId_, uint256 voteID_);
+    function _cancelVoting(uint256 _voteId) internal virtual returns (bool success_);
     function _setCurrency(bytes3 _currency) internal virtual;
     function _setStartingDate(uint256 _startingDate) internal virtual;
     function _setVotingRight(bool _votingRight) internal virtual;
@@ -883,9 +889,23 @@ abstract contract Internals is Modifiers {
         uint256 _pageLength
     ) internal view virtual returns (address[] memory members_);
     function _getControlListType() internal view virtual returns (bool);
+    function _isCorporateActionDisabled(bytes32 _actionId) internal view virtual returns (bool isDisabled_);
     function _getCorporateAction(
         bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_);
+    ) internal view virtual returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_, bool isDisabled_);
+    function _getCorporateActions(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        virtual
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        );
     function _getCorporateActionCount() internal view virtual returns (uint256 corporateActionCount_);
     function _getCorporateActionCountByType(
         bytes32 _actionType
@@ -904,6 +924,20 @@ abstract contract Internals is Modifiers {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (bytes32[] memory corporateActionIds_);
+    function _getCorporateActionsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        virtual
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        );
     function _getCorporateActionResult(
         bytes32 actionId,
         uint256 resultId
@@ -911,7 +945,11 @@ abstract contract Internals is Modifiers {
     function _getCorporateActionResultCount(bytes32 actionId) internal view virtual returns (uint256);
     function _getCoupon(
         uint256 _couponID
-    ) internal view virtual returns (IBondRead.RegisteredCoupon memory registeredCoupon_);
+    )
+        internal
+        view
+        virtual
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_);
     function _getCouponAmountFor(
         uint256 _couponID,
         address _account
@@ -943,11 +981,15 @@ abstract contract Internals is Modifiers {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory holders_);
-    function _getDividends(
+    function _getDividend(
         uint256 _dividendID
-    ) internal view virtual returns (IEquity.RegisteredDividend memory registeredDividend_);
+    )
+        internal
+        view
+        virtual
+        returns (IEquity.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_);
     function _getDividendsCount() internal view virtual returns (uint256 dividendCount_);
-    function _getDividendsFor(
+    function _getDividendFor(
         uint256 _dividendID,
         address _account
     ) internal view virtual returns (IEquity.DividendFor memory dividendFor_);
@@ -1161,7 +1203,15 @@ abstract contract Internals is Modifiers {
         returns (ISustainabilityPerformanceTargetRate.InterestRate memory interestRate_);
     function _getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) internal view virtual returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_);
+    )
+        internal
+        view
+        virtual
+        returns (
+            IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_,
+            bytes32 corporateActionId_,
+            bool isDisabled_
+        );
     function _getScheduledBalanceAdjustmentCount() internal view virtual returns (uint256);
     function _getScheduledBalanceAdjustments(
         uint256 _pageIndex,
@@ -1241,7 +1291,11 @@ abstract contract Internals is Modifiers {
     ) internal view virtual returns (uint256);
     function _getVoting(
         uint256 _voteID
-    ) internal view virtual returns (IEquity.RegisteredVoting memory registeredVoting_);
+    )
+        internal
+        view
+        virtual
+        returns (IEquity.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_);
     function _getVotingCount() internal view virtual returns (uint256 votingCount_);
     function _getVotingFor(
         uint256 _voteID,

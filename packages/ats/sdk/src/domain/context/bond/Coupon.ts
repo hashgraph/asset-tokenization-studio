@@ -16,6 +16,7 @@ export class Coupon extends ValidatedDomain<Coupon> {
   fixingTimeStamp: number;
   rateStatus: RateStatus;
   snapshotId?: number;
+  isDisabled: boolean;
 
   constructor(
     recordTimeStamp: number,
@@ -27,6 +28,7 @@ export class Coupon extends ValidatedDomain<Coupon> {
     fixingTimeStamp: number,
     rateStatus: RateStatus,
     snapshotId?: number,
+    isDisabled: boolean = false,
   ) {
     super({
       executionTimeStamp: (val) => {
@@ -46,6 +48,7 @@ export class Coupon extends ValidatedDomain<Coupon> {
     this.fixingTimeStamp = fixingTimeStamp;
     this.rateStatus = rateStatus;
     this.snapshotId = snapshotId ? snapshotId : undefined;
+    this.isDisabled = isDisabled;
 
     ValidatedDomain.handleValidation(Coupon.name, this);
   }

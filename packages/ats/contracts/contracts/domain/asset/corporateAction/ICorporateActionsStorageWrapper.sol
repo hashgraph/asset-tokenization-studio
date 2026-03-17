@@ -8,6 +8,7 @@ struct ActionData {
     bytes data;
     bytes[] results;
     uint256 actionIdByType;
+    bool isDisabled;
 }
 
 struct CorporateActionDataStorage {

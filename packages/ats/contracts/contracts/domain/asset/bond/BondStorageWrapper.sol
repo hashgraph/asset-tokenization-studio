@@ -72,6 +72,17 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorage
 
         emit CouponSet(corporateActionId_, couponID_, _msgSender(), _newCoupon);
     }
+    function _cancelCoupon(uint256 _couponId) internal override returns (bool success_) {
+        IBondRead.RegisteredCoupon memory registeredCoupon;
+        bytes32 corporateActionId;
+        (registeredCoupon, corporateActionId, ) = _getCoupon(_couponId);
+        if (registeredCoupon.coupon.executionDate <= _blockTimestamp()) {
+            revert IBondStorageWrapper.CouponAlreadyExecuted(corporateActionId, _couponId);
+        }
+        _cancelCorporateAction(corporateActionId);
+        success_ = true;
+        emit CouponCancelled(_couponId, _msgSender());
+    }
 
     function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual override {
         if (_actionId == bytes32(0)) {
@@ -193,25 +204,32 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorage
 
     function _getCoupon(
         uint256 _couponID
-    ) internal view virtual override returns (IBondRead.RegisteredCoupon memory registeredCoupon_) {
-        bytes32 actionId = _getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
+    )
+        internal
+        view
+        virtual
+        override
+        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_)
+    {
+        corporateActionId_ = _getCorporateActionIdByTypeIndex(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1);
 
-        (, , bytes memory data) = _getCorporateAction(actionId);
+        bytes memory data;
+        (, , data, isDisabled_) = _getCorporateAction(corporateActionId_);
 
-        if (data.length > 0) {
-            (registeredCoupon_.coupon) = abi.decode(data, (IBondRead.Coupon));
-        }
+        assert(data.length > 0);
+        (registeredCoupon_.coupon) = abi.decode(data, (IBondRead.Coupon));
 
-        registeredCoupon_.snapshotId = _getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+        registeredCoupon_.snapshotId = _getUintResultAt(corporateActionId_, SNAPSHOT_RESULT_ID);
     }
 
     function _getCouponFor(
         uint256 _couponID,
         address _account
     ) internal view override returns (IBondRead.CouponFor memory couponFor_) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , bool isDisabled) = _getCoupon(_couponID);
 
         couponFor_.coupon = registeredCoupon.coupon;
+        couponFor_.isDisabled = isDisabled;
 
         if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
             couponFor_.recordDateReached = true;
@@ -262,7 +280,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorage
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view override returns (address[] memory holders_) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
 
         if (registeredCoupon.coupon.recordDate >= _blockTimestamp()) return new address[](0);
 
@@ -273,7 +291,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, NominalValueStorage
     }
 
     function _getTotalCouponHolders(uint256 _couponID) internal view override returns (uint256) {
-        IBondRead.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
+        (IBondRead.RegisteredCoupon memory registeredCoupon, , ) = _getCoupon(_couponID);
 
         if (registeredCoupon.coupon.recordDate >= _blockTimestamp()) return 0;
 

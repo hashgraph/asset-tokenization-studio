@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-13T09:05:35.695Z
- * Facets: 197
+ * Generated: 2026-03-03T13:51:49.353Z
+ * Facets: 196
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -311,8 +311,6 @@ import {
   LockKpiLinkedRateFacetTimeTravel__factory,
   LockSustainabilityPerformanceTargetRateFacet__factory,
   LockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
-  NominalValueFacet__factory,
-  NominalValueFacetTimeTravel__factory,
   NoncesFacet__factory,
   NoncesFacetTimeTravel__factory,
   NoncesFixedRateFacet__factory,
@@ -852,6 +850,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x86d59729",
       },
       {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
+      },
+      {
         name: "fullRedeemAtMaturity",
         signature: "function fullRedeemAtMaturity(address _tokenHolder)",
         selector: "0xd0db5fb2",
@@ -897,6 +900,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
+      },
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
       },
       {
         name: "fullRedeemAtMaturity",
@@ -945,6 +953,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
+      },
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
       },
       {
         name: "fullRedeemAtMaturity",
@@ -999,7 +1012,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
         selector: "0x936e3169",
       },
       {
@@ -1016,7 +1029,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1091,7 +1104,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
         selector: "0x936e3169",
       },
       {
@@ -1108,7 +1121,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1186,7 +1199,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
         selector: "0x936e3169",
       },
       {
@@ -1203,7 +1216,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1280,7 +1293,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCoupon",
         signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_)",
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
         selector: "0x936e3169",
       },
       {
@@ -1297,7 +1310,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getCouponFor",
         signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon) couponFor_)",
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
         selector: "0xbba7b56d",
       },
       {
@@ -1369,6 +1382,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function _initialize_bondUSA((bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals, uint256 startingDate, uint256 maturityDate) _bondDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
         selector: "0x86d59729",
+      },
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
       },
       {
         name: "fullRedeemAtMaturity",
@@ -2824,15 +2842,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x14f1d784",
       },
       {
-        name: "addCorporateAction",
-        signature:
-          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
-        selector: "0xd9e4d92c",
-      },
-      {
         name: "getCorporateAction",
         signature:
-          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
         selector: "0x911181da",
       },
       {
@@ -2858,19 +2870,17 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
       },
-    ],
-    events: [
       {
-        name: "CorporateActionAdded",
-        signature: "CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)",
-        topic0: "0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a",
+        name: "getCorporateActions",
+        signature:
+          "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0xe248a917",
       },
-    ],
-    errors: [
       {
-        name: "DuplicatedCorporateAction",
-        signature: "DuplicatedCorporateAction(bytes32,bytes)",
-        selector: "0x3266e9e3",
+        name: "getCorporateActionsByType",
+        signature:
+          "function getCorporateActionsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0x7715ccac",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -2891,15 +2901,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x14f1d784",
       },
       {
-        name: "addCorporateAction",
-        signature:
-          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
-        selector: "0xd9e4d92c",
-      },
-      {
         name: "getCorporateAction",
         signature:
-          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
         selector: "0x911181da",
       },
       {
@@ -2925,22 +2929,20 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
       },
-    ],
-    events: [
       {
-        name: "CorporateActionAdded",
-        signature: "CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)",
-        topic0: "0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a",
+        name: "getCorporateActions",
+        signature:
+          "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0xe248a917",
+      },
+      {
+        name: "getCorporateActionsByType",
+        signature:
+          "function getCorporateActionsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0x7715ccac",
       },
     ],
-    errors: [
-      {
-        name: "DuplicatedCorporateAction",
-        signature: "DuplicatedCorporateAction(bytes32,bytes)",
-        selector: "0x3266e9e3",
-      },
-      { name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" },
-    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new CorporateActionsFixedRateFacetTimeTravel__factory(signer)
@@ -2961,15 +2963,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x14f1d784",
       },
       {
-        name: "addCorporateAction",
-        signature:
-          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
-        selector: "0xd9e4d92c",
-      },
-      {
         name: "getCorporateAction",
         signature:
-          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
         selector: "0x911181da",
       },
       {
@@ -2995,22 +2991,20 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
       },
-    ],
-    events: [
       {
-        name: "CorporateActionAdded",
-        signature: "CorporateActionAdded(address,bytes32,bytes32,uint256,bytes)",
-        topic0: "0x5874a7cfb402f641e9d5e7fe4da2993095f1d4d397e7291daa27fd6c29dd3f1a",
+        name: "getCorporateActions",
+        signature:
+          "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0xe248a917",
+      },
+      {
+        name: "getCorporateActionsByType",
+        signature:
+          "function getCorporateActionsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0x7715ccac",
       },
     ],
-    errors: [
-      {
-        name: "DuplicatedCorporateAction",
-        signature: "DuplicatedCorporateAction(bytes32,bytes)",
-        selector: "0x3266e9e3",
-      },
-      { name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" },
-    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer, useTimeTravel = false) =>
       useTimeTravel
         ? new CorporateActionsKpiLinkedRateFacetTimeTravel__factory(signer)
@@ -3030,15 +3024,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x14f1d784",
       },
       {
-        name: "addCorporateAction",
-        signature:
-          "function addCorporateAction(bytes32 _actionType, bytes _data) returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)",
-        selector: "0xd9e4d92c",
-      },
-      {
         name: "getCorporateAction",
         signature:
-          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_)",
+          "function getCorporateAction(bytes32 _corporateActionId) view returns (bytes32 actionType_, uint256 actionTypeId_, bytes data_, bool isDisabled_)",
         selector: "0x911181da",
       },
       {
@@ -3063,6 +3051,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getCorporateActionIdsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] corporateActionIds_)",
         selector: "0xe73bbddb",
+      },
+      {
+        name: "getCorporateActions",
+        signature:
+          "function getCorporateActions(uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0xe248a917",
+      },
+      {
+        name: "getCorporateActionsByType",
+        signature:
+          "function getCorporateActionsByType(bytes32 _actionType, uint256 _pageIndex, uint256 _pageLength) view returns (bytes32[] actionTypes_, uint256[] actionTypeIds_, bytes[] datas_, bool[] isDisabled_)",
+        selector: "0x7715ccac",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -3196,10 +3196,37 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x8c505179",
       },
       {
+        name: "cancelDividend",
+        signature: "function cancelDividend(uint256 _dividendId) returns (bool success_)",
+        selector: "0xd1869b7c",
+      },
+      {
+        name: "cancelScheduledBalanceAdjustment",
+        signature: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
+        selector: "0x564387f9",
+      },
+      {
+        name: "cancelVoting",
+        signature: "function cancelVoting(uint256 _voteId) returns (bool success_)",
+        selector: "0x549bdd6e",
+      },
+      {
+        name: "getDividend",
+        signature:
+          "function getDividend(uint256 _dividendID) view returns (((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_, bool isDisabled_)",
+        selector: "0x0ecfcaa4",
+      },
+      {
         name: "getDividendAmountFor",
         signature:
           "function getDividendAmountFor(uint256 _dividendID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) dividendAmountFor_)",
         selector: "0xd258b2f1",
+      },
+      {
+        name: "getDividendFor",
+        signature:
+          "function getDividendFor(uint256 _dividendID, address _account) view returns ((uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached, bool isDisabled) dividendFor_)",
+        selector: "0x85f196b0",
       },
       {
         name: "getDividendHolders",
@@ -3208,21 +3235,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xeba3918e",
       },
       {
-        name: "getDividends",
-        signature:
-          "function getDividends(uint256 _dividendID) view returns (((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_)",
-        selector: "0x3837ac88",
-      },
-      {
         name: "getDividendsCount",
         signature: "function getDividendsCount() view returns (uint256 dividendCount_)",
         selector: "0x9e676952",
-      },
-      {
-        name: "getDividendsFor",
-        signature:
-          "function getDividendsFor(uint256 _dividendID, address _account) view returns ((uint256 tokenBalance, uint256 amount, uint8 amountDecimals, uint256 recordDate, uint256 executionDate, uint8 decimals, bool recordDateReached) dividendFor_)",
-        selector: "0x323e22da",
       },
       {
         name: "getEquityDetails",
@@ -3233,7 +3248,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getScheduledBalanceAdjustment",
         signature:
-          "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns ((uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_)",
+          "function getScheduledBalanceAdjustment(uint256 _balanceAdjustmentID) view returns ((uint256 executionDate, uint256 factor, uint8 decimals) balanceAdjustment_, bool isDisabled_)",
         selector: "0x3d5338e8",
       },
       {
@@ -3271,7 +3286,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getVoting",
         signature:
-          "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_)",
+          "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
         selector: "0x3afc7282",
       },
       {
@@ -3282,7 +3297,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       {
         name: "getVotingFor",
         signature:
-          "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached) votingFor_)",
+          "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached, bool isDisabled) votingFor_)",
         selector: "0x7633eccf",
       },
       {
@@ -3292,10 +3307,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x009f64ac",
       },
       {
-        name: "setDividends",
+        name: "setDividend",
         signature:
-          "function setDividends((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
-        selector: "0x1129e1c1",
+          "function setDividend((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
+        selector: "0xe7686a05",
       },
       {
         name: "setScheduledBalanceAdjustment",
@@ -8443,46 +8458,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         : new LockSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
-  NominalValueFacet: {
-    name: "NominalValueFacet",
-    resolverKey: {
-      name: "_NOMINAL_VALUE_RESOLVER_KEY",
-      value: "0x48903d4da8b1f0a5e9a9874be74ec5d2f8043d4d5b65cc093173c3dae103df8f",
-    },
-    inheritance: ["NominalValue", "Common", "IStaticFunctionSelectors"],
-    methods: [
-      {
-        name: "getNominalValue",
-        signature: "function getNominalValue() view returns (uint256)",
-        selector: "0xbd4ff0a9",
-      },
-      {
-        name: "getNominalValueDecimals",
-        signature: "function getNominalValueDecimals() view returns (uint8)",
-        selector: "0x27e4bb51",
-      },
-      {
-        name: "initialize_NominalValue",
-        signature: "function initialize_NominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals)",
-        selector: "0x0c0e65af",
-      },
-      {
-        name: "setNominalValue",
-        signature: "function setNominalValue(uint256 _nominalValue, uint8 _nominalValueDecimals)",
-        selector: "0x40ba1a0d",
-      },
-    ],
-    events: [
-      {
-        name: "NominalValueSet",
-        signature: "NominalValueSet(address,uint256,uint8)",
-        topic0: "0x82c69cdf3dea5ac004c2c46c4184c1f5e39bc3268e2b12d3ed05a03a96706f3a",
-      },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new NominalValueFacetTimeTravel__factory(signer) : new NominalValueFacet__factory(signer),
-  },
-
   NoncesFacet: {
     name: "NoncesFacet",
     resolverKey: {
@@ -10595,7 +10570,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 197 as const;
+export const TOTAL_FACETS = 196 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -10895,7 +10870,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   BondStorageWrapper: {
     name: "BondStorageWrapper",
-    inheritance: ["IBondStorageWrapper", "NominalValueStorageWrapper"],
+    inheritance: ["IBondStorageWrapper", "ERC20PermitStorageWrapper"],
     methods: [],
   },
 
@@ -11081,6 +11056,11 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
     events: [
       {
+        name: "CouponCancelled",
+        signature: "CouponCancelled(uint256,address)",
+        topic0: "0xf3f7ee3ec63ca38fe59a56a06f6d730ef89a41b7819ca5c04dda2205c4f2a712",
+      },
+      {
         name: "CouponSet",
         signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
         topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
@@ -11088,6 +11068,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
     errors: [
       { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
+      { name: "CouponAlreadyExecuted", signature: "CouponAlreadyExecuted(bytes32,uint256)", selector: "0xae5a5af7" },
       { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
     ],
   },
@@ -11219,14 +11200,29 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
     events: [
       {
+        name: "DividendCancelled",
+        signature: "DividendCancelled(uint256,address)",
+        topic0: "0x188bc828dca3e79fc15106a0bd0347c4fa4c9be522391b586199a133d1ed28c8",
+      },
+      {
         name: "DividendSet",
         signature: "DividendSet(bytes32,uint256,address,uint256,uint256,uint256,uint8)",
         topic0: "0xc849cd6d345b059ab830e5aa8ab5e38bd118833e14bcdfea70231b0e5c072a12",
       },
       {
+        name: "ScheduledBalanceAdjustmentCancelled",
+        signature: "ScheduledBalanceAdjustmentCancelled(uint256,address)",
+        topic0: "0x94a946c45b2317528f3b8fed727c5627bed2062d7fe7a83a5c6b38aa2dcc178a",
+      },
+      {
         name: "ScheduledBalanceAdjustmentSet",
         signature: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
         topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
+      },
+      {
+        name: "VotingCancelled",
+        signature: "VotingCancelled(uint256,address)",
+        topic0: "0x0ca8f69518859b63e253a165f70a3ef3ad0db94215d1703ebcadd269c4c860bc",
       },
       {
         name: "VotingSet",
@@ -11236,11 +11232,22 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
     errors: [
       {
+        name: "BalanceAdjustmentAlreadyExecuted",
+        signature: "BalanceAdjustmentAlreadyExecuted(bytes32,uint256)",
+        selector: "0xd0447e7d",
+      },
+      {
         name: "BalanceAdjustmentCreationFailed",
         signature: "BalanceAdjustmentCreationFailed()",
         selector: "0x0c68e660",
       },
+      {
+        name: "DividendAlreadyExecuted",
+        signature: "DividendAlreadyExecuted(bytes32,uint256)",
+        selector: "0x50fe6757",
+      },
       { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
+      { name: "VotingAlreadyRecorded", signature: "VotingAlreadyRecorded(bytes32,uint256)", selector: "0x7a2e2617" },
       { name: "VotingRightsCreationFailed", signature: "VotingRightsCreationFailed()", selector: "0x0cc16600" },
     ],
   },
@@ -11519,12 +11526,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
-  NominalValueStorageWrapper: {
-    name: "NominalValueStorageWrapper",
-    inheritance: ["ERC20PermitStorageWrapper"],
-    methods: [],
-  },
-
   NonceStorageWrapper: {
     name: "NonceStorageWrapper",
     inheritance: ["Internals"],
@@ -11625,7 +11626,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 58 as const;
+export const TOTAL_STORAGE_WRAPPERS = 57 as const;
 
 /**
  * All role identifiers extracted from contracts.
@@ -11652,7 +11653,6 @@ export const ROLES = {
   _KYC_ROLE: "0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d",
   _LOCKER_ROLE: "0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88",
   _MATURITY_REDEEMER_ROLE: "0xa0d696902e9ed231892dc96649f0c62b808a1cb9dd1269e78e0adc1cc4b8358c",
-  _NOMINAL_VALUE_ROLE: "0x127c185a9f04723376575bc896cc0d3cf15a32dd0db17f01168dcac5d2de6102",
   _PAUSE_MANAGER_ROLE: "0xbc36fbd776e95c4811506a63b650c876b4159cb152d827a5f717968b67c69b84",
   _PAUSER_ROLE: "0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb",
   _PROCEED_RECIPIENT_MANAGER_ROLE: "0xebc53fe99fea28c7aa9476a714959af5b931f34a8a8734365ec63113198d512f",
@@ -11667,4 +11667,4 @@ export const ROLES = {
 /**
  * Total number of unique roles in the registry.
  */
-export const TOTAL_ROLES = 31 as const;
+export const TOTAL_ROLES = 30 as const;

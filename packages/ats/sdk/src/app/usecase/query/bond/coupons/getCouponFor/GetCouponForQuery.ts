@@ -8,6 +8,7 @@ export class GetCouponForQueryResponse implements QueryResponse {
   constructor(
     public readonly tokenBalance: BigDecimal,
     public readonly decimals: number,
+    public readonly isDisabled: boolean,
   ) {}
 }
 

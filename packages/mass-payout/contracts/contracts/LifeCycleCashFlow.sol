@@ -5,7 +5,7 @@ pragma solidity 0.8.22;
 
 import { ILifeCycleCashFlow } from "./interfaces/ILifeCycleCashFlow.sol";
 import { LifeCycleCashFlowStorageWrapper } from "./LifeCycleCashFlowStorageWrapper.sol";
-import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/layer_1/interfaces/ERC1400/IERC20.sol";
+import { IERC20 } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { IERC20 as OZ_IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { _PAYOUT_ROLE, _CASHOUT_ROLE, _TRANSFERER_ROLE, _PAYMENT_TOKEN_MANAGER_ROLE } from "./constants/roles.sol";

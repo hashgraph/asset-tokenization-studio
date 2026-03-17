@@ -52,6 +52,7 @@ interface IEquity {
         uint256 executionDate;
         uint8 decimals;
         bool recordDateReached;
+        bool isDisabled;
     }
 
     struct DividendAmountFor {
@@ -66,6 +67,7 @@ interface IEquity {
         bytes data;
         uint8 decimals;
         bool recordDateReached;
+        bool isDisabled;
     }
 
     struct ScheduledBalanceAdjustment {
@@ -78,13 +80,29 @@ interface IEquity {
      * @notice Sets a new dividend
      * @dev Can only be called by an account with the corporate actions role
      */
-    function setDividends(Dividend calldata _newDividend) external returns (uint256 dividendID_);
+    function setDividend(Dividend calldata _newDividend) external returns (uint256 dividendID_);
+
+    /**
+     * @notice Cancels an existing dividend
+     * @dev Can only be called by an account with the corporate actions role
+     * @param _dividendId The ID of the dividend to cancel
+     * @return success_ True if the dividend was cancelled successfully
+     */
+    function cancelDividend(uint256 _dividendId) external returns (bool success_);
 
     /**
      * @notice Sets a new voting
      * @dev Can only be called by an account with the corporate actions role
      */
     function setVoting(Voting calldata _newVoting) external returns (uint256 voteID_);
+
+    /**
+     * @notice Cancels an existing voting
+     * @dev Can only be called by an account with the corporate actions role
+     * @param _voteId The ID of the voting to cancel
+     * @return success_ True if the voting was cancelled successfully
+     */
+    function cancelVoting(uint256 _voteId) external returns (bool success_);
 
     /**
      * @notice Sets a new scheduled balance adjustment
@@ -94,14 +112,26 @@ interface IEquity {
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) external returns (uint256 balanceAdjustmentID_);
 
+    /**
+     * @notice Cancels a scheduled balance adjustment
+     * @dev Can only be called by an account with the corporate actions role.
+     * @param _balanceAdjustmentId The ID of the scheduled balance adjustment to cancel
+     * @return success_ True if the scheduled balance adjustment was cancelled successfully
+     */
+    function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) external returns (bool success_);
+
     function getEquityDetails() external view returns (EquityDetailsData memory equityDetailsData_);
 
     /**
      * @dev returns the properties and related snapshots (if any) of a dividend.
      *
      * @param _dividendID The dividend Id
+     * @return registeredDividend_ The dividend data
+     * @return isDisabled_ True if the dividend has been cancelled
      */
-    function getDividends(uint256 _dividendID) external view returns (RegisteredDividend memory registeredDividend_);
+    function getDividend(
+        uint256 _dividendID
+    ) external view returns (RegisteredDividend memory registeredDividend_, bool isDisabled_);
 
     /**
      * @dev returns the dividends for an account.
@@ -109,7 +139,7 @@ interface IEquity {
      * @param _dividendID The dividend Id
      * @param _account The account
      */
-    function getDividendsFor(
+    function getDividendFor(
         uint256 _dividendID,
         address _account
     ) external view returns (DividendFor memory dividendFor_);
@@ -144,7 +174,9 @@ interface IEquity {
     /**
      * @notice Returns the details of a previously registered voting
      */
-    function getVoting(uint256 _voteID) external view returns (RegisteredVoting memory registeredVoting_);
+    function getVoting(
+        uint256 _voteID
+    ) external view returns (RegisteredVoting memory registeredVoting_, bool isDisabled_);
 
     /**
      * @notice Returns the voting details for an account
@@ -175,7 +207,7 @@ interface IEquity {
      */
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+    ) external view returns (ScheduledBalanceAdjustment memory balanceAdjustment_, bool isDisabled_);
 
     /**
      * @notice Returns the total number of scheduled balance adjustments

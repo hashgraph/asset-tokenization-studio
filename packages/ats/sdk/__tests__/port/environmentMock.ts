@@ -568,7 +568,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return controlList.findIndex((item) => item == account) !== -1;
   });
 
-  singletonInstance.getDividendsFor = jest.fn(async (address: EvmAddress, target: EvmAddress, dividend: number) => {
+  singletonInstance.getDividendFor = jest.fn(async (address: EvmAddress, target: EvmAddress, dividend: number) => {
     const dividendsBalances = dividendsFor.get(dividend);
 
     if (!dividendsBalances)
@@ -580,7 +580,7 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return new DividendFor(BigDecimal.fromString("0", securityInfo.decimals), securityInfo.decimals);
   });
 
-  singletonInstance.getDividends = jest.fn(async (address: EvmAddress, dividend: number) => {
+  singletonInstance.getDividend = jest.fn(async (address: EvmAddress, dividend: number) => {
     if (dividend > dividends.length) return undefined;
     return dividends[dividend - 1];
   });
@@ -1384,7 +1384,7 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     } as TransactionResponse;
   });
 
-  singletonInstance.setDividends = jest.fn(
+  singletonInstance.setDividend = jest.fn(
     async (address: EvmAddress, recordDate: BigDecimal, executionDate: BigDecimal, amount: BigDecimal) => {
       const dividend = new Dividend(
         amount,
@@ -1405,6 +1405,16 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     const votingRight = new VotingRights(parseInt(recordDate.toString()), data, 0);
     votingRights.push(votingRight);
 
+    return {
+      status: "success",
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.cancelVoting = jest.fn(async function (_security: EvmAddress, votingId: number) {
+    if (votingId > 0 && votingId <= votingRights.length) {
+      votingRights.splice(votingId - 1, 1);
+    }
     return {
       status: "success",
       id: transactionId,
@@ -1684,6 +1694,19 @@ jest.mock("@port/out/rpc/RPCTransactionAdapter", () => {
     scheduledBalanceAdjustments.pop();
     scheduledBalanceAdjustments.push(scheduledBalanceAdjustment);
 
+    return {
+      status: "success",
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.cancelScheduledBalanceAdjustment = jest.fn(async function (
+    _security: EvmAddress,
+    balanceAdjustmentId: number,
+  ) {
+    if (balanceAdjustmentId > 0 && balanceAdjustmentId <= scheduledBalanceAdjustments.length) {
+      scheduledBalanceAdjustments.splice(balanceAdjustmentId - 1, 1);
+    }
     return {
       status: "success",
       id: transactionId,
