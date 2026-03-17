@@ -96,6 +96,9 @@ const BOND_KPI_LINKED_RATE_FACETS = [
   "KpiLinkedRateFacet",
   "KpisKpiLinkedRateFacet",
 
+  // Nominal Value (1)
+  "NominalValueFacet",
+
   // Jurisdiction-Specific
   "BondUSAKpiLinkedRateFacet",
   "BondUSAReadKpiLinkedRateFacet",

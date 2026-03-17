@@ -5,9 +5,7 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   ResolverProxy,
-  BondUSASustainabilityPerformanceTargetRateFacetTimeTravel,
   SustainabilityPerformanceTargetRateFacetTimeTravel,
-  BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel,
   TimeTravelFacet,
   ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel,
   ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel,
@@ -45,8 +43,6 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
   let project1: string;
   let project2: string;
 
-  let bondSPTRateFacet: BondUSASustainabilityPerformanceTargetRateFacetTimeTravel;
-  let bondReadFacet: BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel;
   let couponSPTRateFacet: CouponFacetTimeTravel;
   let sptRateFacet: SustainabilityPerformanceTargetRateFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
@@ -99,16 +95,6 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       },
     ]);
 
-    bondSPTRateFacet = await ethers.getContractAt(
-      "BondUSASustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
-    bondReadFacet = await ethers.getContractAt(
-      "BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
     sptRateFacet = await ethers.getContractAt(
       "SustainabilityPerformanceTargetRateFacetTimeTravel",
       diamond.target,
@@ -657,7 +643,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
           executionDate: newExecutionDate.toString(),
         };
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData2);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData2);
 
         await timeTravelFacet.changeSystemTimestamp(newFixingDate - 1);
         await kpisFacet.addKpiData(newFixingDate - 1, 1500, project1); // Above baseline -> no penalty

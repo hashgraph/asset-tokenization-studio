@@ -132,6 +132,9 @@ bytes32 constant _KPI_LINKED_RATE_STORAGE_POSITION = 0x3004b60ac76f4502c30ee18a6
 // keccak256('security.token.standard.sustainabilityPerformanceTarget.rate.storage');
 bytes32 constant _SUSTAINABILITY_PERFORMANCE_TARGET_RATE_STORAGE_POSITION = 0x93dfece0e867ca7a953a76c2874bb7238395e73f4592fa6a72639df7d5350c09;
 
+// keccak256('security.token.standard.nominalValue.storage');
+bytes32 constant _NOMINAL_VALUE_STORAGE_POSITION = 0xc0fde456b6db4817b54ba988cff47f70c0e04c5da2d340c51e72c7d679d44c40;
+
 // Layer 3 Unique Constants
 // keccak256('security.token.standard.security.storage');
 bytes32 constant _SECURITY_STORAGE_POSITION = 0x95205812666aa702c6386778a59ee67a93a9559063c49d34d12e4072e5995379;

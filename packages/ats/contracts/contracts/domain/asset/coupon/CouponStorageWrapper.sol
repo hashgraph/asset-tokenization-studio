@@ -7,8 +7,9 @@ import { ICoupon } from "../../../facets/layer_2/coupon/ICoupon.sol";
 import { ICouponStorageWrapper } from "./ICouponStorageWrapper.sol";
 import { ERC20PermitStorageWrapper } from "../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol";
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 
-abstract contract CouponStorageWrapper is ICouponStorageWrapper, ERC20PermitStorageWrapper {
+abstract contract CouponStorageWrapper is ICouponStorageWrapper, NominalValueStorageWrapper {
     struct CouponDataStorage {
         uint256[] couponsOrderedListByIds;
     }
@@ -169,7 +170,7 @@ abstract contract CouponStorageWrapper is ICouponStorageWrapper, ERC20PermitStor
                 : _getTotalBalanceForAdjustedAt(_account, _blockTimestamp());
 
             couponFor_.decimals = _decimalsAdjustedAt(_blockTimestamp());
-            couponFor_.nominalValue = 0; //TODO: Replace 0 with _getNominalValue() when available
+            couponFor_.nominalValue = _getNominalValue();
         }
 
         couponFor_.couponAmount = _calculateCouponAmount(
@@ -238,15 +239,13 @@ abstract contract CouponStorageWrapper is ICouponStorageWrapper, ERC20PermitStor
         uint256 _tokenBalance,
         uint8 _decimals,
         bool _recordDateReached
-    ) internal pure returns (ICoupon.CouponAmountFor memory couponAmountFor_) {
+    ) internal view returns (ICoupon.CouponAmountFor memory couponAmountFor_) {
         if (!_recordDateReached) return couponAmountFor_;
 
         uint256 period = _coupon.endDate - _coupon.startDate;
 
-        // TODO: Replace 0 with _getNominalValue() when available
-        uint256 nominalValue = 0;
-        // TODO: Replace 0 with _getNominalValueDecimals() when available
-        uint8 nominalValueDecimals = 0;
+        uint256 nominalValue = _getNominalValue();
+        uint8 nominalValueDecimals = _getNominalValueDecimals();
 
         couponAmountFor_.recordDateReached = true;
         couponAmountFor_.numerator = _tokenBalance * nominalValue * _coupon.rate * period;

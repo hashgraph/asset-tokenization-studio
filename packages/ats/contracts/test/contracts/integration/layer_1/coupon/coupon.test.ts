@@ -19,6 +19,7 @@ import {
   BondUSAReadFacet,
   TimeTravelFacet as TimeTravel,
   CouponFacetTimeTravel,
+  NominalValueFacet,
 } from "@contract-types";
 import {
   DEFAULT_PARTITION,
@@ -85,6 +86,7 @@ describe("Coupon Tests", () => {
   let clearingActionsFacet: ClearingActionsFacet;
   let freezeFacet: FreezeFacet;
   let clearingTransferFacet: ClearingTransferFacet;
+  let nominalValueFacet: NominalValueFacet;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -155,6 +157,7 @@ describe("Coupon Tests", () => {
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
+    nominalValueFacet = await ethers.getContractAt("NominalValueFacet", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
 
@@ -362,12 +365,12 @@ describe("Coupon Tests", () => {
     expect(couponFor.tokenBalance).to.equal(0);
     expect(couponFor.recordDateReached).to.equal(false);
     expect(couponFor.isDisabled).to.equal(false);
-    // expect(couponFor.nominalValue).to.be.greaterThan(0); //TODO REMOVE WHEN NOMINAL AVAILABLE
-    // expect(couponFor.decimals).to.be.greaterThan(0);//TODO REMOVE WHEN NOMINAL AVAILABLE
+    expect(couponFor.nominalValue).to.be.equal(0);
+    expect(couponFor.decimals).to.be.equal(0);
 
     expect(couponFor.couponAmount.recordDateReached).to.equal(false);
-    // expect(couponFor.couponAmount.numerator).to.equal(0);//TODO REMOVE WHEN NOMINAL AVAILABLE
-    // expect(couponFor.couponAmount.denominator).to.equal(0);//TODO REMOVE WHEN NOMINAL AVAILABLE
+    expect(couponFor.couponAmount.numerator).to.equal(0);
+    expect(couponFor.couponAmount.denominator).to.equal(0);
 
     expect(couponTotalHolders).to.equal(0);
     expect(couponHolders.length).to.equal(couponTotalHolders);
@@ -419,6 +422,9 @@ describe("Coupon Tests", () => {
     const couponAmountFor = await couponFacet.getCouponAmountFor(1, signer_A.address);
     const couponTotalHolders = await couponFacet.getTotalCouponHolders(1);
     const couponHolders = await couponFacet.getCouponHolders(1, 0, couponTotalHolders);
+    const nominalValue = await nominalValueFacet.getNominalValue();
+    const nominalValueDecimals = await nominalValueFacet.getNominalValueDecimals();
+    const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
 
     const [couponsForList, accountsList] = await couponFacet.getCouponsFor(1, 0, 10);
     expect(couponsForList.length).to.equal(1);
@@ -429,8 +435,8 @@ describe("Coupon Tests", () => {
     expect(couponForFromList.tokenBalance).to.equal(TotalAmount);
     expect(couponForFromList.recordDateReached).to.equal(true);
     expect(couponForFromList.isDisabled).to.equal(false);
-    // expect(couponForFromList.nominalValue).to.be.greaterThan(0);//TODO REMOVE WHEN NOMINAL AVAILABLE
-    // expect(couponForFromList.decimals).to.be.greaterThan(0);//TODO REMOVE WHEN NOMINAL AVAILABLE
+    expect(couponForFromList.nominalValue).to.be.greaterThan(0);
+    expect(couponForFromList.decimals).to.be.greaterThan(0);
 
     expect(couponFor.tokenBalance).to.equal(TotalAmount);
     expect(couponFor.recordDateReached).to.equal(true);
@@ -438,13 +444,10 @@ describe("Coupon Tests", () => {
     expect(couponHolders.length).to.equal(couponTotalHolders);
     expect([...couponHolders]).to.have.members([signer_A.address]);
     expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
-    // expect(couponAmountFor.numerator).to.equal(
-    //   couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
-    // );//TODO REMOVE WHEN NOMINAL AVAILABLE
-    // expect(couponAmountFor.denominator).to.equal(
-    //   10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
-    //     BigInt(YEAR_SECONDS),
-    // );//TODO REMOVE WHEN NOMINAL AVAILABLE
+    expect(couponAmountFor.numerator).to.equal(couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period);
+    expect(couponAmountFor.denominator).to.equal(
+      10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+    );
   });
 
   it("GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds", async () => {
@@ -491,6 +494,9 @@ describe("Coupon Tests", () => {
     const couponAmountFor = await couponFacet.getCouponAmountFor(1, signer_A.address);
     const couponTotalHolders = await couponFacet.getTotalCouponHolders(1);
     const couponHolders = await couponFacet.getCouponHolders(1, 0, couponTotalHolders);
+    const nominalValue = await nominalValueFacet.getNominalValue();
+    const nominalValueDecimals = await nominalValueFacet.getNominalValueDecimals();
+    const period = couponFor.coupon.endDate - couponFor.coupon.startDate;
 
     const [couponsForList, accountsList] = await couponFacet.getCouponsFor(1, 0, 10);
     expect(couponsForList.length).to.equal(1);
@@ -501,8 +507,8 @@ describe("Coupon Tests", () => {
     expect(couponForFromList.tokenBalance).to.equal(TotalAmount);
     expect(couponForFromList.recordDateReached).to.equal(true);
     expect(couponForFromList.isDisabled).to.equal(false);
-    // expect(couponForFromList.nominalValue).to.be.greaterThan(0); //TODO REMOVE WHEN NOMINAL AVAILABLE
-    // expect(couponForFromList.decimals).to.be.greaterThan(0);//TODO REMOVE WHEN NOMINAL AVAILABLE
+    expect(couponForFromList.nominalValue).to.be.greaterThan(0);
+    expect(couponForFromList.decimals).to.be.greaterThan(0);
 
     expect(couponFor.tokenBalance).to.equal(TotalAmount);
     expect(couponFor.recordDateReached).to.equal(true);
@@ -510,13 +516,10 @@ describe("Coupon Tests", () => {
     expect(couponHolders.length).to.equal(couponTotalHolders);
     expect([...couponHolders]).to.have.members([signer_A.address]);
     expect(couponAmountFor.recordDateReached).to.equal(couponFor.recordDateReached);
-    // expect(couponAmountFor.numerator).to.equal(
-    //   couponFor.tokenBalance * bondDetails.nominalValue * couponFor.coupon.rate * period,
-    // );//TODO REMOVE WHEN NOMINAL AVAILABLE
-    // expect(couponAmountFor.denominator).to.equal(
-    //   10n ** (couponFor.decimals + bondDetails.nominalValueDecimals + couponFor.coupon.rateDecimals) *
-    //     BigInt(YEAR_SECONDS),
-    // );//TODO REMOVE WHEN NOMINAL AVAILABLE
+    expect(couponAmountFor.numerator).to.equal(couponFor.tokenBalance * nominalValue * couponFor.coupon.rate * period);
+    expect(couponAmountFor.denominator).to.equal(
+      10n ** (couponFor.decimals + nominalValueDecimals + couponFor.coupon.rateDecimals) * BigInt(YEAR_SECONDS),
+    );
   });
 
   it("GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds", async () => {

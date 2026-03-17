@@ -9,11 +9,15 @@ import { CouponStorageWrapper } from "../coupon/CouponStorageWrapper.sol";
 abstract contract BondStorageWrapper is IBondStorageWrapper, CouponStorageWrapper {
     struct BondDataStorage {
         bytes3 currency;
-        uint256 nominalValue;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
+        // solhint-disable-next-line var-name-mixedcase
+        uint256 DEPRECATED_nominalValue;
         uint256 startingDate;
         uint256 maturityDate;
         bool initialized;
-        uint8 nominalValueDecimals;
+        /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
+        // solhint-disable-next-line var-name-mixedcase
+        uint8 DEPRECATED_nominalValueDecimals;
         // solhint-disable-next-line var-name-mixedcase
         uint256[] DEPRECATED_couponsOrderedListByIds;
     }
@@ -40,15 +44,17 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, CouponStorageWrappe
     {
         BondDataStorage storage bondStorage = _bondStorage();
         bondStorage.initialized = true;
-        _storeBondDetails(_bondDetailsData);
+        _setCurrency(_bondDetailsData.currency);
+        _setStartingDate(_bondDetailsData.startingDate);
+        _setMaturityDate(_bondDetailsData.maturityDate);
     }
 
-    function _storeBondDetails(IBondRead.BondDetailsData memory _bondDetails) internal override {
-        _bondStorage().currency = _bondDetails.currency;
-        _bondStorage().nominalValue = _bondDetails.nominalValue;
-        _bondStorage().nominalValueDecimals = _bondDetails.nominalValueDecimals;
-        _bondStorage().startingDate = _bondDetails.startingDate;
-        _bondStorage().maturityDate = _bondDetails.maturityDate;
+    function _setCurrency(bytes3 _currency) internal override {
+        _bondStorage().currency = _currency;
+    }
+
+    function _setStartingDate(uint256 _startingDate) internal override {
+        _bondStorage().startingDate = _startingDate;
     }
 
     /**
@@ -61,11 +67,19 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, CouponStorageWrappe
         return true;
     }
 
+    /// @dev DEPRECATED – MIGRATION: Remove this function and the DEPRECATED_ fields from
+    /// BondDataStorage once all legacy tokens have been migrated.
+    function _migrateBondNominalValue() internal override {
+        if (_bondStorage().DEPRECATED_nominalValue == 0) return;
+        _bondStorage().DEPRECATED_nominalValue = 0;
+        _bondStorage().DEPRECATED_nominalValueDecimals = 0;
+    }
+
     function _getBondDetails() internal view override returns (IBondRead.BondDetailsData memory bondDetails_) {
         bondDetails_ = IBondRead.BondDetailsData({
             currency: _bondStorage().currency,
-            nominalValue: _bondStorage().nominalValue,
-            nominalValueDecimals: _bondStorage().nominalValueDecimals,
+            nominalValue: _getNominalValue(),
+            nominalValueDecimals: _getNominalValueDecimals(),
             startingDate: _bondStorage().startingDate,
             maturityDate: _bondStorage().maturityDate
         });
@@ -96,6 +110,16 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, CouponStorageWrappe
         uint256 _position
     ) internal view override returns (uint256 total_) {
         return _bondStorage().DEPRECATED_couponsOrderedListByIds[_position];
+    }
+
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
+    function _bondNominalValue() internal view virtual override returns (uint256) {
+        return _bondStorage().DEPRECATED_nominalValue;
+    }
+
+    /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
+    function _bondNominalValueDecimals() internal view virtual override returns (uint8) {
+        return _bondStorage().DEPRECATED_nominalValueDecimals;
     }
 
     function _bondStorage() internal pure returns (BondDataStorage storage bondData_) {
