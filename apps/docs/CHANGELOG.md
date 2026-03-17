@@ -1,5 +1,11 @@
 # @hashgraph/asset-tokenization-studio-docs
 
+## 1.2.0
+
+### Minor Changes
+
+- 3048bbf: Enable docusarus documentation deployments with Netlify and fix ats web deployment build
+
 ## 1.1.0
 
 ### Minor Changes
