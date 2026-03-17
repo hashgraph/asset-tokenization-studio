@@ -76,6 +76,28 @@ graph TB
     style Equity fill:#ffe1f5
 ```
 
+### Directory Structure (DDD-aligned)
+
+The contracts follow a Domain-Driven Design layout:
+
+```
+contracts/
+├── constants/          # Resolver keys, roles, storage positions
+├── domain/             # Storage wrappers (formerly layer_0/)
+│   ├── core/           # Cross-cutting storage (ERC1400, AccessControl, KYC, Cap, Nonce)
+│   └── asset/          # Asset-specific storage (Bond, Equity, CorporateAction, NominalValue)
+├── facets/             # Business logic facets
+│   ├── layer_1/        # Core implementations (ERC-1400, ERC-3643, Freeze, Hold)
+│   ├── layer_2/        # Domain features (Bond, Equity, NominalValue, Scheduled Tasks)
+│   └── layer_3/        # Jurisdiction-specific (USA)
+├── infrastructure/     # Diamond pattern infrastructure (formerly resolver/ and proxies/)
+│   ├── diamond/        # Diamond proxy and resolver
+│   ├── proxy/          # Upgradeable proxies
+│   └── utils/          # Infrastructure utilities
+├── factory/            # Token deployment factories
+└── test/mocks/         # Test mock contracts
+```
+
 ### 4-Layer Hierarchical Design
 
 ```
@@ -91,23 +113,33 @@ graph TB
 │ (Facet Registry) │  │ (Token Creator) │
 └───────┬──────────┘  └─────────────────┘
         │
-        ├─ Layer 0: Storage Wrappers
-        ├─ Layer 1: Core Logic (ERC-1400, ERC-3643)
-        ├─ Layer 2: Domain Features (Bond, Equity, Corporate Actions)
-        └─ Layer 3: Jurisdiction-Specific (USA)
+        ├─ domain/: Storage Wrappers (core + asset)
+        ├─ facets/layer_1/: Core Logic (ERC-1400, ERC-3643)
+        ├─ facets/layer_2/: Domain Features (Bond, Equity, NominalValue, Corporate Actions)
+        └─ facets/layer_3/: Jurisdiction-Specific (USA)
 ```
 
 ## Contract Layers
 
-### Layer 0: Storage Wrappers
+### Domain: Storage Wrappers (formerly Layer 0)
 
-Provide type-safe access to Diamond storage:
+Provide type-safe access to Diamond storage, split into **core** and **asset** subdomains:
+
+**Core** (cross-cutting concerns):
 
 - **ERC1400StorageWrapper** - Token state and partition data
+- **ERC20StorageWrapper** - ERC20 balances and total supply (with lazy migration from legacy storage)
 - **KycStorageWrapper** - KYC and identity management
 - **CapStorageWrapper** - Supply cap and issuance limits
 - **AccessControlStorageWrapper** - Role-based permissions
 - **NonceStorageWrapper** - EIP712 nonce storage for signature verification
+
+**Asset** (asset-type-specific storage):
+
+- **BondStorageWrapper** - Bond-specific data (coupons, maturity, nominal value)
+- **EquityStorageWrapper** - Equity-specific data (dividends, voting, nominal value)
+- **CorporateActionsStorageWrapper** - Corporate action lifecycle and cancellation state
+- **NominalValueStorageWrapper** - Dedicated nominal value storage with migration support
 
 **Purpose**: Storage isolation per feature for safe upgradeability
 
@@ -133,20 +165,29 @@ Feature-specific implementations:
 
 **Bond Facets:**
 
-- **BondFacet** - Create bonds, set coupons, manage maturity
+- **BondFacet** - Create bonds, set coupons, cancel coupons, manage maturity
 - **BondReadFacet** - Read bond information (coupons, maturity)
 
 **Equity Facets:**
 
-- **EquityFacet** - Create equity, set dividends, voting, stock splits
+- **EquityFacet** - Create equity, set/cancel dividends, voting, stock splits
+
+**Nominal Value:**
+
+- **NominalValueFacet** - Set and query nominal value per token (with migration from legacy bond/equity storage)
 
 **Scheduled Tasks:**
 
 - **ScheduledTasksFacet** - Snapshots, balance adjustments, cross-ordered tasks
 
+**Snapshot Queries:**
+
+- **SnapshotsFacet** - `balancesOfAtSnapshot()` - Paginated query of holder balances at a specific snapshot
+
 **Corporate Actions:**
 
 - **ProceedRecipientsFacet** - Payment distribution logic
+- **CorporateActionsStorageWrapper** - Cancellation support via `_cancelCorporateAction()`
 
 **Purpose**: Each facet is independently upgradeable
 
@@ -277,17 +318,19 @@ Existing storage preserved
 
 ### Equity Features
 
-- Dividend distribution scheduling
-- Voting rights management
-- Stock splits and reverse splits
+- Dividend distribution scheduling and cancellation
+- Voting rights management and cancellation
+- Stock splits, reverse splits, and cancellation
 - Balance adjustments
+- Nominal value management
 
 ### Bond Features
 
-- Coupon payment scheduling
+- Coupon payment scheduling and cancellation
 - Maturity date management
 - Redemption at maturity
 - Interest calculations
+- Nominal value management
 
 ### Compliance
 
