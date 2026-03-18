@@ -3,47 +3,13 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from "../../../constants/values.sol";
 import { IEquity } from "./IEquity.sol";
 import { Common } from "../../../domain/Common.sol";
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 abstract contract Equity is IEquity, Common {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function setDividend(
-        Dividend calldata _newDividend
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_CORPORATE_ACTION_ROLE)
-        validateDates(_newDividend.recordDate, _newDividend.executionDate)
-        onlyValidTimestamp(_newDividend.recordDate)
-        returns (uint256 dividendID_)
-    {
-        bytes32 corporateActionID;
-        (corporateActionID, dividendID_) = _setDividend(_newDividend);
-        emit DividendSet(
-            corporateActionID,
-            dividendID_,
-            _msgSender(),
-            _newDividend.recordDate,
-            _newDividend.executionDate,
-            _newDividend.amount,
-            _newDividend.amountDecimals
-        );
-    }
-
-    function cancelDividend(
-        uint256 _dividendId
-    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
-        (success_) = _cancelDividend(_dividendId);
-    }
-
     function cancelVoting(
         uint256 _voteId
     ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (bool success_) {
@@ -96,60 +62,6 @@ abstract contract Equity is IEquity, Common {
 
     function getEquityDetails() external view override returns (EquityDetailsData memory equityDetailsData_) {
         return _getEquityDetails();
-    }
-
-    function getDividend(
-        uint256 _dividendID
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (RegisteredDividend memory registeredDividend_, bool isDisabled_)
-    {
-        (registeredDividend_, , isDisabled_) = _getDividend(_dividendID);
-    }
-
-    function getDividendFor(
-        uint256 _dividendID,
-        address _account
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (DividendFor memory dividendFor_)
-    {
-        return _getDividendFor(_dividendID, _account);
-    }
-
-    function getDividendAmountFor(
-        uint256 _dividendID,
-        address _account
-    )
-        external
-        view
-        override
-        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
-        returns (DividendAmountFor memory dividendAmountFor_)
-    {
-        return _getDividendAmountFor(_dividendID, _account);
-    }
-
-    function getDividendsCount() external view override returns (uint256 dividendCount_) {
-        return _getDividendsCount();
-    }
-
-    function getDividendHolders(
-        uint256 _dividendID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory holders_) {
-        return _getDividendHolders(_dividendID, _pageIndex, _pageLength);
-    }
-
-    function getTotalDividendHolders(uint256 _dividendID) external view returns (uint256) {
-        return _getTotalDividendHolders(_dividendID);
     }
 
     function getVoting(
