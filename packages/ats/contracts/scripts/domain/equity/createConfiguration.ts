@@ -24,7 +24,7 @@ import { EQUITY_CONFIG_ID } from "../constants";
 import { atsRegistry } from "../atsRegistry";
 
 /**
- * Equity-specific facets list (41 facets total).
+ * Equity-specific facets list (47 facets total).
  *
  * This is an explicit positive list of all facets required for equity tokens.
  * Includes all common facets plus EquityUSAFacet.
@@ -94,6 +94,8 @@ const EQUITY_FACETS = [
 
   // Voting (1)
   "VotingFacet",
+  // Dividend (1)
+  "DividendFacet",
 
   // Jurisdiction-Specific (1)
   "EquityUSAFacet",
@@ -104,7 +106,7 @@ const EQUITY_FACETS = [
  *
  * Thin wrapper that calls the generic core operation with equity-specific data:
  * - Configuration ID: EQUITY_CONFIG_ID
- * - Facet list: EQUITY_FACETS (43 facets)
+ * - Facet list: EQUITY_FACETS (47 facets)
  *
  * All implementation logic is handled by the generic createConfiguration()
  * operation in core/operations/blrConfigurations.ts.

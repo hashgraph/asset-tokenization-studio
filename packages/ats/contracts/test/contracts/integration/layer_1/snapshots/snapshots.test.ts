@@ -17,6 +17,7 @@ import {
   TimeTravelFacet,
   FreezeFacet,
   ClearingTransferFacet,
+  DividendFacet,
 } from "@contract-types";
 import { ZERO, EMPTY_STRING, ADDRESS_ZERO, dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { grantRoleAndPauseToken } from "@test";
@@ -55,6 +56,7 @@ describe("Snapshots Tests", () => {
   let equityFacet: Equity;
   let timeTravelFacet: TimeTravelFacet;
   let freezeFacet: FreezeFacet;
+  let dividendFacet: DividendFacet;
   let clearingTransferFacet: ClearingTransferFacet;
 
   async function deploySecurityFixtureMultiPartition() {
@@ -91,6 +93,7 @@ describe("Snapshots Tests", () => {
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
     freezeFacet = await ethers.getContractAt("FreezeFacet", diamond.target);
     clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target);
   }
 
   function set_initRbacs(): any[] {
@@ -779,9 +782,9 @@ describe("Snapshots Tests", () => {
         amount: dividendsAmountPerEquity,
         amountDecimals: dividendAmountDecimalsPerEquity,
       };
-      await equityFacet.connect(signer_A).setDividend(dividendData_1);
-      await equityFacet.connect(signer_A).setDividend(dividendData_2);
-      await equityFacet.connect(signer_A).setDividend(dividendData_3);
+      await dividendFacet.connect(signer_A).setDividend(dividendData_1);
+      await dividendFacet.connect(signer_A).setDividend(dividendData_2);
+      await dividendFacet.connect(signer_A).setDividend(dividendData_3);
 
       const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:07Z");
       const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp("2030-01-01T00:00:13Z");
@@ -828,9 +831,9 @@ describe("Snapshots Tests", () => {
       const decimalFactor_3 = decimalFactor_2 + balanceAdjustmentsDecimals_3;
 
       // check
-      const dividendFor_C_1 = await equityFacet.getDividendFor(1, signer_C.address);
-      const dividendFor_C_2 = await equityFacet.getDividendFor(2, signer_C.address);
-      const dividendFor_C_3 = await equityFacet.getDividendFor(3, signer_C.address);
+      const dividendFor_C_1 = await dividendFacet.getDividendFor(1, signer_C.address);
+      const dividendFor_C_2 = await dividendFacet.getDividendFor(2, signer_C.address);
+      const dividendFor_C_3 = await dividendFacet.getDividendFor(3, signer_C.address);
       const balance_C_At_Snapshot_4 = await snapshotFacet.balanceOfAtSnapshot(4, signer_C.address);
 
       expect(dividendFor_C_1.tokenBalance).to.be.equal(balanceOf_C_Original);
