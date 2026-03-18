@@ -13,6 +13,7 @@ import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
 import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
 import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
 import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
+import { GetCouponsForQuery } from "@query/bond/coupons/getCouponsFor/GetCouponsForQuery";
 import { GetCouponFromOrderedListAtQuery } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQuery";
 import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery";
 import { GetCouponsOrderedListQuery } from "@query/bond/coupons/getCouponsOrderedList/GetCouponsOrderedListQuery";
@@ -22,6 +23,7 @@ import { GetCouponHoldersRequest, GetTotalCouponHoldersRequest } from "../reques
 import CancelCouponRequest from "../request/bond/CancelCouponRequest";
 import GetAllCouponsRequest from "../request/bond/GetAllCouponsRequest";
 import GetCouponForRequest from "../request/bond/GetCouponForRequest";
+import GetCouponsForRequest from "../request/bond/GetCouponsForRequest";
 import GetCouponFromOrderedListAtRequest from "../request/bond/GetCouponFromOrderedListAtRequest";
 import GetCouponRequest from "../request/bond/GetCouponRequest";
 import GetCouponsOrderedListRequest from "../request/bond/GetCouponsOrderedListRequest";
@@ -35,6 +37,7 @@ interface ICouponInPort {
   setCoupon(request: SetCouponRequest): Promise<{ payload: number; transactionId: string }>;
   cancelCoupon(request: CancelCouponRequest): Promise<{ payload: boolean; transactionId: string }>;
   getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
+  getCouponsFor(request: GetCouponsForRequest): Promise<{ coupons: CouponForViewModel[]; accounts: string[] }>;
   getCouponAmountFor(request: GetCouponForRequest): Promise<CouponAmountForViewModel>;
   getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
@@ -119,6 +122,40 @@ class CouponInPort implements ICouponInPort {
     };
 
     return couponFor;
+  }
+
+  @LogError
+  async getCouponsFor(request: GetCouponsForRequest): Promise<{ coupons: CouponForViewModel[]; accounts: string[] }> {
+    ValidatedRequest.handleValidation("GetCouponsForRequest", request);
+
+    const res = await this.queryBus.execute(
+      new GetCouponsForQuery(request.securityId, request.couponId, request.pageIndex, request.pageLength),
+    );
+
+    const coupons: CouponForViewModel[] = res.coupons.map((couponFor) => ({
+      tokenBalance: couponFor.tokenBalance.toString(),
+      nominalValue: couponFor.nominalValue.toString(),
+      decimals: couponFor.decimals.toString(),
+      recordDateReached: couponFor.recordDateReached,
+      coupon: {
+        recordDate: new Date(couponFor.coupon.recordTimeStamp * ONE_THOUSAND),
+        executionDate: new Date(couponFor.coupon.executionTimeStamp * ONE_THOUSAND),
+        rate: couponFor.coupon.rate.toString(),
+        rateDecimals: couponFor.coupon.rateDecimals,
+        startDate: new Date(couponFor.coupon.startTimeStamp * ONE_THOUSAND),
+        endDate: new Date(couponFor.coupon.endTimeStamp * ONE_THOUSAND),
+        fixingDate: new Date(couponFor.coupon.fixingTimeStamp * ONE_THOUSAND),
+        rateStatus: CastRateStatus.toNumber(couponFor.coupon.rateStatus),
+      },
+      couponAmount: {
+        numerator: couponFor.couponAmount.numerator,
+        denominator: couponFor.couponAmount.denominator,
+        recordDateReached: couponFor.couponAmount.recordDateReached,
+      },
+      isDisabled: couponFor.isDisabled,
+    }));
+
+    return { coupons, accounts: res.accounts };
   }
 
   @LogError

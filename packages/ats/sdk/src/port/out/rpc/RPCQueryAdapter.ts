@@ -486,6 +486,52 @@ export class RPCQueryAdapter {
     );
   }
 
+  async getCouponsFor(
+    address: EvmAddress,
+    couponId: number,
+    pageIndex: number,
+    pageLength: number,
+  ): Promise<{ coupons: CouponFor[]; accounts: string[] }> {
+    LogService.logTrace(`Getting Coupons for`);
+
+    const result = await this.connect(Coupon__factory, address.toString()).getCouponsFor(
+      couponId,
+      pageIndex,
+      pageLength,
+    );
+
+    const coupons = result.couponFor_.map((couponFor) => {
+      const couponDomain = new Coupon(
+        Number(couponFor.coupon.recordDate),
+        Number(couponFor.coupon.executionDate),
+        new BigDecimal(couponFor.coupon.rate.toString()),
+        Number(couponFor.coupon.rateDecimals),
+        Number(couponFor.coupon.startDate),
+        Number(couponFor.coupon.endDate),
+        Number(couponFor.coupon.fixingDate),
+        CastRateStatus.fromBigint(couponFor.coupon.rateStatus),
+      );
+
+      const couponAmountDomain = new CouponAmountFor(
+        couponFor.couponAmount.numerator.toString(),
+        couponFor.couponAmount.denominator.toString(),
+        couponFor.couponAmount.recordDateReached,
+      );
+
+      return new CouponFor(
+        new BigDecimal(couponFor.tokenBalance),
+        new BigDecimal(couponFor.nominalValue),
+        Number(couponFor.decimals),
+        couponFor.recordDateReached,
+        couponDomain,
+        couponAmountDomain,
+        couponFor.isDisabled,
+      );
+    });
+
+    return { coupons, accounts: [...result.accounts_] };
+  }
+
   async getCouponAmountFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponAmountFor> {
     LogService.logTrace(`Getting Coupon Amount for`);
 
