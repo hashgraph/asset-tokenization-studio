@@ -15,6 +15,7 @@ import {
   Bond,
   Coupon,
   GetCouponForRequest,
+  GetCouponsForRequest,
   Role,
   RoleRequest,
   SetCouponRequest,
@@ -320,5 +321,19 @@ describe("🧪 Coupon test", () => {
 
     expect(typeof result).toBe("number");
     expect(result).toBeGreaterThanOrEqual(0);
+  }, 600_000);
+
+  it("Get coupons for account with pagination", async () => {
+    const result = await Coupon.getCouponsFor(
+      new GetCouponsForRequest({
+        securityId: bond.evmDiamondAddress!.toString(),
+        couponId: 1,
+        pageIndex: 0,
+        pageLength: 10,
+      }),
+    );
+
+    expect(Array.isArray(result.coupons)).toBe(true);
+    expect(Array.isArray(result.accounts)).toBe(true);
   }, 600_000);
 });

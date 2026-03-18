@@ -676,6 +676,12 @@ jest.mock("@port/out/rpc/RPCQueryAdapter", () => {
     return pos + 1;
   });
 
+  singletonInstance.getCouponsFor = jest.fn(
+    async (address: EvmAddress, couponId: number, pageIndex: number, pageLength: number) => {
+      return { coupons: [], accounts: [] };
+    },
+  );
+
   singletonInstance.getAccountSecurityRelationship = jest.fn(async (address: EvmAddress, target: EvmAddress) => {});
 
   singletonInstance.isPaused = jest.fn(async (address: EvmAddress) => {
