@@ -1,5 +1,34 @@
 # @hashgraph/asset-tokenization-contracts
 
+## 6.0.0
+
+### Major Changes
+
+- 5e58601: Add cancelCorporateAction and rename the calls, commands and queries from dividends to dividend when set or return one
+
+### Minor Changes
+
+- 2e5fdcf: - Added `balancesOfAtSnapshot` query to retrieve holder balances at specific snapshots with pagination support.
+- 9d56586: Restructure contracts folder layout for DDD alignment:
+  - Reorganize `layer_0/` into `domain/` with `core/` and `asset/` split, drop `Lib` prefix from all domain files
+  - Move `layer_1/`, `layer_2/`, `layer_3/` under `facets/` directory
+  - Build `infrastructure/` from `resolver/` and `proxies/` with `diamond/`, `proxy/`, and `utils/` subdirectories
+  - Consolidate all scattered `constants/` into root `constants/` directory
+  - Move `mocks/` and test-only contracts into `test/mocks/`
+  - Colocate all interfaces next to their implementations (remove centralized `interfaces/` directories)
+  - Rename plural feature folders to singular (`snapshots/` → `snapshot/`, `nonces/` → `nonce/`, etc.)
+
+- 8b538ed: Refactor nominal value in a new facet
+
+### Patch Changes
+
+- f809d77: Fix downstream project compatibility for contracts package:
+  - Convert 454 bare `contracts/` prefix imports to relative imports across 250 Solidity files; relative imports work universally across Hardhat, Foundry, and downstream consumers
+  - Reorganize test utilities into dedicated files (`helpers/assertions.ts`, `fixtures/hardhatHelpers.ts`) and expose via new `./test/fixtures` export entry point for downstream test reuse
+  - Add `isDeployable` field to `ContractMetadata` in registry generator to correctly distinguish deployable contracts from interfaces/libraries; only deployable mocks generate TypeChain factory references
+  - Include test helpers and fixtures in published package build output (`tsconfig.build.json`)
+  - Re-enable `use-natspec` solhint rule
+
 ## 5.0.0
 
 ### Patch Changes

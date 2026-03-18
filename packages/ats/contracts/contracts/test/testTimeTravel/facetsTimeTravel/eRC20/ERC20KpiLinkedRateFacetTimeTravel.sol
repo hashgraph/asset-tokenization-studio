@@ -3,9 +3,11 @@
 
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ERC20KpiLinkedRateFacet } from "../../../../layer_1/ERC1400/ERC20/kpiLinkedRate/ERC20KpiLinkedRateFacet.sol";
+import {
+    ERC20KpiLinkedRateFacet
+} from "../../../../facets/layer_1/ERC1400/ERC20/kpiLinkedRate/ERC20KpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC20KpiLinkedRateFacetTimeTravel is ERC20KpiLinkedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

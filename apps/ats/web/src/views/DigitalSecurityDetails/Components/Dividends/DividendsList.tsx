@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { DividendsViewModel, GetAllDividendsRequest } from "@hashgraph/asset-tokenization-sdk";
+import { DividendViewModel, GetAllDividendsRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { createColumnHelper } from "@tanstack/table-core";
 import { Table, Text } from "io-bricks-ui";
@@ -26,7 +26,7 @@ export const DividendsList = () => {
     }),
   );
 
-  const columnHelper = createColumnHelper<DividendsViewModel>();
+  const columnHelper = createColumnHelper<DividendViewModel>();
 
   const columns = [
     columnHelper.accessor("dividendId", {

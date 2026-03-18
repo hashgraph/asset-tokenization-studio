@@ -5,4 +5,5 @@ import { QueryResponse } from "@core/query/QueryResponse";
 export default interface VotingRightsForViewModel extends QueryResponse {
   tokenBalance: string;
   decimals: string;
+  isDisabled: boolean;
 }

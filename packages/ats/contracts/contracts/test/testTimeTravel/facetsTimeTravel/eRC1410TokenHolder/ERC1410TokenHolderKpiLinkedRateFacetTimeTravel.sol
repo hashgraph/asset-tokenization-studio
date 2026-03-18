@@ -5,9 +5,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     ERC1410TokenHolderKpiLinkedRateFacet
-} from "../../../../layer_1/ERC1400/ERC1410/kpiLinkedRate/ERC1410TokenHolderKpiLinkedRateFacet.sol";
+} from "../../../../facets/layer_1/ERC1400/ERC1410/kpiLinkedRate/ERC1410TokenHolderKpiLinkedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ERC1410TokenHolderKpiLinkedRateFacetTimeTravel is
     ERC1410TokenHolderKpiLinkedRateFacet,

@@ -449,21 +449,21 @@ The ATS contracts implement a **4-layer hierarchical design** using the **Diamon
 - Central registry mapping Business Logic Keys (BLK) to versioned facet addresses
 - Manages global version counter across all facets
 - Provides configuration management for token types
-- Location: `contracts/resolver/BusinessLogicResolver.sol`
+- Location: `contracts/infrastructure/diamond/BusinessLogicResolver.sol`
 
 **Diamond Proxy (ResolverProxy)**
 
 - EIP-2535 compliant proxy routing function calls to appropriate facets
 - Each token is a proxy instance
 - Routes via BLR resolution
-- Location: `contracts/resolverProxy/ResolverProxy.sol`
+- Location: `contracts/infrastructure/proxy/ResolverProxy.sol`
 
 **TREXFactory**
 
 - Factory pattern for deploying complete token ecosystems
 - Creates tokens with specific configurations (Equity/Bond)
 - Handles initialization of all required facets
-- Location: `contracts/factory/TREXFactory.sol`
+- Location: `contracts/factory/ERC3643/TREXFactory.sol`
 
 ### Core Facet Categories
 

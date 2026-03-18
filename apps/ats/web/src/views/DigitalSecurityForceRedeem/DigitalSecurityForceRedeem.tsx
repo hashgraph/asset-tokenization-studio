@@ -7,7 +7,7 @@ import { Text, InputController, InputNumberController, Button, Checkbox } from "
 import { SubmitHandler, useForm } from "react-hook-form";
 import { required, min } from "../../utils/rules";
 import { CancelButton } from "../../components/CancelButton";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { ForceRedeemRequest, FullRedeemAtMaturityRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useForceRedeemSecurity } from "../../hooks/queries/useForceRedeemSecurity";
 import { useFullRedeemAtMaturity } from "../../hooks/queries/useFullRedeemAtMaturity";
