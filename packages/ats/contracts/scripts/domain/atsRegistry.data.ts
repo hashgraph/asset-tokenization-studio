@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-17T11:03:48.849Z
- * Facets: 201
+ * Generated: 2026-03-17T18:09:13.154Z
+ * Facets: 202
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -125,6 +125,8 @@ import {
   CouponSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   DiamondFacet__factory,
   DiamondFacetTimeTravel__factory,
+  DividendFacet__factory,
+  DividendFacetTimeTravel__factory,
   ERC1410IssuerFacet__factory,
   ERC1410IssuerFacetTimeTravel__factory,
   ERC1410IssuerFixedRateFacet__factory,
@@ -3272,34 +3274,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel ? new DiamondFacetTimeTravel__factory(signer) : new DiamondFacet__factory(signer),
   },
 
-  EquityUSAFacet: {
-    name: "EquityUSAFacet",
+  DividendFacet: {
+    name: "DividendFacet",
     resolverKey: {
-      name: "_EQUITY_RESOLVER_KEY",
-      value: "0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810",
+      name: "_DIVIDEND_RESOLVER_KEY",
+      value: "0x63752e3f4bd54d9fec1ad1667ef4de4f80e9a6484fb94f93ea4312aef9c19bea",
     },
-    inheritance: ["EquityUSA", "IStaticFunctionSelectors"],
+    inheritance: ["DividendFacetBase", "Common"],
     methods: [
-      {
-        name: "_initialize_equityUSA",
-        signature:
-          "function _initialize_equityUSA((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
-        selector: "0x8c505179",
-      },
       {
         name: "cancelDividend",
         signature: "function cancelDividend(uint256 _dividendId) returns (bool success_)",
         selector: "0xd1869b7c",
-      },
-      {
-        name: "cancelScheduledBalanceAdjustment",
-        signature: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
-        selector: "0x564387f9",
-      },
-      {
-        name: "cancelVoting",
-        signature: "function cancelVoting(uint256 _voteId) returns (bool success_)",
-        selector: "0x549bdd6e",
       },
       {
         name: "getDividend",
@@ -3331,6 +3317,46 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9e676952",
       },
       {
+        name: "getTotalDividendHolders",
+        signature: "function getTotalDividendHolders(uint256 _dividendID) view returns (uint256)",
+        selector: "0xd61a022b",
+      },
+      {
+        name: "setDividend",
+        signature:
+          "function setDividend((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
+        selector: "0xe7686a05",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new DividendFacetTimeTravel__factory(signer) : new DividendFacet__factory(signer),
+  },
+
+  EquityUSAFacet: {
+    name: "EquityUSAFacet",
+    resolverKey: {
+      name: "_EQUITY_RESOLVER_KEY",
+      value: "0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810",
+    },
+    inheritance: ["EquityUSA", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "_initialize_equityUSA",
+        signature:
+          "function _initialize_equityUSA((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) _equityDetailsData, (uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) _regulationData, (bool countriesControlListType, string listOfCountries, string info) _additionalSecurityData)",
+        selector: "0x8c505179",
+      },
+      {
+        name: "cancelScheduledBalanceAdjustment",
+        signature: "function cancelScheduledBalanceAdjustment(uint256 _balanceAdjustmentId) returns (bool success_)",
+        selector: "0x564387f9",
+      },
+      {
+        name: "cancelVoting",
+        signature: "function cancelVoting(uint256 _voteId) returns (bool success_)",
+        selector: "0x549bdd6e",
+      },
+      {
         name: "getEquityDetails",
         signature:
           "function getEquityDetails() view returns ((bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetailsData_)",
@@ -3358,11 +3384,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalDividendHolders",
-        signature: "function getTotalDividendHolders(uint256 _dividendID) view returns (uint256)",
-        selector: "0xd61a022b",
       },
       {
         name: "getTotalSecurityHolders",
@@ -3396,12 +3417,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
         selector: "0x009f64ac",
-      },
-      {
-        name: "setDividend",
-        signature:
-          "function setDividend((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
-        selector: "0xe7686a05",
       },
       {
         name: "setScheduledBalanceAdjustment",
@@ -10706,7 +10721,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 201 as const;
+export const TOTAL_FACETS = 202 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -11053,9 +11068,15 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
+  DividendStorageWrapper: {
+    name: "DividendStorageWrapper",
+    inheritance: ["IDividendStorageWrapper", "BondStorageWrapper"],
+    methods: [],
+  },
+
   EquityStorageWrapper: {
     name: "EquityStorageWrapper",
-    inheritance: ["IEquityStorageWrapper", "BondStorageWrapper"],
+    inheritance: ["IEquityStorageWrapper", "DividendStorageWrapper"],
     methods: [],
   },
 
@@ -11342,8 +11363,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
-  IEquityStorageWrapper: {
-    name: "IEquityStorageWrapper",
+  IDividendStorageWrapper: {
+    name: "IDividendStorageWrapper",
     methods: [],
     events: [
       {
@@ -11356,6 +11377,21 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         signature: "DividendSet(bytes32,uint256,address,uint256,uint256,uint256,uint8)",
         topic0: "0xc849cd6d345b059ab830e5aa8ab5e38bd118833e14bcdfea70231b0e5c072a12",
       },
+    ],
+    errors: [
+      {
+        name: "DividendAlreadyExecuted",
+        signature: "DividendAlreadyExecuted(bytes32,uint256)",
+        selector: "0x50fe6757",
+      },
+      { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
+    ],
+  },
+
+  IEquityStorageWrapper: {
+    name: "IEquityStorageWrapper",
+    methods: [],
+    events: [
       {
         name: "ScheduledBalanceAdjustmentCancelled",
         signature: "ScheduledBalanceAdjustmentCancelled(uint256,address)",
@@ -11388,12 +11424,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         signature: "BalanceAdjustmentCreationFailed()",
         selector: "0x0c68e660",
       },
-      {
-        name: "DividendAlreadyExecuted",
-        signature: "DividendAlreadyExecuted(bytes32,uint256)",
-        selector: "0x50fe6757",
-      },
-      { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
       { name: "VotingAlreadyRecorded", signature: "VotingAlreadyRecorded(bytes32,uint256)", selector: "0x7a2e2617" },
       { name: "VotingRightsCreationFailed", signature: "VotingRightsCreationFailed()", selector: "0x0cc16600" },
     ],
@@ -11779,7 +11809,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 60 as const;
+export const TOTAL_STORAGE_WRAPPERS = 62 as const;
 
 /**
  * All role identifiers extracted from contracts.

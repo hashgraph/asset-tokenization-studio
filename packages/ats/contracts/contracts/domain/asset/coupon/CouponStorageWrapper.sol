@@ -5,7 +5,6 @@ import { _COUPON_STORAGE_POSITION } from "../../../constants/storagePositions.so
 import { COUPON_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } from "../../../constants/values.sol";
 import { ICoupon } from "../../../facets/layer_2/coupon/ICoupon.sol";
 import { ICouponStorageWrapper } from "./ICouponStorageWrapper.sol";
-import { ERC20PermitStorageWrapper } from "../ERC1400/ERC20Permit/ERC20PermitStorageWrapper.sol";
 import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
 import { NominalValueStorageWrapper } from "../nominalValue/NominalValueStorageWrapper.sol";
 

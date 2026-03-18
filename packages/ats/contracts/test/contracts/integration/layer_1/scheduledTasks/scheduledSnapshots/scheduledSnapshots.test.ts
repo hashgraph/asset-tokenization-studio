@@ -5,11 +5,11 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   type ResolverProxy,
-  type EquityUSAFacet,
   type ScheduledSnapshotsFacet,
   type AccessControl,
   ScheduledCrossOrderedTasksFacet,
   TimeTravelFacet,
+  DividendFacet,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -22,7 +22,7 @@ describe("Scheduled Snapshots Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let equityFacet: EquityUSAFacet;
+  let dividendFacet: DividendFacet;
   let scheduledSnapshotsFacet: ScheduledSnapshotsFacet;
   let scheduledTasksFacet: ScheduledCrossOrderedTasksFacet;
   let accessControlFacet: AccessControl;
@@ -47,10 +47,10 @@ describe("Scheduled Snapshots Tests", () => {
 
   async function setFacets(diamond: ResolverProxy) {
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSAFacet", diamond.target, signer_A);
     scheduledSnapshotsFacet = await ethers.getContractAt("ScheduledSnapshotsFacet", diamond.target, signer_A);
     scheduledTasksFacet = await ethers.getContractAt("ScheduledCrossOrderedTasksFacet", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -85,9 +85,9 @@ describe("Scheduled Snapshots Tests", () => {
       amount: dividendsAmountPerEquity,
       amountDecimals: dividendAmountDecimalsPerEquity,
     };
-    await equityFacet.connect(signer_C).setDividend(dividendData_2);
-    await equityFacet.connect(signer_C).setDividend(dividendData_3);
-    await equityFacet.connect(signer_C).setDividend(dividendData_1);
+    await dividendFacet.connect(signer_C).setDividend(dividendData_2);
+    await dividendFacet.connect(signer_C).setDividend(dividendData_3);
+    await dividendFacet.connect(signer_C).setDividend(dividendData_1);
 
     const dividend_2_Id = "0x0000000000000000000000000000000000000000000000000000000000000001";
     const dividend_3_Id = "0x0000000000000000000000000000000000000000000000000000000000000002";
@@ -162,15 +162,15 @@ describe("Scheduled Snapshots Tests", () => {
       amount: dividendsAmountPerEquity,
       amountDecimals: dividendAmountDecimalsPerEquity,
     };
-    await equityFacet.connect(signer_C).setDividend(dividendData);
+    await dividendFacet.connect(signer_C).setDividend(dividendData);
 
     let scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
     expect(scheduledSnapshotCount).to.equal(1);
 
-    const [dividendBefore] = await equityFacet.getDividend(1);
+    const [dividendBefore] = await dividendFacet.getDividend(1);
     expect(dividendBefore.snapshotId).to.equal(0);
 
-    await equityFacet.connect(signer_C).cancelDividend(1);
+    await dividendFacet.connect(signer_C).cancelDividend(1);
 
     await timeTravelFacet.changeSystemTimestamp(dividendsRecordDateInSeconds + 1);
 
@@ -182,7 +182,7 @@ describe("Scheduled Snapshots Tests", () => {
     scheduledSnapshotCount = await scheduledSnapshotsFacet.scheduledSnapshotCount();
     expect(scheduledSnapshotCount).to.equal(0);
 
-    const [dividendAfter] = await equityFacet.getDividend(1);
+    const [dividendAfter] = await dividendFacet.getDividend(1);
     expect(dividendAfter.snapshotId).to.equal(0);
   });
 });
