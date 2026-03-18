@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _EQUITY_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,

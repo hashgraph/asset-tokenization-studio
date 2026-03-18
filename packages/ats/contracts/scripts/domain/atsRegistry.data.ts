@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-30T11:20:37.382Z
+ * Generated: 2026-03-30T12:41:52.758Z
  * Facets: 203
  * Infrastructure: 2
  *
@@ -11386,6 +11386,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   IDividendStorageWrapper: {
     name: "IDividendStorageWrapper",
+    description: "Defines the events and errors emitted by the dividend storage layer.",
     methods: [],
     events: [
       {
@@ -11398,6 +11399,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         signature: "DividendSet(bytes32,uint256,address,uint256,uint256,uint256,uint8)",
         topic0: "0xc849cd6d345b059ab830e5aa8ab5e38bd118833e14bcdfea70231b0e5c072a12",
       },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [
       {
@@ -11406,6 +11408,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0x50fe6757",
       },
       { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
     ],
   },
 
