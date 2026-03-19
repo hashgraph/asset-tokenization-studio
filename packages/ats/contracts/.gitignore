@@ -36,6 +36,7 @@ extracted-methods.txt
 #Hardhat files
 /cache
 artifacts
+contracts/hardhat-dependency-compiler/
 
 .deps/
 ./docs/*
