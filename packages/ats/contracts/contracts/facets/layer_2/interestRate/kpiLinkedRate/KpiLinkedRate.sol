@@ -4,7 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 /* solhint-disable max-line-length */
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";

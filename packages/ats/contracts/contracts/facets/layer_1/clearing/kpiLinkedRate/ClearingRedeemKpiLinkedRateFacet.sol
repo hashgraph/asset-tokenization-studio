@@ -6,7 +6,7 @@ import { _CLEARING_REDEEM_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../const
 /* solhint-disable max-line-length */
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 
 contract ClearingRedeemKpiLinkedRateFacet is ClearingRedeemFacetBase, CommonKpiLinkedInterestRate {

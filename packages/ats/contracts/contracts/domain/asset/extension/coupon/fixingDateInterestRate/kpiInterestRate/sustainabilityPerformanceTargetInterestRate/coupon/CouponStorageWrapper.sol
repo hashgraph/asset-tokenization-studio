@@ -13,7 +13,7 @@ import { Internals } from "../../../../../../../../domain/Internals.sol";
 import { CouponStorageWrapper } from "../../../../../../../../domain/asset/coupon/CouponStorageWrapper.sol";
 import { KpisStorageWrapper } from "../../KpisStorageWrapper.sol";
 
-abstract contract BondStorageWrapperSustainabilityPerformanceTargetInterestRate is
+abstract contract CouponStorageWrapperSustainabilityPerformanceTargetInterestRate is
     InternalsSustainabilityPerformanceTargetInterestRate,
     ProceedRecipientsStorageWrapperKpiInterestRate
 {

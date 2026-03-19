@@ -6,7 +6,7 @@ import { ScheduledBalanceAdjustmentsFacetBase } from "../ScheduledBalanceAdjustm
 /* solhint-disable max-line-length */
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 
 contract ScheduledBalanceAdjustmentsKpiLinkedRateFacet is

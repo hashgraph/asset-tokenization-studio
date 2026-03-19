@@ -6,7 +6,7 @@ import { _CONTROL_LIST_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../constant
 /* solhint-disable max-line-length */
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 
 contract ControlListKpiLinkedRateFacet is ControlListFacetBase, CommonKpiLinkedInterestRate {

@@ -3,13 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  ResolverProxy,
-  BondUSAFixedRateFacet,
-  FixedRate,
-  BondUSAReadFacet,
-  CouponFacetTimeTravel,
-} from "@contract-types";
+import { ResolverProxy, FixedRate, CouponFacetTimeTravel } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -38,8 +32,6 @@ describe("Bond Fixed Rate Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;
 
-  let bondFixedRateFacet: BondUSAFixedRateFacet;
-  let bondReadFacet: BondUSAReadFacet;
   let fixedRateFacet: FixedRate;
   let couponFixedRateFacet: CouponFacetTimeTravel;
 
@@ -56,8 +48,6 @@ describe("Bond Fixed Rate Tests", () => {
       },
     ]);
 
-    bondFixedRateFacet = await ethers.getContractAt("BondUSAFixedRateFacetTimeTravel", diamond.target, signer_A);
-    bondReadFacet = await ethers.getContractAt("BondUSAReadFacetTimeTravel", diamond.target, signer_A);
     fixedRateFacet = await ethers.getContractAt("FixedRate", diamond.target, signer_A);
     couponFixedRateFacet = await ethers.getContractAt("CouponFixedRateFacetTimeTravel", diamond.target, signer_A);
   }

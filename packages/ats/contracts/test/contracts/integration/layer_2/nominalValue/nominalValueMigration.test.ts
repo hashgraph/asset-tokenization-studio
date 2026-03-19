@@ -5,13 +5,8 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import { type ResolverProxy, type INominalValue, type NominalValueMigrationFacetTest } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ATS_ROLES, BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
+import { BOND_CONFIG_ID, EQUITY_CONFIG_ID } from "@scripts";
 import { deployBondTokenFixture, deployEquityTokenFixture } from "@test";
-
-async function grantNominalValueRole(diamond: ResolverProxy, admin: HardhatEthersSigner, account: string) {
-  const accessControl = await ethers.getContractAt("AccessControl", diamond.target, admin);
-  await accessControl.grantRole(ATS_ROLES._NOMINAL_VALUE_ROLE, account);
-}
 
 async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deployBondTokenFixture>>, configId: string) {
   const { blr, deployer, diamond: baseDiamond } = base;

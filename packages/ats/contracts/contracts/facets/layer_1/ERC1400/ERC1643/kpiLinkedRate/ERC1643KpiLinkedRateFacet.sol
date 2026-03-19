@@ -6,7 +6,7 @@ import { _ERC1643_KPI_LINKED_RATE_RESOLVER_KEY } from "../../../../../constants/
 /* solhint-disable max-line-length */
 import {
     CommonKpiLinkedInterestRate
-} from "../../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
+} from "../../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/kpiLinkedInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 
 contract ERC1643KpiLinkedRateFacet is ERC1643FacetBase, CommonKpiLinkedInterestRate {

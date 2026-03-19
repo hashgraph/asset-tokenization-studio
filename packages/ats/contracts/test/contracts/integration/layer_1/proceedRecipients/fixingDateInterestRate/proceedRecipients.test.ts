@@ -7,7 +7,6 @@ import {
   ProceedRecipientsKpiLinkedRateFacetTimeTravel,
   ResolverProxy,
   AccessControl,
-  BondUSAKpiLinkedRateFacetTimeTravel,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
   TimeTravelFacet,
   CouponFacetTimeTravel,
@@ -26,7 +25,6 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   let diamond: ResolverProxy;
   let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
   let accessControlFacet: AccessControl;
-  let bondKpiLinkedRateFacet: BondUSAKpiLinkedRateFacetTimeTravel;
   let couponKpiLinkedRateFacet: CouponFacetTimeTravel;
   let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
@@ -54,11 +52,6 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
       signer_A,
     );
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    bondKpiLinkedRateFacet = await ethers.getContractAt(
-      "BondUSAKpiLinkedRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
     couponKpiLinkedRateFacet = await ethers.getContractAt(
       "CouponKpiLinkedRateFacetTimeTravel",
       diamond.target,
