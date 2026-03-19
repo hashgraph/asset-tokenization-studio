@@ -42,6 +42,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledCouponLi
         if (isDisabled) {
             return;
         }
+        //? TODO: consider change IEquity with other interface
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi.decode(
             balanceAdjustmentData,
             (IEquity.ScheduledBalanceAdjustment)
