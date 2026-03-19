@@ -69,3 +69,5 @@ deployments/**/.checkpoints/
 
 # Test artifacts - all test-generated files go here
 .temp/
+
+*.code-workspace
