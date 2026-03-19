@@ -4,6 +4,7 @@ import {
   ApplyRolesRequest,
   BalanceViewModel,
   Bond,
+  Coupon,
   BondDetailsViewModel,
   ConnectRequest,
   ControlListRequest,
@@ -396,16 +397,16 @@ export class SDKService {
 
   // COUPONS ////////////////////////////////////////////
   public static async setCoupon(req: SetCouponRequest): Promise<number> {
-    const response = await Bond.setCoupon(req);
+    const response = await Coupon.setCoupon(req);
     return response.payload;
   }
 
   public static async getCouponFor(req: GetCouponForRequest): Promise<CouponForViewModel> {
-    return await Bond.getCouponFor(req);
+    return await Coupon.getCouponFor(req);
   }
 
   public static async getCouponAmountFor(req: GetCouponForRequest): Promise<CouponAmountForViewModel> {
-    return await Bond.getCouponAmountFor(req);
+    return await Coupon.getCouponAmountFor(req);
   }
 
   public static async getPrincipalFor(req: GetPrincipalForRequest): Promise<PrincipalForViewModel> {
@@ -413,19 +414,19 @@ export class SDKService {
   }
 
   public static async getCoupon(req: GetCouponRequest): Promise<CouponViewModel> {
-    return await Bond.getCoupon(req);
+    return await Coupon.getCoupon(req);
   }
 
   public static async getAllCoupons(req: GetAllCouponsRequest): Promise<CouponViewModel[]> {
-    return await Bond.getAllCoupons(req);
+    return await Coupon.getAllCoupons(req);
   }
 
   public static async getCouponHolders(req: GetCouponHoldersRequest): Promise<string[]> {
-    return await Bond.getCouponHolders(req);
+    return await Coupon.getCouponHolders(req);
   }
 
   public static async getTotalCouponHolders(req: GetTotalCouponHoldersRequest): Promise<number> {
-    return await Bond.getTotalCouponHolders(req);
+    return await Coupon.getTotalCouponHolders(req);
   }
 
   // ROLES ////////////////////////////////////////////
