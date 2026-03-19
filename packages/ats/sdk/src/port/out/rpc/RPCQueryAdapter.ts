@@ -62,6 +62,7 @@ import {
   Kpis__factory,
   KpiLinkedRate__factory,
   ScheduledCouponListingFacet__factory,
+  NominalValue__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -434,7 +435,9 @@ export class RPCQueryAdapter {
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
-    const { registeredVoting_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getVoting(voting);
+    const { registeredVoting_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getVoting(
+      voting,
+    );
 
     return new VotingRights(
       Number(registeredVoting_.voting.recordDate),
@@ -1434,11 +1437,12 @@ export class RPCQueryAdapter {
 
   async getCorporateAction(
     address: EvmAddress,
-    corporateActionId: string
+    corporateActionId: string,
   ): Promise<{ actionType: string; actionTypeId: number; data: string; isDisabled: boolean }> {
     LogService.logTrace(`Getting corporate action ${corporateActionId} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateAction(corporateActionId);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateAction(
+      corporateActionId,
+    );
 
     return {
       actionType: result.actionType_,
@@ -1451,11 +1455,13 @@ export class RPCQueryAdapter {
   async getCorporateActions(
     address: EvmAddress,
     start: number,
-    end: number
+    end: number,
   ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
     LogService.logTrace(`Getting corporate actions from ${start} to ${end} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateActions(start, end);
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateActions(
+      start,
+      end,
+    );
 
     return {
       actionTypes: result.actionTypes_,
@@ -1469,11 +1475,16 @@ export class RPCQueryAdapter {
     address: EvmAddress,
     actionType: string,
     start: number,
-    end: number
+    end: number,
   ): Promise<{ actionTypes: string[]; actionTypeIds: number[]; datas: string[]; isDisabled: boolean[] }> {
-    LogService.logTrace(`Getting corporate actions of type ${actionType} from ${start} to ${end} for security: ${address.toString()}`);
-    const result = await this.connect(CorporateActionsFacet__factory, address.toString())
-      .getCorporateActionsByType(actionType, start, end);
+    LogService.logTrace(
+      `Getting corporate actions of type ${actionType} from ${start} to ${end} for security: ${address.toString()}`,
+    );
+    const result = await this.connect(CorporateActionsFacet__factory, address.toString()).getCorporateActionsByType(
+      actionType,
+      start,
+      end,
+    );
 
     return {
       actionTypes: result.actionTypes_,
@@ -1554,5 +1565,17 @@ export class RPCQueryAdapter {
       pageIndex,
       pageLength,
     );
+  }
+
+  async getNominalValue(address: EvmAddress): Promise<BigDecimal> {
+    LogService.logTrace(`Getting nominal value for security: ${address.toString()}`);
+    const result = await this.connect(NominalValue__factory, address.toString()).getNominalValue();
+    return new BigDecimal(result.toString());
+  }
+
+  async getNominalValueDecimals(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting nominal value decimals for security: ${address.toString()}`);
+    const result = await this.connect(NominalValue__factory, address.toString()).getNominalValueDecimals();
+    return Number(result);
   }
 }
