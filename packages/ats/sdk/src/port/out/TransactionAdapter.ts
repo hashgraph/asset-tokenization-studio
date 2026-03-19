@@ -91,7 +91,7 @@ interface ITransactionAdapter {
     factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
 
-createBondFixedRate(
+  createBondFixedRate(
     security: Security,
     bondFixedRateDetails: BondFixedRateDetails,
     factory: EvmAddress,
@@ -200,17 +200,27 @@ createBondFixedRate(
   pause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   unpause(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
   takeSnapshot(security: EvmAddress, securityId?: ContractId | string): Promise<TransactionResponse>;
-  setDividends(
+  setDividend(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
+  cancelDividend(
+    security: EvmAddress,
+    dividendId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
   setVotingRights(
     security: EvmAddress,
     recordDate: BigDecimal,
     data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  cancelVoting(
+    security: EvmAddress,
+    votingId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setCoupon(
@@ -222,6 +232,11 @@ createBondFixedRate(
     endDate: BigDecimal,
     fixingDate: BigDecimal,
     rateStatus: RateStatus,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setDocument(
@@ -337,6 +352,11 @@ createBondFixedRate(
     sourceId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
 }
 
 interface RoleTransactionAdapter {
@@ -1110,11 +1130,16 @@ export default abstract class TransactionAdapter
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract getAccount(): Account;
-  abstract setDividends(
+  abstract setDividend(
     security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract cancelDividend(
+    security: EvmAddress,
+    dividendId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   abstract setCoupon(
@@ -1128,10 +1153,20 @@ export default abstract class TransactionAdapter
     rateStatus: RateStatus,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
+  abstract cancelCoupon(
+    security: EvmAddress,
+    couponId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
   abstract setVotingRights(
     security: EvmAddress,
     recordDate: BigDecimal,
     data: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+  abstract cancelVoting(
+    security: EvmAddress,
+    votingId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
 
@@ -1763,4 +1798,10 @@ export default abstract class TransactionAdapter
     rateDecimals: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+
+  abstract cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
 }

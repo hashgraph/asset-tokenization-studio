@@ -27,6 +27,7 @@ export class PostgresModule {
       module: PostgresModule,
       imports: [
         TypeOrmModule.forRootAsync({
+          imports: [],
           inject: [ConfigService],
           useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
             return {

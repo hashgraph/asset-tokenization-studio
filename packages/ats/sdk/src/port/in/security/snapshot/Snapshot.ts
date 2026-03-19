@@ -6,16 +6,19 @@ import {
   GetTotalTokenHoldersAtSnapshotRequest,
   TakeSnapshotRequest,
 } from "../../request";
+import BalancesOfAtSnapshotRequest from "@port/in/request/snapshots/BalancesOfAtSnapshotRequest";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import { BaseSecurityInPort } from "../BaseSecurityInPort";
 import { TakeSnapshotCommand } from "@command/security/operations/snapshot/takeSnapshot/TakeSnapshotCommand";
 import { GetTokenHoldersAtSnapshotQuery } from "@query/security/snapshot/getTokenHoldersAtSnapshot/GetTokenHoldersAtSnapshotQuery";
 import { GetTotalTokenHoldersAtSnapshotQuery } from "@query/security/snapshot/getTotalTokenHoldersAtSnapshot/GetTotalTokenHoldersAtSnapshotQuery";
+import { BalancesOfAtSnapshotQuery } from "@query/security/snapshot/balancesOfAtSnapshot/BalancesOfAtSnapshotQuery";
 
 export interface ISecurityInPortSnapshot {
   takeSnapshot(request: TakeSnapshotRequest): Promise<{ payload: number; transactionId: string }>;
   getTokenHoldersAtSnapshot(request: GetTokenHoldersAtSnapshotRequest): Promise<string[]>;
   getTotalTokenHoldersAtSnapshot(request: GetTotalTokenHoldersAtSnapshotRequest): Promise<number>;
+  balancesOfAtSnapshot(request: BalancesOfAtSnapshotRequest): Promise<{ holder: string; balance: bigint }[]>;
 }
 
 export class SecurityInPortSnapshot extends BaseSecurityInPort implements ISecurityInPortSnapshot {
@@ -42,5 +45,14 @@ export class SecurityInPortSnapshot extends BaseSecurityInPort implements ISecur
     ValidatedRequest.handleValidation(GetTotalTokenHoldersAtSnapshotRequest.name, request);
 
     return (await this.queryBus.execute(new GetTotalTokenHoldersAtSnapshotQuery(securityId, snapshotId))).payload;
+  }
+
+  @LogError
+  async balancesOfAtSnapshot(request: BalancesOfAtSnapshotRequest): Promise<{ holder: string; balance: bigint }[]> {
+    const { securityId, snapshotId, pageIndex, pageLength } = request;
+    ValidatedRequest.handleValidation(BalancesOfAtSnapshotRequest.name, request);
+
+    return (await this.queryBus.execute(new BalancesOfAtSnapshotQuery(securityId, snapshotId, pageIndex, pageLength)))
+      .payload;
   }
 }

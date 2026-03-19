@@ -7,7 +7,7 @@ import { Info } from "@phosphor-icons/react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useDividends } from "../../../../hooks/queries/useDividends";
-import { SetDividendsRequest } from "@hashgraph/asset-tokenization-sdk";
+import { SetDividendRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { dateToUnixTimestamp } from "../../../../utils/format";
 import { DATE_TIME_FORMAT } from "../../../../utils/constants";
@@ -31,7 +31,7 @@ export const ProgramDividend = () => {
   const { id } = useParams();
 
   const submit: SubmitHandler<ProgramDividendFormValues> = (params) => {
-    const request = new SetDividendsRequest({
+    const request = new SetDividendRequest({
       securityId: id ?? "",
       amountPerUnitOfSecurity: params.amountPerUnitOfSecurity.toString(),
       recordTimestamp: dateToUnixTimestamp(params.recordTimestamp),

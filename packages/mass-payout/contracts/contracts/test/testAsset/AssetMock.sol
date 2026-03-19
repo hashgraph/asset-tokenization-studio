@@ -2,7 +2,7 @@
 pragma solidity 0.8.22;
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
-import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/interfaces/factory/IFactory.sol";
+import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/factory/IFactory.sol";
 
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
@@ -100,7 +100,7 @@ contract AssetMock is IAssetMock {
         bondDetailsData_.maturityDate = 1761823607;
     }
 
-    function getCoupon(uint256) external pure returns (RegisteredCoupon memory registeredCoupon_) {
+    function getCoupon(uint256) external pure returns (RegisteredCoupon memory registeredCoupon_, bool isDisabled_) {
         registeredCoupon_.coupon.recordDate = 1753874807;
         registeredCoupon_.coupon.executionDate = 1753874807;
         registeredCoupon_.coupon.startDate = 1;
@@ -109,6 +109,7 @@ contract AssetMock is IAssetMock {
         registeredCoupon_.coupon.rate = 1;
         registeredCoupon_.coupon.rateDecimals = 1;
         registeredCoupon_.snapshotId = 1;
+        isDisabled_ = false;
     }
 
     function getCouponFor(uint256, address) external pure returns (CouponFor memory couponFor_) {
@@ -132,7 +133,23 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function setDividends(Dividend calldata) external pure returns (uint256) {
+    function setDividend(Dividend calldata) external pure returns (uint256) {
+        revert NotImplemented();
+    }
+
+    function cancelCoupon(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function cancelDividend(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function cancelVoting(uint256) external pure returns (bool) {
+        revert NotImplemented();
+    }
+
+    function cancelScheduledBalanceAdjustment(uint256) external pure returns (bool) {
         revert NotImplemented();
     }
 
@@ -158,15 +175,18 @@ contract AssetMock is IAssetMock {
         equityDetailsData_.nominalValueDecimals = 2;
     }
 
-    function getDividends(uint256) external pure returns (RegisteredDividend memory registeredDividend_) {
+    function getDividend(
+        uint256
+    ) external pure returns (RegisteredDividend memory registeredDividend_, bool isDisabled_) {
         registeredDividend_.dividend.recordDate = 1753874807;
         registeredDividend_.dividend.executionDate = 1753874807;
         registeredDividend_.dividend.amount = 400;
         registeredDividend_.dividend.amountDecimals = 2;
         registeredDividend_.snapshotId = 1;
+        isDisabled_ = false;
     }
 
-    function getDividendsFor(uint256, address) external pure returns (DividendFor memory dividendFor_) {
+    function getDividendFor(uint256, address) external pure returns (DividendFor memory dividendFor_) {
         dividendFor_.tokenBalance = 3;
         dividendFor_.amount = 200;
         dividendFor_.amountDecimals = 2;
@@ -184,7 +204,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getVoting(uint256) external pure returns (RegisteredVoting memory) {
+    function getVoting(uint256) external pure returns (RegisteredVoting memory, bool) {
         revert NotImplemented();
     }
 
@@ -204,7 +224,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getScheduledBalanceAdjustment(uint256) external pure returns (ScheduledBalanceAdjustment memory) {
+    function getScheduledBalanceAdjustment(uint256) external pure returns (ScheduledBalanceAdjustment memory, bool) {
         revert NotImplemented();
     }
 

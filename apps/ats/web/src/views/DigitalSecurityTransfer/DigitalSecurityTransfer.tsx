@@ -9,7 +9,7 @@ import { required, min } from "../../utils/rules";
 import { CancelButton } from "../../components/CancelButton";
 import { useTransferSecurity } from "../../hooks/queries/useTransferSecurity";
 import { TransferRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
 import { useWalletStore } from "../../store/walletStore";
 import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";

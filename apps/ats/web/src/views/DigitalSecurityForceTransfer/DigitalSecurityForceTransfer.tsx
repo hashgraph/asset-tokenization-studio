@@ -8,7 +8,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { required, min } from "../../utils/rules";
 import { CancelButton } from "../../components/CancelButton";
 import { ForceTransferRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { useForceTransferSecurity } from "../../hooks/queries/useForceTransferSecurity";
 import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
 import { useWalletStore } from "../../store/walletStore";

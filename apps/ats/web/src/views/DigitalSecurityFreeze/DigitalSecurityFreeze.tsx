@@ -15,7 +15,7 @@ import {
 import { SubmitHandler, useForm } from "react-hook-form";
 import { required, min } from "../../utils/rules";
 import { CancelButton } from "../../components/CancelButton";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
 import { useDetailsBalancePanel } from "../../hooks/useDetailsBalancePanel";
 import { useWalletStore } from "../../store/walletStore";

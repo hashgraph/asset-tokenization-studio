@@ -20,7 +20,8 @@ const config: Config = {
   url: "https://hashgraph.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/asset-tokenization-studio/",
+  // For Netlify deploymenent, it is often '/'
+  baseUrl: "/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -138,11 +139,11 @@ const config: Config = {
           items: [
             {
               label: "ATS Getting Started",
-              to: "/asset-tokenization-studio/ats/getting-started/quick-start",
+              to: "/ats/getting-started/quick-start",
             },
             {
               label: "MP Getting Started",
-              to: "/asset-tokenization-studio/mass-payout/getting-started/quick-start",
+              to: "/mass-payout/getting-started/quick-start",
             },
           ],
         },

@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
+
+/* solhint-disable max-line-length */
 import {
     ExternalKycListManagementSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_1/externalKycLists/sustainabilityPerformanceTargetRate/ExternalKycListManagementSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/layer_1/externalKycList/sustainabilityPerformanceTargetRate/ExternalKycListManagementSustainabilityPerformanceTargetRateFacet.sol";
+/* solhint-enable max-line-length */
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ExternalKycListManagementSustainabilityPerformanceTargetRateFacetTimeTravel is
     ExternalKycListManagementSustainabilityPerformanceTargetRateFacet,

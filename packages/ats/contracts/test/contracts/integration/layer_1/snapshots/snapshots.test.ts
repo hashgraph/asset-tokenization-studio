@@ -323,8 +323,12 @@ describe("Snapshots Tests", () => {
     const snapshot_TotalSupply_1_Partition_1 = await snapshotFacet.totalSupplyAtSnapshotByPartition(_PARTITION_ID_1, 1);
     const snapshot_TotalSupply_1_Partition_2 = await snapshotFacet.totalSupplyAtSnapshotByPartition(_PARTITION_ID_2, 1);
 
-    const snapshot_Balance_Of_A_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_A.address);
-    const snapshot_Balance_Of_C_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_C.address);
+    const snapshot_Balance_Paginated = await snapshotFacet.balancesOfAtSnapshot(2, 0, 50);
+    const snapshot_Balance_Of_A_2 =
+      snapshot_Balance_Paginated.find((b) => b.holder.toLowerCase() === signer_A.address.toLowerCase())?.balance ?? 0n;
+    const snapshot_Balance_Of_C_2 =
+      snapshot_Balance_Paginated.find((b) => b.holder.toLowerCase() === signer_C.address.toLowerCase())?.balance ?? 0n;
+
     const snapshot_TotalTokenHolders_2 = await snapshotFacet.getTotalTokenHoldersAtSnapshot(2);
     const snapshot_TokenHolders_2 = await snapshotFacet.getTokenHoldersAtSnapshot(2, 0, snapshot_TotalTokenHolders_2);
     const snapshot_Balance_Of_A_2_Partition_1 = await snapshotFacet.balanceOfAtSnapshotByPartition(
@@ -775,9 +779,9 @@ describe("Snapshots Tests", () => {
         amount: dividendsAmountPerEquity,
         amountDecimals: dividendAmountDecimalsPerEquity,
       };
-      await equityFacet.connect(signer_A).setDividends(dividendData_1);
-      await equityFacet.connect(signer_A).setDividends(dividendData_2);
-      await equityFacet.connect(signer_A).setDividends(dividendData_3);
+      await equityFacet.connect(signer_A).setDividend(dividendData_1);
+      await equityFacet.connect(signer_A).setDividend(dividendData_2);
+      await equityFacet.connect(signer_A).setDividend(dividendData_3);
 
       const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp("2030-01-01T00:00:07Z");
       const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp("2030-01-01T00:00:13Z");
@@ -824,9 +828,9 @@ describe("Snapshots Tests", () => {
       const decimalFactor_3 = decimalFactor_2 + balanceAdjustmentsDecimals_3;
 
       // check
-      const dividendFor_C_1 = await equityFacet.getDividendsFor(1, signer_C.address);
-      const dividendFor_C_2 = await equityFacet.getDividendsFor(2, signer_C.address);
-      const dividendFor_C_3 = await equityFacet.getDividendsFor(3, signer_C.address);
+      const dividendFor_C_1 = await equityFacet.getDividendFor(1, signer_C.address);
+      const dividendFor_C_2 = await equityFacet.getDividendFor(2, signer_C.address);
+      const dividendFor_C_3 = await equityFacet.getDividendFor(3, signer_C.address);
       const balance_C_At_Snapshot_4 = await snapshotFacet.balanceOfAtSnapshot(4, signer_C.address);
 
       expect(dividendFor_C_1.tokenBalance).to.be.equal(balanceOf_C_Original);

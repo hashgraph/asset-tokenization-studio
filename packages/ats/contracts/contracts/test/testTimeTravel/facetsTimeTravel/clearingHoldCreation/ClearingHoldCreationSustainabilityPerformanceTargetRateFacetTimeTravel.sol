@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/* solhint-disable max-line-length */
 import {
     ClearingHoldCreationSustainabilityPerformanceTargetRateFacet
-} from "../../../../layer_1/clearing/sustainabilityPerformanceTargetRate/ClearingHoldCreationSustainabilityPerformanceTargetRateFacet.sol";
+} from "../../../../facets/layer_1/clearing/sustainabilityPerformanceTargetRate/ClearingHoldCreationSustainabilityPerformanceTargetRateFacet.sol";
+/* solhint-enable max-line-length */
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract ClearingHoldCreationSustainabilityPerformanceTargetRateFacetTimeTravel is
     ClearingHoldCreationSustainabilityPerformanceTargetRateFacet,

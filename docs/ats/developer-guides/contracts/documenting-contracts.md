@@ -10,7 +10,7 @@ This guide explains how to properly document Solidity smart contracts using NatS
 
 ## Overview
 
-The ATS contracts use **NatSpec** (Ethereum Natural Language Specification Format) for inline documentation. This documentation is automatically extracted and published to the [API Documentation](/docs/references/api) section.
+The ATS contracts use **NatSpec** (Ethereum Natural Language Specification Format) for inline documentation. This documentation is automatically extracted and published to the API Documentation section.
 
 ## NatSpec Basics
 

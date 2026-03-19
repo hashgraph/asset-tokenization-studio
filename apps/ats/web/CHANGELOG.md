@@ -1,5 +1,40 @@
 # @hashgraph/asset-tokenization-dapp
 
+## 6.0.0
+
+### Major Changes
+
+- 77aa333: Migrate to HWC 2
+
+### Minor Changes
+
+- 77aa333: Implement comprehensive bond tokenization SDK with KPI-linked rates and coupon management:
+  - Add CreateBondFixedRate and CreateBondKpiLinkedRate commands for bond creation
+  - Implement setInterestRate, setRate, getRate, and getInterestRate for rate management
+  - Add KPI data infrastructure: addKpiData, getLatestKpiData, getMinDate, getIsCheckPointDate, setImpactData
+  - Implement coupon management: getCouponsOrdered, GetCouponFromOrderedListAt, getOrderedLiistTotal
+  - Add scheduled coupon distribution: GetScheduledCouponListing, getScheduledCouponListingCount
+  - Enhance RPC and Hedera transaction adapters for bond operations
+
+### Patch Changes
+
+- 77aa333: Fix failing tests in web app and SDK:
+  - Mock ESM-only packages (@hashgraph/hedera-wallet-connect, @reown/appkit) in web jest config to resolve CJS/ESM incompatibility
+  - Fix HederaWalletConnectTransactionAdapter unit test: use jest.spyOn for read-only rpcProvider property
+  - Update environmentMock paths for custodial adapters (hs/hts/custodial → hs/custodial) following file restructure
+  - Remove mocks for deleted HederaTransactionAdapter and abstract CustodialTransactionAdapter
+  - Add register() and createBond() mocks to DFNS, Fireblocks, and AWSKMS custodial adapter mocks
+  - Grant \_KPI_MANAGER_ROLE to bond creator in createBond mock to enable addKpiData tests
+
+- 3048bbf: Enable docusarus documentation deployments with Netlify and fix ats web deployment build
+- Updated dependencies [77aa333]
+- Updated dependencies [2e5fdcf]
+- Updated dependencies [5e58601]
+- Updated dependencies [77aa333]
+- Updated dependencies [77aa333]
+- Updated dependencies [3048bbf]
+  - @hashgraph/asset-tokenization-sdk@6.0.0
+
 ## 5.0.0
 
 ### Major Changes
