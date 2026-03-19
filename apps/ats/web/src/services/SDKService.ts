@@ -182,6 +182,11 @@ import {
   GetProceedRecipientDataRequest,
   DividendAmountForViewModel,
   FullRedeemAtMaturityRequest,
+  CancelCouponRequest,
+  GetCouponsForRequest,
+  GetCouponFromOrderedListAtRequest,
+  GetCouponsOrderedListRequest,
+  GetCouponsOrderedListTotalRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -427,6 +432,29 @@ export class SDKService {
 
   public static async getTotalCouponHolders(req: GetTotalCouponHoldersRequest): Promise<number> {
     return await Coupon.getTotalCouponHolders(req);
+  }
+
+  public static async cancelCoupon(req: CancelCouponRequest): Promise<boolean> {
+    const response = await Coupon.cancelCoupon(req);
+    return response.payload;
+  }
+
+  public static async getCouponsFor(
+    req: GetCouponsForRequest,
+  ): Promise<{ coupons: CouponForViewModel[]; accounts: string[] }> {
+    return await Coupon.getCouponsFor(req);
+  }
+
+  public static async getCouponsOrderedList(req: GetCouponsOrderedListRequest): Promise<number[]> {
+    return await Coupon.getCouponsOrderedList(req);
+  }
+
+  public static async getCouponsOrderedListTotal(req: GetCouponsOrderedListTotalRequest): Promise<number> {
+    return await Coupon.getCouponsOrderedListTotal(req);
+  }
+
+  public static async getCouponFromOrderedListAt(req: GetCouponFromOrderedListAtRequest): Promise<number> {
+    return await Coupon.getCouponFromOrderedListAt(req);
   }
 
   // ROLES ////////////////////////////////////////////
