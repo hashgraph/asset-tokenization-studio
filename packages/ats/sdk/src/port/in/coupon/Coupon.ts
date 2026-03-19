@@ -99,26 +99,26 @@ class CouponInPort implements ICouponInPort {
     );
 
     const couponFor: CouponForViewModel = {
-      tokenBalance: res.tokenBalance.toString(),
-      nominalValue: res.nominalValue.toString(),
-      decimals: res.decimals.toString(),
-      recordDateReached: res.recordDateReached,
+      tokenBalance: res.couponFor.tokenBalance.toString(),
+      nominalValue: res.couponFor.nominalValue.toString(),
+      decimals: res.couponFor.decimals.toString(),
+      recordDateReached: res.couponFor.recordDateReached,
       coupon: {
-        recordDate: new Date(res.coupon.recordTimeStamp * ONE_THOUSAND),
-        executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
-        rate: res.coupon.rate.toString(),
-        rateDecimals: res.coupon.rateDecimals,
-        startDate: new Date(res.coupon.startTimeStamp * ONE_THOUSAND),
-        endDate: new Date(res.coupon.endTimeStamp * ONE_THOUSAND),
-        fixingDate: new Date(res.coupon.fixingTimeStamp * ONE_THOUSAND),
-        rateStatus: CastRateStatus.toNumber(res.coupon.rateStatus),
+        recordDate: new Date(res.couponFor.coupon.recordTimeStamp * ONE_THOUSAND),
+        executionDate: new Date(res.couponFor.coupon.executionTimeStamp * ONE_THOUSAND),
+        rate: res.couponFor.coupon.rate.toString(),
+        rateDecimals: res.couponFor.coupon.rateDecimals,
+        startDate: new Date(res.couponFor.coupon.startTimeStamp * ONE_THOUSAND),
+        endDate: new Date(res.couponFor.coupon.endTimeStamp * ONE_THOUSAND),
+        fixingDate: new Date(res.couponFor.coupon.fixingTimeStamp * ONE_THOUSAND),
+        rateStatus: CastRateStatus.toNumber(res.couponFor.coupon.rateStatus),
       },
       couponAmount: {
-        numerator: res.couponAmount.numerator,
-        denominator: res.couponAmount.denominator,
-        recordDateReached: res.couponAmount.recordDateReached,
+        numerator: res.couponFor.couponAmount.numerator,
+        denominator: res.couponFor.couponAmount.denominator,
+        recordDateReached: res.couponFor.couponAmount.recordDateReached,
       },
-      isDisabled: res.isDisabled,
+      isDisabled: res.couponFor.isDisabled,
     };
 
     return couponFor;

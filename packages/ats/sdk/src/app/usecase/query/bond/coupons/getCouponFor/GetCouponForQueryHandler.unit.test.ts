@@ -72,13 +72,13 @@ describe("GetCouponForQueryHandler", () => {
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(GetCouponForQueryResponse);
-      expect(result.tokenBalance).toStrictEqual(amount);
-      expect(result.nominalValue).toStrictEqual(nominalValue);
-      expect(result.decimals).toStrictEqual(decimals);
-      expect(result.recordDateReached).toBe(false);
-      expect(result.coupon).toStrictEqual(coupon);
-      expect(result.couponAmount).toStrictEqual(couponAmount);
-      expect(result.isDisabled).toBe(false);
+      expect(result.couponFor.tokenBalance).toStrictEqual(amount);
+      expect(result.couponFor.nominalValue).toStrictEqual(nominalValue);
+      expect(result.couponFor.decimals).toStrictEqual(decimals);
+      expect(result.couponFor.recordDateReached).toBe(false);
+      expect(result.couponFor.coupon).toStrictEqual(coupon);
+      expect(result.couponFor.couponAmount).toStrictEqual(couponAmount);
+      expect(result.couponFor.isDisabled).toBe(false);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);

@@ -239,7 +239,7 @@ describe("Coupon", () => {
         isDisabled: false,
       };
 
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
+      queryBusMock.execute.mockResolvedValue({ couponFor: expectedResponse });
 
       const result = await CouponToken.getCouponFor(getCouponForRequest);
 
