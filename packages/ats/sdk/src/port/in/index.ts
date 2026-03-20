@@ -4,6 +4,7 @@ import Account from "./account/Account";
 import Role from "./role/Role";
 import Security from "./security/Security";
 import Equity from "./equity/Equity";
+import Dividend from "./dividend/Dividend";
 import Bond from "./bond/Bond";
 import Event from "./event/Event";
 import Network from "./network/Network";
@@ -20,6 +21,7 @@ import KpiLinkedRate from "./interestRates/kpiLinkedRate/KpiLinkedRate";
 export {
   Security,
   Equity,
+  Dividend,
   Bond,
   Account,
   Role,
@@ -41,6 +43,7 @@ export * from "./response";
 
 export * from "./security/Security";
 export * from "./equity/Equity";
+export * from "./dividend/Dividend";
 export * from "./bond/Bond";
 export * from "./account/Account";
 export * from "./role/Role";
