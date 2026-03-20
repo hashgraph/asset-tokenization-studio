@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
-import { SetDividendCommand } from "@command/equity/dividends/set/SetDividendCommand";
-import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
-import { GetDividendQuery } from "@query/equity/dividends/getDividend/GetDividendQuery";
-import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCount/GetDividendsCountQuery";
-import { GetDividendForQuery } from "@query/equity/dividends/getDividendFor/GetDividendForQuery";
-import { GetDividendAmountForQuery } from "@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQuery";
+import { SetDividendCommand } from "@command/dividend/set/SetDividendCommand";
+import { CancelDividendCommand } from "@command/dividend/cancel/CancelDividendCommand";
+import { GetDividendQuery } from "@query/dividend/getDividend/GetDividendQuery";
+import { GetDividendsCountQuery } from "@query/dividend/getDividendsCount/GetDividendsCountQuery";
+import { GetDividendForQuery } from "@query/dividend/getDividendFor/GetDividendForQuery";
+import { GetDividendAmountForQuery } from "@query/dividend/getDividendAmountFor/GetDividendAmountForQuery";
 import { SetVotingRightsCommand } from "@command/equity/votingRights/set/SetVotingRightsCommand";
 import { CancelVotingCommand } from "@command/equity/votingRights/cancel/CancelVotingCommand";
 import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQuery";
@@ -52,8 +52,8 @@ import ScheduledBalanceAdjustmentViewModel from "../response/ScheduledBalanceAdj
 import { GetScheduledBalanceAdjustmentQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery";
 import GetScheduledBalanceAdjustmentCountRequest from "../request/equity/GetScheduledBalanceAdjustmentsCountRequest";
 import { GetScheduledBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery";
-import { GetDividendHoldersQuery } from "@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery";
-import { GetTotalDividendHoldersQuery } from "@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery";
+import { GetDividendHoldersQuery } from "@query/dividend/getDividendHolders/GetDividendHoldersQuery";
+import { GetTotalDividendHoldersQuery } from "@query/dividend/getTotalDividendHolders/GetTotalDividendHoldersQuery";
 import { GetVotingHoldersQuery } from "@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery";
 import { GetTotalVotingHoldersQuery } from "@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery";
 import GetAllScheduledBalanceAdjustmentsRequest from "../request/equity/GetAllScheduledBalanceAdjustmentst";
