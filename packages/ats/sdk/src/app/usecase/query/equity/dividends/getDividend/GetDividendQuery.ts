@@ -2,7 +2,7 @@
 
 import { Query } from "@core/query/Query";
 import { QueryResponse } from "@core/query/QueryResponse";
-import { Dividend } from "@domain/context/equity/Dividend";
+import { Dividend } from "@domain/context/dividend/Dividend";
 
 export class GetDividendQueryResponse implements QueryResponse {
   constructor(public readonly dividend: Dividend) {}

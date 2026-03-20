@@ -14,7 +14,7 @@ import EvmAddress from "@domain/context/contract/EvmAddress";
 import { MirrorNodeAdapter } from "../mirror/MirrorNodeAdapter";
 import { Security } from "@domain/context/security/Security";
 import { BondDetails } from "@domain/context/bond/BondDetails";
-import { Dividend } from "@domain/context/equity/Dividend";
+import { Dividend } from "@domain/context/dividend/Dividend";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { HederaId } from "@domain/context/shared/HederaId";
 import {
@@ -81,7 +81,7 @@ import {
   CastResaleHoldPeriodorscation,
 } from "@domain/context/factory/RegulationType";
 import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
-import { DividendFor } from "@domain/context/equity/DividendFor";
+import { DividendFor } from "@domain/context/dividend/DividendFor";
 import { VotingFor } from "@domain/context/equity/VotingFor";
 import { Kyc } from "@domain/context/kyc/Kyc";
 import { KycAccountData } from "@domain/context/kyc/KycAccountData";
@@ -95,7 +95,7 @@ import {
 import { HoldDetails } from "@domain/context/security/Hold";
 import { CouponAmountFor } from "@domain/context/bond/CouponAmountFor";
 import { PrincipalFor } from "@domain/context/bond/PrincipalFor";
-import { DividendAmountFor } from "@domain/context/equity/DividendAmountFor";
+import { DividendAmountFor } from "@domain/context/dividend/DividendAmountFor";
 import { CastRateStatus } from "@domain/context/bond/RateStatus";
 import { CouponFor } from "@domain/context/bond/CouponFor";
 

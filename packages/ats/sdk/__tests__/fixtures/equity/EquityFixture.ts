@@ -27,12 +27,12 @@ import GetScheduledBalanceAdjustmentRequest from "@port/in/request/equity/GetSch
 import GetAllScheduledBalanceAdjustmentsRequest from "@port/in/request/equity/GetAllScheduledBalanceAdjustmentst";
 import { ScheduledBalanceAdjustment } from "@domain/context/equity/ScheduledBalanceAdjustment";
 import { GetScheduledBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery";
-import { Dividend } from "@domain/context/equity/Dividend";
+import { Dividend } from "@domain/context/dividend/Dividend";
 import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCount/GetDividendsCountQuery";
 import { GetDividendQuery } from "@query/equity/dividends/getDividend/GetDividendQuery";
 import { GetDividendForQuery } from "@query/equity/dividends/getDividendFor/GetDividendForQuery";
 import { GetDividendAmountForQuery } from "@query/equity/dividends/getDividendAmountFor/GetDividendAmountForQuery";
-import { DividendFor } from "@domain/context/equity/DividendFor";
+import { DividendFor } from "@domain/context/dividend/DividendFor";
 import { GetEquityDetailsQuery } from "@query/equity/get/getEquityDetails/GetEquityDetailsQuery";
 import { EquityDetails } from "@domain/context/equity/EquityDetails";
 import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQuery";
