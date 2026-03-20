@@ -7,6 +7,7 @@ import { FireblocksTransactionAdapter } from "@port/out/hs/custodial/FireblocksT
 import { AWSKMSTransactionAdapter } from "@port/out/hs/custodial/AWSKMSTransactionAdapter";
 import { COMMAND_HANDLERS_AGENT } from "./agent/InjectableAgent";
 import { COMMAND_HANDLERS_BOND, QUERY_HANDLERS_BOND } from "./bond/InjectableBond";
+import { COMMAND_HANDLERS_DIVIDEND, QUERY_HANDLERS_DIVIDEND } from "./dividend/InjectableDividend";
 import { COMMAND_HANDLERS_CLEARING, QUERY_HANDLERS_CLEARING } from "./clearing/InjectableClearing";
 import { COMMAND_HANDLERS_COMPLIANCE, QUERY_HANDLERS_COMPLIANCE } from "./compliance/InjectableCompliance";
 import { COMMAND_HANDLERS_CONTROL_LIST, QUERY_HANDLERS_CONTROL_LIST } from "./controlList/InjectableControlList";
@@ -44,6 +45,7 @@ import { COMMAND_HANDLERS_KPI, QUERY_HANDLERS_KPI } from "./kpis/InjectableKpis"
 export const COMMAND_HANDLERS = [
   ...COMMAND_HANDLERS_AGENT,
   ...COMMAND_HANDLERS_BOND,
+  ...COMMAND_HANDLERS_DIVIDEND,
   ...COMMAND_HANDLERS_CLEARING,
   ...COMMAND_HANDLERS_COMPLIANCE,
   ...COMMAND_HANDLERS_CONTROL_LIST,
@@ -74,6 +76,7 @@ export const COMMAND_HANDLERS = [
 
 export const QUERY_HANDLERS = [
   ...QUERY_HANDLERS_BOND,
+  ...QUERY_HANDLERS_DIVIDEND,
   ...QUERY_HANDLERS_CLEARING,
   ...QUERY_HANDLERS_COMPLIANCE,
   ...QUERY_HANDLERS_CONTROL_LIST,
