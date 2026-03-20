@@ -11,7 +11,7 @@ import { ProceedRecipientsStorageWrapperKpiInterestRate } from "../../ProceedRec
 import { KpisStorageWrapper } from "../../KpisStorageWrapper.sol";
 import { ICoupon } from "../../../../../../../../facets/layer_2/coupon/ICoupon.sol";
 
-abstract contract BondStorageWrapperKpiLinkedInterestRate is
+abstract contract CouponStorageWrapperKpiLinkedInterestRate is
     InternalsKpiLinkedInterestRate,
     ProceedRecipientsStorageWrapperKpiInterestRate
 {

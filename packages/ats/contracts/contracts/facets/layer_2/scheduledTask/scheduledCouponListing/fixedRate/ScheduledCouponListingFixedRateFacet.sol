@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _SCHEDULED_COUPON_LISTING_FIXED_RATE_RESOLVER_KEY } from "../../../../../constants/resolverKeys.sol";
 import { ScheduledCouponListingFacetBase } from "../ScheduledCouponListingFacetBase.sol";
-import { CommonFixedInterestRate } from "../../../../../domain/asset/extension/bond/fixedInterestRate/Common.sol";
+import { CommonFixedInterestRate } from "../../../../../domain/asset/extension/coupon/fixedInterestRate/Common.sol";
 
 contract ScheduledCouponListingFixedRateFacet is ScheduledCouponListingFacetBase, CommonFixedInterestRate {
     function getStaticResolverKey() external pure override returns (bytes32 staticResolverKey_) {

@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-17T18:09:13.154Z
+ * Generated: 2026-03-20T13:23:50.493Z
  * Facets: 202
  * Infrastructure: 2
  *
@@ -11025,31 +11025,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     methods: [],
   },
 
-  BondStorageWrapperFixedInterestRate: {
-    name: "BondStorageWrapperFixedInterestRate",
-    inheritance: ["InternalsFixedInterestRate", "Common"],
-    methods: [],
-    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
-  },
-
-  BondStorageWrapperKpiLinkedInterestRate: {
-    name: "BondStorageWrapperKpiLinkedInterestRate",
-    methods: [],
-    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
-  },
-
-  BondStorageWrapperSustainabilityPerformanceTargetInterestRate: {
-    name: "BondStorageWrapperSustainabilityPerformanceTargetInterestRate",
-    methods: [],
-    errors: [
-      {
-        name: "InterestRateIsSustainabilityPerformanceTarget",
-        signature: "InterestRateIsSustainabilityPerformanceTarget()",
-        selector: "0x15a15b0a",
-      },
-    ],
-  },
-
   ControlListStorageWrapper: {
     name: "ControlListStorageWrapper",
     inheritance: ["IControlListStorageWrapper", "ExternalControlListManagementStorageWrapper"],
@@ -11066,6 +11041,31 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "CouponStorageWrapper",
     inheritance: ["ICouponStorageWrapper", "NominalValueStorageWrapper"],
     methods: [],
+  },
+
+  CouponStorageWrapperFixedInterestRate: {
+    name: "CouponStorageWrapperFixedInterestRate",
+    inheritance: ["InternalsFixedInterestRate", "Common"],
+    methods: [],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
+  },
+
+  CouponStorageWrapperKpiLinkedInterestRate: {
+    name: "CouponStorageWrapperKpiLinkedInterestRate",
+    methods: [],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
+  },
+
+  CouponStorageWrapperSustainabilityPerformanceTargetInterestRate: {
+    name: "CouponStorageWrapperSustainabilityPerformanceTargetInterestRate",
+    methods: [],
+    errors: [
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
   },
 
   DividendStorageWrapper: {
@@ -11693,7 +11693,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
-    inheritance: ["InternalsKpiInterestRate", "BondStorageWrapperFixingDateInterestRate"],
+    inheritance: ["InternalsKpiInterestRate", "CouponStorageWrapperFixingDateInterestRate"],
     methods: [],
   },
 

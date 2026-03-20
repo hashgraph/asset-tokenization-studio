@@ -26,6 +26,7 @@ import FullRedeemAtMaturityRequest from "@port/in/request/bond/FullRedeemAtMatur
 import GetAllCouponsRequest from "@port/in/request/bond/GetAllCouponsRequest";
 import GetBondDetailsRequest from "@port/in/request/bond/GetBondDetailsRequest";
 import GetCouponForRequest from "@port/in/request/bond/GetCouponForRequest";
+import GetCouponsForRequest from "@port/in/request/bond/GetCouponsForRequest";
 import GetCouponHoldersRequest from "@port/in/request/bond/GetCouponHoldersRequest";
 import GetCouponRequest from "@port/in/request/bond/GetCouponRequest";
 import GetCouponsOrderedListRequest from "@port/in/request/bond/GetCouponsOrderedListRequest";
@@ -42,6 +43,7 @@ import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
 import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
 import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
 import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
+import { GetCouponsForQuery } from "@query/bond/coupons/getCouponsFor/GetCouponsForQuery";
 import { GetCouponFromOrderedListAtQuery } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQuery";
 import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery";
 import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
@@ -165,6 +167,13 @@ export const GetCouponForQueryFixture = createFixture<GetCouponForQuery>((query)
   query.securityId.as(() => HederaIdPropsFixture.create().value);
   query.targetId.as(() => HederaIdPropsFixture.create().value);
   query.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+});
+
+export const GetCouponsForQueryFixture = createFixture<GetCouponsForQuery>((query) => {
+  query.securityId.as(() => HederaIdPropsFixture.create().value);
+  query.couponId.faker((faker) => faker.number.int({ min: 1, max: 999 }));
+  query.pageIndex.faker((faker) => faker.number.int({ min: 0, max: 10 }));
+  query.pageLength.faker((faker) => faker.number.int({ min: 1, max: 50 }));
 });
 
 export const GetCouponAmountForQueryFixture = createFixture<GetCouponAmountForQuery>((query) => {
@@ -311,6 +320,13 @@ export const GetCouponForRequestFixture = createFixture<GetCouponForRequest>((re
   request.securityId.as(() => HederaIdPropsFixture.create().value);
   request.targetId.as(() => HederaIdPropsFixture.create().value);
   request.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+});
+
+export const GetCouponsForRequestFixture = createFixture<GetCouponsForRequest>((request) => {
+  request.securityId.as(() => HederaIdPropsFixture.create().value);
+  request.couponId.faker((faker) => faker.number.int({ min: 1, max: 10 }));
+  request.pageIndex.faker((faker) => faker.number.int({ min: 0, max: 10 }));
+  request.pageLength.faker((faker) => faker.number.int({ min: 1, max: 50 }));
 });
 
 export const GetPrincipalForRequestFixture = createFixture<GetPrincipalForRequest>((request) => {

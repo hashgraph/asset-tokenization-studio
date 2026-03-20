@@ -9,7 +9,7 @@ import {
     ScheduledCrossOrderedTasksStorageWrapperFixingDateInterestRate
 } from "./ScheduledCrossOrderedTasksStorageWrapper.sol";
 
-abstract contract BondStorageWrapperFixingDateInterestRate is
+abstract contract CouponStorageWrapperFixingDateInterestRate is
     ScheduledCrossOrderedTasksStorageWrapperFixingDateInterestRate
 {
     using LowLevelCall for address;

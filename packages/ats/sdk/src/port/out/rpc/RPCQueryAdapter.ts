@@ -20,6 +20,7 @@ import { HederaId } from "@domain/context/shared/HederaId";
 import {
   AccessControlFacet__factory,
   BondRead__factory,
+  Coupon__factory,
   CapFacet__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
@@ -456,15 +457,86 @@ export class RPCQueryAdapter {
   async getCouponFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponFor> {
     LogService.logTrace(`Getting Coupon for`);
 
-    const couponFor = await this.connect(BondRead__factory, address.toString()).getCouponFor(coupon, target.toString());
+    const couponFor = await this.connect(Coupon__factory, address.toString()).getCouponFor(coupon, target.toString());
 
-    return new CouponFor(new BigDecimal(couponFor.tokenBalance), Number(couponFor.decimals), couponFor.isDisabled);
+    const couponDomain = new Coupon(
+      Number(couponFor.coupon.recordDate),
+      Number(couponFor.coupon.executionDate),
+      new BigDecimal(couponFor.coupon.rate.toString()),
+      Number(couponFor.coupon.rateDecimals),
+      Number(couponFor.coupon.startDate),
+      Number(couponFor.coupon.endDate),
+      Number(couponFor.coupon.fixingDate),
+      CastRateStatus.fromBigint(couponFor.coupon.rateStatus),
+    );
+
+    const couponAmountDomain = new CouponAmountFor(
+      couponFor.couponAmount.numerator.toString(),
+      couponFor.couponAmount.denominator.toString(),
+      couponFor.couponAmount.recordDateReached,
+    );
+
+    return new CouponFor(
+      new BigDecimal(couponFor.tokenBalance),
+      new BigDecimal(couponFor.nominalValue),
+      Number(couponFor.decimals),
+      couponFor.recordDateReached,
+      couponDomain,
+      couponAmountDomain,
+      couponFor.isDisabled,
+    );
+  }
+
+  async getCouponsFor(
+    address: EvmAddress,
+    couponId: number,
+    pageIndex: number,
+    pageLength: number,
+  ): Promise<{ coupons: CouponFor[]; accounts: string[] }> {
+    LogService.logTrace(`Getting Coupons for`);
+
+    const result = await this.connect(Coupon__factory, address.toString()).getCouponsFor(
+      couponId,
+      pageIndex,
+      pageLength,
+    );
+
+    const coupons = result.couponFor_.map((couponFor) => {
+      const couponDomain = new Coupon(
+        Number(couponFor.coupon.recordDate),
+        Number(couponFor.coupon.executionDate),
+        new BigDecimal(couponFor.coupon.rate.toString()),
+        Number(couponFor.coupon.rateDecimals),
+        Number(couponFor.coupon.startDate),
+        Number(couponFor.coupon.endDate),
+        Number(couponFor.coupon.fixingDate),
+        CastRateStatus.fromBigint(couponFor.coupon.rateStatus),
+      );
+
+      const couponAmountDomain = new CouponAmountFor(
+        couponFor.couponAmount.numerator.toString(),
+        couponFor.couponAmount.denominator.toString(),
+        couponFor.couponAmount.recordDateReached,
+      );
+
+      return new CouponFor(
+        new BigDecimal(couponFor.tokenBalance),
+        new BigDecimal(couponFor.nominalValue),
+        Number(couponFor.decimals),
+        couponFor.recordDateReached,
+        couponDomain,
+        couponAmountDomain,
+        couponFor.isDisabled,
+      );
+    });
+
+    return { coupons, accounts: [...result.accounts_] };
   }
 
   async getCouponAmountFor(address: EvmAddress, target: EvmAddress, coupon: number): Promise<CouponAmountFor> {
     LogService.logTrace(`Getting Coupon Amount for`);
 
-    const couponAmountFor = await this.connect(BondRead__factory, address.toString()).getCouponAmountFor(
+    const couponAmountFor = await this.connect(Coupon__factory, address.toString()).getCouponAmountFor(
       coupon,
       target.toString(),
     );
@@ -487,7 +559,7 @@ export class RPCQueryAdapter {
   async getCoupon(address: EvmAddress, coupon: number): Promise<Coupon> {
     LogService.logTrace(`Getting Coupon`);
 
-    const { registeredCoupon_, isDisabled_ } = await this.connect(BondRead__factory, address.toString()).getCoupon(
+    const { registeredCoupon_, isDisabled_ } = await this.connect(Coupon__factory, address.toString()).getCoupon(
       coupon,
     );
 
@@ -508,7 +580,7 @@ export class RPCQueryAdapter {
   async getCouponCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting Coupon count`);
 
-    const couponCount = await this.connect(BondRead__factory, address.toString()).getCouponCount();
+    const couponCount = await this.connect(Coupon__factory, address.toString()).getCouponCount();
 
     return Number(couponCount);
   }
@@ -1304,13 +1376,13 @@ export class RPCQueryAdapter {
 
   async getCouponHolders(address: EvmAddress, couponId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting coupon holders for coupon ${couponId} for security ${address.toString()}`);
-    return await this.connect(BondRead__factory, address.toString()).getCouponHolders(couponId, start, end);
+    return await this.connect(Coupon__factory, address.toString()).getCouponHolders(couponId, start, end);
   }
 
   async getTotalCouponHolders(address: EvmAddress, couponId: number): Promise<number> {
     LogService.logTrace(`Getting total coupon holders for coupon ${couponId} for security ${address.toString()}`);
 
-    const total = await this.connect(BondRead__factory, address.toString()).getTotalCouponHolders(couponId);
+    const total = await this.connect(Coupon__factory, address.toString()).getTotalCouponHolders(couponId);
 
     return Number(total);
   }
@@ -1318,7 +1390,7 @@ export class RPCQueryAdapter {
   async getCouponFromOrderedListAt(address: EvmAddress, pos: number): Promise<number> {
     LogService.logTrace(`Getting coupon from ordered list at position ${pos} for security ${address.toString()}`);
 
-    const couponId = await this.connect(BondRead__factory, address.toString()).getCouponFromOrderedListAt(pos);
+    const couponId = await this.connect(Coupon__factory, address.toString()).getCouponFromOrderedListAt(pos);
 
     return Number(couponId);
   }
@@ -1330,22 +1402,22 @@ export class RPCQueryAdapter {
 
     // If pagination parameters are provided, use paginated call
     if (pageIndex !== undefined && pageLength !== undefined) {
-      const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(
+      const couponIds = await this.connect(Coupon__factory, address.toString()).getCouponsOrderedList(
         pageIndex,
         pageLength,
       );
-      return couponIds.map((id) => Number(id));
+      return couponIds.map((id: bigint) => Number(id));
     }
 
     // Otherwise get all coupons (simulate by getting first page with large length)
-    const couponIds = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedList(0, 1000);
-    return couponIds.map((id) => Number(id));
+    const couponIds = await this.connect(Coupon__factory, address.toString()).getCouponsOrderedList(0, 1000);
+    return couponIds.map((id: bigint) => Number(id));
   }
 
   async getCouponsOrderedListTotal(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting coupons ordered list total for security ${address.toString()}`);
 
-    const total = await this.connect(BondRead__factory, address.toString()).getCouponsOrderedListTotal();
+    const total = await this.connect(Coupon__factory, address.toString()).getCouponsOrderedListTotal();
 
     return Number(total);
   }

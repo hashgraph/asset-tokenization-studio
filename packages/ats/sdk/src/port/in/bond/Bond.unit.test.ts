@@ -2,20 +2,12 @@
 
 import { createMock } from "@golevelup/ts-jest";
 import { CommandBus } from "@core/command/CommandBus";
-import CancelCouponRequest from "../request/bond/CancelCouponRequest";
 import {
   CreateBondRequest,
   GetBondDetailsRequest,
-  SetCouponRequest,
-  GetCouponForRequest,
-  GetCouponRequest,
-  GetAllCouponsRequest,
-  GetCouponsOrderedListRequest,
   UpdateMaturityDateRequest,
   RedeemAtMaturityByPartitionRequest,
   FullRedeemAtMaturityRequest,
-  GetCouponHoldersRequest,
-  GetTotalCouponHoldersRequest,
   CreateTrexSuiteBondRequest,
   RemoveProceedRecipientRequest,
   UpdateProceedRecipientDataRequest,
@@ -34,19 +26,10 @@ import NetworkService from "@service/network/NetworkService";
 import BondToken from "./Bond";
 import {
   BondDetailsFixture,
-  CouponFixture,
   CreateBondRequestFixture,
-  GetAllCouponsRequestFixture,
-  GetCouponsOrderedListRequestFixture,
   GetBondDetailsRequestFixture,
-  GetCouponForRequestFixture,
-  GetCouponHoldersQueryFixture,
-  GetCouponRequestFixture,
   RedeemAtMaturityByPartitionRequestFixture,
   FullRedeemAtMaturityRequestFixture,
-  GetTotalCouponHoldersRequestFixture,
-  CancelCouponRequestFixture,
-  SetCouponRequestFixture,
   UpdateMaturityDateRequestFixture,
   CreateTrexSuiteBondRequestFixture,
   AddProceedRecipientRequestFixture,
@@ -67,20 +50,10 @@ import BigDecimal from "@domain/context/shared/BigDecimal";
 import { faker } from "@faker-js/faker/.";
 import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
 import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
-import { CancelCouponCommand } from "@command/bond/coupon/cancel/CancelCouponCommand";
-import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
-
-import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
 import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
-import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
-import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
-import { GetCouponsOrderedListQuery } from "@query/bond/coupons/getCouponsOrderedList/GetCouponsOrderedListQuery";
-import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
 import { UpdateMaturityDateCommand } from "@command/bond/updateMaturityDate/UpdateMaturityDateCommand";
 import { RedeemAtMaturityByPartitionCommand } from "@command/bond/redeemAtMaturityByPartition/RedeemAtMaturityByPartitionCommand";
 import { FullRedeemAtMaturityCommand } from "@command/bond/fullRedeemAtMaturity/FullRedeemAtMaturityCommand";
-import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery";
-import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
 import { CreateTrexSuiteBondCommand } from "@command/bond/createTrexSuite/CreateTrexSuiteBondCommand";
 import AddProceedRecipientRequest from "../request/bond/AddProceedRecipientRequest";
 import { AddProceedRecipientCommand } from "@command/security/proceedRecipients/addProceedRecipient/AddProceedRecipientCommand";
@@ -90,7 +63,6 @@ import { IsProceedRecipientQuery } from "@query/security/proceedRecipient/isProc
 import { GetProceedRecipientsCountQuery } from "@query/security/proceedRecipient/getProceedRecipientsCount/GetProceedRecipientsCountQuery";
 import { GetProceedRecipientDataQuery } from "@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery";
 import { GetProceedRecipientsQuery } from "@query/security/proceedRecipient/getProceedRecipients/GetProceedRecipientsQuery";
-import { CastRateStatus } from "@domain/context/bond/RateStatus";
 
 describe("Bond", () => {
   let commandBusMock: jest.Mocked<CommandBus>;
@@ -99,17 +71,9 @@ describe("Bond", () => {
 
   let createBondRequest: CreateBondRequest;
   let getBondDetailsRequest: GetBondDetailsRequest;
-  let setCouponRequest: SetCouponRequest;
-  let cancelCouponRequest: CancelCouponRequest;
-  let getCouponForRequest: GetCouponForRequest;
-  let getCouponRequest: GetCouponRequest;
-  let getAllCouponsRequest: GetAllCouponsRequest;
-  let getCouponsOrderedListRequest: GetCouponsOrderedListRequest;
   let updateMaturityDateRequest: UpdateMaturityDateRequest;
   let redeemAtMaturityByPartitionRequest: RedeemAtMaturityByPartitionRequest;
   let fullRedeemAtMaturityRequest: FullRedeemAtMaturityRequest;
-  let getCouponHoldersRequest: GetCouponHoldersRequest;
-  let getTotalCouponHoldersRequest: GetTotalCouponHoldersRequest;
   let createTrexSuiteBondRequest: CreateTrexSuiteBondRequest;
   let getPrincipalForRequest: GetPrincipalForRequest;
 
@@ -124,8 +88,6 @@ describe("Bond", () => {
     commandBusMock = createMock<CommandBus>();
     queryBusMock = createMock<QueryBus>();
     handleValidationSpy = jest.spyOn(ValidatedRequest, "handleValidation");
-    getAllCouponsRequest = new GetAllCouponsRequest(GetAllCouponsRequestFixture.create());
-    getCouponsOrderedListRequest = new GetCouponsOrderedListRequest(GetCouponsOrderedListRequestFixture.create());
     networkServiceMock = createMock<NetworkService>({
       configuration: {
         factoryAddress: factoryAddress,
@@ -468,309 +430,6 @@ describe("Bond", () => {
       await expect(BondToken.getBondDetails(getBondDetailsRequest)).rejects.toThrow(ValidationError);
     });
   });
-
-  describe("setCoupon", () => {
-    setCouponRequest = new SetCouponRequest(SetCouponRequestFixture.create());
-    it("should set coupon successfully", async () => {
-      const expectedResponse = {
-        payload: 1,
-        transactionId: transactionId,
-      };
-
-      commandBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await BondToken.setCoupon(setCouponRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("SetCouponRequest", setCouponRequest);
-
-      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new SetCouponCommand(
-          setCouponRequest.securityId,
-          setCouponRequest.recordTimestamp,
-          setCouponRequest.executionTimestamp,
-          setCouponRequest.rate,
-          setCouponRequest.startTimestamp,
-          setCouponRequest.endTimestamp,
-          setCouponRequest.fixingTimestamp,
-          CastRateStatus.fromNumber(setCouponRequest.rateStatus),
-        ),
-      );
-
-      expect(result).toEqual(expectedResponse);
-    });
-
-    it("should throw an error if command execution fails", async () => {
-      const error = new Error("Command execution failed");
-      commandBusMock.execute.mockRejectedValue(error);
-
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow("Command execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("SetCouponRequest", setCouponRequest);
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new SetCouponCommand(
-          setCouponRequest.securityId,
-          setCouponRequest.recordTimestamp,
-          setCouponRequest.executionTimestamp,
-          setCouponRequest.rate,
-          setCouponRequest.startTimestamp,
-          setCouponRequest.endTimestamp,
-          setCouponRequest.fixingTimestamp,
-          CastRateStatus.fromNumber(setCouponRequest.rateStatus),
-        ),
-      );
-    });
-
-    it("should throw error if recordTimestamp is invalid", async () => {
-      setCouponRequest = new SetCouponRequest({
-        ...SetCouponRequestFixture.create(),
-        recordTimestamp: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
-      });
-
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if executionTimestamp is invalid", async () => {
-      const time = faker.date.past().getTime();
-      setCouponRequest = new SetCouponRequest({
-        ...SetCouponRequestFixture.create(),
-        recordTimestamp: time.toString(),
-        executionTimestamp: (time - 10).toString(),
-      });
-
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      setCouponRequest = new SetCouponRequest({
-        ...SetCouponRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(ValidationError);
-    });
-    it("should throw error if rate is invalid", async () => {
-      setCouponRequest = new SetCouponRequest({
-        ...SetCouponRequestFixture.create(),
-        rate: "invalid",
-      });
-
-      await expect(BondToken.setCoupon(setCouponRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("cancelCoupon", () => {
-    beforeEach(() => {
-      cancelCouponRequest = new CancelCouponRequest(CancelCouponRequestFixture.create());
-    });
-    it("should cancel coupon successfully", async () => {
-      const expectedResponse = {
-        payload: true,
-        transactionId: transactionId,
-      };
-
-      commandBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await BondToken.cancelCoupon(cancelCouponRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("CancelCouponRequest", cancelCouponRequest);
-
-      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new CancelCouponCommand(cancelCouponRequest.securityId, cancelCouponRequest.couponId),
-      );
-
-      expect(result).toEqual(expectedResponse);
-    });
-
-    it("should throw an error if command execution fails", async () => {
-      const error = new Error("Command execution failed");
-      commandBusMock.execute.mockRejectedValue(error);
-
-      await expect(BondToken.cancelCoupon(cancelCouponRequest)).rejects.toThrow("Command execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("CancelCouponRequest", cancelCouponRequest);
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new CancelCouponCommand(cancelCouponRequest.securityId, cancelCouponRequest.couponId),
-      );
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      cancelCouponRequest = new CancelCouponRequest({
-        ...CancelCouponRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(BondToken.cancelCoupon(cancelCouponRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("getCouponFor", () => {
-    beforeEach(() => {
-      getCouponForRequest = new GetCouponForRequest(GetCouponForRequestFixture.create());
-    });
-    it("should get coupon for successfully", async () => {
-      const expectedResponse = {
-        tokenBalance: BigInt(1000),
-        decimals: 2,
-        isDisabled: false,
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await BondToken.getCouponFor(getCouponForRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponForRequest", getCouponForRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponForQuery(
-          getCouponForRequest.targetId,
-          getCouponForRequest.securityId,
-          getCouponForRequest.couponId,
-        ),
-      );
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          tokenBalance: expectedResponse.tokenBalance.toString(),
-          decimals: expectedResponse.decimals.toString(),
-          isDisabled: false,
-        }),
-      );
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow("Query execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponForRequest", getCouponForRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponForQuery(
-          getCouponForRequest.targetId,
-          getCouponForRequest.securityId,
-          getCouponForRequest.couponId,
-        ),
-      );
-    });
-
-    it("should throw error if targetId is invalid", async () => {
-      getCouponForRequest = new GetCouponForRequest({
-        ...GetCouponForRequestFixture.create(),
-        targetId: "invalid",
-      });
-
-      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      getCouponForRequest = new GetCouponForRequest({
-        ...GetCouponForRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if couponId is invalid", async () => {
-      getCouponForRequest = new GetCouponForRequest({
-        ...GetCouponForRequestFixture.create(),
-        couponId: 0,
-      });
-
-      await expect(BondToken.getCouponFor(getCouponForRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("getCouponAmountFor", () => {
-    beforeEach(() => {
-      getCouponForRequest = new GetCouponForRequest(GetCouponForRequestFixture.create());
-    });
-    it("should get coupon for successfully", async () => {
-      const expectedResponse = {
-        numerator: "10",
-        denominator: "4",
-        recordDateReached: true,
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await BondToken.getCouponAmountFor(getCouponForRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponForRequest", getCouponForRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponAmountForQuery(
-          getCouponForRequest.targetId,
-          getCouponForRequest.securityId,
-          getCouponForRequest.couponId,
-        ),
-      );
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          numerator: expectedResponse.numerator,
-          denominator: expectedResponse.denominator,
-          recordDateReached: expectedResponse.recordDateReached,
-        }),
-      );
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(BondToken.getCouponAmountFor(getCouponForRequest)).rejects.toThrow("Query execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponForRequest", getCouponForRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponAmountForQuery(
-          getCouponForRequest.targetId,
-          getCouponForRequest.securityId,
-          getCouponForRequest.couponId,
-        ),
-      );
-    });
-
-    it("should throw error if targetId is invalid", async () => {
-      getCouponForRequest = new GetCouponForRequest({
-        ...GetCouponForRequestFixture.create(),
-        targetId: "invalid",
-      });
-
-      await expect(BondToken.getCouponAmountFor(getCouponForRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      getCouponForRequest = new GetCouponForRequest({
-        ...GetCouponForRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(BondToken.getCouponAmountFor(getCouponForRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if couponId is invalid", async () => {
-      getCouponForRequest = new GetCouponForRequest({
-        ...GetCouponForRequestFixture.create(),
-        couponId: 0,
-      });
-
-      await expect(BondToken.getCouponAmountFor(getCouponForRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
   describe("getPrincipalFor", () => {
     beforeEach(() => {
       getPrincipalForRequest = new GetPrincipalForRequest(GetPrincipalForRequestFixture.create());
@@ -832,220 +491,6 @@ describe("Bond", () => {
       await expect(BondToken.getPrincipalFor(getPrincipalForRequest)).rejects.toThrow(ValidationError);
     });
   });
-
-  describe("getCoupon", () => {
-    getCouponRequest = new GetCouponRequest(GetCouponRequestFixture.create());
-    it("should get coupon successfully", async () => {
-      const expectedResponse = {
-        coupon: CouponFixture.create(),
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await BondToken.getCoupon(getCouponRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponRequest", getCouponRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponQuery(getCouponRequest.securityId, getCouponRequest.couponId),
-      );
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          couponId: getCouponRequest.couponId,
-          recordDate: new Date(expectedResponse.coupon.recordTimeStamp * ONE_THOUSAND),
-          executionDate: new Date(expectedResponse.coupon.executionTimeStamp * ONE_THOUSAND),
-          rate: expectedResponse.coupon.rate.toString(),
-        }),
-      );
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(BondToken.getCoupon(getCouponRequest)).rejects.toThrow("Query execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponRequest", getCouponRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponQuery(getCouponRequest.securityId, getCouponRequest.couponId),
-      );
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      getCouponRequest = new GetCouponRequest({
-        ...GetCouponRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(BondToken.getCoupon(getCouponRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if couponId is invalid", async () => {
-      getCouponRequest = new GetCouponRequest({
-        ...GetCouponRequestFixture.create(),
-        couponId: 0,
-      });
-
-      await expect(BondToken.getCoupon(getCouponRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("getAllCoupons", () => {
-    getAllCouponsRequest = new GetAllCouponsRequest(GetAllCouponsRequestFixture.create());
-    it("should get all coupon successfully", async () => {
-      const expectedResponse = {
-        payload: 1,
-      };
-
-      const expectedResponse2 = {
-        coupon: CouponFixture.create(),
-      };
-
-      queryBusMock.execute.mockResolvedValueOnce(expectedResponse).mockResolvedValueOnce(expectedResponse2);
-
-      const result = await BondToken.getAllCoupons(getAllCouponsRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllCouponsRequest", getAllCouponsRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
-
-      expect(queryBusMock.execute).toHaveBeenNthCalledWith(1, new GetCouponCountQuery(getAllCouponsRequest.securityId));
-
-      expect(queryBusMock.execute).toHaveBeenNthCalledWith(2, new GetCouponQuery(getAllCouponsRequest.securityId, 1));
-
-      expect(result).toEqual(
-        expect.arrayContaining([
-          {
-            couponId: 1,
-            recordDate: new Date(expectedResponse2.coupon.recordTimeStamp * ONE_THOUSAND),
-            executionDate: new Date(expectedResponse2.coupon.executionTimeStamp * ONE_THOUSAND),
-            rate: expectedResponse2.coupon.rate.toString(),
-            rateDecimals: expectedResponse2.coupon.rateDecimals,
-            startDate: new Date(expectedResponse2.coupon.startTimeStamp * ONE_THOUSAND),
-            endDate: new Date(expectedResponse2.coupon.endTimeStamp * ONE_THOUSAND),
-            fixingDate: new Date(expectedResponse2.coupon.fixingTimeStamp * ONE_THOUSAND),
-            rateStatus: CastRateStatus.toNumber(expectedResponse2.coupon.rateStatus),
-            isDisabled: expectedResponse2.coupon.isDisabled,
-          },
-        ]),
-      );
-    });
-
-    it("should return empty array if count is 0", async () => {
-      const expectedResponse = {
-        payload: 0,
-      };
-      queryBusMock.execute.mockResolvedValueOnce(expectedResponse);
-
-      const result = await BondToken.getAllCoupons(getAllCouponsRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllCouponsRequest", getAllCouponsRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetCouponCountQuery(getAllCouponsRequest.securityId));
-
-      expect(result).toStrictEqual([]);
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(BondToken.getAllCoupons(getAllCouponsRequest)).rejects.toThrow("Query execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllCouponsRequest", getAllCouponsRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetCouponCountQuery(getAllCouponsRequest.securityId));
-    });
-  });
-
-  describe("getCouponsOrderedList", () => {
-    it("should get coupons ordered list successfully", async () => {
-      const expectedResponse = [1, 2, 3, 4, 5];
-
-      queryBusMock.execute.mockResolvedValue({ payload: expectedResponse });
-
-      const result = await BondToken.getCouponsOrderedList(getCouponsOrderedListRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponsOrderedListRequest", getCouponsOrderedListRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponsOrderedListQuery(
-          getCouponsOrderedListRequest.securityId,
-          getCouponsOrderedListRequest.pageIndex,
-          getCouponsOrderedListRequest.pageLength,
-        ),
-      );
-
-      expect(result).toEqual(expectedResponse);
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(BondToken.getCouponsOrderedList(getCouponsOrderedListRequest)).rejects.toThrow(
-        "Query execution failed",
-      );
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponsOrderedListRequest", getCouponsOrderedListRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponsOrderedListQuery(
-          getCouponsOrderedListRequest.securityId,
-          getCouponsOrderedListRequest.pageIndex,
-          getCouponsOrderedListRequest.pageLength,
-        ),
-      );
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      const invalidRequest = new GetCouponsOrderedListRequest({
-        securityId: "invalid",
-        pageIndex: 0,
-        pageLength: 10,
-      });
-
-      await expect(BondToken.getCouponsOrderedList(invalidRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should work with mocked query handler", async () => {
-      const expectedResponse = [10, 20, 30];
-
-      // Mock the query handler directly
-      const mockHandler = {
-        execute: jest.fn().mockResolvedValue({ payload: expectedResponse }),
-      };
-
-      // Replace the query bus execute for this specific query
-      queryBusMock.execute.mockImplementation((query) => {
-        if (query instanceof GetCouponsOrderedListQuery) {
-          return mockHandler.execute(query);
-        }
-        return Promise.resolve({});
-      });
-
-      const result = await BondToken.getCouponsOrderedList(getCouponsOrderedListRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetCouponsOrderedListRequest", getCouponsOrderedListRequest);
-      expect(mockHandler.execute).toHaveBeenCalledWith(
-        new GetCouponsOrderedListQuery(
-          getCouponsOrderedListRequest.securityId,
-          getCouponsOrderedListRequest.pageIndex,
-          getCouponsOrderedListRequest.pageLength,
-        ),
-      );
-      expect(result).toEqual(expectedResponse);
-    });
-  });
-
   describe("updateMaturityDate", () => {
     updateMaturityDateRequest = new UpdateMaturityDateRequest(UpdateMaturityDateRequestFixture.create());
     it("should update maturity date successfully", async () => {
@@ -1257,148 +702,6 @@ describe("Bond", () => {
       await expect(BondToken.fullRedeemAtMaturity(fullRedeemAtMaturityRequest)).rejects.toThrow(ValidationError);
     });
   });
-
-  describe("getCouponHolders", () => {
-    getCouponHoldersRequest = new GetCouponHoldersRequest(GetCouponHoldersQueryFixture.create());
-    it("should get coupon holders successfully", async () => {
-      const expectedResponse = {
-        payload: [transactionId],
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await BondToken.getCouponHolders(getCouponHoldersRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(GetCouponHoldersRequest.name, getCouponHoldersRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponHoldersQuery(
-          getCouponHoldersRequest.securityId,
-          getCouponHoldersRequest.couponId,
-          getCouponHoldersRequest.start,
-          getCouponHoldersRequest.end,
-        ),
-      );
-
-      expect(result).toStrictEqual(expectedResponse.payload);
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow("Query execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(GetCouponHoldersRequest.name, getCouponHoldersRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetCouponHoldersQuery(
-          getCouponHoldersRequest.securityId,
-          getCouponHoldersRequest.couponId,
-          getCouponHoldersRequest.start,
-          getCouponHoldersRequest.end,
-        ),
-      );
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      getCouponHoldersRequest = new GetCouponHoldersRequest({
-        ...GetCouponHoldersQueryFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if couponId is invalid", async () => {
-      getCouponHoldersRequest = new GetCouponHoldersRequest({
-        ...GetCouponHoldersQueryFixture.create(),
-        couponId: -1,
-      });
-
-      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if start is invalid", async () => {
-      getCouponHoldersRequest = new GetCouponHoldersRequest({
-        ...GetCouponHoldersQueryFixture.create(),
-        start: -1,
-      });
-
-      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-    it("should throw error if end is invalid", async () => {
-      getCouponHoldersRequest = new GetCouponHoldersRequest({
-        ...GetCouponHoldersQueryFixture.create(),
-        end: -1,
-      });
-
-      await expect(BondToken.getCouponHolders(getCouponHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("getTotalCouponHolders", () => {
-    getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest(GetTotalCouponHoldersRequestFixture.create());
-    it("should get total coupon holders successfully", async () => {
-      const expectedResponse = {
-        payload: 1,
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(GetTotalCouponHoldersRequest.name, getTotalCouponHoldersRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetTotalCouponHoldersQuery(getTotalCouponHoldersRequest.securityId, getTotalCouponHoldersRequest.couponId),
-      );
-
-      expect(result).toEqual(expectedResponse.payload);
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest)).rejects.toThrow(
-        "Query execution failed",
-      );
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(GetTotalCouponHoldersRequest.name, getTotalCouponHoldersRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetTotalCouponHoldersQuery(getTotalCouponHoldersRequest.securityId, getTotalCouponHoldersRequest.couponId),
-      );
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest({
-        ...GetTotalCouponHoldersRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if couponId is invalid", async () => {
-      getTotalCouponHoldersRequest = new GetTotalCouponHoldersRequest({
-        ...GetTotalCouponHoldersRequestFixture.create(),
-        couponId: -1,
-      });
-
-      await expect(BondToken.getTotalCouponHolders(getTotalCouponHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
   describe("createTrexSuite", () => {
     createTrexSuiteBondRequest = new CreateTrexSuiteBondRequest(CreateTrexSuiteBondRequestFixture.create());
     it("should create successfully", async () => {

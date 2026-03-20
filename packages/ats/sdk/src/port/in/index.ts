@@ -6,6 +6,7 @@ import Security from "./security/Security";
 import Equity from "./equity/Equity";
 import Dividend from "./dividend/Dividend";
 import Bond from "./bond/Bond";
+import Coupon from "./coupon/Coupon";
 import Event from "./event/Event";
 import Network from "./network/Network";
 import Factory from "./factory/Factory";
@@ -23,6 +24,7 @@ export {
   Equity,
   Dividend,
   Bond,
+  Coupon,
   Account,
   Role,
   Event,
@@ -45,6 +47,7 @@ export * from "./security/Security";
 export * from "./equity/Equity";
 export * from "./dividend/Dividend";
 export * from "./bond/Bond";
+export * from "./coupon/Coupon";
 export * from "./account/Account";
 export * from "./role/Role";
 export * from "./event/Event";

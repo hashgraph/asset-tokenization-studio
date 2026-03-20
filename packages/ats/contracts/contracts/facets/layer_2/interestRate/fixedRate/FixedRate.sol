@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { CommonFixedInterestRate } from "../../../../domain/asset/extension/bond/fixedInterestRate/Common.sol";
+import { CommonFixedInterestRate } from "../../../../domain/asset/extension/coupon/fixedInterestRate/Common.sol";
 import { IFixedRate } from "./IFixedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 

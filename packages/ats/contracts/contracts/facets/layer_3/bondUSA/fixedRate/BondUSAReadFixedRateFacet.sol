@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { BondUSAReadFacetBase } from "../BondUSAReadFacetBase.sol";
 import { _BOND_FIXED_READ_RESOLVER_KEY } from "../../../../constants/resolverKeys.sol";
-import { CommonFixedInterestRate } from "../../../../domain/asset/extension/bond/fixedInterestRate/Common.sol";
+import { CommonFixedInterestRate } from "../../../../domain/asset/extension/coupon/fixedInterestRate/Common.sol";
 
 contract BondUSAReadFixedRateFacet is BondUSAReadFacetBase, CommonFixedInterestRate {
     function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {

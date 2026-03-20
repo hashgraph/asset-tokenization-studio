@@ -7,7 +7,7 @@ import { Common } from "../../../../../../domain/Common.sol";
 import { Internals } from "../../../../../../domain/Internals.sol";
 import { CouponStorageWrapper } from "../../../../../../domain/asset/coupon/CouponStorageWrapper.sol";
 
-abstract contract BondStorageWrapperFixedInterestRate is InternalsFixedInterestRate, Common {
+abstract contract CouponStorageWrapperFixedInterestRate is InternalsFixedInterestRate, Common {
     error InterestRateIsFixed();
 
     function _setCoupon(
