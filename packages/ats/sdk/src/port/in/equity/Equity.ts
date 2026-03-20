@@ -20,10 +20,10 @@ import { QueryBus } from "@core/query/QueryBus";
 import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 
-import GetDividendForRequest from "../request/equity/GetDividendForRequest";
-import GetDividendRequest from "../request/equity/GetDividendRequest";
-import GetAllDividendsRequest from "../request/equity/GetAllDividendsRequest";
-import SetDividendRequest from "../request/equity/SetDividendRequest";
+import GetDividendForRequest from "../request/dividend/GetDividendForRequest";
+import GetDividendRequest from "../request/dividend/GetDividendRequest";
+import GetAllDividendsRequest from "../request/dividend/GetAllDividendsRequest";
+import SetDividendRequest from "../request/dividend/SetDividendRequest";
 import DividendForViewModel from "../response/DividendForViewModel";
 import DividendViewModel from "../response/DividendViewModel";
 import SetVotingRightsRequest from "../request/equity/SetVotingRightsRequest";
@@ -57,9 +57,9 @@ import { GetTotalDividendHoldersQuery } from "@query/equity/dividends/getTotalDi
 import { GetVotingHoldersQuery } from "@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery";
 import { GetTotalVotingHoldersQuery } from "@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery";
 import GetAllScheduledBalanceAdjustmentsRequest from "../request/equity/GetAllScheduledBalanceAdjustmentst";
-import CancelDividendRequest from "../request/equity/CancelDividendRequest";
-import GetDividendHoldersRequest from "../request/equity/GetDividendHoldersRequest";
-import GetTotalDividendHoldersRequest from "../request/equity/GetTotalDividendHoldersRequest";
+import CancelDividendRequest from "../request/dividend/CancelDividendRequest";
+import GetDividendHoldersRequest from "../request/dividend/GetDividendHoldersRequest";
+import GetTotalDividendHoldersRequest from "../request/dividend/GetTotalDividendHoldersRequest";
 import GetVotingHoldersRequest from "../request/equity/GetVotingHoldersRequest";
 import GetTotalVotingHoldersRequest from "../request/equity/GetTotalVotingHoldersRequest";
 import CreateTrexSuiteEquityRequest from "../request/equity/CreateTrexSuiteEquityRequest";
