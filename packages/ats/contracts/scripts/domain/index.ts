@@ -58,3 +58,9 @@ export * from "./bondKpiLinkedRate/createConfiguration";
 
 // Bond Sustainability Performance Target Rate configuration
 export * from "./bondSustainabilityPerformanceTargetRate/createConfiguration";
+
+// Loan configuration
+export * from "./loan/createConfiguration";
+
+// Loan Portfolio configuration
+export * from "./loanPortfolio/createConfiguration";

@@ -57,6 +57,22 @@ export const BOND_KPI_LINKED_RATE_CONFIG_ID = "0x0000000000000000000000000000000
 export const BOND_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_CONFIG_ID =
   "0x0000000000000000000000000000000000000000000000000000000000000005";
 
+/**
+ * Loan configuration ID.
+ *
+ * bytes32(uint256(6)) = 0x00...06
+ * Used by BusinessLogicResolver to identify loan facet configuration.
+ */
+export const LOAN_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000006";
+
+/**
+ * Loan Portfolio configuration ID.
+ *
+ * bytes32(uint256(7)) = 0x00...07
+ * Used by BusinessLogicResolver to identify loan portfolio facet configuration.
+ */
+export const LOAN_PORTFOLIO_CONFIG_ID = "0x0000000000000000000000000000000000000000000000000000000000000007";
+
 // ============================================================================
 // ATS-Specific Contract Names
 // ============================================================================
