@@ -22,6 +22,7 @@ import { RegulationData, AdditionalSecurityData } from "../constants/regulation.
 import { ICap } from "../facets/layer_1/cap/ICap.sol";
 import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
 import { IEquity } from "../facets/layer_2/equity/IEquity.sol";
+import { IVoting } from "../facets/layer_2/voting/IVoting.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
 /* solhint-disable max-line-length */
@@ -565,7 +566,7 @@ abstract contract Internals is Modifiers {
     function _setTotalLockLabaf(address _tokenHolder, uint256 _labaf) internal virtual;
     function _setTotalLockLabafByPartition(bytes32 _partition, address _tokenHolder, uint256 _labaf) internal virtual;
     function _setVoting(
-        IEquity.Voting calldata _newVoting
+        IVoting.Voting calldata _newVoting
     ) internal virtual returns (bytes32 corporateActionId_, uint256 voteID_);
     function _cancelVoting(uint256 _voteId) internal virtual returns (bool success_);
     function _setCurrency(bytes3 _currency) internal virtual;
@@ -1295,12 +1296,12 @@ abstract contract Internals is Modifiers {
         internal
         view
         virtual
-        returns (IEquity.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_);
+        returns (IVoting.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_);
     function _getVotingCount() internal view virtual returns (uint256 votingCount_);
     function _getVotingFor(
         uint256 _voteID,
         address _account
-    ) internal view virtual returns (IEquity.VotingFor memory votingFor_);
+    ) internal view virtual returns (IVoting.VotingFor memory votingFor_);
     function _getVotingHolders(
         uint256 _voteID,
         uint256 _pageIndex,

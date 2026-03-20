@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-17T10:10:44.870Z
- * Facets: 197
+ * Generated: 2026-03-19T11:53:43.552Z
+ * Facets: 198
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -412,6 +412,8 @@ import {
   TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacet__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  VotingFacet__factory,
+  VotingFacetTimeTravel__factory,
 } from "@contract-types";
 
 /**
@@ -3208,11 +3210,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x564387f9",
       },
       {
-        name: "cancelVoting",
-        signature: "function cancelVoting(uint256 _voteId) returns (bool success_)",
-        selector: "0x549bdd6e",
-      },
-      {
         name: "getDividend",
         signature:
           "function getDividend(uint256 _dividendID) view returns (((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) dividend, uint256 snapshotId) registeredDividend_, bool isDisabled_)",
@@ -3281,34 +3278,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
       {
-        name: "getTotalVotingHolders",
-        signature: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256)",
-        selector: "0x92c51818",
-      },
-      {
-        name: "getVoting",
-        signature:
-          "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
-        selector: "0x3afc7282",
-      },
-      {
-        name: "getVotingCount",
-        signature: "function getVotingCount() view returns (uint256 votingCount_)",
-        selector: "0x9c2aab5e",
-      },
-      {
-        name: "getVotingFor",
-        signature:
-          "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached, bool isDisabled) votingFor_)",
-        selector: "0x7633eccf",
-      },
-      {
-        name: "getVotingHolders",
-        signature:
-          "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-        selector: "0x009f64ac",
-      },
-      {
         name: "setDividend",
         signature:
           "function setDividend((uint256 recordDate, uint256 executionDate, uint256 amount, uint8 amountDecimals) _newDividend) returns (uint256 dividendID_)",
@@ -3319,11 +3288,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function setScheduledBalanceAdjustment((uint256 executionDate, uint256 factor, uint8 decimals) _newBalanceAdjustment) returns (uint256 balanceAdjustmentID_)",
         selector: "0xd1661084",
-      },
-      {
-        name: "setVoting",
-        signature: "function setVoting((uint256 recordDate, bytes data) _newVoting) returns (uint256 voteID_)",
-        selector: "0x5adaa49e",
       },
     ],
     factory: (signer, useTimeTravel = false) =>
@@ -10607,12 +10571,63 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         ? new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
         : new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
+
+  VotingFacet: {
+    name: "VotingFacet",
+    resolverKey: {
+      name: "_VOTING_RESOLVER_KEY",
+      value: "0x97e0ffc69e5d5dd7c4635bfce0a5cf15b1c313433d49edbd55813da224b03768",
+    },
+    inheritance: ["Voting", "IStaticFunctionSelectors"],
+    methods: [
+      {
+        name: "cancelVoting",
+        signature: "function cancelVoting(uint256 _voteId) returns (bool success_)",
+        selector: "0x549bdd6e",
+      },
+      {
+        name: "getTotalVotingHolders",
+        signature: "function getTotalVotingHolders(uint256 _voteID) view returns (uint256)",
+        selector: "0x92c51818",
+      },
+      {
+        name: "getVoting",
+        signature:
+          "function getVoting(uint256 _voteID) view returns (((uint256 recordDate, bytes data) voting, uint256 snapshotId) registeredVoting_, bool isDisabled_)",
+        selector: "0x3afc7282",
+      },
+      {
+        name: "getVotingCount",
+        signature: "function getVotingCount() view returns (uint256 votingCount_)",
+        selector: "0x9c2aab5e",
+      },
+      {
+        name: "getVotingFor",
+        signature:
+          "function getVotingFor(uint256 _voteID, address _account) view returns ((uint256 tokenBalance, uint256 recordDate, bytes data, uint8 decimals, bool recordDateReached, bool isDisabled) votingFor_)",
+        selector: "0x7633eccf",
+      },
+      {
+        name: "getVotingHolders",
+        signature:
+          "function getVotingHolders(uint256 _voteID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0x009f64ac",
+      },
+      {
+        name: "setVoting",
+        signature: "function setVoting((uint256 recordDate, bytes data) _newVoting) returns (uint256 voteID_)",
+        selector: "0x5adaa49e",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new VotingFacetTimeTravel__factory(signer) : new VotingFacet__factory(signer),
+  },
 };
 
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 197 as const;
+export const TOTAL_FACETS = 198 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -10955,7 +10970,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   EquityStorageWrapper: {
     name: "EquityStorageWrapper",
-    inheritance: ["IEquityStorageWrapper", "BondStorageWrapper"],
+    inheritance: ["IEquityStorageWrapper", "VotingStorageWrapper"],
     methods: [],
   },
 
@@ -11261,16 +11276,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         signature: "ScheduledBalanceAdjustmentSet(bytes32,uint256,address,uint256,uint256,uint256)",
         topic0: "0x71cd63a6f86ff487645dcceb29d3eac904f16d7006cfa7b1da3ea951a77a9666",
       },
-      {
-        name: "VotingCancelled",
-        signature: "VotingCancelled(uint256,address)",
-        topic0: "0x0ca8f69518859b63e253a165f70a3ef3ad0db94215d1703ebcadd269c4c860bc",
-      },
-      {
-        name: "VotingSet",
-        signature: "VotingSet(bytes32,uint256,address,uint256,bytes)",
-        topic0: "0x5ca20e6ec9818c8d574ae3452d46ed4c9dc9d8df2ffa263150507c7e9124ac2f",
-      },
     ],
     errors: [
       {
@@ -11289,8 +11294,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0x50fe6757",
       },
       { name: "DividendCreationFailed", signature: "DividendCreationFailed()", selector: "0x409bf2d2" },
-      { name: "VotingAlreadyRecorded", signature: "VotingAlreadyRecorded(bytes32,uint256)", selector: "0x7a2e2617" },
-      { name: "VotingRightsCreationFailed", signature: "VotingRightsCreationFailed()", selector: "0x0cc16600" },
     ],
   },
 
@@ -11550,6 +11553,27 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     ],
   },
 
+  IVotingStorageWrapper: {
+    name: "IVotingStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "VotingCancelled",
+        signature: "VotingCancelled(uint256,address)",
+        topic0: "0x0ca8f69518859b63e253a165f70a3ef3ad0db94215d1703ebcadd269c4c860bc",
+      },
+      {
+        name: "VotingSet",
+        signature: "VotingSet(bytes32,uint256,address,uint256,bytes)",
+        topic0: "0x5ca20e6ec9818c8d574ae3452d46ed4c9dc9d8df2ffa263150507c7e9124ac2f",
+      },
+    ],
+    errors: [
+      { name: "VotingAlreadyRecorded", signature: "VotingAlreadyRecorded(bytes32,uint256)", selector: "0x7a2e2617" },
+      { name: "VotingRightsCreationFailed", signature: "VotingRightsCreationFailed()", selector: "0x0cc16600" },
+    ],
+  },
+
   KpiLinkedRateStorageWrapper: {
     name: "KpiLinkedRateStorageWrapper",
     inheritance: ["PauseStorageWrapper"],
@@ -11669,12 +11693,18 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     inheritance: ["FixedRateStorageWrapper"],
     methods: [],
   },
+
+  VotingStorageWrapper: {
+    name: "VotingStorageWrapper",
+    inheritance: ["IVotingStorageWrapper", "BondStorageWrapper"],
+    methods: [],
+  },
 };
 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 58 as const;
+export const TOTAL_STORAGE_WRAPPERS = 60 as const;
 
 /**
  * All role identifiers extracted from contracts.

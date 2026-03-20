@@ -92,6 +92,9 @@ const EQUITY_FACETS = [
   // Nominal Value (1)
   "NominalValueFacet",
 
+  // Voting (1)
+  "VotingFacet",
+
   // Jurisdiction-Specific (1)
   "EquityUSAFacet",
 ] as const;
