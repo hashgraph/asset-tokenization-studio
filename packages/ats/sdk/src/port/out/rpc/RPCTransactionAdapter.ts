@@ -63,6 +63,7 @@ import {
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
+  Dividend__factory,
   Equity__factory,
   ERC1410IssuerFacet__factory,
   ERC1410ManagementFacet__factory,
@@ -80,6 +81,7 @@ import {
   HoldManagementFacet__factory,
   HoldTokenHolderFacet__factory,
   IBondRead,
+  IDividend,
   IEquity,
   KpiLinkedRate__factory,
   Kpis__factory,
@@ -577,7 +579,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       executionDate: ${executionDate},
       amount : ${amount}  `,
     );
-    const dividendStruct: IEquity.DividendStruct = {
+    const dividendStruct: IDividend.DividendStruct = {
       recordDate: recordDate.toBigInt(),
       executionDate: executionDate.toBigInt(),
       amount: amount.toBigInt(),
@@ -585,7 +587,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Dividend__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setDividend",
       [dividendStruct],
       GAS.SET_DIVIDENDS,
@@ -595,7 +597,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async cancelDividend(security: EvmAddress, dividendId: number): Promise<TransactionResponse> {
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Dividend__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelDividend",
       [dividendId],
       GAS.CANCEL_DIVIDEND,

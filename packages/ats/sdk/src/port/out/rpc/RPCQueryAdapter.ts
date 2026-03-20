@@ -28,6 +28,7 @@ import {
   ClearingTransferFacet__factory,
   ControlListFacet__factory,
   DiamondFacet__factory,
+  Dividend__factory,
   Equity__factory,
   ERC1410ReadFacet__factory,
   ERC20Votes__factory,
@@ -371,7 +372,7 @@ export class RPCQueryAdapter {
   async getDividendFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendFor> {
     LogService.logTrace(`Getting dividends for`);
 
-    const dividendFor = await this.connect(Equity__factory, address.toString()).getDividendFor(
+    const dividendFor = await this.connect(Dividend__factory, address.toString()).getDividendFor(
       dividend,
       target.toString(),
     );
@@ -386,7 +387,7 @@ export class RPCQueryAdapter {
   async getDividendAmountFor(address: EvmAddress, target: EvmAddress, dividend: number): Promise<DividendAmountFor> {
     LogService.logTrace(`Getting dividends amount for`);
 
-    const dividendAmountFor = await this.connect(Equity__factory, address.toString()).getDividendAmountFor(
+    const dividendAmountFor = await this.connect(Dividend__factory, address.toString()).getDividendAmountFor(
       dividend,
       target.toString(),
     );
@@ -401,7 +402,7 @@ export class RPCQueryAdapter {
   async getDividend(address: EvmAddress, dividend: number): Promise<Dividend> {
     LogService.logTrace(`Getting dividends`);
 
-    const { registeredDividend_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getDividend(
+    const { registeredDividend_, isDisabled_ } = await this.connect(Dividend__factory, address.toString()).getDividend(
       dividend,
     );
 
@@ -418,7 +419,7 @@ export class RPCQueryAdapter {
   async getDividendsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting dividends count`);
 
-    const dividendsCount = await this.connect(Equity__factory, address.toString()).getDividendsCount();
+    const dividendsCount = await this.connect(Dividend__factory, address.toString()).getDividendsCount();
 
     return Number(dividendsCount);
   }
@@ -1351,13 +1352,13 @@ export class RPCQueryAdapter {
 
   async getDividendHolders(address: EvmAddress, dividendId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting dividend holders for dividend ${dividendId} for security ${address.toString()}`);
-    return await this.connect(Equity__factory, address.toString()).getDividendHolders(dividendId, start, end);
+    return await this.connect(Dividend__factory, address.toString()).getDividendHolders(dividendId, start, end);
   }
 
   async getTotalDividendHolders(address: EvmAddress, dividendId: number): Promise<number> {
     LogService.logTrace(`Getting total dividend holders for dividend ${dividendId} for security ${address.toString()}`);
 
-    const total = await this.connect(Equity__factory, address.toString()).getTotalDividendHolders(dividendId);
+    const total = await this.connect(Dividend__factory, address.toString()).getTotalDividendHolders(dividendId);
 
     return Number(total);
   }
