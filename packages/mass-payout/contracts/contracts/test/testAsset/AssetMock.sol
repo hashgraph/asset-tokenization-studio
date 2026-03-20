@@ -3,6 +3,9 @@ pragma solidity 0.8.22;
 
 import { IAssetMock } from "./interfaces/IAssetMock.sol";
 import { IFactory } from "@hashgraph/asset-tokenization-contracts/contracts/factory/IFactory.sol";
+import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
+import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
+import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/dividend/IDividend.sol";
 
 // solhint-disable no-unused-vars
 contract AssetMock is IAssetMock {
@@ -54,7 +57,11 @@ contract AssetMock is IAssetMock {
         principalFor_.denominator = 1;
     }
 
-    function getCouponAmountFor(uint256, address) external view returns (CouponAmountFor memory couponAmountFor_) {
+    // solhint-disable-next-line max-line-length
+    function getCouponAmountFor(
+        uint256,
+        address
+    ) external view returns (ICoupon.CouponAmountFor memory couponAmountFor_) {
         couponAmountFor_.numerator = _numerator;
         couponAmountFor_.denominator = 1;
         couponAmountFor_.recordDateReached = true;
@@ -63,7 +70,7 @@ contract AssetMock is IAssetMock {
     function getDividendAmountFor(
         uint256,
         address
-    ) external view returns (DividendAmountFor memory dividendAmountFor_) {
+    ) external view returns (IDividend.DividendAmountFor memory dividendAmountFor_) {
         dividendAmountFor_.numerator = _numerator;
         dividendAmountFor_.denominator = 1;
         dividendAmountFor_.recordDateReached = true;
@@ -84,7 +91,7 @@ contract AssetMock is IAssetMock {
         return;
     }
 
-    function setCoupon(Coupon calldata) external pure returns (uint256) {
+    function setCoupon(ICoupon.Coupon calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -92,7 +99,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function getBondDetails() external pure returns (BondDetailsData memory bondDetailsData_) {
+    function getBondDetails() external pure returns (IBondRead.BondDetailsData memory bondDetailsData_) {
         bondDetailsData_.currency = 0x555344;
         bondDetailsData_.nominalValue = 2345678901;
         bondDetailsData_.nominalValueDecimals = 2;
@@ -100,7 +107,10 @@ contract AssetMock is IAssetMock {
         bondDetailsData_.maturityDate = 1761823607;
     }
 
-    function getCoupon(uint256) external pure returns (RegisteredCoupon memory registeredCoupon_, bool isDisabled_) {
+    // solhint-disable-next-line max-line-length
+    function getCoupon(
+        uint256
+    ) external pure returns (ICoupon.RegisteredCoupon memory registeredCoupon_, bool isDisabled_) {
         registeredCoupon_.coupon.recordDate = 1753874807;
         registeredCoupon_.coupon.executionDate = 1753874807;
         registeredCoupon_.coupon.startDate = 1;
@@ -112,7 +122,7 @@ contract AssetMock is IAssetMock {
         isDisabled_ = false;
     }
 
-    function getCouponFor(uint256, address) external pure returns (CouponFor memory couponFor_) {
+    function getCouponFor(uint256, address) external pure returns (ICoupon.CouponFor memory couponFor_) {
         couponFor_.tokenBalance = 3;
         couponFor_.decimals = 2;
         couponFor_.recordDateReached = true;
@@ -133,7 +143,7 @@ contract AssetMock is IAssetMock {
         revert NotImplemented();
     }
 
-    function setDividend(Dividend calldata) external pure returns (uint256) {
+    function setDividend(IDividend.Dividend calldata) external pure returns (uint256) {
         revert NotImplemented();
     }
 
@@ -177,7 +187,7 @@ contract AssetMock is IAssetMock {
 
     function getDividend(
         uint256
-    ) external pure returns (RegisteredDividend memory registeredDividend_, bool isDisabled_) {
+    ) external pure returns (IDividend.RegisteredDividend memory registeredDividend_, bool isDisabled_) {
         registeredDividend_.dividend.recordDate = 1753874807;
         registeredDividend_.dividend.executionDate = 1753874807;
         registeredDividend_.dividend.amount = 400;
@@ -186,7 +196,7 @@ contract AssetMock is IAssetMock {
         isDisabled_ = false;
     }
 
-    function getDividendFor(uint256, address) external pure returns (DividendFor memory dividendFor_) {
+    function getDividendFor(uint256, address) external pure returns (IDividend.DividendFor memory dividendFor_) {
         dividendFor_.tokenBalance = 3;
         dividendFor_.amount = 200;
         dividendFor_.amountDecimals = 2;

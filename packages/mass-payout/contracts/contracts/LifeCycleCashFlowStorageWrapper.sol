@@ -15,7 +15,8 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { ISnapshots } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_1/snapshot/ISnapshots.sol";
 import { IBond } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBond.sol";
 import { IBondRead } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/bond/IBondRead.sol";
-import { IEquity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/equity/IEquity.sol";
+import { ICoupon } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/coupon/ICoupon.sol";
+import { IDividend } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/dividend/IDividend.sol";
 import { ISecurity } from "@hashgraph/asset-tokenization-contracts/contracts/facets/layer_2/security/ISecurity.sol";
 import { _PERCENTAGE_DECIMALS_SIZE } from "./constants/values.sol";
 import { _LIFECYCLE_CASH_FLOW_STORAGE_POSITION } from "./constants/storagePositions.sol";
@@ -725,9 +726,9 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         uint256 _pageLength
     ) private view returns (address[] memory holders_) {
         if (_assetType == ILifeCycleCashFlow.AssetType.Equity) {
-            return IEquity(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
+            return IDividend(_asset).getDividendHolders(_distributionID, _pageIndex, _pageLength);
         } else {
-            return IBondRead(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
+            return ICoupon(_asset).getCouponHolders(_distributionID, _pageIndex, _pageLength);
         }
     }
 
@@ -810,7 +811,7 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256 amount) {
-        IBondRead.CouponAmountFor memory couponAmountFor = IBondRead(_asset).getCouponAmountFor(_couponID, _holder);
+        ICoupon.CouponAmountFor memory couponAmountFor = ICoupon(_asset).getCouponAmountFor(_couponID, _holder);
         return (couponAmountFor.numerator * 10 ** _paymentTokenDecimals) / couponAmountFor.denominator;
     }
 
@@ -830,7 +831,10 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
         address _holder,
         uint8 _paymentTokenDecimals
     ) private view returns (uint256) {
-        IEquity.DividendAmountFor memory dividendAmountFor = IEquity(_asset).getDividendAmountFor(_dividendID, _holder);
+        IDividend.DividendAmountFor memory dividendAmountFor = IDividend(_asset).getDividendAmountFor(
+            _dividendID,
+            _holder
+        );
         return (dividendAmountFor.numerator * 10 ** _paymentTokenDecimals) / dividendAmountFor.denominator;
     }
 
@@ -861,10 +865,12 @@ abstract contract LifeCycleCashFlowStorageWrapper is ILifeCycleCashFlow, HederaT
      */
     function _getDistributionExecutionDate(address _asset, uint256 _distributionID) private view returns (uint256) {
         if (_lifeCycleCashFlowStorage().assetType == ILifeCycleCashFlow.AssetType.Equity) {
-            (IEquity.RegisteredDividend memory registeredDividend_, ) = IEquity(_asset).getDividend(_distributionID);
+            (IDividend.RegisteredDividend memory registeredDividend_, ) = IDividend(_asset).getDividend(
+                _distributionID
+            );
             return registeredDividend_.dividend.executionDate;
         } else {
-            (IBondRead.RegisteredCoupon memory registeredCoupon_, ) = IBondRead(_asset).getCoupon(_distributionID);
+            (ICoupon.RegisteredCoupon memory registeredCoupon_, ) = ICoupon(_asset).getCoupon(_distributionID);
             return registeredCoupon_.coupon.executionDate;
         }
     }
