@@ -8,7 +8,7 @@ import { ERC3643ManagementFacetBase } from "../ERC3643ManagementFacetBase.sol";
 /* solhint-disable max-line-length */
 import {
     CommonSustainabilityPerformanceTargetInterestRate
-} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+} from "../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 
 contract ERC3643ManagementSustainabilityPerformanceTargetRateFacet is

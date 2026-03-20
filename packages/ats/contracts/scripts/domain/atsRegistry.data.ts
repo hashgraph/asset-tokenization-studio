@@ -10,8 +10,8 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-17T10:10:44.870Z
- * Facets: 197
+ * Generated: 2026-03-19T14:35:23.736Z
+ * Facets: 201
  * Infrastructure: 2
  *
  * @module domain/atsRegistry.data
@@ -115,6 +115,14 @@ import {
   CorporateActionsKpiLinkedRateFacetTimeTravel__factory,
   CorporateActionsSustainabilityPerformanceTargetRateFacet__factory,
   CorporateActionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  CouponFacet__factory,
+  CouponFacetTimeTravel__factory,
+  CouponFixedRateFacet__factory,
+  CouponFixedRateFacetTimeTravel__factory,
+  CouponKpiLinkedRateFacet__factory,
+  CouponKpiLinkedRateFacetTimeTravel__factory,
+  CouponSustainabilityPerformanceTargetRateFacet__factory,
+  CouponSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   DiamondFacet__factory,
   DiamondFacetTimeTravel__factory,
   ERC1410IssuerFacet__factory,
@@ -852,11 +860,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x86d59729",
       },
       {
-        name: "cancelCoupon",
-        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
-        selector: "0x0459fafb",
-      },
-      {
         name: "fullRedeemAtMaturity",
         signature: "function fullRedeemAtMaturity(address _tokenHolder)",
         selector: "0xd0db5fb2",
@@ -865,12 +868,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "redeemAtMaturityByPartition",
         signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
         selector: "0x8a647211",
-      },
-      {
-        name: "setCoupon",
-        signature:
-          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-        selector: "0xb16fd0cc",
       },
       {
         name: "updateMaturityDate",
@@ -904,11 +901,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x86d59729",
       },
       {
-        name: "cancelCoupon",
-        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
-        selector: "0x0459fafb",
-      },
-      {
         name: "fullRedeemAtMaturity",
         signature: "function fullRedeemAtMaturity(address _tokenHolder)",
         selector: "0xd0db5fb2",
@@ -917,12 +909,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "redeemAtMaturityByPartition",
         signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
         selector: "0x8a647211",
-      },
-      {
-        name: "setCoupon",
-        signature:
-          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-        selector: "0xb16fd0cc",
       },
       {
         name: "updateMaturityDate",
@@ -957,11 +943,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x86d59729",
       },
       {
-        name: "cancelCoupon",
-        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
-        selector: "0x0459fafb",
-      },
-      {
         name: "fullRedeemAtMaturity",
         signature: "function fullRedeemAtMaturity(address _tokenHolder)",
         selector: "0xd0db5fb2",
@@ -970,12 +951,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "redeemAtMaturityByPartition",
         signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
         selector: "0x8a647211",
-      },
-      {
-        name: "setCoupon",
-        signature:
-          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-        selector: "0xb16fd0cc",
       },
       {
         name: "updateMaturityDate",
@@ -1012,51 +987,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getCoupon",
-        signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
-        selector: "0x936e3169",
-      },
-      {
-        name: "getCouponAmountFor",
-        signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
-        selector: "0x439efc2e",
-      },
-      {
-        name: "getCouponCount",
-        signature: "function getCouponCount() view returns (uint256 couponCount_)",
-        selector: "0x468bb240",
-      },
-      {
-        name: "getCouponFor",
-        signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
-        selector: "0xbba7b56d",
-      },
-      {
-        name: "getCouponFromOrderedListAt",
-        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-        selector: "0x65a88a2c",
-      },
-      {
-        name: "getCouponHolders",
-        signature:
-          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature:
-          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-        selector: "0xee1d26eb",
-      },
-      {
         name: "getPrincipalFor",
         signature:
           "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
@@ -1073,11 +1003,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-        selector: "0xec116ae3",
       },
       {
         name: "getTotalSecurityHolders",
@@ -1104,51 +1029,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getCoupon",
-        signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
-        selector: "0x936e3169",
-      },
-      {
-        name: "getCouponAmountFor",
-        signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
-        selector: "0x439efc2e",
-      },
-      {
-        name: "getCouponCount",
-        signature: "function getCouponCount() view returns (uint256 couponCount_)",
-        selector: "0x468bb240",
-      },
-      {
-        name: "getCouponFor",
-        signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
-        selector: "0xbba7b56d",
-      },
-      {
-        name: "getCouponFromOrderedListAt",
-        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-        selector: "0x65a88a2c",
-      },
-      {
-        name: "getCouponHolders",
-        signature:
-          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature:
-          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-        selector: "0xee1d26eb",
-      },
-      {
         name: "getPrincipalFor",
         signature:
           "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
@@ -1165,11 +1045,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-        selector: "0xec116ae3",
       },
       {
         name: "getTotalSecurityHolders",
@@ -1199,51 +1074,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getCoupon",
-        signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
-        selector: "0x936e3169",
-      },
-      {
-        name: "getCouponAmountFor",
-        signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
-        selector: "0x439efc2e",
-      },
-      {
-        name: "getCouponCount",
-        signature: "function getCouponCount() view returns (uint256 couponCount_)",
-        selector: "0x468bb240",
-      },
-      {
-        name: "getCouponFor",
-        signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
-        selector: "0xbba7b56d",
-      },
-      {
-        name: "getCouponFromOrderedListAt",
-        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-        selector: "0x65a88a2c",
-      },
-      {
-        name: "getCouponHolders",
-        signature:
-          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature:
-          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-        selector: "0xee1d26eb",
-      },
-      {
         name: "getPrincipalFor",
         signature:
           "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
@@ -1260,11 +1090,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-        selector: "0xec116ae3",
       },
       {
         name: "getTotalSecurityHolders",
@@ -1293,51 +1118,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x4ce02414",
       },
       {
-        name: "getCoupon",
-        signature:
-          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
-        selector: "0x936e3169",
-      },
-      {
-        name: "getCouponAmountFor",
-        signature:
-          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
-        selector: "0x439efc2e",
-      },
-      {
-        name: "getCouponCount",
-        signature: "function getCouponCount() view returns (uint256 couponCount_)",
-        selector: "0x468bb240",
-      },
-      {
-        name: "getCouponFor",
-        signature:
-          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, bool isDisabled) couponFor_)",
-        selector: "0xbba7b56d",
-      },
-      {
-        name: "getCouponFromOrderedListAt",
-        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
-        selector: "0x65a88a2c",
-      },
-      {
-        name: "getCouponHolders",
-        signature:
-          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
-        selector: "0xa92e8371",
-      },
-      {
-        name: "getCouponsOrderedList",
-        signature:
-          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
-        selector: "0xd7133de1",
-      },
-      {
-        name: "getCouponsOrderedListTotal",
-        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
-        selector: "0xee1d26eb",
-      },
-      {
         name: "getPrincipalFor",
         signature:
           "function getPrincipalFor(address _account) view returns ((uint256 numerator, uint256 denominator) principalFor_)",
@@ -1354,11 +1134,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function getSecurityRegulationData() pure returns (((uint8 regulationType, uint8 regulationSubType, uint256 dealSize, uint8 accreditedInvestors, uint256 maxNonAccreditedInvestors, uint8 manualInvestorVerification, uint8 internationalInvestors, uint8 resaleHoldPeriod) regulationData, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) securityRegulationData_)",
         selector: "0x8fda5afe",
-      },
-      {
-        name: "getTotalCouponHolders",
-        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
-        selector: "0xec116ae3",
       },
       {
         name: "getTotalSecurityHolders",
@@ -1386,11 +1161,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x86d59729",
       },
       {
-        name: "cancelCoupon",
-        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
-        selector: "0x0459fafb",
-      },
-      {
         name: "fullRedeemAtMaturity",
         signature: "function fullRedeemAtMaturity(address _tokenHolder)",
         selector: "0xd0db5fb2",
@@ -1399,12 +1169,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "redeemAtMaturityByPartition",
         signature: "function redeemAtMaturityByPartition(address _tokenHolder, bytes32 _partition, uint256 _amount)",
         selector: "0x8a647211",
-      },
-      {
-        name: "setCoupon",
-        signature:
-          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
-        selector: "0xb16fd0cc",
       },
       {
         name: "updateMaturityDate",
@@ -3071,6 +2835,331 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       useTimeTravel
         ? new CorporateActionsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
         : new CorporateActionsSustainabilityPerformanceTargetRateFacet__factory(signer),
+  },
+
+  CouponFacet: {
+    name: "CouponFacet",
+    resolverKey: {
+      name: "_COUPON_RESOLVER_KEY",
+      value: "0xa404f705370f56f56364ac9aa1092c1002b2bfcd7020c1bb5ca7489f8061efa7",
+    },
+    inheritance: ["CouponFacetBase", "Common"],
+    methods: [
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
+      },
+      {
+        name: "getCoupon",
+        signature:
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
+        selector: "0x936e3169",
+      },
+      {
+        name: "getCouponAmountFor",
+        signature:
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+        selector: "0x439efc2e",
+      },
+      {
+        name: "getCouponCount",
+        signature: "function getCouponCount() view returns (uint256 couponCount_)",
+        selector: "0x468bb240",
+      },
+      {
+        name: "getCouponFor",
+        signature:
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
+        selector: "0xbba7b56d",
+      },
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponHolders",
+        signature:
+          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xa92e8371",
+      },
+      {
+        name: "getCouponsFor",
+        signature:
+          "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] accounts_)",
+        selector: "0x7327ad90",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature:
+          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getTotalCouponHolders",
+        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
+        selector: "0xec116ae3",
+      },
+      {
+        name: "setCoupon",
+        signature:
+          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+        selector: "0xb16fd0cc",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new CouponFacetTimeTravel__factory(signer) : new CouponFacet__factory(signer),
+  },
+
+  CouponFixedRateFacet: {
+    name: "CouponFixedRateFacet",
+    resolverKey: {
+      name: "_COUPON_FIXED_RATE_RESOLVER_KEY",
+      value: "0x2e0b1146e97bc72f92441d75c9cfa74185548319741c7f292fe0014252933ae9",
+    },
+    inheritance: ["CouponFacetBase", "CommonFixedInterestRate"],
+    methods: [
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
+      },
+      {
+        name: "getCoupon",
+        signature:
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
+        selector: "0x936e3169",
+      },
+      {
+        name: "getCouponAmountFor",
+        signature:
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+        selector: "0x439efc2e",
+      },
+      {
+        name: "getCouponCount",
+        signature: "function getCouponCount() view returns (uint256 couponCount_)",
+        selector: "0x468bb240",
+      },
+      {
+        name: "getCouponFor",
+        signature:
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
+        selector: "0xbba7b56d",
+      },
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponHolders",
+        signature:
+          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xa92e8371",
+      },
+      {
+        name: "getCouponsFor",
+        signature:
+          "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] accounts_)",
+        selector: "0x7327ad90",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature:
+          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getTotalCouponHolders",
+        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
+        selector: "0xec116ae3",
+      },
+      {
+        name: "setCoupon",
+        signature:
+          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+        selector: "0xb16fd0cc",
+      },
+    ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel ? new CouponFixedRateFacetTimeTravel__factory(signer) : new CouponFixedRateFacet__factory(signer),
+  },
+
+  CouponKpiLinkedRateFacet: {
+    name: "CouponKpiLinkedRateFacet",
+    resolverKey: {
+      name: "_COUPON_KPI_LINKED_RATE_RESOLVER_KEY",
+      value: "0x45f4a1774eac5a47f3cbc755bf5332ca30d8a6bb0330d479c77590dd0d5aab18",
+    },
+    inheritance: ["CouponFacetBase", "CommonKpiLinkedInterestRate"],
+    methods: [
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
+      },
+      {
+        name: "getCoupon",
+        signature:
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
+        selector: "0x936e3169",
+      },
+      {
+        name: "getCouponAmountFor",
+        signature:
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+        selector: "0x439efc2e",
+      },
+      {
+        name: "getCouponCount",
+        signature: "function getCouponCount() view returns (uint256 couponCount_)",
+        selector: "0x468bb240",
+      },
+      {
+        name: "getCouponFor",
+        signature:
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
+        selector: "0xbba7b56d",
+      },
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponHolders",
+        signature:
+          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xa92e8371",
+      },
+      {
+        name: "getCouponsFor",
+        signature:
+          "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] accounts_)",
+        selector: "0x7327ad90",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature:
+          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getTotalCouponHolders",
+        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
+        selector: "0xec116ae3",
+      },
+      {
+        name: "setCoupon",
+        signature:
+          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+        selector: "0xb16fd0cc",
+      },
+    ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new CouponKpiLinkedRateFacetTimeTravel__factory(signer)
+        : new CouponKpiLinkedRateFacet__factory(signer),
+  },
+
+  CouponSustainabilityPerformanceTargetRateFacet: {
+    name: "CouponSustainabilityPerformanceTargetRateFacet",
+    resolverKey: {
+      name: "_COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY",
+      value: "0x435034f1d262736f434867e5f70c71157492ebd5a90e9e4455b2868f5bda6b6e",
+    },
+    methods: [
+      {
+        name: "cancelCoupon",
+        signature: "function cancelCoupon(uint256 _couponID) returns (bool success_)",
+        selector: "0x0459fafb",
+      },
+      {
+        name: "getCoupon",
+        signature:
+          "function getCoupon(uint256 _couponID) view returns (((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, uint256 snapshotId) registeredCoupon_, bool isDisabled_)",
+        selector: "0x936e3169",
+      },
+      {
+        name: "getCouponAmountFor",
+        signature:
+          "function getCouponAmountFor(uint256 _couponID, address _account) view returns ((uint256 numerator, uint256 denominator, bool recordDateReached) couponAmountFor_)",
+        selector: "0x439efc2e",
+      },
+      {
+        name: "getCouponCount",
+        signature: "function getCouponCount() view returns (uint256 couponCount_)",
+        selector: "0x468bb240",
+      },
+      {
+        name: "getCouponFor",
+        signature:
+          "function getCouponFor(uint256 _couponID, address _account) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled) couponFor_)",
+        selector: "0xbba7b56d",
+      },
+      {
+        name: "getCouponFromOrderedListAt",
+        signature: "function getCouponFromOrderedListAt(uint256 _pos) view returns (uint256 couponID_)",
+        selector: "0x65a88a2c",
+      },
+      {
+        name: "getCouponHolders",
+        signature:
+          "function getCouponHolders(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns (address[] holders_)",
+        selector: "0xa92e8371",
+      },
+      {
+        name: "getCouponsFor",
+        signature:
+          "function getCouponsFor(uint256 _couponID, uint256 _pageIndex, uint256 _pageLength) view returns ((uint256 tokenBalance, uint256 nominalValue, uint8 decimals, bool recordDateReached, (uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) coupon, (uint256 numerator, uint256 denominator, bool recordDateReached) couponAmount, bool isDisabled)[] couponFor_, address[] accounts_)",
+        selector: "0x7327ad90",
+      },
+      {
+        name: "getCouponsOrderedList",
+        signature:
+          "function getCouponsOrderedList(uint256 _pageIndex, uint256 _pageLength) view returns (uint256[] couponIDs_)",
+        selector: "0xd7133de1",
+      },
+      {
+        name: "getCouponsOrderedListTotal",
+        signature: "function getCouponsOrderedListTotal() view returns (uint256 total_)",
+        selector: "0xee1d26eb",
+      },
+      {
+        name: "getTotalCouponHolders",
+        signature: "function getTotalCouponHolders(uint256 _couponID) view returns (uint256)",
+        selector: "0xec116ae3",
+      },
+      {
+        name: "setCoupon",
+        signature:
+          "function setCoupon((uint256 recordDate, uint256 executionDate, uint256 startDate, uint256 endDate, uint256 fixingDate, uint256 rate, uint8 rateDecimals, uint8 rateStatus) _newCoupon) returns (uint256 couponID_)",
+        selector: "0xb16fd0cc",
+      },
+    ],
+    factory: (signer, useTimeTravel = false) =>
+      useTimeTravel
+        ? new CouponSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
+        : new CouponSustainabilityPerformanceTargetRateFacet__factory(signer),
   },
 
   DiamondFacet: {
@@ -10326,7 +10415,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_TIME_TRAVEL_RESOLVER_KEY",
       value: "0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8",
     },
-    inheritance: ["IStaticFunctionSelectors", "ITimeTravel", "TimeTravelStorageWrapper"],
+    inheritance: ["IStaticFunctionSelectors", "ITimeTravel", "Common", "TimeTravelStorageWrapper"],
     methods: [
       { name: "blockTimestamp", signature: "function blockTimestamp() view returns (uint256)", selector: "0xadb61832" },
       {
@@ -10346,6 +10435,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "resetSystemBlocknumber", signature: "function resetSystemBlocknumber()", selector: "0x64b677a4" },
       { name: "resetSystemTimestamp", signature: "function resetSystemTimestamp()", selector: "0x8f145250" },
+      {
+        name: "testOnlyAddDeprecatedCoupon",
+        signature: "function testOnlyAddDeprecatedCoupon(uint256 _couponID)",
+        selector: "0xa1435b5a",
+      },
     ],
     events: [
       {
@@ -10612,7 +10706,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
 /**
  * Total number of facets in the registry.
  */
-export const TOTAL_FACETS = 197 as const;
+export const TOTAL_FACETS = 201 as const;
 
 /**
  * Registry of non-facet infrastructure contracts (BusinessLogicResolver, Factory, etc.).
@@ -10912,33 +11006,8 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   BondStorageWrapper: {
     name: "BondStorageWrapper",
-    inheritance: ["IBondStorageWrapper", "NominalValueStorageWrapper"],
+    inheritance: ["IBondStorageWrapper", "CouponStorageWrapper"],
     methods: [],
-  },
-
-  BondStorageWrapperFixedInterestRate: {
-    name: "BondStorageWrapperFixedInterestRate",
-    inheritance: ["InternalsFixedInterestRate", "Common"],
-    methods: [],
-    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
-  },
-
-  BondStorageWrapperKpiLinkedInterestRate: {
-    name: "BondStorageWrapperKpiLinkedInterestRate",
-    methods: [],
-    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
-  },
-
-  BondStorageWrapperSustainabilityPerformanceTargetInterestRate: {
-    name: "BondStorageWrapperSustainabilityPerformanceTargetInterestRate",
-    methods: [],
-    errors: [
-      {
-        name: "InterestRateIsSustainabilityPerformanceTarget",
-        signature: "InterestRateIsSustainabilityPerformanceTarget()",
-        selector: "0x15a15b0a",
-      },
-    ],
   },
 
   ControlListStorageWrapper: {
@@ -10951,6 +11020,37 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "CorporateActionsStorageWrapper",
     inheritance: ["ClearingStorageWrapper1"],
     methods: [],
+  },
+
+  CouponStorageWrapper: {
+    name: "CouponStorageWrapper",
+    inheritance: ["ICouponStorageWrapper", "NominalValueStorageWrapper"],
+    methods: [],
+  },
+
+  CouponStorageWrapperFixedInterestRate: {
+    name: "CouponStorageWrapperFixedInterestRate",
+    inheritance: ["InternalsFixedInterestRate", "Common"],
+    methods: [],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
+  },
+
+  CouponStorageWrapperKpiLinkedInterestRate: {
+    name: "CouponStorageWrapperKpiLinkedInterestRate",
+    methods: [],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
+  },
+
+  CouponStorageWrapperSustainabilityPerformanceTargetInterestRate: {
+    name: "CouponStorageWrapperSustainabilityPerformanceTargetInterestRate",
+    methods: [],
+    errors: [
+      {
+        name: "InterestRateIsSustainabilityPerformanceTarget",
+        signature: "InterestRateIsSustainabilityPerformanceTarget()",
+        selector: "0x15a15b0a",
+      },
+    ],
   },
 
   EquityStorageWrapper: {
@@ -11096,23 +11196,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   IBondStorageWrapper: {
     name: "IBondStorageWrapper",
     methods: [],
-    events: [
-      {
-        name: "CouponCancelled",
-        signature: "CouponCancelled(uint256,address)",
-        topic0: "0xf3f7ee3ec63ca38fe59a56a06f6d730ef89a41b7819ca5c04dda2205c4f2a712",
-      },
-      {
-        name: "CouponSet",
-        signature: "CouponSet(bytes32,uint256,address,IBondRead.Coupon)",
-        topic0: "0x1d6989dd898a107b9d5cee785b926348c7339560721a818c4013b3cca11c137f",
-      },
-    ],
-    errors: [
-      { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
-      { name: "CouponAlreadyExecuted", signature: "CouponAlreadyExecuted(bytes32,uint256)", selector: "0xae5a5af7" },
-      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
-    ],
+    errors: [{ name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" }],
   },
 
   ICapStorageWrapper: {
@@ -11234,6 +11318,27 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     errors: [
       { name: "WrongDates", signature: "WrongDates(uint256,uint256)", selector: "0x1c94559c" },
       { name: "WrongIndexForAction", signature: "WrongIndexForAction(uint256,bytes32)", selector: "0xd3924f4e" },
+    ],
+  },
+
+  ICouponStorageWrapper: {
+    name: "ICouponStorageWrapper",
+    methods: [],
+    events: [
+      {
+        name: "CouponCancelled",
+        signature: "CouponCancelled(uint256,address)",
+        topic0: "0xf3f7ee3ec63ca38fe59a56a06f6d730ef89a41b7819ca5c04dda2205c4f2a712",
+      },
+      {
+        name: "CouponSet",
+        signature: "CouponSet(bytes32,uint256,address,ICoupon.Coupon)",
+        topic0: "0x45a4a51111e1d39f00bd8ed73c6ec8c10ca5663e2228f2cd49e7f44828e70ca8",
+      },
+    ],
+    errors: [
+      { name: "CouponAlreadyExecuted", signature: "CouponAlreadyExecuted(bytes32,uint256)", selector: "0xae5a5af7" },
+      { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
     ],
   },
 
@@ -11558,7 +11663,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   KpisStorageWrapper: {
     name: "KpisStorageWrapper",
-    inheritance: ["InternalsKpiInterestRate", "BondStorageWrapperFixingDateInterestRate"],
+    inheritance: ["InternalsKpiInterestRate", "CouponStorageWrapperFixingDateInterestRate"],
     methods: [],
   },
 
@@ -11674,7 +11779,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 58 as const;
+export const TOTAL_STORAGE_WRAPPERS = 60 as const;
 
 /**
  * All role identifiers extracted from contracts.

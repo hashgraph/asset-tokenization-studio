@@ -799,7 +799,8 @@ describe("Factory Tests", () => {
       expect(bondDetails.nominalValueDecimals).to.be.deep.equal(bondData.bondDetails.nominalValueDecimals);
       expect(bondDetails.startingDate).to.be.deep.equal(bondData.bondDetails.startingDate);
       expect(bondDetails.maturityDate).to.be.deep.equal(bondData.bondDetails.maturityDate);
-      const couponCount = await bondFacet.getCouponCount();
+      const couponFacet = await ethers.getContractAt("CouponFacet", bondAddress);
+      const couponCount = await couponFacet.getCouponCount();
       expect(couponCount).to.equal(0);
 
       // Coupon count assertion removed - no automatic coupons created

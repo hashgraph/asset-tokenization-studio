@@ -6,7 +6,7 @@ import { _LOCK_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY } from "../..
 /* solhint-disable max-line-length */
 import {
     CommonSustainabilityPerformanceTargetInterestRate
-} from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+} from "../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 
 contract LockSustainabilityPerformanceTargetRateFacet is
