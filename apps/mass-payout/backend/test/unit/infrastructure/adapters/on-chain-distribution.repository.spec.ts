@@ -33,7 +33,6 @@ jest.mock("@hashgraph/asset-tokenization-sdk", () => ({
   GetTotalTokenHoldersAtSnapshotRequest: jest.fn(),
 }))
 
-const mockBond = Bond as jest.Mocked<typeof Bond>
 const mockCoupon = Coupon as jest.Mocked<typeof Coupon>
 const mockDividend = Dividend as jest.Mocked<typeof Dividend>
 import { Security } from "@hashgraph/asset-tokenization-sdk"
