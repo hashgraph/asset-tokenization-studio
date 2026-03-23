@@ -19,6 +19,8 @@ import { SetNominalValueCommandHandler } from "./SetNominalValueCommandHandler";
 import { SetNominalValueCommandFixture } from "@test/fixtures/nominalValue/NominalValueFixture";
 import { SetNominalValueCommandError } from "./error/SetNominalValueCommandError";
 import { ErrorCode } from "@core/error/BaseError";
+import { SecurityPaused } from "@domain/context/security/error/operations/SecurityPaused";
+import { NotGrantedRole } from "@domain/context/security/error/operations/NotGrantedRole";
 
 describe("SetNominalValueCommandHandler", () => {
   let handler: SetNominalValueCommandHandler;
@@ -52,6 +54,47 @@ describe("SetNominalValueCommandHandler", () => {
   });
 
   describe("execute", () => {
+    it("throws SetNominalValueCommandError when security is paused", async () => {
+      const fakeError = new SecurityPaused();
+
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      validationServiceMock.checkPause.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(SetNominalValueCommandError);
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(`An error occurred while setting nominal value: ${fakeError.message}`),
+        errorCode: ErrorCode.SecurityPaused,
+      });
+
+      expect(validationServiceMock.checkPause).toHaveBeenCalledWith(command.securityId);
+    });
+
+    it("throws SetNominalValueCommandError when account does not have NOMINAL_VALUE_ROLE", async () => {
+      const fakeError = new NotGrantedRole(SecurityRole._NOMINAL_VALUE_ROLE);
+
+      contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
+      accountServiceMock.getCurrentAccount.mockReturnValue(account);
+      validationServiceMock.checkPause.mockResolvedValue(undefined);
+      validationServiceMock.checkRole.mockRejectedValue(fakeError);
+
+      const resultPromise = handler.execute(command);
+
+      await expect(resultPromise).rejects.toBeInstanceOf(SetNominalValueCommandError);
+      await expect(resultPromise).rejects.toMatchObject({
+        message: expect.stringContaining(`An error occurred while setting nominal value: ${fakeError.message}`),
+        errorCode: ErrorCode.RoleNotAssigned,
+      });
+
+      expect(validationServiceMock.checkRole).toHaveBeenCalledWith(
+        SecurityRole._NOMINAL_VALUE_ROLE,
+        account.id.toString(),
+        command.securityId,
+      );
+    });
+
     it("throws SetNominalValueCommandError when command fails with uncaught error", async () => {
       const fakeError = new Error(errorMsg);
 
