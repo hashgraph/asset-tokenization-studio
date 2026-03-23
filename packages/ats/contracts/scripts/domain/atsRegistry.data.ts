@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-23T09:49:29.856Z
+ * Generated: 2026-03-23T13:52:14.302Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -2095,7 +2095,54 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "setOnchainID", signature: "function setOnchainID(address _onchainID)", selector: "0x3d1ddc5b" },
       { name: "setSymbol", signature: "function setSymbol(string _symbol)", selector: "0xb84c8246" },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    events: [
+      {
+        name: "AgentAdded",
+        signature: "AgentAdded(address)",
+        topic0: "0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5",
+      },
+      {
+        name: "AgentRemoved",
+        signature: "AgentRemoved(address)",
+        topic0: "0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b",
+      },
+      {
+        name: "IdentityRegistryAdded",
+        signature: "IdentityRegistryAdded(address)",
+        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
+      },
+      {
+        name: "is",
+        signature: "is(string,string,uint8,string,address)",
+        topic0: "0x854cacca0af9cc4c26ced55e5812e85d9e301a50ef5829c787566862b7129af6",
+      },
+      {
+        name: "RecoverySuccess",
+        signature: "RecoverySuccess(address,address,address)",
+        topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
+      },
+      {
+        name: "UpdatedTokenInformation",
+        signature: "UpdatedTokenInformation(string,string,uint8,string,address)",
+        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
+      },
+    ],
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+      { name: "AddressNotVerified", signature: "AddressNotVerified()", selector: "0x209d2853" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
+      { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
+      { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
+      { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
+      {
+        name: "InputAmountsArrayLengthMismatch",
+        signature: "InputAmountsArrayLengthMismatch()",
+        selector: "0x64f13710",
+      },
+      { name: "InputBoolArrayLengthMismatch", signature: "InputBoolArrayLengthMismatch()", selector: "0x07ac0eb9" },
+      { name: "WalletRecovered", signature: "WalletRecovered()", selector: "0xf9f9bcf9" },
+    ],
     factory: (signer) => new ERC3643ManagementFacet__factory(signer),
     timeTravelFactory: (signer) => new ERC3643ManagementFacetTimeTravel__factory(signer),
   },

@@ -41,6 +41,11 @@
 // Re-export auto-generated registries and constants
 export { FACET_REGISTRY, INFRASTRUCTURE_CONTRACTS, STORAGE_WRAPPER_REGISTRY, ROLES } from "./atsRegistry.data";
 
+// Re-export orchestrator library helpers
+export { getFacetRequiredLibraries, LIBRARY_DEPENDENT_FACETS } from "./orchestratorLibraries";
+
+import { getFacetRequiredLibraries } from "./orchestratorLibraries";
+
 import { createRegistryHelpers } from "../infrastructure/registryFactory";
 import { FACET_REGISTRY, INFRASTRUCTURE_CONTRACTS, STORAGE_WRAPPER_REGISTRY } from "./atsRegistry.data";
 
@@ -99,3 +104,12 @@ export const atsRegistry: RegistryProvider = {
   getFacetDefinition,
   getAllFacets,
 };
+
+/**
+ * Check if a facet requires orchestrator library linking.
+ * @param facetName - Name of the facet
+ * @returns true if facet needs library links, false otherwise
+ */
+export function isLibraryDependentFacet(facetName: string): boolean {
+  return getFacetRequiredLibraries(facetName).length > 0;
+}

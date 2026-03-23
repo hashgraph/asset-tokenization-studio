@@ -15,6 +15,9 @@
  * @module domain/orchestratorLibraries
  */
 
+import { Signer } from "ethers";
+import { info } from "@scripts/infrastructure";
+
 /**
  * Deployed addresses of all orchestrator libraries.
  */
@@ -76,6 +79,64 @@ export function hasOrchestratorLibraryAddresses(): boolean {
 }
 
 /**
+ * Determine which orchestrator libraries a facet requires for TypeChain linking.
+ *
+ * Returns an array of library names that must be linked when deploying the facet.
+ * Library-dependent facets use `public` functions from external libraries,
+ * so their addresses must be provided to the TypeChain factory constructor.
+ *
+ * @param facetName - Name of the facet contract
+ * @returns Array of library names (e.g., ["tokenCoreOps"], ["clearingOps", "clearingReadOps"])
+ *
+ * @example
+ * ```typescript
+ * getFacetRequiredLibraries("ClearingActionsFacet") // returns ["clearingOps", "clearingReadOps"]
+ * getFacetRequiredLibraries("AccessControlFacet") // returns []
+ * ```
+ */
+export function getFacetRequiredLibraries(facetName: string): Array<keyof typeof LIBRARY_KEYS> {
+  return LIBRARY_DEPENDENT_FACETS[facetName] || [];
+}
+
+export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY_KEYS>> = {
+  // TokenCoreOps dependencies - ERC20 and ERC1410 token operations
+  ERC20Facet: ["tokenCoreOps"],
+  ERC20ReadFacet: ["tokenCoreOps"],
+  ERC1410ManagementFacet: ["tokenCoreOps"],
+  ERC1410TokenHolderFacet: ["tokenCoreOps"],
+  ERC1410ReadFacet: ["tokenCoreOps"],
+  // HoldOps dependencies - hold/lock operations
+  HoldManagementFacet: ["holdOps"],
+  HoldReadFacet: ["holdOps"],
+  HoldTokenHolderFacet: ["holdOps"],
+  // ClearingOps dependencies - clearing transfer operations
+  ClearingActionsFacet: ["clearingOps", "clearingReadOps"],
+  ClearingTransferFacet: ["clearingOps"],
+  ClearingRedeemFacet: ["clearingOps"],
+  ClearingHoldCreationFacet: ["clearingOps"],
+  // ClearingReadOps dependencies - clearing read operations
+  ClearingReadFacet: ["clearingReadOps"],
+};
+
+/**
+ * Get library link addresses in TypeChain format for factory construction.
+ *
+ * Returns a Record with TypeChain-format keys mapped to deployed library addresses.
+ * This can be passed directly to TypeChain factory constructors.
+ *
+ * @param libs - Library names to include
+ * @returns Record with TypeChain-format keys and deployed addresses
+ */
+export function getLibLinks(...libs: (keyof typeof LIBRARY_KEYS)[]): Record<string, string> {
+  const addrs = getOrchestratorLibraryAddresses();
+  const result: Record<string, string> = {};
+  for (const lib of libs) {
+    result[LIBRARY_KEYS[lib]] = addrs[lib];
+  }
+  return result;
+}
+
+/**
  * Get library links for a specific facet.
  *
  * This function determines which libraries a facet requires and returns them
@@ -118,4 +179,68 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
     [LIBRARY_KEYS.clearingOps]: addrs.clearingOps,
     [LIBRARY_KEYS.clearingReadOps]: addrs.clearingReadOps,
   };
+}
+
+/**
+ * Deploy all orchestrator libraries in correct dependency order.
+ *
+ * Deployment order:
+ * 1. TokenCoreOps, HoldOps, ClearingReadOps (no dependencies)
+ * 2. ClearingOps (depends on HoldOps + ClearingReadOps)
+ *
+ * After deployment, automatically calls `setOrchestratorLibraryAddresses()`.
+ *
+ * @param signer - Ethers.js signer for deploying contracts
+ * @returns Deployed library addresses
+ */
+export async function deployOrchestratorLibraries(signer: Signer): Promise<OrchestratorLibraryAddresses> {
+  // Dynamic import to avoid eager loading of typechain
+  const { TokenCoreOps__factory, HoldOps__factory, ClearingReadOps__factory, ClearingOps__factory } =
+    await import("@contract-types");
+
+  info("   Deploying orchestrator libraries...");
+
+  // Phase 1: Deploy libraries with no dependencies (in parallel)
+  const [tokenCoreOps, holdOps, clearingReadOps] = await Promise.all([
+    new TokenCoreOps__factory(signer).deploy(),
+    new HoldOps__factory(signer).deploy(),
+    new ClearingReadOps__factory(signer).deploy(),
+  ]);
+
+  await Promise.all([
+    tokenCoreOps.waitForDeployment(),
+    holdOps.waitForDeployment(),
+    clearingReadOps.waitForDeployment(),
+  ]);
+
+  const holdOpsAddr = await holdOps.getAddress();
+  const clearingReadOpsAddr = await clearingReadOps.getAddress();
+
+  info(`   ✓ TokenCoreOps deployed at ${await tokenCoreOps.getAddress()}`);
+  info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
+  info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
+
+  // Phase 2: Deploy ClearingOps (depends on HoldOps + ClearingReadOps)
+  const clearingOps = await new ClearingOps__factory(
+    {
+      [LIBRARY_KEYS.holdOps]: holdOpsAddr,
+      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
+    } as any,
+    signer,
+  ).deploy();
+  await clearingOps.waitForDeployment();
+
+  info(`   ✓ ClearingOps deployed at ${await clearingOps.getAddress()}`);
+
+  const addresses: OrchestratorLibraryAddresses = {
+    tokenCoreOps: await tokenCoreOps.getAddress(),
+    holdOps: holdOpsAddr,
+    clearingOps: await clearingOps.getAddress(),
+    clearingReadOps: clearingReadOpsAddr,
+  };
+
+  setOrchestratorLibraryAddresses(addresses);
+  info("   ✅ All orchestrator libraries deployed and addresses set");
+
+  return addresses;
 }
