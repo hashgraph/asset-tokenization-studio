@@ -7,14 +7,9 @@ import { AccessControl } from "../../facets/layer_1/accessControl/AccessControl.
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../domain/core/PauseStorageWrapper.sol";
+import { PauseModifiers } from "../../domain/core/PauseModifiers.sol";
 
 abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper {
-    modifier onlyRole(bytes32 _role) {
-        AccessControlStorageWrapper.checkRole(_role, msg.sender);
-        _;
-    }
-
     modifier validateConfigurationId(bytes32 _configurationId) {
         _checkConfigurationId(_configurationId);
         _;

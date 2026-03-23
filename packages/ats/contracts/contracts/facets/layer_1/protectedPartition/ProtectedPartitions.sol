@@ -4,10 +4,17 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IProtectedPartitions } from "./IProtectedPartitions.sol";
 import { _PROTECTED_PARTITIONS_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
+import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
 
-abstract contract ProtectedPartitions is IProtectedPartitions, PauseStorageWrapper {
+abstract contract ProtectedPartitions is
+    IProtectedPartitions,
+    AccessControlModifiers,
+    PauseModifiers,
+    PartitionModifiers
+{
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -16,14 +23,24 @@ abstract contract ProtectedPartitions is IProtectedPartitions, PauseStorageWrapp
         success_ = ProtectedPartitionsStorageWrapper.initialize_ProtectedPartitions(_protectPartitions);
     }
 
-    function protectPartitions() external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_PROTECTED_PARTITIONS_ROLE, msg.sender);
+    function protectPartitions()
+        external
+        override
+        onlyUnpaused
+        onlyRole(_PROTECTED_PARTITIONS_ROLE)
+        returns (bool success_)
+    {
         ProtectedPartitionsStorageWrapper.setProtectedPartitions(true);
         success_ = true;
     }
 
-    function unprotectPartitions() external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_PROTECTED_PARTITIONS_ROLE, msg.sender);
+    function unprotectPartitions()
+        external
+        override
+        onlyUnpaused
+        onlyRole(_PROTECTED_PARTITIONS_ROLE)
+        returns (bool success_)
+    {
         ProtectedPartitionsStorageWrapper.setProtectedPartitions(false);
         success_ = true;
     }

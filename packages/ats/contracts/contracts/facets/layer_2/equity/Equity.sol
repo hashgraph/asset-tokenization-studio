@@ -9,16 +9,18 @@ import {
 } from "../../../constants/values.sol";
 import { IEquity } from "./IEquity.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../../../domain/asset/AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/EquityStorageWrapper.sol";
 import { IEquityStorageWrapper } from "../../../domain/asset/equity/IEquityStorageWrapper.sol";
 
-abstract contract Equity is IEquity, PauseStorageWrapper {
-    function setDividends(Dividend calldata _newDividend) external override onlyUnpaused returns (uint256 dividendID_) {
-        AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
+abstract contract Equity is IEquity, AccessControlModifiers, PauseModifiers {
+    function setDividends(
+        Dividend calldata _newDividend
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (uint256 dividendID_) {
         CorporateActionsStorageWrapper.requireValidDates(_newDividend.recordDate, _newDividend.executionDate);
         ScheduledTasksStorageWrapper.requireValidTimestamp(_newDividend.recordDate);
         bytes32 corporateActionID;
@@ -34,8 +36,9 @@ abstract contract Equity is IEquity, PauseStorageWrapper {
         );
     }
 
-    function setVoting(Voting calldata _newVoting) external override onlyUnpaused returns (uint256 voteID_) {
-        AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
+    function setVoting(
+        Voting calldata _newVoting
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (uint256 voteID_) {
         ScheduledTasksStorageWrapper.requireValidTimestamp(_newVoting.recordDate);
         bytes32 corporateActionID;
         (corporateActionID, voteID_) = EquityStorageWrapper.setVoting(_newVoting);
@@ -50,8 +53,7 @@ abstract contract Equity is IEquity, PauseStorageWrapper {
 
     function setScheduledBalanceAdjustment(
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) external override onlyUnpaused returns (uint256 balanceAdjustmentID_) {
-        AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
+    ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (uint256 balanceAdjustmentID_) {
         ScheduledTasksStorageWrapper.requireValidTimestamp(_newBalanceAdjustment.executionDate);
         AdjustBalancesStorageWrapper.requireValidFactor(_newBalanceAdjustment.factor);
         bytes32 corporateActionID;

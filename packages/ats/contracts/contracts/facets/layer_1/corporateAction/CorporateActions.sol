@@ -4,15 +4,20 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ICorporateActions } from "./ICorporateActions.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
-
-abstract contract CorporateActions is ICorporateActions, PauseStorageWrapper {
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+abstract contract CorporateActions is ICorporateActions, PauseModifiers, AccessControlModifiers {
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
-    ) external override onlyUnpaused returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
-        AccessControlStorageWrapper.checkRole(_CORPORATE_ACTION_ROLE, msg.sender);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_)
+    {
         (corporateActionId_, corporateActionIdByType_) = CorporateActionsStorageWrapper.addCorporateAction(
             _actionType,
             _data

@@ -4,13 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ISnapshots, HolderBalance } from "./ISnapshots.sol";
 import { _SNAPSHOT_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
-
-abstract contract Snapshots is ISnapshots, PauseStorageWrapper {
-    function takeSnapshot() external override onlyUnpaused returns (uint256 snapshotID_) {
-        AccessControlStorageWrapper.checkRole(_SNAPSHOT_ROLE, msg.sender);
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+abstract contract Snapshots is ISnapshots, PauseModifiers, AccessControlModifiers {
+    function takeSnapshot() external override onlyUnpaused onlyRole(_SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
         ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
         snapshotID_ = SnapshotsStorageWrapper.takeSnapshot();
         emit SnapshotTaken(msg.sender, snapshotID_);

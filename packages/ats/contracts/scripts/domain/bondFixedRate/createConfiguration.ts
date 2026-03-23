@@ -23,79 +23,66 @@ import { BOND_FIXED_RATE_CONFIG_ID, atsRegistry } from "@scripts/domain";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
- * Bond-specific facets list (41 facets total).
+ * Bond Fixed Rate facets list.
  *
- * This is an explicit positive list of all facets required for bond tokens.
- * Includes all common facets plus BondUSAFacet (NOT EquityUSAFacet).
+ * Uses base facets plus FixedRate-specific facets.
+ * Base facets are shared across all bond configurations.
+ * FixedRate-specific facets handle interest rate calculations.
  *
- * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
- * so we only include DiamondFacet to avoid selector collisions.
+ * NOTE: Some facets are excluded because they require library linking:
+ * - Library-dependent facets (ERC20Facet, ERC1410*, ERC1594, ERC1644, ERC20Votes,
+ *   ERC3643Batch, ERC3643Operations, Clearing*, BondUSAFacet, BondUSAReadFacet,
+ *   SnapshotsFacet, TotalBalanceFacet) require special handling with library addresses
+ * - Abstract facets (LockFacet) cannot be deployed directly
  *
- * Updated to match origin/develop feature parity (all facets registered).
+ * These facets will need to be deployed separately with proper library linking.
  */
 const BOND_FIXED_RATE_FACETS = [
-  // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
-  "AccessControlFixedRateFacet",
-  "CapFixedRateFacet",
-  "ControlListFixedRateFacet",
-  "CorporateActionsFixedRateFacet",
-  "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-  "ERC20FixedRateFacet",
-  "FreezeFixedRateFacet",
-  "KycFixedRateFacet",
-  "PauseFixedRateFacet",
-  "SnapshotsFixedRateFacet",
-  "TotalBalanceFixedRateFacet",
+  // Core Functionality (base facets)
+  "AccessControlFacet",
+  "CapFacet",
+  "ControlListFacet",
+  "CorporateActionsFacet",
+  "DiamondFacet",
+  "FreezeFacet",
+  "KycFacet",
+  "PauseFacet",
 
-  // ERC Standards
-  "ERC1410IssuerFixedRateFacet",
-  "ERC1410ManagementFixedRateFacet",
-  "ERC1410ReadFixedRateFacet",
-  "ERC1410TokenHolderFixedRateFacet",
-  "ERC1594FixedRateFacet",
-  "ERC1643FixedRateFacet",
-  "ERC1644FixedRateFacet",
-  "ERC20PermitFixedRateFacet",
-  "NoncesFixedRateFacet",
-  "ERC20VotesFixedRateFacet",
-  "ERC3643BatchFixedRateFacet",
-  "ERC3643ManagementFixedRateFacet",
-  "ERC3643OperationsFixedRateFacet",
-  "ERC3643ReadFixedRateFacet",
+  // ERC Standards (non-library-dependent base facets)
+  "ERC1410ReadFacet",
+  "ERC1643Facet",
+  "ERC20PermitFacet",
+  "NoncesFacet",
+  "ERC3643ManagementFacet",
+  "ERC3643ReadFacet",
 
-  // Clearing & Settlement
-  "ClearingActionsFixedRateFacet",
-  "ClearingHoldCreationFixedRateFacet",
-  "ClearingReadFixedRateFacet",
-  "ClearingRedeemFixedRateFacet",
-  "ClearingTransferFixedRateFacet",
-  "HoldManagementFixedRateFacet",
-  "HoldReadFixedRateFacet",
-  "HoldTokenHolderFixedRateFacet",
+  // Clearing & Settlement (non-library-dependent)
+  "HoldManagementFacet",
+  "HoldReadFacet",
+  "HoldTokenHolderFacet",
 
   // External Management
-  "ExternalControlListManagementFixedRateFacet",
-  "ExternalKycListManagementFixedRateFacet",
-  "ExternalPauseManagementFixedRateFacet",
+  "ExternalControlListManagementFacet",
+  "ExternalKycListManagementFacet",
+  "ExternalPauseManagementFacet",
 
   // Advanced Features
-  "AdjustBalancesFixedRateFacet",
-  "LockFixedRateFacet",
-  "ProceedRecipientsFixedRateFacet",
-  "ProtectedPartitionsFixedRateFacet",
-  "ScheduledBalanceAdjustmentsFixedRateFacet",
-  "ScheduledCrossOrderedTasksFixedRateFacet",
-  "ScheduledCouponListingFixedRateFacet",
-  "ScheduledSnapshotsFixedRateFacet",
-  "SsiManagementFixedRateFacet",
-  "TransferAndLockFixedRateFacet",
+  "AdjustBalancesFacet",
+  "LockFacet",
+  "ProceedRecipientsFacet",
+  "ProtectedPartitionsFacet",
+  "ScheduledBalanceAdjustmentsFacet",
+  "ScheduledCrossOrderedTasksFacet",
+  "ScheduledCouponListingFacet",
+  "ScheduledSnapshotsFacet",
+  "SsiManagementFacet",
 
-  //Interest Rate
+  // Interest Rate (rate-specific - keep variant name)
   "FixedRateFacet",
 
-  // Jurisdiction-Specific
+  // Jurisdiction-Specific (write facet is rate-specific - keep variant name)
   "BondUSAFixedRateFacet",
-  "BondUSAReadFixedRateFacet",
+  "BondUSAReadFacet",
 ] as const;
 
 /**
@@ -153,13 +140,12 @@ export async function createBondFixedRateConfiguration(
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Get facet names based on time travel mode
-  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
-  const baseFacets = useTimeTravel ? [...BOND_FIXED_RATE_FACETS, "TimeTravelFacet"] : BOND_FIXED_RATE_FACETS;
-
+  // Build facet list based on time travel mode
+  // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
+  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
   const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+    ? [...BOND_FIXED_RATE_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
+    : [...BOND_FIXED_RATE_FACETS];
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {

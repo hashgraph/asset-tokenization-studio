@@ -6,7 +6,8 @@ import { _LOCKER_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
 import { BasicTransferInfo } from "../../layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import {
     IProtectedPartitionsStorageWrapper
@@ -14,15 +15,14 @@ import {
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 
-abstract contract TransferAndLock is ITransferAndLock, PauseStorageWrapper {
+abstract contract TransferAndLock is ITransferAndLock, AccessControlModifiers, PauseModifiers {
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,
         uint256 _amount,
         bytes calldata _data,
         uint256 _expirationTimestamp
-    ) external override onlyUnpaused returns (bool success_, uint256 lockId_) {
-        AccessControlStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
+    ) external override onlyUnpaused onlyRole(_LOCKER_ROLE) returns (bool success_, uint256 lockId_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();
@@ -49,8 +49,7 @@ abstract contract TransferAndLock is ITransferAndLock, PauseStorageWrapper {
         uint256 _amount,
         bytes calldata _data,
         uint256 _expirationTimestamp
-    ) external override onlyUnpaused returns (bool success_, uint256 lockId_) {
-        AccessControlStorageWrapper.checkRole(_LOCKER_ROLE, msg.sender);
+    ) external override onlyUnpaused onlyRole(_LOCKER_ROLE) returns (bool success_, uint256 lockId_) {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();

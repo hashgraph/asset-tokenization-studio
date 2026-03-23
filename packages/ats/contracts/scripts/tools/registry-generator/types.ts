@@ -19,6 +19,8 @@ export interface HardhatArtifact {
   bytecode: string;
   deployedBytecode: string;
   metadata?: string;
+  linkReferences?: Record<string, Record<string, { length: number; start: number }[]>>;
+  deployedLinkReferences?: Record<string, Record<string, { length: number; start: number }[]>>;
 }
 
 /**
@@ -118,8 +120,8 @@ export interface ContractMetadata {
   inheritance: string[];
   solidityVersion: string | null;
   upgradeable: boolean;
-  /** Whether TypeChain generates a deployment factory (non-empty bytecode + non-empty ABI) */
   isDeployable: boolean;
+  requiresLibraries: boolean;
   description?: string;
 }
 

@@ -3,10 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IScheduledCrossOrderedTasks } from "./IScheduledCrossOrderedTasks.sol";
 import { ScheduledTask } from "../scheduledTasksCommon/IScheduledTasksCommon.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { ScheduledTasksStorageWrapper } from "../../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 
-abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, PauseStorageWrapper {
+abstract contract ScheduledCrossOrderedTasks is IScheduledCrossOrderedTasks, PauseModifiers {
     function triggerPendingScheduledCrossOrderedTasks() external override onlyUnpaused returns (uint256) {
         return ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
     }

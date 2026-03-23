@@ -30,6 +30,9 @@ export * from "./atsRegistry.data";
 // Domain constants
 export * from "./constants";
 
+// Orchestrator library management
+export * from "./orchestratorLibraries";
+
 // Domain registry (ATS-specific contract registry helpers)
 export * from "./atsRegistry";
 

@@ -9,7 +9,7 @@ import {
   SustainabilityPerformanceTargetRateFacetTimeTravel,
   BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel,
   TimeTravelFacet,
-  ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel,
+  ERC1594FacetTimeTravel,
   ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel,
   KpisSustainabilityPerformanceTargetRateFacetTimeTravel,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel,
@@ -48,7 +48,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
   let bondReadFacet: BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel;
   let sptRateFacet: SustainabilityPerformanceTargetRateFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
-  let erc1594Facet: ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel;
+  let erc1594Facet: ERC1594FacetTimeTravel;
   let proceedRecipientsFacet: ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel;
   let kpisFacet: KpisSustainabilityPerformanceTargetRateFacetTimeTravel;
   let scheduledTasksFacet: ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel;
@@ -112,11 +112,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       diamond.target,
       signer_A,
     );
-    erc1594Facet = await ethers.getContractAt(
-      "ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
+    erc1594Facet = await ethers.getContractAt("ERC1594FacetTimeTravel", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel",

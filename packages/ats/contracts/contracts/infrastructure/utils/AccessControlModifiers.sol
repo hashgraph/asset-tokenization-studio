@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import { AccessControlStorageWrapper, RoleDataStorage } from "../../domain/core/AccessControlStorageWrapper.sol";
+
+/**
+ * @title AccessControlModifiers
+ * @dev Abstract contract providing mandatory AccessControl modifiers
+ *
+ * This contract provides reusable modifiers for validating access control
+ * requirements. All facets should inherit from this contract to ensure
+ * consistent role validation across the codebase.
+ *
+ * @notice Modifiers are MANDATORY unless compilation fails or bytecode exceeds limits
+ * @author Asset Tokenization Studio Team
+ */
+abstract contract AccessControlModifiers {
+    using AccessControlStorageWrapper for RoleDataStorage;
+
+    /**
+     * @dev Emitted when a role check fails
+     */
+    error AccessControlRequired(bytes32 role, address sender);
+
+    /**
+     * @dev Modifier that validates msg.sender has the specified role
+     *
+     * Requirements:
+     * - msg.sender must have the role specified in _role parameter
+     *
+     * @param _role The role to check for
+     */
+    modifier onlyRole(bytes32 _role) virtual {
+        AccessControlStorageWrapper.checkRole(_role, msg.sender);
+        _;
+    }
+
+    /**
+     * @dev Modifier that validates msg.sender has any of the specified roles
+     *
+     * Requirements:
+     * - msg.sender must have at least one role from the _roles array
+     *
+     * @param _roles Array of roles to check for
+     */
+    modifier onlyAnyRole(bytes32[] memory _roles) virtual {
+        AccessControlStorageWrapper.checkAnyRole(_roles, msg.sender);
+        _;
+    }
+
+    /**
+     * @dev Modifier that validates roles and actives arrays have the same length
+     *
+     * Requirements:
+     * - _rolesLength must equal _activesLength
+     *
+     * @param _rolesLength Length of roles array
+     * @param _activesLength Length of actives array
+     */
+    modifier onlySameRolesAndActivesLength(uint256 _rolesLength, uint256 _activesLength) virtual {
+        AccessControlStorageWrapper.checkSameRolesAndActivesLength(_rolesLength, _activesLength);
+        _;
+    }
+
+    /**
+     * @dev Modifier that validates roles and actives arrays are consistent (unique values)
+     *
+     * Requirements:
+     * - Roles and actives must have unique values (no duplicates)
+     *
+     * @param _roles Array of roles to validate
+     * @param _actives Array of actives to validate
+     */
+    modifier onlyConsistentRoles(bytes32[] calldata _roles, bool[] calldata _actives) virtual {
+        AccessControlStorageWrapper.checkConsistentRoles(_roles, _actives);
+        _;
+    }
+}

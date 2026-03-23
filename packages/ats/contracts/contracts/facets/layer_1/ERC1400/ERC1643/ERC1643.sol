@@ -5,12 +5,16 @@ import { IERC1643 } from "./IERC1643.sol";
 import { _DOCUMENTER_ROLE } from "../../../../constants/roles.sol";
 import { _ERC1643_STORAGE_POSITION } from "../../../../constants/storagePositions.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC1643 is IERC1643, TimestampProvider, PauseStorageWrapper {
-    function setDocument(bytes32 _name, string calldata _uri, bytes32 _documentHash) external override onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_DOCUMENTER_ROLE, msg.sender);
+abstract contract ERC1643 is IERC1643, AccessControlModifiers, TimestampProvider, PauseModifiers {
+    function setDocument(
+        bytes32 _name,
+        string calldata _uri,
+        bytes32 _documentHash
+    ) external override onlyUnpaused onlyRole(_DOCUMENTER_ROLE) {
         if (_name == bytes32(0)) {
             revert EmptyName();
         }
@@ -29,8 +33,7 @@ abstract contract ERC1643 is IERC1643, TimestampProvider, PauseStorageWrapper {
         emit DocumentUpdated(_name, _uri, _documentHash);
     }
 
-    function removeDocument(bytes32 _name) external override onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_DOCUMENTER_ROLE, msg.sender);
+    function removeDocument(bytes32 _name) external override onlyUnpaused onlyRole(_DOCUMENTER_ROLE) {
         ERC1643Storage storage erc1643Storage = _erc1643Storage();
         if (erc1643Storage.documents[_name].lastModified == uint256(0)) {
             revert DocumentDoesNotExist(_name);

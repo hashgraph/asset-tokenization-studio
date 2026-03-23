@@ -3,11 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IAccessControl } from "./IAccessControl.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 
-abstract contract AccessControl is IAccessControl, PauseStorageWrapper {
-    function grantRole(bytes32 _role, address _account) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(AccessControlStorageWrapper.getRoleAdmin(_role), msg.sender);
+abstract contract AccessControl is IAccessControl, PauseModifiers, AccessControlModifiers {
+    function grantRole(
+        bytes32 _role,
+        address _account
+    ) external override onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_role)) returns (bool success_) {
         if (!AccessControlStorageWrapper.grantRole(_role, _account)) {
             revert AccountAssignedToRole(_role, _account);
         }
@@ -15,8 +18,10 @@ abstract contract AccessControl is IAccessControl, PauseStorageWrapper {
         return true;
     }
 
-    function revokeRole(bytes32 _role, address _account) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(AccessControlStorageWrapper.getRoleAdmin(_role), msg.sender);
+    function revokeRole(
+        bytes32 _role,
+        address _account
+    ) external override onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_role)) returns (bool success_) {
         success_ = AccessControlStorageWrapper.revokeRole(_role, _account);
         if (!success_) {
             revert AccountNotAssignedToRole(_role, _account);
@@ -28,9 +33,14 @@ abstract contract AccessControl is IAccessControl, PauseStorageWrapper {
         bytes32[] calldata _roles,
         bool[] calldata _actives,
         address _account
-    ) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkSameRolesAndActivesLength(_roles.length, _actives.length);
-        AccessControlStorageWrapper.checkConsistentRoles(_roles, _actives);
+    )
+        external
+        override
+        onlyUnpaused
+        onlySameRolesAndActivesLength(_roles.length, _actives.length)
+        onlyConsistentRoles(_roles, _actives)
+        returns (bool success_)
+    {
         success_ = AccessControlStorageWrapper.applyRoles(_roles, _actives, _account);
         if (!success_) {
             revert RolesNotApplied(_roles, _actives, _account);

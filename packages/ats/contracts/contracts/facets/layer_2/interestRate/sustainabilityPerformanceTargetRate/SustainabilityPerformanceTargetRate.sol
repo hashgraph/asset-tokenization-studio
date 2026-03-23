@@ -4,11 +4,16 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ISustainabilityPerformanceTargetRate } from "./ISustainabilityPerformanceTargetRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 
-contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRate, PauseStorageWrapper {
+contract SustainabilityPerformanceTargetRate is
+    ISustainabilityPerformanceTargetRate,
+    AccessControlModifiers,
+    PauseModifiers
+{
     error AlreadyInitialized();
     // solhint-disable-next-line func-name-mixedcase
     function initialize_SustainabilityPerformanceTargetRate(
@@ -28,14 +33,17 @@ contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTarget
         );
     }
 
-    function setInterestRate(InterestRate calldata _newInterestRate) external onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
+    function setInterestRate(
+        InterestRate calldata _newInterestRate
+    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.setSPTInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
     }
 
-    function setImpactData(ImpactData[] calldata _newImpactData, address[] calldata _projects) external onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
+    function setImpactData(
+        ImpactData[] calldata _newImpactData,
+        address[] calldata _projects
+    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.requireEqualLength(_newImpactData.length, _projects.length);
         for (uint256 index = 0; index < _newImpactData.length; index++) {
             if (!ProceedRecipientsStorageWrapper.isProceedRecipient(_projects[index])) {

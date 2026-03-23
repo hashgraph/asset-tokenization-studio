@@ -75,6 +75,7 @@ const makeMetadata = (overrides: Partial<ContractMetadata> = {}): ContractMetada
   solidityVersion: "0.8.18",
   upgradeable: false,
   isDeployable: true,
+  requiresLibraries: false,
   ...overrides,
 });
 

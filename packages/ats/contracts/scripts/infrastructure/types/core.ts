@@ -159,8 +159,23 @@ export interface FacetDefinition {
   /** Custom errors defined in this facet */
   errors?: ErrorDefinition[];
 
-  /** TypeChain factory constructor function for creating contract instances */
-  factory?: (signer: Signer, useTimeTravel?: boolean) => ContractFactory;
+  /**
+   * TypeChain factory constructor function for creating contract instances.
+   *
+   * For library-dependent facets (e.g., LockFacet), this assumes:
+   * 1. Libraries have been deployed via deployOrchestratorLibraries()
+   * 2. Addresses set via setOrchestratorLibraryAddresses()
+   * 3. Factory is called with: new XFacet__factory(getLibLinks('tokenCoreOps'), signer)
+   *
+   * The registry stores the factory reference; deployment code handles library linking.
+   */
+  factory?: (signer: Signer) => unknown;
+
+  /**
+   * TypeChain factory for the TimeTravel variant of this facet (test-only).
+   * Same library linking assumptions as factory.
+   */
+  timeTravelFactory?: (signer: Signer) => unknown;
 }
 
 /**

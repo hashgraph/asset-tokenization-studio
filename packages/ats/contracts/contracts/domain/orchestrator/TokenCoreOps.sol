@@ -3,25 +3,25 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
-import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
+import { ClearingReadOps } from "./ClearingReadOps.sol";
 import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../asset/ERC20StorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
+import { SnapshotsStorageWrapper } from "../asset/SnapshotsStorageWrapper.sol";
+import { IERC1410StorageWrapper } from "../asset/ERC1400/ERC1410/IERC1410StorageWrapper.sol";
+import { IERC20StorageWrapper } from "../asset/ERC1400/ERC20/IERC20StorageWrapper.sol";
 import { BasicTransferInfo, IssueData, OperatorTransferData } from "../../facets/layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { IProtectedPartitionsStorageWrapper } from "../core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 
 /// @title TokenCoreOps - Orchestrator for core token operations
-/// @notice Deployed once as a separate contract. Facets call via DELEGATECALL, keeping
-/// facet bytecode thin. StorageWrapper `internal` functions are inlined here, not in facets.
-/// Internal balance aggregation functions are inlined into calling StorageWrappers
-/// (e.g. ERC3643StorageWrapper). Frozen amounts are NOT included in balance aggregation —
-/// they are added by ERC3643StorageWrapper.getTotalBalanceForAdjustedAt.
+/// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
+/// @dev Contains balance operations for ClearingOps to avoid inlining.
 library TokenCoreOps {
     // ============================================================================
-    // Public functions — Transfer Operations (deployed, called via DELEGATECALL)
+    // Public functions — Transfer Operations
     // ============================================================================
 
-    /// @notice Transfer tokens by partition with hooks, compliance, and snapshots
     function transferByPartition(
         address _from,
         BasicTransferInfo memory _basicTransferInfo,
@@ -41,12 +41,10 @@ library TokenCoreOps {
             );
     }
 
-    /// @notice Operator transfer by partition
     function operatorTransferByPartition(OperatorTransferData calldata _operatorTransferData) public returns (bytes32) {
         return ERC1410StorageWrapper.operatorTransferByPartition(_operatorTransferData);
     }
 
-    /// @notice Protected transfer with EIP-712 signature verification
     function protectedTransferFromByPartition(
         bytes32 _partition,
         address _from,
@@ -61,12 +59,10 @@ library TokenCoreOps {
     // Public functions — Issue / Redeem
     // ============================================================================
 
-    /// @notice Issue tokens by partition with hooks, compliance, and snapshots
     function issueByPartition(IssueData memory _issueData) public {
         ERC1410StorageWrapper.issueByPartition(_issueData);
     }
 
-    /// @notice Redeem tokens by partition with hooks, compliance, and snapshots
     function redeemByPartition(
         bytes32 _partition,
         address _from,
@@ -78,7 +74,6 @@ library TokenCoreOps {
         ERC1410StorageWrapper.redeemByPartition(_partition, _from, _operator, _value, _data, _operatorData);
     }
 
-    /// @notice Protected redeem with EIP-712 signature verification
     function protectedRedeemFromByPartition(
         bytes32 _partition,
         address _from,
@@ -92,27 +87,22 @@ library TokenCoreOps {
     // Public functions — ERC20 Operations
     // ============================================================================
 
-    /// @notice ERC20-style transfer on default partition
     function transfer(address _from, address _to, uint256 _value) public returns (bool) {
         return ERC20StorageWrapper.transfer(_from, _to, _value);
     }
 
-    /// @notice ERC20-style transferFrom with allowance decrease
     function transferFrom(address _spender, address _from, address _to, uint256 _value) public returns (bool) {
         return ERC20StorageWrapper.transferFrom(_spender, _from, _to, _value);
     }
 
-    /// @notice ERC20-style mint on default partition
     function mint(address _to, uint256 _value) public {
         ERC20StorageWrapper.mint(_to, _value);
     }
 
-    /// @notice ERC20-style burn on default partition
     function burn(address _from, uint256 _value) public {
         ERC20StorageWrapper.burn(_from, _value);
     }
 
-    /// @notice ERC20-style burnFrom with allowance decrease
     function burnFrom(address _account, uint256 _value) public {
         ERC20StorageWrapper.burnFrom(_account, _value);
     }
@@ -121,31 +111,111 @@ library TokenCoreOps {
     // Public functions — Approval Operations
     // ============================================================================
 
-    /// @notice Set approval for spender
     function approve(address _owner, address _spender, uint256 _value) public returns (bool) {
         return ERC20StorageWrapper.approve(_owner, _spender, _value);
     }
 
-    /// @notice Increase allowance with ABAF sync
     function increaseAllowance(address _spender, uint256 _addedValue) public returns (bool) {
         return ERC20StorageWrapper.increaseAllowance(_spender, _addedValue);
     }
 
-    /// @notice Decrease allowance with ABAF sync
     function decreaseAllowance(address _spender, uint256 _subtractedValue) public returns (bool) {
         return ERC20StorageWrapper.decreaseAllowance(_spender, _subtractedValue);
     }
 
-    /// @notice Sync balance adjustments before allowance changes
     function beforeAllowanceUpdate(address _owner, address _spender) public {
         ERC20StorageWrapper.beforeAllowanceUpdate(_owner, _spender);
+    }
+
+    // ============================================================================
+    // Public functions — Balance Operations (for ClearingOps)
+    // ============================================================================
+
+    function reduceBalanceByPartition(address _from, uint256 _amount, bytes32 _partition) public {
+        ERC1410StorageWrapper.reduceBalanceByPartition(_from, _amount, _partition);
+    }
+
+    function increaseBalanceByPartition(address _to, uint256 _amount, bytes32 _partition) public {
+        ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _partition);
+    }
+
+    function addPartitionTo(uint256 _amount, address _to, bytes32 _partition) public {
+        ERC1410StorageWrapper.addPartitionTo(_amount, _to, _partition);
+    }
+
+    function transferDefaultPartition(address _sender, address _from, address _to, uint256 _amount) public {
+        ERC20StorageWrapper.transfer(_from, _to, _amount);
+        emit IERC20StorageWrapper.Transfer(_sender, _to, _amount);
+    }
+
+    function increaseAllowedBalance(address _owner, address _spender, uint256 _amount) public {
+        ERC20StorageWrapper.increaseAllowedBalance(_owner, _spender, _amount);
+    }
+
+    function decreaseAllowedBalance(address _owner, address _spender, uint256 _amount) public {
+        ERC20StorageWrapper.decreaseAllowedBalance(_owner, _spender, _amount);
+    }
+
+    function updateAccountSnapshot(address _account, bytes32 _partition) public {
+        SnapshotsStorageWrapper.updateAccountSnapshot(_account, _partition);
+    }
+
+    function updateAccountClearedBalancesSnapshot(address _account, bytes32 _partition) public {
+        SnapshotsStorageWrapper.updateAccountClearedBalancesSnapshot(_account, _partition);
+    }
+
+    function triggerAndSyncAll(bytes32 _partition, address _from, address _to) public {
+        ERC1410StorageWrapper.triggerAndSyncAll(_partition, _from, _to);
+    }
+
+    function emitTransferByPartition(
+        bytes32 _partition,
+        address _operator,
+        address _from,
+        address _to,
+        uint256 _amount,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) public {
+        emit IERC1410StorageWrapper.TransferByPartition(
+            _partition,
+            _operator,
+            _from,
+            _to,
+            _amount,
+            _data,
+            _operatorData
+        );
+    }
+
+    function emitTransfer(address _from, address _to, uint256 _amount) public {
+        emit IERC20StorageWrapper.Transfer(_from, _to, _amount);
+    }
+
+    // ============================================================================
+    // Public view functions
+    // ============================================================================
+
+    function validPartitionForReceiver(bytes32 _partition, address _receiver) public view returns (bool) {
+        return ERC1410StorageWrapper.validPartitionForReceiver(_partition, _receiver);
+    }
+
+    function getTokenName() public view returns (string memory) {
+        return ERC20StorageWrapper.getName();
+    }
+
+    function checkIdentity(address _from, address _to) public view {
+        ERC1594StorageWrapper.checkIdentity(_from, _to);
+    }
+
+    function checkCompliance(address _from, address _to, bool _checkSender) public view {
+        ERC1594StorageWrapper.checkCompliance(_from, _to, _checkSender);
     }
 
     // ============================================================================
     // Internal functions (inlined into calling StorageWrappers)
     // ============================================================================
 
-    /// @notice Aggregates: base balance + locked + held + cleared (excludes frozen)
     function getTotalBalanceForAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
@@ -154,10 +224,9 @@ library TokenCoreOps {
             AdjustBalancesStorageWrapper.balanceOfAdjustedAt(_tokenHolder, _timestamp) +
             LockStorageWrapper.getLockedAmountForAdjustedAt(_tokenHolder, _timestamp) +
             HoldStorageWrapper.getHeldAmountForAdjustedAt(_tokenHolder, _timestamp) +
-            ClearingStorageWrapper.getClearedAmountForAdjustedAt(_tokenHolder, _timestamp);
+            ClearingReadOps.getClearedAmountForAdjustedAt(_tokenHolder, _timestamp);
     }
 
-    /// @notice Aggregates partition: base + locked + held + cleared (excludes frozen)
     function getTotalBalanceForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
@@ -167,6 +236,6 @@ library TokenCoreOps {
             AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
             LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
             HoldStorageWrapper.getHeldAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp) +
-            ClearingStorageWrapper.getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
+            ClearingReadOps.getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
     }
 }

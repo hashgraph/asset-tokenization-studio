@@ -11,7 +11,8 @@ import { IIdentityRegistry } from "../../facets/layer_1/ERC3643/IIdentityRegistr
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { _ACCESS_CONTROL_STORAGE_POSITION, RoleDataStorage } from "./AccessControlStorageWrapper.sol";
 import { ControlListStorageWrapper } from "./ControlListStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
 import { ERC20StorageWrapper, ERC20Storage } from "../asset/ERC20StorageWrapper.sol";
@@ -25,6 +26,8 @@ import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
 
 library ERC3643StorageWrapper {
     using LowLevelCall for address;
+    using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
     // --- Initialization ---
 
@@ -51,16 +54,14 @@ library ERC3643StorageWrapper {
     }
 
     function addAgent(address _agent) internal {
-        if (!AccessControlStorageWrapper.grantRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
-        }
+        _rolesStorage().roles[_AGENT_ROLE].roleMembers.add(_agent);
+        _rolesStorage().memberRoles[_agent].add(_AGENT_ROLE);
         emit IERC3643Management.AgentAdded(_agent);
     }
 
     function removeAgent(address _agent) internal {
-        if (!AccessControlStorageWrapper.revokeRole(_AGENT_ROLE, _agent)) {
-            revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
-        }
+        _rolesStorage().roles[_AGENT_ROLE].roleMembers.remove(_agent);
+        _rolesStorage().memberRoles[_agent].remove(_AGENT_ROLE);
         emit IERC3643Management.AgentRemoved(_agent);
     }
 
@@ -308,6 +309,14 @@ library ERC3643StorageWrapper {
     }
 
     // --- Internal pure functions (storage accessors) ---
+
+    function _rolesStorage() internal pure returns (RoleDataStorage storage roles_) {
+        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            roles_.slot := position
+        }
+    }
 
     function erc3643Storage() internal pure returns (IERC3643Management.ERC3643Storage storage erc3643Storage_) {
         bytes32 position = _ERC3643_STORAGE_POSITION;

@@ -19,6 +19,7 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { LockStorageWrapper } from "./LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "./HoldStorageWrapper.sol";
 import { ClearingStorageWrapper } from "./ClearingStorageWrapper.sol";
+import { ClearingReadOps } from "../orchestrator/ClearingReadOps.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 
 struct SnapshotStorage {
@@ -455,7 +456,7 @@ library SnapshotsStorageWrapper {
             balanceOfAtAdjusted(
                 snapshotID,
                 snapshotStorage().accountClearedBalanceSnapshots[tokenHolder],
-                ClearingStorageWrapper.getClearedAmountForAdjustedAt(tokenHolder, block.timestamp)
+                ClearingReadOps.getClearedAmountForAdjustedAt(tokenHolder, block.timestamp)
             );
     }
 
@@ -468,7 +469,7 @@ library SnapshotsStorageWrapper {
             balanceOfAtAdjusted(
                 snapshotID,
                 snapshotStorage().accountPartitionClearedBalanceSnapshots[tokenHolder][partition],
-                ClearingStorageWrapper.getClearedAmountForByPartitionAdjustedAt(partition, tokenHolder, block.timestamp)
+                ClearingReadOps.getClearedAmountForByPartitionAdjustedAt(partition, tokenHolder, block.timestamp)
             );
     }
 

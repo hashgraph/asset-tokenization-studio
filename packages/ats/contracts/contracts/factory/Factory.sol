@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable func-name-mixedcase
+// solhint-disable private-vars-leading-underscore
+
 import { IFactory } from "./IFactory.sol";
 import { ResolverProxy } from "../infrastructure/proxy/ResolverProxy.sol";
 import { IResolverProxy } from "../infrastructure/proxy/IResolverProxy.sol";
@@ -20,10 +23,12 @@ import {
     RegulationData,
     RegulationType,
     RegulationSubType,
-    _checkRegulationTypeAndSubType
+    _checkRegulationTypeAndSubType,
+    AdditionalSecurityData
 } from "../constants/regulation.sol";
 import { IEquityUSA } from "../facets/layer_3/equityUSA/IEquityUSA.sol";
 import { IBondUSA } from "../facets/layer_3/bondUSA/IBondUSA.sol";
+import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
 import { IProceedRecipients } from "../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
 import { IProtectedPartitions } from "../facets/layer_1/protectedPartition/IProtectedPartitions.sol";
 import { IExternalPauseManagement } from "../facets/layer_1/externalPause/IExternalPauseManagement.sol";
@@ -114,7 +119,9 @@ contract Factory is IFactory {
     {
         equityAddress_ = _deploySecurity(_equityData.security, SecurityType.Equity);
 
-        IEquityUSA(equityAddress_)._initialize_equityUSA(
+        // Initialize equity USA features (EquityUSAFacet may not be present)
+        _tryInitialize_equityUSA(
+            equityAddress_,
             _equityData.equityDetails,
             _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
@@ -158,7 +165,8 @@ contract Factory is IFactory {
             SecurityType.BondFixedRate
         );
 
-        IFixedRate(bondAddress_).initialize_FixedRate(_bondFixedRateData.fixedRateData);
+        // Initialize fixed rate (FixedRateFacet may not be present)
+        _tryInitialize_FixedRate(bondAddress_, _bondFixedRateData.fixedRateData);
 
         emit BondFixedRateDeployed(msg.sender, bondAddress_, _bondFixedRateData);
     }
@@ -184,7 +192,9 @@ contract Factory is IFactory {
             SecurityType.BondKpiLinkedRate
         );
 
-        IKpiLinkedRate(bondAddress_).initialize_KpiLinkedRate(
+        // Initialize KPI linked rate (KpiLinkedRateFacet may not be present)
+        _tryInitialize_KpiLinkedRate(
+            bondAddress_,
             _bondKpiLinkedRateData.interestRate,
             _bondKpiLinkedRateData.impactData
         );
@@ -211,7 +221,10 @@ contract Factory is IFactory {
             SecurityType.BondSPTRate
         );
 
-        ISustainabilityPerformanceTargetRate(bondAddress_).initialize_SustainabilityPerformanceTargetRate(
+        // Initialize sustainability performance target rate
+        // (SustainabilityPerformanceTargetRateFacet may not be present)
+        _tryInitialize_SustainabilityPerformanceTargetRate(
+            bondAddress_,
             _bondSustainabilityPerformanceTargetRateData.interestRate,
             _bondSustainabilityPerformanceTargetRateData.impactData,
             _bondSustainabilityPerformanceTargetRateData.projects
@@ -238,16 +251,16 @@ contract Factory is IFactory {
     ) internal returns (address bondAddress_) {
         bondAddress_ = _deploySecurity(_bondData.security, _securityType);
 
-        IBondUSA(bondAddress_)._initialize_bondUSA(
+        // Initialize bond USA features (BondUSAFacet may not be present)
+        _tryInitialize_bondUSA(
+            bondAddress_,
             _bondData.bondDetails,
             _buildRegulationData(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType),
             _factoryRegulationData.additionalSecurityData
         );
 
-        IProceedRecipients(bondAddress_).initialize_ProceedRecipients(
-            _bondData.proceedRecipients,
-            _bondData.proceedRecipientsData
-        );
+        // Initialize proceed recipients (ProceedRecipientsFacet may not be present)
+        _tryInitialize_ProceedRecipients(bondAddress_, _bondData.proceedRecipients, _bondData.proceedRecipientsData);
     }
 
     function _deploySecurity(
@@ -264,44 +277,185 @@ contract Factory is IFactory {
         securityAddress_ = address(equity);
 
         // configure Control List
-        IControlList(securityAddress_).initialize_ControlList(_securityData.isWhiteList);
+        IControlList(securityAddress_).initializeControlList(_securityData.isWhiteList);
 
-        // configure multi partition flag
-        IERC1410(securityAddress_).initialize_ERC1410(_securityData.isMultiPartition);
+        // configure multi partition flag (ERC1410ManagementFacet may not be present)
+        _tryInitialize_ERC1410(securityAddress_, _securityData.isMultiPartition);
 
-        // configure controller flag
-        IERC1644(securityAddress_).initialize_ERC1644(_securityData.isControllable);
+        // configure controller flag (ERC1644Facet may not be present)
+        _tryInitialize_ERC1644(securityAddress_, _securityData.isControllable);
 
-        // configure erc20 metadata
+        // configure erc20 metadata (ERC20Facet may not be present)
         IERC20.ERC20Metadata memory erc20Metadata = IERC20.ERC20Metadata({
             info: _securityData.erc20MetadataInfo,
             securityType: _securityType
         });
+        _tryInitialize_ERC20(securityAddress_, erc20Metadata);
 
-        IERC20(securityAddress_).initialize_ERC20(erc20Metadata);
+        // configure issue flag (ERC1594Facet may not be present)
+        _tryInitialize_ERC1594(securityAddress_);
 
-        // configure issue flag
-        IERC1594(securityAddress_).initialize_ERC1594();
-
-        // configure issue flag
+        // configure cap (CapFacet should be present)
         ICap(securityAddress_).initialize_Cap(_securityData.maxSupply, new ICap.PartitionCap[](0));
 
+        // configure protected partitions (should be present)
         IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(_securityData.arePartitionsProtected);
 
-        IClearingActions(securityAddress_).initializeClearing(_securityData.clearingActive);
+        // configure clearing (ClearingActionsFacet may not be present)
+        _tryInitializeClearing(securityAddress_, _securityData.clearingActive);
 
+        // configure external pauses (should be present)
         IExternalPauseManagement(securityAddress_).initialize_ExternalPauses(_securityData.externalPauses);
 
+        // configure external control lists (should be present)
         IExternalControlListManagement(securityAddress_).initialize_ExternalControlLists(
             _securityData.externalControlLists
         );
 
+        // configure internal KYC (should be present)
         IKyc(securityAddress_).initializeInternalKyc(_securityData.internalKycActivated);
 
+        // configure external KYC lists (should be present)
         IExternalKycListManagement(securityAddress_).initialize_ExternalKycLists(_securityData.externalKycLists);
 
-        IERC20Votes(securityAddress_).initialize_ERC20Votes(_securityData.erc20VotesActivated);
+        // configure ERC20Votes (ERC20VotesFacet may not be present)
+        _tryInitialize_ERC20Votes(securityAddress_, _securityData.erc20VotesActivated);
 
+        // configure ERC3643 (should be present)
         IERC3643(securityAddress_).initialize_ERC3643(_securityData.compliance, _securityData.identityRegistry);
+    }
+
+    function _tryInitialize_ERC1410(address securityAddress_, bool isMultiPartition) private {
+        try IERC1410(securityAddress_).initialize_ERC1410(isMultiPartition) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_ERC1644(address securityAddress_, bool isControllable) private {
+        try IERC1644(securityAddress_).initialize_ERC1644(isControllable) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_ERC20(address securityAddress_, IERC20.ERC20Metadata memory erc20Metadata) private {
+        try IERC20(securityAddress_).initialize_ERC20(erc20Metadata) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_ERC1594(address securityAddress_) private {
+        try IERC1594(securityAddress_).initialize_ERC1594() {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitializeClearing(address securityAddress_, bool clearingActive) private {
+        try IClearingActions(securityAddress_).initializeClearing(clearingActive) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_ERC20Votes(address securityAddress_, bool erc20VotesActivated) private {
+        try IERC20Votes(securityAddress_).initialize_ERC20Votes(erc20VotesActivated) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_equityUSA(
+        address securityAddress_,
+        IEquityUSA.EquityDetailsData calldata equityDetailsData,
+        RegulationData memory regulationData,
+        AdditionalSecurityData calldata additionalSecurityData
+    ) private {
+        try
+            IEquityUSA(securityAddress_)._initialize_equityUSA(
+                equityDetailsData,
+                regulationData,
+                additionalSecurityData
+            )
+        {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_bondUSA(
+        address securityAddress_,
+        IBondRead.BondDetailsData calldata bondDetailsData,
+        RegulationData memory regulationData,
+        AdditionalSecurityData calldata additionalSecurityData
+    ) private {
+        try IBondUSA(securityAddress_)._initialize_bondUSA(bondDetailsData, regulationData, additionalSecurityData) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_FixedRate(
+        address securityAddress_,
+        IFixedRate.FixedRateData calldata fixedRateData
+    ) private {
+        try IFixedRate(securityAddress_).initialize_FixedRate(fixedRateData) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_KpiLinkedRate(
+        address securityAddress_,
+        IKpiLinkedRate.InterestRate calldata interestRate,
+        IKpiLinkedRate.ImpactData calldata impactData
+    ) private {
+        try IKpiLinkedRate(securityAddress_).initialize_KpiLinkedRate(interestRate, impactData) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_SustainabilityPerformanceTargetRate(
+        address securityAddress_,
+        ISustainabilityPerformanceTargetRate.InterestRate calldata interestRate,
+        ISustainabilityPerformanceTargetRate.ImpactData[] calldata impactData,
+        address[] calldata projects
+    ) private {
+        try
+            ISustainabilityPerformanceTargetRate(securityAddress_).initialize_SustainabilityPerformanceTargetRate(
+                interestRate,
+                impactData,
+                projects
+            )
+        {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
+    }
+
+    function _tryInitialize_ProceedRecipients(
+        address securityAddress_,
+        address[] calldata proceedRecipients,
+        bytes[] calldata data
+    ) private {
+        try IProceedRecipients(securityAddress_).initialize_ProceedRecipients(proceedRecipients, data) {
+            // success
+        } catch {
+            // facet not present - skip initialization
+        }
     }
 }

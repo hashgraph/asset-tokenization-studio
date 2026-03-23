@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+/**
+ * @title IAccessControlStorageWrapper
+ * @notice Interface for AccessControlStorageWrapper events and errors
+ * @author Asset Tokenization Studio Team
+ */
 interface IAccessControlStorageWrapper {
     /**
      * @dev Emitted when a default admin role is replaced

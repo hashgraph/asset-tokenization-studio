@@ -28,13 +28,10 @@ import {
   hasStorageWrapper,
   STORAGE_WRAPPER_REGISTRY_COUNT,
   atsRegistry,
+  isLibraryDependentFacet,
 } from "@scripts/domain";
 
 describe("atsRegistry.data - Factory Functions", () => {
-  /**
-   * Get all facet names from the registry that have factory functions.
-   * This ensures comprehensive coverage of all factory branches.
-   */
   const facetNames = Object.keys(FACET_REGISTRY);
 
   // Cache signer to avoid repeated Hardhat network bootstrap (saves ~4+ seconds)
@@ -44,19 +41,22 @@ describe("atsRegistry.data - Factory Functions", () => {
     [signer] = await ethers.getSigners();
   });
 
+  // Helper to check if a facet can be safely instantiated without library addresses
+  // Library-dependent facets require orchestrator library addresses to be set first
+  const canTestFactory = (facetName: string): boolean => {
+    return !isLibraryDependentFacet(facetName);
+  };
+
   describe("TimeTravel factory branches (comprehensive)", () => {
     facetNames.forEach((facetName) => {
       const facet = FACET_REGISTRY[facetName as keyof typeof FACET_REGISTRY];
 
-      // Only test facets that have a factory function
-      if (typeof facet.factory === "function") {
+      if (typeof facet.timeTravelFactory === "function" && canTestFactory(facetName)) {
         it(`should create TimeTravel factory for ${facetName}`, () => {
           expect(facet).to.not.be.undefined;
-          expect(facet.factory).to.be.a("function");
+          expect(facet.timeTravelFactory).to.be.a("function");
 
-          // Test TimeTravel factory (useTimeTravel = true)
-          // This exercises the uncovered branch
-          const timeTravelFactory = facet.factory!(signer, true);
+          const timeTravelFactory = facet.timeTravelFactory!(signer);
           expect(timeTravelFactory).to.not.be.undefined;
           expect(timeTravelFactory).to.have.property("deploy");
         });
@@ -68,14 +68,12 @@ describe("atsRegistry.data - Factory Functions", () => {
     facetNames.forEach((facetName) => {
       const facet = FACET_REGISTRY[facetName as keyof typeof FACET_REGISTRY];
 
-      // Only test facets that have a factory function
-      if (typeof facet.factory === "function") {
+      if (typeof facet.factory === "function" && canTestFactory(facetName)) {
         it(`should create normal factory for ${facetName}`, () => {
           expect(facet).to.not.be.undefined;
           expect(facet.factory).to.be.a("function");
 
-          // Test normal factory (useTimeTravel = false)
-          const normalFactory = facet.factory!(signer, false);
+          const normalFactory = facet.factory!(signer);
           expect(normalFactory).to.not.be.undefined;
           expect(normalFactory).to.have.property("deploy");
         });
@@ -83,27 +81,18 @@ describe("atsRegistry.data - Factory Functions", () => {
     });
   });
 
-  describe("Factory default parameter behavior", () => {
-    it("should default to normal factory when useTimeTravel is omitted", () => {
-      // Find any facet with a factory function
-      const facetWithFactory = facetNames.find((name) => {
+  describe("Factory availability", () => {
+    it("should have both factory and timeTravelFactory when available", () => {
+      const facetWithBoth = facetNames.find((name) => {
         const facet = FACET_REGISTRY[name as keyof typeof FACET_REGISTRY];
-        return typeof facet.factory === "function";
+        return typeof facet.factory === "function" && typeof facet.timeTravelFactory === "function";
       });
 
-      expect(facetWithFactory).to.not.be.undefined;
+      expect(facetWithBoth).to.not.be.undefined;
 
-      const facet = FACET_REGISTRY[facetWithFactory as keyof typeof FACET_REGISTRY];
-
-      // Without second parameter - should use normal factory
-      const defaultFactory = facet.factory!(signer);
-      const normalFactory = facet.factory!(signer, false);
-
-      // Both should be the same type of factory
-      expect(defaultFactory).to.not.be.undefined;
-      expect(normalFactory).to.not.be.undefined;
-      expect(defaultFactory).to.have.property("deploy");
-      expect(normalFactory).to.have.property("deploy");
+      const facet = FACET_REGISTRY[facetWithBoth as keyof typeof FACET_REGISTRY];
+      expect(facet.factory).to.be.a("function");
+      expect(facet.timeTravelFactory).to.be.a("function");
     });
   });
 
@@ -114,8 +103,8 @@ describe("atsRegistry.data - Factory Functions", () => {
         return typeof facet.factory === "function";
       });
 
-      // Verify we have a significant number of facets (adjust as registry grows)
-      expect(facetsWithFactory.length).to.be.greaterThan(150);
+      // 68 total facets, but library facets and abstract facets don't have deployable factories
+      expect(facetsWithFactory.length).to.be.greaterThan(40);
     });
 
     it("should have matching facet names in factory entries", () => {
@@ -148,7 +137,7 @@ describe("atsRegistry - Registry Helper Functions", () => {
     it("getAllFacets should return all facets", () => {
       const facets = getAllFacets();
       expect(facets).to.be.an("array");
-      expect(facets.length).to.be.greaterThan(100);
+      expect(facets.length).to.be.greaterThan(60);
     });
 
     it("hasFacet should return true for existing facet", () => {
@@ -235,7 +224,7 @@ describe("atsRegistry - Registry Helper Functions", () => {
       expect(atsRegistry.getAllFacets).to.be.a("function");
       const facets = atsRegistry.getAllFacets();
       expect(facets).to.be.an("array");
-      expect(facets.length).to.be.greaterThan(100);
+      expect(facets.length).to.be.greaterThan(60);
     });
   });
 

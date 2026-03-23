@@ -12,8 +12,6 @@ interface IExternalControlListManagement {
 
     error ExternalControlListsNotUpdated(address[] controlLista, bool[] actives);
 
-    error ZeroAddressNotAllowed();
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalControlLists(address[] calldata _controlLists) external;
 

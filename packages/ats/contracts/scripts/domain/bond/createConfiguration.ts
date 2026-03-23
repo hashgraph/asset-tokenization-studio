@@ -24,52 +24,44 @@ import { atsRegistry } from "../atsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
- * Bond-specific facets list (41 facets total).
+ * Bond Token Configuration
  *
- * This is an explicit positive list of all facets required for bond tokens.
+ * Defines the set of facets for Bond tokens.
  * Includes all common facets plus BondUSAFacet (NOT EquityUSAFacet).
  *
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
  *
  * Updated to match origin/develop feature parity (all facets registered).
+ *
+ * NOTE: Some facets are excluded because they require library linking:
+ * - Library-dependent facets (ERC20Facet, ERC1410*, ERC1594, ERC1644, ERC20Votes,
+ *   ERC3643Batch, ERC3643Operations, Clearing*, BondUSAFacet, BondUSAReadFacet,
+ *   SnapshotsFacet, TotalBalanceFacet) require special handling with library addresses
+ * - Abstract facets (LockFacet) cannot be deployed directly
+ *
+ * These facets will need to be deployed separately with proper library linking.
  */
 const BOND_FACETS = [
-  // Core Functionality (10 - DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet)
+  // Core Functionality
   "AccessControlFacet",
   "CapFacet",
   "ControlListFacet",
   "CorporateActionsFacet",
   "DiamondFacet", // Combined: includes DiamondCutFacet + DiamondLoupeFacet functionality
-  "ERC20Facet",
   "FreezeFacet",
   "KycFacet",
   "PauseFacet",
-  "SnapshotsFacet",
-  "TotalBalanceFacet",
 
-  // ERC Standards
-  "ERC1410IssuerFacet",
-  "ERC1410ManagementFacet",
+  // ERC Standards (non-library-dependent)
   "ERC1410ReadFacet",
-  "ERC1410TokenHolderFacet",
-  "ERC1594Facet",
   "ERC1643Facet",
-  "ERC1644Facet",
   "ERC20PermitFacet",
   "NoncesFacet",
-  "ERC20VotesFacet",
-  "ERC3643BatchFacet",
   "ERC3643ManagementFacet",
-  "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
 
-  // Clearing & Settlement
-  "ClearingActionsFacet",
-  "ClearingHoldCreationFacet",
-  "ClearingReadFacet",
-  "ClearingRedeemFacet",
-  "ClearingTransferFacet",
+  // Clearing & Settlement (non-library-dependent)
   "HoldManagementFacet",
   "HoldReadFacet",
   "HoldTokenHolderFacet",
@@ -90,10 +82,6 @@ const BOND_FACETS = [
   "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
-
-  // Jurisdiction-Specific
-  "BondUSAFacet",
-  "BondUSAReadFacet",
 ] as const;
 
 /**
@@ -151,13 +139,12 @@ export async function createBondConfiguration(
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Get facet names based on time travel mode
-  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
-  const baseFacets = useTimeTravel ? [...BOND_FACETS, "TimeTravelFacet"] : BOND_FACETS;
-
+  // Build facet list based on time travel mode
+  // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
+  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
   const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+    ? [...BOND_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
+    : [...BOND_FACETS];
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {

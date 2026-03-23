@@ -124,6 +124,7 @@ library ScheduledTasksStorageWrapper {
         return triggerScheduledTasks(scheduledCrossOrderedTaskStorage(), bytes32("crossOrdered"), _max);
     }
 
+    // TODO: REMOVE IT!!! Ya no es necesario el delegate call entre facetas, que se explote la librería externa.
     function callTriggerPendingScheduledCrossOrderedTasks() internal returns (uint256) {
         return IScheduledCrossOrderedTasks(address(this)).triggerPendingScheduledCrossOrderedTasks();
     }

@@ -47,6 +47,8 @@ import {
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
   createBondSustainabilityPerformanceTargetRateConfiguration,
+  deployOrchestratorLibraries,
+  hasOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 
 import { BusinessLogicResolver__factory } from "@contract-types";
@@ -424,6 +426,13 @@ export async function deploySystemWithExistingBlr(
         info(`✅ Loaded ${facetsResult.deployed.size} facets from checkpoint`);
       } else {
         info(`\n📦 Step 3/${totalSteps}: Deploying all facets...`);
+
+        // Deploy orchestrator libraries first (required for facet factory linking)
+        if (!hasOrchestratorLibraryAddresses()) {
+          info("   Deploying orchestrator libraries (required for facet linking)...");
+          await deployOrchestratorLibraries(signer);
+        }
+
         let allFacets = atsRegistry.getAllFacets();
         info(`   Found ${allFacets.length} facets in registry`);
 
@@ -437,13 +446,21 @@ export async function deploySystemWithExistingBlr(
         }
 
         // Create factories from registry
+        // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
+        // Skip facets without factories (abstract contracts like LockFacet)
         const facetFactories: Record<string, ContractFactory> = {};
         for (const facet of allFacets) {
-          if (!facet.factory) {
-            throw new Error(`No factory found for facet: ${facet.name}`);
+          // Select factory: TimeTravel variant when available and enabled, else production
+          const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
+
+          if (!selectedFactory) {
+            info(`   Skipping ${facet.name} (abstract contract, no factory)`);
+            continue;
           }
 
-          const factory = facet.factory(signer, useTimeTravel);
+          // Get factory
+          const factory = selectedFactory(signer) as ContractFactory;
+          // Use the actual contract name from the factory
           const contractName = factory.constructor.name.replace("__factory", "");
 
           // Skip if already deployed

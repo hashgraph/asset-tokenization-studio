@@ -4,10 +4,11 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 
-contract KpiLinkedRate is IKpiLinkedRate, PauseStorageWrapper {
+contract KpiLinkedRate is IKpiLinkedRate, AccessControlModifiers, PauseModifiers {
     error AlreadyInitialized();
     // solhint-disable-next-line func-name-mixedcase
     function initialize_KpiLinkedRate(
@@ -20,15 +21,17 @@ contract KpiLinkedRate is IKpiLinkedRate, PauseStorageWrapper {
         InterestRateStorageWrapper.kpiLinkedRateStorage().initialized = true;
     }
 
-    function setInterestRate(InterestRate calldata _newInterestRate) external onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
+    function setInterestRate(
+        InterestRate calldata _newInterestRate
+    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.requireValidInterestRate(_newInterestRate);
         InterestRateStorageWrapper.setInterestRate(_newInterestRate);
         emit InterestRateUpdated(msg.sender, _newInterestRate);
     }
 
-    function setImpactData(ImpactData calldata _newImpactData) external onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_INTEREST_RATE_MANAGER_ROLE, msg.sender);
+    function setImpactData(
+        ImpactData calldata _newImpactData
+    ) external onlyUnpaused onlyRole(_INTEREST_RATE_MANAGER_ROLE) {
         InterestRateStorageWrapper.requireValidImpactData(_newImpactData);
         InterestRateStorageWrapper.setImpactData(_newImpactData);
         emit ImpactDataUpdated(msg.sender, _newImpactData);

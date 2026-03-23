@@ -4,11 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ICap } from "./ICap.sol";
 import { _CAP_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 
-abstract contract Cap is ICap, TimestampProvider, PauseStorageWrapper {
+abstract contract Cap is ICap, TimestampProvider, PauseModifiers, AccessControlModifiers {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -18,8 +19,9 @@ abstract contract Cap is ICap, TimestampProvider, PauseStorageWrapper {
         CapStorageWrapper.initialize_Cap(maxSupply, partitionCap);
     }
 
-    function setMaxSupply(uint256 _maxSupply) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CAP_ROLE, msg.sender);
+    function setMaxSupply(
+        uint256 _maxSupply
+    ) external override onlyUnpaused onlyRole(_CAP_ROLE) returns (bool success_) {
         CapStorageWrapper.requireValidNewMaxSupply(_maxSupply, _getBlockTimestamp());
         CapStorageWrapper.setMaxSupply(_maxSupply, _getBlockTimestamp());
         success_ = true;
@@ -28,8 +30,7 @@ abstract contract Cap is ICap, TimestampProvider, PauseStorageWrapper {
     function setMaxSupplyByPartition(
         bytes32 _partition,
         uint256 _maxSupply
-    ) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CAP_ROLE, msg.sender);
+    ) external override onlyUnpaused onlyRole(_CAP_ROLE) returns (bool success_) {
         CapStorageWrapper.requireValidNewMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp());
         CapStorageWrapper.setMaxSupplyByPartition(_partition, _maxSupply, _getBlockTimestamp());
         success_ = true;

@@ -3,7 +3,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { KpisFacetBase, PauseFacet, ProceedRecipientsFacet, type ResolverProxy } from "@contract-types";
+import {
+  KpisSustainabilityPerformanceTargetRateFacet,
+  PauseFacet,
+  ProceedRecipientsFacet,
+  type ResolverProxy,
+} from "@contract-types";
 import { ATS_ROLES, dateToUnixTimestamp } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployBondSustainabilityPerformanceTargetRateTokenFixture } from "@test";
@@ -17,7 +22,7 @@ describe("Kpi Latest Tests", () => {
   let project1: string;
   let project2: string;
 
-  let kpiFacet: KpisFacetBase;
+  let kpiFacet: KpisSustainabilityPerformanceTargetRateFacet;
   let pauseFacet: PauseFacet;
   let proceedRecipientsFacet: ProceedRecipientsFacet;
 
@@ -51,7 +56,7 @@ describe("Kpi Latest Tests", () => {
       },
     ]);
 
-    kpiFacet = await ethers.getContractAt("KpisFacetBase", diamond.target, signer_A);
+    kpiFacet = await ethers.getContractAt("KpisSustainabilityPerformanceTargetRateFacet", diamond.target, signer_A);
     pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_A);
     proceedRecipientsFacet = await ethers.getContractAt("ProceedRecipientsFacet", diamond.target, signer_A);
 

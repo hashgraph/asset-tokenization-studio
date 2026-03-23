@@ -92,6 +92,9 @@ export function extractMetadata(
   // non-empty bytecode (not just "0x") AND non-empty ABI
   const isDeployable = contract.artifactData.bytecode !== "0x" && contract.artifactData.abi.length > 0;
 
+  // Library dependencies are computed in the generator (not extractor) to avoid circular deps
+  const requiresLibraries = false;
+
   return {
     name,
     contractName: name,
@@ -109,6 +112,7 @@ export function extractMetadata(
     solidityVersion,
     upgradeable,
     isDeployable,
+    requiresLibraries,
     description,
   };
 }

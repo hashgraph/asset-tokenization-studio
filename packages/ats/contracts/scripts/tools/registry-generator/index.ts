@@ -72,7 +72,7 @@ async function main(): Promise<void> {
       cacheDir: process.cwd(),
       excludePaths: [
         "**/test/**",
-        "!**/test/testTimeTravel/**",
+        "!**/test/timeTravel/**",
         "**/tests/**",
         "**/mocks/**",
         "**/mock/**",

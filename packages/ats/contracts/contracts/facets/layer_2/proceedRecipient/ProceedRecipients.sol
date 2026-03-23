@@ -4,11 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IProceedRecipients } from "./IProceedRecipients.sol";
 import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 
-abstract contract ProceedRecipients is IProceedRecipients, PauseStorageWrapper {
+abstract contract ProceedRecipients is IProceedRecipients, AccessControlModifiers, PauseModifiers {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -20,16 +21,19 @@ abstract contract ProceedRecipients is IProceedRecipients, PauseStorageWrapper {
         ProceedRecipientsStorageWrapper.initialize_ProceedRecipients(_proceedRecipients, _data);
     }
 
-    function addProceedRecipient(address _proceedRecipient, bytes calldata _data) external override onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
+    function addProceedRecipient(
+        address _proceedRecipient,
+        bytes calldata _data
+    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
         ERC1410StorageWrapper.requireValidAddress(_proceedRecipient);
         ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.addProceedRecipient(_proceedRecipient, _data);
         emit ProceedRecipientAdded(msg.sender, _proceedRecipient, _data);
     }
 
-    function removeProceedRecipient(address _proceedRecipient) external override onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
+    function removeProceedRecipient(
+        address _proceedRecipient
+    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
         ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.removeProceedRecipient(_proceedRecipient);
         emit ProceedRecipientRemoved(msg.sender, _proceedRecipient);
@@ -38,8 +42,7 @@ abstract contract ProceedRecipients is IProceedRecipients, PauseStorageWrapper {
     function updateProceedRecipientData(
         address _proceedRecipient,
         bytes calldata _data
-    ) external override onlyUnpaused {
-        AccessControlStorageWrapper.checkRole(_PROCEED_RECIPIENT_MANAGER_ROLE, msg.sender);
+    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
         ERC1410StorageWrapper.requireValidAddress(_proceedRecipient);
         ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.setProceedRecipientData(_proceedRecipient, _data);

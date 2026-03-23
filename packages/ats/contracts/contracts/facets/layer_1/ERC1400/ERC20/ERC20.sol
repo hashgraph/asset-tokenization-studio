@@ -7,8 +7,8 @@ import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { ERC3643StorageWrapper } from "../../../../domain/core/ERC3643StorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -17,7 +17,7 @@ import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWr
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC20 is IERC20, TimestampProvider, PauseStorageWrapper {
+abstract contract ERC20 is IERC20, TimestampProvider, PauseModifiers {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase

@@ -5,12 +5,15 @@ import { IClearingActions } from "./IClearingActions.sol";
 import { IClearing } from "./IClearing.sol";
 import { _CLEARING_VALIDATOR_ROLE, _CLEARING_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
+import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
+import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
 
-abstract contract ClearingActions is IClearingActions, PauseStorageWrapper {
+abstract contract ClearingActions is IClearingActions, AccessControlModifiers, PauseModifiers, ClearingModifiers {
     error AlreadyInitialized();
 
     function initializeClearing(bool _clearingActive) external {
@@ -19,27 +22,31 @@ abstract contract ClearingActions is IClearingActions, PauseStorageWrapper {
     }
 
     function activateClearing() external onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CLEARING_ROLE, msg.sender);
         success_ = ClearingStorageWrapper.setClearing(true);
         emit ClearingActivated(msg.sender);
     }
 
     function deactivateClearing() external onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CLEARING_ROLE, msg.sender);
         success_ = ClearingStorageWrapper.setClearing(false);
         emit ClearingDeactivated(msg.sender);
     }
 
     function approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) external override onlyUnpaused returns (bool success_, bytes32 partition_) {
-        AccessControlStorageWrapper.checkRole(_CLEARING_VALIDATOR_ROLE, msg.sender);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyClearingActivated
+        returns (bool success_, bytes32 partition_)
+    {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         ClearingStorageWrapper.requireClearingActivated();
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
         bytes memory operationData;
-        (success_, operationData, partition_) = ClearingStorageWrapper.approveClearingOperationByPartition(
+        (success_, operationData, partition_) = ClearingOps.approveClearingOperationByPartition(
             _clearingOperationIdentifier
         );
 
@@ -55,13 +62,12 @@ abstract contract ClearingActions is IClearingActions, PauseStorageWrapper {
 
     function cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CLEARING_VALIDATOR_ROLE, msg.sender);
+    ) external override onlyUnpaused onlyRole(_CLEARING_VALIDATOR_ROLE) onlyClearingActivated returns (bool success_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         ClearingStorageWrapper.requireClearingActivated();
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
-        success_ = ClearingStorageWrapper.cancelClearingOperationByPartition(_clearingOperationIdentifier);
+        success_ = ClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationCanceled(
             msg.sender,
             _clearingOperationIdentifier.tokenHolder,
@@ -73,13 +79,13 @@ abstract contract ClearingActions is IClearingActions, PauseStorageWrapper {
 
     function reclaimClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) external override onlyUnpaused returns (bool success_) {
+    ) external override onlyUnpaused onlyWithValidClearingId(_clearingOperationIdentifier) returns (bool success_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         ERC1594StorageWrapper.requireIdentified(_clearingOperationIdentifier.tokenHolder, address(0));
         ClearingStorageWrapper.requireClearingActivated();
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, true);
-        success_ = ClearingStorageWrapper.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
+        success_ = ClearingOps.reclaimClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationReclaimed(
             msg.sender,
             _clearingOperationIdentifier.tokenHolder,

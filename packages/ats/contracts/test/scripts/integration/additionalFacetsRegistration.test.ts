@@ -19,7 +19,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployContract, registerFacets, registerAdditionalFacets } from "@scripts/infrastructure";
-import { atsRegistry } from "@scripts/domain";
+import { atsRegistry, isLibraryDependentFacet, getFacetRequiredLibraries, getLibLinks } from "@scripts/domain";
+import { deployOrchestratorLibraries, setOrchestratorLibraryAddresses } from "@scripts/domain";
 import { TEST_SIZES, BLR_VERSIONS, deployBlrFixture, silenceScriptLogging } from "@test";
 
 describe("registerAdditionalFacets - Integration Tests", () => {
@@ -76,7 +77,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const freezeFactory = await ethers.getContractFactory("FreezeFacet", deployer);
       const freeze = await deployContract(freezeFactory, {});
 
-      const lockFactory = await ethers.getContractFactory("LockFacet", deployer);
+      const lockFactory = await ethers.getContractFactory("CapFacet", deployer);
       const lock = await deployContract(lockFactory, {});
 
       const newFacetsWithKeys = [
@@ -86,9 +87,9 @@ describe("registerAdditionalFacets - Integration Tests", () => {
           resolverKey: atsRegistry.getFacetDefinition("FreezeFacet")!.resolverKey!.value,
         },
         {
-          name: "LockFacet",
+          name: "CapFacet",
           address: lock.address!,
-          resolverKey: atsRegistry.getFacetDefinition("LockFacet")!.resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("CapFacet")!.resolverKey!.value,
         },
       ];
 
@@ -107,7 +108,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       // Verify registered count includes new facets
       expect(result.registered.length).to.equal(TEST_SIZES.DUAL);
       expect(result.registered).to.include("FreezeFacet");
-      expect(result.registered).to.include("LockFacet");
+      expect(result.registered).to.include("CapFacet");
       expect(result.failed.length).to.equal(0);
 
       // Verify BLR now has 5 facets total
@@ -255,13 +256,13 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       expect(count).to.equal(4); // 2 + 2 = 4
 
       // Call 3: Register 1 more facet
-      const facet5Factory = await ethers.getContractFactory("LockFacet", deployer);
+      const facet5Factory = await ethers.getContractFactory("CapFacet", deployer);
       const facet5 = await deployContract(facet5Factory, {});
       const newFacetsWithKeys3 = [
         {
-          name: "LockFacet",
+          name: "CapFacet",
           address: facet5.address!,
-          resolverKey: atsRegistry.getFacetDefinition("LockFacet")!.resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("CapFacet")!.resolverKey!.value,
         },
       ];
       await registerAdditionalFacets(deployer, {
@@ -276,24 +277,36 @@ describe("registerAdditionalFacets - Integration Tests", () => {
     it("should handle pagination for large existing facet counts", async () => {
       const { deployer, blr, blrAddress } = await loadFixture(deployBlrFixture);
 
-      // Register 10 facets initially
+      // Register 10 facets initially (no duplicates!)
       const facetNames = [
         "AccessControlFacet",
         "KycFacet",
         "PauseFacet",
         "FreezeFacet",
-        "LockFacet",
-        "ControlListFacet",
         "CapFacet",
+        "ControlListFacet",
         "SnapshotsFacet",
         "ERC20Facet",
         "DiamondFacet",
+        "AdjustBalancesFacet",
       ];
+
+      // Deploy orchestrator libraries if any facet needs them
+      const needsLibraries = facetNames.some((name) => isLibraryDependentFacet(name));
+      if (needsLibraries) {
+        const libAddresses = await deployOrchestratorLibraries(deployer);
+        setOrchestratorLibraryAddresses(libAddresses);
+      }
 
       const facets: Record<string, string> = {};
       for (const name of facetNames) {
-        const factory = await ethers.getContractFactory(name, deployer);
-        const result = await deployContract(factory, {});
+        const requiredLibs = getFacetRequiredLibraries(name);
+        const libLinks = requiredLibs.length > 0 ? getLibLinks(...requiredLibs) : undefined;
+        const factory = await ethers.getContractFactory(name, {
+          signer: deployer,
+          libraries: libLinks,
+        });
+        const result = await deployContract(factory as any, {});
         facets[name] = result.address!;
       }
 
@@ -302,9 +315,10 @@ describe("registerAdditionalFacets - Integration Tests", () => {
         address: facets[name],
         resolverKey: atsRegistry.getFacetDefinition(name)!.resolverKey!.value,
       }));
-      await registerFacets(blr, {
+      const registerResult = await registerFacets(blr, {
         facets: facetsWithKeys,
       });
+      expect(registerResult.success).to.be.true;
 
       // Verify 10 facets registered
       const initialCount = await blr.getBusinessLogicCount();
@@ -314,8 +328,13 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const erc1410Factory = await ethers.getContractFactory("ERC1410ReadFacet", deployer);
       const erc1410 = await deployContract(erc1410Factory, {});
 
-      const erc1594Factory = await ethers.getContractFactory("ERC1594Facet", deployer);
-      const erc1594 = await deployContract(erc1594Factory, {});
+      // ERC1594Facet needs TokenCoreOps library linking
+      const erc1594RequiredLibs = getFacetRequiredLibraries("ERC1594Facet");
+      const erc1594Factory = await ethers.getContractFactory("ERC1594Facet", {
+        signer: deployer,
+        libraries: erc1594RequiredLibs.length > 0 ? getLibLinks(...erc1594RequiredLibs) : undefined,
+      });
+      const erc1594 = await deployContract(erc1594Factory as any, {});
 
       const newFacetsWithKeys = [
         {
@@ -576,13 +595,13 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const { deployer, blr, blrAddress } = await loadFixture(deployBlrFixture);
 
       // Register initial facet
-      const facet1Factory = await ethers.getContractFactory("LockFacet", deployer);
+      const facet1Factory = await ethers.getContractFactory("CapFacet", deployer);
       const facet1 = await deployContract(facet1Factory, {});
       const facetsWithKeys = [
         {
-          name: "LockFacet",
+          name: "CapFacet",
           address: facet1.address!,
-          resolverKey: atsRegistry.getFacetDefinition("LockFacet")!.resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("CapFacet")!.resolverKey!.value,
         },
       ];
       await registerFacets(blr, {
@@ -590,14 +609,14 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       });
 
       // Try to register different address for same facet
-      const facet2Factory = await ethers.getContractFactory("LockFacet", deployer);
+      const facet2Factory = await ethers.getContractFactory("CapFacet", deployer);
       const facet2 = await deployContract(facet2Factory, {});
 
       const newFacetsWithKeys = [
         {
-          name: "LockFacet",
+          name: "CapFacet",
           address: facet2.address!,
-          resolverKey: atsRegistry.getFacetDefinition("LockFacet")!.resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("CapFacet")!.resolverKey!.value,
         },
       ];
       const result = await registerAdditionalFacets(deployer, {
@@ -610,7 +629,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       expect(result.error).to.exist;
       expect(result.error).to.include("already exist");
       expect(result.error).to.include("allowOverwrite");
-      expect(result.failed).to.deep.equal(["LockFacet"]);
+      expect(result.failed).to.deep.equal(["CapFacet"]);
     });
   });
 
@@ -638,7 +657,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       });
 
       // Then use registerAdditionalFacets to extend
-      const facets2 = ["FreezeFacet", "LockFacet"];
+      const facets2 = ["FreezeFacet", "CapFacet"];
       const addresses2: Record<string, string> = {};
 
       for (const name of facets2) {
@@ -702,7 +721,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       const freezeFactory = await ethers.getContractFactory("FreezeFacet", deployer);
       const freeze = await deployContract(freezeFactory, {});
 
-      const lockFactory = await ethers.getContractFactory("LockFacet", deployer);
+      const lockFactory = await ethers.getContractFactory("CapFacet", deployer);
       const lock = await deployContract(lockFactory, {});
 
       const newFacetsWithKeys = [
@@ -712,9 +731,9 @@ describe("registerAdditionalFacets - Integration Tests", () => {
           resolverKey: atsRegistry.getFacetDefinition("FreezeFacet")!.resolverKey!.value,
         },
         {
-          name: "LockFacet",
+          name: "CapFacet",
           address: lock.address!,
-          resolverKey: atsRegistry.getFacetDefinition("LockFacet")!.resolverKey!.value,
+          resolverKey: atsRegistry.getFacetDefinition("CapFacet")!.resolverKey!.value,
         },
       ];
       const addResult = await registerAdditionalFacets(deployer, {
@@ -725,7 +744,7 @@ describe("registerAdditionalFacets - Integration Tests", () => {
       expect(addResult.success).to.be.true;
 
       // Verify all facets can be resolved from BLR
-      const facetNames = ["AccessControlFacet", "KycFacet", "PauseFacet", "FreezeFacet", "LockFacet"];
+      const facetNames = ["AccessControlFacet", "KycFacet", "PauseFacet", "FreezeFacet", "CapFacet"];
 
       for (const name of facetNames) {
         const facetDefinition = atsRegistry.getFacetDefinition(name);

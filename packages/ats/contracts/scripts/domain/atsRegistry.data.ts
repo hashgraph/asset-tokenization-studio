@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-14T19:57:13.024Z
+ * Generated: 2026-03-23T09:49:29.856Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -20,141 +20,142 @@
 import { FacetDefinition, ContractDefinition, StorageWrapperDefinition } from "@scripts/infrastructure";
 import {
   AccessControlFacet__factory,
-  AccessControlFacetTimeTravel__factory,
   AdjustBalancesFacet__factory,
-  AdjustBalancesFacetTimeTravel__factory,
   BondUSAFacet__factory,
-  BondUSAFacetTimeTravel__factory,
   BondUSAFixedRateFacet__factory,
-  BondUSAFixedRateFacetTimeTravel__factory,
   BondUSAKpiLinkedRateFacet__factory,
-  BondUSAKpiLinkedRateFacetTimeTravel__factory,
   BondUSAReadFacet__factory,
-  BondUSAReadFacetTimeTravel__factory,
   BondUSAReadFixedRateFacet__factory,
-  BondUSAReadFixedRateFacetTimeTravel__factory,
   BondUSAReadKpiLinkedRateFacet__factory,
-  BondUSAReadKpiLinkedRateFacetTimeTravel__factory,
   BondUSAReadSustainabilityPerformanceTargetRateFacet__factory,
-  BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   BondUSASustainabilityPerformanceTargetRateFacet__factory,
-  BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   CapFacet__factory,
-  CapFacetTimeTravel__factory,
   ClearingActionsFacet__factory,
-  ClearingActionsFacetTimeTravel__factory,
   ClearingHoldCreationFacet__factory,
-  ClearingHoldCreationFacetTimeTravel__factory,
   ClearingReadFacet__factory,
-  ClearingReadFacetTimeTravel__factory,
   ClearingRedeemFacet__factory,
-  ClearingRedeemFacetTimeTravel__factory,
   ClearingTransferFacet__factory,
-  ClearingTransferFacetTimeTravel__factory,
   ControlListFacet__factory,
-  ControlListFacetTimeTravel__factory,
   CorporateActionsFacet__factory,
-  CorporateActionsFacetTimeTravel__factory,
   DiamondFacet__factory,
-  DiamondFacetTimeTravel__factory,
   ERC1410IssuerFacet__factory,
-  ERC1410IssuerFacetTimeTravel__factory,
   ERC1410ManagementFacet__factory,
-  ERC1410ManagementFacetTimeTravel__factory,
   ERC1410ReadFacet__factory,
-  ERC1410ReadFacetTimeTravel__factory,
   ERC1410TokenHolderFacet__factory,
-  ERC1410TokenHolderFacetTimeTravel__factory,
   ERC1594Facet__factory,
-  ERC1594FacetTimeTravel__factory,
   ERC1643Facet__factory,
-  ERC1643FacetTimeTravel__factory,
   ERC1644Facet__factory,
-  ERC1644FacetTimeTravel__factory,
   ERC20Facet__factory,
-  ERC20FacetTimeTravel__factory,
   ERC20PermitFacet__factory,
-  ERC20PermitFacetTimeTravel__factory,
   ERC20VotesFacet__factory,
-  ERC20VotesFacetTimeTravel__factory,
   ERC3643BatchFacet__factory,
-  ERC3643BatchFacetTimeTravel__factory,
   ERC3643ManagementFacet__factory,
-  ERC3643ManagementFacetTimeTravel__factory,
   ERC3643OperationsFacet__factory,
-  ERC3643OperationsFacetTimeTravel__factory,
   ERC3643ReadFacet__factory,
-  ERC3643ReadFacetTimeTravel__factory,
   EquityUSAFacet__factory,
-  EquityUSAFacetTimeTravel__factory,
   ExternalControlListManagementFacet__factory,
-  ExternalControlListManagementFacetTimeTravel__factory,
   ExternalKycListManagementFacet__factory,
-  ExternalKycListManagementFacetTimeTravel__factory,
   ExternalPauseManagementFacet__factory,
-  ExternalPauseManagementFacetTimeTravel__factory,
   FixedRateFacet__factory,
-  FixedRateFacetTimeTravel__factory,
   FreezeFacet__factory,
-  FreezeFacetTimeTravel__factory,
   HoldManagementFacet__factory,
-  HoldManagementFacetTimeTravel__factory,
   HoldReadFacet__factory,
-  HoldReadFacetTimeTravel__factory,
   HoldTokenHolderFacet__factory,
-  HoldTokenHolderFacetTimeTravel__factory,
   KpiLinkedRateFacet__factory,
-  KpiLinkedRateFacetTimeTravel__factory,
   KpisKpiLinkedRateFacet__factory,
-  KpisKpiLinkedRateFacetTimeTravel__factory,
   KpisSustainabilityPerformanceTargetRateFacet__factory,
-  KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   KycFacet__factory,
-  KycFacetTimeTravel__factory,
   LockFacet__factory,
-  LockFacetTimeTravel__factory,
   NoncesFacet__factory,
-  NoncesFacetTimeTravel__factory,
   PauseFacet__factory,
-  PauseFacetTimeTravel__factory,
   ProceedRecipientsFacet__factory,
-  ProceedRecipientsFacetTimeTravel__factory,
   ProceedRecipientsKpiLinkedRateFacet__factory,
-  ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory,
   ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory,
-  ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ProtectedPartitionsFacet__factory,
-  ProtectedPartitionsFacetTimeTravel__factory,
   ScheduledBalanceAdjustmentsFacet__factory,
-  ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
   ScheduledCouponListingFacet__factory,
-  ScheduledCouponListingFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksFacet__factory,
-  ScheduledCrossOrderedTasksFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory,
-  ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory,
-  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   ScheduledSnapshotsFacet__factory,
-  ScheduledSnapshotsFacetTimeTravel__factory,
   SnapshotsFacet__factory,
-  SnapshotsFacetTimeTravel__factory,
   SsiManagementFacet__factory,
-  SsiManagementFacetTimeTravel__factory,
   SustainabilityPerformanceTargetRateFacet__factory,
-  SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
   TimeTravelFacet__factory,
   TotalBalanceFacet__factory,
-  TotalBalanceFacetTimeTravel__factory,
   TransferAndLockFacet__factory,
-  TransferAndLockFacetTimeTravel__factory,
   TransferAndLockFixedRateFacet__factory,
-  TransferAndLockFixedRateFacetTimeTravel__factory,
   TransferAndLockKpiLinkedRateFacet__factory,
-  TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacet__factory,
+  AccessControlFacetTimeTravel__factory,
+  AdjustBalancesFacetTimeTravel__factory,
+  BondUSAFacetTimeTravel__factory,
+  BondUSAFixedRateFacetTimeTravel__factory,
+  BondUSAKpiLinkedRateFacetTimeTravel__factory,
+  BondUSAReadFacetTimeTravel__factory,
+  BondUSAReadFixedRateFacetTimeTravel__factory,
+  BondUSAReadKpiLinkedRateFacetTimeTravel__factory,
+  BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  CapFacetTimeTravel__factory,
+  ClearingActionsFacetTimeTravel__factory,
+  ClearingHoldCreationFacetTimeTravel__factory,
+  ClearingReadFacetTimeTravel__factory,
+  ClearingRedeemFacetTimeTravel__factory,
+  ClearingTransferFacetTimeTravel__factory,
+  ControlListFacetTimeTravel__factory,
+  CorporateActionsFacetTimeTravel__factory,
+  DiamondFacetTimeTravel__factory,
+  ERC1410IssuerFacetTimeTravel__factory,
+  ERC1410ManagementFacetTimeTravel__factory,
+  ERC1410ReadFacetTimeTravel__factory,
+  ERC1410TokenHolderFacetTimeTravel__factory,
+  ERC1594FacetTimeTravel__factory,
+  ERC1643FacetTimeTravel__factory,
+  ERC1644FacetTimeTravel__factory,
+  ERC20FacetTimeTravel__factory,
+  ERC20PermitFacetTimeTravel__factory,
+  ERC20VotesFacetTimeTravel__factory,
+  ERC3643BatchFacetTimeTravel__factory,
+  ERC3643ManagementFacetTimeTravel__factory,
+  ERC3643OperationsFacetTimeTravel__factory,
+  ERC3643ReadFacetTimeTravel__factory,
+  EquityUSAFacetTimeTravel__factory,
+  ExternalControlListManagementFacetTimeTravel__factory,
+  ExternalKycListManagementFacetTimeTravel__factory,
+  ExternalPauseManagementFacetTimeTravel__factory,
+  FixedRateFacetTimeTravel__factory,
+  FreezeFacetTimeTravel__factory,
+  HoldManagementFacetTimeTravel__factory,
+  HoldReadFacetTimeTravel__factory,
+  HoldTokenHolderFacetTimeTravel__factory,
+  KpiLinkedRateFacetTimeTravel__factory,
+  KpisKpiLinkedRateFacetTimeTravel__factory,
+  KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  KycFacetTimeTravel__factory,
+  LockFacetTimeTravel__factory,
+  NoncesFacetTimeTravel__factory,
+  PauseFacetTimeTravel__factory,
+  ProceedRecipientsFacetTimeTravel__factory,
+  ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory,
+  ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  ProtectedPartitionsFacetTimeTravel__factory,
+  ScheduledBalanceAdjustmentsFacetTimeTravel__factory,
+  ScheduledCouponListingFacetTimeTravel__factory,
+  ScheduledCrossOrderedTasksFacetTimeTravel__factory,
+  ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory,
+  ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  ScheduledSnapshotsFacetTimeTravel__factory,
+  SnapshotsFacetTimeTravel__factory,
+  SsiManagementFacetTimeTravel__factory,
+  SustainabilityPerformanceTargetRateFacetTimeTravel__factory,
+  TotalBalanceFacetTimeTravel__factory,
+  TransferAndLockFacetTimeTravel__factory,
+  TransferAndLockFixedRateFacetTimeTravel__factory,
+  TransferAndLockKpiLinkedRateFacetTimeTravel__factory,
   TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory,
 } from "@contract-types";
+import { getLibLinks } from "./orchestratorLibraries";
 
 /**
  * Registry of all facet contracts.
@@ -239,6 +240,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AccountAssignedToRole", signature: "AccountAssignedToRole(bytes32,address)", selector: "0xa6006e94" },
       {
         name: "AccountNotAssignedToRole",
@@ -247,8 +249,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "RolesNotApplied", signature: "RolesNotApplied(bytes32[],bool[],address)", selector: "0xaa4b6234" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new AccessControlFacetTimeTravel__factory(signer) : new AccessControlFacet__factory(signer),
+    factory: (signer) => new AccessControlFacet__factory(signer),
+    timeTravelFactory: (signer) => new AccessControlFacetTimeTravel__factory(signer),
   },
 
   AdjustBalancesFacet: {
@@ -265,8 +267,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe2d77e44",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new AdjustBalancesFacetTimeTravel__factory(signer) : new AdjustBalancesFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) => new AdjustBalancesFacet__factory(signer),
+    timeTravelFactory: (signer) => new AdjustBalancesFacetTimeTravel__factory(signer),
   },
 
   BondUSAFacet: {
@@ -307,14 +312,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+        name: "on",
+        signature: "on(address,bytes32,uint256)",
+        topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
       },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new BondUSAFacetTimeTravel__factory(signer) : new BondUSAFacet__factory(signer),
+    factory: (signer) => new BondUSAFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAFacetTimeTravel__factory(signer),
   },
 
   BondUSAFixedRateFacet: {
@@ -355,14 +361,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+        name: "on",
+        signature: "on(address,bytes32,uint256)",
+        topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
       },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new BondUSAFixedRateFacetTimeTravel__factory(signer) : new BondUSAFixedRateFacet__factory(signer),
+    factory: (signer) => new BondUSAFixedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAFixedRateFacetTimeTravel__factory(signer),
   },
 
   BondUSAKpiLinkedRateFacet: {
@@ -403,16 +410,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+        name: "on",
+        signature: "on(address,bytes32,uint256)",
+        topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
       },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new BondUSAKpiLinkedRateFacetTimeTravel__factory(signer)
-        : new BondUSAKpiLinkedRateFacet__factory(signer),
+    factory: (signer) => new BondUSAKpiLinkedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSAKpiLinkedRateFacetTimeTravel__factory(signer),
   },
 
   BondUSAReadFacet: {
@@ -503,8 +509,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new BondUSAReadFacetTimeTravel__factory(signer) : new BondUSAReadFacet__factory(signer),
+    factory: (signer) => new BondUSAReadFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BondUSAReadFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   BondUSAReadFixedRateFacet: {
@@ -595,10 +602,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new BondUSAReadFixedRateFacetTimeTravel__factory(signer)
-        : new BondUSAReadFixedRateFacet__factory(signer),
+    factory: (signer) => new BondUSAReadFixedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BondUSAReadFixedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   BondUSAReadKpiLinkedRateFacet: {
@@ -689,10 +695,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(signer)
-        : new BondUSAReadKpiLinkedRateFacet__factory(signer),
+    factory: (signer) => new BondUSAReadKpiLinkedRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BondUSAReadKpiLinkedRateFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   BondUSAReadSustainabilityPerformanceTargetRateFacet: {
@@ -783,10 +788,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xbd007c8f",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
-        : new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) =>
+      new BondUSAReadSustainabilityPerformanceTargetRateFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel__factory(
+        getLibLinks("clearingReadOps") as any,
+        signer,
+      ),
   },
 
   BondUSASustainabilityPerformanceTargetRateFacet: {
@@ -827,16 +835,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "MaturityDateUpdated",
-        signature: "MaturityDateUpdated(address,uint256,uint256)",
-        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+        name: "on",
+        signature: "on(address,bytes32,uint256)",
+        topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
       },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
-        : new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
   CapFacet: {
@@ -873,9 +880,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b69647",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new CapFacetTimeTravel__factory(signer) : new CapFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+    ],
+    factory: (signer) => new CapFacet__factory(signer),
+    timeTravelFactory: (signer) => new CapFacetTimeTravel__factory(signer),
   },
 
   ClearingActionsFacet: {
@@ -952,9 +962,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ClearingActionsFacetTimeTravel__factory(signer) : new ClearingActionsFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+    ],
+    factory: (signer) => new ClearingActionsFacet__factory(getLibLinks("clearingOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingActionsFacetTimeTravel__factory(getLibLinks("clearingOps") as any, signer),
   },
 
   ClearingHoldCreationFacet: {
@@ -996,10 +1010,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9b646ab9",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ClearingHoldCreationFacetTimeTravel__factory(signer)
-        : new ClearingHoldCreationFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) =>
+      new ClearingHoldCreationFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingHoldCreationFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
   },
 
   ClearingReadFacet: {
@@ -1040,8 +1057,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xcf38dab5",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ClearingReadFacetTimeTravel__factory(signer) : new ClearingReadFacet__factory(signer),
+    factory: (signer) => new ClearingReadFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingReadFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   ClearingRedeemFacet: {
@@ -1083,8 +1101,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x498f1f65",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ClearingRedeemFacetTimeTravel__factory(signer) : new ClearingRedeemFacet__factory(signer),
+    factory: (signer) => new ClearingRedeemFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingRedeemFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
   },
 
   ClearingTransferFacet: {
@@ -1126,8 +1145,10 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1f4eef27",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ClearingTransferFacetTimeTravel__factory(signer) : new ClearingTransferFacet__factory(signer),
+    factory: (signer) =>
+      new ClearingTransferFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ClearingTransferFacetTimeTravel__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),
   },
 
   ControlListFacet: {
@@ -1160,9 +1181,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1d46c292",
       },
       {
-        name: "initialize_ControlList",
-        signature: "function initialize_ControlList(bool _isWhiteList)",
-        selector: "0xf88bd9f2",
+        name: "initializeControlList",
+        signature: "function initializeControlList(bool _isWhiteList)",
+        selector: "0x24bf9186",
       },
       {
         name: "isInControlList",
@@ -1188,12 +1209,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ControlListFacetTimeTravel__factory(signer) : new ControlListFacet__factory(signer),
+    factory: (signer) => new ControlListFacet__factory(signer),
+    timeTravelFactory: (signer) => new ControlListFacetTimeTravel__factory(signer),
   },
 
   CorporateActionsFacet: {
@@ -1253,14 +1275,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       {
         name: "DuplicatedCorporateAction",
         signature: "DuplicatedCorporateAction(bytes32,bytes)",
         selector: "0x3266e9e3",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new CorporateActionsFacetTimeTravel__factory(signer) : new CorporateActionsFacet__factory(signer),
+    factory: (signer) => new CorporateActionsFacet__factory(signer),
+    timeTravelFactory: (signer) => new CorporateActionsFacetTimeTravel__factory(signer),
   },
 
   DiamondFacet: {
@@ -1369,8 +1392,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xe5d3a872",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new DiamondFacetTimeTravel__factory(signer) : new DiamondFacet__factory(signer),
+    factory: (signer) => new DiamondFacet__factory(signer),
+    timeTravelFactory: (signer) => new DiamondFacetTimeTravel__factory(signer),
   },
 
   EquityUSAFacet: {
@@ -1501,9 +1524,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5adaa49e",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new EquityUSAFacetTimeTravel__factory(signer) : new EquityUSAFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+    ],
+    factory: (signer) => new EquityUSAFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) => new EquityUSAFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   ERC1410IssuerFacet: {
@@ -1521,8 +1547,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x18180262",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC1410IssuerFacetTimeTravel__factory(signer) : new ERC1410IssuerFacet__factory(signer),
+    factory: (signer) => new ERC1410IssuerFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC1410IssuerFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC1410ManagementFacet: {
@@ -1575,11 +1602,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b5ef4a",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ERC1410ManagementFacetTimeTravel__factory(signer)
-        : new ERC1410ManagementFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+    ],
+    factory: (signer) => new ERC1410ManagementFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC1410ManagementFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC1410ReadFacet: {
@@ -1645,8 +1674,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa26734dc",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC1410ReadFacetTimeTravel__factory(signer) : new ERC1410ReadFacet__factory(signer),
+    factory: (signer) => new ERC1410ReadFacet__factory(signer),
+    timeTravelFactory: (signer) => new ERC1410ReadFacetTimeTravel__factory(signer),
   },
 
   ERC1410TokenHolderFacet: {
@@ -1686,10 +1715,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x6afb79db",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ERC1410TokenHolderFacetTimeTravel__factory(signer)
-        : new ERC1410TokenHolderFacet__factory(signer),
+    factory: (signer) => new ERC1410TokenHolderFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC1410TokenHolderFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC1594Facet: {
@@ -1748,9 +1776,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xe68ca1ec8e8e022357047aae1f96036cbb808c6dc2bbbfbd3bde507ab21098c4",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC1594FacetTimeTravel__factory(signer) : new ERC1594Facet__factory(signer),
+    errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      {
+        name: "ProtectedPartitionRoleRequired",
+        signature: "ProtectedPartitionRoleRequired(bytes32,address)",
+        selector: "0xfd294631",
+      },
+    ],
+    factory: (signer) => new ERC1594Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new ERC1594FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC1643Facet: {
@@ -1791,13 +1826,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "DocumentDoesNotExist", signature: "DocumentDoesNotExist(bytes32)", selector: "0xc2e54650" },
       { name: "EmptyHASH", signature: "EmptyHASH()", selector: "0x402e72be" },
       { name: "EmptyName", signature: "EmptyName()", selector: "0x2ef13105" },
       { name: "EmptyURI", signature: "EmptyURI()", selector: "0xd07b00d6" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC1643FacetTimeTravel__factory(signer) : new ERC1643Facet__factory(signer),
+    factory: (signer) => new ERC1643Facet__factory(signer),
+    timeTravelFactory: (signer) => new ERC1643FacetTimeTravel__factory(signer),
   },
 
   ERC1644Facet: {
@@ -1827,9 +1863,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC1644FacetTimeTravel__factory(signer) : new ERC1644Facet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+    ],
+    factory: (signer) => new ERC1644Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new ERC1644FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC20Facet: {
@@ -1899,8 +1938,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC20FacetTimeTravel__factory(signer) : new ERC20Facet__factory(signer),
+    factory: (signer) => new ERC20Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new ERC20FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC20PermitFacet: {
@@ -1927,8 +1966,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "ERC2612ExpiredSignature", signature: "ERC2612ExpiredSignature(uint256)", selector: "0x62791302" },
       { name: "ERC2612InvalidSigner", signature: "ERC2612InvalidSigner(address,address)", selector: "0x4b800e46" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC20PermitFacetTimeTravel__factory(signer) : new ERC20PermitFacet__factory(signer),
+    factory: (signer) => new ERC20PermitFacet__factory(signer),
+    timeTravelFactory: (signer) => new ERC20PermitFacetTimeTravel__factory(signer),
   },
 
   ERC20VotesFacet: {
@@ -1987,8 +2026,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC20VotesFacetTimeTravel__factory(signer) : new ERC20VotesFacet__factory(signer),
+    factory: (signer) => new ERC20VotesFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC20VotesFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   ERC3643BatchFacet: {
@@ -2020,8 +2060,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x88d695b2",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC3643BatchFacetTimeTravel__factory(signer) : new ERC3643BatchFacet__factory(signer),
+    factory: (signer) => new ERC3643BatchFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) => new ERC3643BatchFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC3643ManagementFacet: {
@@ -2055,57 +2095,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "setOnchainID", signature: "function setOnchainID(address _onchainID)", selector: "0x3d1ddc5b" },
       { name: "setSymbol", signature: "function setSymbol(string _symbol)", selector: "0xb84c8246" },
     ],
-    events: [
-      {
-        name: "AgentAdded",
-        signature: "AgentAdded(address)",
-        topic0: "0xf68e73cec97f2d70aa641fb26e87a4383686e2efacb648f2165aeb02ac562ec5",
-      },
-      {
-        name: "AgentRemoved",
-        signature: "AgentRemoved(address)",
-        topic0: "0xed9c8ad8d5a0a66898ea49d2956929c93ae2e8bd50281b2ed897c5d1a6737e0b",
-      },
-      {
-        name: "IdentityRegistryAdded",
-        signature: "IdentityRegistryAdded(address)",
-        topic0: "0xd2be862d755bca7e0d39772b2cab3a5578da9c285f69199f4c063c2294a7f36c",
-      },
-      {
-        name: "is",
-        signature: "is(string,string,uint8,string,address)",
-        topic0: "0x854cacca0af9cc4c26ced55e5812e85d9e301a50ef5829c787566862b7129af6",
-      },
-      {
-        name: "RecoverySuccess",
-        signature: "RecoverySuccess(address,address,address)",
-        topic0: "0xf0c9129a94f30f1caaceb63e44b9811d0a3edf1d6c23757f346093af5553fed0",
-      },
-      {
-        name: "UpdatedTokenInformation",
-        signature: "UpdatedTokenInformation(string,string,uint8,string,address)",
-        topic0: "0x6a1105ac8148a3c319adbc369f9072573e8a11d3a3d195e067e7c40767ec54d1",
-      },
-    ],
-    errors: [
-      { name: "AddressNotVerified", signature: "AddressNotVerified()", selector: "0x209d2853" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
-      { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
-      { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
-      { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
-      { name: "IdentityRegistryCallFailed", signature: "IdentityRegistryCallFailed()", selector: "0xad87849e" },
-      {
-        name: "InputAmountsArrayLengthMismatch",
-        signature: "InputAmountsArrayLengthMismatch()",
-        selector: "0x64f13710",
-      },
-      { name: "InputBoolArrayLengthMismatch", signature: "InputBoolArrayLengthMismatch()", selector: "0x07ac0eb9" },
-      { name: "WalletRecovered", signature: "WalletRecovered()", selector: "0xf9f9bcf9" },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ERC3643ManagementFacetTimeTravel__factory(signer)
-        : new ERC3643ManagementFacet__factory(signer),
+    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    factory: (signer) => new ERC3643ManagementFacet__factory(signer),
+    timeTravelFactory: (signer) => new ERC3643ManagementFacetTimeTravel__factory(signer),
   },
 
   ERC3643OperationsFacet: {
@@ -2124,10 +2116,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "mint", signature: "function mint(address _to, uint256 _amount)", selector: "0x40c10f19" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ERC3643OperationsFacetTimeTravel__factory(signer)
-        : new ERC3643OperationsFacet__factory(signer),
+    factory: (signer) => new ERC3643OperationsFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new ERC3643OperationsFacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
 
   ERC3643ReadFacet: {
@@ -2153,8 +2144,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "onchainID", signature: "function onchainID() view returns (address)", selector: "0xaba63705" },
       { name: "version", signature: "function version() view returns (string)", selector: "0x54fd4d50" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new ERC3643ReadFacetTimeTravel__factory(signer) : new ERC3643ReadFacet__factory(signer),
+    factory: (signer) => new ERC3643ReadFacet__factory(signer),
+    timeTravelFactory: (signer) => new ERC3643ReadFacetTimeTravel__factory(signer),
   },
 
   ExternalControlListManagementFacet: {
@@ -2203,38 +2194,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0ba2b922",
       },
     ],
-    events: [
-      {
-        name: "AddedToExternalControlLists",
-        signature: "AddedToExternalControlLists(address,address)",
-        topic0: "0x3d65de474cd161ee7f82f178e1edc66856cbd5f71f6fb8da9149d8c4b8af24cb",
-      },
-      {
-        name: "ExternalControlListsUpdated",
-        signature: "ExternalControlListsUpdated(address,address[],bool[])",
-        topic0: "0xf33492ee91b93cacfde1a1273fb2fe62ca266ca3e8abd548ea55c38559e0d27d",
-      },
-      {
-        name: "RemovedFromExternalControlLists",
-        signature: "RemovedFromExternalControlLists(address,address)",
-        topic0: "0xe4058444c388a9cf0c802f605695e3600e235e37a4af77aab2bb582e214e453d",
-      },
-    ],
-    errors: [
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
-      {
-        name: "ExternalControlListsNotUpdated",
-        signature: "ExternalControlListsNotUpdated(address[],bool[])",
-        selector: "0xbd29da3f",
-      },
-      { name: "ListedControlList", signature: "ListedControlList(address)", selector: "0x67a1e319" },
-      { name: "UnlistedControlList", signature: "UnlistedControlList(address)", selector: "0x6b4e1917" },
-      { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ExternalControlListManagementFacetTimeTravel__factory(signer)
-        : new ExternalControlListManagementFacet__factory(signer),
+    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    factory: (signer) => new ExternalControlListManagementFacet__factory(signer),
+    timeTravelFactory: (signer) => new ExternalControlListManagementFacetTimeTravel__factory(signer),
   },
 
   ExternalKycListManagementFacet: {
@@ -2305,6 +2267,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "ExternalKycListsNotUpdated",
@@ -2314,10 +2277,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "ListedKycList", signature: "ListedKycList(address)", selector: "0x91c6b79d" },
       { name: "UnlistedKycList", signature: "UnlistedKycList(address)", selector: "0xf5cc4d79" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ExternalKycListManagementFacetTimeTravel__factory(signer)
-        : new ExternalKycListManagementFacet__factory(signer),
+    factory: (signer) => new ExternalKycListManagementFacet__factory(signer),
+    timeTravelFactory: (signer) => new ExternalKycListManagementFacetTimeTravel__factory(signer),
   },
 
   ExternalPauseManagementFacet: {
@@ -2383,6 +2344,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "ExternalPausesNotUpdated",
@@ -2392,10 +2354,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "ListedPause", signature: "ListedPause(address)", selector: "0x267b9ec9" },
       { name: "UnlistedPause", signature: "UnlistedPause(address)", selector: "0x3281637c" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ExternalPauseManagementFacetTimeTravel__factory(signer)
-        : new ExternalPauseManagementFacet__factory(signer),
+    factory: (signer) => new ExternalPauseManagementFacet__factory(signer),
+    timeTravelFactory: (signer) => new ExternalPauseManagementFacetTimeTravel__factory(signer),
   },
 
   FixedRateFacet: {
@@ -2429,9 +2389,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xa7fd66e9450da5029fb2dfd59586274386eb4c169bfc873e265aa29d3df59424",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new FixedRateFacetTimeTravel__factory(signer) : new FixedRateFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+    ],
+    factory: (signer) => new FixedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new FixedRateFacetTimeTravel__factory(signer),
   },
 
   FreezeFacet: {
@@ -2500,8 +2463,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new FreezeFacetTimeTravel__factory(signer) : new FreezeFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) => new FreezeFacet__factory(signer),
+    timeTravelFactory: (signer) => new FreezeFacetTimeTravel__factory(signer),
   },
 
   HoldManagementFacet: {
@@ -2533,23 +2499,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "ControllerHeldByPartition",
-        signature: "ControllerHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0xf6f3741306d730c309f18e6262f05de4790259d916f67334766f2f71dbf00b11",
-      },
-      {
-        name: "OperatorHeldByPartition",
-        signature: "OperatorHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0xecb0a532842468318362280a5b81ec910b4d495202a817fc545fd2b7628559e4",
-      },
-      {
-        name: "ProtectedHeldByPartition",
-        signature: "ProtectedHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
+        name: "on",
+        signature: "on(bytes32,address,Hold,bytes)",
+        topic0: "0xd870e45eb1ba04173c1d2416f69cb8e771b45eb6dc760ea82a594d1d017612eb",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new HoldManagementFacetTimeTravel__factory(signer) : new HoldManagementFacet__factory(signer),
+    factory: (signer) => new HoldManagementFacet__factory(signer),
+    timeTravelFactory: (signer) => new HoldManagementFacetTimeTravel__factory(signer),
   },
 
   HoldReadFacet: {
@@ -2596,8 +2552,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xeb89899d",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new HoldReadFacetTimeTravel__factory(signer) : new HoldReadFacet__factory(signer),
+    factory: (signer) => new HoldReadFacet__factory(signer),
+    timeTravelFactory: (signer) => new HoldReadFacetTimeTravel__factory(signer),
   },
 
   HoldTokenHolderFacet: {
@@ -2639,35 +2595,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf8bafc1c",
       },
     ],
-    events: [
-      {
-        name: "HeldByPartition",
-        signature: "HeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0x8aaecda291be1880bb8f1b74d739076b63e172f3758535440d4781002a135663",
-      },
-      {
-        name: "HeldFromByPartition",
-        signature: "HeldFromByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0x89e7674560e6cad671bf2d392a62a88b25b960e62476504e038081c3aabe7ece",
-      },
-      {
-        name: "HoldByPartitionExecuted",
-        signature: "HoldByPartitionExecuted(address,bytes32,uint256,uint256,address)",
-        topic0: "0x4fb20409d1b2a56fa4c5b29c11d9b1e148649db67860c5648a8a86f35edf8582",
-      },
-      {
-        name: "HoldByPartitionReclaimed",
-        signature: "HoldByPartitionReclaimed(address,address,bytes32,uint256,uint256)",
-        topic0: "0xee0ec155026031ca64823d8fbf00832ff3f96c7da0994432ddc1a32c72022a09",
-      },
-      {
-        name: "HoldByPartitionReleased",
-        signature: "HoldByPartitionReleased(address,bytes32,uint256,uint256)",
-        topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
-      },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new HoldTokenHolderFacetTimeTravel__factory(signer) : new HoldTokenHolderFacet__factory(signer),
+    factory: (signer) => new HoldTokenHolderFacet__factory(signer),
+    timeTravelFactory: (signer) => new HoldTokenHolderFacetTimeTravel__factory(signer),
   },
 
   KpiLinkedRateFacet: {
@@ -2722,12 +2651,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "WrongImpactDataValues", signature: "WrongImpactDataValues(ImpactData)", selector: "0xb90540b6" },
       { name: "WrongInterestRateValues", signature: "WrongInterestRateValues(InterestRate)", selector: "0xf2973d16" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new KpiLinkedRateFacetTimeTravel__factory(signer) : new KpiLinkedRateFacet__factory(signer),
+    factory: (signer) => new KpiLinkedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new KpiLinkedRateFacetTimeTravel__factory(signer),
   },
 
   KpisKpiLinkedRateFacet: {
@@ -2772,10 +2702,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "InvalidDateRange", signature: "InvalidDateRange(uint256,uint256)", selector: "0x8914d40b" },
       { name: "KpiDataAlreadyExists", signature: "KpiDataAlreadyExists(uint256)", selector: "0x74efd82c" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new KpisKpiLinkedRateFacetTimeTravel__factory(signer)
-        : new KpisKpiLinkedRateFacet__factory(signer),
+    factory: (signer) => new KpisKpiLinkedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new KpisKpiLinkedRateFacetTimeTravel__factory(signer),
   },
 
   KpisSustainabilityPerformanceTargetRateFacet: {
@@ -2820,10 +2748,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "InvalidDateRange", signature: "InvalidDateRange(uint256,uint256)", selector: "0x8914d40b" },
       { name: "KpiDataAlreadyExists", signature: "KpiDataAlreadyExists(uint256)", selector: "0x74efd82c" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
-        : new KpisSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) => new KpisSustainabilityPerformanceTargetRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new KpisSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
   KycFacet: {
@@ -2906,14 +2832,15 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "InvalidDates", signature: "InvalidDates()", selector: "0xd937486c" },
       { name: "InvalidKycStatus", signature: "InvalidKycStatus()", selector: "0xfc855b1b" },
       { name: "InvalidZeroAddress", signature: "InvalidZeroAddress()", selector: "0xf6b2911f" },
       { name: "KycIsNotGranted", signature: "KycIsNotGranted()", selector: "0xd5209e15" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new KycFacetTimeTravel__factory(signer) : new KycFacet__factory(signer),
+    factory: (signer) => new KycFacet__factory(signer),
+    timeTravelFactory: (signer) => new KycFacetTimeTravel__factory(signer),
   },
 
   LockFacet: {
@@ -2924,6 +2851,18 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     },
     inheritance: ["Lock", "IStaticFunctionSelectors"],
     methods: [
+      {
+        name: "forceReleaseByPartition",
+        signature:
+          "function forceReleaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) returns (bool success_)",
+        selector: "0x7087bb3f",
+      },
+      {
+        name: "getLockByPartition",
+        signature:
+          "function getLockByPartition(bytes32 _partition, uint256 _lockId) view returns ((uint256 id, uint256 amount, uint256 expirationTimestamp) lockData_)",
+        selector: "0x401f8a4a",
+      },
       {
         name: "getLockCountFor",
         signature: "function getLockCountFor(address _tokenHolder) view returns (uint256 lockCount_)",
@@ -3006,8 +2945,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new LockFacetTimeTravel__factory(signer) : new LockFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) => new LockFacet__factory(signer),
+    timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
   },
 
   NoncesFacet: {
@@ -3020,8 +2962,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     methods: [
       { name: "nonces", signature: "function nonces(address owner) view returns (uint256)", selector: "0x7ecebe00" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new NoncesFacetTimeTravel__factory(signer) : new NoncesFacet__factory(signer),
+    factory: (signer) => new NoncesFacet__factory(signer),
+    timeTravelFactory: (signer) => new NoncesFacetTimeTravel__factory(signer),
   },
 
   PauseFacet: {
@@ -3036,8 +2978,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
       { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new PauseFacetTimeTravel__factory(signer) : new PauseFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) => new PauseFacet__factory(signer),
+    timeTravelFactory: (signer) => new PauseFacetTimeTravel__factory(signer),
   },
 
   ProceedRecipientsFacet: {
@@ -3108,6 +3053,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "ProceedRecipientAlreadyExists",
@@ -3116,10 +3062,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "ProceedRecipientNotFound", signature: "ProceedRecipientNotFound(address)", selector: "0x664dc89c" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ProceedRecipientsFacetTimeTravel__factory(signer)
-        : new ProceedRecipientsFacet__factory(signer),
+    factory: (signer) => new ProceedRecipientsFacet__factory(signer),
+    timeTravelFactory: (signer) => new ProceedRecipientsFacetTimeTravel__factory(signer),
   },
 
   ProceedRecipientsKpiLinkedRateFacet: {
@@ -3190,6 +3134,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "ProceedRecipientAlreadyExists",
@@ -3198,10 +3143,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "ProceedRecipientNotFound", signature: "ProceedRecipientNotFound(address)", selector: "0x664dc89c" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory(signer)
-        : new ProceedRecipientsKpiLinkedRateFacet__factory(signer),
+    factory: (signer) => new ProceedRecipientsKpiLinkedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new ProceedRecipientsKpiLinkedRateFacetTimeTravel__factory(signer),
   },
 
   ProceedRecipientsSustainabilityPerformanceTargetRateFacet: {
@@ -3272,6 +3215,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "ProceedRecipientAlreadyExists",
@@ -3280,10 +3224,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "ProceedRecipientNotFound", signature: "ProceedRecipientNotFound(address)", selector: "0x664dc89c" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
-        : new ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) => new ProceedRecipientsSustainabilityPerformanceTargetRateFacet__factory(signer),
+    timeTravelFactory: (signer) =>
+      new ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
   ProtectedPartitionsFacet: {
@@ -3321,10 +3264,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ProtectedPartitionsFacetTimeTravel__factory(signer)
-        : new ProtectedPartitionsFacet__factory(signer),
+    factory: (signer) => new ProtectedPartitionsFacet__factory(signer),
+    timeTravelFactory: (signer) => new ProtectedPartitionsFacetTimeTravel__factory(signer),
   },
 
   ScheduledBalanceAdjustmentsFacet: {
@@ -3347,10 +3288,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x2de241e3",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ScheduledBalanceAdjustmentsFacetTimeTravel__factory(signer)
-        : new ScheduledBalanceAdjustmentsFacet__factory(signer),
+    factory: (signer) => new ScheduledBalanceAdjustmentsFacet__factory(signer),
+    timeTravelFactory: (signer) => new ScheduledBalanceAdjustmentsFacetTimeTravel__factory(signer),
   },
 
   ScheduledCouponListingFacet: {
@@ -3373,10 +3312,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x80a84271",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ScheduledCouponListingFacetTimeTravel__factory(signer)
-        : new ScheduledCouponListingFacet__factory(signer),
+    factory: (signer) => new ScheduledCouponListingFacet__factory(signer),
+    timeTravelFactory: (signer) => new ScheduledCouponListingFacetTimeTravel__factory(signer),
   },
 
   ScheduledCrossOrderedTasksFacet: {
@@ -3409,10 +3346,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5be4a143",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ScheduledCrossOrderedTasksFacetTimeTravel__factory(signer)
-        : new ScheduledCrossOrderedTasksFacet__factory(signer),
+    factory: (signer) => new ScheduledCrossOrderedTasksFacet__factory(signer),
+    timeTravelFactory: (signer) => new ScheduledCrossOrderedTasksFacetTimeTravel__factory(signer),
   },
 
   ScheduledCrossOrderedTasksKpiLinkedRateFacet: {
@@ -3445,10 +3380,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5be4a143",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory(signer)
-        : new ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory(signer),
+    factory: (signer) => new ScheduledCrossOrderedTasksKpiLinkedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel__factory(signer),
   },
 
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet: {
@@ -3480,10 +3413,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5be4a143",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
-        : new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory(signer),
+    factory: (signer) => new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacet__factory(signer),
+    timeTravelFactory: (signer) =>
+      new ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
   ScheduledSnapshotsFacet: {
@@ -3506,10 +3438,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xa19e91fe",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new ScheduledSnapshotsFacetTimeTravel__factory(signer)
-        : new ScheduledSnapshotsFacet__factory(signer),
+    factory: (signer) => new ScheduledSnapshotsFacet__factory(signer),
+    timeTravelFactory: (signer) => new ScheduledSnapshotsFacetTimeTravel__factory(signer),
   },
 
   SnapshotsFacet: {
@@ -3625,8 +3555,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9657ddb9",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new SnapshotsFacetTimeTravel__factory(signer) : new SnapshotsFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) => new SnapshotsFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   SsiManagementFacet: {
@@ -3688,12 +3621,13 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AccountIsNotIssuer", signature: "AccountIsNotIssuer(address)", selector: "0xcd324f53" },
       { name: "ListedIssuer", signature: "ListedIssuer(address)", selector: "0xcb2beece" },
       { name: "UnlistedIssuer", signature: "UnlistedIssuer(address)", selector: "0xd1243a92" },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new SsiManagementFacetTimeTravel__factory(signer) : new SsiManagementFacet__factory(signer),
+    factory: (signer) => new SsiManagementFacet__factory(signer),
+    timeTravelFactory: (signer) => new SsiManagementFacetTimeTravel__factory(signer),
   },
 
   SustainabilityPerformanceTargetRateFacet: {
@@ -3735,31 +3669,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xd7a0d0e8",
       },
     ],
-    events: [
-      {
-        name: "ImpactDataUpdated",
-        signature: "ImpactDataUpdated(address,ImpactData[],address[])",
-        topic0: "0x8ac5147acc7918904f238d103d9306aaa3208ad0a679f15a37f43e6767a8aa03",
-      },
-      {
-        name: "InterestRateUpdated",
-        signature: "InterestRateUpdated(address,InterestRate)",
-        topic0: "0xed3c060bc037e2b9f05c9d552119ccb2cf7499562ac630370d20178beb1583e7",
-      },
-    ],
-    errors: [
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
-      { name: "NotExistingProject", signature: "NotExistingProject(address)", selector: "0x2f850995" },
-      {
-        name: "ProvidedListsLengthMismatch",
-        signature: "ProvidedListsLengthMismatch(uint256,uint256)",
-        selector: "0x4470462b",
-      },
-    ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new SustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
-        : new SustainabilityPerformanceTargetRateFacet__factory(signer),
+    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    factory: (signer) => new SustainabilityPerformanceTargetRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new SustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 
   TimeTravelFacet: {
@@ -3839,8 +3751,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf29416ed",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new TotalBalanceFacetTimeTravel__factory(signer) : new TotalBalanceFacet__factory(signer),
+    factory: (signer) => new TotalBalanceFacet__factory(getLibLinks("clearingReadOps") as any, signer),
+    timeTravelFactory: (signer) =>
+      new TotalBalanceFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
 
   TransferAndLockFacet: {
@@ -3871,8 +3784,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel ? new TransferAndLockFacetTimeTravel__factory(signer) : new TransferAndLockFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) => new TransferAndLockFacet__factory(signer),
+    timeTravelFactory: (signer) => new TransferAndLockFacetTimeTravel__factory(signer),
   },
 
   TransferAndLockFixedRateFacet: {
@@ -3903,10 +3819,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new TransferAndLockFixedRateFacetTimeTravel__factory(signer)
-        : new TransferAndLockFixedRateFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) => new TransferAndLockFixedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new TransferAndLockFixedRateFacetTimeTravel__factory(signer),
   },
 
   TransferAndLockKpiLinkedRateFacet: {
@@ -3937,10 +3854,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(signer)
-        : new TransferAndLockKpiLinkedRateFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) => new TransferAndLockKpiLinkedRateFacet__factory(signer),
+    timeTravelFactory: (signer) => new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(signer),
   },
 
   TransferAndLockSustainabilityPerformanceTargetRateFacet: {
@@ -3971,10 +3889,12 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    factory: (signer, useTimeTravel = false) =>
-      useTimeTravel
-        ? new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer)
-        : new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(signer),
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
+    factory: (signer) => new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(signer),
+    timeTravelFactory: (signer) =>
+      new TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
 };
 
@@ -4279,6 +4199,7 @@ export const TOTAL_INFRASTRUCTURE_CONTRACTS = 2 as const;
 export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> = {
   AccessControlStorageWrapper: {
     name: "AccessControlStorageWrapper",
+    description: "Use with `using AccessControlStorageWrapper for RoleDataStorage;` or call functions directly",
     methods: [],
   },
 
@@ -4304,6 +4225,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   ControlListStorageWrapper: {
     name: "ControlListStorageWrapper",
+    description: "Call these library functions to manage control list",
     methods: [],
   },
 
@@ -4384,6 +4306,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   IAccessControlStorageWrapper: {
     name: "IAccessControlStorageWrapper",
+    description: "Interface for AccessControlStorageWrapper events and errors",
     methods: [],
     events: [
       {
@@ -4391,6 +4314,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         signature: "RoleAdminChanged(bytes32,bytes32,bytes32)",
         topic0: "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff",
       },
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
     errors: [
       { name: "AccountHasNoRole", signature: "AccountHasNoRole(address,bytes32)", selector: "0xa1180aad" },
@@ -4400,6 +4324,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         signature: "RolesAndActivesLengthMismatch(uint256,uint256)",
         selector: "0x365ff1a4",
       },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
     ],
   },
 
@@ -4640,7 +4565,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         selector: "0xb96d9539",
       },
       { name: "Unauthorized", signature: "Unauthorized(address,address,bytes32)", selector: "0x1e09743f" },
-      { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
       { name: "ZeroPartition", signature: "ZeroPartition()", selector: "0x4a6f30c3" },
       { name: "ZeroValue", signature: "ZeroValue()", selector: "0x7c946ed7" },
     ],
@@ -4875,6 +4799,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   PauseStorageWrapper: {
     name: "PauseStorageWrapper",
+    description: "Use PauseModifiers for modifiers, or call functions directly",
     methods: [],
   },
 

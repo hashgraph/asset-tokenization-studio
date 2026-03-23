@@ -41,7 +41,7 @@ describe("Control List Tests", () => {
   });
 
   it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-    await expect(controlListFacet.initialize_ControlList(true)).to.be.rejectedWith("AlreadyInitialized");
+    await expect(controlListFacet.initializeControlList(true)).to.be.rejectedWith("AlreadyInitialized");
   });
 
   it("GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole", async () => {

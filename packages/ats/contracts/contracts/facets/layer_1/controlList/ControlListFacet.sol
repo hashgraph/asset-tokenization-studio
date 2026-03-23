@@ -14,7 +14,7 @@ contract ControlListFacet is ControlList, IStaticFunctionSelectors {
     function getStaticFunctionSelectors() external pure override returns (bytes4[] memory staticFunctionSelectors_) {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this.initialize_ControlList.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.initializeControlList.selector;
         staticFunctionSelectors_[selectorIndex++] = this.addToControlList.selector;
         staticFunctionSelectors_[selectorIndex++] = this.removeFromControlList.selector;
         staticFunctionSelectors_[selectorIndex++] = this.isInControlList.selector;

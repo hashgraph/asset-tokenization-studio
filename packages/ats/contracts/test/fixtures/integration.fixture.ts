@@ -16,6 +16,30 @@ import { BusinessLogicResolver__factory } from "@contract-types";
 import type { BusinessLogicResolver } from "@contract-types";
 import { deployContract, deployProxy, registerFacets } from "@scripts/infrastructure";
 import { atsRegistry } from "@scripts/domain";
+import {
+  deployOrchestratorLibraries,
+  getFacetLibraryLinks,
+  LIBRARY_DEPENDENT_FACETS,
+  type OrchestratorLibraryAddresses,
+} from "@scripts/domain";
+import type { Signer } from "ethers";
+
+/**
+ * Cached orchestrator library addresses for test fixtures.
+ * Deployed once and reused across fixtures.
+ */
+let _cachedLibraryAddresses: OrchestratorLibraryAddresses | null = null;
+
+/**
+ * Deploy and cache orchestrator libraries for tests.
+ * Libraries are deployed once per test session and reused.
+ */
+async function getOrDeployLibraries(signer: Signer): Promise<OrchestratorLibraryAddresses> {
+  if (!_cachedLibraryAddresses) {
+    _cachedLibraryAddresses = await deployOrchestratorLibraries(signer);
+  }
+  return _cachedLibraryAddresses;
+}
 
 /**
  * Deploy and initialize BLR
@@ -103,9 +127,16 @@ export async function registerERC20FacetFixture() {
   const base = await registerCommonFacetsFixture();
   const { deployer, blr, facetAddresses } = base;
 
-  // Deploy ERC20Facet
-  const erc20Factory = await ethers.getContractFactory("ERC20Facet", deployer);
-  const erc20Result = await deployContract(erc20Factory, {
+  // Deploy orchestrator libraries first (required for ERC20Facet)
+  await getOrDeployLibraries(deployer);
+
+  // Deploy ERC20Facet with library linking - only TokenCoreOps needed
+  const erc20LibraryLinks = getFacetLibraryLinks("ERC20Facet");
+  const erc20Factory = await ethers.getContractFactory("ERC20Facet", {
+    signer: deployer,
+    libraries: erc20LibraryLinks,
+  });
+  const erc20Result = await deployContract(erc20Factory as any, {
     confirmations: 0,
     verifyDeployment: false,
   });

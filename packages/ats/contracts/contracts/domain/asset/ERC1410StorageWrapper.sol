@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 import {
     _ERC1410_BASIC_STORAGE_POSITION,
@@ -694,7 +695,7 @@ library ERC1410StorageWrapper {
     }
 
     function requireValidAddress(address account) internal pure {
-        if (account == address(0)) revert IERC1410StorageWrapper.ZeroAddressNotAllowed();
+        AddressValidation.checkZeroAddress(account);
     }
 
     function erc1410BasicStorage() internal pure returns (ERC1410BasicStorage storage erc1410BasicStorage_) {

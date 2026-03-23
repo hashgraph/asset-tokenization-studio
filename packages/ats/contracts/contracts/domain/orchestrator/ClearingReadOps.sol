@@ -2,115 +2,147 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
+import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
 import { IClearingTransfer } from "../../facets/layer_1/clearing/IClearingTransfer.sol";
 import { IClearingRedeem } from "../../facets/layer_1/clearing/IClearingRedeem.sol";
 import { IClearingHoldCreation } from "../../facets/layer_1/clearing/IClearingHoldCreation.sol";
 
-/// @title ClearingReadOps - Orchestrator for clearing read and preparation operations
-/// @notice Deployed once as a separate contract. Facets call via DELEGATECALL, keeping
-/// facet bytecode thin. ClearingStorageWrapper `internal` functions are inlined here,
-/// not in facets.
+/// @title ClearingReadOps
+/// @notice Clearing read operations library - deployed once and called via DELEGATECALL
+/// @dev Contains read-only clearing operations with ABAF adjustments
 library ClearingReadOps {
-    // ============================================================================
-    // Public functions — Clearing Preparation (deployed, called via DELEGATECALL)
-    // ============================================================================
+    // ==========================================================================
+    // ERRORS
+    // ==========================================================================
 
-    /// @notice Prepare clearing operation — ABAF sync + snapshots before state changes
-    function beforeClearingOperation(
-        IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
-        address _to
-    ) public {
-        ClearingStorageWrapper.beforeClearingOperation(_clearingOperationIdentifier, _to);
-    }
+    error WrongExpirationTimestamp();
 
-    // ============================================================================
-    // Public functions — Adjusted Read Operations
-    // ============================================================================
+    // ==========================================================================
+    // CLEARING READ OPERATIONS (ABAF-adjusted)
+    // ==========================================================================
 
     /// @notice Get cleared amount for token holder adjusted at timestamp
+    /// @dev Uses ABAF factor to adjust the cleared amount for balance adjustments
     function getClearedAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) public view returns (uint256) {
-        return ClearingStorageWrapper.getClearedAmountForAdjustedAt(_tokenHolder, _timestamp);
+        uint256 clearedAmount = ClearingStorageWrapper.getClearedAmountFor(_tokenHolder);
+        uint256 factor = AdjustBalancesStorageWrapper.calculateFactorForClearedAmountByTokenHolderAdjustedAt(
+            _tokenHolder,
+            _timestamp
+        );
+        return clearedAmount * factor;
     }
 
     /// @notice Get cleared amount by partition adjusted at timestamp
+    /// @dev Uses ABAF factor to adjust the cleared amount for balance adjustments
     function getClearedAmountForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _timestamp
     ) public view returns (uint256) {
-        return ClearingStorageWrapper.getClearedAmountForByPartitionAdjustedAt(_partition, _tokenHolder, _timestamp);
+        uint256 clearedAmount = ClearingStorageWrapper.getClearedAmountForByPartition(_partition, _tokenHolder);
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp);
+        uint256 labaf = AdjustBalancesStorageWrapper.getTotalClearedLabafByPartition(_partition, _tokenHolder);
+        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
+        return clearedAmount * factor;
     }
 
-    /// @notice Get clearing transfer data adjusted at timestamp
+    /// @notice Get clearing transfer data by partition adjusted at timestamp
+    /// @dev Returns transfer data with ABAF-adjusted amount
     function getClearingTransferForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId,
         uint256 _timestamp
     ) public view returns (IClearingTransfer.ClearingTransferData memory clearingTransferData_) {
-        return
-            ClearingStorageWrapper.getClearingTransferForByPartitionAdjustedAt(
-                _partition,
-                _tokenHolder,
-                _clearingId,
-                _timestamp
-            );
+        clearingTransferData_ = ClearingStorageWrapper.getClearingTransferForByPartition(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
+
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp);
+        IClearing.ClearingOperationIdentifier memory clearingId = IClearing.ClearingOperationIdentifier({
+            tokenHolder: _tokenHolder,
+            partition: _partition,
+            clearingId: _clearingId,
+            clearingOperationType: IClearing.ClearingOperationType.Transfer
+        });
+        uint256 labaf = AdjustBalancesStorageWrapper.getClearingLabafById(clearingId);
+        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
+
+        clearingTransferData_.amount *= factor;
     }
 
-    /// @notice Get clearing redeem data adjusted at timestamp
+    /// @notice Get clearing redeem data by partition adjusted at timestamp
+    /// @dev Returns redeem data with ABAF-adjusted amount
     function getClearingRedeemForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId,
         uint256 _timestamp
     ) public view returns (IClearingRedeem.ClearingRedeemData memory clearingRedeemData_) {
-        return
-            ClearingStorageWrapper.getClearingRedeemForByPartitionAdjustedAt(
-                _partition,
-                _tokenHolder,
-                _clearingId,
-                _timestamp
-            );
+        clearingRedeemData_ = ClearingStorageWrapper.getClearingRedeemForByPartition(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
+
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp);
+        IClearing.ClearingOperationIdentifier memory clearingId = IClearing.ClearingOperationIdentifier({
+            tokenHolder: _tokenHolder,
+            partition: _partition,
+            clearingId: _clearingId,
+            clearingOperationType: IClearing.ClearingOperationType.Redeem
+        });
+        uint256 labaf = AdjustBalancesStorageWrapper.getClearingLabafById(clearingId);
+        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
+
+        clearingRedeemData_.amount *= factor;
     }
 
-    /// @notice Get clearing hold creation data adjusted at timestamp
+    /// @notice Get clearing hold creation data by partition adjusted at timestamp
+    /// @dev Returns hold creation data with ABAF-adjusted amount
     function getClearingHoldCreationForByPartitionAdjustedAt(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId,
         uint256 _timestamp
     ) public view returns (IClearingHoldCreation.ClearingHoldCreationData memory clearingHoldCreationData_) {
-        return
-            ClearingStorageWrapper.getClearingHoldCreationForByPartitionAdjustedAt(
-                _partition,
-                _tokenHolder,
-                _clearingId,
-                _timestamp
-            );
+        clearingHoldCreationData_ = ClearingStorageWrapper.getClearingHoldCreationForByPartition(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
+
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbafAdjustedAt(_timestamp);
+        IClearing.ClearingOperationIdentifier memory clearingId = IClearing.ClearingOperationIdentifier({
+            tokenHolder: _tokenHolder,
+            partition: _partition,
+            clearingId: _clearingId,
+            clearingOperationType: IClearing.ClearingOperationType.HoldCreation
+        });
+        uint256 labaf = AdjustBalancesStorageWrapper.getClearingLabafById(clearingId);
+        uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, labaf);
+
+        clearingHoldCreationData_.amount *= factor;
     }
 
-    // ============================================================================
-    // Public functions — Guard / Validation
-    // ============================================================================
+    // ==========================================================================
+    // TIMESTAMP VALIDATION
+    // ==========================================================================
 
-    /// @notice Require valid clearing ID
-    function requireValidClearingId(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) public view {
-        ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
-    }
-
-    /// @notice Require clearing feature is activated
-    function requireClearingActivated() public view {
-        ClearingStorageWrapper.requireClearingActivated();
-    }
-
-    /// @notice Require clearing operation expiration timestamp meets condition
-    function requireExpirationTimestamp(
+    /// @notice Check clearing operation expiration timestamp
+    function checkClearingExpirationTimestamp(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
-        bool _mustBeExpired
+        bool _mustBeExpired,
+        uint256 /* _blockTimestamp */
     ) public view {
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, _mustBeExpired);
+    }
+
+    /// @notice Validate that a clearing expiration timestamp is in the future
+    function checkClearingValidExpirationTimestamp(uint256 _expirationTimestamp, uint256 _blockTimestamp) public pure {
+        if (_expirationTimestamp < _blockTimestamp) revert WrongExpirationTimestamp();
     }
 }

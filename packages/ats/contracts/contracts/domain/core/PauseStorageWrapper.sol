@@ -15,25 +15,34 @@ struct PauseDataStorage {
     bool paused;
 }
 
-abstract contract PauseStorageWrapper {
+/**
+ * @title PauseStorageWrapper
+ * @dev Library providing pause storage operations with Diamond Storage Pattern
+ *
+ * This library uses ERC-2535 Diamond Storage Pattern to store pause data in a specific storage slot.
+ * It provides storage operations, read functions, and state checks for pause functionality.
+ *
+ * @notice Use PauseModifiers for modifiers, or call functions directly
+ * @author Asset Tokenization Studio Team
+ */
+library PauseStorageWrapper {
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    // --- Modifiers ---
+    // --- Storage accessor (pure) ---
 
-    modifier onlyUnpaused() {
-        _requireNotPaused();
-        _;
-    }
-
-    modifier onlyPaused() {
-        _requirePaused();
-        _;
+    function pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
+        bytes32 position = _PAUSE_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            pause_.slot := position
+        }
     }
 
     // --- State-changing functions ---
 
-    function _setPause(bool _paused) internal {
-        _pauseStorage().paused = _paused;
+    // solhint-disable-next-line ordering
+    function setPause(bool _paused) internal {
+        pauseStorage().paused = _paused;
         if (_paused) {
             emit IPauseStorageWrapper.TokenPaused(msg.sender);
             return;
@@ -42,7 +51,7 @@ abstract contract PauseStorageWrapper {
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ExternalPauses(address[] calldata _pauses) internal {
+    function initialize_ExternalPauses(address[] calldata _pauses) internal {
         uint256 length = _pauses.length;
         for (uint256 index; index < length; ) {
             ExternalListManagementStorageWrapper.checkValidAddress(_pauses[index]);
@@ -56,23 +65,12 @@ abstract contract PauseStorageWrapper {
 
     // --- Read functions ---
 
-    function _isPaused() internal view returns (bool) {
-        return _pauseStorage().paused || _isExternallyPaused();
+    // solhint-disable-next-line ordering
+    function isPaused() internal view returns (bool) {
+        return pauseStorage().paused || isExternallyPaused();
     }
 
-    function _requireNotPaused() internal view {
-        if (_isPaused()) {
-            revert IPauseStorageWrapper.TokenIsPaused();
-        }
-    }
-
-    function _requirePaused() internal view {
-        if (!_isPaused()) {
-            revert IPauseStorageWrapper.TokenIsUnpaused();
-        }
-    }
-
-    function _isExternallyPaused() internal view returns (bool) {
+    function isExternallyPaused() internal view returns (bool) {
         ExternalListDataStorage storage externalPauseDataStorage = ExternalListManagementStorageWrapper
             .externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION);
         uint256 length = ExternalListManagementStorageWrapper.getExternalListsCount(_PAUSE_MANAGEMENT_STORAGE_POSITION);
@@ -85,17 +83,7 @@ abstract contract PauseStorageWrapper {
         return false;
     }
 
-    function _isExternalPauseInitialized() internal view returns (bool) {
+    function isExternalPauseInitialized() internal view returns (bool) {
         return ExternalListManagementStorageWrapper.externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized;
-    }
-
-    // --- Storage accessor (pure) ---
-
-    function _pauseStorage() internal pure returns (PauseDataStorage storage pause_) {
-        bytes32 position = _PAUSE_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            pause_.slot := position
-        }
     }
 }

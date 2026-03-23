@@ -8,14 +8,15 @@ import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
-abstract contract ERC1410Management is IERC1410Management, PauseStorageWrapper {
+abstract contract ERC1410Management is IERC1410Management, AccessControlModifiers, PauseModifiers {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -34,12 +35,10 @@ abstract contract ERC1410Management is IERC1410Management, PauseStorageWrapper {
     ) external override onlyUnpaused returns (bytes32) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         ERC1644StorageWrapper.requireControllable();
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
-        }
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _CONTROLLER_ROLE;
+        roles[1] = _AGENT_ROLE;
+        AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         return
             TokenCoreOps.transferByPartition(
                 _from,
@@ -60,12 +59,10 @@ abstract contract ERC1410Management is IERC1410Management, PauseStorageWrapper {
     ) external override onlyUnpaused {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         ERC1644StorageWrapper.requireControllable();
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _CONTROLLER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
-        }
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _CONTROLLER_ROLE;
+        roles[1] = _AGENT_ROLE;
+        AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         TokenCoreOps.redeemByPartition(_partition, _tokenHolder, msg.sender, _value, _data, _operatorData);
     }
 
@@ -105,11 +102,12 @@ abstract contract ERC1410Management is IERC1410Management, PauseStorageWrapper {
         address _to,
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) external override returns (bytes32) {
-        AccessControlStorageWrapper.checkRole(
-            ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
-            msg.sender
-        );
+    )
+        external
+        override
+        onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
+        returns (bytes32)
+    {
         ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(_from, _to, _partition, _amount);
         return TokenCoreOps.protectedTransferFromByPartition(_partition, _from, _to, _amount, _protectionData);
@@ -120,11 +118,7 @@ abstract contract ERC1410Management is IERC1410Management, PauseStorageWrapper {
         address _from,
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) external override {
-        AccessControlStorageWrapper.checkRole(
-            ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition),
-            msg.sender
-        );
+    ) external override onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition)) {
         ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(_from, _partition, _amount);
         TokenCoreOps.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);

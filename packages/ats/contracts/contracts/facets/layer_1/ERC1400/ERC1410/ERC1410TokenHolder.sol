@@ -4,17 +4,19 @@ pragma solidity >=0.8.0 <0.9.0;
 import { BasicTransferInfo } from "./IERC1410.sol";
 import { IERC1410TokenHolder } from "./IERC1410TokenHolder.sol";
 import { _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
+
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
-abstract contract ERC1410TokenHolder is IERC1410TokenHolder, PauseStorageWrapper {
+abstract contract ERC1410TokenHolder is IERC1410TokenHolder, PauseModifiers {
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,

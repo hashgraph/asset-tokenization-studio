@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { AddressValidation } from "../../infrastructure/utils/AddressValidation.sol";
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
@@ -20,8 +21,10 @@ import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IControlListStorageWrapper } from "../core/controlList/IControlListStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
 import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
-import { AccessControlStorageWrapper } from "../core/AccessControlStorageWrapper.sol";
+
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
+import { _ACCESS_CONTROL_STORAGE_POSITION, RoleDataStorage } from "../core/AccessControlStorageWrapper.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 struct ERC1594Storage {
     bool issuance;
@@ -126,11 +129,7 @@ library ERC1594StorageWrapper {
             );
         }
 
-        bool checkSender = from != msg.sender &&
-            !AccessControlStorageWrapper.hasRole(
-                ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition),
-                msg.sender
-            );
+        bool checkSender = from != msg.sender && !checkSenderHasProtectedPartitionRole(partition);
 
         (isAbleToRedeemFrom, statusCode, reasonCode, details) = isCompliant(from, address(0), value, checkSender);
         if (!isAbleToRedeemFrom) {
@@ -187,16 +186,12 @@ library ERC1594StorageWrapper {
             return (
                 false,
                 Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-                IERC1410StorageWrapper.ZeroAddressNotAllowed.selector,
+                AddressValidation.ZeroAddressNotAllowed.selector,
                 EMPTY_BYTES
             );
         }
 
-        bool checkSender = from != msg.sender &&
-            !AccessControlStorageWrapper.hasRole(
-                ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition),
-                msg.sender
-            );
+        bool checkSender = from != msg.sender && !checkSenderHasProtectedPartitionRole(partition);
 
         (isAbleToTransfer, statusCode, reasonCode, details) = isCompliant(from, to, value, checkSender);
         if (!isAbleToTransfer) {
@@ -246,6 +241,16 @@ library ERC1594StorageWrapper {
         }
 
         return (true, Eip1066.SUCCESS, bytes32(0), EMPTY_BYTES);
+    }
+    function checkSenderHasProtectedPartitionRole(bytes32 partition) private view returns (bool hasRole_) {
+        bytes32 role = ProtectedPartitionsStorageWrapper.protectedPartitionsRole(partition);
+        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
+        RoleDataStorage storage roleDataStorage;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            roleDataStorage.slot := position
+        }
+        hasRole_ = EnumerableSet.contains(roleDataStorage.roles[role].roleMembers, msg.sender);
     }
 
     function isCompliant(

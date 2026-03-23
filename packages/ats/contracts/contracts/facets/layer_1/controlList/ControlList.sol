@@ -4,20 +4,21 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IControlList } from "./IControlList.sol";
 import { _CONTROL_LIST_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ControlListStorageWrapper } from "../../../domain/core/ControlListStorageWrapper.sol";
-
-abstract contract ControlList is IControlList, PauseStorageWrapper {
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+abstract contract ControlList is IControlList, PauseModifiers, AccessControlModifiers {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ControlList(bool _isWhiteList) external override {
+    function initializeControlList(bool _isWhiteList) external override {
         if (ControlListStorageWrapper.isControlListInitialized()) revert AlreadyInitialized();
-        ControlListStorageWrapper.initialize_ControlList(_isWhiteList);
+        ControlListStorageWrapper.initializeControlList(_isWhiteList);
     }
 
-    function addToControlList(address _account) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_ROLE, msg.sender);
+    function addToControlList(
+        address _account
+    ) external override onlyUnpaused onlyRole(_CONTROL_LIST_ROLE) returns (bool success_) {
         success_ = ControlListStorageWrapper.addToControlList(_account);
         if (!success_) {
             revert ListedAccount(_account);
@@ -25,8 +26,9 @@ abstract contract ControlList is IControlList, PauseStorageWrapper {
         emit AddedToControlList(msg.sender, _account);
     }
 
-    function removeFromControlList(address _account) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_CONTROL_LIST_ROLE, msg.sender);
+    function removeFromControlList(
+        address _account
+    ) external override onlyUnpaused onlyRole(_CONTROL_LIST_ROLE) returns (bool success_) {
         success_ = ControlListStorageWrapper.removeFromControlList(_account);
         if (!success_) {
             revert UnlistedAccount(_account);

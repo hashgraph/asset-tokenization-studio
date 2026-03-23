@@ -179,6 +179,18 @@ export interface DeploymentCheckpoint {
      */
     facets?: Map<string, DeployedContract>;
 
+    /**
+     * Orchestrator libraries deployment (step 2.5)
+     * Required for library-dependent facets like ERC1410IssuerFacet
+     */
+    libraries?: {
+      tokenCoreOps: string;
+      holdOps: string;
+      clearingOps: string;
+      clearingReadOps: string;
+      deployedAt: string;
+    };
+
     /** Facets registered in BLR (step 3) */
     facetsRegistered?: boolean;
 

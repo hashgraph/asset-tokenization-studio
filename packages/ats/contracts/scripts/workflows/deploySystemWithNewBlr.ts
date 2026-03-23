@@ -51,6 +51,8 @@ import {
   createBondFixedRateConfiguration,
   createBondKpiLinkedRateConfiguration,
   createBondSustainabilityPerformanceTargetRateConfiguration,
+  deployOrchestratorLibraries,
+  hasOrchestratorLibraryAddresses,
 } from "@scripts/domain";
 import {
   BusinessLogicResolver__factory,
@@ -297,6 +299,14 @@ export async function deploySystemWithNewBlr(
       throw new Error(createTestFailureMessage("step", "blr"));
     }
 
+    // Step 2a: Deploy orchestrator libraries (required for facet factory linking)
+    if (!hasOrchestratorLibraryAddresses()) {
+      info("\n📚 Deploying orchestrator libraries (required for facet linking)...");
+      await deployOrchestratorLibraries(signer);
+    } else {
+      info("\n✓ Orchestrator library addresses already set");
+    }
+
     // Step 2: Deploy all facets (with incremental checkpoint saves)
     let facetsResult: Awaited<ReturnType<typeof deployFacets>>;
 
@@ -339,14 +349,19 @@ export async function deploySystemWithNewBlr(
       }
 
       // Create factories from registry
+      // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
+      // Skip facets without factories (abstract contracts like LockFacet)
       const facetFactories: Record<string, ContractFactory> = {};
       for (const facet of allFacets) {
-        if (!facet.factory) {
-          throw new Error(`No factory found for facet: ${facet.name}`);
+        // Select factory: TimeTravel variant when available and enabled, else production
+        const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
+
+        if (!selectedFactory) {
+          info(`   Skipping ${facet.name} (abstract contract, no factory)`);
+          continue;
         }
 
-        // Get factory (regular or TimeTravel variant based on useTimeTravel flag)
-        const factory = facet.factory(signer, useTimeTravel);
+        const factory = selectedFactory(signer) as ContractFactory;
         // Use the actual contract name from the factory
         const contractName = factory.constructor.name.replace("__factory", "");
 
@@ -436,27 +451,31 @@ export async function deploySystemWithNewBlr(
     } else {
       info(`\n📝 Step 4/${totalSteps}: Registering facets in BLR...`);
 
-      // Prepare facets with resolver keys from registry (synchronous - no RPC calls needed)
-      const facetsToRegister = Array.from(facetsResult.deployed.entries()).map(([facetName, deploymentResult]) => {
-        if (!deploymentResult.address) {
-          throw new Error(`No address for facet: ${facetName}`);
-        }
+      // Prepare facets with resolver keys from registry
+      const facetsToRegister = await Promise.all(
+        Array.from(facetsResult.deployed.entries()).map(async ([facetName, deploymentResult]) => {
+          if (!deploymentResult.address) {
+            throw new Error(`No address for facet: ${facetName}`);
+          }
 
-        // Strip "TimeTravel" suffix to get canonical name
-        const baseName = facetName.replace(/TimeTravel$/, "");
+          // Strip "TimeTravel" suffix to get canonical name
+          const baseName = facetName.replace(/TimeTravel$/, "");
+          // deploymentResult.address
+          const staticSelector = IStaticFunctionSelectors__factory.connect(deploymentResult.address, signer);
+          const resolverKey = await staticSelector.getStaticResolverKey();
+          // Look up resolver key from registry
 
-        // Look up resolver key from registry
-        const definition = atsRegistry.getFacetDefinition(baseName);
-        if (!definition || !definition.resolverKey?.value) {
-          throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
-        }
+          if (!resolverKey) {
+            throw new Error(`Facet ${baseName} not found in registry or missing resolver key`);
+          }
 
-        return {
-          name: facetName,
-          address: deploymentResult.address,
-          resolverKey: definition.resolverKey.value,
-        };
-      });
+          return {
+            name: facetName,
+            address: deploymentResult.address,
+            resolverKey: resolverKey,
+          };
+        }),
+      );
 
       const registerResult = await registerFacets(blrContract, {
         facets: facetsToRegister,

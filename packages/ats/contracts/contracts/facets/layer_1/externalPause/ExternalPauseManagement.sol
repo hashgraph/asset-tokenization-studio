@@ -5,24 +5,25 @@ import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
 import { _PAUSE_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseModifiers.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 
-abstract contract ExternalPauseManagement is IExternalPauseManagement, PauseStorageWrapper {
+abstract contract ExternalPauseManagement is IExternalPauseManagement, AccessControlModifiers, PauseModifiers {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ExternalPauses(address[] calldata _pauses) external override {
-        if (_isExternalPauseInitialized()) revert AlreadyInitialized();
-        _initialize_ExternalPauses(_pauses);
+        if (PauseStorageWrapper.isExternalPauseInitialized()) revert AlreadyInitialized();
+        PauseStorageWrapper.initialize_ExternalPauses(_pauses);
     }
 
     function updateExternalPauses(
         address[] calldata _pauses,
         bool[] calldata _actives
-    ) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_PAUSE_MANAGER_ROLE, msg.sender);
+    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) returns (bool success_) {
         ArrayValidation.checkUniqueValues(_pauses, _actives);
         success_ = ExternalListManagementStorageWrapper.updateExternalLists(
             _PAUSE_MANAGEMENT_STORAGE_POSITION,
@@ -35,8 +36,9 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, PauseStor
         emit ExternalPausesUpdated(msg.sender, _pauses, _actives);
     }
 
-    function addExternalPause(address _pause) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_PAUSE_MANAGER_ROLE, msg.sender);
+    function addExternalPause(
+        address _pause
+    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) returns (bool success_) {
         ExternalListManagementStorageWrapper.checkValidAddress(_pause);
         success_ = ExternalListManagementStorageWrapper.addExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
@@ -45,8 +47,9 @@ abstract contract ExternalPauseManagement is IExternalPauseManagement, PauseStor
         emit AddedToExternalPauses(msg.sender, _pause);
     }
 
-    function removeExternalPause(address _pause) external override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_PAUSE_MANAGER_ROLE, msg.sender);
+    function removeExternalPause(
+        address _pause
+    ) external override onlyUnpaused onlyRole(_PAUSE_MANAGER_ROLE) returns (bool success_) {
         success_ = ExternalListManagementStorageWrapper.removeExternalList(_PAUSE_MANAGEMENT_STORAGE_POSITION, _pause);
         if (!success_) {
             revert UnlistedPause(_pause);

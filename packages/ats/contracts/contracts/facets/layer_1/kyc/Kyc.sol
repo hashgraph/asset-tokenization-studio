@@ -4,13 +4,14 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { IKyc } from "./IKyc.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract Kyc is IKyc, TimestampProvider, PauseStorageWrapper {
+abstract contract Kyc is IKyc, AccessControlModifiers, TimestampProvider, PauseModifiers {
     error AlreadyInitialized();
 
     function initializeInternalKyc(bool _internalKycActivated) external {
@@ -18,14 +19,17 @@ abstract contract Kyc is IKyc, TimestampProvider, PauseStorageWrapper {
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
     }
 
-    function activateInternalKyc() external onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_INTERNAL_KYC_MANAGER_ROLE, msg.sender);
+    function activateInternalKyc() external onlyUnpaused onlyRole(_INTERNAL_KYC_MANAGER_ROLE) returns (bool success_) {
         success_ = KycStorageWrapper.setInternalKyc(true);
         emit InternalKycStatusUpdated(msg.sender, true);
     }
 
-    function deactivateInternalKyc() external onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_INTERNAL_KYC_MANAGER_ROLE, msg.sender);
+    function deactivateInternalKyc()
+        external
+        onlyUnpaused
+        onlyRole(_INTERNAL_KYC_MANAGER_ROLE)
+        returns (bool success_)
+    {
         success_ = KycStorageWrapper.setInternalKyc(false);
         emit InternalKycStatusUpdated(msg.sender, false);
     }
@@ -36,8 +40,7 @@ abstract contract Kyc is IKyc, TimestampProvider, PauseStorageWrapper {
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
-    ) external virtual override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_KYC_ROLE, msg.sender);
+    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) returns (bool success_) {
         ERC1410StorageWrapper.requireValidAddress(_account);
         KycStorageWrapper.requireValidKycStatus(KycStatus.NOT_GRANTED, _account);
         KycStorageWrapper.requireValidDates(_validFrom, _validTo, _getBlockTimestamp());
@@ -46,8 +49,9 @@ abstract contract Kyc is IKyc, TimestampProvider, PauseStorageWrapper {
         emit KycGranted(_account, msg.sender);
     }
 
-    function revokeKyc(address _account) external virtual override onlyUnpaused returns (bool success_) {
-        AccessControlStorageWrapper.checkRole(_KYC_ROLE, msg.sender);
+    function revokeKyc(
+        address _account
+    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) returns (bool success_) {
         ERC1410StorageWrapper.requireValidAddress(_account);
         success_ = KycStorageWrapper.revokeKyc(_account);
         emit KycRevoked(_account, msg.sender);

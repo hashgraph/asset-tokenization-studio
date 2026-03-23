@@ -10,6 +10,7 @@ import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 
 struct LockDataStorage {
     mapping(address => uint256) totalLockedAmountByAccount;
@@ -287,6 +288,21 @@ library LockStorageWrapper {
             AdjustBalancesStorageWrapper.getTotalLockLabafByPartition(partition, tokenHolder)
         );
         return getLockedAmountForByPartition(partition, tokenHolder) * factor;
+    }
+
+    function getLockCountFor(address tokenHolder) internal view returns (uint256 lockCount_) {
+        lockCount_ = lockStorage().lockIdsByAccountAndPartition[tokenHolder][_DEFAULT_PARTITION].length();
+    }
+
+    function getLocksIdFor(
+        address tokenHolder,
+        uint256 pageIndex,
+        uint256 pageLength
+    ) internal view returns (uint256[] memory locksId_) {
+        locksId_ = lockStorage().lockIdsByAccountAndPartition[tokenHolder][_DEFAULT_PARTITION].getFromSet(
+            pageIndex,
+            pageLength
+        );
     }
 
     // --- Storage accessor ---

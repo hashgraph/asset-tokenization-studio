@@ -7,7 +7,9 @@ import { IERC1594 } from "./IERC1594.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
+
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
+import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { IPauseStorageWrapper } from "../../../../domain/core/pause/IPauseStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
@@ -18,8 +20,8 @@ import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWr
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
-
-abstract contract ERC1594 is IERC1594, TimestampProvider, PauseStorageWrapper {
+import { ProtectedPartitionRoleValidator } from "../../../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
+abstract contract ERC1594 is IERC1594, TimestampProvider, PauseModifiers, ProtectedPartitionRoleValidator {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -54,12 +56,10 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, PauseStorageWrapper {
         CapStorageWrapper.requireWithinMaxSupply(_value, _getBlockTimestamp());
         ERC1594StorageWrapper.requireIdentified(address(0), _tokenHolder);
         ERC1594StorageWrapper.requireCompliant(address(0), _tokenHolder, false);
-        {
-            bytes32[] memory roles = new bytes32[](2);
-            roles[0] = _ISSUER_ROLE;
-            roles[1] = _AGENT_ROLE;
-            AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
-        }
+        bytes32[] memory roles = new bytes32[](2);
+        roles[0] = _ISSUER_ROLE;
+        roles[1] = _AGENT_ROLE;
+        AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
         ERC1594StorageWrapper.issue(_tokenHolder, _value, _data);
     }
 
@@ -88,7 +88,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, PauseStorageWrapper {
         uint256 _value,
         bytes memory _data
     ) external view override returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
+        if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
         }
         ERC1410StorageWrapper.requireWithoutMultiPartition();
@@ -109,7 +109,7 @@ abstract contract ERC1594 is IERC1594, TimestampProvider, PauseStorageWrapper {
         uint256 _value,
         bytes memory _data
     ) external view returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
+        if (PauseStorageWrapper.isPaused()) {
             return (false, Eip1066.PAUSED, IPauseStorageWrapper.TokenIsPaused.selector);
         }
         ERC1410StorageWrapper.requireWithoutMultiPartition();

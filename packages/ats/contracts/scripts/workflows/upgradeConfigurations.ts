@@ -41,7 +41,13 @@ import {
   saveDeploymentOutput,
   resolveCheckpointForResume,
 } from "@scripts/infrastructure";
-import { atsRegistry, createEquityConfiguration, createBondConfiguration } from "@scripts/domain";
+import {
+  atsRegistry,
+  createEquityConfiguration,
+  createBondConfiguration,
+  deployOrchestratorLibraries,
+  hasOrchestratorLibraryAddresses,
+} from "@scripts/domain";
 import { BusinessLogicResolver__factory } from "@contract-types";
 
 // ============================================================================
@@ -377,6 +383,12 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
     return;
   }
 
+  // Deploy orchestrator libraries first (required for facet factory linking)
+  if (!hasOrchestratorLibraryAddresses()) {
+    info("   Deploying orchestrator libraries (required for facet linking)...");
+    await deployOrchestratorLibraries(signer);
+  }
+
   info("\n📦 Step 1/5: Deploying all facets...");
 
   let allFacets = registry.getAllFacets();
@@ -393,13 +405,18 @@ async function deployFacetsPhase(ctx: UpgradePhaseContext): Promise<void> {
   }
 
   // Create factories from registry
+  // When useTimeTravel=true, deploy TimeTravel variant facets instead of production ones
+  // Skip facets without factories (abstract contracts like LockFacet)
   const facetFactories: Record<string, ContractFactory> = {};
   for (const facet of allFacets) {
-    if (!facet.factory) {
-      throw new Error(`No factory found for facet: ${facet.name}`);
+    const selectedFactory = useTimeTravel && facet.timeTravelFactory ? facet.timeTravelFactory : facet.factory;
+
+    if (!selectedFactory) {
+      info(`   Skipping ${facet.name} (abstract contract, no factory)`);
+      continue;
     }
 
-    const factory = facet.factory(signer, useTimeTravel);
+    const factory = selectedFactory(signer) as ContractFactory;
     const contractName = factory.constructor.name.replace("__factory", "");
 
     // Skip if already deployed

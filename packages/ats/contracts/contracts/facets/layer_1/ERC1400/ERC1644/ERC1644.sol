@@ -5,12 +5,13 @@ import { IERC1644 } from "./IERC1644.sol";
 import { IERC1644StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1644/IERC1644StorageWrapper.sol";
 import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE, _AGENT_ROLE } from "../../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessControlModifiers.sol";
+import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
-abstract contract ERC1644 is IERC1644, PauseStorageWrapper {
+abstract contract ERC1644 is IERC1644, AccessControlModifiers, PauseModifiers {
     error AlreadyInitialized();
 
     // solhint-disable-next-line func-name-mixedcase
@@ -56,8 +57,7 @@ abstract contract ERC1644 is IERC1644, PauseStorageWrapper {
         emit IERC1644StorageWrapper.ControllerRedemption(msg.sender, _tokenHolder, _value, _data, _operatorData);
     }
 
-    function finalizeControllable() external override {
-        AccessControlStorageWrapper.checkRole(_DEFAULT_ADMIN_ROLE, msg.sender);
+    function finalizeControllable() external override onlyRole(_DEFAULT_ADMIN_ROLE) {
         ERC1644StorageWrapper.requireControllable();
         ERC1644StorageWrapper.finalizeControllable();
     }

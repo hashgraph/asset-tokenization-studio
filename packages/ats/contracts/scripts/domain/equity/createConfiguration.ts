@@ -149,13 +149,12 @@ export async function createEquityConfiguration(
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
-  // Get facet names based on time travel mode
-  // Include TimeTravelFacet when useTimeTravel=true to provide time manipulation functions
-  const baseFacets = useTimeTravel ? [...EQUITY_FACETS, "TimeTravelFacet"] : EQUITY_FACETS;
-
+  // Build facet list based on time travel mode
+  // When useTimeTravel=true, ALL facets get TimeTravel suffix (universal mapping)
+  // plus TimeTravelFacet controller. No filtering needed — simplifies deployment logic.
   const facetNames = useTimeTravel
-    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
-    : baseFacets;
+    ? [...EQUITY_FACETS.map((name) => `${name}TimeTravel`), "TimeTravelFacet"]
+    : [...EQUITY_FACETS];
 
   // Build facet data with resolver keys from registry
   const facets = facetNames.map((name) => {
