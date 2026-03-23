@@ -29,16 +29,9 @@ import { BusinessLogicResolver } from "@contract-types";
  * Base facets are shared across all bond configurations.
  * FixedRate-specific facets handle interest rate calculations.
  *
- * NOTE: Some facets are excluded because they require library linking:
- * - Library-dependent facets (ERC20Facet, ERC1410*, ERC1594, ERC1644, ERC20Votes,
- *   ERC3643Batch, ERC3643Operations, Clearing*, BondUSAFacet, BondUSAReadFacet,
- *   SnapshotsFacet, TotalBalanceFacet) require special handling with library addresses
- * - Abstract facets (LockFacet) cannot be deployed directly
- *
- * These facets will need to be deployed separately with proper library linking.
  */
 const BOND_FIXED_RATE_FACETS = [
-  // Core Functionality (base facets)
+  // Core Functionality
   "AccessControlFacet",
   "CapFacet",
   "ControlListFacet",
@@ -47,16 +40,32 @@ const BOND_FIXED_RATE_FACETS = [
   "FreezeFacet",
   "KycFacet",
   "PauseFacet",
+  "SnapshotsFacet",
+  "TotalBalanceFacet",
 
-  // ERC Standards (non-library-dependent base facets)
+  // ERC Standards
+  "ERC20Facet",
+  "ERC1410IssuerFacet",
+  "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
+  "ERC1410TokenHolderFacet",
+  "ERC1594Facet",
   "ERC1643Facet",
+  "ERC1644Facet",
   "ERC20PermitFacet",
   "NoncesFacet",
+  "ERC20VotesFacet",
+  "ERC3643BatchFacet",
   "ERC3643ManagementFacet",
+  "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
 
-  // Clearing & Settlement (non-library-dependent)
+  // Clearing & Settlement
+  "ClearingActionsFacet",
+  "ClearingHoldCreationFacet",
+  "ClearingReadFacet",
+  "ClearingRedeemFacet",
+  "ClearingTransferFacet",
   "HoldManagementFacet",
   "HoldReadFacet",
   "HoldTokenHolderFacet",
@@ -77,10 +86,10 @@ const BOND_FIXED_RATE_FACETS = [
   "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
 
-  // Interest Rate (rate-specific - keep variant name)
+  // Interest Rate (rate-specific)
   "FixedRateFacet",
 
-  // Jurisdiction-Specific (write facet is rate-specific - keep variant name)
+  // Jurisdiction-Specific
   "BondUSAFixedRateFacet",
   "BondUSAReadFacet",
 ] as const;

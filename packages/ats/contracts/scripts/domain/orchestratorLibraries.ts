@@ -186,7 +186,7 @@ export function toTypeChainLibraryAddresses(addresses?: OrchestratorLibraryAddre
  *
  * Deployment order:
  * 1. TokenCoreOps, HoldOps, ClearingReadOps (no dependencies)
- * 2. ClearingOps (depends on HoldOps + ClearingReadOps)
+ * 2. ClearingOps (depends on TokenCoreOps)
  *
  * After deployment, automatically calls `setOrchestratorLibraryAddresses()`.
  *
@@ -213,18 +213,18 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
     clearingReadOps.waitForDeployment(),
   ]);
 
+  const tokenCoreOpsAddr = await tokenCoreOps.getAddress();
   const holdOpsAddr = await holdOps.getAddress();
   const clearingReadOpsAddr = await clearingReadOps.getAddress();
 
-  info(`   ✓ TokenCoreOps deployed at ${await tokenCoreOps.getAddress()}`);
+  info(`   ✓ TokenCoreOps deployed at ${tokenCoreOpsAddr}`);
   info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
   info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
 
-  // Phase 2: Deploy ClearingOps (depends on HoldOps + ClearingReadOps)
+  // Phase 2: Deploy ClearingOps (depends on TokenCoreOps)
   const clearingOps = await new ClearingOps__factory(
     {
-      [LIBRARY_KEYS.holdOps]: holdOpsAddr,
-      [LIBRARY_KEYS.clearingReadOps]: clearingReadOpsAddr,
+      [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
     } as any,
     signer,
   ).deploy();
@@ -233,7 +233,7 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   info(`   ✓ ClearingOps deployed at ${await clearingOps.getAddress()}`);
 
   const addresses: OrchestratorLibraryAddresses = {
-    tokenCoreOps: await tokenCoreOps.getAddress(),
+    tokenCoreOps: tokenCoreOpsAddr,
     holdOps: holdOpsAddr,
     clearingOps: await clearingOps.getAddress(),
     clearingReadOps: clearingReadOpsAddr,

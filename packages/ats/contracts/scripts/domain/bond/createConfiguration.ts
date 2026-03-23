@@ -34,13 +34,6 @@ import { BusinessLogicResolver } from "@contract-types";
  *
  * Updated to match origin/develop feature parity (all facets registered).
  *
- * NOTE: Some facets are excluded because they require library linking:
- * - Library-dependent facets (ERC20Facet, ERC1410*, ERC1594, ERC1644, ERC20Votes,
- *   ERC3643Batch, ERC3643Operations, Clearing*, BondUSAFacet, BondUSAReadFacet,
- *   SnapshotsFacet, TotalBalanceFacet) require special handling with library addresses
- * - Abstract facets (LockFacet) cannot be deployed directly
- *
- * These facets will need to be deployed separately with proper library linking.
  */
 const BOND_FACETS = [
   // Core Functionality
@@ -52,16 +45,32 @@ const BOND_FACETS = [
   "FreezeFacet",
   "KycFacet",
   "PauseFacet",
+  "SnapshotsFacet",
+  "TotalBalanceFacet",
 
-  // ERC Standards (non-library-dependent)
+  // ERC Standards
+  "ERC20Facet",
+  "ERC1410IssuerFacet",
+  "ERC1410ManagementFacet",
   "ERC1410ReadFacet",
+  "ERC1410TokenHolderFacet",
+  "ERC1594Facet",
   "ERC1643Facet",
+  "ERC1644Facet",
   "ERC20PermitFacet",
   "NoncesFacet",
+  "ERC20VotesFacet",
+  "ERC3643BatchFacet",
   "ERC3643ManagementFacet",
+  "ERC3643OperationsFacet",
   "ERC3643ReadFacet",
 
-  // Clearing & Settlement (non-library-dependent)
+  // Clearing & Settlement
+  "ClearingActionsFacet",
+  "ClearingHoldCreationFacet",
+  "ClearingReadFacet",
+  "ClearingRedeemFacet",
+  "ClearingTransferFacet",
   "HoldManagementFacet",
   "HoldReadFacet",
   "HoldTokenHolderFacet",
@@ -82,6 +91,10 @@ const BOND_FACETS = [
   "ScheduledSnapshotsFacet",
   "SsiManagementFacet",
   "TransferAndLockFacet",
+
+  // Jurisdiction-Specific
+  "BondUSAFacet",
+  "BondUSAReadFacet",
 ] as const;
 
 /**
