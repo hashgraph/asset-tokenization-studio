@@ -4,7 +4,7 @@ import { OnChainDistributionRepository } from "@infrastructure/adapters/on-chain
 import { AssetType } from "@domain/model/asset-type.enum"
 import { Asset } from "@domain/model/asset"
 import { CorporateActionDetails, DistributionType, PayoutSubtype, AmountType } from "@domain/model/distribution"
-import { Bond, Dividend } from "@hashgraph/asset-tokenization-sdk"
+import { Bond, Dividend, Coupon } from "@hashgraph/asset-tokenization-sdk"
 import { AssetUtils } from "@test/shared/asset.utils"
 import { DistributionUtils } from "@test/shared/distribution.utils"
 import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id"
@@ -13,6 +13,9 @@ import { faker } from "@faker-js/faker"
 
 jest.mock("@hashgraph/asset-tokenization-sdk", () => ({
   Bond: {
+    getAllCoupons: jest.fn(),
+  },
+  Coupon: {
     getAllCoupons: jest.fn(),
     getTotalCouponHolders: jest.fn(),
   },
@@ -31,6 +34,7 @@ jest.mock("@hashgraph/asset-tokenization-sdk", () => ({
 }))
 
 const mockBond = Bond as jest.Mocked<typeof Bond>
+const mockCoupon = Coupon as jest.Mocked<typeof Coupon>
 const mockDividend = Dividend as jest.Mocked<typeof Dividend>
 import { Security } from "@hashgraph/asset-tokenization-sdk"
 const mockSecurity = Security as jest.Mocked<typeof Security>
@@ -63,11 +67,11 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
+      mockCoupon.getAllCoupons.mockResolvedValue(mockCoupons)
 
       await repository.getAllDistributionsByAsset(bondAsset)
 
-      expect(mockBond.getAllCoupons).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockCoupon.getAllCoupons).toHaveBeenCalledWith(expect.any(Object))
     })
 
     it("should call getDividendsForAsset for EQUITY assets", async () => {
@@ -129,7 +133,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
+      mockCoupon.getAllCoupons.mockResolvedValue(mockCoupons)
 
       const result = await repository.getAllDistributionsByAsset(bondAsset)
 
@@ -158,7 +162,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
+      mockCoupon.getAllCoupons.mockResolvedValue(mockCoupons)
 
       const result = await repository.getAllDistributionsByAsset(bondAsset)
 
@@ -166,7 +170,7 @@ describe(OnChainDistributionRepository.name, () => {
     })
 
     it("should return empty array when no coupons exist", async () => {
-      mockBond.getAllCoupons.mockResolvedValue([])
+      mockCoupon.getAllCoupons.mockResolvedValue([])
 
       const result = await repository.getAllDistributionsByAsset(bondAsset)
 
@@ -217,7 +221,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockBond.getAllCoupons.mockResolvedValue(mockCoupons)
+      mockCoupon.getAllCoupons.mockResolvedValue(mockCoupons)
 
       const result = await repository.getAllDistributionsByAsset(bondAsset)
 
@@ -349,7 +353,7 @@ describe(OnChainDistributionRepository.name, () => {
         },
       })
       const expectedCount = 250
-      mockBond.getTotalCouponHolders.mockResolvedValue(expectedCount)
+      mockCoupon.getTotalCouponHolders.mockResolvedValue(expectedCount)
 
       const result = await repository.getHoldersCountForCorporateActionId(distribution)
 
