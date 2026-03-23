@@ -48,7 +48,8 @@ graph TB
 
     subgraph "Facets - Layer 2 (Features)"
         Bond[Bond Facet<br/>Coupon & Maturity]
-        Equity[Equity Facet<br/>Dividends & Voting]
+        Equity[Equity Facet<br/>Dividends & Splits]
+        Voting[Voting Facet<br/>Voting Rights]
         Corporate[Corporate Actions<br/>Distributions]
         Freeze[Freeze Facet<br/>Account Freezing]
         Hold[Hold Facet<br/>Token Holds]
@@ -64,6 +65,7 @@ graph TB
 
     BLR --> Bond
     BLR --> Equity
+    BLR --> Voting
     BLR --> Corporate
     BLR --> Freeze
     BLR --> Hold
@@ -74,6 +76,7 @@ graph TB
     style BLR fill:#07E78E
     style Bond fill:#ffe1f5
     style Equity fill:#ffe1f5
+    style Voting fill:#ffe1f5
 ```
 
 ### Directory Structure (DDD-aligned)
@@ -137,7 +140,8 @@ Provide type-safe access to Diamond storage, split into **core** and **asset** s
 **Asset** (asset-type-specific storage):
 
 - **BondStorageWrapper** - Bond-specific data (coupons, maturity, nominal value)
-- **EquityStorageWrapper** - Equity-specific data (dividends, voting, nominal value)
+- **EquityStorageWrapper** - Equity-specific data (dividends, nominal value)
+- **VotingStorageWrapper** - Voting rights data (separated from equity storage)
 - **CorporateActionsStorageWrapper** - Corporate action lifecycle and cancellation state
 - **NominalValueStorageWrapper** - Dedicated nominal value storage with migration support
 
@@ -170,7 +174,11 @@ Feature-specific implementations:
 
 **Equity Facets:**
 
-- **EquityFacet** - Create equity, set/cancel dividends, voting, stock splits
+- **EquityFacet** - Create equity, set/cancel dividends, stock splits
+
+**Voting:**
+
+- **VotingFacet** - Set and cancel voting events (separated from equity facet for independent upgradeability)
 
 **Nominal Value:**
 
@@ -319,10 +327,13 @@ Existing storage preserved
 ### Equity Features
 
 - Dividend distribution scheduling and cancellation
-- Voting rights management and cancellation
 - Stock splits, reverse splits, and cancellation
 - Balance adjustments
 - Nominal value management
+
+### Voting Features
+
+- Voting rights management and cancellation (independent facet)
 
 ### Bond Features
 
