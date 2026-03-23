@@ -11,6 +11,7 @@ import {
   Lock,
   IHold,
   type IERC1410,
+  type VotingFacet,
   Kyc,
   SsiManagement,
   ClearingActionsFacet,
@@ -71,6 +72,7 @@ describe("Equity Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let equityFacet: EquityUSA;
+  let votingFacet: VotingFacet;
   let accessControlFacet: AccessControl;
   let pauseFacet: Pause;
   let lockFacet: Lock;
@@ -113,6 +115,7 @@ describe("Equity Tests", () => {
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target, signer_A);
     equityFacet = await ethers.getContractAt("EquityUSA", diamond.target, signer_A);
+    votingFacet = await ethers.getContractAt("VotingFacet", diamond.target, signer_A);
     kycFacet = await ethers.getContractAt("Kyc", diamond.target, signer_B);
     ssiManagementFacet = await ethers.getContractAt("SsiManagement", diamond.target, signer_A);
     clearingTransferFacet = await ethers.getContractAt("ClearingTransferFacet", diamond.target, signer_A);
@@ -722,8 +725,8 @@ describe("Equity Tests", () => {
         data: "0x",
       });
 
-      await expect(equityFacet.connect(signer_C).setVoting(votingData))
-        .to.emit(equityFacet, "VotingSet")
+      await expect(votingFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(votingFacet, "VotingSet")
         .withArgs(
           "0x0000000000000000000000000000000000000000000000000000000000000001",
           1,
@@ -741,19 +744,19 @@ describe("Equity Tests", () => {
         data: "0x",
       });
 
-      const [voting, isDisabled] = await equityFacet.getVoting(1);
+      const [voting, isDisabled] = await votingFacet.getVoting(1);
       expect(voting.snapshotId).to.not.equal(0);
       expect(isDisabled).to.equal(false);
 
       // Verify getVotingHolders returns holders from snapshot (line 279)
-      const votingHolders = await equityFacet.getVotingHolders(1, 0, 99);
+      const votingHolders = await votingFacet.getVotingHolders(1, 0, 99);
       expect([...votingHolders]).to.have.members([signer_A.address]);
 
       // Verify getTotalVotingHolders returns count from snapshot (line 292)
-      const totalHolders = await equityFacet.getTotalVotingHolders(1);
+      const totalHolders = await votingFacet.getTotalVotingHolders(1);
       expect(totalHolders).to.equal(1);
 
-      const votingFor = await equityFacet.getVotingFor(1, signer_A.address);
+      const votingFor = await votingFacet.getVotingFor(1, signer_A.address);
       expect(votingFor.tokenBalance).to.equal(1000n);
       expect(votingFor.recordDateReached).to.equal(true);
       expect(votingFor.isDisabled).to.be.false;
@@ -772,8 +775,8 @@ describe("Equity Tests", () => {
       });
 
       // Create voting (schedules a snapshot for recordDate)
-      await expect(equityFacet.connect(signer_C).setVoting(votingData))
-        .to.emit(equityFacet, "VotingSet")
+      await expect(votingFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(votingFacet, "VotingSet")
         .withArgs(
           "0x0000000000000000000000000000000000000000000000000000000000000001",
           1,
@@ -787,22 +790,22 @@ describe("Equity Tests", () => {
       await timeTravelFacet.changeSystemTimestamp(votingRecordDateInSeconds + 1);
 
       // Verify snapshot was NOT executed (snapshotId == 0)
-      const [voting, isDisabled] = await equityFacet.getVoting(1);
+      const [voting, isDisabled] = await votingFacet.getVoting(1);
       expect(voting.snapshotId).to.equal(0);
       expect(isDisabled).to.equal(false);
 
       // Get total voting holders using _getTotalTokenHolders (line 294 in EquityStorageWrapper.sol)
-      const totalHolders = await equityFacet.getTotalVotingHolders(1);
+      const totalHolders = await votingFacet.getTotalVotingHolders(1);
       expect(totalHolders).to.equal(1);
 
       // Also verify getVotingHolders returns current holders (line 281)
-      const holders = await equityFacet.getVotingHolders(1, 0, 99);
+      const holders = await votingFacet.getVotingHolders(1, 0, 99);
       expect([...holders]).to.have.members([signer_A.address]);
     });
 
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
       // set voting fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
     });
 
     it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
@@ -817,7 +820,7 @@ describe("Equity Tests", () => {
       );
 
       // set voting fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("TokenIsPaused");
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("TokenIsPaused");
     });
 
     it("GIVEN an account with corporateActions role WHEN setVoting with invalid timestamp THEN transaction fails with WrongTimestamp", async () => {
@@ -830,8 +833,8 @@ describe("Equity Tests", () => {
         data: voteData,
       };
 
-      await expect(equityFacet.connect(signer_C).setVoting(invalidVotingData)).to.be.revertedWithCustomError(
-        equityFacet,
+      await expect(votingFacet.connect(signer_C).setVoting(invalidVotingData)).to.be.revertedWithCustomError(
+        votingFacet,
         "WrongTimestamp",
       );
     });
@@ -840,16 +843,16 @@ describe("Equity Tests", () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
       // Create a voting
-      await equityFacet.connect(signer_C).setVoting(votingData);
+      await votingFacet.connect(signer_C).setVoting(votingData);
 
       // Create a dividend to have different action types
       await equityFacet.connect(signer_C).setDividend(dividendData);
 
       // Try to access voting with dividend ID (should fail)
-      await expect(equityFacet.getVoting(2)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(votingFacet.getVoting(2)).to.be.rejectedWith("WrongIndexForAction");
 
       // Try to access voting details with wrong ID (getVotingFor has the modifier)
-      await expect(equityFacet.getVotingFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
+      await expect(votingFacet.getVotingFor(2, signer_A.address)).to.be.rejectedWith("WrongIndexForAction");
 
       // Note: getVotingHolders and getTotalVotingHolders don't have onlyMatchingActionType modifier
     });
@@ -861,7 +864,7 @@ describe("Equity Tests", () => {
       await equityFacet.connect(signer_C).setDividend(dividendData);
 
       // Create a voting to have different action types
-      await equityFacet.connect(signer_C).setVoting(votingData);
+      await votingFacet.connect(signer_C).setVoting(votingData);
 
       // Try to access dividend with voting ID (should fail)
       await expect(equityFacet.getDividend(2)).to.be.rejectedWith("WrongIndexForAction");
@@ -870,7 +873,7 @@ describe("Equity Tests", () => {
     });
     it("GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole", async () => {
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("AccountHasNoRole");
     });
 
     it("GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused", async () => {
@@ -885,7 +888,18 @@ describe("Equity Tests", () => {
       );
 
       // set dividend fails
-      await expect(equityFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("TokenIsPaused");
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.rejectedWith("TokenIsPaused");
+    });
+
+    it("GIVEN a duplicate voting WHEN setVoting THEN transaction fails with VotingRightsCreationFailed", async () => {
+      await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+
+      await votingFacet.connect(signer_C).setVoting(votingData);
+
+      await expect(votingFacet.connect(signer_C).setVoting(votingData)).to.be.revertedWithCustomError(
+        votingFacet,
+        "VotingRightsCreationFailed",
+      );
     });
 
     it("GIVEN an account with corporateActions role WHEN setVoting THEN transaction succeeds", async () => {
@@ -893,8 +907,8 @@ describe("Equity Tests", () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
       // set dividend
-      await expect(equityFacet.connect(signer_C).setVoting(votingData))
-        .to.emit(equityFacet, "VotingSet")
+      await expect(votingFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(votingFacet, "VotingSet")
         .withArgs(
           "0x0000000000000000000000000000000000000000000000000000000000000001",
           1,
@@ -904,15 +918,15 @@ describe("Equity Tests", () => {
         );
 
       // check list members
-      // await expect(equityFacet.getVoting(1000)).to.be.rejectedWith(
+      // await expect(votingFacet.getVoting(1000)).to.be.rejectedWith(
       //     'WrongIndexForAction'
       // )
 
-      const listCount = await equityFacet.getVotingCount();
-      const [voting, isDisabled] = await equityFacet.getVoting(1);
-      const votingFor = await equityFacet.getVotingFor(1, signer_A.address);
-      const votingTotalHolder = await equityFacet.getTotalVotingHolders(1);
-      const votingHolders = await equityFacet.getVotingHolders(1, 0, votingTotalHolder);
+      const listCount = await votingFacet.getVotingCount();
+      const [voting, isDisabled] = await votingFacet.getVoting(1);
+      const votingFor = await votingFacet.getVotingFor(1, signer_A.address);
+      const votingTotalHolder = await votingFacet.getTotalVotingHolders(1);
+      const votingHolders = await votingFacet.getVotingHolders(1, 0, votingTotalHolder);
 
       expect(listCount).to.equal(1);
       expect(voting.snapshotId).to.equal(0);
@@ -945,8 +959,8 @@ describe("Equity Tests", () => {
       await lockFacet.connect(signer_C).lock(LockedAmount, signer_A.address, 99999999999);
 
       // set dividend
-      await expect(equityFacet.connect(signer_C).setVoting(votingData))
-        .to.emit(equityFacet, "VotingSet")
+      await expect(votingFacet.connect(signer_C).setVoting(votingData))
+        .to.emit(votingFacet, "VotingSet")
         .withArgs(
           "0x0000000000000000000000000000000000000000000000000000000000000001",
           1,
@@ -956,9 +970,9 @@ describe("Equity Tests", () => {
         );
 
       await timeTravelFacet.changeSystemTimestamp(votingRecordDateInSeconds + 1);
-      const votingFor = await equityFacet.getVotingFor(1, signer_A.address);
-      const votingTotalHolder = await equityFacet.getTotalVotingHolders(1);
-      const votingHolders = await equityFacet.getVotingHolders(1, 0, votingTotalHolder);
+      const votingFor = await votingFacet.getVotingFor(1, signer_A.address);
+      const votingTotalHolder = await votingFacet.getTotalVotingHolders(1);
+      const votingHolders = await votingFacet.getVotingHolders(1, 0, votingTotalHolder);
 
       expect(votingFor.tokenBalance).to.equal(TotalAmount);
       expect(votingFor.recordDateReached).to.equal(true);
@@ -970,27 +984,27 @@ describe("Equity Tests", () => {
     describe("Cancel Voting", () => {
       it("GIVEN an account without corporateActions role WHEN cancelVoting THEN transaction fails with AccountHasNoRole", async () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-        await equityFacet.connect(signer_B).setVoting(votingData);
-        await expect(equityFacet.connect(signer_C).cancelVoting(1)).to.be.rejectedWith("AccountHasNoRole");
+        await votingFacet.connect(signer_B).setVoting(votingData);
+        await expect(votingFacet.connect(signer_C).cancelVoting(1)).to.be.rejectedWith("AccountHasNoRole");
       });
 
       it("GIVEN a paused Token WHEN cancelVoting THEN transaction fails with TokenIsPaused", async () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_B.address);
-        await equityFacet.connect(signer_B).setVoting(votingData);
+        await votingFacet.connect(signer_B).setVoting(votingData);
         await pauseFacet.connect(signer_B).pause();
 
-        await expect(equityFacet.connect(signer_B).cancelVoting(1)).to.be.rejectedWith("TokenIsPaused");
+        await expect(votingFacet.connect(signer_B).cancelVoting(1)).to.be.rejectedWith("TokenIsPaused");
       });
 
       it("GIVEN a voting already recorded WHEN cancelVoting THEN transaction fails with VotingAlreadyRecorded", async () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-        await equityFacet.connect(signer_C).setVoting(votingData);
+        await votingFacet.connect(signer_C).setVoting(votingData);
 
         await timeTravelFacet.changeSystemTimestamp(votingRecordDateInSeconds + 1);
 
-        await expect(equityFacet.connect(signer_C).cancelVoting(1)).to.be.revertedWithCustomError(
-          equityFacet,
+        await expect(votingFacet.connect(signer_C).cancelVoting(1)).to.be.revertedWithCustomError(
+          votingFacet,
           "VotingAlreadyRecorded",
         );
       });
@@ -998,13 +1012,13 @@ describe("Equity Tests", () => {
       it("GIVEN a voting not yet recorded WHEN cancelVoting THEN transaction succeeds", async () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-        await equityFacet.connect(signer_C).setVoting(votingData);
+        await votingFacet.connect(signer_C).setVoting(votingData);
 
-        await expect(equityFacet.connect(signer_C).cancelVoting(1))
-          .to.emit(equityFacet, "VotingCancelled")
+        await expect(votingFacet.connect(signer_C).cancelVoting(1))
+          .to.emit(votingFacet, "VotingCancelled")
           .withArgs(1, signer_C.address);
-        expect((await equityFacet.getVoting(1)).isDisabled_).to.equal(true);
-        const votingFor = await equityFacet.getVotingFor(1, signer_A.address);
+        expect((await votingFacet.getVoting(1)).isDisabled_).to.equal(true);
+        const votingFor = await votingFacet.getVotingFor(1, signer_A.address);
         expect(votingFor.recordDate).to.equal(votingRecordDateInSeconds);
         expect(votingFor.isDisabled).to.be.true;
       });
@@ -1012,28 +1026,28 @@ describe("Equity Tests", () => {
       it("GIVEN a non-existent voting WHEN cancelVoting THEN transaction fails", async () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-        await expect(equityFacet.connect(signer_C).cancelVoting(999)).to.be.rejected;
+        await expect(votingFacet.connect(signer_C).cancelVoting(999)).to.be.rejected;
       });
 
       it("GIVEN multiple votings WHEN cancelVoting on one THEN only that voting is cancelled", async () => {
         await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
 
-        await equityFacet.connect(signer_C).setVoting(votingData);
+        await votingFacet.connect(signer_C).setVoting(votingData);
 
         const secondVotingData = {
           recordDate: (votingRecordDateInSeconds + 10000).toString(),
           data: "0xAABBCC",
         };
-        await equityFacet.connect(signer_C).setVoting(secondVotingData);
+        await votingFacet.connect(signer_C).setVoting(secondVotingData);
 
-        await expect(equityFacet.connect(signer_C).cancelVoting(1))
-          .to.emit(equityFacet, "VotingCancelled")
+        await expect(votingFacet.connect(signer_C).cancelVoting(1))
+          .to.emit(votingFacet, "VotingCancelled")
           .withArgs(1, signer_C.address);
 
-        const [, isDisabled1] = await equityFacet.getVoting(1);
+        const [, isDisabled1] = await votingFacet.getVoting(1);
         expect(isDisabled1).to.equal(true);
 
-        const [voting2, isDisabled2] = await equityFacet.getVoting(2);
+        const [voting2, isDisabled2] = await votingFacet.getVoting(2);
         expect(isDisabled2).to.equal(false);
         expect(voting2.voting.recordDate).to.equal(votingRecordDateInSeconds + 10000);
       });
