@@ -154,6 +154,9 @@ import RevokeKycMockRequest from "./security/externalKycLists/mock/RevokeKycMock
 import GetKycStatusMockRequest from "./security/externalKycLists/mock/GetKycStatusMockRequest";
 import SetNameRequest from "./security/operations/tokeMetadata/SetNameRequest";
 import SetSymbolRequest from "./security/operations/tokeMetadata/SetSymbolRequest";
+import SetNominalValueRequest from "./security/operations/nominalValue/SetNominalValueRequest";
+import GetNominalValueRequest from "./security/operations/nominalValue/GetNominalValueRequest";
+import GetNominalValueDecimalsRequest from "./security/operations/nominalValue/GetNominalValueDecimalsRequest";
 import SetOnchainIDRequest from "./security/operations/tokeMetadata/SetOnchainIDRequest";
 import SetComplianceRequest from "./security/compliance/SetComplianceRequest";
 import ComplianceRequest from "./security/compliance/ComplianceRequest";
@@ -449,4 +452,7 @@ export {
   CancelCouponRequest,
   CancelScheduledBalanceAdjustmentRequest,
   CancelVotingRequest,
+  SetNominalValueRequest,
+  GetNominalValueRequest,
+  GetNominalValueDecimalsRequest,
 };

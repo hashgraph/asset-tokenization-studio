@@ -9,6 +9,7 @@ import {
   FreezeFacet__factory,
   ERC1410ManagementFacet__factory,
   CapFacet__factory,
+  NominalValue__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { EVM_ZERO_ADDRESS, GAS } from "@core/Constants";
 import BigDecimal from "@domain/context/shared/BigDecimal";
@@ -352,6 +353,22 @@ export class SecurityMetadataOperations {
       "setMaxSupply",
       [maxSupply.toHexString()],
       GAS.SET_MAX_SUPPLY,
+    );
+  }
+
+  async setNominalValue(
+    security: EvmAddress,
+    nominalValue: string,
+    nominalValueDecimals: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting nominal value for security: ${security.toString()}`);
+    return this.executor.executeContractCall(
+      securityId.toString(),
+      NominalValue__factory.createInterface(),
+      "setNominalValue",
+      [nominalValue, nominalValueDecimals],
+      GAS.SET_NOMINAL_VALUE,
     );
   }
 }
