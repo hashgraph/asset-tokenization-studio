@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _EQUITY_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE,
@@ -13,9 +12,9 @@ import {
 import { IEquity } from "../../../facets/layer_2/equity/IEquity.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IEquityStorageWrapper } from "../../../domain/asset/equity/IEquityStorageWrapper.sol";
-import { BondStorageWrapper } from "../bond/BondStorageWrapper.sol";
+import { VotingStorageWrapper } from "../voting/VotingStorageWrapper.sol";
 
-abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrapper {
+abstract contract EquityStorageWrapper is IEquityStorageWrapper, VotingStorageWrapper {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct EquityDataStorage {
@@ -119,39 +118,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
 
         _addScheduledCrossOrderedTask(newDividend.recordDate, SNAPSHOT_TASK_TYPE);
         _addScheduledSnapshot(newDividend.recordDate, _actionId);
-    }
-
-    function _setVoting(
-        IEquity.Voting calldata _newVoting
-    ) internal override returns (bytes32 corporateActionId_, uint256 voteID_) {
-        bytes memory data = abi.encode(_newVoting);
-
-        (corporateActionId_, voteID_) = _addCorporateAction(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, data);
-
-        _initVotingRights(corporateActionId_, data);
-    }
-
-    function _cancelVoting(uint256 _voteId) internal override returns (bool success_) {
-        IEquity.RegisteredVoting memory registeredVoting;
-        bytes32 corporateActionId;
-        (registeredVoting, corporateActionId, ) = _getVoting(_voteId);
-        if (registeredVoting.voting.recordDate <= _blockTimestamp()) {
-            revert IEquityStorageWrapper.VotingAlreadyRecorded(corporateActionId, _voteId);
-        }
-        _cancelCorporateAction(corporateActionId);
-        success_ = true;
-        emit VotingCancelled(_voteId, _msgSender());
-    }
-
-    function _initVotingRights(bytes32 _actionId, bytes memory _data) internal override {
-        if (_actionId == bytes32(0)) {
-            revert IEquityStorageWrapper.VotingRightsCreationFailed();
-        }
-
-        IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
-
-        _addScheduledCrossOrderedTask(newVoting.recordDate, SNAPSHOT_TASK_TYPE);
-        _addScheduledSnapshot(newVoting.recordDate, _actionId);
     }
 
     function _setScheduledBalanceAdjustment(
@@ -312,84 +278,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, BondStorageWrap
         if (registeredDividend.dividend.recordDate >= _blockTimestamp()) return 0;
 
         if (registeredDividend.snapshotId != 0) return _totalTokenHoldersAt(registeredDividend.snapshotId);
-
-        return _getTotalTokenHolders();
-    }
-
-    function _getVoting(
-        uint256 _voteID
-    )
-        internal
-        view
-        override
-        returns (IEquity.RegisteredVoting memory registeredVoting_, bytes32 corporateActionId_, bool isDisabled_)
-    {
-        corporateActionId_ = _getCorporateActionIdByTypeIndex(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1);
-
-        bytes memory data;
-        (, , data, isDisabled_) = _getCorporateAction(corporateActionId_);
-
-        assert(data.length > 0);
-        (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
-
-        registeredVoting_.snapshotId = _getUintResultAt(corporateActionId_, SNAPSHOT_RESULT_ID);
-    }
-
-    /**
-     * @dev returns the properties and related snapshots (if any) of a voting.
-     *
-     * @param _voteID The dividend Id
-     * @param _account The account
-     *
-     */
-    function _getVotingFor(
-        uint256 _voteID,
-        address _account
-    ) internal view override returns (IEquity.VotingFor memory votingFor_) {
-        (IEquity.RegisteredVoting memory registeredVoting, , bool isDisabled_) = _getVoting(_voteID);
-
-        votingFor_.recordDate = registeredVoting.voting.recordDate;
-        votingFor_.data = registeredVoting.voting.data;
-        votingFor_.isDisabled = isDisabled_;
-
-        (
-            votingFor_.tokenBalance,
-            votingFor_.decimals,
-            votingFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
-            registeredVoting.voting.recordDate,
-            registeredVoting.snapshotId,
-            _account
-        );
-    }
-
-    function _getVotingCount() internal view override returns (uint256 votingCount_) {
-        return _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
-    }
-
-    function _getVotingHolders(
-        uint256 _voteID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view override returns (address[] memory holders_) {
-        IEquity.RegisteredVoting memory registeredVoting;
-        (registeredVoting, , ) = _getVoting(_voteID);
-
-        if (registeredVoting.voting.recordDate >= _blockTimestamp()) return new address[](0);
-
-        if (registeredVoting.snapshotId != 0)
-            return _tokenHoldersAt(registeredVoting.snapshotId, _pageIndex, _pageLength);
-
-        return _getTokenHolders(_pageIndex, _pageLength);
-    }
-
-    function _getTotalVotingHolders(uint256 _voteID) internal view override returns (uint256) {
-        IEquity.RegisteredVoting memory registeredVoting;
-        (registeredVoting, , ) = _getVoting(_voteID);
-
-        if (registeredVoting.voting.recordDate >= _blockTimestamp()) return 0;
-
-        if (registeredVoting.snapshotId != 0) return _totalTokenHoldersAt(registeredVoting.snapshotId);
 
         return _getTotalTokenHolders();
     }

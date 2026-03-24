@@ -635,6 +635,9 @@ bytes32 constant _KPIS_LATEST_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KE
 // keccak256('security.token.standard.nominalValue.resolverKey');
 bytes32 constant _NOMINAL_VALUE_RESOLVER_KEY = 0x48903d4da8b1f0a5e9a9874be74ec5d2f8043d4d5b65cc093173c3dae103df8f;
 
+// keccak256('security.token.standard.voting.resolverKey');
+bytes32 constant _VOTING_RESOLVER_KEY = 0x97e0ffc69e5d5dd7c4635bfce0a5cf15b1c313433d49edbd55813da224b03768;
+
 // Layer 3 Resolver Keys
 
 // keccak256("security.token.standard.transferAndLock.resolverKey")
