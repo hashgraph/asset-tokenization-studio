@@ -5,6 +5,7 @@ import { _KPIS_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKpis } from "../../facets/layer_2/kpi/kpiLatest/IKpis.sol";
 import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { BondStorageWrapper } from "./BondStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 struct KpisDataStorage {
     mapping(address => Checkpoints.Checkpoint[]) checkpointsByProject;
@@ -86,8 +87,8 @@ library KpisStorageWrapper {
 
     function requireValidDate(uint256 date, address project) internal view {
         uint256 minDate = getMinDateAdjusted();
-        if (date <= minDate || date > block.timestamp) {
-            revert IKpis.InvalidDate(date, minDate, block.timestamp);
+        if (date <= minDate || date > TimeTravelStorageWrapper.getBlockTimestamp()) {
+            revert IKpis.InvalidDate(date, minDate, TimeTravelStorageWrapper.getBlockTimestamp());
         }
         if (isCheckpointDate(date, project)) {
             revert IKpis.KpiDataAlreadyExists(date);
@@ -107,7 +108,9 @@ library KpisStorageWrapper {
     function getMinDateAdjusted() internal view returns (uint256 minDate_) {
         minDate_ = kpisDataStorage().minDate;
 
-        uint256 total = BondStorageWrapper.getCouponsOrderedListTotalAdjustedAt(block.timestamp);
+        uint256 total = BondStorageWrapper.getCouponsOrderedListTotalAdjustedAt(
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
 
         if (total == 0) return minDate_;
 

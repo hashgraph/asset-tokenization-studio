@@ -12,6 +12,7 @@ import { Hold } from "../../facets/layer_1/hold/IHold.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /// @title ClearingOps - Orchestrator for clearing state-changing operations
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
@@ -226,7 +227,7 @@ library ClearingOps {
             _protectedClearingOperation.from,
             NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
-            block.timestamp
+            TimeTravelStorageWrapper.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkClearingTransferSignature(
@@ -259,7 +260,7 @@ library ClearingOps {
             _protectedClearingOperation.from,
             NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
-            block.timestamp
+            TimeTravelStorageWrapper.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkClearingRedeemSignature(
@@ -290,7 +291,7 @@ library ClearingOps {
             _protectedClearingOperation.from,
             NonceStorageWrapper.getNonceFor(_protectedClearingOperation.from),
             _protectedClearingOperation.deadline,
-            block.timestamp
+            TimeTravelStorageWrapper.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkClearingCreateHoldSignature(

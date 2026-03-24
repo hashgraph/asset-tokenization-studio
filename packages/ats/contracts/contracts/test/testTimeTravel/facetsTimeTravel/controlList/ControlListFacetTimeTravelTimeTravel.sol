@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ControlListFacet } from "../../../../facets/layer_1/controlList/ControlListFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract ControlListFacetTimeTravel is ControlListFacet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract ControlListFacetTimeTravel is ControlListFacet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }

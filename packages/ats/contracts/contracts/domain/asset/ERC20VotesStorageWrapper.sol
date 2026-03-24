@@ -9,6 +9,7 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IERC20VotesStorageWrapper } from "./ERC20Votes/IERC20VotesStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 // solhint-disable custom-errors
 
@@ -92,7 +93,10 @@ library ERC20VotesStorageWrapper {
 
         takeAbafCheckpoint();
 
-        uint256 delegatorBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(delegator, block.timestamp);
+        uint256 delegatorBalance = ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+            delegator,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
 
         erc20VotesStorage_().delegates[delegator] = delegatee;
 
@@ -144,13 +148,13 @@ library ERC20VotesStorageWrapper {
     }
 
     function clock() internal view returns (uint48) {
-        return SafeCast.toUint48(block.number);
+        return SafeCast.toUint48(TimeTravelStorageWrapper.getBlockNumber());
     }
 
     // solhint-disable-next-line func-name-mixedcase
     function CLOCK_MODE() internal view returns (string memory) {
         // Check that the clock was not modified
-        require(clock() == block.number, "ERC20Votes: broken clock mode");
+        require(clock() == TimeTravelStorageWrapper.getBlockNumber(), "ERC20Votes: broken clock mode");
         return "mode=blocknumber&from=default";
     }
 

@@ -30,6 +30,7 @@ import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 library HoldStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
@@ -91,7 +92,7 @@ library HoldStorageWrapper {
             _from,
             NonceStorageWrapper.getNonceFor(_from),
             _protectedHold.deadline,
-            block.timestamp
+            TimeTravelStorageWrapper.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkCreateHoldSignature(
@@ -551,7 +552,7 @@ library HoldStorageWrapper {
     // --- Hold validation checks ---
 
     function isHoldExpired(Hold memory _hold) internal view returns (bool) {
-        return block.timestamp > _hold.expirationTimestamp;
+        return TimeTravelStorageWrapper.getBlockTimestamp() > _hold.expirationTimestamp;
     }
 
     function isEscrow(Hold memory _hold, address _escrow) internal pure returns (bool) {

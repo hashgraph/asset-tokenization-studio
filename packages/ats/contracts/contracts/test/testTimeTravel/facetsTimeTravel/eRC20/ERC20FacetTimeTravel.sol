@@ -4,8 +4,15 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC20Facet } from "../../../../facets/layer_1/ERC1400/ERC20/ERC20Facet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
+import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-contract ERC20FacetTimeTravel is ERC20Facet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract ERC20FacetTimeTravel is ERC20Facet, TimeTravelProvider {
+    function _getBlockTimestamp() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+        return TimeTravelProvider._getBlockTimestamp();
+    }
+
+    function _getBlockNumber() internal view override(TimestampProvider, TimeTravelProvider) returns (uint256) {
+        return TimeTravelProvider._getBlockNumber();
+    }
 }

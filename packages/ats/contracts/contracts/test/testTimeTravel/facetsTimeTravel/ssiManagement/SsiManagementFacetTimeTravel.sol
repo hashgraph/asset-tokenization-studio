@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { SsiManagementFacet } from "../../../../facets/layer_1/ssi/SsiManagementFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract SsiManagementFacetTimeTravel is SsiManagementFacet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract SsiManagementFacetTimeTravel is SsiManagementFacet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }

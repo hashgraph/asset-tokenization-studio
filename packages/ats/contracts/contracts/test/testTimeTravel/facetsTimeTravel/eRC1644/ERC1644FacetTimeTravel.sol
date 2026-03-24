@@ -4,8 +4,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1644Facet } from "../../../../facets/layer_1/ERC1400/ERC1644/ERC1644Facet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract ERC1644FacetTimeTravel is ERC1644Facet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract ERC1644FacetTimeTravel is ERC1644Facet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }

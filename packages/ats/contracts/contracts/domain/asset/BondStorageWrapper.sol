@@ -12,6 +12,7 @@ import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 struct BondDataStorage {
     bytes3 currency;
@@ -141,14 +142,17 @@ library BondStorageWrapper {
 
         couponFor_.coupon = registeredCoupon.coupon;
 
-        if (registeredCoupon.coupon.recordDate < block.timestamp) {
+        if (registeredCoupon.coupon.recordDate < TimeTravelStorageWrapper.getBlockTimestamp()) {
             couponFor_.recordDateReached = true;
 
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
                 ? SnapshotsStorageWrapper.getTotalBalanceOfAtSnapshot(registeredCoupon.snapshotId, account)
-                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, block.timestamp);
+                : ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(
+                    account,
+                    TimeTravelStorageWrapper.getBlockTimestamp()
+                );
 
-            couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(block.timestamp);
+            couponFor_.decimals = ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
         }
     }
 
@@ -176,10 +180,12 @@ library BondStorageWrapper {
         IBondRead.BondDetailsData memory bondDetails = getBondDetails();
 
         principalFor_.numerator =
-            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, block.timestamp) *
+            ERC3643StorageWrapper.getTotalBalanceForAdjustedAt(account, TimeTravelStorageWrapper.getBlockTimestamp()) *
             bondDetails.nominalValue;
         principalFor_.denominator =
-            10 ** (ERC20StorageWrapper.decimalsAdjustedAt(block.timestamp) + bondDetails.nominalValueDecimals);
+            10 **
+                (ERC20StorageWrapper.decimalsAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp()) +
+                    bondDetails.nominalValueDecimals);
     }
 
     function getCouponCount() internal view returns (uint256 couponCount_) {
@@ -193,7 +199,7 @@ library BondStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         IBondRead.RegisteredCoupon memory registeredCoupon = getCoupon(couponID);
 
-        if (registeredCoupon.coupon.recordDate >= block.timestamp) return new address[](0);
+        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return new address[](0);
 
         if (registeredCoupon.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredCoupon.snapshotId, pageIndex, pageLength);
@@ -204,7 +210,7 @@ library BondStorageWrapper {
     function getTotalCouponHolders(uint256 couponID) internal view returns (uint256) {
         IBondRead.RegisteredCoupon memory registeredCoupon = getCoupon(couponID);
 
-        if (registeredCoupon.coupon.recordDate >= block.timestamp) return 0;
+        if (registeredCoupon.coupon.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
 
         if (registeredCoupon.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredCoupon.snapshotId);
@@ -217,7 +223,7 @@ library BondStorageWrapper {
     }
 
     function getCouponFromOrderedListAt(uint256 pos) internal view returns (uint256 couponID_) {
-        if (pos >= getCouponsOrderedListTotalAdjustedAt(block.timestamp)) return 0;
+        if (pos >= getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp())) return 0;
 
         uint256 actualOrderedListLengthTotal = getCouponsOrderedListTotal();
 
@@ -237,7 +243,11 @@ library BondStorageWrapper {
         (uint256 start, uint256 end) = Pagination.getStartAndEnd(pageIndex, pageLength);
 
         couponIDs_ = new uint256[](
-            Pagination.getSize(start, end, getCouponsOrderedListTotalAdjustedAt(block.timestamp))
+            Pagination.getSize(
+                start,
+                end,
+                getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp())
+            )
         );
 
         for (uint256 i = 0; i < couponIDs_.length; i++) {
@@ -256,7 +266,7 @@ library BondStorageWrapper {
     }
 
     function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
-        uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(block.timestamp);
+        uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
 
         if (orderedListLength < 2) return (0);
 

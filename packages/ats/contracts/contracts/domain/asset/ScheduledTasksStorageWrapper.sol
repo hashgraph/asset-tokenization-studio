@@ -27,6 +27,7 @@ import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { BondStorageWrapper } from "./BondStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 library ScheduledTasksStorageWrapper {
     error WrongTimestamp(uint256 timeStamp);
@@ -60,7 +61,7 @@ library ScheduledTasksStorageWrapper {
                 pos
             );
 
-            if (currentScheduledTask.scheduledTimestamp < block.timestamp) {
+            if (currentScheduledTask.scheduledTimestamp < TimeTravelStorageWrapper.getBlockTimestamp()) {
                 ScheduledTasksLib.popScheduledTask(_scheduledTasks);
 
                 if (callbackType == bytes32("snapshot")) {
@@ -134,7 +135,7 @@ library ScheduledTasksStorageWrapper {
     // ============================================================================
 
     function requireValidTimestamp(uint256 _timestamp) internal view {
-        if (_timestamp <= block.timestamp) revert WrongTimestamp(_timestamp);
+        if (_timestamp <= TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongTimestamp(_timestamp);
     }
 
     function getScheduledSnapshotCount() internal view returns (uint256) {

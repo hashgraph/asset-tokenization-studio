@@ -22,6 +22,7 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 /// @dev Represents a fungible set of tokens.
 struct Partition {
@@ -362,7 +363,7 @@ library ERC1410StorageWrapper {
             from,
             NonceStorageWrapper.getNonceFor(from),
             protectionData.deadline,
-            block.timestamp
+            TimeTravelStorageWrapper.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkTransferSignature(
@@ -390,7 +391,7 @@ library ERC1410StorageWrapper {
             from,
             NonceStorageWrapper.getNonceFor(from),
             protectionData.deadline,
-            block.timestamp
+            TimeTravelStorageWrapper.getBlockTimestamp()
         );
 
         ProtectedPartitionsStorageWrapper.checkRedeemSignature(
@@ -425,8 +426,11 @@ library ERC1410StorageWrapper {
             // burn | redeem
             SnapshotsStorageWrapper.updateAccountSnapshot(from, partition);
             SnapshotsStorageWrapper.updateTotalSupplySnapshot(partition);
-            if (amount > 0 && AdjustBalancesStorageWrapper.balanceOfAdjustedAt(from, block.timestamp) == amount)
-                removeFrom = true;
+            if (
+                amount > 0 &&
+                AdjustBalancesStorageWrapper.balanceOfAdjustedAt(from, TimeTravelStorageWrapper.getBlockTimestamp()) ==
+                amount
+            ) removeFrom = true;
         }
         // transfer
         else {
@@ -434,8 +438,11 @@ library ERC1410StorageWrapper {
             SnapshotsStorageWrapper.updateAccountSnapshot(to, partition);
             // balanceOf instead of balanceOfAdjusted because we are comparing it to 0
             if (amount > 0 && ERC20StorageWrapper.balanceOf(to) == 0) addTo = true;
-            if (amount > 0 && AdjustBalancesStorageWrapper.balanceOfAdjustedAt(from, block.timestamp) == amount)
-                removeFrom = true;
+            if (
+                amount > 0 &&
+                AdjustBalancesStorageWrapper.balanceOfAdjustedAt(from, TimeTravelStorageWrapper.getBlockTimestamp()) ==
+                amount
+            ) removeFrom = true;
         }
 
         if (addTo && removeFrom) {

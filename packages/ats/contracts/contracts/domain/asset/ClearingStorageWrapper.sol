@@ -9,6 +9,7 @@ import { IERC20StorageWrapper } from "./ERC1400/ERC20/IERC20StorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { ThirdPartyType } from "./types/ThirdPartyType.sol";
 
 /// @title ClearingStorageWrapper - Pure Storage Operations
@@ -486,7 +487,11 @@ library ClearingStorageWrapper {
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
         bool _mustBeExpired
     ) internal view {
-        if (isClearingBasicInfo(_clearingOperationIdentifier).expirationTimestamp > block.timestamp != _mustBeExpired) {
+        if (
+            isClearingBasicInfo(_clearingOperationIdentifier).expirationTimestamp >
+            TimeTravelStorageWrapper.getBlockTimestamp() !=
+            _mustBeExpired
+        ) {
             if (_mustBeExpired) revert IClearing.ExpirationDateNotReached();
             revert IClearing.ExpirationDateReached();
         }

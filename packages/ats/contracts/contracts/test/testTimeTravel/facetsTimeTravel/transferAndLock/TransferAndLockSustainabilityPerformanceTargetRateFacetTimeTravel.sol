@@ -6,11 +6,11 @@ import {
     TransferAndLockSustainabilityPerformanceTargetRateFacet
 } from "../../../../facets/layer_3/transferAndLock/sustainabilityPerformanceTargetRate/TransferAndLockSustainabilityPerformanceTargetRateFacet.sol";
 /* solhint-enable max-line-length */
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
 contract TransferAndLockSustainabilityPerformanceTargetRateFacetTimeTravel is
     TransferAndLockSustainabilityPerformanceTargetRateFacet,
-    TimeTravelStorageWrapper
+    TimeTravelProvider
 {
     // Composed facet for testing
 }

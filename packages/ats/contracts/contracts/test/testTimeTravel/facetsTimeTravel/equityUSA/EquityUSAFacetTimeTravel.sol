@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { EquityUSAFacet } from "../../../../facets/layer_3/equityUSA/EquityUSAFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract EquityUSAFacetTimeTravel is EquityUSAFacet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract EquityUSAFacetTimeTravel is EquityUSAFacet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }

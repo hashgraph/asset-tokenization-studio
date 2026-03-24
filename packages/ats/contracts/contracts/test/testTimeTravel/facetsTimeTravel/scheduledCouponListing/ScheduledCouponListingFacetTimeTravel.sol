@@ -4,8 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     ScheduledCouponListingFacet
 } from "../../../../facets/layer_2/scheduledTask/scheduledCouponListing/ScheduledCouponListingFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract ScheduledCouponListingFacetTimeTravel is ScheduledCouponListingFacet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract ScheduledCouponListingFacetTimeTravel is ScheduledCouponListingFacet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }

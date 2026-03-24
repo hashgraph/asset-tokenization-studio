@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { TransferAndLockFacet } from "../../../../facets/layer_3/transferAndLock/standard/TransferAndLockFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract TransferAndLockFacetTimeTravel is TransferAndLockFacet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract TransferAndLockFacetTimeTravel is TransferAndLockFacet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }

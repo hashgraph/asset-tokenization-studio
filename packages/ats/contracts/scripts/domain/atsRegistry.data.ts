@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-24T11:58:50.747Z
+ * Generated: 2026-03-24T16:07:11.017Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -3741,7 +3741,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       name: "_TIME_TRAVEL_RESOLVER_KEY",
       value: "0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8",
     },
-    inheritance: ["IStaticFunctionSelectors", "ITimeTravel", "TimeTravelStorageWrapper"],
+    inheritance: ["IStaticFunctionSelectors", "ITimeTravel", "ITimeTravelStorageWrapper", "TimeTravelProvider"],
     methods: [
       { name: "blockTimestamp", signature: "function blockTimestamp() view returns (uint256)", selector: "0xadb61832" },
       {
@@ -3756,7 +3756,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       {
         name: "checkBlockChainid",
-        signature: "function checkBlockChainid(uint256 chainId) pure",
+        signature: "function checkBlockChainid(uint256 chainId) view",
         selector: "0xd939398c",
       },
       { name: "resetSystemBlocknumber", signature: "function resetSystemBlocknumber()", selector: "0x64b677a4" },
@@ -4909,7 +4909,6 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 
   TimeTravelStorageWrapper: {
     name: "TimeTravelStorageWrapper",
-    inheritance: ["ITimeTravelStorageWrapper", "LocalContext"],
     methods: [],
   },
 };

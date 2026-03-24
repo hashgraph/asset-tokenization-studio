@@ -11,6 +11,7 @@ import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 struct LockDataStorage {
     mapping(address => uint256) totalLockedAmountByAccount;
@@ -199,7 +200,7 @@ library LockStorageWrapper {
     ) internal view returns (bool) {
         ILock.LockData memory lock = getLock(partition, tokenHolder, lockId);
 
-        if (lock.expirationTimestamp > block.timestamp) return false;
+        if (lock.expirationTimestamp > TimeTravelStorageWrapper.getBlockTimestamp()) return false;
 
         return true;
     }
@@ -211,7 +212,7 @@ library LockStorageWrapper {
     // --- Guard functions ---
 
     function requireValidExpirationTimestamp(uint256 expirationTimestamp) internal view {
-        if (expirationTimestamp < block.timestamp) revert WrongExpirationTimestamp();
+        if (expirationTimestamp < TimeTravelStorageWrapper.getBlockTimestamp()) revert WrongExpirationTimestamp();
     }
 
     function requireValidLockId(bytes32 partition, address tokenHolder, uint256 lockId) internal view {

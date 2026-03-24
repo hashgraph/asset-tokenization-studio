@@ -8,6 +8,7 @@ import { SsiManagementStorageWrapper } from "./SsiManagementStorageWrapper.sol";
 import { _KYC_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 struct KycStorage {
     mapping(address => IKyc.KycData) kyc;
@@ -110,7 +111,8 @@ library KycStorageWrapper {
 
     function verifyKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view returns (bool) {
         KycStorage storage ks = kycStorage();
-        bool internalKycValid = !ks.internalKycActivated || getKycStatusFor(_account, block.timestamp) == _kycStatus;
+        bool internalKycValid = !ks.internalKycActivated ||
+            getKycStatusFor(_account, TimeTravelStorageWrapper.getBlockTimestamp()) == _kycStatus;
         return internalKycValid && ExternalListManagementStorageWrapper.isExternallyGranted(_account, _kycStatus);
     }
 

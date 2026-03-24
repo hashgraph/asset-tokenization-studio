@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingHoldCreationFacet } from "../../../../facets/layer_1/clearing/ClearingHoldCreationFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract ClearingHoldCreationFacetTimeTravel is ClearingHoldCreationFacet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract ClearingHoldCreationFacetTimeTravel is ClearingHoldCreationFacet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }

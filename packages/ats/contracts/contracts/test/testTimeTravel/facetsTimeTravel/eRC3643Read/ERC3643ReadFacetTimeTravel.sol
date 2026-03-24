@@ -4,8 +4,8 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC3643ReadFacet } from "../../../../facets/layer_1/ERC3643/ERC3643ReadFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract ERC3643ReadFacetTimeTravel is ERC3643ReadFacet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract ERC3643ReadFacetTimeTravel is ERC3643ReadFacet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }

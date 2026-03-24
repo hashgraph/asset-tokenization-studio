@@ -18,6 +18,7 @@ import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 struct EquityDataStorage {
     bool votingRight;
@@ -218,7 +219,8 @@ library EquityStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         IEquity.RegisteredDividend memory registeredDividend = getDividends(dividendID);
 
-        if (registeredDividend.dividend.recordDate >= block.timestamp) return new address[](0);
+        if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp())
+            return new address[](0);
 
         if (registeredDividend.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredDividend.snapshotId, pageIndex, pageLength);
@@ -229,7 +231,7 @@ library EquityStorageWrapper {
     function getTotalDividendHolders(uint256 dividendID) internal view returns (uint256) {
         IEquity.RegisteredDividend memory registeredDividend = getDividends(dividendID);
 
-        if (registeredDividend.dividend.recordDate >= block.timestamp) return 0;
+        if (registeredDividend.dividend.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
 
         if (registeredDividend.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredDividend.snapshotId);
@@ -285,7 +287,7 @@ library EquityStorageWrapper {
     ) internal view returns (address[] memory holders_) {
         IEquity.RegisteredVoting memory registeredVoting = getVoting(voteID);
 
-        if (registeredVoting.voting.recordDate >= block.timestamp) return new address[](0);
+        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return new address[](0);
 
         if (registeredVoting.snapshotId != 0)
             return SnapshotsStorageWrapper.tokenHoldersAt(registeredVoting.snapshotId, pageIndex, pageLength);
@@ -296,7 +298,7 @@ library EquityStorageWrapper {
     function getTotalVotingHolders(uint256 voteID) internal view returns (uint256) {
         IEquity.RegisteredVoting memory registeredVoting = getVoting(voteID);
 
-        if (registeredVoting.voting.recordDate >= block.timestamp) return 0;
+        if (registeredVoting.voting.recordDate >= TimeTravelStorageWrapper.getBlockTimestamp()) return 0;
 
         if (registeredVoting.snapshotId != 0)
             return SnapshotsStorageWrapper.totalTokenHoldersAt(registeredVoting.snapshotId);
@@ -327,7 +329,7 @@ library EquityStorageWrapper {
         uint256 snapshotId,
         address account
     ) internal view returns (uint256 balance_, uint8 decimals_, bool dateReached_) {
-        if (date < block.timestamp) {
+        if (date < TimeTravelStorageWrapper.getBlockTimestamp()) {
             dateReached_ = true;
 
             balance_ = (snapshotId != 0)

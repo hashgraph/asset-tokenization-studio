@@ -1,38 +1,56 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import { TimeTravelProvider } from "./TimeTravelProvider.sol";
 import { TimeTravelStorageWrapper } from "./TimeTravelStorageWrapper.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { ITimeTravel } from "../ITimeTravel.sol";
+import { ITimeTravelStorageWrapper } from "../ITimeTravelStorageWrapper.sol";
 import { _TIME_TRAVEL_RESOLVER_KEY } from "../constants/resolverKeys.sol";
 
-contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, TimeTravelStorageWrapper {
+contract TimeTravelFacet is IStaticFunctionSelectors, ITimeTravel, ITimeTravelStorageWrapper, TimeTravelProvider {
     function changeSystemTimestamp(uint256 newTimestamp) external override {
-        _changeSystemTimestamp(newTimestamp);
+        if (newTimestamp == 0) {
+            revert InvalidTimestamp(newTimestamp);
+        }
+
+        uint256 oldTimestamp = TimeTravelStorageWrapper.getTimestampOverride();
+        TimeTravelStorageWrapper.setTimestampOverride(newTimestamp);
+
+        emit SystemTimestampChanged(oldTimestamp, newTimestamp);
     }
 
     function resetSystemTimestamp() external override {
-        _resetSystemTimestamp();
+        TimeTravelStorageWrapper.setTimestampOverride(0);
+        emit SystemTimestampReset();
     }
 
     function changeSystemBlocknumber(uint256 _newSystemBlocknumber) external override {
-        _changeSystemBlocknumber(_newSystemBlocknumber);
+        if (_newSystemBlocknumber == 0) {
+            revert InvalidBlocknumber(_newSystemBlocknumber);
+        }
+
+        uint256 oldBlocknumber = TimeTravelStorageWrapper.getBlockNumberOverride();
+        TimeTravelStorageWrapper.setBlockNumberOverride(_newSystemBlocknumber);
+
+        emit SystemBlocknumberChanged(oldBlocknumber, _newSystemBlocknumber);
     }
 
     function resetSystemBlocknumber() external override {
-        _resetSystemBlocknumber();
+        TimeTravelStorageWrapper.setBlockNumberOverride(0);
+        emit SystemBlocknumberReset();
     }
 
     function blockTimestamp() external view override returns (uint256) {
-        return _blockTimestamp();
+        return TimeTravelStorageWrapper.getBlockTimestamp();
     }
 
     /*
      * @dev Check the chainId of the current block (only for testing)
      * @param chainId The chainId to check
      */
-    function checkBlockChainid(uint256 chainId) external pure {
-        _checkBlockChainid(chainId);
+    function checkBlockChainid(uint256 chainId) external view {
+        if (block.chainid != chainId) revert WrongChainId();
     }
 
     function getStaticResolverKey() external pure virtual override returns (bytes32 staticResolverKey_) {

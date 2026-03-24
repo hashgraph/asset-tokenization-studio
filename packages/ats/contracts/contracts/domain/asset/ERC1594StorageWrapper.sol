@@ -25,6 +25,7 @@ import { KycStorageWrapper } from "../core/KycStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION, RoleDataStorage } from "../core/AccessControlStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 struct ERC1594Storage {
     bool issuance;
@@ -399,7 +400,11 @@ library ERC1594StorageWrapper {
         bytes32 partition
     ) private view returns (bool isAbleToTransfer, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         if (checkAllowance) {
-            uint256 currentAllowance = ERC20StorageWrapper.allowanceAdjustedAt(from, msg.sender, block.timestamp);
+            uint256 currentAllowance = ERC20StorageWrapper.allowanceAdjustedAt(
+                from,
+                msg.sender,
+                TimeTravelStorageWrapper.getBlockTimestamp()
+            );
             if (currentAllowance < value) {
                 return (
                     false,
@@ -424,7 +429,7 @@ library ERC1594StorageWrapper {
         uint256 currentPartitionBalance = AdjustBalancesStorageWrapper.balanceOfByPartitionAdjustedAt(
             partition,
             from,
-            block.timestamp
+            TimeTravelStorageWrapper.getBlockTimestamp()
         );
         if (currentPartitionBalance < value) {
             return (

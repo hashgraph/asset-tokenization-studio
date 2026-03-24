@@ -4,8 +4,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import {
     ExternalControlListManagementFacet
 } from "../../../../facets/layer_1/externalControlList/ExternalControlListManagementFacet.sol";
-import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
+import { TimeTravelProvider } from "../../timeTravel/TimeTravelProvider.sol";
 
-contract ExternalControlListManagementFacetTimeTravel is ExternalControlListManagementFacet, TimeTravelStorageWrapper {
-    // solhint-disable-previous-line no-empty-blocks
+contract ExternalControlListManagementFacetTimeTravel is ExternalControlListManagementFacet, TimeTravelProvider {
+    // solhint-disable-next-line no-empty-blocks
 }
