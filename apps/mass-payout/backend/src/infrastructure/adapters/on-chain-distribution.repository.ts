@@ -7,6 +7,7 @@ import { Asset } from "@domain/model/asset"
 import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id"
 import {
   Bond,
+  Coupon,
   Equity,
   Security,
   GetAllCouponsRequest,
@@ -50,7 +51,7 @@ export class OnChainDistributionRepository implements OnChainDistributionReposit
           securityId: tokenId,
           couponId: corporateActionId,
         })
-        return await Bond.getTotalCouponHolders(couponRequest)
+        return await Coupon.getTotalCouponHolders(couponRequest)
       }
 
       case AssetType.EQUITY: {
@@ -88,7 +89,7 @@ export class OnChainDistributionRepository implements OnChainDistributionReposit
 
   private async getCouponsForAsset(asset: Asset): Promise<Distribution[]> {
     const request = new GetAllCouponsRequest({ securityId: asset.hederaTokenAddress })
-    const coupons = await Bond.getAllCoupons(request)
+    const coupons = await Coupon.getAllCoupons(request)
     const now = new Date()
 
     const futureCoupons = coupons
