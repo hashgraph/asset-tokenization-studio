@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { BondStorageWrapper } from "../../domain/asset/BondStorageWrapper.sol";
+import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title BondModifiers
@@ -16,7 +17,7 @@ abstract contract BondModifiers {
      * @dev Reverts with AlreadyInitialized if bond is already initialized
      */
     modifier onlyNotBondInitialized() {
-        BondStorageWrapper._checkNotBondInitialized();
+        _checkNotInitialized(BondStorageWrapper.isBondInitialized());
         _;
     }
 }

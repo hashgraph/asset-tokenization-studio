@@ -65,12 +65,6 @@ library ProtectedPartitionsStorageWrapper {
         return protectedPartitionsStorage().initialized;
     }
 
-    function _checkNotProtectedPartitionInitialized() internal view {
-        if (isProtectedPartitionInitialized()) {
-            revert IProtectedPartitionsStorageWrapper.AlreadyInitialized();
-        }
-    }
-
     function _checkUnProtectedPartitionsOrWildCardRole(bytes32 /*partition*/, bool isWildCardRole) internal view {
         if (!isWildCardRole && arePartitionsProtected()) {
             // TODO: REVERT REASONS CANNOT BE USED

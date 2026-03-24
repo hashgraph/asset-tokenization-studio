@@ -497,10 +497,4 @@ library ClearingStorageWrapper {
             revert IClearing.ClearingIsActivated();
         }
     }
-
-    function _checkNotClearingInitialized() internal view {
-        if (isClearingInitialized()) {
-            revert IClearingStorageWrapper.AlreadyInitialized();
-        }
-    }
 }

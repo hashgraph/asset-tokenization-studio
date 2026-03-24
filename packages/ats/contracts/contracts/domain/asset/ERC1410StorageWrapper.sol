@@ -647,12 +647,6 @@ library ERC1410StorageWrapper {
         return erc1410BasicStorage().initialized;
     }
 
-    function _checkNotERC1410Initialized() internal view {
-        if (isERC1410Initialized()) {
-            revert IERC1410StorageWrapper.AlreadyInitialized();
-        }
-    }
-
     function isOperator(address operator, address tokenHolder) internal view returns (bool) {
         return erc1410OperatorStorage().approvals[tokenHolder][operator];
     }

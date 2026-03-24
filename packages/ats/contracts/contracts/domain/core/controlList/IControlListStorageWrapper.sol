@@ -9,9 +9,4 @@ interface IControlListStorageWrapper {
      *
      */
     error AccountIsBlocked(address account);
-
-    /**
-     * @dev Error thrown when control list is already initialized
-     */
-    error AlreadyInitialized();
 }

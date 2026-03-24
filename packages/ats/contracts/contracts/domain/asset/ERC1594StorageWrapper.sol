@@ -65,12 +65,6 @@ library ERC1594StorageWrapper {
         return erc1594Storage().initialized;
     }
 
-    function _checkNotERC1594Initialized() internal view {
-        if (isERC1594Initialized()) {
-            revert IERC1594StorageWrapper.AlreadyInitialized();
-        }
-    }
-
     function requireCanTransferFromByPartition(
         address from,
         address to,

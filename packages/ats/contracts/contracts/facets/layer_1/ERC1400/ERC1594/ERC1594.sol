@@ -18,6 +18,7 @@ import { CapStorageWrapper } from "../../../../domain/core/CapStorageWrapper.sol
 import { ERC3643StorageWrapper } from "../../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
+import { _checkNotInitialized } from "../../../../services/InitializationErrors.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
@@ -25,8 +26,7 @@ import { ProtectedPartitionRoleValidator } from "../../../../infrastructure/util
 abstract contract ERC1594 is IERC1594, TimestampProvider, PauseModifiers, ProtectedPartitionRoleValidator {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594() external override {
-        // TODO: BAD PATTERN. _check function is required.
-        if (ERC1594StorageWrapper.isERC1594Initialized()) revert IERC1594StorageWrapper.AlreadyInitialized();
+        _checkNotInitialized(ERC1594StorageWrapper.isERC1594Initialized());
         ERC1594StorageWrapper.initialize();
     }
 

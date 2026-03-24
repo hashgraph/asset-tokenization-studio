@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients } from "../../facets/layer_2/proceedRecipient/IProceedRecipients.sol";
 import { ProceedRecipientsStorageWrapper } from "../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title ProceedRecipientModifiers
@@ -19,7 +20,7 @@ abstract contract ProceedRecipientModifiers {
     /// @notice Modifier to ensure proceed recipients have not been initialized
     /// @dev Calls _checkNotProceedRecipientsInitialized from ProceedRecipientsStorageWrapper
     modifier onlyNotProceedRecipientsInitialized() {
-        ProceedRecipientsStorageWrapper._checkNotProceedRecipientsInitialized();
+        _checkNotInitialized(ProceedRecipientsStorageWrapper.isProceedRecipientsInitialized());
         _;
     }
 

@@ -12,12 +12,12 @@ import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapp
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
+import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
 
 abstract contract ClearingActions is IClearingActions, AccessControlModifiers, PauseModifiers, ClearingModifiers {
     function initializeClearing(bool _clearingActive) external {
-        // TODO: BAD PATTERN, _check function is required.
-        if (ClearingStorageWrapper.isClearingInitialized()) revert IClearingStorageWrapper.AlreadyInitialized();
+        _checkNotInitialized(ClearingStorageWrapper.isClearingInitialized());
         ClearingStorageWrapper.initializeClearing(_clearingActive);
     }
 

@@ -207,12 +207,6 @@ library ERC20VotesStorageWrapper {
         return erc20VotesStorage_().initialized;
     }
 
-    function _checkNotERC20VotesInitialized() internal view {
-        if (isERC20VotesInitialized()) {
-            revert IERC20VotesStorageWrapper.AlreadyInitialized();
-        }
-    }
-
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         return a + b;
     }

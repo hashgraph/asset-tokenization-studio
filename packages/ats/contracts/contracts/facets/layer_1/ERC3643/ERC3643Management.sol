@@ -9,13 +9,13 @@ import { AccessControlModifiers } from "../../../infrastructure/utils/AccessCont
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 
 abstract contract ERC3643Management is IERC3643Management, AccessControlModifiers, PauseModifiers, ERC3643Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) external {
-        // TODO: BAD PATTERN. _check function is required.
-        if (ERC3643StorageWrapper.isERC3643Initialized()) revert IERC3643StorageWrapper.AlreadyInitialized();
+        _checkNotInitialized(ERC3643StorageWrapper.isERC3643Initialized());
         ERC3643StorageWrapper.initialize_ERC3643(_compliance, _identityRegistry);
     }
 

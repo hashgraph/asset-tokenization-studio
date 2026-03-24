@@ -70,12 +70,6 @@ library ProceedRecipientsStorageWrapper {
         }
     }
 
-    function _checkNotProceedRecipientsInitialized() internal view {
-        if (isProceedRecipientsInitialized()) {
-            revert IProceedRecipients.AlreadyInitialized();
-        }
-    }
-
     // --- Read functions ---
 
     function getProceedRecipientData(address _proceedRecipient) internal view returns (bytes memory) {

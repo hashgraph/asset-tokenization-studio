@@ -12,26 +12,27 @@ pragma solidity >=0.8.0 <0.9.0;
  * @author Asset Tokenization Studio Team
  */
 import { InterestRateStorageWrapper } from "../../domain/asset/InterestRateStorageWrapper.sol";
+import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 abstract contract InterestRateModifiers {
     /// @notice Modifier that ensures fixed rate has not been initialized
     /// @dev Calls _checkNotFixedRateInitialized from InterestRateStorageWrapper
     modifier onlyNotFixedRateInitialized() {
-        InterestRateStorageWrapper._checkNotFixedRateInitialized();
+        _checkNotInitialized(InterestRateStorageWrapper.isFixedRateInitialized());
         _;
     }
 
     /// @notice Modifier that ensures KPI linked rate has not been initialized
     /// @dev Calls _checkNotKpiLinkedRateInitialized from InterestRateStorageWrapper
     modifier onlyNotKpiLinkedRateInitialized() {
-        InterestRateStorageWrapper._checkNotKpiLinkedRateInitialized();
+        _checkNotInitialized(InterestRateStorageWrapper.isKpiLinkedRateInitialized());
         _;
     }
 
     /// @notice Modifier that ensures sustainability performance target rate has not been initialized
     /// @dev Calls _checkNotSustainabilityPerformanceTargetRateInitialized from InterestRateStorageWrapper
     modifier onlyNotSustainabilityPerformanceTargetRateInitialized() {
-        InterestRateStorageWrapper._checkNotSustainabilityPerformanceTargetRateInitialized();
+        _checkNotInitialized(InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized());
         _;
     }
 }

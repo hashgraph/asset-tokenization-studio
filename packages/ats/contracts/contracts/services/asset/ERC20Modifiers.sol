@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC20StorageWrapper } from "../../domain/asset/ERC20StorageWrapper.sol";
 import { ERC20VotesStorageWrapper } from "../../domain/asset/ERC20VotesStorageWrapper.sol";
+import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title ERC20Modifiers
@@ -17,7 +18,7 @@ abstract contract ERC20Modifiers {
      * @dev Reverts with AlreadyInitialized if ERC20 is already initialized
      */
     modifier onlyNotERC20Initialized() {
-        ERC20StorageWrapper._checkNotERC20Initialized();
+        _checkNotInitialized(ERC20StorageWrapper.isERC20Initialized());
         _;
     }
 
@@ -26,7 +27,7 @@ abstract contract ERC20Modifiers {
      * @dev Reverts with AlreadyInitialized if ERC20Votes is already initialized
      */
     modifier onlyNotERC20VotesInitialized() {
-        ERC20VotesStorageWrapper._checkNotERC20VotesInitialized();
+        _checkNotInitialized(ERC20VotesStorageWrapper.isERC20VotesInitialized());
         _;
     }
 }

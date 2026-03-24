@@ -8,13 +8,13 @@ import { AccessControlModifiers } from "../../../infrastructure/utils/AccessCont
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
+import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract Kyc is IKyc, AccessControlModifiers, TimestampProvider, PauseModifiers {
     function initializeInternalKyc(bool _internalKycActivated) external {
-        // TODO: BAD PATTERN. _check function is required.
-        if (KycStorageWrapper.isKycInitialized()) revert IKyc.AlreadyInitialized();
+        _checkNotInitialized(KycStorageWrapper.isKycInitialized());
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
     }
 

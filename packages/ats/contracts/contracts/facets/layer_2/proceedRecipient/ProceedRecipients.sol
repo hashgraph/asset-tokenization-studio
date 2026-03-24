@@ -8,6 +8,7 @@ import { AccessControlModifiers } from "../../../infrastructure/utils/AccessCont
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 
 abstract contract ProceedRecipients is IProceedRecipients, AccessControlModifiers, PauseModifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -15,9 +16,7 @@ abstract contract ProceedRecipients is IProceedRecipients, AccessControlModifier
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
     ) external override {
-        // TODO: BAD PATTERN. _check function is required.
-        if (ProceedRecipientsStorageWrapper.isProceedRecipientsInitialized())
-            revert IProceedRecipients.AlreadyInitialized();
+        _checkNotInitialized(ProceedRecipientsStorageWrapper.isProceedRecipientsInitialized());
         ProceedRecipientsStorageWrapper.initialize_ProceedRecipients(_proceedRecipients, _data);
     }
 

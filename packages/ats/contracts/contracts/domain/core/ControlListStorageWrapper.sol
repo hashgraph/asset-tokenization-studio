@@ -63,12 +63,6 @@ library ControlListStorageWrapper {
         }
     }
 
-    function _checkNotControlListInitialized() internal view {
-        if (isControlListInitialized()) {
-            revert IControlListStorageWrapper.AlreadyInitialized();
-        }
-    }
-
     // --- Control list operations ---
 
     function addToControlList(address _account) internal returns (bool success_) {

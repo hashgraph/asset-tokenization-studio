@@ -23,5 +23,4 @@ interface IERC1644StorageWrapper {
     );
 
     error TokenIsNotControllable();
-    error AlreadyInitialized();
 }

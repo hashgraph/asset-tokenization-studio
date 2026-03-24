@@ -151,24 +151,6 @@ library InterestRateStorageWrapper {
         return kpiLinkedRateStorage().initialized;
     }
 
-    function _checkNotFixedRateInitialized() internal view {
-        if (isFixedRateInitialized()) {
-            revert IInterestRateStorageWrapper.AlreadyInitialized();
-        }
-    }
-
-    function _checkNotKpiLinkedRateInitialized() internal view {
-        if (isKpiLinkedRateInitialized()) {
-            revert IInterestRateStorageWrapper.AlreadyInitialized();
-        }
-    }
-
-    function _checkNotSustainabilityPerformanceTargetRateInitialized() internal view {
-        if (isSustainabilityPerformanceTargetRateInitialized()) {
-            revert IInterestRateStorageWrapper.AlreadyInitialized();
-        }
-    }
-
     // --- View functions ---
 
     function getRate() internal view returns (uint256 rate_, uint8 decimals_) {

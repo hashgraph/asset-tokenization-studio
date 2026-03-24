@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
 import { ClearingStorageWrapper } from "../../domain/asset/ClearingStorageWrapper.sol";
+import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title ClearingModifiers
@@ -45,7 +46,7 @@ abstract contract ClearingModifiers {
      * @dev Reverts with AlreadyInitialized if clearing is already initialized
      */
     modifier onlyNotClearingInitialized() {
-        ClearingStorageWrapper._checkNotClearingInitialized();
+        _checkNotInitialized(ClearingStorageWrapper.isClearingInitialized());
         _;
     }
 }

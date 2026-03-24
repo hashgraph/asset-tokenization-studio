@@ -16,6 +16,4 @@ interface IERC3643StorageWrapper {
         uint256 availableFrozen,
         bytes32 partition
     );
-
-    error AlreadyInitialized();
 }

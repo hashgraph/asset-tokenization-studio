@@ -141,14 +141,6 @@ library CapStorageWrapper {
         return capStorage().initialized;
     }
 
-    // --- Guard functions for modifiers ---
-
-    function _checkNotCapInitialized() internal view {
-        if (isCapInitialized()) {
-            revert ICapStorageWrapper.AlreadyInitialized();
-        }
-    }
-
     // --- Storage accessor and pure helpers ---
 
     function capStorage() internal pure returns (CapDataStorage storage cap_) {

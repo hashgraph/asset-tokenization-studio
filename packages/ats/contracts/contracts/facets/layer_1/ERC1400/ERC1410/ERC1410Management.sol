@@ -14,14 +14,14 @@ import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
+import { _checkNotInitialized } from "../../../../services/InitializationErrors.sol";
 import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
 abstract contract ERC1410Management is IERC1410Management, AccessControlModifiers, PauseModifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool _multiPartition) external override {
-        // TODO: BAD PATTERN. _check function is required.
-        if (ERC1410StorageWrapper.isERC1410Initialized()) revert IERC1410StorageWrapper.AlreadyInitialized();
+        _checkNotInitialized(ERC1410StorageWrapper.isERC1410Initialized());
         ERC1410StorageWrapper.initialize_ERC1410(_multiPartition);
     }
 

@@ -7,14 +7,14 @@ import { _CAP_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
+import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 
 abstract contract Cap is ICap, TimestampProvider, PauseModifiers, AccessControlModifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external override {
-        // TODO: BAD PATTERN, _check function is required.
-        if (CapStorageWrapper.isCapInitialized()) revert ICapStorageWrapper.AlreadyInitialized();
+        _checkNotInitialized(CapStorageWrapper.isCapInitialized());
         CapStorageWrapper.requireValidNewMaxSupply(maxSupply, _getBlockTimestamp());
         CapStorageWrapper.initialize_Cap(maxSupply, partitionCap);
     }

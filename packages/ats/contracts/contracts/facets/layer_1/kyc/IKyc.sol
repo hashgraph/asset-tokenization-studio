@@ -43,8 +43,6 @@ interface IKyc {
     error InvalidKycStatus();
     error KycIsNotGranted();
     error InvalidZeroAddress();
-    error AlreadyInitialized();
-
     /**
      * @dev Initialize Internal Kyc
      */

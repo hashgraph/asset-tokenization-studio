@@ -253,12 +253,6 @@ library ERC20StorageWrapper {
         return erc20Storage().initialized;
     }
 
-    function _checkNotERC20Initialized() internal view {
-        if (isERC20Initialized()) {
-            revert IERC20StorageWrapper.AlreadyInitialized();
-        }
-    }
-
     function getERC20Metadata() internal view returns (IERC20.ERC20Metadata memory erc20Metadata_) {
         ERC20Storage storage erc20Stor = erc20Storage();
         IERC20.ERC20MetadataInfo memory erc20Info = IERC20.ERC20MetadataInfo({

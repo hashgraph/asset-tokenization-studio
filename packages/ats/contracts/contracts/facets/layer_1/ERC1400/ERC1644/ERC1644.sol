@@ -9,13 +9,13 @@ import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessC
 import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWrapper.sol";
+import { _checkNotInitialized } from "../../../../services/InitializationErrors.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
 abstract contract ERC1644 is IERC1644, AccessControlModifiers, PauseModifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1644(bool _controllable) external override {
-        // TODO: BAD PATTERN. _check function is required.
-        if (ERC1644StorageWrapper.isERC1644Initialized()) revert IERC1644StorageWrapper.AlreadyInitialized();
+        _checkNotInitialized(ERC1644StorageWrapper.isERC1644Initialized());
         ERC1644StorageWrapper.initialize_ERC1644(_controllable);
     }
 
