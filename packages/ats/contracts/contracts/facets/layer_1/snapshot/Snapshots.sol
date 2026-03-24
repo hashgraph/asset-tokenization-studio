@@ -10,7 +10,7 @@ import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTas
 import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 abstract contract Snapshots is ISnapshots, PauseModifiers, AccessControlModifiers {
     function takeSnapshot() external override onlyUnpaused onlyRole(_SNAPSHOT_ROLE) returns (uint256 snapshotID_) {
-        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
         snapshotID_ = SnapshotsStorageWrapper.takeSnapshot();
         emit SnapshotTaken(msg.sender, snapshotID_);
     }

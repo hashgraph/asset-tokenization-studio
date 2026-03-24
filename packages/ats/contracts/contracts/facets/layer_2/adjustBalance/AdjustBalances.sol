@@ -15,7 +15,7 @@ abstract contract AdjustBalances is IAdjustBalances, AccessControlModifiers, Pau
         uint8 decimals
     ) external override onlyUnpaused onlyRole(_ADJUSTMENT_BALANCE_ROLE) returns (bool success_) {
         AdjustBalancesStorageWrapper.requireValidFactor(factor);
-        ScheduledTasksStorageWrapper.callTriggerPendingScheduledCrossOrderedTasks();
+        ScheduledTasksStorageWrapper.triggerScheduledCrossOrderedTasks(0);
         AdjustBalancesStorageWrapper.adjustBalances(factor, decimals);
         success_ = true;
     }
