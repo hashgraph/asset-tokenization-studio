@@ -5,13 +5,14 @@ import { IBusinessLogicResolver } from "./IBusinessLogicResolver.sol";
 import { DiamondCutManager } from "./DiamondCutManager.sol";
 import { _DEFAULT_ADMIN_ROLE } from "../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
+import { IInitializationErrors } from "../../services/IInitializationErrors.sol";
 
-contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
+contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager, IInitializationErrors {
     error Unimplemented();
-    error AlreadyInitialized();
 
     modifier onlyUninitialized(bool _initialized) {
-        if (_initialized) revert AlreadyInitialized();
+        // TODO: Bad pattern, function _check required.
+        if (_initialized) revert AlreadyInitialized(true);
         _;
     }
 

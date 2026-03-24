@@ -10,6 +10,7 @@ import {
     ISustainabilityPerformanceTargetRate
 } from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
+import { IInterestRateStorageWrapper } from "./interestRate/IInterestRateStorageWrapper.sol";
 
 // --- Storage structs ---
 
@@ -140,6 +141,32 @@ library InterestRateStorageWrapper {
 
     function isSustainabilityPerformanceTargetRateInitialized() internal view returns (bool) {
         return sustainabilityPerformanceTargetRateStorage().initialized;
+    }
+
+    function isFixedRateInitialized() internal view returns (bool) {
+        return fixedRateStorage().initialized;
+    }
+
+    function isKpiLinkedRateInitialized() internal view returns (bool) {
+        return kpiLinkedRateStorage().initialized;
+    }
+
+    function _checkNotFixedRateInitialized() internal view {
+        if (isFixedRateInitialized()) {
+            revert IInterestRateStorageWrapper.AlreadyInitialized();
+        }
+    }
+
+    function _checkNotKpiLinkedRateInitialized() internal view {
+        if (isKpiLinkedRateInitialized()) {
+            revert IInterestRateStorageWrapper.AlreadyInitialized();
+        }
+    }
+
+    function _checkNotSustainabilityPerformanceTargetRateInitialized() internal view {
+        if (isSustainabilityPerformanceTargetRateInitialized()) {
+            revert IInterestRateStorageWrapper.AlreadyInitialized();
+        }
     }
 
     // --- View functions ---

@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _AGENT_ROLE, _TREX_OWNER_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Management } from "./IERC3643Management.sol";
+import { IERC3643StorageWrapper } from "../../../domain/asset/ERC3643/IERC3643StorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
@@ -11,11 +12,10 @@ import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapp
 import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 
 abstract contract ERC3643Management is IERC3643Management, AccessControlModifiers, PauseModifiers, ERC3643Modifiers {
-    error AlreadyInitialized();
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) external {
-        if (ERC3643StorageWrapper.isERC3643Initialized()) revert AlreadyInitialized();
+        // TODO: BAD PATTERN. _check function is required.
+        if (ERC3643StorageWrapper.isERC3643Initialized()) revert IERC3643StorageWrapper.AlreadyInitialized();
         ERC3643StorageWrapper.initialize_ERC3643(_compliance, _identityRegistry);
     }
 

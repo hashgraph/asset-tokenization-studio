@@ -32,4 +32,5 @@ interface IEquityStorageWrapper {
     error DividendCreationFailed();
     error VotingRightsCreationFailed();
     error BalanceAdjustmentCreationFailed();
+    error AlreadyInitialized();
 }

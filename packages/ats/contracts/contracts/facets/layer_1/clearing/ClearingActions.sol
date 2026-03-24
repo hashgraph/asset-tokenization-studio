@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingActions } from "./IClearingActions.sol";
 import { IClearing } from "./IClearing.sol";
+import { IClearingStorageWrapper } from "../../../domain/asset/clearing/IClearingStorageWrapper.sol";
 import { _CLEARING_VALIDATOR_ROLE, _CLEARING_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
@@ -14,10 +15,9 @@ import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
 
 abstract contract ClearingActions is IClearingActions, AccessControlModifiers, PauseModifiers, ClearingModifiers {
-    error AlreadyInitialized();
-
     function initializeClearing(bool _clearingActive) external {
-        if (ClearingStorageWrapper.isClearingInitialized()) revert AlreadyInitialized();
+        // TODO: BAD PATTERN, _check function is required.
+        if (ClearingStorageWrapper.isClearingInitialized()) revert IClearingStorageWrapper.AlreadyInitialized();
         ClearingStorageWrapper.initializeClearing(_clearingActive);
     }
 

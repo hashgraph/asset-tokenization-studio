@@ -340,6 +340,16 @@ library EquityStorageWrapper {
         }
     }
 
+    function isEquityInitialized() internal view returns (bool) {
+        return equityStorage().initialized;
+    }
+
+    function _checkNotEquityInitialized() internal view {
+        if (isEquityInitialized()) {
+            revert IEquityStorageWrapper.AlreadyInitialized();
+        }
+    }
+
     // --- Pure functions (storage accessors) ---
 
     function equityStorage() internal pure returns (EquityDataStorage storage equityData_) {

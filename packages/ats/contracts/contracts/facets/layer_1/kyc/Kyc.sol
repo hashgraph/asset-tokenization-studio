@@ -12,10 +12,9 @@ import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapp
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract Kyc is IKyc, AccessControlModifiers, TimestampProvider, PauseModifiers {
-    error AlreadyInitialized();
-
     function initializeInternalKyc(bool _internalKycActivated) external {
-        if (KycStorageWrapper.isKycInitialized()) revert AlreadyInitialized();
+        // TODO: BAD PATTERN. _check function is required.
+        if (KycStorageWrapper.isKycInitialized()) revert IKyc.AlreadyInitialized();
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);
     }
 

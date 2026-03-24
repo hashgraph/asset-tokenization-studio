@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _CONTROLLER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 import { BasicTransferInfo, OperatorTransferData } from "./IERC1410.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";
+import { IERC1410StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1410/IERC1410StorageWrapper.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
@@ -17,11 +18,10 @@ import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWr
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
 abstract contract ERC1410Management is IERC1410Management, AccessControlModifiers, PauseModifiers {
-    error AlreadyInitialized();
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool _multiPartition) external override {
-        if (ERC1410StorageWrapper.isERC1410Initialized()) revert AlreadyInitialized();
+        // TODO: BAD PATTERN. _check function is required.
+        if (ERC1410StorageWrapper.isERC1410Initialized()) revert IERC1410StorageWrapper.AlreadyInitialized();
         ERC1410StorageWrapper.initialize_ERC1410(_multiPartition);
     }
 

@@ -5,6 +5,7 @@ import { _PAUSE_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IPauseStorageWrapper } from "./pause/IPauseStorageWrapper.sol";
 import { IExternalPause } from "../../facets/layer_1/externalPause/IExternalPause.sol";
+import { IInitializationErrors } from "../../services/IInitializationErrors.sol";
 import {
     ExternalListManagementStorageWrapper,
     ExternalListDataStorage
@@ -85,5 +86,21 @@ library PauseStorageWrapper {
 
     function isExternalPauseInitialized() internal view returns (bool) {
         return ExternalListManagementStorageWrapper.externalListStorage(_PAUSE_MANAGEMENT_STORAGE_POSITION).initialized;
+    }
+
+    // --- Guard functions for modifiers ---
+
+    function _checkUnpaused() internal view {
+        if (isPaused()) revert IPauseStorageWrapper.TokenIsPaused();
+    }
+
+    function _checkPaused() internal view {
+        if (!isPaused()) revert IPauseStorageWrapper.TokenIsUnpaused();
+    }
+
+    function _checkNotExternalPauseInitialized() internal view {
+        if (isExternalPauseInitialized()) {
+            revert IInitializationErrors.AlreadyInitialized(true);
+        }
     }
 }

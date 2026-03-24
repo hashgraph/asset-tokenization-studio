@@ -5,18 +5,14 @@ import { IExternalKycListManagement } from "./IExternalKycListManagement.sol";
 import { _KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _KYC_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 import { IKyc } from "../kyc/IKyc.sol";
 
-abstract contract ExternalKycListManagement is IExternalKycListManagement, AccessControlModifiers, PauseModifiers {
-    error AlreadyInitialized();
-
+abstract contract ExternalKycListManagement is IExternalKycListManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalKycLists(address[] calldata _kycLists) external override {
-        if (ExternalListManagementStorageWrapper.isKycExternalInitialized()) revert AlreadyInitialized();
+    function initialize_ExternalKycLists(address[] calldata _kycLists) external override onlyNotKycExternalInitialized {
         ExternalListManagementStorageWrapper.initialize_ExternalKycLists(_kycLists);
     }
 

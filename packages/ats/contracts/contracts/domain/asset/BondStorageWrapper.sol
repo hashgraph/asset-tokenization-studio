@@ -280,6 +280,12 @@ library BondStorageWrapper {
         if (maturityDate <= getMaturityDate()) revert IBondStorageWrapper.BondMaturityDateWrong();
     }
 
+    function _checkNotBondInitialized() internal view {
+        if (isBondInitialized()) {
+            revert IBondStorageWrapper.AlreadyInitialized();
+        }
+    }
+
     // --- Pure Functions ---
 
     function bondStorage() internal pure returns (BondDataStorage storage bondData_) {

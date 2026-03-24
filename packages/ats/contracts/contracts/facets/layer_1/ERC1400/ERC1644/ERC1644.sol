@@ -12,11 +12,10 @@ import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWr
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
 abstract contract ERC1644 is IERC1644, AccessControlModifiers, PauseModifiers {
-    error AlreadyInitialized();
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1644(bool _controllable) external override {
-        if (ERC1644StorageWrapper.isERC1644Initialized()) revert AlreadyInitialized();
+        // TODO: BAD PATTERN. _check function is required.
+        if (ERC1644StorageWrapper.isERC1644Initialized()) revert IERC1644StorageWrapper.AlreadyInitialized();
         ERC1644StorageWrapper.initialize_ERC1644(_controllable);
     }
 

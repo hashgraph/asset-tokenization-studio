@@ -24,6 +24,9 @@ library ExternalListManagementStorageWrapper {
     using Pagination for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    // TODO: This error cannot be declared in every file. ONLY 1 ERROR TYPE MUST BE DECLARED.
+    error AlreadyInitialized();
+
     function updateExternalLists(
         bytes32 _position,
         address[] calldata _lists,
@@ -134,6 +137,20 @@ library ExternalListManagementStorageWrapper {
             }
         }
         return true;
+    }
+
+    // --- Guard functions for modifiers ---
+
+    function _checkNotExternalControlListInitialized() internal view {
+        if (isExternalControlListInitialized()) {
+            revert AlreadyInitialized();
+        }
+    }
+
+    function _checkNotKycExternalInitialized() internal view {
+        if (isKycExternalInitialized()) {
+            revert AlreadyInitialized();
+        }
     }
 
     function isKycExternalInitialized() internal view returns (bool) {

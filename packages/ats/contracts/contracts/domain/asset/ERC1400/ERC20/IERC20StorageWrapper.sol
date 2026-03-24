@@ -11,4 +11,5 @@ interface IERC20StorageWrapper {
     error ZeroOwnerAddress();
     error InsufficientAllowance(address spender, address from);
     error SpenderWithZeroAddress();
+    error AlreadyInitialized();
 }

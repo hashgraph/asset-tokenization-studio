@@ -36,4 +36,5 @@ interface IProtectedPartitionsStorageWrapper {
     error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
     error PartitionsAreUnProtected();
     error WrongSignature();
+    error AlreadyInitialized();
 }

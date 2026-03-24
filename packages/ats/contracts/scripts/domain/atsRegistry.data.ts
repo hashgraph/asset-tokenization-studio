@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-23T18:01:09.199Z
+ * Generated: 2026-03-24T07:42:12.920Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -318,7 +318,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
     factory: (signer) => new BondUSAFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSAFacetTimeTravel__factory(signer),
   },
@@ -367,7 +366,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
     factory: (signer) => new BondUSAFixedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSAFixedRateFacetTimeTravel__factory(signer),
   },
@@ -416,7 +414,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
     factory: (signer) => new BondUSAKpiLinkedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSAKpiLinkedRateFacetTimeTravel__factory(signer),
   },
@@ -841,7 +838,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
     factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
@@ -882,7 +878,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
     ],
     factory: (signer) => new CapFacet__factory(signer),
     timeTravelFactory: (signer) => new CapFacetTimeTravel__factory(signer),
@@ -964,7 +959,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
     ],
     factory: (signer) => new ClearingActionsFacet__factory(getLibLinks("clearingOps") as any, signer),
     timeTravelFactory: (signer) =>
@@ -1209,8 +1203,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "ListedAccount", signature: "ListedAccount(address)", selector: "0x1a4a04ba" },
       { name: "UnlistedAccount", signature: "UnlistedAccount(address)", selector: "0x4c463ddc" },
     ],
@@ -1526,7 +1518,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
     ],
     factory: (signer) => new EquityUSAFacet__factory(getLibLinks("clearingReadOps") as any, signer),
     timeTravelFactory: (signer) => new EquityUSAFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
@@ -1604,7 +1595,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
     ],
     factory: (signer) => new ERC1410ManagementFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
@@ -1777,7 +1767,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "ProtectedPartitionRoleRequired",
         signature: "ProtectedPartitionRoleRequired(bytes32,address)",
@@ -1865,7 +1854,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
     ],
     factory: (signer) => new ERC1644Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) => new ERC1644FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
@@ -1937,7 +1925,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x46bcf81f2ddc9f000abc20dea52d3061e6deb0c928ad04616fd2bee32e475440",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
     factory: (signer) => new ERC20Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) => new ERC20FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
   },
@@ -2024,7 +2011,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "AbafChangeForBlockForbidden(uint256)",
         selector: "0x5a2afdff",
       },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
     ],
     factory: (signer) => new ERC20VotesFacet__factory(getLibLinks("clearingReadOps") as any, signer),
     timeTravelFactory: (signer) =>
@@ -2130,7 +2116,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     errors: [
       { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AddressNotVerified", signature: "AddressNotVerified()", selector: "0x209d2853" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
       { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
       { name: "ComplianceNotAllowed", signature: "ComplianceNotAllowed()", selector: "0x66eb1b54" },
@@ -2241,7 +2226,32 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x0ba2b922",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    events: [
+      {
+        name: "AddedToExternalControlLists",
+        signature: "AddedToExternalControlLists(address,address)",
+        topic0: "0x3d65de474cd161ee7f82f178e1edc66856cbd5f71f6fb8da9149d8c4b8af24cb",
+      },
+      {
+        name: "ExternalControlListsUpdated",
+        signature: "ExternalControlListsUpdated(address,address[],bool[])",
+        topic0: "0xf33492ee91b93cacfde1a1273fb2fe62ca266ca3e8abd548ea55c38559e0d27d",
+      },
+      {
+        name: "RemovedFromExternalControlLists",
+        signature: "RemovedFromExternalControlLists(address,address)",
+        topic0: "0xe4058444c388a9cf0c802f605695e3600e235e37a4af77aab2bb582e214e453d",
+      },
+    ],
+    errors: [
+      {
+        name: "ExternalControlListsNotUpdated",
+        signature: "ExternalControlListsNotUpdated(address[],bool[])",
+        selector: "0xbd29da3f",
+      },
+      { name: "ListedControlList", signature: "ListedControlList(address)", selector: "0x67a1e319" },
+      { name: "UnlistedControlList", signature: "UnlistedControlList(address)", selector: "0x6b4e1917" },
+    ],
     factory: (signer) => new ExternalControlListManagementFacet__factory(signer),
     timeTravelFactory: (signer) => new ExternalControlListManagementFacetTimeTravel__factory(signer),
   },
@@ -2314,8 +2324,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "ExternalKycListsNotUpdated",
         signature: "ExternalKycListsNotUpdated(address[],bool[])",
@@ -2391,8 +2399,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "ExternalPausesNotUpdated",
         signature: "ExternalPausesNotUpdated(address[],bool[])",
@@ -2435,10 +2441,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "RateUpdated(address,uint256,uint8)",
         topic0: "0xa7fd66e9450da5029fb2dfd59586274386eb4c169bfc873e265aa29d3df59424",
       },
-    ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
     ],
     factory: (signer) => new FixedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new FixedRateFacetTimeTravel__factory(signer),
@@ -2698,8 +2700,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "WrongImpactDataValues", signature: "WrongImpactDataValues(ImpactData)", selector: "0xb90540b6" },
       { name: "WrongInterestRateValues", signature: "WrongInterestRateValues(InterestRate)", selector: "0xf2973d16" },
     ],
@@ -2994,7 +2994,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
     ],
     factory: (signer) => new LockFacet__factory(signer),
     timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
@@ -3311,7 +3310,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x1277b323",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
     factory: (signer) => new ProtectedPartitionsFacet__factory(signer),
     timeTravelFactory: (signer) => new ProtectedPartitionsFacetTimeTravel__factory(signer),
   },
@@ -3717,7 +3715,26 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xd7a0d0e8",
       },
     ],
-    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
+    events: [
+      {
+        name: "ImpactDataUpdated",
+        signature: "ImpactDataUpdated(address,ImpactData[],address[])",
+        topic0: "0x8ac5147acc7918904f238d103d9306aaa3208ad0a679f15a37f43e6767a8aa03",
+      },
+      {
+        name: "InterestRateUpdated",
+        signature: "InterestRateUpdated(address,InterestRate)",
+        topic0: "0xed3c060bc037e2b9f05c9d552119ccb2cf7499562ac630370d20178beb1583e7",
+      },
+    ],
+    errors: [
+      { name: "NotExistingProject", signature: "NotExistingProject(address)", selector: "0x2f850995" },
+      {
+        name: "ProvidedListsLengthMismatch",
+        signature: "ProvidedListsLengthMismatch(uint256,uint256)",
+        selector: "0x4470462b",
+      },
+    ],
     factory: (signer) => new SustainabilityPerformanceTargetRateFacet__factory(signer),
     timeTravelFactory: (signer) => new SustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },
@@ -3958,7 +3975,7 @@ export const TOTAL_FACETS = 68 as const;
 export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
   BusinessLogicResolver: {
     name: "BusinessLogicResolver",
-    inheritance: ["IBusinessLogicResolver", "DiamondCutManager"],
+    inheritance: ["IBusinessLogicResolver", "DiamondCutManager", "IInitializationErrors"],
     methods: [
       {
         name: "addSelectorsToBlacklist",
@@ -4183,10 +4200,7 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
       },
       { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
     ],
-    errors: [
-      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
-      { name: "Unimplemented", signature: "Unimplemented()", selector: "0x6e128399" },
-    ],
+    errors: [{ name: "Unimplemented", signature: "Unimplemented()", selector: "0x6e128399" }],
   },
 
   Factory: {
@@ -4345,6 +4359,10 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
   ExternalListManagementStorageWrapper: {
     name: "ExternalListManagementStorageWrapper",
     methods: [],
+    errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      { name: "cannot", signature: "cannot()", selector: "0xea431aa7" },
+    ],
   },
 
   HoldStorageWrapper: {
@@ -4400,6 +4418,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
     ],
     errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "BondMaturityDateWrong", signature: "BondMaturityDateWrong()", selector: "0x67d08758" },
       { name: "CouponCreationFailed", signature: "CouponCreationFailed()", selector: "0x3a11c78b" },
     ],
@@ -4421,6 +4440,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
     ],
     errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "MaxSupplyReached", signature: "MaxSupplyReached(uint256)", selector: "0xf9f84915" },
       {
         name: "MaxSupplyReachedForPartition",
@@ -4510,12 +4530,16 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         topic0: "0x8aea721bf4270b3b07d0974586b57ecd35862ae7a8b733530161d941489283f1",
       },
     ],
+    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
   },
 
   IControlListStorageWrapper: {
     name: "IControlListStorageWrapper",
     methods: [],
-    errors: [{ name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" }],
+    errors: [
+      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+    ],
   },
 
   ICorporateActionsStorageWrapper: {
@@ -4548,6 +4572,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
     ],
     errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "BalanceAdjustmentCreationFailed",
         signature: "BalanceAdjustmentCreationFailed()",
@@ -4599,6 +4624,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
     ],
     errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
       {
         name: "InsufficientBalance",
@@ -4633,6 +4659,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         topic0: "0xb7d0d6b60740753e9f16692a2f479472a1385aec2420fa43225b02f2ffa1afe7",
       },
     ],
+    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
   },
 
   IERC1644StorageWrapper: {
@@ -4655,7 +4682,10 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
         topic0: "0x08a9c42b6917e90aff41cebfd6d2815b241dc3555d2482d792eeada3fe7df6fd",
       },
     ],
-    errors: [{ name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" }],
+    errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
+      { name: "TokenIsNotControllable", signature: "TokenIsNotControllable()", selector: "0xf4b7b072" },
+    ],
   },
 
   IERC20StorageWrapper: {
@@ -4674,10 +4704,17 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
     ],
     errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       { name: "InsufficientAllowance", signature: "InsufficientAllowance(address,address)", selector: "0xf180d8f9" },
       { name: "SpenderWithZeroAddress", signature: "SpenderWithZeroAddress()", selector: "0x80e32d8f" },
       { name: "ZeroOwnerAddress", signature: "ZeroOwnerAddress()", selector: "0x42cad957" },
     ],
+  },
+
+  IERC20VotesStorageWrapper: {
+    name: "IERC20VotesStorageWrapper",
+    methods: [],
+    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
   },
 
   IERC3643StorageWrapper: {
@@ -4696,12 +4733,19 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
     ],
     errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "InsufficientFrozenBalance",
         signature: "InsufficientFrozenBalance(address,uint256,uint256,bytes32)",
         selector: "0xefafde54",
       },
     ],
+  },
+
+  IInterestRateStorageWrapper: {
+    name: "IInterestRateStorageWrapper",
+    methods: [],
+    errors: [{ name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" }],
   },
 
   InterestRateStorageWrapper: {
@@ -4756,6 +4800,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
       },
     ],
     errors: [
+      { name: "AlreadyInitialized", signature: "AlreadyInitialized()", selector: "0x0dc149f0" },
       {
         name: "PartitionsAreProtectedAndNoRole",
         signature: "PartitionsAreProtectedAndNoRole(address,bytes32)",
@@ -4834,6 +4879,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
     name: "LockStorageWrapper",
     methods: [],
     errors: [
+      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
       { name: "WrongExpirationTimestamp", signature: "WrongExpirationTimestamp()", selector: "0xe39f4776" },
       { name: "WrongLockId", signature: "WrongLockId()", selector: "0x039be1dd" },
     ],
@@ -4896,7 +4942,7 @@ export const STORAGE_WRAPPER_REGISTRY: Record<string, StorageWrapperDefinition> 
 /**
  * Total number of storage wrapper contracts in the registry.
  */
-export const TOTAL_STORAGE_WRAPPERS = 48 as const;
+export const TOTAL_STORAGE_WRAPPERS = 50 as const;
 
 /**
  * All role identifiers extracted from contracts.

@@ -8,6 +8,7 @@ import { Checkpoints } from "../../infrastructure/utils/Checkpoints.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
+import { IERC20VotesStorageWrapper } from "./ERC20Votes/IERC20VotesStorageWrapper.sol";
 
 // solhint-disable custom-errors
 
@@ -204,6 +205,12 @@ library ERC20VotesStorageWrapper {
 
     function isERC20VotesInitialized() internal view returns (bool) {
         return erc20VotesStorage_().initialized;
+    }
+
+    function _checkNotERC20VotesInitialized() internal view {
+        if (isERC20VotesInitialized()) {
+            revert IERC20VotesStorageWrapper.AlreadyInitialized();
+        }
     }
 
     function add(uint256 a, uint256 b) internal pure returns (uint256) {

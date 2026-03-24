@@ -54,4 +54,9 @@ interface ICapStorageWrapper {
      * @dev Emitted when the new total max supply by partition is set to ZERO
      */
     error NewMaxSupplyByPartitionTooHigh(bytes32 partition, uint256 newMaxSupplyByPartition, uint256 maxSupply);
+
+    /**
+     * @dev Error thrown when cap is already initialized
+     */
+    error AlreadyInitialized();
 }

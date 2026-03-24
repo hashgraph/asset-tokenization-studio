@@ -39,6 +39,12 @@ library ERC1644StorageWrapper {
         return erc1644Storage().initialized;
     }
 
+    function _checkNotERC1644Initialized() internal view {
+        if (isERC1644Initialized()) {
+            revert IERC1644StorageWrapper.AlreadyInitialized();
+        }
+    }
+
     // --- Pure functions ---
 
     function erc1644Storage() internal pure returns (ERC1644Storage storage erc1644Storage_) {

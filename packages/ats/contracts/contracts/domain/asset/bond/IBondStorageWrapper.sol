@@ -22,4 +22,10 @@ interface IBondStorageWrapper {
      * @notice Provided maturity date is invalid (e.g. in the past or before issuance).
      */
     error BondMaturityDateWrong();
+
+    /**
+     * @notice Bond is already initialized.
+     */
+    //TODO: Duplicated, remove it.
+    error AlreadyInitialized();
 }

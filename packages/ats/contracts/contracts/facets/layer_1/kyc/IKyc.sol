@@ -2,17 +2,17 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IKyc {
+    enum KycStatus {
+        NOT_GRANTED,
+        GRANTED
+    }
+
     struct KycData {
         uint256 validFrom;
         uint256 validTo;
         string vcId;
         address issuer;
         KycStatus status;
-    }
-
-    enum KycStatus {
-        NOT_GRANTED,
-        GRANTED
     }
 
     /**
@@ -43,6 +43,7 @@ interface IKyc {
     error InvalidKycStatus();
     error KycIsNotGranted();
     error InvalidZeroAddress();
+    error AlreadyInitialized();
 
     /**
      * @dev Initialize Internal Kyc

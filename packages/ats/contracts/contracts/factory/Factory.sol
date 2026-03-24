@@ -38,7 +38,7 @@ import {
 import { IExternalKycListManagement } from "../facets/layer_1/externalKycList/IExternalKycListManagement.sol";
 import { IKyc } from "../facets/layer_1/kyc/IKyc.sol";
 import { IERC3643 } from "../facets/layer_1/ERC3643/IERC3643.sol";
-import { validateISIN } from "./isinValidator.sol";
+import { _validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageWrapper.sol";
@@ -57,7 +57,7 @@ contract Factory is IFactory {
     }
 
     modifier checkISIN(string calldata isin) {
-        validateISIN(isin);
+        _validateISIN(isin);
         _;
     }
 

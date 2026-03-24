@@ -5,21 +5,15 @@ import { IExternalControlListManagement } from "./IExternalControlListManagement
 import { _CONTROL_LIST_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _CONTROL_LIST_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 
-abstract contract ExternalControlListManagement is
-    IExternalControlListManagement,
-    AccessControlModifiers,
-    PauseModifiers
-{
-    error AlreadyInitialized();
-
+abstract contract ExternalControlListManagement is IExternalControlListManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalControlLists(address[] calldata _controlLists) external override {
-        if (ExternalListManagementStorageWrapper.isExternalControlListInitialized()) revert AlreadyInitialized();
+    function initialize_ExternalControlLists(
+        address[] calldata _controlLists
+    ) external override onlyNotExternalControlListInitialized {
         ExternalListManagementStorageWrapper.initialize_ExternalControlLists(_controlLists);
     }
 

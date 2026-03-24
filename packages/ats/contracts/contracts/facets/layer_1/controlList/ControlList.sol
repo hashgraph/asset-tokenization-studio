@@ -4,15 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IControlList } from "./IControlList.sol";
 import { _CONTROL_LIST_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ControlListStorageWrapper } from "../../../domain/core/ControlListStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-abstract contract ControlList is IControlList, PauseModifiers, AccessControlModifiers {
-    error AlreadyInitialized();
-
+import { Modifiers } from "../../../services/Modifiers.sol";
+import { IControlListStorageWrapper } from "../../../domain/core/controlList/IControlListStorageWrapper.sol";
+abstract contract ControlList is IControlList, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initializeControlList(bool _isWhiteList) external override {
-        if (ControlListStorageWrapper.isControlListInitialized()) revert AlreadyInitialized();
+    function initializeControlList(bool _isWhiteList) external override onlyNotControlListInitialized {
         ControlListStorageWrapper.initializeControlList(_isWhiteList);
     }
 

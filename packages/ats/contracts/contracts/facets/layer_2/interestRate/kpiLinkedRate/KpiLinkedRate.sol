@@ -4,18 +4,15 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKpiLinkedRate } from "./IKpiLinkedRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
+import { Modifiers } from "../../../../services/Modifiers.sol";
 
-contract KpiLinkedRate is IKpiLinkedRate, AccessControlModifiers, PauseModifiers {
-    error AlreadyInitialized();
+contract KpiLinkedRate is IKpiLinkedRate, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_KpiLinkedRate(
         InterestRate calldata _interestRate,
         ImpactData calldata _impactData
-    ) external override {
-        if (InterestRateStorageWrapper.kpiLinkedRateStorage().initialized) revert AlreadyInitialized();
+    ) external override onlyNotKpiLinkedRateInitialized {
         InterestRateStorageWrapper.setInterestRate(_interestRate);
         InterestRateStorageWrapper.setImpactData(_impactData);
         InterestRateStorageWrapper.kpiLinkedRateStorage().initialized = true;

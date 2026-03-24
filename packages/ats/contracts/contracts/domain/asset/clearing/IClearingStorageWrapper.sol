@@ -138,4 +138,6 @@ interface IClearingStorageWrapper {
         bytes data,
         bytes operatorData
     );
+
+    error AlreadyInitialized();
 }

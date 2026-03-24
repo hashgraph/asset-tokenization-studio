@@ -10,14 +10,14 @@ import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRe
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 
 abstract contract ProceedRecipients is IProceedRecipients, AccessControlModifiers, PauseModifiers {
-    error AlreadyInitialized();
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProceedRecipients(
         address[] calldata _proceedRecipients,
         bytes[] calldata _data
     ) external override {
-        if (ProceedRecipientsStorageWrapper.isProceedRecipientsInitialized()) revert AlreadyInitialized();
+        // TODO: BAD PATTERN. _check function is required.
+        if (ProceedRecipientsStorageWrapper.isProceedRecipientsInitialized())
+            revert IProceedRecipients.AlreadyInitialized();
         ProceedRecipientsStorageWrapper.initialize_ProceedRecipients(_proceedRecipients, _data);
     }
 

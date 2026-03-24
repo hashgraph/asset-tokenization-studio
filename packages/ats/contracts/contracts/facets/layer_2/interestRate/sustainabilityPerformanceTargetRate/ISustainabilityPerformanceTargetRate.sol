@@ -2,13 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface ISustainabilityPerformanceTargetRate {
-    struct InterestRate {
-        uint256 baseRate;
-        uint256 startPeriod;
-        uint256 startRate;
-        uint8 rateDecimals;
-    }
-
     enum BaseLineMode {
         MINIMUM,
         MAXIMUM
@@ -17,6 +10,13 @@ interface ISustainabilityPerformanceTargetRate {
     enum ImpactDataMode {
         PENALTY,
         BONUS
+    }
+
+    struct InterestRate {
+        uint256 baseRate;
+        uint256 startPeriod;
+        uint256 startRate;
+        uint8 rateDecimals;
     }
 
     struct ImpactData {

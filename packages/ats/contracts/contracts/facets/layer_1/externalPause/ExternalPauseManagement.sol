@@ -2,21 +2,18 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IExternalPauseManagement } from "./IExternalPauseManagement.sol";
+import { IPauseStorageWrapper } from "../../../domain/core/pause/IPauseStorageWrapper.sol";
 import { _PAUSE_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { _PAUSE_MANAGEMENT_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
-import { PauseStorageWrapper } from "../../../domain/core/PauseModifiers.sol";
+import { PauseStorageWrapper } from "../../../domain/core/PauseStorageWrapper.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ArrayValidation } from "../../../infrastructure/utils/ArrayValidation.sol";
 
-abstract contract ExternalPauseManagement is IExternalPauseManagement, AccessControlModifiers, PauseModifiers {
-    error AlreadyInitialized();
-
+abstract contract ExternalPauseManagement is IExternalPauseManagement, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ExternalPauses(address[] calldata _pauses) external override {
-        if (PauseStorageWrapper.isExternalPauseInitialized()) revert AlreadyInitialized();
+    function initialize_ExternalPauses(address[] calldata _pauses) external override onlyNotExternalPauseInitialized {
         PauseStorageWrapper.initialize_ExternalPauses(_pauses);
     }
 

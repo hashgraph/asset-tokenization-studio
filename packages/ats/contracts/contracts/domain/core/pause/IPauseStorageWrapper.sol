@@ -20,7 +20,7 @@ interface IPauseStorageWrapper {
     error TokenIsPaused();
 
     /**
-     * @dev Emitted when the token is unpaused and it should not
+     * @dev Error thrown when the token is unpaused and it should not
      */
     error TokenIsUnpaused();
 }

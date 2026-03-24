@@ -491,4 +491,16 @@ library ClearingStorageWrapper {
             revert IClearing.ExpirationDateReached();
         }
     }
+
+    function _checkClearingDisabled() internal view {
+        if (isClearingActivated()) {
+            revert IClearing.ClearingIsActivated();
+        }
+    }
+
+    function _checkNotClearingInitialized() internal view {
+        if (isClearingInitialized()) {
+            revert IClearingStorageWrapper.AlreadyInitialized();
+        }
+    }
 }

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _ISSUER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 import { IERC1594 } from "./IERC1594.sol";
+import { IERC1594StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1594/IERC1594StorageWrapper.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
@@ -22,11 +23,10 @@ import { TimestampProvider } from "../../../../infrastructure/utils/TimestampPro
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 import { ProtectedPartitionRoleValidator } from "../../../../infrastructure/utils/ProtectedPartitionRoleValidator.sol";
 abstract contract ERC1594 is IERC1594, TimestampProvider, PauseModifiers, ProtectedPartitionRoleValidator {
-    error AlreadyInitialized();
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594() external override {
-        if (ERC1594StorageWrapper.isERC1594Initialized()) revert AlreadyInitialized();
+        // TODO: BAD PATTERN. _check function is required.
+        if (ERC1594StorageWrapper.isERC1594Initialized()) revert IERC1594StorageWrapper.AlreadyInitialized();
         ERC1594StorageWrapper.initialize();
     }
 

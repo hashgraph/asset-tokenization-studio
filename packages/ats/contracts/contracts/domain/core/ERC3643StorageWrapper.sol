@@ -264,6 +264,12 @@ library ERC3643StorageWrapper {
         return erc3643Storage().initialized;
     }
 
+    function _checkNotERC3643Initialized() internal view {
+        if (isERC3643Initialized()) {
+            revert IERC3643StorageWrapper.AlreadyInitialized();
+        }
+    }
+
     function getFrozenAmountForAdjustedAt(address _tokenHolder, uint256 _timestamp) internal view returns (uint256) {
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactorForFrozenAmountByTokenHolderAdjustedAt(
             _tokenHolder,

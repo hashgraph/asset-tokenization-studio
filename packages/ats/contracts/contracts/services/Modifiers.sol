@@ -14,10 +14,10 @@ pragma solidity >=0.8.0 <0.9.0;
  *
  * @author Asset Tokenization Studio Team
  */
-import { CoreModifiers } from "./core/Modifiers.sol";
-import { AssetModifiers } from "./asset/Modifiers.sol";
+import { CoreModifiers } from "./core/CoreModifiers.sol";
+import { AssetModifiers } from "./asset/AssetModifiers.sol";
 
 abstract contract Modifiers is CoreModifiers, AssetModifiers {
     // This contract aggregates all modifiers through inheritance
-    // No additional logic needed - modifiers are provided by parent contracts
+    // No additional logic needed - modifiers are provided by parent contra
 }

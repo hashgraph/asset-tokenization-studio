@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap } from "./ICap.sol";
+import { ICapStorageWrapper } from "../../../domain/asset/cap/ICapStorageWrapper.sol";
 import { _CAP_ROLE } from "../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
@@ -10,11 +11,10 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 
 abstract contract Cap is ICap, TimestampProvider, PauseModifiers, AccessControlModifiers {
-    error AlreadyInitialized();
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external override {
-        if (CapStorageWrapper.isCapInitialized()) revert AlreadyInitialized();
+        // TODO: BAD PATTERN, _check function is required.
+        if (CapStorageWrapper.isCapInitialized()) revert ICapStorageWrapper.AlreadyInitialized();
         CapStorageWrapper.requireValidNewMaxSupply(maxSupply, _getBlockTimestamp());
         CapStorageWrapper.initialize_Cap(maxSupply, partitionCap);
     }

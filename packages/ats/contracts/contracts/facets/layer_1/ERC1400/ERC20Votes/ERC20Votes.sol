@@ -2,16 +2,16 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20Votes } from "./IERC20Votes.sol";
+import { IERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20Votes/IERC20VotesStorageWrapper.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";
 
 abstract contract ERC20Votes is IERC20Votes, PauseModifiers {
-    error AlreadyInitialized();
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20Votes(bool _activated) external override {
-        if (ERC20VotesStorageWrapper.isERC20VotesInitialized()) revert AlreadyInitialized();
+        // TODO: BAD Pattern, function _check is required.
+        if (ERC20VotesStorageWrapper.isERC20VotesInitialized()) revert IERC20VotesStorageWrapper.AlreadyInitialized();
         ERC20VotesStorageWrapper.initialize_ERC20Votes(_activated);
     }
 

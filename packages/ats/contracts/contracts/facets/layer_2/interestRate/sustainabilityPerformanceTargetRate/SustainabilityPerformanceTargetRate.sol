@@ -4,26 +4,17 @@ pragma solidity >=0.8.0 <0.9.0;
 import { ISustainabilityPerformanceTargetRate } from "./ISustainabilityPerformanceTargetRate.sol";
 import { _INTEREST_RATE_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { InterestRateStorageWrapper } from "../../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
+import { Modifiers } from "../../../../services/Modifiers.sol";
 
-contract SustainabilityPerformanceTargetRate is
-    ISustainabilityPerformanceTargetRate,
-    AccessControlModifiers,
-    PauseModifiers
-{
-    error AlreadyInitialized();
+contract SustainabilityPerformanceTargetRate is ISustainabilityPerformanceTargetRate, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_SustainabilityPerformanceTargetRate(
         InterestRate calldata _interestRate,
         ImpactData[] calldata _impactData,
         address[] calldata _projects
-    ) external override {
-        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
-            revert AlreadyInitialized();
-        }
+    ) external override onlyNotSustainabilityPerformanceTargetRateInitialized {
         InterestRateStorageWrapper.requireEqualLength(_impactData.length, _projects.length);
         InterestRateStorageWrapper.initialize_SustainabilityPerformanceTargetRate(
             _interestRate,

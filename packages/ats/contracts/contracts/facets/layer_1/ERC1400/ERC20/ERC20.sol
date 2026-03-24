@@ -13,16 +13,16 @@ import { ERC3643StorageWrapper } from "../../../../domain/core/ERC3643StorageWra
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../../../../domain/asset/ERC20StorageWrapper.sol";
+import { IERC20StorageWrapper } from "../../../../domain/asset/ERC1400/ERC20/IERC20StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
 abstract contract ERC20 is IERC20, TimestampProvider, PauseModifiers {
-    error AlreadyInitialized();
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(ERC20Metadata calldata erc20Metadata) external override {
-        if (ERC20StorageWrapper.isERC20Initialized()) revert AlreadyInitialized();
+        // TODO: BAD PATERN, function _check is required.
+        if (ERC20StorageWrapper.isERC20Initialized()) revert IERC20StorageWrapper.AlreadyInitialized();
         ERC20StorageWrapper.initializeERC20(erc20Metadata);
     }
 

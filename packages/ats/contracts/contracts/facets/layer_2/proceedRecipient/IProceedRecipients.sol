@@ -10,6 +10,7 @@ interface IProceedRecipients {
 
     error ProceedRecipientAlreadyExists(address proceedRecipient);
     error ProceedRecipientNotFound(address proceedRecipient);
+    error AlreadyInitialized();
 
     /**
      * @notice Initializes the proceedRecipients contract with a list of initial proceedRecipients.
