@@ -212,7 +212,9 @@ library ERC20VotesStorageWrapper {
     }
 
     function subtract(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a - b;
+        // Handle underflow gracefully - voting power cannot go negative
+        // Returns 0 when b > a (e.g., delegating zero-balance accounts)
+        return a > b ? a - b : 0;
     }
 
     function erc20VotesStorage_() internal pure returns (ERC20VotesStorage storage erc20votesStorage_) {

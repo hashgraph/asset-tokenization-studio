@@ -201,20 +201,8 @@ contract Factory is IFactory {
         )
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(
-            _bondKpiLinkedRateData.bondData,
-            _bondKpiLinkedRateData.factoryRegulationData,
-            SecurityType.BondKpiLinkedRate
-        );
-
-        // Initialize KPI linked rate (KpiLinkedRateFacet may not be present)
-        _tryInitialize_KpiLinkedRate(
-            bondAddress_,
-            _bondKpiLinkedRateData.interestRate,
-            _bondKpiLinkedRateData.impactData
-        );
-
-        emit BondKpiLinkedRateDeployed(msg.sender, bondAddress_, _bondKpiLinkedRateData);
+        bondAddress_ = _deployBondKpiLinkedRate(_bondKpiLinkedRateData);
+        _emitBondKpiLinkedRateDeployed(bondAddress_, _bondKpiLinkedRateData);
     }
 
     function deployBondSustainabilityPerformanceTargetRate(
@@ -228,24 +216,13 @@ contract Factory is IFactory {
             _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationType,
             _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationSubType
         )
-        checkBondDates(_bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.startingDate, _bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.maturityDate)
+        checkBondDates(
+            _bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.startingDate,
+            _bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.maturityDate
+        )
         returns (address bondAddress_)
     {
-        bondAddress_ = _deployBond(
-            _bondSustainabilityPerformanceTargetRateData.bondData,
-            _bondSustainabilityPerformanceTargetRateData.factoryRegulationData,
-            SecurityType.BondSPTRate
-        );
-
-        // Initialize sustainability performance target rate
-        // (SustainabilityPerformanceTargetRateFacet may not be present)
-        _tryInitialize_SustainabilityPerformanceTargetRate(
-            bondAddress_,
-            _bondSustainabilityPerformanceTargetRateData.interestRate,
-            _bondSustainabilityPerformanceTargetRateData.impactData,
-            _bondSustainabilityPerformanceTargetRateData.projects
-        );
-
+        bondAddress_ = _deployBondSustainabilityPerformanceTargetRate(_bondSustainabilityPerformanceTargetRateData);
         emit BondSustainabilityPerformanceTargetRateDeployed(
             msg.sender,
             bondAddress_,
@@ -277,6 +254,28 @@ contract Factory is IFactory {
 
         // Initialize proceed recipients (ProceedRecipientsFacet may not be present)
         _tryInitialize_ProceedRecipients(bondAddress_, _bondData.proceedRecipients, _bondData.proceedRecipientsData);
+    }
+
+    function _deployBondKpiLinkedRate(BondKpiLinkedRateData calldata _data) internal returns (address bondAddress_) {
+        bondAddress_ = _deployBond(_data.bondData, _data.factoryRegulationData, SecurityType.BondKpiLinkedRate);
+
+        // Initialize KPI linked rate (KpiLinkedRateFacet may not be present)
+        _tryInitialize_KpiLinkedRate(bondAddress_, _data.interestRate, _data.impactData);
+    }
+
+    function _deployBondSustainabilityPerformanceTargetRate(
+        BondSustainabilityPerformanceTargetRateData calldata _data
+    ) internal returns (address bondAddress_) {
+        bondAddress_ = _deployBond(_data.bondData, _data.factoryRegulationData, SecurityType.BondSPTRate);
+
+        // Initialize sustainability performance target rate
+        // (SustainabilityPerformanceTargetRateFacet may not be present)
+        _tryInitialize_SustainabilityPerformanceTargetRate(
+            bondAddress_,
+            _data.interestRate,
+            _data.impactData,
+            _data.projects
+        );
     }
 
     function _deploySecurity(
@@ -473,5 +472,12 @@ contract Factory is IFactory {
         } catch {
             // facet not present - skip initialization
         }
+    }
+
+    function _emitBondKpiLinkedRateDeployed(
+        address _bondAddress,
+        BondKpiLinkedRateData calldata _bondKpiLinkedRateData
+    ) private {
+        emit BondKpiLinkedRateDeployed(msg.sender, _bondAddress, _bondKpiLinkedRateData);
     }
 }
