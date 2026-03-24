@@ -42,6 +42,7 @@ import { _validateISIN } from "./isinValidator.sol";
 import { IFixedRate } from "../facets/layer_2/interestRate/fixedRate/IFixedRate.sol";
 import { IKpiLinkedRate } from "../facets/layer_2/interestRate/kpiLinkedRate/IKpiLinkedRate.sol";
 import { InterestRateStorageWrapper } from "../domain/asset/InterestRateStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../domain/core/CorporateActionsStorageWrapper.sol";
 /* solhint-disable max-line-length */
 import {
     ISustainabilityPerformanceTargetRate
@@ -106,6 +107,11 @@ contract Factory is IFactory {
         _;
     }
 
+    modifier checkBondDates(uint256 startingDate, uint256 maturityDate) {
+        CorporateActionsStorageWrapper.requireValidDates(startingDate, maturityDate);
+        _;
+    }
+
     function deployEquity(
         EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
@@ -139,6 +145,7 @@ contract Factory is IFactory {
         checkISIN(_bondData.security.erc20MetadataInfo.isin)
         checkAdmins(_bondData.security.rbacs)
         checkRegulation(_factoryRegulationData.regulationType, _factoryRegulationData.regulationSubType)
+        checkBondDates(_bondData.bondDetails.startingDate, _bondData.bondDetails.maturityDate)
         returns (address bondAddress_)
     {
         bondAddress_ = _deployBond(_bondData, _factoryRegulationData, SecurityType.BondVariableRate);
@@ -156,6 +163,10 @@ contract Factory is IFactory {
         checkRegulation(
             _bondFixedRateData.factoryRegulationData.regulationType,
             _bondFixedRateData.factoryRegulationData.regulationSubType
+        )
+        checkBondDates(
+            _bondFixedRateData.bondData.bondDetails.startingDate,
+            _bondFixedRateData.bondData.bondDetails.maturityDate
         )
         returns (address bondAddress_)
     {
@@ -184,6 +195,10 @@ contract Factory is IFactory {
         )
         checkInterestRate(_bondKpiLinkedRateData.interestRate)
         checkImpactData(_bondKpiLinkedRateData.impactData)
+        checkBondDates(
+            _bondKpiLinkedRateData.bondData.bondDetails.startingDate,
+            _bondKpiLinkedRateData.bondData.bondDetails.maturityDate
+        )
         returns (address bondAddress_)
     {
         bondAddress_ = _deployBond(
@@ -213,6 +228,7 @@ contract Factory is IFactory {
             _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationType,
             _bondSustainabilityPerformanceTargetRateData.factoryRegulationData.regulationSubType
         )
+        checkBondDates(_bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.startingDate, _bondSustainabilityPerformanceTargetRateData.bondData.bondDetails.maturityDate)
         returns (address bondAddress_)
     {
         bondAddress_ = _deployBond(
