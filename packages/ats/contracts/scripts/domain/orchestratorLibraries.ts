@@ -105,6 +105,7 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ERC1410ManagementFacet: ["tokenCoreOps"],
   ERC1410TokenHolderFacet: ["tokenCoreOps"],
   ERC1410ReadFacet: ["tokenCoreOps"],
+  ERC1594Facet: ["tokenCoreOps"],
   // HoldOps dependencies - hold/lock operations
   HoldManagementFacet: ["holdOps"],
   HoldReadFacet: ["holdOps"],
@@ -116,6 +117,8 @@ export const LIBRARY_DEPENDENT_FACETS: Record<string, Array<keyof typeof LIBRARY
   ClearingHoldCreationFacet: ["clearingOps"],
   // ClearingReadOps dependencies - clearing read operations
   ClearingReadFacet: ["clearingReadOps"],
+  // SnapshotsFacet dependencies - uses ClearingReadOps in SnapshotsStorageWrapper
+  SnapshotsFacet: ["clearingReadOps"],
 };
 
 /**
