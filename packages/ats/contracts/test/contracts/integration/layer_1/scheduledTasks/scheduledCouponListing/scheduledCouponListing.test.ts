@@ -3,12 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  type ResolverProxy,
-  ScheduledCouponListingFacet,
-  BondUSAKpiLinkedRateFacet,
-  AccessControl,
-} from "@contract-types";
+import { type ResolverProxy, ScheduledCouponListingFacet, CouponFacetTimeTravel, AccessControl } from "@contract-types";
 import { deployBondKpiLinkedRateTokenFixture, getDltTimestamp } from "@test";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ATS_ROLES, TIME_PERIODS_S } from "@scripts";
@@ -18,7 +13,7 @@ describe("ScheduledCouponListing Tests", () => {
   let signer_A: HardhatEthersSigner;
 
   let scheduledCouponListingFacet: ScheduledCouponListingFacet;
-  let bondFacet: BondUSAKpiLinkedRateFacet;
+  let couponFacet: CouponFacetTimeTravel;
   let accessControlFacet: AccessControl;
 
   let startingDate = 0;
@@ -46,7 +41,7 @@ describe("ScheduledCouponListing Tests", () => {
     signer_A = base.deployer;
 
     scheduledCouponListingFacet = await ethers.getContractAt("ScheduledCouponListingFacet", diamond.target);
-    bondFacet = await ethers.getContractAt("BondUSAKpiLinkedRateFacetTimeTravel", diamond.target);
+    couponFacet = await ethers.getContractAt("CouponKpiLinkedRateFacetTimeTravel", diamond.target);
     accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
 
     // Grant corporate action role to signer_A
@@ -69,7 +64,7 @@ describe("ScheduledCouponListing Tests", () => {
         const fixingDate = startingDate + TIME_PERIODS_S.MONTH * (i + 1);
         const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
 
-        await bondFacet.setCoupon({
+        await couponFacet.setCoupon({
           recordDate: fixingDate.toString(),
           executionDate: executionDate.toString(),
           rate: 0,
@@ -93,7 +88,7 @@ describe("ScheduledCouponListing Tests", () => {
         const fixingDate = startingDate + TIME_PERIODS_S.MONTH * (i + 1);
         const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
 
-        await bondFacet.setCoupon({
+        await couponFacet.setCoupon({
           recordDate: fixingDate.toString(),
           executionDate: executionDate.toString(),
           rate: 0,

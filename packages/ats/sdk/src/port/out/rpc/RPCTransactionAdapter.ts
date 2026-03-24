@@ -13,6 +13,7 @@ import {
   CANCEL_VOTING_EVENT,
   EVM_ZERO_ADDRESS,
   GAS,
+  NOMINAL_VALUE_SET_EVENT,
   SET_COUPON_EVENT,
   SET_DIVIDEND_EVENT,
   SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
@@ -57,6 +58,7 @@ import {
   AccessControlFacet__factory,
   Bond__factory,
   CapFacet__factory,
+  Coupon__factory,
   ClearingActionsFacet__factory,
   ClearingHoldCreationFacet__factory,
   ClearingRedeemFacet__factory,
@@ -79,7 +81,7 @@ import {
   FreezeFacet__factory,
   HoldManagementFacet__factory,
   HoldTokenHolderFacet__factory,
-  IBondRead,
+  ICoupon,
   IEquity,
   KpiLinkedRate__factory,
   Kpis__factory,
@@ -97,6 +99,7 @@ import {
   SsiManagementFacet__factory,
   TransferAndLockFacet__factory,
   TREXFactoryAts__factory,
+  NominalValue__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ContractId } from "@hiero-ledger/sdk";
 import EventService from "@service/event/EventService";
@@ -643,7 +646,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       endDate: ${endDate},
       fixingDate: ${fixingDate}`,
     );
-    const couponStruct: IBondRead.CouponStruct = {
+    const couponStruct: ICoupon.CouponStruct = {
       recordDate: recordDate.toBigInt(),
       executionDate: executionDate.toBigInt(),
       rate: rate.toBigInt(),
@@ -655,7 +658,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return this.executeTransaction(
-      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Coupon__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setCoupon",
       [couponStruct],
       GAS.SET_COUPON,
@@ -667,7 +670,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Cancelling coupon: ${couponId} for bond: ${security}`);
 
     return this.executeTransaction(
-      Bond__factory.connect(security.toString(), this.getSignerOrProvider()),
+      Coupon__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelCoupon",
       [couponId],
       GAS.CANCEL_COUPON,
@@ -2719,13 +2722,32 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async cancelScheduledBalanceAdjustment(security: EvmAddress, balanceAdjustmentId: number): Promise<TransactionResponse> {
+  async cancelScheduledBalanceAdjustment(
+    security: EvmAddress,
+    balanceAdjustmentId: number,
+  ): Promise<TransactionResponse> {
     return this.executeTransaction(
       Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelScheduledBalanceAdjustment",
       [balanceAdjustmentId],
       GAS.CANCEL_SCHEDULED_BALANCE_ADJUSTMENT,
       CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+    );
+  }
+
+  async setNominalValue(
+    security: EvmAddress,
+    nominalValue: string,
+    nominalValueDecimals: number,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Setting nominal value for security: ${security.toString()}`);
+
+    return this.executeTransaction(
+      NominalValue__factory.connect(security.toString(), this.getSignerOrProvider()),
+      "setNominalValue",
+      [nominalValue, nominalValueDecimals],
+      GAS.SET_NOMINAL_VALUE,
+      NOMINAL_VALUE_SET_EVENT,
     );
   }
 }

@@ -5,7 +5,7 @@ import { _BOND_SUSTAINABILITY_PERFORMANCE_TARGET_READ_RESOLVER_KEY } from "../..
 import { BondUSAReadFacetBase } from "../BondUSAReadFacetBase.sol";
 // prettier-ignore
 /* solhint-disable max-line-length */
-import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../domain/asset/extension/bond/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
+import { CommonSustainabilityPerformanceTargetInterestRate } from "../../../../domain/asset/extension/coupon/fixingDateInterestRate/kpiInterestRate/sustainabilityPerformanceTargetInterestRate/Common.sol";
 /* solhint-enable max-line-length */
 
 contract BondUSAReadSustainabilityPerformanceTargetRateFacet is

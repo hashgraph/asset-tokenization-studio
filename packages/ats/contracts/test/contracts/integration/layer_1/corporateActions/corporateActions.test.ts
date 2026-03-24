@@ -50,7 +50,7 @@ describe("Corporate Actions Tests", () => {
     const currentTimestamp = await timeTravelFacet.blockTimestamp();
     const ONE_DAY = 86400n; // 24 hours in seconds
 
-    let dividendData = {
+    const dividendData = {
       recordDate: Number(currentTimestamp + ONE_DAY),
       executionDate: Number(currentTimestamp + ONE_DAY + 1000n),
       amount: 10,

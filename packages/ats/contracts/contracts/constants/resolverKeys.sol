@@ -500,6 +500,18 @@ bytes32 constant _TOTAL_BALANCE_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_
 // keccak256('security.token.standard.equity.resolverKey');
 bytes32 constant _EQUITY_RESOLVER_KEY = 0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810;
 
+// keccak256('security.token.standard.coupon.variable.rate.resolverKey');
+bytes32 constant _COUPON_RESOLVER_KEY = 0xa404f705370f56f56364ac9aa1092c1002b2bfcd7020c1bb5ca7489f8061efa7;
+
+// keccak256('security.token.standard.coupon.fixed.rate.resolverKey');
+bytes32 constant _COUPON_FIXED_RATE_RESOLVER_KEY = 0x2e0b1146e97bc72f92441d75c9cfa74185548319741c7f292fe0014252933ae9;
+
+// keccak256('security.token.standard.coupon.kpilinked.rate.resolverKey');
+bytes32 constant _COUPON_KPI_LINKED_RATE_RESOLVER_KEY = 0x45f4a1774eac5a47f3cbc755bf5332ca30d8a6bb0330d479c77590dd0d5aab18;
+
+// keccak256('security.token.standard.coupon.SustainabilityPerformanceTarget.rate.resolverKey');
+bytes32 constant _COUPON_SUSTAINABILITY_PERFORMANCE_TARGET_RATE_RESOLVER_KEY = 0x435034f1d262736f434867e5f70c71157492ebd5a90e9e4455b2868f5bda6b6e;
+
 // keccak256('security.token.standard.bond.variable.rate.resolverKey');
 bytes32 constant _BOND_VARIABLE_RATE_RESOLVER_KEY = 0xe6594ee8f54f346ab25268fdc7955031a6b06102355e1446353d89ab1d593de3;
 

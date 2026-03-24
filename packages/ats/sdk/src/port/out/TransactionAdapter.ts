@@ -877,6 +877,15 @@ interface IFixedRate {
   ): Promise<TransactionResponse>;
 }
 
+interface INominalValueTransactionAdapter {
+  setNominalValue(
+    security: EvmAddress,
+    nominalValue: string,
+    nominalValueDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     WalletAdapter,
@@ -901,7 +910,8 @@ export default abstract class TransactionAdapter
     IBatchAdapter,
     IAgent,
     IProceedRecipients,
-    IFixedRate
+    IFixedRate,
+    INominalValueTransactionAdapter
 {
   abstract setImpactData(
     security: EvmAddress,
@@ -1804,4 +1814,11 @@ export default abstract class TransactionAdapter
     balanceAdjustmentId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
+
+  abstract setNominalValue(
+    security: EvmAddress,
+    nominalValue: string,
+    nominalValueDecimals: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }

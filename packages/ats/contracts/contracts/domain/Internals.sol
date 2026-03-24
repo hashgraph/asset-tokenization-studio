@@ -18,6 +18,7 @@ import {
 import { ILock } from "../facets/layer_1/lock/ILock.sol";
 import { ISecurity } from "../facets/layer_2/security/ISecurity.sol";
 import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
+import { ICoupon } from "../facets/layer_2/coupon/ICoupon.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 import { ICap } from "../facets/layer_1/cap/ICap.sol";
 import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
@@ -191,7 +192,7 @@ abstract contract Internals is Modifiers {
     function _increaseTotalSupply(uint256 _value) internal virtual;
     function _increaseTotalSupplyByPartition(bytes32 _partition, uint256 _value) internal virtual;
     function _initBalanceAdjustment(bytes32 _actionId, bytes memory _data) internal virtual;
-    function _initCoupon(bytes32 _actionId, IBondRead.Coupon memory _newCoupon) internal virtual;
+    function _initCoupon(bytes32 _actionId, ICoupon.Coupon memory _newCoupon) internal virtual;
     function _initDividend(bytes32 _actionId, bytes memory _data) internal virtual;
     function _initVotingRights(bytes32 _actionId, bytes memory _data) internal virtual;
     function _initializeSecurity(
@@ -311,7 +312,7 @@ abstract contract Internals is Modifiers {
     function _updateCorporateActionResult(bytes32 actionId, uint256 resultId, bytes memory newResult) internal virtual;
     function _updateCouponRate(
         uint256 _couponID,
-        IBondRead.Coupon memory _coupon,
+        ICoupon.Coupon memory _coupon,
         uint256 _rate,
         uint8 _rateDecimals
     ) internal virtual;
@@ -510,7 +511,7 @@ abstract contract Internals is Modifiers {
     function _setClearing(bool _activated) internal virtual returns (bool success_);
     function _setCompliance(address _compliance) internal virtual;
     function _setCoupon(
-        IBondRead.Coupon memory _newCoupon
+        ICoupon.Coupon memory _newCoupon
     ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_);
     function _cancelCoupon(uint256 _couponId) internal virtual returns (bool success_);
     function _setDividend(
@@ -950,16 +951,21 @@ abstract contract Internals is Modifiers {
         internal
         view
         virtual
-        returns (IBondRead.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_);
+        returns (ICoupon.RegisteredCoupon memory registeredCoupon_, bytes32 corporateActionId_, bool isDisabled_);
     function _getCouponAmountFor(
         uint256 _couponID,
         address _account
-    ) internal view virtual returns (IBondRead.CouponAmountFor memory couponAmountFor_);
+    ) internal view virtual returns (ICoupon.CouponAmountFor memory couponAmountFor_);
     function _getCouponCount() internal view virtual returns (uint256 couponCount_);
     function _getCouponFor(
         uint256 _couponID,
         address _account
-    ) internal view virtual returns (IBondRead.CouponFor memory couponFor_);
+    ) internal view virtual returns (ICoupon.CouponFor memory couponFor_);
+    function _getCouponsFor(
+        uint256 _couponID,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (ICoupon.CouponFor[] memory couponsFor_, address[] memory accounts_);
     function _getCouponFromOrderedListAt(uint256 _pos) internal view virtual returns (uint256 couponID_);
     function _getCouponHolders(
         uint256 _couponID,
@@ -1505,6 +1511,13 @@ abstract contract Internals is Modifiers {
     function _getResolverProxyConfigurationId() internal view virtual returns (bytes32);
 
     function _getResolverProxyVersion() internal view virtual returns (uint256);
+
+    // solhint-disable-next-line func-name-mixedcase
+    function _DEPRECATED_BOND_getCouponsOrderedListTotal() internal view virtual returns (uint256 total_);
+    // solhint-disable-next-line func-name-mixedcase
+    function _DEPRECATED_BOND_getCouponsOrderedListByPosition(
+        uint256 _position
+    ) internal view virtual returns (uint256 total_);
     function _buildClearingHoldCreationData(
         uint256 _amount,
         uint256 _expirationTimestamp,

@@ -130,6 +130,7 @@ export const GAS = {
   CREATE_EXTERNAL_KYC_LIST_MOCK: 7000000,
   SET_NAME: 7000000,
   SET_SYMBOL: 7000000,
+  SET_NOMINAL_VALUE: 7000000,
   FREEZE_PARTIAL_TOKENS: 7000000,
   UNFREEZE_PARTIAL_TOKENS: 7000000,
   SET_ADDRESS_FROZEN: 700000,
@@ -170,6 +171,7 @@ export const CANCEL_COUPON_EVENT = "CouponCancelled";
 export const CANCEL_VOTING_EVENT = "VotingCancelled";
 export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT = "ScheduledBalanceAdjustmentSet";
 export const CANCEL_SCHEDULED_BALANCE_ADJUSTMENT_EVENT = "ScheduledBalanceAdjustmentCancelled";
+export const NOMINAL_VALUE_SET_EVENT = "NominalValueSet";
 
 // * Generic
 export const BYTES_32_LENGTH = 32 * 2;

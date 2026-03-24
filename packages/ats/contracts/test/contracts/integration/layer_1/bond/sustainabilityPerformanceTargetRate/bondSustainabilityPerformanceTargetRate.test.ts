@@ -5,14 +5,13 @@ import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
   ResolverProxy,
-  BondUSASustainabilityPerformanceTargetRateFacetTimeTravel,
   SustainabilityPerformanceTargetRateFacetTimeTravel,
-  BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel,
   TimeTravelFacet,
   ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel,
   ProceedRecipientsSustainabilityPerformanceTargetRateFacetTimeTravel,
   KpisSustainabilityPerformanceTargetRateFacetTimeTravel,
   ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel,
+  CouponFacetTimeTravel,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES, TIME_PERIODS_S } from "@scripts";
 import { SecurityType } from "@scripts/domain";
@@ -44,8 +43,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
   let project1: string;
   let project2: string;
 
-  let bondSPTRateFacet: BondUSASustainabilityPerformanceTargetRateFacetTimeTravel;
-  let bondReadFacet: BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel;
+  let couponSPTRateFacet: CouponFacetTimeTravel;
   let sptRateFacet: SustainabilityPerformanceTargetRateFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
   let erc1594Facet: ERC1594SustainabilityPerformanceTargetRateFacetTimeTravel;
@@ -97,16 +95,6 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       },
     ]);
 
-    bondSPTRateFacet = await ethers.getContractAt(
-      "BondUSASustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
-    bondReadFacet = await ethers.getContractAt(
-      "BondUSAReadSustainabilityPerformanceTargetRateFacetTimeTravel",
-      diamond.target,
-      signer_A,
-    );
     sptRateFacet = await ethers.getContractAt(
       "SustainabilityPerformanceTargetRateFacetTimeTravel",
       diamond.target,
@@ -130,6 +118,11 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
     );
     scheduledTasksFacet = await ethers.getContractAt(
       "ScheduledCrossOrderedTasksSustainabilityPerformanceTargetRateFacetTimeTravel",
+      diamond.target,
+      signer_A,
+    );
+    couponSPTRateFacet = await ethers.getContractAt(
+      "CouponSustainabilityPerformanceTargetRateFacetTimeTravel",
       diamond.target,
       signer_A,
     );
@@ -157,9 +150,9 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
     nominalValue: number = 100,
     nominalValueDecimals: number = 2,
   ) {
-    const registeredCouponPostFixingDate = (await bondReadFacet.getCoupon(couponID)).registeredCoupon_;
-    const couponForPostFixingDate = await bondReadFacet.getCouponFor(couponID, accountAddress);
-    const couponAmountForPostFixingDate = await bondReadFacet.getCouponAmountFor(couponID, accountAddress);
+    const registeredCouponPostFixingDate = (await couponSPTRateFacet.getCoupon(couponID)).registeredCoupon_;
+    const couponForPostFixingDate = await couponSPTRateFacet.getCouponFor(couponID, accountAddress);
+    const couponAmountForPostFixingDate = await couponSPTRateFacet.getCouponAmountFor(couponID, accountAddress);
 
     const numerator =
       BigInt(amount) *
@@ -243,7 +236,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
 
       const originalFixingDate = couponData.fixingDate;
 
-      await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+      await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
       const tasks_count_Before = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
 
       await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) + 1);
@@ -292,7 +285,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
         const deltaRateProject1 = 300;
         const deltaRateProject2 = 400;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) + 1);
 
@@ -307,7 +300,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
         const kpiValue = 800;
         const deltaRateProject1 = 300;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, kpiValue, project1);
@@ -324,7 +317,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       it("GIVEN KPI value at or above baseline with PENALTY MINIMUM mode WHEN rate is calculated THEN no deltaRate is added for that project", async () => {
         const kpiValue = 1000;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, kpiValue, project1);
@@ -342,7 +335,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
         const kpiValue = 2200;
         const deltaRateProject2 = 400;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, kpiValue, project2);
@@ -359,7 +352,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       it("GIVEN KPI value at or below baseline with PENALTY MAXIMUM mode WHEN rate is calculated THEN no deltaRate is added for that project", async () => {
         const kpiValue = 2000;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, kpiValue, project2);
@@ -374,7 +367,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       });
 
       it("GIVEN multiple projects with all targets met WHEN rate is calculated THEN base rate is maintained", async () => {
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, 1200, project1); // Above baseline (MINIMUM) -> no penalty
@@ -417,7 +410,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       });
 
       it("GIVEN no KPI data for any project WHEN rate is calculated with BONUS mode THEN no deltaRate is subtracted", async () => {
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) + 1);
 
@@ -436,7 +429,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
         const kpiValue = 1200;
         const deltaRateProject1 = 250;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, kpiValue, project1);
@@ -452,7 +445,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       it("GIVEN KPI value at or below baseline with BONUS MINIMUM mode WHEN rate is calculated THEN no deltaRate is subtracted", async () => {
         const kpiValue = 1000;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, kpiValue, project1);
@@ -474,7 +467,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
         const kpiValue = 1800;
         const deltaRateProject2 = 350;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, kpiValue, project2);
@@ -490,7 +483,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       it("GIVEN KPI value at or above baseline with BONUS MAXIMUM mode WHEN rate is calculated THEN no deltaRate is subtracted", async () => {
         const kpiValue = 2000;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, kpiValue, project2);
@@ -537,7 +530,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
         const deltaRateProject1 = 200;
         const deltaRateProject2 = 150;
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, kpiValue1, project1);
@@ -552,7 +545,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
       });
 
       it("GIVEN one project with KPI data and one without WHEN rate is calculated THEN only applicable adjustments are made", async () => {
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, 1500, project1); // Above baseline -> no penalty
@@ -596,7 +589,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
           [project1, project2],
         );
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, 2000, project1); // Above baseline -> bonus applies
@@ -627,7 +620,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
           [project1, project2],
         );
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData);
 
         await timeTravelFacet.changeSystemTimestamp(parseInt(couponData.fixingDate) - 1);
         await kpisFacet.addKpiData(parseInt(couponData.fixingDate) - 1, 800, project1); // Below baseline -> penalty
@@ -650,7 +643,7 @@ describe("Bond Sustainability Performance Target Rate Tests", () => {
           executionDate: newExecutionDate.toString(),
         };
 
-        await bondSPTRateFacet.connect(signer_A).setCoupon(couponData2);
+        await couponSPTRateFacet.connect(signer_A).setCoupon(couponData2);
 
         await timeTravelFacet.changeSystemTimestamp(newFixingDate - 1);
         await kpisFacet.addKpiData(newFixingDate - 1, 1500, project1); // Above baseline -> no penalty
