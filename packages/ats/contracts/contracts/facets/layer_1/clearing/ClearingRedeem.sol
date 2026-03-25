@@ -19,13 +19,17 @@ import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
+import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
+import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 
 abstract contract ClearingRedeem is
     IClearingRedeem,
     AccessControlModifiers,
     TimestampProvider,
     PauseModifiers,
-    ClearingModifiers
+    ClearingModifiers,
+    PartitionModifiers,
+    ERC3643Modifiers
 {
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
@@ -112,20 +116,20 @@ abstract contract ClearingRedeem is
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyProtectedPartitions
         onlyRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
             )
         )
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
         LockStorageWrapper.requireValidExpirationTimestamp(
             _protectedClearingOperation.clearingOperation.expirationTimestamp
         );
-        ClearingStorageWrapper.requireClearingActivated();
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_protectedClearingOperation.from);
         (success_, clearingId_) = ClearingOps.protectedClearingRedeemByPartition(
             _protectedClearingOperation,
             _amount,

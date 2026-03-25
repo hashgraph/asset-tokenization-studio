@@ -19,13 +19,17 @@ import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
+import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
+import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 
 abstract contract ClearingTransfer is
     IClearingTransfer,
     AccessControlModifiers,
     TimestampProvider,
     PauseModifiers,
-    ClearingModifiers
+    ClearingModifiers,
+    PartitionModifiers,
+    ERC3643Modifiers
 {
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
@@ -127,22 +131,22 @@ abstract contract ClearingTransfer is
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_to)
+        onlyProtectedPartitions
         onlyRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
             )
         )
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
         ERC1410StorageWrapper.requireValidAddress(_to);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_protectedClearingOperation.from);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
         LockStorageWrapper.requireValidExpirationTimestamp(
             _protectedClearingOperation.clearingOperation.expirationTimestamp
         );
-        ClearingStorageWrapper.requireClearingActivated();
         (success_, clearingId_) = ClearingOps.protectedClearingTransferByPartition(
             _protectedClearingOperation,
             _amount,

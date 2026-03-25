@@ -19,8 +19,18 @@ import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.so
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
+import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
+import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 
-abstract contract ClearingHoldCreation is IClearingHoldCreation, AccessControlModifiers, PauseModifiers {
+abstract contract ClearingHoldCreation is
+    IClearingHoldCreation,
+    AccessControlModifiers,
+    PauseModifiers,
+    ClearingModifiers,
+    PartitionModifiers,
+    ERC3643Modifiers
+{
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         Hold calldata _hold
@@ -122,21 +132,21 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, AccessControlMo
         external
         override
         onlyUnpaused
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_hold.to)
+        onlyProtectedPartitions
         onlyRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
             )
         )
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_protectedClearingOperation.from);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
-        ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
         LockStorageWrapper.requireValidExpirationTimestamp(
             _protectedClearingOperation.clearingOperation.expirationTimestamp
         );
-        ClearingStorageWrapper.requireClearingActivated();
         (success_, clearingId_) = ClearingOps.protectedClearingCreateHoldByPartition(
             _protectedClearingOperation,
             _hold,
