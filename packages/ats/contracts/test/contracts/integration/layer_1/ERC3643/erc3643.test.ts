@@ -1830,7 +1830,7 @@ describe("ERC3643 Tests", () => {
         ).to.emit(erc1410Facet, "RedeemedByPartition");
         await expect(
           erc1644Facet.connect(signer_B).controllerTransfer(signer_E.address, signer_D.address, amount, "0x", "0x"),
-        ).to.emit(erc1644Facet, "TransferByPartition");
+        ).to.emit(erc1644Facet, "ControllerTransfer");
         await expect(
           erc1410Facet
             .connect(signer_B)
