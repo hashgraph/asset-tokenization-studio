@@ -10,6 +10,7 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IERC20VotesStorageWrapper } from "./ERC20Votes/IERC20VotesStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 // solhint-disable custom-errors
 
@@ -45,7 +46,7 @@ library ERC20VotesStorageWrapper {
     }
 
     function delegate(address delegatee) internal {
-        delegate(msg.sender, delegatee);
+        delegate(EvmAccessors.getMsgSender(), delegatee);
     }
 
     function takeAbafCheckpoint() internal {
