@@ -5,6 +5,7 @@ import { AddressValidation } from "../../infrastructure/utils/AddressValidation.
 import { ZERO_ADDRESS, EMPTY_BYTES, _DEFAULT_PARTITION } from "../../constants/values.sol";
 import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { IERC1594StorageWrapper } from "./ERC1400/ERC1594/IERC1594StorageWrapper.sol";
 import { Eip1066 } from "../../constants/eip1066.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
@@ -45,17 +46,17 @@ library ERC1594StorageWrapper {
 
     function issue(address tokenHolder, uint256 value, bytes memory data) internal {
         ERC20StorageWrapper.mint(tokenHolder, value);
-        emit IERC1594StorageWrapper.Issued(msg.sender, tokenHolder, value, data);
+        emit IERC1594StorageWrapper.Issued(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
     function redeem(uint256 value, bytes memory data) internal {
-        ERC20StorageWrapper.burn(msg.sender, value);
-        emit IERC1594StorageWrapper.Redeemed(address(0), msg.sender, value, data);
+        ERC20StorageWrapper.burn(EvmAccessors.getMsgSender(), value);
+        emit IERC1594StorageWrapper.Redeemed(address(0), EvmAccessors.getMsgSender(), value, data);
     }
 
     function redeemFrom(address tokenHolder, uint256 value, bytes memory data) internal {
         ERC20StorageWrapper.burnFrom(tokenHolder, value);
-        emit IERC1594StorageWrapper.Redeemed(msg.sender, tokenHolder, value, data);
+        emit IERC1594StorageWrapper.Redeemed(EvmAccessors.getMsgSender(), tokenHolder, value, data);
     }
 
     function isIssuable() internal view returns (bool) {
@@ -139,7 +140,7 @@ library ERC1594StorageWrapper {
             );
         }
 
-        bool checkSender = from != msg.sender && !checkSenderHasProtectedPartitionRole(partition);
+        bool checkSender = from != EvmAccessors.getMsgSender() && !checkSenderHasProtectedPartitionRole(partition);
 
         (isAbleToRedeemFrom, statusCode, reasonCode, details) = isCompliant(from, address(0), value, checkSender);
         if (!isAbleToRedeemFrom) {
@@ -152,7 +153,8 @@ library ERC1594StorageWrapper {
         }
 
         // Allowance check for the 'from' methods
-        bool checkAllowance = checkSender && !ERC1410StorageWrapper.isAuthorized(partition, msg.sender, from);
+        bool checkAllowance = checkSender &&
+            !ERC1410StorageWrapper.isAuthorized(partition, EvmAccessors.getMsgSender(), from);
 
         return businessLogicChecks(checkAllowance, from, value, partition);
     }
@@ -201,7 +203,7 @@ library ERC1594StorageWrapper {
             );
         }
 
-        bool checkSender = from != msg.sender && !checkSenderHasProtectedPartitionRole(partition);
+        bool checkSender = from != EvmAccessors.getMsgSender() && !checkSenderHasProtectedPartitionRole(partition);
 
         (isAbleToTransfer, statusCode, reasonCode, details) = isCompliant(from, to, value, checkSender);
         if (!isAbleToTransfer) {
@@ -214,7 +216,8 @@ library ERC1594StorageWrapper {
         }
 
         // Allowance check for the 'from' methods
-        bool checkAllowance = checkSender && !ERC1410StorageWrapper.isAuthorized(partition, msg.sender, from);
+        bool checkAllowance = checkSender &&
+            !ERC1410StorageWrapper.isAuthorized(partition, EvmAccessors.getMsgSender(), from);
 
         return businessLogicChecks(checkAllowance, from, value, partition);
     }
@@ -260,7 +263,7 @@ library ERC1594StorageWrapper {
         assembly {
             roleDataStorage.slot := position
         }
-        hasRole_ = EnumerableSet.contains(roleDataStorage.roles[role].roleMembers, msg.sender);
+        hasRole_ = EnumerableSet.contains(roleDataStorage.roles[role].roleMembers, EvmAccessors.getMsgSender());
     }
 
     function isCompliant(
@@ -271,26 +274,31 @@ library ERC1594StorageWrapper {
     ) private view returns (bool status, bytes1 statusCode, bytes32 reasonCode, bytes memory details) {
         // Check sender for blocked status and recovery status when required
         if (checkSender) {
-            if (!ControlListStorageWrapper.isAbleToAccess(msg.sender)) {
+            if (!ControlListStorageWrapper.isAbleToAccess(EvmAccessors.getMsgSender())) {
                 return (
                     false,
                     Eip1066.DISALLOWED_OR_STOP,
                     IControlListStorageWrapper.AccountIsBlocked.selector,
-                    abi.encode(msg.sender)
+                    abi.encode(EvmAccessors.getMsgSender())
                 );
             }
-            if (ERC3643StorageWrapper.isRecovered(msg.sender)) {
+            if (ERC3643StorageWrapper.isRecovered(EvmAccessors.getMsgSender())) {
                 return (
                     false,
                     Eip1066.REVOKED_OR_BANNED,
                     IERC3643Management.WalletRecovered.selector,
-                    abi.encode(msg.sender)
+                    abi.encode(EvmAccessors.getMsgSender())
                 );
             }
             // Compliance check for sender in compliance module (amount is 0)
             bytes memory complianceResultSender = (ERC3643StorageWrapper.erc3643Storage().compliance)
                 .functionStaticCall(
-                    abi.encodeWithSelector(ICompliance.canTransfer.selector, msg.sender, address(0), 0),
+                    abi.encodeWithSelector(
+                        ICompliance.canTransfer.selector,
+                        EvmAccessors.getMsgSender(),
+                        address(0),
+                        0
+                    ),
                     IERC3643Management.ComplianceCallFailed.selector
                 );
 
@@ -411,7 +419,7 @@ library ERC1594StorageWrapper {
         if (checkAllowance) {
             uint256 currentAllowance = ERC20StorageWrapper.allowanceAdjustedAt(
                 from,
-                msg.sender,
+                EvmAccessors.getMsgSender(),
                 TimeTravelStorageWrapper.getBlockTimestamp()
             );
             if (currentAllowance < value) {
@@ -419,7 +427,7 @@ library ERC1594StorageWrapper {
                     false,
                     Eip1066.INSUFFICIENT_FUNDS,
                     IERC1410StorageWrapper.InsufficientAllowance.selector,
-                    abi.encode(msg.sender, from, currentAllowance, value, _DEFAULT_PARTITION)
+                    abi.encode(EvmAccessors.getMsgSender(), from, currentAllowance, value, _DEFAULT_PARTITION)
                 );
             }
         }
