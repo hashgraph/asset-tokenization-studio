@@ -9,6 +9,7 @@ import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { CapStorageWrapper } from "../core/CapStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct AdjustBalancesStorage {
     mapping(address => uint256[]) labafUserPartition;
@@ -160,7 +161,7 @@ library AdjustBalancesStorageWrapper {
         ERC20StorageWrapper.adjustDecimals(_decimals);
         CapStorageWrapper.adjustMaxSupply(_factor);
         updateAbaf(_factor);
-        emit IAdjustBalancesStorageWrapper.AdjustmentBalanceSet(msg.sender, _factor, _decimals);
+        emit IAdjustBalancesStorageWrapper.AdjustmentBalanceSet(EvmAccessors.getMsgSender(), _factor, _decimals);
     }
 
     function adjustTotalAndMaxSupplyForPartition(bytes32 _partition) internal {
