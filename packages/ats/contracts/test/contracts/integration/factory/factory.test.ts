@@ -209,7 +209,7 @@ describe("Factory Tests", () => {
         );
       });
 
-      it("GIVEN invalid ISIN checksum WHEN deploying equity THEN reverts with WrongISIN", async () => {
+      it("GIVEN invalid ISIN checksum WHEN deploying equity THEN reverts with WrongISINChecksum", async () => {
         const equityData = {
           security: getSecurityData(businessLogicResolver, {
             erc20MetadataInfo: { isin: "US0378331009" }, // Wrong checksum digit
@@ -224,7 +224,7 @@ describe("Factory Tests", () => {
 
         await expect(factory.deployEquity(equityData, getRegulationData())).to.be.revertedWithCustomError(
           factory,
-          "WrongISIN",
+          "WrongISINChecksum",
         );
       });
 
@@ -511,7 +511,7 @@ describe("Factory Tests", () => {
     it("GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const equityData = {
         security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "invalid_isin" },
+          erc20MetadataInfo: { isin: "wrong_isin" },
         }),
         equityDetails: getEquityDetails(),
       };
@@ -708,7 +708,7 @@ describe("Factory Tests", () => {
     it("GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails", async () => {
       const bondData = {
         security: getSecurityData(businessLogicResolver, {
-          erc20MetadataInfo: { isin: "invalid_isin" },
+          erc20MetadataInfo: { isin: "wrong_isin" },
           rbacs: init_rbacs,
         }),
         bondDetails: await getBondDetails(),
@@ -1117,7 +1117,7 @@ describe("Factory Tests", () => {
       const bondFixedRateData = {
         bondData: {
           security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "invalid_isin" },
+            erc20MetadataInfo: { isin: "wrong_isin" },
             rbacs: init_rbacs,
           }),
           bondDetails: await getBondDetails(),
@@ -1471,7 +1471,7 @@ describe("Factory Tests", () => {
       const bondKpiLinkedRateData = {
         bondData: {
           security: getSecurityData(businessLogicResolver, {
-            erc20MetadataInfo: { isin: "invalid_isin" },
+            erc20MetadataInfo: { isin: "wrong_isin" },
             rbacs: init_rbacs,
           }),
           bondDetails: await getBondDetails(),
