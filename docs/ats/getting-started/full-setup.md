@@ -11,12 +11,7 @@ Complete guide for setting up the Asset Tokenization Studio development environm
 
 ## Overview
 
-This guide covers the complete setup process for developers who want to:
-
-- Build and deploy smart contracts
-- Integrate the ATS SDK into their projects
-- Contribute to the ATS codebase
-- Customize contract functionality
+This guide walks you through cloning the repo, building all components, deploying the smart contracts, and running the web application.
 
 ## Prerequisites
 
@@ -53,7 +48,7 @@ npm run ats:web:build
 
 ## Step 3: Smart Contracts Setup
 
-### Configure Hardhat
+### Configure Environment
 
 Navigate to the contracts directory:
 
@@ -67,35 +62,18 @@ Create `.env` file:
 cp .env.example .env
 ```
 
-Configure environment variables:
-
-```bash
-# Hedera Network
-HEDERA_NETWORK=testnet
-
-# Operator Account (for deploying contracts)
-OPERATOR_ID=0.0.12345678
-OPERATOR_KEY=302e020100300506032b657004220420...
-
-# JSON-RPC Relay
-JSON_RPC_RELAY_URL=https://testnet.hashio.io/api
-```
+Edit `.env` with your private key and endpoints. See `packages/ats/contracts/.env.example` for all available variables, or the [Contract Deployment Guide](../developer-guides/contracts/deployment.md#2-configure-environment) for a minimal testnet example.
 
 ### Deploy Contracts
 
-See the [Contract Deployment Guide](../developer-guides/contracts/deployment.md) for detailed instructions on deploying the Business Logic Resolver, Diamond Proxy, and Factory contracts.
-
-## Step 4: SDK Setup
-
-The SDK is built as part of step 2. To use it in your own project:
+From `packages/ats/contracts/`:
 
 ```bash
-npm install @hashgraph/asset-tokenization-contracts @hashgraph/asset-tokenization-sdk
+# Example for testnet, replace with your target network
+npm run deploy:hedera:testnet
 ```
 
-See the [SDK Integration Guide](../developer-guides/sdk-integration.md) for usage examples.
-
-## Step 5: Web Application Setup
+## Step 4: Web Application Setup
 
 Configure the web application:
 
@@ -104,19 +82,7 @@ cd apps/ats/web
 cp .env.example .env
 ```
 
-Edit `.env` with your configuration:
-
-```bash
-REACT_APP_MIRROR_NODE=https://testnet.mirrornode.hedera.com/api/v1/
-REACT_APP_RPC_NODE=https://testnet.hashio.io/api
-
-# Your deployed contract IDs
-REACT_APP_RPC_RESOLVER=0.0.12345678
-REACT_APP_RPC_FACTORY=0.0.87654321
-
-# WalletConnect
-REACT_APP_PROJECT_ID=your_project_id
-```
+Edit `.env` with your deployed contract IDs and endpoints. See `apps/ats/web/.env.example` for all available variables (preconfigured for testnet).
 
 Run the development server:
 
@@ -124,72 +90,6 @@ Run the development server:
 npm run dev
 # Or from root: npm run ats:web:dev
 ```
-
-## Step 6: Running Tests
-
-### Contract Tests
-
-```bash
-cd packages/ats/contracts
-npm run test
-
-# With coverage
-npm run test:coverage
-```
-
-### SDK Tests
-
-```bash
-cd packages/ats/sdk
-npm run test
-```
-
-### Web Application Tests
-
-```bash
-cd apps/ats/web
-npm run test
-```
-
-## Development Workflow
-
-### Making Changes
-
-1. **Contracts**: Edit in `packages/ats/contracts/contracts/`
-2. **SDK**: Edit in `packages/ats/sdk/src/`
-3. **Web App**: Edit in `apps/ats/web/src/`
-
-### Rebuilding After Changes
-
-```bash
-# If you change contracts
-npm run ats:contracts:build
-
-# If you change SDK
-npm run ats:sdk:build
-
-# Web app rebuilds automatically in dev mode
-```
-
-### Linting and Formatting
-
-```bash
-# Lint all code
-npm run lint
-
-# Fix linting issues
-npm run lint:fix
-
-# Format code
-npm run format
-```
-
-## Next Steps
-
-- [Developer Guides](../developer-guides/index.md) - Learn about architecture and patterns
-- [Contract Development](../developer-guides/contracts/index.md) - Deploy and customize contracts
-- [SDK Integration](../developer-guides/sdk-integration.md) - Integrate ATS into your project
-- [API Documentation](../api/index.md) - Technical reference
 
 ## Troubleshooting
 
@@ -227,8 +127,9 @@ npm list @hashgraph/asset-tokenization-contracts
 npm list @hashgraph/asset-tokenization-sdk
 ```
 
-## Need Help?
+## Next Steps
 
-- [GitHub Issues](https://github.com/hashgraph/asset-tokenization-studio/issues)
-- [Developer Guides](../developer-guides/index.md)
-- [Hedera Discord](https://hedera.com/discord)
+- [Developer Guides](../developer-guides/index.md) - Learn about architecture and patterns
+- [Contract Development](../developer-guides/contracts/index.md) - Deploy and customize contracts
+- [SDK Integration](../developer-guides/sdk-integration.md) - Integrate ATS into your project
+- [API Documentation](../api/index.md) - Technical reference

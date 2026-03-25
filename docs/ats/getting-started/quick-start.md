@@ -9,6 +9,8 @@ sidebar_position: 1
 
 Quick start guide to run the Asset Tokenization Studio web application.
 
+> **Note**: All examples in this guide use **Hedera Testnet**. Replace endpoints, keys, and network names with your target network as needed.
+
 ## Prerequisites
 
 - **Node.js**: v20.19.4 or newer
