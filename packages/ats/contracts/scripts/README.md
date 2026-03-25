@@ -451,7 +451,7 @@ import type { DeploymentResult } from "@scripts/infrastructure";
 **From contracts directory** (`packages/ats/contracts/`):
 
 ```bash
-cp .env.sample .env
+cp .env.example .env
 ```
 
 **For local testing** (local Hardhat node):
@@ -1680,10 +1680,10 @@ const output = await deploySystemWithNewBlr(signer, "hedera-testnet", {
 
 ## Environment Configuration
 
-Create `.env` from `.env.sample`:
+Create `.env` from `.env.example`:
 
 ```bash
-cp .env.sample .env
+cp .env.example .env
 ```
 
 Configure for your target network:

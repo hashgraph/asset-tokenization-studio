@@ -191,7 +191,7 @@ npx hardhat deploy-system --network hedera-testnet --timetravel
 
    ```bash
    cd packages/ats/contracts
-   cp .env.sample .env
+   cp .env.example .env
    # Edit .env with your credentials
    ```
 

@@ -37,7 +37,7 @@ Latest deployed smart contract addresses for Asset Tokenization Studio.
 
 ## Usage in Web App
 
-Configure these addresses in your `.env.local` file:
+Configure these addresses in your `.env` file:
 
 ```bash
 # Smart Contract Version: 4.0.0
@@ -45,7 +45,7 @@ REACT_APP_RPC_RESOLVER='0.0.7707874'
 REACT_APP_RPC_FACTORY='0.0.7708432'
 ```
 
-See the complete `.env.sample` in `apps/ats/web/.env.sample` for all required environment variables.
+See the complete `.env.example` in `apps/ats/web/.env.example` for all required environment variables.
 
 ## Usage in SDK
 

@@ -101,20 +101,21 @@ Configure the web application:
 
 ```bash
 cd apps/ats/web
-cp .env.local.example .env.local
+cp .env.example .env
 ```
 
-Edit `.env.local` with your configuration:
+Edit `.env` with your configuration:
 
 ```bash
-VITE_NETWORK=testnet
-VITE_JSON_RPC_RELAY_URL=https://testnet.hashio.io/api
-VITE_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com
-VITE_WALLET_CONNECT_PROJECT_ID=your_project_id
+REACT_APP_MIRROR_NODE=https://testnet.mirrornode.hedera.com/api/v1/
+REACT_APP_RPC_NODE=https://testnet.hashio.io/api
 
 # Your deployed contract IDs
-VITE_BUSINESS_LOGIC_RESOLVER_ID=0.0.12345678
-VITE_TREX_FACTORY_ID=0.0.87654321
+REACT_APP_RPC_RESOLVER=0.0.12345678
+REACT_APP_RPC_FACTORY=0.0.87654321
+
+# WalletConnect
+REACT_APP_PROJECT_ID=your_project_id
 ```
 
 Run the development server:
