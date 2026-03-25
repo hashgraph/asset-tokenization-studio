@@ -486,7 +486,9 @@ describe("ProtectedPartitions Tests", () => {
       await clearingFacet.activateClearing();
 
       await expect(
-        holdFacet.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
+        holdFacet
+          .connect(signer_B)
+          .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
       ).to.be.revertedWithCustomError(holdFacet, "ClearingIsActivated");
     });
 
@@ -502,7 +504,9 @@ describe("ProtectedPartitions Tests", () => {
       await setProtected();
 
       await expect(
-        holdFacet.protectedCreateHoldByPartition(DEFAULT_PARTITION, ADDRESS_ZERO, protectedHold, "0x1234"),
+        holdFacet
+          .connect(signer_B)
+          .protectedCreateHoldByPartition(DEFAULT_PARTITION, ADDRESS_ZERO, protectedHold, "0x1234"),
       ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
     });
 
@@ -512,7 +516,9 @@ describe("ProtectedPartitions Tests", () => {
       protectedHold.hold.escrow = ADDRESS_ZERO;
 
       await expect(
-        holdFacet.protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
+        holdFacet
+          .connect(signer_B)
+          .protectedCreateHoldByPartition(DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
       ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
     });
 

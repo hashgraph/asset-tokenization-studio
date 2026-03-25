@@ -170,6 +170,8 @@ abstract contract HoldManagement is IHoldManagement, Modifiers {
         override
         onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
+        notZeroAddress(_from)
+        notZeroAddress(_protectedHold.hold.escrow)
         onlyClearingDisabled
         onlyValidExpirationTimestamp(_protectedHold.hold.expirationTimestamp)
         onlyUnrecoveredAddress(_from)

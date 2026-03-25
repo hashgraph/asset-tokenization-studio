@@ -4,13 +4,12 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IFreeze } from "./IFreeze.sol";
 import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 
 /**
  * @title Freeze
@@ -20,7 +19,7 @@ import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers
  * Provides functionality for freezing addresses and partial token amounts
  * with role-based access control. Inherits ERC3643Modifiers for compliance checks.
  */
-abstract contract Freeze is IFreeze, TimestampProvider, PauseModifiers, AccessControlModifiers, ERC3643Modifiers {
+abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     /**
      * @notice Set address frozen status
      * @dev Only callable by FREEZE_MANAGER_ROLE or AGENT_ROLE
@@ -36,7 +35,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, PauseModifiers, AccessCo
     function setAddressFrozen(
         address _userAddress,
         bool _freezStatus
-    ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) {
+    ) external override onlyUnpaused notZeroAddress(_userAddress) onlyUnrecoveredAddress(_userAddress) {
         _requireFreezeRoles();
         ERC3643StorageWrapper.setAddressFrozen(_userAddress, _freezStatus);
         emit AddressFrozen(_userAddress, _freezStatus, msg.sender);

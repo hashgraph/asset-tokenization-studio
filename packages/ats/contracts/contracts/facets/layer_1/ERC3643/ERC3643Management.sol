@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
+// solhint-disable max-line-length
+
 import { _AGENT_ROLE, _TREX_OWNER_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Management } from "./IERC3643Management.sol";
 import { IERC3643StorageWrapper } from "../../../domain/asset/ERC3643/IERC3643StorageWrapper.sol";
@@ -40,12 +42,16 @@ abstract contract ERC3643Management is IERC3643Management, AccessControlModifier
         ERC3643StorageWrapper.setCompliance(_compliance);
     }
 
-    function addAgent(address _agent) external onlyRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE)) {
+    function addAgent(
+        address _agent
+    ) external onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE)) {
         AccessControlStorageWrapper.grantRole(_AGENT_ROLE, _agent);
         emit AgentAdded(_agent);
     }
 
-    function removeAgent(address _agent) external onlyRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE)) {
+    function removeAgent(
+        address _agent
+    ) external onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE)) {
         AccessControlStorageWrapper.revokeRole(_AGENT_ROLE, _agent);
         emit AgentRemoved(_agent);
     }
