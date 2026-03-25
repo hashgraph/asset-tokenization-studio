@@ -14,6 +14,7 @@ import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @title ClearingOps - Orchestrator for clearing state-changing operations
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
@@ -436,11 +437,27 @@ library ClearingOps {
     function transferClearingBalance(bytes32 _partition, address _to, uint256 _amount) internal {
         if (TokenCoreOps.validPartitionForReceiver(_partition, _to)) {
             TokenCoreOps.increaseBalanceByPartition(_to, _amount, _partition);
-            TokenCoreOps.emitTransferByPartition(_partition, msg.sender, address(0), _to, _amount, "", "");
+            TokenCoreOps.emitTransferByPartition(
+                _partition,
+                EvmAccessors.getMsgSender(),
+                address(0),
+                _to,
+                _amount,
+                "",
+                ""
+            );
             TokenCoreOps.emitTransfer(address(0), _to, _amount);
         } else {
             TokenCoreOps.addPartitionTo(_amount, _to, _partition);
-            TokenCoreOps.emitTransferByPartition(_partition, msg.sender, address(0), _to, _amount, "", "");
+            TokenCoreOps.emitTransferByPartition(
+                _partition,
+                EvmAccessors.getMsgSender(),
+                address(0),
+                _to,
+                _amount,
+                "",
+                ""
+            );
             TokenCoreOps.emitTransfer(address(0), _to, _amount);
         }
     }
@@ -545,7 +562,7 @@ library ClearingOps {
         ThirdPartyType /* _operatorType */
     ) internal {
         emit IClearingStorageWrapper.ClearedTransferByPartition(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _from,
             _to,
             _partition,
@@ -568,7 +585,7 @@ library ClearingOps {
         ThirdPartyType /* _operatorType */
     ) internal {
         emit IClearingStorageWrapper.ClearedRedeemByPartition(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _from,
             _partition,
             _clearingId,
@@ -590,7 +607,7 @@ library ClearingOps {
         ThirdPartyType /* _operatorType */
     ) internal {
         emit IClearingStorageWrapper.ClearedHoldByPartition(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _from,
             _partition,
             _clearingId,

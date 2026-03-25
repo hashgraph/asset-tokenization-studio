@@ -31,6 +31,7 @@ import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../core/ControlListStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 library HoldStorageWrapper {
     using Pagination for EnumerableSet.UintSet;
@@ -67,7 +68,7 @@ library HoldStorageWrapper {
 
         emit IERC1410StorageWrapper.TransferByPartition(
             _partition,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _from,
             address(0),
             _hold.amount,
@@ -116,7 +117,7 @@ library HoldStorageWrapper {
         uint256 _amount,
         uint256 _holdId
     ) internal {
-        address thirdPartyAddress = msg.sender;
+        address thirdPartyAddress = EvmAccessors.getMsgSender();
         ERC20StorageWrapper.decreaseAllowedBalance(_from, thirdPartyAddress, _amount);
         holdStorage().holdThirdPartyByAccountPartitionAndId[_from][_partition][_holdId] = thirdPartyAddress;
     }
@@ -211,7 +212,7 @@ library HoldStorageWrapper {
         }
         if (_operation != OperationType.Reclaim) {
             if (isHoldExpired(holdData.hold)) revert IHold.HoldExpirationReached();
-            if (!isEscrow(holdData.hold, msg.sender)) revert IHold.IsNotEscrow();
+            if (!isEscrow(holdData.hold, EvmAccessors.getMsgSender())) revert IHold.IsNotEscrow();
         } else if (_operation == OperationType.Reclaim && !isHoldExpired(holdData.hold)) {
             revert IHold.HoldExpirationNotReached();
         }
@@ -239,7 +240,7 @@ library HoldStorageWrapper {
             }
             emit IERC1410StorageWrapper.TransferByPartition(
                 _holdIdentifier.partition,
-                msg.sender,
+                EvmAccessors.getMsgSender(),
                 address(0),
                 _to,
                 _amount,
@@ -258,7 +259,7 @@ library HoldStorageWrapper {
         }
         emit IERC1410StorageWrapper.TransferByPartition(
             _holdIdentifier.partition,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             address(0),
             _to,
             _amount,

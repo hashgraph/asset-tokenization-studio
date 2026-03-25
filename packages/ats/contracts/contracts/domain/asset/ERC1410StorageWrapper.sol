@@ -24,6 +24,7 @@ import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /// @dev Represents a fungible set of tokens.
 struct Partition {
@@ -181,23 +182,23 @@ library ERC1410StorageWrapper {
     // ============================================================================
 
     function authorizeOperator(address operator) internal {
-        erc1410OperatorStorage().approvals[msg.sender][operator] = true;
-        emit IERC1410StorageWrapper.AuthorizedOperator(operator, msg.sender);
+        erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = true;
+        emit IERC1410StorageWrapper.AuthorizedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     function revokeOperator(address operator) internal {
-        erc1410OperatorStorage().approvals[msg.sender][operator] = false;
-        emit IERC1410StorageWrapper.RevokedOperator(operator, msg.sender);
+        erc1410OperatorStorage().approvals[EvmAccessors.getMsgSender()][operator] = false;
+        emit IERC1410StorageWrapper.RevokedOperator(operator, EvmAccessors.getMsgSender());
     }
 
     function authorizeOperatorByPartition(bytes32 partition, address operator) internal {
-        erc1410OperatorStorage().partitionApprovals[msg.sender][partition][operator] = true;
-        emit IERC1410StorageWrapper.AuthorizedOperatorByPartition(partition, operator, msg.sender);
+        erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = true;
+        emit IERC1410StorageWrapper.AuthorizedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
 
     function revokeOperatorByPartition(bytes32 partition, address operator) internal {
-        erc1410OperatorStorage().partitionApprovals[msg.sender][partition][operator] = false;
-        emit IERC1410StorageWrapper.RevokedOperatorByPartition(partition, operator, msg.sender);
+        erc1410OperatorStorage().partitionApprovals[EvmAccessors.getMsgSender()][partition][operator] = false;
+        emit IERC1410StorageWrapper.RevokedOperatorByPartition(partition, operator, EvmAccessors.getMsgSender());
     }
 
     // ============================================================================
@@ -260,7 +261,7 @@ library ERC1410StorageWrapper {
                 BasicTransferInfo(operatorTransferData.to, operatorTransferData.value),
                 operatorTransferData.partition,
                 operatorTransferData.data,
-                msg.sender,
+                EvmAccessors.getMsgSender(),
                 operatorTransferData.operatorData
             );
     }
@@ -294,7 +295,7 @@ library ERC1410StorageWrapper {
         // RULE 2: Emit TransferByPartition when ERC1410BasicStorage.partitions change
         emit IERC1410StorageWrapper.TransferByPartition(
             issueData.partition,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             address(0),
             issueData.tokenHolder,
             issueData.value,
@@ -304,7 +305,7 @@ library ERC1410StorageWrapper {
 
         emit IERC1410StorageWrapper.IssuedByPartition(
             issueData.partition,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             issueData.tokenHolder,
             issueData.value,
             issueData.data
@@ -378,7 +379,7 @@ library ERC1410StorageWrapper {
 
         NonceStorageWrapper.setNonceFor(protectionData.nounce, from);
 
-        return transferByPartition(from, BasicTransferInfo(to, amount), partition, "", msg.sender, "");
+        return transferByPartition(from, BasicTransferInfo(to, amount), partition, "", EvmAccessors.getMsgSender(), "");
     }
 
     function protectedRedeemFromByPartition(
@@ -404,7 +405,7 @@ library ERC1410StorageWrapper {
         );
         NonceStorageWrapper.setNonceFor(protectionData.nounce, from);
 
-        redeemByPartition(partition, from, msg.sender, amount, "", "");
+        redeemByPartition(partition, from, EvmAccessors.getMsgSender(), amount, "", "");
     }
 
     // ============================================================================
@@ -675,8 +676,8 @@ library ERC1410StorageWrapper {
     // ============================================================================
 
     function requireOperator(bytes32 partition, address from) internal view {
-        if (!isAuthorized(partition, msg.sender, from))
-            revert IERC1410StorageWrapper.Unauthorized(msg.sender, from, partition);
+        if (!isAuthorized(partition, EvmAccessors.getMsgSender(), from))
+            revert IERC1410StorageWrapper.Unauthorized(EvmAccessors.getMsgSender(), from, partition);
     }
 
     function requireWithoutMultiPartition() internal view {
@@ -745,7 +746,7 @@ library ERC1410StorageWrapper {
             unchecked {
                 emit IERC1410StorageWrapper.TransferByPartition(
                     partition,
-                    msg.sender,
+                    EvmAccessors.getMsgSender(),
                     address(0),
                     address(0),
                     newAmount - oldAmount,
