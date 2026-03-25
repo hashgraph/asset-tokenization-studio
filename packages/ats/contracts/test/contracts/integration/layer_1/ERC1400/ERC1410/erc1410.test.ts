@@ -1029,7 +1029,7 @@ describe("ERC1410 Tests", () => {
           value: amount,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account WHEN transfer more than its balance THEN transaction fails", async () => {
@@ -1299,7 +1299,7 @@ describe("ERC1410 Tests", () => {
           value: 3 * amount,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(supplyFacet, "MaxSupplyReached");
+      ).to.be.revertedWithCustomError(capFacet, "MaxSupplyReached");
 
       await expect(
         erc1410Facet.issueByPartition({
@@ -1308,7 +1308,7 @@ describe("ERC1410 Tests", () => {
           value: 2 * amount,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(supplyFacet, "MaxSupplyReachedForPartition");
+      ).to.be.revertedWithCustomError(capFacet, "MaxSupplyReachedForPartition");
     });
 
     it("GIVEN an account WHEN issue THEN transaction succeeds", async () => {
@@ -1575,7 +1575,7 @@ describe("ERC1410 Tests", () => {
             data,
             operatorData,
           ),
-      ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1600,7 +1600,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .controllerRedeemByPartition(_PARTITION_ID_1, signer_D.address, amount, data, operatorData),
-      ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -2171,7 +2171,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 1,
                 signature: "0x1234",
               }),
-          ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
+          ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
         });
 
         it("GIVEN a blacklisted account WHEN performing a protected transfer from it THEN transaction fails with AccountIsBlocked", async () => {
@@ -2336,7 +2336,7 @@ describe("ERC1410 Tests", () => {
               nounce: 1,
               signature: "0x1234",
             }),
-          ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
+          ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
         });
 
         it("GIVEN a blacklisted account WHEN performing a protected redeem from it THEN transaction fails with AccountIsBlocked", async () => {
