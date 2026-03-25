@@ -10,6 +10,7 @@ import { IFactory } from "../../factory/IFactory.sol";
 import { ERC1410BasicStorage, ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct ERC20Storage {
     string name;
@@ -131,7 +132,7 @@ library ERC20StorageWrapper {
             revert IERC20StorageWrapper.SpenderWithZeroAddress();
         }
 
-        increaseAllowedBalance(msg.sender, spender, addedValue);
+        increaseAllowedBalance(EvmAccessors.getMsgSender(), spender, addedValue);
 
         return true;
     }
@@ -140,8 +141,12 @@ library ERC20StorageWrapper {
         if (spender == address(0)) {
             revert IERC20StorageWrapper.SpenderWithZeroAddress();
         }
-        decreaseAllowedBalance(msg.sender, spender, subtractedValue);
-        emit IERC20StorageWrapper.Approval(msg.sender, spender, erc20Storage().allowed[msg.sender][spender]);
+        decreaseAllowedBalance(EvmAccessors.getMsgSender(), spender, subtractedValue);
+        emit IERC20StorageWrapper.Approval(
+            EvmAccessors.getMsgSender(),
+            spender,
+            erc20Storage().allowed[EvmAccessors.getMsgSender()][spender]
+        );
         return true;
     }
 
@@ -183,7 +188,7 @@ library ERC20StorageWrapper {
     }
 
     function burnFrom(address account, uint256 value) internal {
-        decreaseAllowedBalance(account, msg.sender, value);
+        decreaseAllowedBalance(account, EvmAccessors.getMsgSender(), value);
         burn(account, value);
     }
 
