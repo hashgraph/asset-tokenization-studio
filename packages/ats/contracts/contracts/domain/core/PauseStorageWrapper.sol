@@ -10,6 +10,7 @@ import {
     ExternalListDataStorage
 } from "./ExternalListManagementStorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct PauseDataStorage {
     bool paused;
@@ -44,10 +45,10 @@ library PauseStorageWrapper {
     function setPause(bool _paused) internal {
         pauseStorage().paused = _paused;
         if (_paused) {
-            emit IPauseStorageWrapper.TokenPaused(msg.sender);
+            emit IPauseStorageWrapper.TokenPaused(EvmAccessors.getMsgSender());
             return;
         }
-        emit IPauseStorageWrapper.TokenUnpaused(msg.sender);
+        emit IPauseStorageWrapper.TokenUnpaused(EvmAccessors.getMsgSender());
     }
 
     // solhint-disable-next-line func-name-mixedcase

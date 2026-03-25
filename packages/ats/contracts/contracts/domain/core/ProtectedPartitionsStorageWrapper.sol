@@ -17,6 +17,7 @@ import {
     _verify
 } from "../../infrastructure/utils/ERC712.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct ProtectedPartitionsDataStorage {
     bool initialized;
@@ -45,10 +46,10 @@ library ProtectedPartitionsStorageWrapper {
     function setProtectedPartitions(bool _protected) internal {
         protectedPartitionsStorage().arePartitionsProtected = _protected;
         if (_protected) {
-            emit IProtectedPartitionsStorageWrapper.PartitionsProtected(msg.sender);
+            emit IProtectedPartitionsStorageWrapper.PartitionsProtected(EvmAccessors.getMsgSender());
             return;
         }
-        emit IProtectedPartitionsStorageWrapper.PartitionsUnProtected(msg.sender);
+        emit IProtectedPartitionsStorageWrapper.PartitionsUnProtected(EvmAccessors.getMsgSender());
     }
 
     // --- Internal view functions ---
