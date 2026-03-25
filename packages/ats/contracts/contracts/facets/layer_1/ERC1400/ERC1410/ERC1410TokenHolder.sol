@@ -50,7 +50,8 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, PauseModifiers {
     }
 
     function revokeOperator(address _operator) external override onlyUnpaused {
-        ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
+        ERC1594StorageWrapper.requireIdentified(msg.sender, _operator);
+        ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
         ERC1410StorageWrapper.revokeOperator(_operator);
     }
 
@@ -62,7 +63,8 @@ abstract contract ERC1410TokenHolder is IERC1410TokenHolder, PauseModifiers {
 
     function revokeOperatorByPartition(bytes32 _partition, address _operator) external override onlyUnpaused {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        ERC1594StorageWrapper.requireCompliant(msg.sender, address(0), false);
+        ERC1594StorageWrapper.requireIdentified(msg.sender, _operator);
+        ERC1594StorageWrapper.requireCompliant(msg.sender, _operator, false);
         ERC1410StorageWrapper.revokeOperatorByPartition(_partition, _operator);
     }
 

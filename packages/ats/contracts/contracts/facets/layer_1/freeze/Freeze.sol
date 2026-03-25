@@ -61,7 +61,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, PauseModifiers, AccessCo
         ERC1410StorageWrapper.requireValidAddress(_userAddress);
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC3643StorageWrapper.freezeTokens(_userAddress, _amount);
-        emit TokensFrozen(_userAddress, _amount, bytes32(0));
+        emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
     /**
@@ -83,7 +83,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, PauseModifiers, AccessCo
         ERC1410StorageWrapper.requireValidAddress(_userAddress);
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC3643StorageWrapper.unfreezeTokens(_userAddress, _amount, 0);
-        emit TokensUnfrozen(_userAddress, _amount, bytes32(0));
+        emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
 
     /**
@@ -127,7 +127,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, PauseModifiers, AccessCo
             ERC1410StorageWrapper.requireWithoutMultiPartition();
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.freezeTokens(_userAddresses[i], _amounts[i]);
-            emit TokensFrozen(_userAddresses[i], _amounts[i], bytes32(0));
+            emit TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
         }
     }
 
@@ -152,7 +152,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, PauseModifiers, AccessCo
             ERC1410StorageWrapper.requireWithoutMultiPartition();
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
-            emit TokensUnfrozen(_userAddresses[i], _amounts[i], bytes32(0));
+            emit TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
         }
     }
 

@@ -14,7 +14,7 @@ abstract contract Pause is IPause, PauseModifiers, AccessControlModifiers {
         success_ = true;
     }
 
-    function unpause() external override onlyPaused onlyRole(_PAUSER_ROLE) returns (bool success_) {
+    function unpause() external override onlyRole(_PAUSER_ROLE) onlyPaused returns (bool success_) {
         PauseStorageWrapper.setPause(false);
         success_ = true;
     }

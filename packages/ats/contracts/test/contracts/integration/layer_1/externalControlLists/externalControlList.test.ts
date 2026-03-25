@@ -442,9 +442,15 @@ describe("ExternalControlList Management Tests", () => {
         value: 1,
         data: "0x",
       };
-      await expect(erc1410Facet.issueByPartition(issueBody)).to.be.rejectedWith("AccountIsBlocked");
+      await expect(erc1410Facet.issueByPartition(issueBody)).to.be.revertedWithCustomError(
+        controlList,
+        "AccountIsBlocked",
+      );
       await initMock1.addToWhitelist(issueBody.tokenHolder);
-      await expect(erc1410Facet.issueByPartition(issueBody)).to.be.rejectedWith("AccountIsBlocked");
+      await expect(erc1410Facet.issueByPartition(issueBody)).to.be.revertedWithCustomError(
+        controlList,
+        "AccountIsBlocked",
+      );
     });
 
     it("GIVEN an externally authorized account WHEN trying to operate THEN transaction succeeds", async () => {

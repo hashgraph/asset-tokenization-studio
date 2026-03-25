@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
+import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "./TokenCoreOps.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
@@ -230,6 +231,9 @@ library ClearingOps {
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
 
+        // Check wallet recovery status for from and to addresses
+        ERC1594StorageWrapper.requireNotRecoveredAddresses(_protectedClearingOperation.from, _to);
+
         ProtectedPartitionsStorageWrapper.checkClearingTransferSignature(
             _protectedClearingOperation,
             _amount,
@@ -263,6 +267,9 @@ library ClearingOps {
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
 
+        // Check wallet recovery status for from address
+        ERC1594StorageWrapper.requireNotRecoveredAddresses(_protectedClearingOperation.from, address(0));
+
         ProtectedPartitionsStorageWrapper.checkClearingRedeemSignature(
             _protectedClearingOperation,
             _amount,
@@ -293,6 +300,9 @@ library ClearingOps {
             _protectedClearingOperation.deadline,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
+
+        // Check wallet recovery status for from and to addresses
+        ERC1594StorageWrapper.requireNotRecoveredAddresses(_protectedClearingOperation.from, _hold.to);
 
         ProtectedPartitionsStorageWrapper.checkClearingCreateHoldSignature(
             _protectedClearingOperation,

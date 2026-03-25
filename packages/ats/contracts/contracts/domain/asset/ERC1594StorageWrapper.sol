@@ -87,6 +87,15 @@ library ERC1594StorageWrapper {
         checkCompliance(from, to, checkSender);
     }
 
+    function requireNotRecoveredAddresses(address from, address to) internal view {
+        if (from != address(0) && ERC3643StorageWrapper.isRecovered(from)) {
+            revert IERC3643Management.WalletRecovered();
+        }
+        if (to != address(0) && ERC3643StorageWrapper.isRecovered(to)) {
+            revert IERC3643Management.WalletRecovered();
+        }
+    }
+
     // --- Internal functions ---
 
     function checkCanRedeemFromByPartition(

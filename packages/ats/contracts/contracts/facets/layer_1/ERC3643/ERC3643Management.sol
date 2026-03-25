@@ -11,6 +11,7 @@ import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrappe
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 abstract contract ERC3643Management is IERC3643Management, AccessControlModifiers, PauseModifiers, ERC3643Modifiers {
     // solhint-disable-next-line func-name-mixedcase
@@ -62,6 +63,11 @@ abstract contract ERC3643Management is IERC3643Management, AccessControlModifier
         returns (bool success_)
     {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
-        success_ = ERC3643StorageWrapper.recoveryAddress(_lostWallet, _newWallet, _investorOnchainID, block.timestamp);
+        success_ = ERC3643StorageWrapper.recoveryAddress(
+            _lostWallet,
+            _newWallet,
+            _investorOnchainID,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
     }
 }

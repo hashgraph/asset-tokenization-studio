@@ -108,11 +108,11 @@ library ERC20VotesStorageWrapper {
     function moveVotingPower(address src, address dst, uint256 amount) internal {
         if (src != dst && amount > 0) {
             if (src != address(0)) {
-                moveVotingPower(src, true, amount);
+                moveVotingPower(src, false, amount); // subtract from src
             }
 
             if (dst != address(0)) {
-                moveVotingPower(dst, false, amount);
+                moveVotingPower(dst, true, amount); // add to dst
             }
         }
     }

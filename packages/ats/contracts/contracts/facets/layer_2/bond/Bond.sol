@@ -15,6 +15,8 @@ import { DateValidationModifiers } from "../../../infrastructure/utils/DateValid
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
+import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { IClearing } from "../../layer_1/clearing/IClearing.sol";
@@ -38,7 +40,9 @@ abstract contract Bond is
     ControlListModifiers,
     KycModifiers,
     MaturityModifiers,
-    DateValidationModifiers
+    DateValidationModifiers,
+    ERC1410Modifiers,
+    ERC3643Modifiers
 {
     /**
      * @dev Redeems all tokens at maturity for a token holder
@@ -64,12 +68,12 @@ abstract contract Bond is
         override
         onlyUnpaused
         onlyRole(_MATURITY_REDEEMER_ROLE)
+        onlyValidAddress(_tokenHolder)
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyValidMaturityDate(_getBlockTimestamp())
     {
-        ERC1410StorageWrapper.requireValidAddress(_tokenHolder);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
         BondStorageWrapper.requireValidMaturityDate(_getBlockTimestamp());
         bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         for (uint256 i = 0; i < partitions.length; i++) {
@@ -109,13 +113,13 @@ abstract contract Bond is
         override
         onlyUnpaused
         onlyRole(_MATURITY_REDEEMER_ROLE)
+        onlyValidAddress(_tokenHolder)
+        onlyDefaultPartition(_partition)
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyValidMaturityDate(_getBlockTimestamp())
     {
-        ERC1410StorageWrapper.requireValidAddress(_tokenHolder);
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
         BondStorageWrapper.requireValidMaturityDate(_getBlockTimestamp());
         ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, msg.sender, _amount, "", "");
     }

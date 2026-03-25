@@ -259,12 +259,12 @@ describe("ERC1594 Tests", () => {
         // transfer with data fails
         await expect(
           erc1594Facet.connect(signer_C).transferWithData(signer_D.address, AMOUNT, DATA),
-        ).to.be.rejectedWith("AccountIsBlocked");
+        ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
 
         // transfer from with data fails
         await expect(
           erc1594Facet.connect(signer_C).transferFromWithData(signer_E.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.rejectedWith("AccountIsBlocked");
+        ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
 
         // Update blacklist
         await controlList.connect(signer_A).removeFromControlList(signer_C.address);
@@ -273,12 +273,12 @@ describe("ERC1594 Tests", () => {
         // transfer with data fails
         await expect(
           erc1594Facet.connect(signer_C).transferWithData(signer_D.address, AMOUNT, DATA),
-        ).to.be.rejectedWith("AccountIsBlocked");
+        ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
 
         // transfer from with data fails
         await expect(
           erc1594Facet.connect(signer_C).transferFromWithData(signer_E.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.rejectedWith("AccountIsBlocked");
+        ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
 
         // Update blacklist
         await controlList.connect(signer_A).removeFromControlList(signer_D.address);
@@ -287,7 +287,7 @@ describe("ERC1594 Tests", () => {
         // transfer from with data fails
         await expect(
           erc1594Facet.connect(signer_C).transferFromWithData(signer_E.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.rejectedWith("AccountIsBlocked");
+        ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       });
 
       it("GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked", async () => {
@@ -331,7 +331,10 @@ describe("ERC1594 Tests", () => {
         await controlList.connect(signer_A).addToControlList(signer_C.address);
 
         // redeem with data fails
-        await expect(erc1594Facet.connect(signer_C).redeem(AMOUNT, DATA)).to.be.rejectedWith("AccountIsBlocked");
+        await expect(erc1594Facet.connect(signer_C).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(
+          controlList,
+          "AccountIsBlocked",
+        );
 
         // redeem from with data fails
         await expect(erc1594Facet.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA)).to.be.rejectedWith(
@@ -464,27 +467,27 @@ describe("ERC1594 Tests", () => {
         expect(await erc1594Facet.connect(signer_C).canTransfer(signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
           false,
           EIP1066_CODES.DISALLOWED_OR_STOP,
-          getSelector(erc1594Facet, "AccountIsBlocked"),
+          getSelector(controlList, "AccountIsBlocked"),
         ]);
         await erc1594Issuer.issue(signer_D.address, AMOUNT, DATA);
         expect(await erc1594Facet.connect(signer_D).canTransfer(signer_C.address, AMOUNT, DATA)).to.be.deep.equal([
           false,
           EIP1066_CODES.DISALLOWED_OR_STOP,
-          getSelector(erc1594Facet, "AccountIsBlocked"),
+          getSelector(controlList, "AccountIsBlocked"),
         ]);
 
         await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
         expect(
           await erc1594Facet.connect(signer_C).canTransferFrom(signer_E.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(erc1594Facet, "AccountIsBlocked")]);
+        ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(controlList, "AccountIsBlocked")]);
 
         expect(
           await erc1594Facet.connect(signer_A).canTransferFrom(signer_C.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(erc1594Facet, "AccountIsBlocked")]);
+        ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(controlList, "AccountIsBlocked")]);
         await erc20Facet.connect(signer_E).increaseAllowance(signer_A.address, AMOUNT);
         expect(
           await erc1594Facet.connect(signer_A).canTransferFrom(signer_E.address, signer_C.address, AMOUNT, DATA),
-        ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(erc1594Facet, "AccountIsBlocked")]);
+        ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(controlList, "AccountIsBlocked")]);
       },
     );
     describe("Kyc", () => {
@@ -568,14 +571,14 @@ describe("ERC1594 Tests", () => {
       expect(await erc1594Facet.canTransfer(ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
         false,
         EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-        getSelector(erc1594Facet, "ZeroAddressNotAllowed"),
+        getSelector(erc20Facet, "ZeroAddressNotAllowed"),
       ]);
       await erc1594Issuer.issue(signer_D.address, AMOUNT, DATA);
       await erc20Facet.connect(signer_D).increaseAllowance(signer_A.address, AMOUNT);
       expect(await erc1594Facet.canTransferFrom(signer_D.address, ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
         false,
         EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
-        getSelector(erc1594Facet, "ZeroAddressNotAllowed"),
+        getSelector(erc20Facet, "ZeroAddressNotAllowed"),
       ]);
     });
 

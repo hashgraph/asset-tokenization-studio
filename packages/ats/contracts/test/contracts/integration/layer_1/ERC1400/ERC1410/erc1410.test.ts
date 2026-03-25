@@ -454,7 +454,10 @@ describe("ERC1410 Tests", () => {
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(erc1410Facet.initialize_ERC1410(true)).to.be.rejectedWith("AlreadyInitialized");
+      await expect(erc1410Facet.initialize_ERC1410(true)).to.be.revertedWithCustomError(
+        erc1410Facet,
+        "AlreadyInitialized",
+      );
     });
 
     it("GIVEN a multi-partition token WHEN checking isMultiPartition THEN returns true", async () => {
@@ -648,14 +651,14 @@ describe("ERC1410 Tests", () => {
       // transfer with data fails
       await expect(
         erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.PAUSED);
 
       // transfer from with data fails
-      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejectedWith(
-        "TokenIsPaused",
-      );
+      await expect(
+        erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
+      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.PAUSED);
     });
@@ -707,7 +710,7 @@ describe("ERC1410 Tests", () => {
           value: amount,
           data: "0x",
         }),
-      ).to.be.rejectedWith("ZeroPartition");
+      ).to.be.revertedWithCustomError(erc1410Facet, "ZeroPartition");
     });
 
     it("GIVEN Token WHEN issue amount 0 THEN transaction fails with ZeroValue", async () => {
@@ -719,7 +722,7 @@ describe("ERC1410 Tests", () => {
           value: 0,
           data: data,
         }),
-      ).to.be.rejectedWith("ZeroValue");
+      ).to.be.revertedWithCustomError(erc1410Facet, "ZeroValue");
     });
 
     it("GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused", async () => {
@@ -734,9 +737,9 @@ describe("ERC1410 Tests", () => {
         .canRedeemByPartition(signer_E.address, _PARTITION_ID_1, amount, data, operatorData);
 
       // transfer with data fails
-      await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data)).to.be.rejectedWith(
-        "TokenIsPaused",
-      );
+      await expect(
+        erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data),
+      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.PAUSED);
 
@@ -745,7 +748,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .operatorRedeemByPartition(_PARTITION_ID_1, signer_E.address, amount, data, operatorData),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
       expect(canRedeem_2[0]).to.be.equal(false);
       expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.PAUSED);
     });
@@ -791,14 +794,14 @@ describe("ERC1410 Tests", () => {
       // transfer with data fails
       await expect(
         erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data),
-      ).to.be.rejectedWith("AccountIsBlocked");
+      ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP);
 
       // transfer from with data fails
-      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejectedWith(
-        "AccountIsBlocked",
-      );
+      await expect(
+        erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
+      ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       expect(canTransfer_2[0]).to.be.equal(false);
       expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP);
 
@@ -815,14 +818,14 @@ describe("ERC1410 Tests", () => {
       // transfer with data fails
       await expect(
         erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data),
-      ).to.be.rejectedWith("AccountIsBlocked");
+      ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP);
 
       // transfer from with data fails
-      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejectedWith(
-        "AccountIsBlocked",
-      );
+      await expect(
+        erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
+      ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       expect(canTransfer_2[0]).to.be.equal(false);
       expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP);
 
@@ -834,9 +837,9 @@ describe("ERC1410 Tests", () => {
         .canTransferByPartition(signer_E.address, signer_D.address, _PARTITION_ID_1, amount, data, operatorData);
 
       // transfer from with data fails
-      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejectedWith(
-        "AccountIsBlocked",
-      );
+      await expect(
+        erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
+      ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       expect(canTransfer_2[0]).to.be.equal(false);
       expect(canTransfer_2[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP);
     });
@@ -912,7 +915,7 @@ describe("ERC1410 Tests", () => {
           value: amount,
           data: data,
         }),
-      ).to.be.rejectedWith("AccountIsBlocked");
+      ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
     });
 
     it("GIVEN non Kyc account WHEN issue or redeem THEN transaction fails with InvalidKycStatus", async () => {
@@ -960,9 +963,9 @@ describe("ERC1410 Tests", () => {
         .canRedeemByPartition(signer_E.address, _PARTITION_ID_1, amount, data, operatorData);
 
       // redeem with data fails
-      await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data)).to.be.rejectedWith(
-        "AccountIsBlocked",
-      );
+      await expect(
+        erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data),
+      ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP);
 
@@ -971,7 +974,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .operatorRedeemByPartition(_PARTITION_ID_1, signer_E.address, amount, data, operatorData),
-      ).to.be.rejectedWith("AccountIsBlocked");
+      ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       expect(canRedeem_2[0]).to.be.equal(false);
       expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP);
 
@@ -987,7 +990,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .operatorRedeemByPartition(_PARTITION_ID_1, signer_E.address, amount, data, operatorData),
-      ).to.be.rejectedWith("AccountIsBlocked");
+      ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       expect(canRedeem_2[0]).to.be.equal(false);
       expect(canRedeem_2[1]).to.be.equal(EIP1066_CODES.DISALLOWED_OR_STOP);
     });
@@ -999,7 +1002,7 @@ describe("ERC1410 Tests", () => {
       // transfer with data fails
       await expect(
         erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID, basicTransferInfo, data),
-      ).to.be.rejectedWith("InvalidPartition");
+      ).to.be.revertedWithCustomError(erc1410Facet, "InvalidPartition");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1010,9 +1013,9 @@ describe("ERC1410 Tests", () => {
         .canRedeemByPartition(signer_C.address, _PARTITION_ID, amount, data, operatorData);
 
       // transfer with data fails
-      await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID, amount, data)).to.be.rejectedWith(
-        "InvalidPartition",
-      );
+      await expect(
+        erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID, amount, data),
+      ).to.be.revertedWithCustomError(erc1410Facet, "InvalidPartition");
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1026,7 +1029,7 @@ describe("ERC1410 Tests", () => {
           value: amount,
           data: data,
         }),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
     });
 
     it("GIVEN an account WHEN transfer more than its balance THEN transaction fails", async () => {
@@ -1130,9 +1133,9 @@ describe("ERC1410 Tests", () => {
 
     it("GIVEN an account WHEN operatorTransferByPartition to address 0 THEN transaction fails with ZeroAddressNotAllowed", async () => {
       operatorTransferData.to = ADDRESS_ZERO;
-      await expect(erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData)).to.be.rejectedWith(
-        "ZeroAddressNotAllowed",
-      );
+      await expect(
+        erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
+      ).to.be.revertedWithCustomError(erc1410Facet, "ZeroAddressNotAllowed");
     });
 
     it("GIVEN protected partitions without wildcard role WHEN transferByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -1143,7 +1146,7 @@ describe("ERC1410 Tests", () => {
 
       await expect(
         erc1410Facet.connect(signer_C).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data),
-      ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+      ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreProtectedAndNoRole");
     });
 
     it("GIVEN protected partitions without wildcard role WHEN redeemByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -1152,9 +1155,9 @@ describe("ERC1410 Tests", () => {
       await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
       await protectedPartitionsFacet.connect(signer_A).protectPartitions();
 
-      await expect(erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data)).to.be.rejectedWith(
-        "PartitionsAreProtectedAndNoRole",
-      );
+      await expect(
+        erc1410Facet.connect(signer_C).redeemByPartition(_PARTITION_ID_1, amount, data),
+      ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreProtectedAndNoRole");
     });
 
     it("GIVEN an account WHEN transfer THEN transaction succeeds", async () => {
@@ -1296,7 +1299,7 @@ describe("ERC1410 Tests", () => {
           value: 3 * amount,
           data: data,
         }),
-      ).to.be.rejectedWith("MaxSupplyReached");
+      ).to.be.revertedWithCustomError(supplyFacet, "MaxSupplyReached");
 
       await expect(
         erc1410Facet.issueByPartition({
@@ -1305,7 +1308,7 @@ describe("ERC1410 Tests", () => {
           value: 2 * amount,
           data: data,
         }),
-      ).to.be.rejectedWith("MaxSupplyReachedForPartition");
+      ).to.be.revertedWithCustomError(supplyFacet, "MaxSupplyReachedForPartition");
     });
 
     it("GIVEN an account WHEN issue THEN transaction succeeds", async () => {
@@ -1572,7 +1575,7 @@ describe("ERC1410 Tests", () => {
             data,
             operatorData,
           ),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1597,7 +1600,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .controllerRedeemByPartition(_PARTITION_ID_1, signer_D.address, amount, data, operatorData),
-      ).to.be.rejectedWith("AccountHasNoRole");
+      ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1618,7 +1621,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .controllerTransferByPartition(_PARTITION_ID_1, signer_D.address, signer_E.address, amount, "0x", "0x"),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
     });
 
     it("GIVEN a paused Token WHEN controllerRedeem THEN transaction fails with TokenIsPaused", async () => {
@@ -1637,7 +1640,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .controllerRedeemByPartition(_PARTITION_ID_1, signer_D.address, amount, "0x", "0x"),
-      ).to.be.rejectedWith("TokenIsPaused");
+      ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
     });
 
     it("GIVEN an account with controller role WHEN controllerTransfer and controllerRedeem THEN transaction succeeds", async () => {
@@ -2056,7 +2059,7 @@ describe("ERC1410 Tests", () => {
             nounce: 0,
             signature: "0x1234",
           }),
-      ).to.be.rejectedWith("PartitionsAreUnProtected");
+      ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreUnProtected");
     });
 
     it("GIVEN an unprotected partitions equity WHEN performing a protected redeem THEN transaction fails with PartitionsAreUnProtected", async () => {
@@ -2066,7 +2069,7 @@ describe("ERC1410 Tests", () => {
           nounce: 0,
           signature: "0x1234",
         }),
-      ).to.be.rejectedWith("PartitionsAreUnProtected");
+      ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreUnProtected");
     });
     describe("Protected Partitions Tests", () => {
       let protectedPartitionsFacet: ProtectedPartitionsFacet;
@@ -2107,7 +2110,7 @@ describe("ERC1410 Tests", () => {
       it("GIVEN protected partitions without wildcard role WHEN operatorTransferByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         await expect(
           erc1410Facet.connect(signer_C).operatorTransferByPartition(operatorTransferData),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreProtectedAndNoRole");
       });
 
       it("GIVEN protected partitions without wildcard role WHEN operatorRedeemByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -2117,7 +2120,7 @@ describe("ERC1410 Tests", () => {
           erc1410Facet
             .connect(signer_C)
             .operatorRedeemByPartition(_PARTITION_ID_1, signer_E.address, amount, data, operatorData),
-        ).to.be.rejectedWith("PartitionsAreProtectedAndNoRole");
+        ).to.be.revertedWithCustomError(erc1410Facet, "PartitionsAreProtectedAndNoRole");
       });
       describe("protectedTransferFromByPartition", () => {
         it("GIVEN a paused security role WHEN performing a protected transfer THEN transaction fails with Paused", async () => {
@@ -2168,7 +2171,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 1,
                 signature: "0x1234",
               }),
-          ).to.be.rejectedWith("AccountHasNoRole");
+          ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
         });
 
         it("GIVEN a blacklisted account WHEN performing a protected transfer from it THEN transaction fails with AccountIsBlocked", async () => {
@@ -2238,7 +2241,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 1,
                 signature: "0x1234",
               }),
-          ).to.be.rejectedWith("ExpiredDeadline");
+          ).to.be.revertedWithCustomError(erc1410Facet, "ExpiredDeadline");
         });
 
         it("GIVEN a wrong signature length WHEN performing a protected transfer THEN transaction fails with WrongSignatureLength", async () => {
@@ -2256,7 +2259,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 1,
                 signature: "0x01",
               }),
-          ).to.be.rejectedWith("WrongSignatureLength");
+          ).to.be.revertedWithCustomError(erc1410Facet, "WrongSignatureLength");
         });
 
         it("GIVEN a wrong signature WHEN performing a protected transfer THEN transaction fails with WrongSignature", async () => {
@@ -2275,7 +2278,7 @@ describe("ERC1410 Tests", () => {
                 signature:
                   "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
               }),
-          ).to.be.rejectedWith("WrongSignature");
+          ).to.be.revertedWithCustomError(erc1410Facet, "WrongSignature");
         });
 
         it("GIVEN a wrong nounce WHEN performing a protected transfer THEN transaction fails with WrongNounce", async () => {
@@ -2295,7 +2298,7 @@ describe("ERC1410 Tests", () => {
                 nounce: 0,
                 signature: "0x1234",
               }),
-          ).to.be.rejectedWith("WrongNounce");
+          ).to.be.revertedWithCustomError(erc1410Facet, "WrongNounce");
         });
       });
 
@@ -2310,7 +2313,7 @@ describe("ERC1410 Tests", () => {
               nounce: 1,
               signature: "0x1234",
             }),
-          ).to.be.rejectedWith("TokenIsPaused");
+          ).to.be.revertedWithCustomError(erc1410Facet, "TokenIsPaused");
         });
 
         it("GIVEN a security with clearing active WHEN performing a protected redeem THEN transaction fails with ClearingIsActivated", async () => {
@@ -2333,7 +2336,7 @@ describe("ERC1410 Tests", () => {
               nounce: 1,
               signature: "0x1234",
             }),
-          ).to.be.rejectedWith("AccountHasNoRole");
+          ).to.be.revertedWithCustomError(roleFacet, "AccountHasNoRole");
         });
 
         it("GIVEN a blacklisted account WHEN performing a protected redeem from it THEN transaction fails with AccountIsBlocked", async () => {
@@ -2345,7 +2348,7 @@ describe("ERC1410 Tests", () => {
               nounce: 1,
               signature: "0x1234",
             }),
-          ).to.be.rejectedWith("AccountIsBlocked");
+          ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
         });
 
         it("GIVEN a non kyc account WHEN performing a protected redeem from THEN transaction fails with InvalidKycStatus", async () => {
@@ -2373,7 +2376,7 @@ describe("ERC1410 Tests", () => {
               nounce: 0,
               signature: "0x1234",
             }),
-          ).to.be.rejectedWith("ExpiredDeadline");
+          ).to.be.revertedWithCustomError(erc1410Facet, "ExpiredDeadline");
         });
         it("GIVEN a wrong signature length WHEN performing a protected redeem THEN transaction fails with WrongSignatureLength", async () => {
           await erc1410Facet.issueByPartition({
@@ -2388,7 +2391,7 @@ describe("ERC1410 Tests", () => {
               nounce: 1,
               signature: "0x01",
             }),
-          ).to.be.rejectedWith("WrongSignatureLength");
+          ).to.be.revertedWithCustomError(erc1410Facet, "WrongSignatureLength");
         });
 
         it("GIVEN a wrong signature WHEN performing a protected redeem THEN transaction fails with WrongSignature", async () => {
@@ -2405,7 +2408,7 @@ describe("ERC1410 Tests", () => {
               signature:
                 "0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344",
             }),
-          ).to.be.rejectedWith("WrongSignature");
+          ).to.be.revertedWithCustomError(erc1410Facet, "WrongSignature");
         });
 
         it("GIVEN a wrong nounce WHEN performing a protected redeem THEN transaction fails with WrongNounce", async () => {
@@ -2423,7 +2426,7 @@ describe("ERC1410 Tests", () => {
               nounce: 0,
               signature: "0x1234",
             }),
-          ).to.be.rejectedWith("WrongNounce");
+          ).to.be.revertedWithCustomError(erc1410Facet, "WrongNounce");
         });
 
         it("GIVEN a correct signature WHEN performing a protected redeem THEN transaction succeeds", async () => {
@@ -2488,7 +2491,10 @@ describe("ERC1410 Tests", () => {
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(erc1410Facet.initialize_ERC1410(false)).to.be.rejectedWith("AlreadyInitialized");
+      await expect(erc1410Facet.initialize_ERC1410(false)).to.be.revertedWithCustomError(
+        erc1410Facet,
+        "AlreadyInitialized",
+      );
     });
 
     it("GIVEN a single-partition token WHEN checking isMultiPartition THEN returns false", async () => {

@@ -18,6 +18,7 @@ import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 abstract contract ClearingHoldCreation is IClearingHoldCreation, AccessControlModifiers, PauseModifiers {
     function clearingCreateHoldByPartition(
@@ -153,7 +154,7 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, AccessControlMo
                 _partition,
                 _tokenHolder,
                 _clearingId,
-                block.timestamp
+                TimeTravelStorageWrapper.getBlockTimestamp()
             );
     }
 

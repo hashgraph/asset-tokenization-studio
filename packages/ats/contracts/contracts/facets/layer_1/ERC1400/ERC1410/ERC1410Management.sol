@@ -105,6 +105,7 @@ abstract contract ERC1410Management is IERC1410Management, AccessControlModifier
     )
         external
         override
+        onlyUnpaused
         onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition))
         returns (bytes32)
     {
@@ -118,7 +119,7 @@ abstract contract ERC1410Management is IERC1410Management, AccessControlModifier
         address _from,
         uint256 _amount,
         IProtectedPartitionsStorageWrapper.ProtectionData calldata _protectionData
-    ) external override onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition)) {
+    ) external override onlyUnpaused onlyRole(ProtectedPartitionsStorageWrapper.protectedPartitionsRole(_partition)) {
         ProtectedPartitionsStorageWrapper.requireProtectedPartitions();
         ERC1594StorageWrapper.requireCanRedeemFromByPartition(_from, _partition, _amount);
         TokenCoreOps.protectedRedeemFromByPartition(_partition, _from, _amount, _protectionData);

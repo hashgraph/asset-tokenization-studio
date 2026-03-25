@@ -16,6 +16,7 @@ import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
+import { ERC20VotesStorageWrapper } from "./ERC20VotesStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "./ScheduledTasksStorageWrapper.sol";
@@ -463,10 +464,9 @@ library ERC1410StorageWrapper {
         }
     }
 
-    // solhint-disable-next-line no-empty-blocks
     function afterTokenTransfer(bytes32 partition, address from, address to, uint256 amount) internal {
-        // Hook for future extensions (e.g., ERC20VotesStorageWrapper)
-        // Currently a no-op
+        // Hook for ERC20Votes integration - emit DelegateVotesChanged when voting power changes
+        ERC20VotesStorageWrapper.afterTokenTransfer(partition, from, to, amount);
     }
 
     function triggerAndSyncAll(bytes32 partition, address from, address to) internal {

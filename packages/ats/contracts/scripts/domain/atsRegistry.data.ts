@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-24T16:07:11.017Z
+ * Generated: 2026-03-24T22:54:12.192Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -1924,6 +1924,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "indicating(address,uint256)",
         topic0: "0x46bcf81f2ddc9f000abc20dea52d3061e6deb0c928ad04616fd2bee32e475440",
       },
+    ],
+    errors: [
+      { name: "AccountIsBlocked", signature: "AccountIsBlocked(address)", selector: "0x796c1f0d" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
+      { name: "ZeroAddressNotAllowed", signature: "ZeroAddressNotAllowed()", selector: "0x8579befe" },
     ],
     factory: (signer) => new ERC20Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) => new ERC20FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),

@@ -19,6 +19,10 @@ interface IERC20 is IERC20StorageWrapper {
         IFactory.SecurityType securityType;
     }
 
+    // Re-export errors from libraries used by ERC20
+    error ZeroAddressNotAllowed();
+    error AccountIsBlocked(address account);
+
     // Initialization function
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(ERC20Metadata calldata erc1594Metadata) external;

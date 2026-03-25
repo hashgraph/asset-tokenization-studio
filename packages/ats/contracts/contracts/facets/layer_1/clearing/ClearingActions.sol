@@ -45,6 +45,10 @@ abstract contract ClearingActions is IClearingActions, AccessControlModifiers, P
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
         ClearingStorageWrapper.requireClearingActivated();
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
+
+        // Check identity verification for tokenHolder
+        ERC1594StorageWrapper.requireIdentified(_clearingOperationIdentifier.tokenHolder, address(0));
+
         bytes memory operationData;
         (success_, operationData, partition_) = ClearingOps.approveClearingOperationByPartition(
             _clearingOperationIdentifier
