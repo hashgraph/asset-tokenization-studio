@@ -2,6 +2,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 interface IProtectedPartitions {
+    // Re-export errors from IProtectedPartitionsStorageWrapper for test compatibility
+    error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+    error PartitionsAreUnProtected();
+    error WrongSignature();
+    
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProtectedPartitions(bool _arePartitionsProtected) external returns (bool success_);
 

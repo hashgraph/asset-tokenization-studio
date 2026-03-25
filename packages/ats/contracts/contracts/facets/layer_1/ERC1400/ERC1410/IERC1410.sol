@@ -37,5 +37,16 @@ struct IssueData {
  * This interface is NOT meant to be inherited by any contract - it's only for external interaction.
  */
 interface IERC1410 is IERC1410StorageWrapper, IERC1410Read, IERC1410TokenHolder, IERC1410Management, IERC1410Issuer {
-    // This interface combines all ERC1410 facets for external access
+    // Re-export errors from storage wrappers for test compatibility
+    error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+    error PartitionsAreUnProtected();
+    
+    // Re-export permit-related errors from ERC712.sol utility
+    error ExpiredDeadline(uint256 deadline);
+    error WrongSignatureLength();
+    error WrongSignature();
+    error WrongNounce(uint256 nounce, address account);
+    
+    // Re-export initialization error from InitializationErrors.sol
+    error AlreadyInitialized();
 }

@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-25T17:01:02.479Z
+ * Generated: 2026-03-25T09:19:33.581Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -2517,6 +2517,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0x8b0e34ce56cda141218491fb231baf3165de0352a77ac6f07e7583b301d9452d",
       },
     ],
+    errors: [
+      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+    ],
     factory: (signer) => new FreezeFacet__factory(signer),
     timeTravelFactory: (signer) => new FreezeFacetTimeTravel__factory(signer),
   },
@@ -2550,24 +2553,9 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
-        name: "ControllerHeldByPartition",
-        signature: "ControllerHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0xf6f3741306d730c309f18e6262f05de4790259d916f67334766f2f71dbf00b11",
-      },
-      {
         name: "on",
         signature: "on(bytes32,address,Hold,bytes)",
         topic0: "0xd870e45eb1ba04173c1d2416f69cb8e771b45eb6dc760ea82a594d1d017612eb",
-      },
-      {
-        name: "OperatorHeldByPartition",
-        signature: "OperatorHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0xecb0a532842468318362280a5b81ec910b4d495202a817fc545fd2b7628559e4",
-      },
-      {
-        name: "ProtectedHeldByPartition",
-        signature: "ProtectedHeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
-        topic0: "0xdf892a9d471e7ee25020da7f5f096608aadc1cbdf9aacb751bf1b83eb97a8d58",
       },
     ],
     factory: (signer) => new HoldManagementFacet__factory(signer),
@@ -3010,6 +2998,8 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     errors: [
       { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
+      { name: "from", signature: "from()", selector: "0xd5ce3389" },
+      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
     ],
     factory: (signer) => new LockFacet__factory(signer),
     timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
@@ -3322,6 +3312,16 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function unprotectPartitions() returns (bool success_)",
         selector: "0x1277b323",
       },
+    ],
+    errors: [
+      {
+        name: "PartitionsAreProtectedAndNoRole",
+        signature: "PartitionsAreProtectedAndNoRole(address,bytes32)",
+        selector: "0x55347310",
+      },
+      { name: "PartitionsAreUnProtected", signature: "PartitionsAreUnProtected()", selector: "0x05681565" },
+      { name: "s", signature: "s()", selector: "0x86b714e2" },
+      { name: "WrongSignature", signature: "WrongSignature()", selector: "0x356a4418" },
     ],
     factory: (signer) => new ProtectedPartitionsFacet__factory(signer),
     timeTravelFactory: (signer) => new ProtectedPartitionsFacetTimeTravel__factory(signer),

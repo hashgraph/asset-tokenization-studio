@@ -24,6 +24,9 @@ interface ILock {
         uint256 lockId
     );
 
+    // Re-export error from LockStorageWrapper for test compatibility
+    error LockExpirationNotReached();
+
     /**
      * @dev Locks a certain amount of tokens held by a tokenHolder, until the expirationTimestamp
      * @param _partition The partition to lock the tokens from
