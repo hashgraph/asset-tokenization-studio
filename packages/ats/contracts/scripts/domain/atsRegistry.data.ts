@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-25T10:52:01.062Z
+ * Generated: 2026-03-25T11:15:43.851Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -3496,6 +3496,14 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         name: "scheduledSnapshotCount",
         signature: "function scheduledSnapshotCount() view returns (uint256)",
         selector: "0xa19e91fe",
+      },
+    ],
+    events: [
+      { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
+      {
+        name: "SnapshotTriggered",
+        signature: "SnapshotTriggered(uint256,bytes)",
+        topic0: "0xf256aa4705d42c3984e319d2b0a2d1eb0a18a8a820922b71ba13e37c7699828c",
       },
     ],
     factory: (signer) => new ScheduledSnapshotsFacet__factory(signer),

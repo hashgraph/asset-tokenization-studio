@@ -4,6 +4,15 @@ pragma solidity >=0.8.0 <0.9.0;
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 
+// Hold struct definition for event parameter ( mirrors IHold.Hold to avoid circular dependency)
+struct ClearingHold {
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address escrow;
+    address to;
+    bytes data;
+}
+
 interface IClearing {
     enum ClearingOperationType {
         Transfer,
@@ -92,6 +101,41 @@ interface IClearing {
         mapping(address => mapping(bytes32 => mapping(ClearingOperationType => mapping(uint256 => address)))) clearingThirdPartyByAccountPartitionTypeAndId;
     }
     // solhint-enable max-line-length
+
+    // Re-export events from storage wrappers for test compatibility
+    event ClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed to,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedRedeemByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        uint256 amount,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
+
+    event ClearedHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        ClearingHold hold,
+        uint256 expirationDate,
+        bytes data,
+        bytes operatorData
+    );
 
     error WrongClearingId();
     error ClearingIsDisabled();

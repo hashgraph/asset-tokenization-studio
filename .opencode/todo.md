@@ -1,95 +1,53 @@
-# TODO: Library Architecture Migration
+# TODO: Contract Test Failures Fix
 
-## 🎯 Goal: Complete StorageWrapper library migration per FINAL-PLAN-LIB-ARCH.md
+## 🎯 Goal: Fix 139 remaining test failures
 
-**Status:** ✅ COMPLETED - 2/2 completed
-
----
-
-## ✅ T1: AccessControlStorageWrapper Migration - COMPLETED
-
-### S1.1: Convert to library | ✅ COMPLETED
-
-- [x] Change `abstract contract` to `library`
-- [x] Rename `_rolesStorage()` → `rolesStorage()`
-- [x] Rename all `_functionName()` → `functionName()` (remove underscore prefix)
-- [x] Make all functions `internal`
-
-### S1.2: Verify AccessControl | ✅ COMPLETED
-
-- [x] Check compilation - Solidity compiles successfully
-- [x] Update all callers (~20 files) to use `AccessControlStorageWrapper.functionName()`
+**Status:** In Progress
 
 ---
 
-## ✅ T2: PauseStorageWrapper Migration - COMPLETED
+## Phase 1: Quick Wins ✅ COMPLETED
 
-### S2.1: Extract modifiers | ✅ COMPLETED
-
-- [x] Create `PauseModifiers.sol` abstract contract with `onlyUnpaused` and `onlyPaused` modifiers
-- [x] Convert PauseStorageWrapper to library with `isPaused()`, `setPause()`, etc.
-
-### S2.2: Convert to library | ✅ COMPLETED
-
-- [x] Change `abstract contract PauseStorageWrapper` to `library PauseStorageWrapper`
-- [x] Rename all functions from `_pauseStorage()` → `pauseStorage()`, etc.
-- [x] Update all callers (~18 files)
-- [x] Update all imports from `PauseStorageWrapper` to `PauseModifiers` for modifier inheritance
-- [x] Add `import { PauseStorageWrapper }` where library functions are called directly
-
-### S2.3: Verify Pause | ✅ COMPLETED
-
-- [x] Check compilation - Solidity compiles successfully
+- [x] Export missing custom errors in facet interfaces (18 tests fixed)
+- [x] Fix WrongISIN → WrongISINChecksum (5 tests fixed)
+- [x] Session 8: Priority 2 investigation complete
 
 ---
 
-## ✅ T3: Final Verification - COMPLETED
+## Phase 2: Pattern 9 - TypeChain Selectors ⏳ IN PROGRESS
 
-- [x] Full compilation check - Solidity compiles successfully
-- [x] Run unit tests (Tests run - failures are pre-existing TokenCoreOp library linking issues unrelated to this migration)
-- [x] Update work-log.md (see session summary)
+### P2.1: AccountIsBlocked selector (1 test)
 
----
-
-## Files Modified
-
-### AccessControlStorageWrapper:
-
-- ✅ `contracts/domain/core/AccessControlStorageWrapper.sol` - Library
-- ✅ `contracts/infrastructure/utils/AccessControlModifiers.sol` - Uses library with `using` directive
-- ✅ `contracts/infrastructure/utils/ProtectedPartitionRoleValidator.sol` - Direct library calls
-- ✅ `contracts/infrastructure/proxy/ResolverProxyUnstructured.sol` - Direct library calls
-- ✅ All facet files updated to use `AccessControlStorageWrapper.functionName()`
-
-### PauseStorageWrapper:
-
-- ✅ `contracts/domain/core/PauseStorageWrapper.sol` - Library
-- ✅ `contracts/domain/core/PauseModifiers.sol` - NEW: abstract contract with modifiers
-- ✅ All facet files updated to inherit from `PauseModifiers` and import `PauseStorageWrapper` where needed
+- [ ] Add `error AccountIsBlocked(address account)` to IControlList.sol
+- [ ] Re-run test to verify fix
 
 ---
 
-## TypeScript Errors (Pre-existing)
+## Phase 3: ReferenceError Fix (5 tests)
 
-The TypeScript errors are pre-existing library linking issues for `TokenCoreOps` - not related to this migration. These were present before the changes and need separate work to update the registry generator.
+### P3.1: roleFacet undefined in erc1410.test.ts
 
-## Pattern Applied
+- [ ] Investigate test file - roleFacet should be defined
+- [ ] Fix reference or add missing declaration
+- [ ] Verify tests pass
 
-```solidity
-// Before (abstract contract inheritance)
-abstract contract MyFacet is PauseStorageWrapper {
-    function foo() external onlyUnpaused {
-        if (_isPaused()) revert...;
-    }
-}
+---
 
-// After (modifiers from PauseModifiers, library calls)
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
-import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
+## Phase 4: Missing Event Exports (8 tests)
 
-abstract contract MyFacet is PauseModifiers {
-    function foo() external onlyUnpaused {
-        if (PauseStorageWrapper.isPaused()) revert...;
-    }
-}
-```
+### P4.1: Event re-exports needed
+
+- [ ] IERC1410.sol - TransferByPartition event
+- [ ] IClearing.sol - ClearedTransferByPartition, ClearedRedeemByPartition, ClearedHoldByPartition events
+- [ ] IScheduledSnapshots.sol - SnapshotTriggered event
+
+---
+
+## Phase 5: Numeric Values (~100 tests) - Needs Investigation
+
+- [ ] Analyze contract logic mismatches
+- [ ] Determine if test expectations or contracts are wrong
+
+---
+
+## Current Test Status: 2010 passing / 139 failing
