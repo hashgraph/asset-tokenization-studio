@@ -7,6 +7,7 @@ import { ICap } from "../../facets/layer_1/cap/ICap.sol";
 import { ICapStorageWrapper } from "../asset/cap/ICapStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../asset/AdjustBalancesStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../asset/ERC1410StorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct CapDataStorage {
     uint256 maxSupply;
@@ -32,14 +33,14 @@ library CapStorageWrapper {
     function setMaxSupply(uint256 _maxSupply, uint256 _timestamp) internal {
         uint256 previousMaxSupply = getMaxSupplyAdjustedAt(_timestamp);
         capStorage().maxSupply = _maxSupply;
-        emit ICapStorageWrapper.MaxSupplySet(msg.sender, _maxSupply, previousMaxSupply);
+        emit ICapStorageWrapper.MaxSupplySet(EvmAccessors.getMsgSender(), _maxSupply, previousMaxSupply);
     }
 
     function setMaxSupplyByPartition(bytes32 _partition, uint256 _maxSupply, uint256 _timestamp) internal {
         uint256 previousMaxSupplyByPartition = getMaxSupplyByPartitionAdjustedAt(_partition, _timestamp);
         capStorage().maxSupplyByPartition[_partition] = _maxSupply;
         emit ICapStorageWrapper.MaxSupplyByPartitionSet(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _partition,
             _maxSupply,
             previousMaxSupplyByPartition

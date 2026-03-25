@@ -13,6 +13,7 @@ import { ERC1410StorageWrapper } from "./ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 struct BondDataStorage {
     bytes3 currency;
@@ -63,7 +64,7 @@ library BondStorageWrapper {
 
         initCoupon(corporateActionId_, newCoupon);
 
-        emit IBondStorageWrapper.CouponSet(corporateActionId_, couponID_, msg.sender, newCoupon);
+        emit IBondStorageWrapper.CouponSet(corporateActionId_, couponID_, EvmAccessors.getMsgSender(), newCoupon);
     }
 
     function initCoupon(bytes32 actionId, IBondRead.Coupon memory newCoupon) internal {

@@ -6,6 +6,7 @@ import { ArrayValidation } from "../../infrastructure/utils/ArrayValidation.sol"
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IAccessControlStorageWrapper } from "./accessControl/IAccessControlStorageWrapper.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title AccessControlStorageWrapper
@@ -87,7 +88,7 @@ library AccessControlStorageWrapper {
         address _account
     ) internal returns (bool success_) {
         RoleDataStorage storage roleDataStorage = rolesStorage();
-        address sender = msg.sender;
+        address sender = EvmAccessors.getMsgSender();
         uint256 length = _roles.length;
         for (uint256 index; index < length; ) {
             checkRole(getRoleAdmin(_roles[index]), sender);
