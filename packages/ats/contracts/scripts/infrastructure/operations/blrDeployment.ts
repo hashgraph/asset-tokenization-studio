@@ -19,6 +19,7 @@ import {
   section,
   success,
   GAS_LIMIT,
+  hederaGasOverrides,
 } from "@scripts/infrastructure";
 
 /**
@@ -98,6 +99,7 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
       initData: "0x",
       overrides: {
         gasLimit: GAS_LIMIT.high,
+        ...hederaGasOverrides(),
       },
     });
 
@@ -116,6 +118,7 @@ export async function deployBlr(signer: Signer, options: DeployBlrOptions = {}):
 
         const initTx = await blr.initialize_BusinessLogicResolver({
           gasLimit: GAS_LIMIT.initialize.businessLogicResolver,
+          ...hederaGasOverrides(),
         });
         await initTx.wait();
 

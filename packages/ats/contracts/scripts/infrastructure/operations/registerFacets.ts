@@ -24,6 +24,7 @@ import {
   waitForTransaction,
   warn,
   GAS_LIMIT,
+  hederaGasOverrides,
 } from "@scripts/infrastructure";
 import { FACET_REGISTRATION_BATCH_SIZE } from "../../domain/constants";
 
@@ -223,7 +224,11 @@ export async function registerFacets(
         i * FACET_REGISTRATION_BATCH_SIZE,
         (i + 1) * FACET_REGISTRATION_BATCH_SIZE,
       );
-      const tx = await blr.registerBusinessLogics(businessLogicsSlice, { gasLimit: GAS_LIMIT.high, ...overrides });
+      const tx = await blr.registerBusinessLogics(businessLogicsSlice, {
+        gasLimit: GAS_LIMIT.high,
+        ...hederaGasOverrides(),
+        ...overrides,
+      });
 
       info(`Registration transaction sent: ${tx.hash}`);
 

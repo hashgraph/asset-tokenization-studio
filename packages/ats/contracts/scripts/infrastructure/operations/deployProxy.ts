@@ -29,6 +29,7 @@ import {
   extractRevertReason,
   formatGasUsage,
   GAS_LIMIT,
+  hederaGasOverrides,
   info,
   section,
   success,
@@ -194,6 +195,7 @@ export async function deployProxy(signer: Signer, options: DeployProxyOptions): 
       info("Deploying ProxyAdmin");
       proxyAdmin = await deployProxyAdmin(signer, {
         gasLimit: GAS_LIMIT.default,
+        ...hederaGasOverrides(),
       });
       proxyAdminAddress = await proxyAdmin.getAddress();
 
@@ -282,6 +284,7 @@ export async function deployMultipleProxies(
     info("Deploying shared ProxyAdmin for all proxies");
     proxyAdmin = await deployProxyAdmin(signer, {
       gasLimit: GAS_LIMIT.default,
+      ...hederaGasOverrides(),
     });
     success(`Shared ProxyAdmin deployed at ${await proxyAdmin.getAddress()}`);
   }

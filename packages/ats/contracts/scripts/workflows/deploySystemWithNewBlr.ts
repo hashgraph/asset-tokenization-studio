@@ -28,6 +28,8 @@ import {
   fetchHederaContractId,
   getDeploymentConfig,
   DEFAULT_BATCH_SIZE,
+  GAS_LIMIT,
+  isInstantMiningNetwork,
   CheckpointManager,
   NullCheckpointManager,
   saveDeploymentOutput,
@@ -363,10 +365,16 @@ export async function deploySystemWithNewBlr(
       if (Object.keys(facetFactories).length > 0) {
         info(`   Deploying ${Object.keys(facetFactories).length} remaining facets...`);
 
+        // On real networks (Hedera) provide explicit gasLimit to skip eth_estimateGas.
+        // On instant-mining networks (Hardhat/local) let ethers auto-estimate so large
+        // contracts like TimeTravel facets get the gas they actually need.
+        const facetOverrides = isInstantMiningNetwork(network) ? {} : { gasLimit: GAS_LIMIT.max };
+
         facetsResult = await deployFacets(facetFactories, {
           confirmations,
           enableRetry,
           verifyDeployment,
+          overrides: facetOverrides,
         });
 
         // Always save deployed facets to checkpoint (even if some failed)
