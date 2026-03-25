@@ -27,8 +27,25 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         );
     }
 
-    function release(uint256 _lockId, address _tokenHolder) external override returns (bool success_) {
+    /**
+     * @notice Release tokens (default partition)
+     * @param _lockId The lock identifier
+     * @param _tokenHolder The token holder address
+     * @return success_ Boolean indicating success
+     */
+    function release(
+        uint256 _lockId,
+        address _tokenHolder
+    )
+        external
+        override
+        onlyUnpaused
+        onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
+        onlyWithLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId)
+        returns (bool success_)
+    {
         success_ = LockStorageWrapper.releaseByPartition(_DEFAULT_PARTITION, _lockId, _tokenHolder, msg.sender);
+        emit LockByPartitionReleased(msg.sender, _tokenHolder, _DEFAULT_PARTITION, _lockId);
     }
 
     // ========================================================================

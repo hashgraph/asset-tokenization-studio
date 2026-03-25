@@ -8,6 +8,7 @@ import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlS
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { LockModifiers } from "../../../infrastructure/utils/LockModifiers.sol";
@@ -20,7 +21,14 @@ import { LockModifiers } from "../../../infrastructure/utils/LockModifiers.sol";
  * Provides functionality for locking tokens with expiration timestamps
  * and role-based access control. Inherits LockModifiers for expiration validation.
  */
-abstract contract Lock is ILock, TimestampProvider, PauseModifiers, AccessControlModifiers, LockModifiers {
+abstract contract Lock is
+    ILock,
+    TimestampProvider,
+    PauseModifiers,
+    AccessControlModifiers,
+    LockModifiers,
+    ERC1410Modifiers
+{
     /**
      * @notice Lock tokens by partition
      * @dev Only callable by LOCKER_ROLE
@@ -65,12 +73,12 @@ abstract contract Lock is ILock, TimestampProvider, PauseModifiers, AccessContro
 
     /**
      * @notice Release tokens by partition
-     * @dev Only callable by LOCKER_ROLE
      *
      * Requirements:
+     * - Contract must not be paused
      * - Partition must be valid and single
      * - Lock ID must be valid
-     * - Caller must have LOCKER_ROLE
+     * - Lock expiration timestamp must have been reached
      *
      * @param _partition The partition identifier
      * @param _lockId The lock identifier
@@ -81,8 +89,15 @@ abstract contract Lock is ILock, TimestampProvider, PauseModifiers, AccessContro
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) external override onlyUnpaused onlyRole(_LOCKER_ROLE) returns (bool success_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartition(_partition)
+        onlyWithValidLockId(_partition, _tokenHolder, _lockId)
+        onlyWithLockedExpirationTimestamp(_partition, _tokenHolder, _lockId)
+        returns (bool success_)
+    {
         success_ = LockStorageWrapper.releaseByPartition(_partition, _lockId, _tokenHolder, msg.sender);
         emit LockByPartitionReleased(msg.sender, _tokenHolder, _partition, _lockId);
     }
