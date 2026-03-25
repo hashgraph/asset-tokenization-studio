@@ -526,7 +526,7 @@ describe("Factory Tests", () => {
         factory.deployEquity(equityData, factoryRegulationData, {
           gasLimit: GAS_LIMIT.default,
         }),
-      ).to.be.revertedWithCustomError(factory, "WrongISIN");
+      ).to.be.revertedWithCustomError(factory, "WrongISINChecksum");
       equityData.security.erc20MetadataInfo.isin = "SJ5633813321";
       await expect(factory.deployEquity(equityData, factoryRegulationData)).to.be.revertedWithCustomError(
         factory,
@@ -701,7 +701,7 @@ describe("Factory Tests", () => {
 
       await expect(factory.deployBond(bondData, factoryRegulationData)).to.be.revertedWithCustomError(
         factory,
-        "EmptyResolver",
+        "WrongISINChecksum",
       );
     });
 
@@ -1136,7 +1136,10 @@ describe("Factory Tests", () => {
         version: 1,
       };
 
-      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.revertedWithCustomError(factory, "WrongISIN");
+      await expect(factory.deployBondFixedRate(bondFixedRateData)).to.be.revertedWithCustomError(
+        factory,
+        "WrongISINChecksum",
+      );
     });
 
     it("GIVEN no admin WHEN deploying BondFixedRate THEN transaction fails", async () => {
@@ -1505,7 +1508,7 @@ describe("Factory Tests", () => {
 
       await expect(factory.deployBondKpiLinkedRate(bondKpiLinkedRateData)).to.be.revertedWithCustomError(
         factory,
-        "WrongISIN",
+        "WrongISINChecksum",
       );
     });
 
