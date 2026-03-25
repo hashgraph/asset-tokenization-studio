@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-25T11:15:43.851Z
+ * Generated: 2026-03-25T12:46:26.106Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -1003,9 +1003,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function protectedClearingCreateHoldByPartition(((bytes32 partition, uint256 expirationTimestamp, bytes data) clearingOperation, address from, uint256 deadline, uint256 nonce) _protectedClearingOperation, (uint256 amount, uint256 expirationTimestamp, address escrow, address to, bytes data) _hold, bytes _signature) returns (bool success_, uint256 clearingId_)",
         selector: "0x9b646ab9",
       },
-    ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
     ],
     factory: (signer) =>
       new ClearingHoldCreationFacet__factory(getLibLinks("clearingOps", "clearingReadOps") as any, signer),

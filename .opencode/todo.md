@@ -8,10 +8,10 @@
 
 ## Progress Summary
 
-| Session   | Passing | Failing | Fixed | Notes                       |
-| --------- | ------- | ------- | ----- | --------------------------- |
-| Session 8 | 2012    | 137     | +5    | WrongISIN→WrongISINChecksum |
-| Session 9 | 2017    | 132     | +5    | Pattern 9 + Event exports   |
+| Session   | Passing | Failing | Fixed | Notes                                      |
+| --------- | ------- | ------- | ----- | ------------------------------------------ |
+| Session 8 | 2012    | 137     | +5    | WrongISIN→WrongISINChecksum                |
+| Session 9 | 2029    | 120     | +17   | Pattern 9 + Event exports + Modifier order |
 
 ---
 
@@ -56,23 +56,38 @@
 
 ---
 
-## ⏳ Phase 5: TransferByPartition Event Issue (NEEDS INVESTIGATION)
+## ✅ Phase 5: TransferByPartition Test Bug Fix (COMPLETED - Session 9)
 
-- [ ] Investigate why IERC3643 tests still fail with TransferByPartition event
-- [ ] Determine if IERC1644 needs event re-export
-- Current tests failing with "Event 'TransferByPartition' doesn't exist" from erc1644Facet
-
----
-
-## ⏳ Phase 6: Wrong Error Logic (NEEDS INVESTIGATION)
-
-- [ ] PartitionsAreUnProtected expected but AccountHasNoRole thrown (3 tests)
-- [ ] LockExpirationNotReached expected but no revert (2 tests)
-- [ ] WalletRecovered expected but different error thrown
+- [x] Fix IERC3643 test - erc1644Facet.controllerTransfer() emits ControllerTransfer, not TransferByPartition
+- [x] Update test to expect correct event
+- Commit: `618feefe`
 
 ---
 
-## ⏳ Phase 7: Numeric Value Mismatches (NEEDS INVESTIGATION)
+## ✅ Phase 6: Wrong Error Logic - Modifier Order (COMPLETED - Session 9)
+
+### P6.1: PartitionsAreUnProtected vs AccountHasNoRole/WalletRecovered (12 tests) - FIXED
+
+- [x] Root Cause: Modifier execution order didn't match main branch
+- [x] Fix: Reordered modifiers to match main branch:
+  1. `onlyUnpaused`
+  2. `onlyUnrecoveredAddress` (WalletRecovered check)
+  3. `onlyProtectedPartitions` (Partitions check)
+  4. `onlyRole` (Role check)
+  5. `onlyClearingActivated`
+- [x] Files Changed: ClearingTransfer.sol, ClearingRedeem.sol, ClearingHoldCreation.sol
+- [x] Added PartitionModifiers and ERC3643Modifiers imports
+- Commit: Pending (local changes)
+
+### P6.2: LockExpirationNotReached (2 tests) - NEEDS INVESTIGATION
+
+- [ ] Tests: releaseByPartition and release should revert when expiration not reached
+- [ ] Actual: Transaction doesn't revert at all
+- [ ] Status: Contract bug - validation missing or not working
+
+---
+
+## ⏸️ Phase 7: Numeric Value Mismatches (NEEDS INVESTIGATION)
 
 - [ ] Analyze contract logic mismatches (~100 tests)
 - [ ] Contracts returning 0 instead of expected values
@@ -83,10 +98,21 @@
 ## Current Test Status
 
 ```
-Passing: 2017
-Failing: 132
+Passing: 2029
+Failing: 120
 Total: 2149
 ```
+
+**Baseline Progress: 2010 → 2029 (+19 tests fixed)**
+
+---
+
+## Commits Made This Session
+
+1. `61ac1194` - fix(contracts): re-export AccountIsBlocked error and fix test references
+2. `9a37a710` - fix(contracts): add clearing and snapshot events for TypeChain visibility
+3. `618feefe` - fix(test): correct event expectation in erc3643 test
+4. **Pending** - fix(contracts): correct modifier execution order to match main branch
 
 ---
 
@@ -96,4 +122,8 @@ Total: 2149
 2. `packages/ats/contracts/test/contracts/integration/layer_1/ERC1400/ERC1410/erc1410.test.ts`
 3. `packages/ats/contracts/contracts/facets/layer_1/clearing/IClearing.sol`
 4. `packages/ats/contracts/contracts/facets/layer_2/scheduledTask/scheduledSnapshot/IScheduledSnapshots.sol`
-5. `packages/ats/contracts/scripts/domain/atsRegistry.data.ts` (auto-generated)
+5. `packages/ats/contracts/test/contracts/integration/layer_1/ERC3643/erc3643.test.ts`
+6. `packages/ats/contracts/contracts/facets/layer_1/clearing/ClearingTransfer.sol`
+7. `packages/ats/contracts/contracts/facets/layer_1/clearing/ClearingRedeem.sol`
+8. `packages/ats/contracts/contracts/facets/layer_1/clearing/ClearingHoldCreation.sol`
+9. `packages/ats/contracts/scripts/domain/atsRegistry.data.ts` (auto-generated)
