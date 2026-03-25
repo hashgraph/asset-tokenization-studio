@@ -566,7 +566,7 @@ describe("Hold Tests", () => {
         };
         await expect(
           holdFacet
-            .connect(signer_B)
+            .connect(signer_C)
             .controllerCreateHoldByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, hold_wrong, EMPTY_HEX_BYTES),
         ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
       });

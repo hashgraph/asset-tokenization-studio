@@ -21,6 +21,7 @@ pragma solidity >=0.8.0 <0.9.0;
  */
 
 import { AccessControlModifiers } from "./AccessControlModifiers.sol";
+import { AddressModifiers } from "./AddressModifiers.sol";
 import { CapModifiers } from "./CapModifiers.sol";
 import { ControlListModifiers } from "./ControlListModifiers.sol";
 import { DateValidationModifiers } from "./DateValidationModifiers.sol";
@@ -30,6 +31,7 @@ import { PauseModifiers } from "./PauseModifiers.sol";
 
 abstract contract CoreModifiers is
     AccessControlModifiers,
+    AddressModifiers,
     CapModifiers,
     ControlListModifiers,
     DateValidationModifiers,

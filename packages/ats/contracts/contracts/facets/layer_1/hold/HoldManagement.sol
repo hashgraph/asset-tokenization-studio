@@ -9,8 +9,7 @@ import {
     IProtectedPartitionsStorageWrapper
 } from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -19,10 +18,6 @@ import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWra
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "../../../domain/asset/HoldStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
-import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
-import { LockModifiers } from "../../../infrastructure/utils/LockModifiers.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
-import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
 
 /**
  * @title HoldManagement
@@ -35,15 +30,7 @@ import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModif
  * @notice Inherit from this contract to gain access to hold management functions
  * @author Asset Tokenization Studio Team
  */
-abstract contract HoldManagement is
-    IHoldManagement,
-    AccessControlModifiers,
-    PauseModifiers,
-    ClearingModifiers,
-    LockModifiers,
-    ERC3643Modifiers,
-    PartitionModifiers
-{
+abstract contract HoldManagement is IHoldManagement, Modifiers {
     /**
      * @dev Creates a hold on behalf of an operator for a specific partition
      *
@@ -131,11 +118,11 @@ abstract contract HoldManagement is
         override
         onlyUnpaused
         onlyRole(_CONTROLLER_ROLE)
+        notZeroAddress(_from)
+        notZeroAddress(_hold.escrow)
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)
         returns (bool success_, uint256 holdId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         ERC1644StorageWrapper.requireControllable();
 
