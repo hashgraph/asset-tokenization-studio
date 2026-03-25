@@ -22,6 +22,8 @@ import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTrave
 import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
 import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
 import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
+import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
+import { ExpirationModifiers } from "../../../infrastructure/utils/ExpirationModifiers.sol";
 
 abstract contract ClearingHoldCreation is
     IClearingHoldCreation,
@@ -29,7 +31,9 @@ abstract contract ClearingHoldCreation is
     PauseModifiers,
     ClearingModifiers,
     PartitionModifiers,
-    ERC3643Modifiers
+    ERC3643Modifiers,
+    ERC1410Modifiers,
+    ExpirationModifiers
 {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
@@ -135,6 +139,8 @@ abstract contract ClearingHoldCreation is
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyUnrecoveredAddress(_hold.to)
         onlyProtectedPartitions
+        onlyValidAddress(_protectedClearingOperation.from)
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
         onlyRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
@@ -143,10 +149,6 @@ abstract contract ClearingHoldCreation is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        );
         (success_, clearingId_) = ClearingOps.protectedClearingCreateHoldByPartition(
             _protectedClearingOperation,
             _hold,

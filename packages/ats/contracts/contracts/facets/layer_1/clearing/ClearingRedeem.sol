@@ -21,6 +21,8 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
 import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
 import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
+import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
+import { ExpirationModifiers } from "../../../infrastructure/utils/ExpirationModifiers.sol";
 
 abstract contract ClearingRedeem is
     IClearingRedeem,
@@ -29,7 +31,9 @@ abstract contract ClearingRedeem is
     PauseModifiers,
     ClearingModifiers,
     PartitionModifiers,
-    ERC3643Modifiers
+    ERC3643Modifiers,
+    ERC1410Modifiers,
+    ExpirationModifiers
 {
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
@@ -116,8 +120,10 @@ abstract contract ClearingRedeem is
         external
         override
         onlyUnpaused
-        onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyProtectedPartitions
+        onlyValidAddress(_protectedClearingOperation.from)
+        onlyUnrecoveredAddress(_protectedClearingOperation.from)
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
         onlyRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
@@ -126,10 +132,6 @@ abstract contract ClearingRedeem is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        );
         (success_, clearingId_) = ClearingOps.protectedClearingRedeemByPartition(
             _protectedClearingOperation,
             _amount,

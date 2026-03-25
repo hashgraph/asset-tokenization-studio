@@ -21,6 +21,8 @@ import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvid
 import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
 import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
 import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
+import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
+import { ExpirationModifiers } from "../../../infrastructure/utils/ExpirationModifiers.sol";
 
 abstract contract ClearingTransfer is
     IClearingTransfer,
@@ -29,7 +31,9 @@ abstract contract ClearingTransfer is
     PauseModifiers,
     ClearingModifiers,
     PartitionModifiers,
-    ERC3643Modifiers
+    ERC3643Modifiers,
+    ERC1410Modifiers,
+    ExpirationModifiers
 {
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
@@ -131,9 +135,12 @@ abstract contract ClearingTransfer is
         external
         override
         onlyUnpaused
+        onlyProtectedPartitions
+        onlyValidAddress(_protectedClearingOperation.from)
+        onlyValidAddress(_to)
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyUnrecoveredAddress(_to)
-        onlyProtectedPartitions
+        onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
         onlyRole(
             ProtectedPartitionsStorageWrapper.protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
@@ -142,11 +149,6 @@ abstract contract ClearingTransfer is
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_protectedClearingOperation.from);
-        ERC1410StorageWrapper.requireValidAddress(_to);
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _protectedClearingOperation.clearingOperation.expirationTimestamp
-        );
         (success_, clearingId_) = ClearingOps.protectedClearingTransferByPartition(
             _protectedClearingOperation,
             _amount,
