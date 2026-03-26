@@ -116,10 +116,11 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         address _tokenHolder,
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        LockStorageWrapper.requireValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId);
-        ILock.LockData memory lock = LockStorageWrapper.getLock(_DEFAULT_PARTITION, _tokenHolder, _lockId);
-        amount_ = lock.amount;
-        expirationTimestamp_ = lock.expirationTimestamp;
+        (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartition(
+            _DEFAULT_PARTITION,
+            _tokenHolder,
+            _lockId
+        );
     }
 
     // ========================================================================
