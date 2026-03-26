@@ -123,7 +123,8 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
     }
 
     function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        amount_ = LockStorageWrapper.getLockedAmountForAdjustedAt(
+        amount_ = LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
+            _DEFAULT_PARTITION,
             _tokenHolder,
             TimeTravelStorageWrapper.getBlockTimestamp()
         );
@@ -145,10 +146,11 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         address _tokenHolder,
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartition(
+        (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartitionAdjustedAt(
             _DEFAULT_PARTITION,
             _tokenHolder,
-            _lockId
+            _lockId,
+            TimeTravelStorageWrapper.getBlockTimestamp()
         );
     }
 
