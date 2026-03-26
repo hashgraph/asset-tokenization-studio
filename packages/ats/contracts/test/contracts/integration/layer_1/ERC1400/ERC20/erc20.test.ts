@@ -509,19 +509,19 @@ describe("ERC20 Tests", () => {
     it("GIVEN a initializer ERC20 WHEN try to use a non authorized account THEN transaction fails with AccountIsBlocked", async () => {
       await controlListFacet.addToControlList(signer_D.address);
       await expect(erc20FacetBlackList.approve(signer_A.address, amount)).to.be.revertedWithCustomError(
-        controlList,
+        controlListFacet,
         "AccountIsBlocked",
       );
       await expect(erc20Facet.approve(signer_D.address, amount)).to.be.revertedWithCustomError(
-        controlList,
+        controlListFacet,
         "AccountIsBlocked",
       );
       await expect(erc20FacetBlackList.transfer(signer_A.address, amount)).to.be.revertedWithCustomError(
-        controlList,
+        controlListFacet,
         "AccountIsBlocked",
       );
       await expect(erc20Facet.transfer(signer_D.address, amount)).to.be.revertedWithCustomError(
-        controlList,
+        controlListFacet,
         "AccountIsBlocked",
       );
       await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_D.address);
@@ -540,14 +540,14 @@ describe("ERC20 Tests", () => {
         "AccountIsBlocked",
       );
       await expect(erc20Facet.increaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
-        controlList,
+        controlListFacet,
         "AccountIsBlocked",
       );
       await expect(erc20FacetBlackList.decreaseAllowance(signer_A.address, amount)).to.be.rejectedWith(
         "AccountIsBlocked",
       );
       await expect(erc20Facet.decreaseAllowance(signer_D.address, amount)).to.be.revertedWithCustomError(
-        controlList,
+        controlListFacet,
         "AccountIsBlocked",
       );
     });

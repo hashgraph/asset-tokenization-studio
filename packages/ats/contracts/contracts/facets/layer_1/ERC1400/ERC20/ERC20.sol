@@ -34,14 +34,14 @@ abstract contract ERC20 is IERC20, TimestampProvider, PauseModifiers {
         return ERC20StorageWrapper.approve(msg.sender, spender, value);
     }
 
-    function transfer(address to, uint256 amount) external override returns (bool) {
+    function transfer(address to, uint256 amount) external override onlyUnpaused returns (bool) {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(msg.sender, to, _DEFAULT_PARTITION, amount);
         return TokenCoreOps.transfer(msg.sender, to, amount);
     }
 
-    function transferFrom(address from, address to, uint256 amount) external override returns (bool) {
+    function transferFrom(address from, address to, uint256 amount) external override onlyUnpaused returns (bool) {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1594StorageWrapper.requireCanTransferFromByPartition(from, to, _DEFAULT_PARTITION, amount);
