@@ -14,6 +14,7 @@ import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWra
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract ClearingActions is IClearingActions, AccessControlModifiers, PauseModifiers, ClearingModifiers {
     function initializeClearing(bool _clearingActive) external {
@@ -21,14 +22,14 @@ abstract contract ClearingActions is IClearingActions, AccessControlModifiers, P
         ClearingStorageWrapper.initializeClearing(_clearingActive);
     }
 
-    function activateClearing() external onlyUnpaused returns (bool success_) {
+    function activateClearing() external onlyUnpaused onlyRole(_CLEARING_ROLE) returns (bool success_) {
         success_ = ClearingStorageWrapper.setClearing(true);
-        emit ClearingActivated(msg.sender);
+        emit ClearingActivated(EvmAccessors.getMsgSender());
     }
 
-    function deactivateClearing() external onlyUnpaused returns (bool success_) {
+    function deactivateClearing() external onlyUnpaused onlyRole(_CLEARING_ROLE) returns (bool success_) {
         success_ = ClearingStorageWrapper.setClearing(false);
-        emit ClearingDeactivated(msg.sender);
+        emit ClearingDeactivated(EvmAccessors.getMsgSender());
     }
 
     function approveClearingOperationByPartition(

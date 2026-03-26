@@ -3951,6 +3951,19 @@ describe("Clearing Tests", () => {
         await accessControlFacet.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
         await erc3643ManagementFacet.recoveryAddress(signer_A.address, signer_D.address, ADDRESS_ZERO);
 
+        // Enable protected partitions - grant role first
+        await accessControlFacet.grantRole(ATS_ROLES._PROTECTED_PARTITIONS_ROLE, signer_A.address);
+        await protectedPartitionsFacet.protectPartitions();
+
+        // Grant role for protected partition
+        const packedData = ethers.AbiCoder.defaultAbiCoder().encode(
+          ["bytes32", "bytes32"],
+          [ATS_ROLES._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION],
+        );
+        const packedDataWithoutPrefix = packedData.slice(2);
+        const protectedPartitionRole = ethers.keccak256("0x" + packedDataWithoutPrefix);
+        await accessControlFacet.grantRole(protectedPartitionRole, signer_A.address);
+
         const protectedClearingOperation = {
           clearingOperation: clearingOperation,
           from: signer_A.address,

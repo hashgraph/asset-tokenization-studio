@@ -7,8 +7,7 @@ import {
     IProtectedPartitionsStorageWrapper
 } from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -18,23 +17,9 @@ import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.so
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
-import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
-import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
-import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
-import { ExpirationModifiers } from "../../../infrastructure/utils/ExpirationModifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ClearingTransfer is
-    IClearingTransfer,
-    AccessControlModifiers,
-    TimestampProvider,
-    PauseModifiers,
-    ClearingModifiers,
-    PartitionModifiers,
-    ERC3643Modifiers,
-    ERC1410Modifiers,
-    ExpirationModifiers
-{
+abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modifiers {
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
@@ -44,13 +29,13 @@ abstract contract ClearingTransfer is
         _requireUnProtectedPartitionsOrWildCardRole();
         LockStorageWrapper.requireValidExpirationTimestamp(_clearingOperation.expirationTimestamp);
         ERC1410StorageWrapper.requireValidAddress(_to);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+        ERC3643StorageWrapper.requireUnrecoveredAddress(EvmAccessors.getMsgSender());
         ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperation,
             _amount,
             _to,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             "",
             ThirdPartyType.NULL
         );
@@ -60,7 +45,15 @@ abstract contract ClearingTransfer is
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        notZeroAddress(_clearingOperationFrom.from)
+        notZeroAddress(_to)
+        returns (bool success_, uint256 clearingId_)
+    {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
@@ -69,9 +62,7 @@ abstract contract ClearingTransfer is
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         );
         {
-            ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
-            ERC1410StorageWrapper.requireValidAddress(_to);
-            ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(EvmAccessors.getMsgSender());
             ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         }
@@ -111,7 +102,7 @@ abstract contract ClearingTransfer is
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
             );
-            ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
+            ERC3643StorageWrapper.requireUnrecoveredAddress(EvmAccessors.getMsgSender());
             ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
             ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         }
@@ -136,8 +127,8 @@ abstract contract ClearingTransfer is
         override
         onlyUnpaused
         onlyProtectedPartitions
-        onlyValidAddress(_protectedClearingOperation.from)
-        onlyValidAddress(_to)
+        notZeroAddress(_protectedClearingOperation.from)
+        notZeroAddress(_to)
         onlyUnrecoveredAddress(_protectedClearingOperation.from)
         onlyUnrecoveredAddress(_to)
         onlyWithValidExpirationTimestamp(_protectedClearingOperation.clearingOperation.expirationTimestamp)
@@ -174,9 +165,12 @@ abstract contract ClearingTransfer is
     function _requireUnProtectedPartitionsOrWildCardRole() internal view {
         if (
             ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
+            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, EvmAccessors.getMsgSender())
         ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
+            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(
+                EvmAccessors.getMsgSender(),
+                _WILD_CARD_ROLE
+            );
         }
     }
 }

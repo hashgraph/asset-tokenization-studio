@@ -334,13 +334,9 @@ library ClearingOps {
         address _from,
         uint256 _amount
     ) public {
-        address spender = ClearingStorageWrapper.getClearingThirdParty(
-            _partition,
-            _from,
-            _clearingOperationType,
-            _clearingId
-        );
+        address spender = msg.sender;
         TokenCoreOps.decreaseAllowedBalance(_from, spender, _amount);
+        ClearingStorageWrapper.setClearingThirdParty(_partition, _from, _clearingOperationType, _clearingId, spender);
     }
 
     // ============================================================================
