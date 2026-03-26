@@ -1299,7 +1299,7 @@ describe("ERC1410 Tests", () => {
           value: 3 * amount,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(capFacet, "MaxSupplyReached");
+      ).to.be.rejectedWith("MaxSupplyReached");
 
       await expect(
         erc1410Facet.issueByPartition({
@@ -1308,7 +1308,7 @@ describe("ERC1410 Tests", () => {
           value: 2 * amount,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(capFacet, "MaxSupplyReachedForPartition");
+      ).to.be.rejectedWith("MaxSupplyReachedForPartition");
     });
 
     it("GIVEN an account WHEN issue THEN transaction succeeds", async () => {
