@@ -18,5 +18,9 @@ interface IBusinessLogicResolverWrapper {
     error BusinessLogicVersionDoesNotExist(uint256 version);
     error BusinessLogicKeyDuplicated(bytes32 businessLogicKey);
     error ZeroKeyNotValidForBusinessLogic();
-    error BusinessLogicKeyMismatch(bytes32 providedBusinessLogicKey, bytes32 actualBusinessLogicKey);
+    error BusinessLogicKeyMismatch(
+        address providedBusinessLogicAddress,
+        bytes32 providedBusinessLogicKey,
+        bytes32 actualBusinessLogicKey
+    );
 }

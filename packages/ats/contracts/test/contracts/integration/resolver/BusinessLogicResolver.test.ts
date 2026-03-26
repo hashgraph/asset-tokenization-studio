@@ -275,7 +275,7 @@ describe("BusinessLogicResolver", () => {
         ]),
       )
         .to.be.revertedWithCustomError(businessLogicResolver, "BusinessLogicKeyMismatch")
-        .withArgs(actualResolverKey, wrongKey);
+        .withArgs(freezeFacet.target, actualResolverKey, wrongKey);
     });
   });
 });

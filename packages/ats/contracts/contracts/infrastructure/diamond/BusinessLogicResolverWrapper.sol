@@ -50,7 +50,11 @@ abstract contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper 
                 .getStaticResolverKey();
 
             if (actualBLKey != _businessLogicsRegistryData.businessLogicKey) {
-                revert BusinessLogicKeyMismatch(actualBLKey, _businessLogicsRegistryData.businessLogicKey);
+                revert BusinessLogicKeyMismatch(
+                    _businessLogicsRegistryData.businessLogicAddress,
+                    actualBLKey,
+                    _businessLogicsRegistryData.businessLogicKey
+                );
             }
 
             if (!businessLogicResolverDataStorage.businessLogicActive[_businessLogicsRegistryData.businessLogicKey]) {
