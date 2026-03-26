@@ -68,3 +68,6 @@ deployments/**/.checkpoints/
 
 # Test artifacts - all test-generated files go here
 .temp/
+
+# Engram AI agent memory
+.engram/

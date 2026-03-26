@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-25T12:46:26.106Z
+ * Generated: 2026-03-25T20:52:47.057Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -2981,23 +2981,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function releaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) returns (bool success_)",
         selector: "0xdc6a3e75",
       },
-    ],
-    events: [
-      {
-        name: "LockByPartitionReleased",
-        signature: "LockByPartitionReleased(address,address,bytes32,uint256)",
-        topic0: "0x6b9cdd97822563ef24ac6b58b361df36a653662e434bb96e40fa50ae5c9de688",
-      },
-      {
-        name: "LockedByPartition",
-        signature: "LockedByPartition(address,address,bytes32,uint256,uint256,uint256)",
-        topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
-      },
-    ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-      { name: "from", signature: "from()", selector: "0xd5ce3389" },
-      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
     ],
     factory: (signer) => new LockFacet__factory(signer),
     timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),
