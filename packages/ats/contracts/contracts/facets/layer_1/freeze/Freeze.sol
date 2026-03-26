@@ -164,7 +164,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
      * @return Frozen token amount
      */
     function getFrozenTokens(address _userAddress) external view override returns (uint256) {
-        return ERC3643StorageWrapper.getFrozenAmountFor(_userAddress);
+        return ERC3643StorageWrapper.getFrozenAmountForAdjustedAt(_userAddress, _getBlockTimestamp());
     }
 
     /**

@@ -9,6 +9,7 @@ import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticF
 import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
+import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
 contract LockFacet is Lock, IStaticFunctionSelectors {
     // ========================================================================
@@ -85,7 +86,11 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 amount_) {
-        amount_ = LockStorageWrapper.getLockedAmountForByPartition(_partition, _tokenHolder);
+        amount_ = LockStorageWrapper.getLockedAmountForByPartitionAdjustedAt(
+            _partition,
+            _tokenHolder,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
     }
 
     function getLockCountForByPartition(
@@ -109,11 +114,19 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         address _tokenHolder,
         uint256 _lockId
     ) external view override returns (uint256 amount_, uint256 expirationTimestamp_) {
-        (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartition(_partition, _tokenHolder, _lockId);
+        (amount_, expirationTimestamp_) = LockStorageWrapper.getLockForByPartitionAdjustedAt(
+            _partition,
+            _tokenHolder,
+            _lockId,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
     }
 
     function getLockedAmountFor(address _tokenHolder) external view override returns (uint256 amount_) {
-        amount_ = LockStorageWrapper.getLockedAmountFor(_tokenHolder);
+        amount_ = LockStorageWrapper.getLockedAmountForAdjustedAt(
+            _tokenHolder,
+            TimeTravelStorageWrapper.getBlockTimestamp()
+        );
     }
 
     function getLockCountFor(address _tokenHolder) external view override returns (uint256 lockCount_) {
