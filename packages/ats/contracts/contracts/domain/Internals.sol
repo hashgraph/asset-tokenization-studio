@@ -1242,7 +1242,7 @@ abstract contract Internals is Modifiers {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (ScheduledTask[] memory scheduledSnapshot_);
-    function _getSnapshotBalanceForIfDateReached(
+    function _getSnapshotTakenBalance(
         uint256 _date,
         uint256 _snapshotId,
         address _account

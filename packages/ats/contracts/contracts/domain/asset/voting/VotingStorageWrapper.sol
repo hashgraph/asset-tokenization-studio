@@ -77,7 +77,7 @@ abstract contract VotingStorageWrapper is IVotingStorageWrapper, BondStorageWrap
             votingFor_.tokenBalance,
             votingFor_.decimals,
             votingFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
+        ) = _getSnapshotTakenBalance(
             registeredVoting.voting.recordDate,
             registeredVoting.snapshotId,
             _account
