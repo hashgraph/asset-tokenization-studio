@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import { ITimeTravelStorageWrapper } from "../interfaces/ITimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../layer_0/context/LocalContext.sol";
+import { ITimeTravelStorageWrapper } from "../ITimeTravelStorageWrapper.sol";
+import { LocalContext } from "../../../infrastructure/utils/LocalContext.sol";
 import { _TIME_TRAVEL_RESOLVER_KEY } from "../constants/resolverKeys.sol";
 
 abstract contract TimeTravelStorageWrapper is ITimeTravelStorageWrapper, LocalContext {

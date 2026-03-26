@@ -1,9 +1,10 @@
-//SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 import {
   ApplyRolesRequest,
   BalanceViewModel,
   Bond,
+  Coupon,
   BondDetailsViewModel,
   ConnectRequest,
   ControlListRequest,
@@ -13,8 +14,8 @@ import {
   CouponViewModel,
   CreateBondRequest,
   CreateEquityRequest,
-  DividendsForViewModel,
-  DividendsViewModel,
+  DividendForViewModel,
+  DividendViewModel,
   Equity,
   EquityDetailsViewModel,
   Factory,
@@ -31,8 +32,8 @@ import {
   GetCouponForRequest,
   GetPrincipalForRequest,
   GetCouponRequest,
-  GetDividendsForRequest,
-  GetDividendsRequest,
+  GetDividendForRequest,
+  GetDividendRequest,
   GetEquityDetailsRequest,
   GetLockedBalanceRequest,
   GetMaxSupplyRequest,
@@ -60,7 +61,7 @@ import {
   SecurityControlListType,
   SecurityViewModel,
   SetCouponRequest,
-  SetDividendsRequest,
+  SetDividendRequest,
   SetMaxSupplyRequest,
   SetVotingRightsRequest,
   SupportedWallets,
@@ -181,6 +182,11 @@ import {
   GetProceedRecipientDataRequest,
   DividendAmountForViewModel,
   FullRedeemAtMaturityRequest,
+  CancelCouponRequest,
+  GetCouponsForRequest,
+  GetCouponFromOrderedListAtRequest,
+  GetCouponsOrderedListRequest,
+  GetCouponsOrderedListTotalRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -396,16 +402,16 @@ export class SDKService {
 
   // COUPONS ////////////////////////////////////////////
   public static async setCoupon(req: SetCouponRequest): Promise<number> {
-    const response = await Bond.setCoupon(req);
+    const response = await Coupon.setCoupon(req);
     return response.payload;
   }
 
   public static async getCouponFor(req: GetCouponForRequest): Promise<CouponForViewModel> {
-    return await Bond.getCouponFor(req);
+    return await Coupon.getCouponFor(req);
   }
 
   public static async getCouponAmountFor(req: GetCouponForRequest): Promise<CouponAmountForViewModel> {
-    return await Bond.getCouponAmountFor(req);
+    return await Coupon.getCouponAmountFor(req);
   }
 
   public static async getPrincipalFor(req: GetPrincipalForRequest): Promise<PrincipalForViewModel> {
@@ -413,19 +419,42 @@ export class SDKService {
   }
 
   public static async getCoupon(req: GetCouponRequest): Promise<CouponViewModel> {
-    return await Bond.getCoupon(req);
+    return await Coupon.getCoupon(req);
   }
 
   public static async getAllCoupons(req: GetAllCouponsRequest): Promise<CouponViewModel[]> {
-    return await Bond.getAllCoupons(req);
+    return await Coupon.getAllCoupons(req);
   }
 
   public static async getCouponHolders(req: GetCouponHoldersRequest): Promise<string[]> {
-    return await Bond.getCouponHolders(req);
+    return await Coupon.getCouponHolders(req);
   }
 
   public static async getTotalCouponHolders(req: GetTotalCouponHoldersRequest): Promise<number> {
-    return await Bond.getTotalCouponHolders(req);
+    return await Coupon.getTotalCouponHolders(req);
+  }
+
+  public static async cancelCoupon(req: CancelCouponRequest): Promise<boolean> {
+    const response = await Coupon.cancelCoupon(req);
+    return response.payload;
+  }
+
+  public static async getCouponsFor(
+    req: GetCouponsForRequest,
+  ): Promise<{ coupons: CouponForViewModel[]; accounts: string[] }> {
+    return await Coupon.getCouponsFor(req);
+  }
+
+  public static async getCouponsOrderedList(req: GetCouponsOrderedListRequest): Promise<number[]> {
+    return await Coupon.getCouponsOrderedList(req);
+  }
+
+  public static async getCouponsOrderedListTotal(req: GetCouponsOrderedListTotalRequest): Promise<number> {
+    return await Coupon.getCouponsOrderedListTotal(req);
+  }
+
+  public static async getCouponFromOrderedListAt(req: GetCouponFromOrderedListAtRequest): Promise<number> {
+    return await Coupon.getCouponFromOrderedListAt(req);
   }
 
   // ROLES ////////////////////////////////////////////
@@ -525,24 +554,24 @@ export class SDKService {
   }
 
   // DIVIDENDS ////////////////////////////////////////////
-  public static async setDividends(req: SetDividendsRequest): Promise<number> {
-    const response = await Equity.setDividends(req);
+  public static async setDividend(req: SetDividendRequest): Promise<number> {
+    const response = await Equity.setDividend(req);
     return response.payload;
   }
 
-  public static async getDividendsFor(req: GetDividendsForRequest): Promise<DividendsForViewModel> {
-    return await Equity.getDividendsFor(req);
+  public static async getDividendFor(req: GetDividendForRequest): Promise<DividendForViewModel> {
+    return await Equity.getDividendFor(req);
   }
 
-  public static async getDividendAmountFor(req: GetDividendsForRequest): Promise<DividendAmountForViewModel> {
+  public static async getDividendAmountFor(req: GetDividendForRequest): Promise<DividendAmountForViewModel> {
     return await Equity.getDividendAmountFor(req);
   }
 
-  public static async getDividends(req: GetDividendsRequest): Promise<DividendsViewModel> {
-    return await Equity.getDividends(req);
+  public static async getDividend(req: GetDividendRequest): Promise<DividendViewModel> {
+    return await Equity.getDividend(req);
   }
 
-  public static async getAllDividends(req: GetAllDividendsRequest): Promise<DividendsViewModel[]> {
+  public static async getAllDividends(req: GetAllDividendsRequest): Promise<DividendViewModel[]> {
     return await Equity.getAllDividends(req);
   }
 

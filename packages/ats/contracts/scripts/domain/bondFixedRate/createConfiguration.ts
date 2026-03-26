@@ -90,8 +90,13 @@ const BOND_FIXED_RATE_FACETS = [
   "SsiManagementFixedRateFacet",
   "TransferAndLockFixedRateFacet",
 
+  "CouponFixedRateFacet",
+
   //Interest Rate
   "FixedRateFacet",
+
+  // Nominal Value (1)
+  "NominalValueFacet",
 
   // Jurisdiction-Specific
   "BondUSAFixedRateFacet",

@@ -6,7 +6,6 @@ import { QueryBus } from "@core/query/QueryBus";
 import ValidatedRequest from "@core/validation/ValidatedArgs";
 import { GetBondDetailsQuery } from "@query/bond/get/getBondDetails/GetBondDetailsQuery";
 
-import { SetCouponCommand } from "@command/bond/coupon/set/SetCouponCommand";
 import { CreateBondCommand } from "@command/bond/create/CreateBondCommand";
 import { CreateBondFixedRateCommand } from "@command/bond/createfixedrate/CreateBondFixedRateCommand";
 import { CreateBondKpiLinkedRateCommand } from "@command/bond/createkpilinkedrate/CreateBondKpiLinkedRateCommand";
@@ -19,21 +18,11 @@ import { AddProceedRecipientCommand } from "@command/security/proceedRecipients/
 import { RemoveProceedRecipientCommand } from "@command/security/proceedRecipients/removeProceedRecipient/RemoveProceedRecipientCommand";
 import { UpdateProceedRecipientDataCommand } from "@command/security/proceedRecipients/updateProceedRecipientData/UpdateProceedRecipientDataCommand";
 import { CommandBus } from "@core/command/CommandBus";
-import { CastRateStatus } from "@domain/context/bond/RateStatus";
 import ContractId from "@domain/context/contract/ContractId";
 import { CastRegulationSubType, CastRegulationType } from "@domain/context/factory/RegulationType";
 import { SecurityProps } from "@domain/context/security/Security";
 import BigDecimal from "@domain/context/shared/BigDecimal";
 import { ONE_THOUSAND } from "@domain/context/shared/SecurityDate";
-import { GetCouponQuery } from "@query/bond/coupons/getCoupon/GetCouponQuery";
-import { GetCouponAmountForQuery } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQuery";
-import { GetCouponCountQuery } from "@query/bond/coupons/getCouponCount/GetCouponCountQuery";
-import { GetCouponForQuery } from "@query/bond/coupons/getCouponFor/GetCouponForQuery";
-import { GetCouponFromOrderedListAtQuery } from "@query/bond/coupons/getCouponFromOrderedListAt/GetCouponFromOrderedListAtQuery";
-import { GetCouponHoldersQuery } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQuery";
-import { GetCouponsOrderedListQuery } from "@query/bond/coupons/getCouponsOrderedList/GetCouponsOrderedListQuery";
-import { GetCouponsOrderedListTotalQuery } from "@query/bond/coupons/getCouponsOrderedListTotal/GetCouponsOrderedListTotalQuery";
-import { GetTotalCouponHoldersQuery } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQuery";
 import { GetPrincipalForQuery } from "@query/bond/get/getPrincipalFor/GetPrincipalForQuery";
 import { GetSecurityQuery } from "@query/security/get/GetSecurityQuery";
 import { GetProceedRecipientDataQuery } from "@query/security/proceedRecipient/getProceedRecipientData/GetProceedRecipientDataQuery";
@@ -42,11 +31,9 @@ import { GetProceedRecipientsCountQuery } from "@query/security/proceedRecipient
 import { IsProceedRecipientQuery } from "@query/security/proceedRecipient/isProceedRecipient/IsProceedRecipientQuery";
 import NetworkService from "@service/network/NetworkService";
 import {
-  GetCouponHoldersRequest,
   GetProceedRecipientDataRequest,
   GetProceedRecipientsCountRequest,
   GetProceedRecipientsRequest,
-  GetTotalCouponHoldersRequest,
 } from "../request";
 import AddProceedRecipientRequest from "../request/bond/AddProceedRecipientRequest";
 import CreateBondFixedRateRequest from "../request/bond/CreateBondFixedRateRequest";
@@ -54,25 +41,15 @@ import CreateBondKpiLinkedRateRequest from "../request/bond/CreateBondKpiLinkedR
 import CreateBondRequest from "../request/bond/CreateBondRequest";
 import CreateTrexSuiteBondRequest from "../request/bond/CreateTrexSuiteBondRequest";
 import FullRedeemAtMaturityRequest from "../request/bond/FullRedeemAtMaturityRequest";
-import GetCouponsOrderedListRequest from "../request/bond/GetCouponsOrderedListRequest";
-import GetCouponsOrderedListTotalRequest from "../request/bond/GetCouponsOrderedListTotalRequest";
-import GetAllCouponsRequest from "../request/bond/GetAllCouponsRequest";
 import GetBondDetailsRequest from "../request/bond/GetBondDetailsRequest";
-import GetCouponForRequest from "../request/bond/GetCouponForRequest";
-import GetCouponFromOrderedListAtRequest from "../request/bond/GetCouponFromOrderedListAtRequest";
-import GetCouponRequest from "../request/bond/GetCouponRequest";
 import GetPrincipalForRequest from "../request/bond/GetPrincipalForRequest";
 import IsProceedRecipientRequest from "../request/bond/IsProceedRecipientRequest";
 import RedeemAtMaturityByPartitionRequest from "../request/bond/RedeemAtMaturityByPartitionRequest";
 import RemoveProceedRecipientRequest from "../request/bond/RemoveProceedRecipientRequest";
-import SetCouponRequest from "../request/bond/SetCouponRequest";
 import UpdateMaturityDateRequest from "../request/bond/UpdateMaturityDateRequest";
 import UpdateProceedRecipientDataRequest from "../request/bond/UpdateProceedRecipientDataRequest";
 import { AddKpiDataRequest } from "../request/kpis/AddKpiDataRequest";
 import BondDetailsViewModel from "../response/BondDetailsViewModel";
-import CouponAmountForViewModel from "../response/CouponAmountForViewModel";
-import CouponForViewModel from "../response/CouponForViewModel";
-import CouponViewModel from "../response/CouponViewModel";
 import PrincipalForViewModel from "../response/PrincipalForViewModel";
 import { SecurityViewModel } from "../security/Security";
 
@@ -80,25 +57,14 @@ interface IBondInPort {
   create(request: CreateBondRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
   createFixedRate(request: CreateBondFixedRateRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
   getBondDetails(request: GetBondDetailsRequest): Promise<BondDetailsViewModel>;
-  setCoupon(request: SetCouponRequest): Promise<{ payload: number; transactionId: string }>;
-  getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
-  getCouponAmountFor(request: GetCouponForRequest): Promise<CouponAmountForViewModel>;
   getPrincipalFor(request: GetPrincipalForRequest): Promise<PrincipalForViewModel>;
-  getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
-  getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
-  getCouponsOrderedList(request: GetCouponsOrderedListRequest): Promise<number[]>;
-  getCouponsOrderedListTotal(request: GetCouponsOrderedListTotalRequest): Promise<number>;
   updateMaturityDate(request: UpdateMaturityDateRequest): Promise<{ payload: boolean; transactionId: string }>;
   redeemAtMaturityByPartition(
     request: RedeemAtMaturityByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
   fullRedeemAtMaturity(request: FullRedeemAtMaturityRequest): Promise<{ payload: boolean; transactionId: string }>;
-  getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]>;
-  getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number>;
-  getCouponFromOrderedListAt(request: GetCouponFromOrderedListAtRequest): Promise<number>;
   createTrexSuite(request: CreateTrexSuiteBondRequest): Promise<{ security: SecurityViewModel; transactionId: string }>;
   addKpiData(request: AddKpiDataRequest): Promise<{ transactionId: string }>;
-
   addProceedRecipient(request: AddProceedRecipientRequest): Promise<{ payload: boolean; transactionId: string }>;
   removeProceedRecipient(request: RemoveProceedRecipientRequest): Promise<{ payload: boolean; transactionId: string }>;
   updateProceedRecipientData(
@@ -358,67 +324,6 @@ class BondInPort implements IBondInPort {
   }
 
   @LogError
-  async setCoupon(request: SetCouponRequest): Promise<{ payload: number; transactionId: string }> {
-    const {
-      rate,
-      recordTimestamp,
-      executionTimestamp,
-      securityId,
-      startTimestamp,
-      endTimestamp,
-      fixingTimestamp,
-      rateStatus,
-    } = request;
-    ValidatedRequest.handleValidation("SetCouponRequest", request);
-
-    return await this.commandBus.execute(
-      new SetCouponCommand(
-        securityId,
-        recordTimestamp,
-        executionTimestamp,
-        rate,
-        startTimestamp,
-        endTimestamp,
-        fixingTimestamp,
-        CastRateStatus.fromNumber(rateStatus),
-      ),
-    );
-  }
-
-  @LogError
-  async getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel> {
-    ValidatedRequest.handleValidation("GetCouponForRequest", request);
-
-    const res = await this.queryBus.execute(
-      new GetCouponForQuery(request.targetId, request.securityId, request.couponId),
-    );
-
-    const couponFor: CouponForViewModel = {
-      tokenBalance: res.tokenBalance.toString(),
-      decimals: res.decimals.toString(),
-    };
-
-    return couponFor;
-  }
-
-  @LogError
-  async getCouponAmountFor(request: GetCouponForRequest): Promise<CouponAmountForViewModel> {
-    ValidatedRequest.handleValidation("GetCouponForRequest", request);
-
-    const res = await this.queryBus.execute(
-      new GetCouponAmountForQuery(request.targetId, request.securityId, request.couponId),
-    );
-
-    const couponAmountFor: CouponAmountForViewModel = {
-      numerator: res.numerator,
-      denominator: res.denominator,
-      recordDateReached: res.recordDateReached,
-    };
-
-    return couponAmountFor;
-  }
-
-  @LogError
   async getPrincipalFor(request: GetPrincipalForRequest): Promise<PrincipalForViewModel> {
     ValidatedRequest.handleValidation("GetPrincipalForRequest", request);
 
@@ -430,73 +335,6 @@ class BondInPort implements IBondInPort {
     };
 
     return principalFor;
-  }
-
-  @LogError
-  async getCoupon(request: GetCouponRequest): Promise<CouponViewModel> {
-    ValidatedRequest.handleValidation("GetCouponRequest", request);
-
-    const res = await this.queryBus.execute(new GetCouponQuery(request.securityId, request.couponId));
-
-    const coupon: CouponViewModel = {
-      couponId: request.couponId,
-      recordDate: new Date(res.coupon.recordTimeStamp * ONE_THOUSAND),
-      executionDate: new Date(res.coupon.executionTimeStamp * ONE_THOUSAND),
-      rate: res.coupon.rate.toString(),
-      rateDecimals: res.coupon.rateDecimals,
-      startDate: new Date(res.coupon.startTimeStamp * ONE_THOUSAND),
-      endDate: new Date(res.coupon.endTimeStamp * ONE_THOUSAND),
-      fixingDate: new Date(res.coupon.fixingTimeStamp * ONE_THOUSAND),
-      rateStatus: CastRateStatus.toNumber(res.coupon.rateStatus),
-    };
-
-    return coupon;
-  }
-
-  @LogError
-  async getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]> {
-    ValidatedRequest.handleValidation("GetAllCouponsRequest", request);
-
-    const count = await this.queryBus.execute(new GetCouponCountQuery(request.securityId));
-
-    if (count.payload == 0) return [];
-
-    const coupons: CouponViewModel[] = [];
-
-    for (let i = 1; i <= count.payload; i++) {
-      const couponRequest = new GetCouponRequest({
-        securityId: request.securityId,
-        couponId: i,
-      });
-
-      const coupon = await this.getCoupon(couponRequest);
-
-      coupons.push(coupon);
-    }
-
-    return coupons;
-  }
-
-  @LogError
-  async getCouponsOrderedList(request: GetCouponsOrderedListRequest): Promise<number[]> {
-    ValidatedRequest.handleValidation("GetCouponsOrderedListRequest", request);
-
-    const { securityId, pageIndex, pageLength } = request;
-
-    const result = await this.queryBus.execute(new GetCouponsOrderedListQuery(securityId, pageIndex, pageLength));
-
-    return result.payload;
-  }
-
-  @LogError
-  async getCouponsOrderedListTotal(request: GetCouponsOrderedListTotalRequest): Promise<number> {
-    ValidatedRequest.handleValidation("GetCouponsOrderedListTotalRequest", request);
-
-    const { securityId } = request;
-
-    const result = await this.queryBus.execute(new GetCouponsOrderedListTotalQuery(securityId));
-
-    return result.payload;
   }
 
   @LogError
@@ -527,30 +365,6 @@ class BondInPort implements IBondInPort {
     ValidatedRequest.handleValidation(FullRedeemAtMaturityRequest.name, request);
 
     return await this.commandBus.execute(new FullRedeemAtMaturityCommand(securityId, sourceId));
-  }
-
-  @LogError
-  async getCouponHolders(request: GetCouponHoldersRequest): Promise<string[]> {
-    const { securityId, couponId, start, end } = request;
-    ValidatedRequest.handleValidation(GetCouponHoldersRequest.name, request);
-
-    return (await this.queryBus.execute(new GetCouponHoldersQuery(securityId, couponId, start, end))).payload;
-  }
-
-  @LogError
-  async getTotalCouponHolders(request: GetTotalCouponHoldersRequest): Promise<number> {
-    const { securityId, couponId } = request;
-    ValidatedRequest.handleValidation(GetTotalCouponHoldersRequest.name, request);
-
-    return (await this.queryBus.execute(new GetTotalCouponHoldersQuery(securityId, couponId))).payload;
-  }
-
-  @LogError
-  async getCouponFromOrderedListAt(request: GetCouponFromOrderedListAtRequest): Promise<number> {
-    const { securityId, pos } = request;
-    ValidatedRequest.handleValidation(GetCouponFromOrderedListAtRequest.name, request);
-
-    return (await this.queryBus.execute(new GetCouponFromOrderedListAtQuery(securityId, pos))).couponId;
   }
 
   @LogError
@@ -668,11 +482,13 @@ class BondInPort implements IBondInPort {
       new GetProceedRecipientsQuery(request.securityId, request.pageIndex, request.pageSize),
     );
   }
+
   @LogError
   async getProceedRecipientsCount(request: GetProceedRecipientsCountRequest): Promise<{ payload: number }> {
     ValidatedRequest.handleValidation(GetProceedRecipientsCountRequest.name, request);
     return await this.queryBus.execute(new GetProceedRecipientsCountQuery(request.securityId));
   }
+
   @LogError
   async getProceedRecipientData(request: GetProceedRecipientDataRequest): Promise<{ payload: string }> {
     ValidatedRequest.handleValidation(GetProceedRecipientDataRequest.name, request);
@@ -680,6 +496,7 @@ class BondInPort implements IBondInPort {
       new GetProceedRecipientDataQuery(request.securityId, request.proceedRecipientId),
     );
   }
+
   @LogError
   async isProceedRecipient(request: IsProceedRecipientRequest): Promise<{ payload: boolean }> {
     ValidatedRequest.handleValidation(IsProceedRecipientRequest.name, request);

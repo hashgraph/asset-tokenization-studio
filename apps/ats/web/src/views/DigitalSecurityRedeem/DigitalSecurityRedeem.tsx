@@ -7,7 +7,7 @@ import { Text, InputNumberController, Button } from "io-bricks-ui";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { required, min } from "../../utils/rules";
 import { CancelButton } from "../../components/CancelButton";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { useRedeemSecurity } from "../../hooks/queries/useRedeemSecurity";
 import { RedeemRequest } from "@hashgraph/asset-tokenization-sdk";
 import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";

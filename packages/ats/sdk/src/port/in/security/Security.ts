@@ -29,12 +29,14 @@ import { ISecurityInPortTokenMetadata, SecurityInPortTokenMetadata } from "./tok
 import { ISecurityInPortTransfer, SecurityInPortTransfer } from "./transfer/Transfer";
 import { BaseSecurityInPort } from "./BaseSecurityInPort";
 import { ISecurityInPortSnapshot, SecurityInPortSnapshot } from "./snapshot/Snapshot";
+import { ISecurityInPortNominalValue, SecurityInPortNominalValue } from "./nominalValue/NominalValue";
 
 export { SecurityViewModel, SecurityControlListType };
 
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging, no-redeclare */
 interface SecurityInPort
-  extends ISecurityInPortAgent,
+  extends
+    ISecurityInPortAgent,
     ISecurityInPortBalance,
     ISecurityInPortClearing,
     ISecurityInPortCompliance,
@@ -52,7 +54,8 @@ interface SecurityInPort
     ISecurityInPortSupply,
     ISecurityInPortTokenMetadata,
     ISecurityInPortTransfer,
-    ISecurityInPortSnapshot {}
+    ISecurityInPortSnapshot,
+    ISecurityInPortNominalValue {}
 
 class SecurityInPort extends BaseSecurityInPort {
   constructor(
@@ -87,6 +90,7 @@ applyMixins(SecurityInPort, [
   SecurityInPortTokenMetadata,
   SecurityInPortTransfer,
   SecurityInPortSnapshot,
+  SecurityInPortNominalValue,
 ]);
 
 export default new SecurityInPort();

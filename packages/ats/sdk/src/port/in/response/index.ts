@@ -3,9 +3,9 @@
 import AccountViewModel from "./AccountViewModel";
 import BalanceViewModel from "./BalanceViewModel";
 import ContractViewModel from "./ContractViewModel";
-import DividendsForViewModel from "./DividendsForViewModel";
+import DividendForViewModel from "./DividendForViewModel";
 import DividendAmountForViewModel from "./DividendAmountForViewModel";
-import DividendsViewModel from "./DividendsViewModel";
+import DividendViewModel from "./DividendViewModel";
 import CouponForViewModel from "./CouponForViewModel";
 import CouponAmountForViewModel from "./CouponAmountForViewModel";
 import PrincipalForViewModel from "./PrincipalForViewModel";
@@ -28,14 +28,16 @@ import KycAccountDataViewModel from "./KycAccountDataViewModel";
 import ClearingCreateHoldViewModel from "./ClearingCreateHoldViewModel";
 import ClearingRedeemViewModel from "./ClearingRedeemViewModel";
 import ClearingTransferViewModel from "./ClearingTransferViewModel";
+import GetCorporateActionResponse from "./corporateActions/GetCorporateActionResponse";
+import GetCorporateActionsResponse from "./corporateActions/GetCorporateActionsResponse";
 
 export {
   AccountViewModel,
   BalanceViewModel,
   ContractViewModel,
-  DividendsForViewModel,
+  DividendForViewModel,
   DividendAmountForViewModel,
-  DividendsViewModel,
+  DividendViewModel,
   CouponForViewModel,
   CouponAmountForViewModel,
   PrincipalForViewModel,
@@ -58,4 +60,6 @@ export {
   ClearingCreateHoldViewModel,
   ClearingRedeemViewModel,
   ClearingTransferViewModel,
+  GetCorporateActionResponse,
+  GetCorporateActionsResponse,
 };

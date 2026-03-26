@@ -1,8 +1,0 @@
-// SPDX-License-Identifier: Apache-2.0
-
-import { QueryResponse } from "@core/query/QueryResponse";
-
-export default interface DividendsForViewModel extends QueryResponse {
-  tokenBalance: string;
-  decimals: string;
-}

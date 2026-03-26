@@ -3,9 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import {
     TransferAndLockFixedRateFacet
-} from "../../../../layer_3/transferAndLock/fixedRate/TransferAndLockFixedRateFacet.sol";
+} from "../../../../facets/layer_3/transferAndLock/fixedRate/TransferAndLockFixedRateFacet.sol";
 import { TimeTravelStorageWrapper } from "../../timeTravel/TimeTravelStorageWrapper.sol";
-import { LocalContext } from "../../../../layer_0/context/LocalContext.sol";
+import { LocalContext } from "../../../../infrastructure/utils/LocalContext.sol";
 
 contract TransferAndLockFixedRateFacetTimeTravel is TransferAndLockFixedRateFacet, TimeTravelStorageWrapper {
     function _blockTimestamp() internal view override(LocalContext, TimeTravelStorageWrapper) returns (uint256) {

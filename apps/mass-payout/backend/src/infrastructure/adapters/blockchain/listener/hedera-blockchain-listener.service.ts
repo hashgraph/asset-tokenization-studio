@@ -15,7 +15,7 @@ import { BlockchainEventListenerService } from "@domain/ports/blockchain-event-l
 import { Injectable, Logger } from "@nestjs/common"
 import axios from "axios"
 import chalk from "chalk"
-import { Interface, LogDescription } from "ethers/lib/utils"
+import { Interface, LogDescription } from "ethers"
 import abiERC20 from "./abi_ERC20"
 
 @Injectable()
@@ -135,7 +135,7 @@ export class HederaBlockchainListenerService implements BlockchainEventListenerS
     return {
       ...eventData,
       ...Object.fromEntries(
-        parsed.eventFragment.inputs.map((input, i) => {
+        parsed.fragment.inputs.map((input, i) => {
           const val = parsed.args[i]
           return [input.name, typeof val === "object" ? val.toString() : val]
         }),

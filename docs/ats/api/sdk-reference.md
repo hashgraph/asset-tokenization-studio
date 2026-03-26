@@ -187,7 +187,7 @@ const request = new SetDividendsRequest({
   executionTimestamp: "1735430400",
 });
 
-const dividendId = await Equity.setDividends(request);
+const dividendId = await Equity.setDividend(request);
 ```
 
 ### SetVotingRightsRequest
@@ -213,6 +213,78 @@ Schedule a stock split or reverse split.
 - `securityId: string` - Token ID
 - `executionTimestamp: string` - Execution date timestamp
 - `factor: string` - Adjustment factor (e.g., "2" for 2:1 split)
+
+### CancelDividendRequest
+
+Cancel a scheduled dividend.
+
+**Location**: `request/equity/CancelDividendRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID
+- `dividendId: number` - ID of the dividend to cancel
+
+**Usage**:
+
+```typescript
+import { Equity, CancelDividendRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new CancelDividendRequest({
+  securityId: "0.0.1234567",
+  dividendId: 1,
+});
+
+const result = await Equity.cancelDividend(request);
+```
+
+### CancelVotingRequest
+
+Cancel a scheduled voting event.
+
+**Location**: `request/equity/CancelVotingRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID
+- `votingId: number` - ID of the voting event to cancel
+
+**Usage**:
+
+```typescript
+import { Equity, CancelVotingRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new CancelVotingRequest({
+  securityId: "0.0.1234567",
+  votingId: 1,
+});
+
+const result = await Equity.cancelVoting(request);
+```
+
+### CancelScheduledBalanceAdjustmentRequest
+
+Cancel a scheduled balance adjustment.
+
+**Location**: `request/equity/CancelScheduledBalanceAdjustmentRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID
+- `balanceAdjustmentId: number` - ID of the balance adjustment to cancel
+
+**Usage**:
+
+```typescript
+import { Equity, CancelScheduledBalanceAdjustmentRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new CancelScheduledBalanceAdjustmentRequest({
+  securityId: "0.0.1234567",
+  balanceAdjustmentId: 1,
+});
+
+const result = await Equity.cancelScheduledBalanceAdjustment(request);
+```
 
 ### GetDividendAmountForRequest
 
@@ -285,6 +357,30 @@ const request = new SetCouponRequest({
 });
 
 const couponId = await Bond.setCoupon(request);
+```
+
+### CancelCouponRequest
+
+Cancel a scheduled coupon payment.
+
+**Location**: `request/bond/CancelCouponRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID
+- `couponId: number` - ID of the coupon to cancel
+
+**Usage**:
+
+```typescript
+import { Bond, CancelCouponRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new CancelCouponRequest({
+  securityId: "0.0.1234567",
+  couponId: 1,
+});
+
+const result = await Bond.cancelCoupon(request);
 ```
 
 ### GetCouponAmountForRequest
@@ -569,6 +665,41 @@ const request = new UpdateConfigRequest({
 });
 
 const success = await Management.updateConfig(request);
+```
+
+## Snapshot Operations
+
+### BalancesOfAtSnapshotRequest
+
+Query holder balances at a specific snapshot with pagination support.
+
+**Location**: `request/snapshots/BalancesOfAtSnapshotRequest.ts`
+
+**Parameters**:
+
+- `securityId: string` - Token ID (Hedera ID or EVM address)
+- `snapshotId: number` - Snapshot ID to query (min: 0)
+- `pageIndex: number` - Page index for pagination (min: 0)
+- `pageLength: number` - Number of results per page (min: 1)
+
+**Response**: `Array<{ holder: string; balance: bigint }>`
+
+**Usage**:
+
+```typescript
+import { Snapshot, BalancesOfAtSnapshotRequest } from "@hashgraph/asset-tokenization-sdk";
+
+const request = new BalancesOfAtSnapshotRequest({
+  securityId: "0.0.1234567",
+  snapshotId: 1,
+  pageIndex: 0,
+  pageLength: 50,
+});
+
+const balances = await Snapshot.balancesOfAtSnapshot(request);
+balances.forEach((entry) => {
+  console.log(`Holder: ${entry.holder}, Balance: ${entry.balance}`);
+});
 ```
 
 ## Source Code Reference

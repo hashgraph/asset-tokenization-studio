@@ -69,10 +69,11 @@ describe("Bond Token Deployment", () => {
       const callArgs = mockFactory.deployBond.getCall(0).args[0];
       const rbacs = callArgs.security.rbacs;
 
-      expect(rbacs).to.have.length(3);
+      expect(rbacs).to.have.length(4);
       expect(rbacs[0].role).to.equal(ATS_ROLES._DEFAULT_ADMIN_ROLE);
-      expect(rbacs[1].role).to.equal(ATS_ROLES._PAUSER_ROLE);
-      expect(rbacs[2].role).to.equal(ATS_ROLES._CORPORATE_ACTION_ROLE);
+      expect(rbacs[1].role).to.equal(ATS_ROLES._NOMINAL_VALUE_ROLE);
+      expect(rbacs[2].role).to.equal(ATS_ROLES._PAUSER_ROLE);
+      expect(rbacs[3].role).to.equal(ATS_ROLES._CORPORATE_ACTION_ROLE);
     });
 
     it("should place admin role first in array", async () => {

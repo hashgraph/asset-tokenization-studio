@@ -2,13 +2,10 @@
 
 import { Query } from "@core/query/Query";
 import { QueryResponse } from "@core/query/QueryResponse";
-import BigDecimal from "@domain/context/shared/BigDecimal";
+import { CouponFor } from "@domain/context/bond/CouponFor";
 
 export class GetCouponForQueryResponse implements QueryResponse {
-  constructor(
-    public readonly tokenBalance: BigDecimal,
-    public readonly decimals: number,
-  ) {}
+  constructor(public readonly couponFor: CouponFor) {}
 }
 
 export class GetCouponForQuery extends Query<GetCouponForQueryResponse> {

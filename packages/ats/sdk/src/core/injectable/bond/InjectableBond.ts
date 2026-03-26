@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
+import { CancelCouponCommandHandler } from "@command/bond/coupon/cancel/CancelCouponCommandHandler";
 import { SetCouponCommandHandler } from "@command/bond/coupon/set/SetCouponCommandHandler";
 import { CreateBondCommandHandler } from "@command/bond/create/CreateBondCommandHandler";
 import { CreateBondFixedRateCommandHandler } from "@command/bond/createfixedrate/CreateBondFixedRateCommandHandler";
@@ -14,6 +15,7 @@ import { GetCouponQueryHandler } from "@query/bond/coupons/getCoupon/GetCouponQu
 import { GetCouponAmountForQueryHandler } from "@query/bond/coupons/getCouponAmountFor/GetCouponAmountForQueryHandler";
 import { GetCouponCountQueryHandler } from "@query/bond/coupons/getCouponCount/GetCouponCountQueryHandler";
 import { GetCouponForQueryHandler } from "@query/bond/coupons/getCouponFor/GetCouponForQueryHandler";
+import { GetCouponsForQueryHandler } from "@query/bond/coupons/getCouponsFor/GetCouponsForQueryHandler";
 import { GetCouponHoldersQueryHandler } from "@query/bond/coupons/getCouponHolders/GetCouponHoldersQueryHandler";
 import { GetTotalCouponHoldersQueryHandler } from "@query/bond/coupons/getTotalCouponHolders/GetTotalCouponHoldersQueryHandler";
 import { GetCouponsOrderedListQueryHandler } from "@query/bond/coupons/getCouponsOrderedList/GetCouponsOrderedListQueryHandler";
@@ -50,6 +52,10 @@ export const COMMAND_HANDLERS_BOND = [
   },
   {
     token: TOKENS.COMMAND_HANDLER,
+    useClass: CancelCouponCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateMaturityDateCommandHandler,
   },
   {
@@ -78,6 +84,10 @@ export const QUERY_HANDLERS_BOND = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetCouponForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetCouponsForQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

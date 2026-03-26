@@ -7,9 +7,9 @@ import {
   ProceedRecipientsKpiLinkedRateFacetTimeTravel,
   ResolverProxy,
   AccessControl,
-  BondUSAKpiLinkedRateFacetTimeTravel,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
   TimeTravelFacet,
+  CouponFacetTimeTravel,
 } from "@contract-types";
 import { dateToUnixTimestamp, ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
@@ -25,7 +25,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   let diamond: ResolverProxy;
   let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
   let accessControlFacet: AccessControl;
-  let bondKpiLinkedRateFacet: BondUSAKpiLinkedRateFacetTimeTravel;
+  let couponKpiLinkedRateFacet: CouponFacetTimeTravel;
   let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
 
@@ -52,8 +52,8 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
       signer_A,
     );
     accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    bondKpiLinkedRateFacet = await ethers.getContractAt(
-      "BondUSAKpiLinkedRateFacetTimeTravel",
+    couponKpiLinkedRateFacet = await ethers.getContractAt(
+      "CouponKpiLinkedRateFacetTimeTravel",
       diamond.target,
       signer_A,
     );
@@ -74,7 +74,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
 
   describe("Add Tests", () => {
     it("GIVEN a unlisted proceed recipient WHEN authorized user adds it THEN it is listed and pending tasks triggered", async () => {
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await couponKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
       const tasks_count_Before = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
 
       await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);
@@ -92,7 +92,7 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
     it("GIVEN a unlisted proceed recipient WHEN authorized user adds it THEN it is listed and pending tasks triggered", async () => {
       await proceedRecipientsFacet.addProceedRecipient(PROCEED_RECIPIENT_1, PROCEED_RECIPIENT_1_DATA);
 
-      await bondKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
+      await couponKpiLinkedRateFacet.connect(signer_A).setCoupon(couponData);
       const tasks_count_Before = await scheduledTasksFacet.scheduledCrossOrderedTaskCount();
 
       await timeTravelFacet.changeSystemTimestamp(couponData.fixingDate + 1);

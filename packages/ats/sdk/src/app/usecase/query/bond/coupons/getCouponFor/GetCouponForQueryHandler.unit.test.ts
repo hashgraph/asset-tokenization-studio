@@ -6,11 +6,12 @@ import { ErrorCode } from "@core/error/BaseError";
 import { RPCQueryAdapter } from "@port/out/rpc/RPCQueryAdapter";
 import ContractService from "@service/contract/ContractService";
 import EvmAddress from "@domain/context/contract/EvmAddress";
-import { GetCouponForQueryFixture } from "@test/fixtures/bond/BondFixture";
+import { CouponFixture, GetCouponForQueryFixture } from "@test/fixtures/bond/BondFixture";
 import { GetCouponForQueryError } from "./error/GetCouponForQueryError";
 import { GetCouponForQueryHandler } from "./GetCouponForQueryHandler";
 import AccountService from "@service/account/AccountService";
 import BigDecimal from "@domain/context/shared/BigDecimal";
+import { CouponAmountFor } from "@domain/context/bond/CouponAmountFor";
 import { GetCouponForQuery, GetCouponForQueryResponse } from "./GetCouponForQuery";
 
 describe("GetCouponForQueryHandler", () => {
@@ -26,7 +27,10 @@ describe("GetCouponForQueryHandler", () => {
 
   const errorMsg = ErrorMsgFixture.create().msg;
   const amount = new BigDecimal("1000000");
+  const nominalValue = new BigDecimal("500");
   const decimals = 6;
+  const coupon = CouponFixture.create();
+  const couponAmount = new CouponAmountFor("10", "4", true);
 
   beforeEach(() => {
     handler = new GetCouponForQueryHandler(queryAdapterServiceMock, accountServiceMock, contractServiceMock);
@@ -55,13 +59,26 @@ describe("GetCouponForQueryHandler", () => {
     it("should successfully get coupon for", async () => {
       contractServiceMock.getContractEvmAddress.mockResolvedValueOnce(evmAddress);
       accountServiceMock.getAccountEvmAddress.mockResolvedValueOnce(targetEvmAddress);
-      queryAdapterServiceMock.getCouponFor.mockResolvedValue({ tokenBalance: amount, decimals: decimals });
+      queryAdapterServiceMock.getCouponFor.mockResolvedValue({
+        tokenBalance: amount,
+        nominalValue: nominalValue,
+        decimals: decimals,
+        recordDateReached: false,
+        coupon: coupon,
+        couponAmount: couponAmount,
+        isDisabled: false,
+      });
 
       const result = await handler.execute(query);
 
       expect(result).toBeInstanceOf(GetCouponForQueryResponse);
-      expect(result.tokenBalance).toStrictEqual(amount);
-      expect(result.decimals).toStrictEqual(decimals);
+      expect(result.couponFor.tokenBalance).toStrictEqual(amount);
+      expect(result.couponFor.nominalValue).toStrictEqual(nominalValue);
+      expect(result.couponFor.decimals).toStrictEqual(decimals);
+      expect(result.couponFor.recordDateReached).toBe(false);
+      expect(result.couponFor.coupon).toStrictEqual(coupon);
+      expect(result.couponFor.couponAmount).toStrictEqual(couponAmount);
+      expect(result.couponFor.isDisabled).toBe(false);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledTimes(1);
       expect(accountServiceMock.getAccountEvmAddress).toHaveBeenCalledTimes(1);
       expect(contractServiceMock.getContractEvmAddress).toHaveBeenCalledWith(query.securityId);

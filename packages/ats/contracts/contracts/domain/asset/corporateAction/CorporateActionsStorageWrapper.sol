@@ -1,0 +1,259 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity >=0.8.0 <0.9.0;
+
+import {
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
+} from "../../../domain/asset/corporateAction/ICorporateActionsStorageWrapper.sol";
+import { LibCommon } from "../../../infrastructure/utils/LibCommon.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { _CORPORATE_ACTION_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
+import { ClearingStorageWrapper1 } from "../clearing/ClearingStorageWrapper1.sol";
+
+abstract contract CorporateActionsStorageWrapper is ClearingStorageWrapper1 {
+    using LibCommon for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    modifier validateDates(uint256 _firstDate, uint256 _secondDate) override {
+        _checkDates(_firstDate, _secondDate);
+        _;
+    }
+
+    modifier onlyMatchingActionType(bytes32 _actionType, uint256 _index) override {
+        _checkMatchingActionType(_actionType, _index);
+        _;
+    }
+
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
+    ) internal override returns (bytes32 corporateActionId_, uint256 corporateActionIdByType_) {
+        CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
+
+        bytes32 contentHash = keccak256(abi.encode(_actionType, _data));
+        if (corporateActions_.actionsContentHashes[contentHash]) {
+            return (bytes32(0), 0);
+        }
+        corporateActions_.actionsContentHashes[contentHash] = true;
+
+        corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
+        bool success = corporateActions_.actions.add(corporateActionId_);
+        assert(success);
+
+        corporateActions_.actionsByType[_actionType].push(corporateActionId_);
+
+        corporateActionIdByType_ = _getCorporateActionCountByType(_actionType);
+
+        corporateActions_.actionsData[corporateActionId_].actionType = _actionType;
+        corporateActions_.actionsData[corporateActionId_].data = _data;
+        corporateActions_.actionsData[corporateActionId_].actionIdByType = corporateActionIdByType_;
+    }
+
+    function _cancelCorporateAction(bytes32 _actionId) internal override {
+        _corporateActionsStorage().actionsData[_actionId].isDisabled = true;
+    }
+
+    function _updateCorporateActionData(bytes32 _actionId, bytes memory _newData) internal override {
+        _corporateActionsStorage().actionsData[_actionId].data = _newData;
+    }
+
+    function _updateCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId,
+        bytes memory newResult
+    ) internal override {
+        CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
+        bytes[] memory results = corporateActions_.actionsData[actionId].results;
+
+        if (results.length > resultId) {
+            corporateActions_.actionsData[actionId].results[resultId] = newResult;
+            return;
+        }
+
+        for (uint256 i = results.length; i < resultId; ++i) {
+            corporateActions_.actionsData[actionId].results.push("");
+        }
+
+        corporateActions_.actionsData[actionId].results.push(newResult);
+    }
+
+    function _isCorporateActionDisabled(bytes32 _actionId) internal view override returns (bool) {
+        return _corporateActionsStorage().actionsData[_actionId].isDisabled;
+    }
+
+    function _getCorporateAction(
+        bytes32 _corporateActionId
+    )
+        internal
+        view
+        override
+        returns (bytes32 actionType_, uint256 actionTypeId_, bytes memory data_, bool isDisabled_)
+    {
+        CorporateActionDataStorage storage corporateActions_ = _corporateActionsStorage();
+        actionType_ = corporateActions_.actionsData[_corporateActionId].actionType;
+        data_ = corporateActions_.actionsData[_corporateActionId].data;
+        actionTypeId_ = corporateActions_.actionsData[_corporateActionId].actionIdByType;
+        isDisabled_ = corporateActions_.actionsData[_corporateActionId].isDisabled;
+    }
+
+    function _getCorporateActionCount() internal view virtual override returns (uint256 corporateActionCount_) {
+        return _corporateActionsStorage().actions.length();
+    }
+
+    function _getCorporateActionIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view override returns (bytes32[] memory corporateActionIds_) {
+        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(_pageIndex, _pageLength);
+    }
+
+    function _getCorporateActionCountByType(
+        bytes32 _actionType
+    ) internal view override returns (uint256 corporateActionCount_) {
+        return _corporateActionsStorage().actionsByType[_actionType].length;
+    }
+
+    function _getCorporateActionIdByTypeIndex(
+        bytes32 _actionType,
+        uint256 _typeIndex
+    ) internal view override returns (bytes32 corporateActionId_) {
+        return _corporateActionsStorage().actionsByType[_actionType][_typeIndex];
+    }
+
+    function _getCorporateActionIdsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view override returns (bytes32[] memory corporateActionIds_) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(_pageIndex, _pageLength);
+
+        corporateActionIds_ = new bytes32[](LibCommon.getSize(start, end, _getCorporateActionCountByType(_actionType)));
+
+        CorporateActionDataStorage storage corporateActions = _corporateActionsStorage();
+
+        for (uint256 i = 0; i < corporateActionIds_.length; i++) {
+            corporateActionIds_[i] = corporateActions.actionsByType[_actionType][start + i];
+        }
+    }
+
+    function _getCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId
+    ) internal view override returns (bytes memory result_) {
+        if (_getCorporateActionResultCount(actionId) > resultId)
+            result_ = _corporateActionsStorage().actionsData[actionId].results[resultId];
+    }
+
+    function _getCorporateActionResultCount(bytes32 actionId) internal view override returns (uint256) {
+        return _corporateActionsStorage().actionsData[actionId].results.length;
+    }
+
+    function _getCorporateActionData(bytes32 actionId) internal view override returns (bytes memory) {
+        return _corporateActionsStorage().actionsData[actionId].data;
+    }
+
+    function _getCorporateActions(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        override
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        bytes32[] memory corporateActionIds = _getCorporateActionIds(_pageIndex, _pageLength);
+        uint256 totalCorporateActions = corporateActionIds.length;
+
+        actionTypes_ = new bytes32[](totalCorporateActions);
+        actionTypeIds_ = new uint256[](totalCorporateActions);
+        datas_ = new bytes[](totalCorporateActions);
+        isDisabled_ = new bool[](totalCorporateActions);
+
+        for (uint256 i = 0; i < totalCorporateActions; ) {
+            (actionTypes_[i], actionTypeIds_[i], datas_[i], isDisabled_[i]) = _getCorporateAction(
+                corporateActionIds[i]
+            );
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function _getCorporateActionsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        override
+        returns (
+            bytes32[] memory actionTypes_,
+            uint256[] memory actionTypeIds_,
+            bytes[] memory datas_,
+            bool[] memory isDisabled_
+        )
+    {
+        bytes32[] memory corporateActionIds = _getCorporateActionIdsByType(_actionType, _pageIndex, _pageLength);
+        uint256 totalCorporateActions = corporateActionIds.length;
+
+        actionTypes_ = new bytes32[](totalCorporateActions);
+        actionTypeIds_ = new uint256[](totalCorporateActions);
+        datas_ = new bytes[](totalCorporateActions);
+        isDisabled_ = new bool[](totalCorporateActions);
+
+        for (uint256 i = 0; i < totalCorporateActions; ) {
+            (actionTypes_[i], actionTypeIds_[i], datas_[i], isDisabled_[i]) = _getCorporateAction(
+                corporateActionIds[i]
+            );
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function _getUintResultAt(bytes32 _actionId, uint256 resultId) internal view override returns (uint256) {
+        bytes memory data = _getCorporateActionResult(_actionId, resultId);
+
+        uint256 bytesLength = data.length;
+
+        if (bytesLength < 32) return 0;
+
+        uint256 value;
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            value := mload(add(data, 0x20))
+        }
+
+        return value;
+    }
+
+    function _actionContentHashExists(bytes32 _contentHash) internal view override returns (bool) {
+        return _corporateActionsStorage().actionsContentHashes[_contentHash];
+    }
+
+    function _corporateActionsStorage() internal pure returns (CorporateActionDataStorage storage corporateActions_) {
+        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            corporateActions_.slot := position
+        }
+    }
+
+    function _checkMatchingActionType(bytes32 _actionType, uint256 _index) private view {
+        if (_getCorporateActionCountByType(_actionType) <= _index)
+            revert ICorporateActionsStorageWrapper.WrongIndexForAction(_index, _actionType);
+    }
+
+    function _checkDates(uint256 _firstDate, uint256 _secondDate) private pure {
+        if (_secondDate < _firstDate) {
+            revert ICorporateActionsStorageWrapper.WrongDates(_firstDate, _secondDate);
+        }
+    }
+}

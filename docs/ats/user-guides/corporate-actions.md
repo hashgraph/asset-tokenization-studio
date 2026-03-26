@@ -59,6 +59,18 @@ Click on a specific dividend to view:
 - Payment status
 - **Dividend Amount Calculation** (numerator, denominator, record date reached status)
 
+#### Cancelling a Dividend
+
+You can cancel a scheduled dividend before its execution date:
+
+1. Navigate to the dividend details view
+2. Click **"Cancel"**
+3. Approve the transaction in your wallet
+
+Once cancelled, the dividend will be marked as disabled and will not be executed. Cancellation is irreversible.
+
+> **Note**: Only dividends that have not yet been executed can be cancelled. Requires **CORPORATE_ACTION_ROLE** or **ISSUER_ROLE**.
+
 #### Viewing Dividend Holders
 
 Click **"Snapshot"** or **"View Holders"** to see:
@@ -118,6 +130,20 @@ Program voting events for equity holders.
    - **Execution Date**: Select voting date using date picker
 3. Click **"Create"**
 4. Approve the transaction
+
+#### Cancelling a Voting Event
+
+1. Navigate to the voting event details
+2. Click **"Cancel"**
+3. Approve the transaction in your wallet
+
+#### Cancelling a Balance Adjustment
+
+Scheduled balance adjustments can also be cancelled before their execution date:
+
+1. Navigate to the balance adjustment details
+2. Click **"Cancel"**
+3. Approve the transaction in your wallet
 
 #### Viewing Voting Events
 
@@ -183,6 +209,16 @@ Click on a specific coupon to view:
 - List of eligible bondholders and their coupon amounts
 - Payment status
 - **Coupon Amount Calculation** (numerator, denominator, record date reached status)
+
+### Cancelling a Coupon
+
+You can cancel a scheduled coupon before its execution date:
+
+1. Navigate to the coupon details view
+2. Click **"Cancel"**
+3. Approve the transaction in your wallet
+
+Once cancelled, the coupon will be marked as disabled and will not be executed.
 
 ### Viewing Coupon Holders
 

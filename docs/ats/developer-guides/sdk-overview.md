@@ -66,10 +66,13 @@ Operations available for all token types:
 Operations specific to equity tokens:
 
 - **`Equity.create()`** - Create equity token
-- **`Equity.setDividends()`** - Schedule dividend distribution
+- **`Equity.setDividend()`** - Schedule dividend distribution
+- **`Equity.cancelDividend()`** - Cancel a scheduled dividend
 - **`Equity.getAllDividends()`** - Query all scheduled dividends
 - **`Equity.setVotingRights()`** - Schedule voting event
+- **`Equity.cancelVoting()`** - Cancel a scheduled voting event
 - **`Equity.setScheduledBalanceAdjustment()`** - Schedule stock split or reverse split
+- **`Equity.cancelScheduledBalanceAdjustment()`** - Cancel a scheduled balance adjustment
 
 ### Bond Operations
 
@@ -80,6 +83,7 @@ Operations specific to bond tokens:
 - **`Bond.createKpiLinkedRate()`** - Create KPI linked rate bond
 - **`Bond.createSustainabilityPerformanceTargetRate()`** - Create sustainability performance target rate bond
 - **`Bond.setCoupon()`** - Schedule coupon payment (with start/end dates)
+- **`Bond.cancelCoupon()`** - Cancel a scheduled coupon
 - **`Bond.getAllCoupons()`** - Query all scheduled coupons
 - **`Bond.updateMaturityDate()`** - Update bond maturity date
 - **`Bond.fullRedeemAtMaturity()`** - Execute maturity redemption
@@ -108,6 +112,12 @@ Operations for role-based access control:
 - **`Role.grantRole()`** - Grant role to account
 - **`Role.revokeRole()`** - Revoke role from account
 - **`Role.getRolesFor()`** - Query roles for account
+
+### Snapshot Queries
+
+Operations for querying historical snapshot data:
+
+- **`Snapshot.balancesOfAtSnapshot()`** - Query holder balances at a specific snapshot with pagination
 
 ### Configuration Management
 
@@ -222,7 +232,7 @@ const dividendRequest = new SetDividendsRequest({
   paymentDate: Math.floor(Date.now() / 1000) + 172800, // 2 days from now
 });
 
-await Equity.setDividends(dividendRequest);
+await Equity.setDividend(dividendRequest);
 ```
 
 ### Setting Coupon Payments
