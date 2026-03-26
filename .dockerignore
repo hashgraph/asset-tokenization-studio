@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+artifacts
+typechain-types
+cache
+
+# Git
+.git
+.github
+.husky
+.changeset
+.claude
+
+# Environment files (values passed via --build-arg)
+.env
+.env.sample
+.env.local
+.env.*.local
+
+# Documentation & non-build files
+docs
+Smart Contracts Audit Report.pdf

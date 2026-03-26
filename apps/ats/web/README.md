@@ -95,6 +95,20 @@ npm run dev
 
 Open a browser and navigate to the URL displayed in the terminal (by default: _http://localhost:5173_)
 
+## Docker
+
+You can also build and run the web app as a Docker container using Docker Compose:
+
+```bash
+cd apps/ats/web
+cp .env.sample .env   # then edit with your values
+docker compose up --build
+```
+
+The app will be available at `http://localhost:5174`.
+
+For full details, see the [Full Development Setup - Docker](https://github.com/hashgraph/asset-tokenization-studio/tree/main/docs/ats/getting-started/full-setup.md#step-6-docker-optional).
+
 # Test
 
 The following _src_ folders contain _**tests**_ subfolders within them with their corresponding tests:

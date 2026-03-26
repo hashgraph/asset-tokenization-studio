@@ -124,7 +124,56 @@ npm run dev
 # Or from root: npm run ats:web:dev
 ```
 
-## Step 6: Running Tests
+## Step 6: Docker (Optional)
+
+The web application can be built and run as a Docker container using Docker Compose. The multi-stage Dockerfile compiles contracts, SDK, and the web app, then serves the production bundle with nginx.
+
+### Prerequisites
+
+- **Docker** and **Docker Compose** installed
+- Sufficient memory allocated to Docker (8 GB+ recommended)
+
+### Configure Environment
+
+Create a `.env` file in `apps/ats/web/` based on the sample:
+
+```bash
+cd apps/ats/web
+cp .env.sample .env
+```
+
+Edit `.env` with your configuration. At minimum, set the required network variables:
+
+```bash
+REACT_APP_MIRROR_NODE='https://testnet.mirrornode.hedera.com/api/v1/'
+REACT_APP_RPC_NODE='https://testnet.hashio.io/api'
+REACT_APP_RPC_RESOLVER='0.0.7511642'
+REACT_APP_RPC_FACTORY='0.0.7512002'
+```
+
+### Build and Run
+
+From the `apps/ats/web/` directory:
+
+```bash
+docker compose up --build
+```
+
+The app will be available at `http://localhost:5174`.
+
+To run from a different directory, use the `--env-file` flag so Compose can resolve the build args:
+
+```bash
+docker compose --env-file apps/ats/web/.env -f apps/ats/web/docker-compose.yml up --build
+```
+
+### Stop
+
+```bash
+docker compose down
+```
+
+## Step 7: Running Tests
 
 ### Contract Tests
 
