@@ -136,6 +136,10 @@ contract AssetMock is IAssetMock {
         couponFor_.coupon.rateDecimals = 1;
     }
 
+    function getCouponsFor(uint256, uint256, uint256) external pure returns (CouponFor[] memory, address[] memory) {
+        revert NotImplemented();
+    }
+
     function getCouponCount() external pure returns (uint256) {
         revert NotImplemented();
     }
