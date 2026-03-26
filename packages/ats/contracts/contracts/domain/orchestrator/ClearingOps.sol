@@ -495,6 +495,36 @@ library ClearingOps {
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition
         );
+
+        // Update clearing LABAF to current ABAF (same pattern as reference _adjustClearingBalances)
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
+        uint256 clearingLabaf = AdjustBalancesStorageWrapper.getClearingLabafById(_clearingOperationIdentifier);
+
+        if (abaf != clearingLabaf) {
+            uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, clearingLabaf);
+            ClearingStorageWrapper.updateClearingAmountById(_clearingOperationIdentifier, factor);
+            AdjustBalancesStorageWrapper.setClearedLabafById(_clearingOperationIdentifier, abaf);
+        }
+
+        // Update total cleared LABAF if needed
+        uint256 totalLabaf = AdjustBalancesStorageWrapper.getTotalClearedLabaf(
+            _clearingOperationIdentifier.tokenHolder
+        );
+        uint256 totalLabafByPartition = AdjustBalancesStorageWrapper.getTotalClearedLabafByPartition(
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.tokenHolder
+        );
+
+        if (abaf != totalLabaf) {
+            AdjustBalancesStorageWrapper.setTotalClearedLabaf(_clearingOperationIdentifier.tokenHolder, abaf);
+        }
+        if (abaf != totalLabafByPartition) {
+            AdjustBalancesStorageWrapper.setTotalClearedLabafByPartition(
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.tokenHolder,
+                abaf
+            );
+        }
     }
 
     function updateClearing(

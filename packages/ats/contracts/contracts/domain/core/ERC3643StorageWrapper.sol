@@ -23,6 +23,7 @@ import { LockStorageWrapper } from "../asset/LockStorageWrapper.sol";
 import { HoldStorageWrapper } from "../asset/HoldStorageWrapper.sol";
 import { ClearingStorageWrapper } from "../asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../orchestrator/TokenCoreOps.sol";
+import { IERC20StorageWrapper } from "../asset/ERC1400/ERC20/IERC20StorageWrapper.sol";
 
 library ERC3643StorageWrapper {
     using LowLevelCall for address;
@@ -142,6 +143,17 @@ library ERC3643StorageWrapper {
         IERC3643Management.ERC3643Storage storage st = erc3643Storage();
         st.frozenTokens[_account] -= _amount;
         st.frozenTokensByPartition[_account][_partition] -= _amount;
+
+        transferFrozenBalance(_partition, _account, _amount);
+        emit IERC20StorageWrapper.Transfer(address(0), _account, _amount);
+    }
+
+    function transferFrozenBalance(bytes32 _partition, address _to, uint256 _amount) internal {
+        if (ERC1410StorageWrapper.validPartitionForReceiver(_partition, _to)) {
+            ERC1410StorageWrapper.increaseBalanceByPartition(_to, _amount, _partition);
+            return;
+        }
+        ERC1410StorageWrapper.addPartitionTo(_amount, _to, _partition);
     }
 
     function updateTotalFreeze(bytes32 _partition, address _tokenHolder) internal returns (uint256 abaf_) {
