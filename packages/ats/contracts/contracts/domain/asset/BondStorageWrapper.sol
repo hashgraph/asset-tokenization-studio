@@ -2,7 +2,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { _BOND_STORAGE_POSITION } from "../../constants/storagePositions.sol";
-import { COUPON_CORPORATE_ACTION_TYPE, SNAPSHOT_RESULT_ID, SNAPSHOT_TASK_TYPE } from "../../constants/values.sol";
+import {
+    COUPON_CORPORATE_ACTION_TYPE,
+    COUPON_LISTING_TASK_TYPE,
+    SNAPSHOT_RESULT_ID,
+    SNAPSHOT_TASK_TYPE
+} from "../../constants/values.sol";
 import { IBondRead } from "../../facets/layer_2/bond/IBondRead.sol";
 import { IBondStorageWrapper } from "./bond/IBondStorageWrapper.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
@@ -74,6 +79,12 @@ library BondStorageWrapper {
 
         ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.recordDate, SNAPSHOT_TASK_TYPE);
         ScheduledTasksStorageWrapper.addScheduledSnapshot(newCoupon.recordDate, actionId);
+
+        // For fixing date rate bonds, add coupon listing task
+        if (newCoupon.fixingDate != 0) {
+            ScheduledTasksStorageWrapper.addScheduledCrossOrderedTask(newCoupon.fixingDate, COUPON_LISTING_TASK_TYPE);
+            ScheduledTasksStorageWrapper.addScheduledCouponListing(newCoupon.fixingDate, actionId);
+        }
     }
 
     function setMaturityDate(uint256 maturityDate) internal returns (bool success_) {
