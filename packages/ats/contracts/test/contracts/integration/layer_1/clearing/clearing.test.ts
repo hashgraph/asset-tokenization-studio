@@ -2411,7 +2411,17 @@ describe("Clearing Tests", () => {
 
         await expect(clearingActionsFacet.approveClearingOperationByPartition(clearingIdentifier))
           .to.emit(clearingActionsFacet, "ClearingOperationApproved")
-          .withArgs(signer_A.address, signer_A.address, _PARTITION_ID_1, 1, ClearingOperationType.Transfer, "0x");
+          .withArgs(
+            signer_A.address,
+            signer_A.address,
+            _PARTITION_ID_1,
+            1,
+            ClearingOperationType.Transfer,
+            ethers.AbiCoder.defaultAbiCoder().encode(
+              ["uint256", "uint256", "address"],
+              [_AMOUNT, clearingOperation.expirationTimestamp, signer_B.address],
+            ),
+          );
 
         const balance_A_final_Transfer = await erc1410Facet.balanceOf(signer_A.address);
         const balance_B_final_Transfer = await erc1410Facet.balanceOf(signer_B.address);
@@ -2423,7 +2433,17 @@ describe("Clearing Tests", () => {
 
         await expect(clearingActionsFacet.approveClearingOperationByPartition(clearingIdentifier))
           .to.emit(clearingActionsFacet, "ClearingOperationApproved")
-          .withArgs(signer_A.address, signer_A.address, _PARTITION_ID_1, 1, ClearingOperationType.Redeem, "0x");
+          .withArgs(
+            signer_A.address,
+            signer_A.address,
+            _PARTITION_ID_1,
+            1,
+            ClearingOperationType.Redeem,
+            ethers.AbiCoder.defaultAbiCoder().encode(
+              ["uint256", "uint256"],
+              [_AMOUNT, clearingOperation.expirationTimestamp],
+            ),
+          );
 
         const balance_A_final_Redeem = await erc1410Facet.balanceOf(signer_A.address);
         const balance_B_final_Redeem = await erc1410Facet.balanceOf(signer_B.address);
@@ -2441,7 +2461,10 @@ describe("Clearing Tests", () => {
             _PARTITION_ID_1,
             1,
             ClearingOperationType.HoldCreation,
-            ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [1]),
+            ethers.AbiCoder.defaultAbiCoder().encode(
+              ["uint256", "uint256", "address"],
+              [_AMOUNT, clearingOperation.expirationTimestamp, signer_C.address],
+            ),
           );
 
         const balance_A_final_HoldCreation = await erc1410Facet.balanceOf(signer_A.address);
