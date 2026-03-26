@@ -138,3 +138,7 @@ asset-tokenization-studio.iml
 .claude/
 CLAUDE.md
 .tasks/
+
+
+scripts/ats/validate-sdk-contracts/__pycache__
+scripts/ats/validate-sdk-contracts/output
