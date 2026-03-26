@@ -605,9 +605,51 @@ library ClearingOps {
         uint256 _expirationTimestamp,
         bytes memory _data,
         bytes memory _operatorData,
-        ThirdPartyType /* _operatorType */
+        ThirdPartyType _thirdPartyType
     ) internal {
-        emit IClearingStorageWrapper.ClearedTransferByPartition(
+        if (_thirdPartyType == ThirdPartyType.NULL) {
+            emit IClearingStorageWrapper.ClearedTransferByPartition(
+                EvmAccessors.getMsgSender(),
+                _from,
+                _to,
+                _partition,
+                _clearingId,
+                _amount,
+                _expirationTimestamp,
+                _data,
+                _operatorData
+            );
+            return;
+        }
+        if (_thirdPartyType == ThirdPartyType.AUTHORIZED) {
+            emit IClearingStorageWrapper.ClearedTransferFromByPartition(
+                EvmAccessors.getMsgSender(),
+                _from,
+                _to,
+                _partition,
+                _clearingId,
+                _amount,
+                _expirationTimestamp,
+                _data,
+                _operatorData
+            );
+            return;
+        }
+        if (_thirdPartyType == ThirdPartyType.OPERATOR) {
+            emit IClearingStorageWrapper.ClearedOperatorTransferByPartition(
+                EvmAccessors.getMsgSender(),
+                _from,
+                _to,
+                _partition,
+                _clearingId,
+                _amount,
+                _expirationTimestamp,
+                _data,
+                _operatorData
+            );
+            return;
+        }
+        emit IClearingStorageWrapper.ProtectedClearedTransferByPartition(
             EvmAccessors.getMsgSender(),
             _from,
             _to,
