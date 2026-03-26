@@ -14,6 +14,7 @@ import {
 } from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 abstract contract TransferAndLock is ITransferAndLock, AccessControlModifiers, PauseModifiers {
     function transferAndLockByPartition(
@@ -27,11 +28,11 @@ abstract contract TransferAndLock is ITransferAndLock, AccessControlModifiers, P
         LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1410StorageWrapper.transferByPartition(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             BasicTransferInfo(_to, _amount),
             _partition,
             _data,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             ""
         );
         (success_, lockId_) = LockStorageWrapper.lockByPartition(
@@ -39,9 +40,17 @@ abstract contract TransferAndLock is ITransferAndLock, AccessControlModifiers, P
             _amount,
             _to,
             _expirationTimestamp,
-            msg.sender
+            EvmAccessors.getMsgSender()
         );
-        emit PartitionTransferredAndLocked(_partition, msg.sender, _to, _amount, _data, _expirationTimestamp, lockId_);
+        emit PartitionTransferredAndLocked(
+            _partition,
+            EvmAccessors.getMsgSender(),
+            _to,
+            _amount,
+            _data,
+            _expirationTimestamp,
+            lockId_
+        );
     }
 
     function transferAndLock(
@@ -54,11 +63,11 @@ abstract contract TransferAndLock is ITransferAndLock, AccessControlModifiers, P
         LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1410StorageWrapper.transferByPartition(
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             BasicTransferInfo(_to, _amount),
             _DEFAULT_PARTITION,
             _data,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             ""
         );
         (success_, lockId_) = LockStorageWrapper.lockByPartition(
@@ -66,11 +75,11 @@ abstract contract TransferAndLock is ITransferAndLock, AccessControlModifiers, P
             _amount,
             _to,
             _expirationTimestamp,
-            msg.sender
+            EvmAccessors.getMsgSender()
         );
         emit PartitionTransferredAndLocked(
             _DEFAULT_PARTITION,
-            msg.sender,
+            EvmAccessors.getMsgSender(),
             _to,
             _amount,
             _data,
@@ -82,9 +91,12 @@ abstract contract TransferAndLock is ITransferAndLock, AccessControlModifiers, P
     function _requireUnProtectedPartitionsOrWildCardRole() internal view {
         if (
             ProtectedPartitionsStorageWrapper.arePartitionsProtected() &&
-            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, msg.sender)
+            !AccessControlStorageWrapper.hasRole(_WILD_CARD_ROLE, EvmAccessors.getMsgSender())
         ) {
-            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(msg.sender, _WILD_CARD_ROLE);
+            revert IProtectedPartitionsStorageWrapper.PartitionsAreProtectedAndNoRole(
+                EvmAccessors.getMsgSender(),
+                _WILD_CARD_ROLE
+            );
         }
     }
 }
