@@ -19,13 +19,28 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) external override onlyUnpaused onlyRole(_LOCKER_ROLE) returns (bool success_, uint256 lockId_) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_LOCKER_ROLE)
+        onlyValidExpirationTimestamp(_expirationTimestamp)
+        returns (bool success_, uint256 lockId_)
+    {
         (success_, lockId_) = LockStorageWrapper.lockByPartition(
             _DEFAULT_PARTITION,
             _amount,
             _tokenHolder,
             _expirationTimestamp,
             EvmAccessors.getMsgSender()
+        );
+        emit LockedByPartition(
+            EvmAccessors.getMsgSender(),
+            _tokenHolder,
+            _DEFAULT_PARTITION,
+            lockId_,
+            _amount,
+            _expirationTimestamp
         );
     }
 
