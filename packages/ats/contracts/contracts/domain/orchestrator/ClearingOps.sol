@@ -7,14 +7,18 @@ import { ERC1594StorageWrapper } from "../asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "./TokenCoreOps.sol";
 import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
+import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
 import { IClearingStorageWrapper } from "../asset/clearing/IClearingStorageWrapper.sol";
+import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
+import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
 import { Hold } from "../../facets/layer_1/hold/IHold.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 
 /// @title ClearingOps - Orchestrator for clearing state-changing operations
 /// @notice Deployed once as a separate contract. Facets call via DELEGATECALL.
@@ -371,6 +375,22 @@ library ClearingOps {
         if (_clearingOperationIdentifier.tokenHolder != destination) {
             TokenCoreOps.checkIdentity(_clearingOperationIdentifier.tokenHolder, destination);
             TokenCoreOps.checkCompliance(_clearingOperationIdentifier.tokenHolder, destination, false);
+
+            // Notify compliance module of the transfer (same pattern as HoldStorageWrapper and ERC1410StorageWrapper)
+            if (
+                _clearingOperationIdentifier.partition == _DEFAULT_PARTITION &&
+                ERC3643StorageWrapper.erc3643Storage().compliance != address(0)
+            ) {
+                (ERC3643StorageWrapper.erc3643Storage().compliance).functionCall(
+                    abi.encodeWithSelector(
+                        ICompliance.transferred.selector,
+                        _clearingOperationIdentifier.tokenHolder,
+                        destination,
+                        data.amount
+                    ),
+                    IERC3643Management.ComplianceCallFailed.selector
+                );
+            }
         }
 
         ClearingStorageWrapper.removeClearing(_clearingOperationIdentifier);
