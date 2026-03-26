@@ -18,13 +18,12 @@ from config import AnalysisConfig, find_matching_bracket, get_inner_content, spl
 
 # ── Exceptions ────────────────────────────────────────────────────────────
 
-@dataclass
 class AnalysisError(Exception):
     """Base class for analysis errors with structured data."""
-    error_type: str
-    message: str
-    details: Dict[str, Any]
-    solutions: List[str]
+    error_type: str = ""
+    message: str = ""
+    details: Dict[str, Any] = None
+    solutions: List[str] = None
     
     def __post_init__(self):
         super().__init__(self.message)
@@ -72,26 +71,38 @@ def find_body_brace(content, start):
     return -1
 
 def iter_methods(content):
-    """Yield (return_type, body) for each top-level async method."""
+    """Yield (return_type, body) for each top-level async method or non-async
+    method that returns Promise<T> (e.g. methods declared without `async` but
+    still returning a promise).
+    """
     content = strip_comments(content)
-    i = 0
-    pat = re.compile(r'\basync\s+\w+\s*\(')
-    while i < len(content):
-        m = pat.search(content, i)
-        if not m:
-            break
 
-        # balance params  ()
+    # Collect candidate positions from two patterns:
+    #   1. async methods:            async methodName(
+    #   2. non-async class methods:  <newline><2 spaces>methodName(
+    # Pattern 2 targets class-level methods (2-space indent) specifically to
+    # avoid matching function calls or nested code (which would be indented more).
+    candidates = {}  # start_pos -> p0
+
+    for m in re.finditer(r'\basync\s+\w+\s*\(', content):
         p0 = content.find('(', m.start())
+        candidates[m.start()] = p0
+
+    for m in re.finditer(r'\n  (\w+)\s*\(', content):
+        # position of the method name (skip \n + 2 spaces)
+        name_start = m.start() + 3
+        p0 = m.start() + m.group().index('(')
+        candidates.setdefault(name_start, p0)
+
+    for start, p0 in sorted(candidates.items()):
+        # balance params  ()
         p1 = find_matching_bracket(content, p0)
         if p1 == -1:
-            i = m.end()
             continue
 
         # find method body { — must skip generics like Promise<{ foo: string }>
         b0 = find_body_brace(content, p1 + 1)
         if b0 == -1:
-            i = p1 + 1
             continue
 
         # return type is the text between ): and {
@@ -99,14 +110,18 @@ def iter_methods(content):
         rt = re.match(r'\s*:\s*(.+?)\s*$', between.rstrip(), re.DOTALL)
         return_type = normalize_string(rt.group(1)) if rt else 'unknown'
 
+        # For non-async candidates: only keep if return type is Promise<...>
+        chunk = content[max(0, start - 6):p0]
+        is_async = bool(re.search(r'\basync\b', chunk))
+        if not is_async and 'Promise<' not in return_type:
+            continue
+
         # balance body  {}
         b1 = find_matching_bracket(content, b0)
         if b1 == -1:
-            i = p1 + 1
             continue
 
         yield return_type, content[b0 + 1:b1]
-        i = b1 + 1
 
 def extract_query_calls(body):
     """Extract calls from pattern: this.connect(Factory__factory, addr).method(args)"""

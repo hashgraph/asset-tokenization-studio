@@ -18,15 +18,14 @@ from dataclasses import dataclass
 from typing import List, Dict, Any
 
 # Import shared configuration
-from config import AnalysisConfig, normalize_facet_name, count_parameters, facet_list_to_dict
+from config import AnalysisConfig, normalize_facet_name, count_parameters, facet_list_to_dict, DEFAULT_WORKSPACE as _CONFIG_DEFAULT_WORKSPACE
 from log_parser import create_log_parser
 from analyze_contracts import NoContractsFoundError, WorkspaceError
 from analyze_sdk import PermissionError
 
 ANALYSIS_DIR     = Path(__file__).parent
 OUTPUT_DIR       = ANALYSIS_DIR / 'output'
-# Workspace root is 4 levels up: scripts/ats/validate_sdk_contracts/<file> → asset-tokenization-studio/
-DEFAULT_WORKSPACE = Path(__file__).resolve().parents[3]
+DEFAULT_WORKSPACE = _CONFIG_DEFAULT_WORKSPACE
 TIMESTAMP        = datetime.now().strftime('%Y%m%d_%H%M%S')
 OUTPUT_DIR.mkdir(exist_ok=True)
 LOG_FILE         = OUTPUT_DIR / f'validate_{TIMESTAMP}.log'
@@ -36,13 +35,12 @@ DEFAULT_EXCLUDES = []
 
 # ── Exceptions ────────────────────────────────────────────────────────────
 
-@dataclass
 class AnalysisError(Exception):
     """Base class for analysis errors with structured data."""
-    error_type: str
-    message: str
-    details: Dict[str, Any]
-    solutions: List[str]
+    error_type: str = ""
+    message: str = ""
+    details: Dict[str, Any] = None
+    solutions: List[str] = None
     
     def __post_init__(self):
         super().__init__(self.message)
@@ -164,6 +162,16 @@ def method_param_map(contract_data):
     return result
 
 
+def method_signature_map(contract_data):
+    """Build {method_name: full_signature} from contract facet data."""
+    result = {}
+    for iface in contract_data.get('interfaces', []):
+        m = re.match(r'function\s+(\w+)\s*\(', iface)
+        if m:
+            result[m.group(1)] = iface
+    return result
+
+
 def validate(contracts, sdk):
     """Return {missing, diff, success} grouped by facet.
 
@@ -197,6 +205,7 @@ def validate(contracts, sdk):
     for contract_norm_name, (contract_name, contract_data) in contract_lookup.items():
         if contract_norm_name in sdk_method_lookup:
             contract_methods = method_param_map(contract_data)
+            contract_signatures = method_signature_map(contract_data)
             sdk_methods = sdk_method_lookup[contract_norm_name]
 
             for method, contract_params in contract_methods.items():
@@ -211,7 +220,10 @@ def validate(contracts, sdk):
                         }
                 else:
                     # Method exists in contract but is never called in SDK
-                    missing_out.setdefault(contract_name, []).append(method)
+                    missing_out.setdefault(contract_name, []).append({
+                        'method': method,
+                        'signature': contract_signatures.get(method, ''),
+                    })
         else:
             # Entire facet has no SDK coverage
             contract_no_sdk.append(contract_name)

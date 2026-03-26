@@ -121,8 +121,11 @@ class LogParser:
         self.log("── missing by facet ─────────────────────")
         for item in result['missing']:
             name = list(item.keys())[0]
-            count = len(list(item.values())[0])
-            self.log(f"  {name}: {count} method(s)")
+            methods = list(item.values())[0]
+            self.log(f"  {name} ({len(methods)}):")
+            for entry in methods:
+                sig = entry['signature'] if isinstance(entry, dict) else entry
+                self.log(f"    ✗ {sig}")
         
         self.log("")
         

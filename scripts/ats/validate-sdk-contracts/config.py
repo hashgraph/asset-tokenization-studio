@@ -11,7 +11,7 @@ from typing import Dict, List, Set, Tuple, Any
 DEFAULT_WORKSPACE = Path("/home/ruben/workspaces/hashgraph/asset-tokenization-studio")
 
 # Contract analysis paths
-DEFAULT_CONTRACTS_DIR = DEFAULT_WORKSPACE / "packages/ats/contracts/contracts"
+DEFAULT_CONTRACTS_DIR = DEFAULT_WORKSPACE / "packages/ats/contracts/contracts/facets"
 DEFAULT_SCAN_DIRS = ["layer_1", "layer_2", "layer_3"]
 DEFAULT_SKIP_DIRS = {"interfaces", "constants", "mocks", "test", "proxies", "resolver", "libraries"}
 DEFAULT_SKIP_SUFFIXES = ("Facet.sol", "FacetBase.sol")
@@ -70,18 +70,68 @@ def count_parameters(interface_sig: str) -> int:
 
 # ── Bracket Matching Utilities ───────────────────────────────────────────────────
 
+def _skip_string(s: str, pos: int) -> int:
+    """Skip past a string/template literal starting at s[pos] (the quote char).
+    Returns the position immediately after the closing quote.
+    Handles: "...", '...', `...${...}...` (including nested template expressions).
+    """
+    quote = s[pos]
+    pos += 1
+    if quote == '`':
+        while pos < len(s):
+            c = s[pos]
+            if c == '\\':
+                pos += 2
+                continue
+            if c == '`':
+                return pos + 1
+            if c == '$' and pos + 1 < len(s) and s[pos + 1] == '{':
+                # Template expression: skip balanced braces, respecting nested strings
+                pos += 2  # skip ${
+                depth = 1
+                while pos < len(s) and depth > 0:
+                    if s[pos] in ('"', "'", '`'):
+                        pos = _skip_string(s, pos)
+                        continue
+                    if s[pos] == '{':
+                        depth += 1
+                    elif s[pos] == '}':
+                        depth -= 1
+                    pos += 1
+                continue
+            pos += 1
+    else:
+        while pos < len(s):
+            c = s[pos]
+            if c == '\\':
+                pos += 2
+                continue
+            if c == quote:
+                return pos + 1
+            pos += 1
+    return pos
+
+
 def find_matching_bracket(s: str, pos: int) -> int:
-    """Find matching close bracket for open bracket at s[pos]."""
-    close = {'(': ')', '[': ']', '{': '}'}[s[pos]]
+    """Find matching close bracket for open bracket at s[pos].
+    Skips string literals (including template literals with ${}) so that
+    braces inside strings are not counted.
+    """
+    close = {'(': ')', '[': ']', '{': '}'}[s[pos]]  # noqa: F841
     depth = 0
-    while pos < len(s):
-        if s[pos] in '([{':
+    i = pos
+    while i < len(s):
+        c = s[i]
+        if c in ('"', "'", '`'):
+            i = _skip_string(s, i)
+            continue
+        if c in '([{':
             depth += 1
-        elif s[pos] in ')]}':
+        elif c in ')]}':
             depth -= 1
             if depth == 0:
-                return pos
-        pos += 1
+                return i
+        i += 1
     return -1
 
 def get_inner_content(s: str, pos: int) -> str:
@@ -131,7 +181,7 @@ class AnalysisConfig:
         self.workspace = workspace or DEFAULT_WORKSPACE
         
         # Contract analysis
-        self.contracts_dir = self.workspace / "packages/ats/contracts/contracts"
+        self.contracts_dir = self.workspace / "packages/ats/contracts/contracts/facets"
         self.scan_dirs = DEFAULT_SCAN_DIRS
         self.skip_dirs = DEFAULT_SKIP_DIRS
         self.skip_suffixes = DEFAULT_SKIP_SUFFIXES

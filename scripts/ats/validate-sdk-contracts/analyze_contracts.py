@@ -17,13 +17,12 @@ from config import AnalysisConfig, normalize_facet_name, strip_comments, normali
 
 # ── Exceptions ────────────────────────────────────────────────────────────
 
-@dataclass
 class AnalysisError(Exception):
     """Base class for analysis errors with structured data."""
-    error_type: str
-    message: str
-    details: Dict[str, Any]
-    solutions: List[str]
+    error_type: str = ""
+    message: str = ""
+    details: Dict[str, Any] = None
+    solutions: List[str] = None
     
     def __post_init__(self):
         super().__init__(self.message)
