@@ -45,14 +45,14 @@ abstract contract ERC3643Management is IERC3643Management, AccessControlModifier
     function addAgent(
         address _agent
     ) external onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE)) {
-        AccessControlStorageWrapper.grantRole(_AGENT_ROLE, _agent);
+        ERC3643StorageWrapper.addAgent(_agent);
         emit AgentAdded(_agent);
     }
 
     function removeAgent(
         address _agent
     ) external onlyUnpaused onlyRole(AccessControlStorageWrapper.getRoleAdmin(_AGENT_ROLE)) {
-        AccessControlStorageWrapper.revokeRole(_AGENT_ROLE, _agent);
+        ERC3643StorageWrapper.removeAgent(_agent);
         emit AgentRemoved(_agent);
     }
 

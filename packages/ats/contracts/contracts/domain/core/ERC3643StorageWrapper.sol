@@ -13,6 +13,7 @@ import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION, RoleDataStorage } from "./AccessControlStorageWrapper.sol";
+import { AccessControlStorageWrapper } from "./AccessControlStorageWrapper.sol";
 import { ControlListStorageWrapper } from "./ControlListStorageWrapper.sol";
 import { ResolverProxyStorageWrapper } from "./ResolverProxyStorageWrapper.sol";
 import { ERC20StorageWrapper, ERC20Storage } from "../asset/ERC20StorageWrapper.sol";
@@ -55,15 +56,15 @@ library ERC3643StorageWrapper {
     }
 
     function addAgent(address _agent) internal {
-        _rolesStorage().roles[_AGENT_ROLE].roleMembers.add(_agent);
-        _rolesStorage().memberRoles[_agent].add(_AGENT_ROLE);
-        emit IERC3643Management.AgentAdded(_agent);
+        if (!AccessControlStorageWrapper.grantRole(_AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountAssignedToRole(_AGENT_ROLE, _agent);
+        }
     }
 
     function removeAgent(address _agent) internal {
-        _rolesStorage().roles[_AGENT_ROLE].roleMembers.remove(_agent);
-        _rolesStorage().memberRoles[_agent].remove(_AGENT_ROLE);
-        emit IERC3643Management.AgentRemoved(_agent);
+        if (!AccessControlStorageWrapper.revokeRole(_AGENT_ROLE, _agent)) {
+            revert IAccessControl.AccountNotAssignedToRole(_AGENT_ROLE, _agent);
+        }
     }
 
     function setCompliance(address _compliance) internal {

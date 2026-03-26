@@ -3,15 +3,16 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _LOCKER_ROLE, _CONTROLLER_ROLE } from "../../../constants/roles.sol";
 import { ILock } from "./ILock.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
-import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
+import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 import { LockModifiers } from "../../../infrastructure/utils/LockModifiers.sol";
+import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -25,10 +26,11 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 abstract contract Lock is
     ILock,
     TimestampProvider,
-    PauseModifiers,
     AccessControlModifiers,
+    ERC1410Modifiers,
+    ERC3643Modifiers,
     LockModifiers,
-    ERC1410Modifiers
+    PauseModifiers
 {
     /**
      * @notice Lock tokens by partition

@@ -25,6 +25,7 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         override
         onlyUnpaused
         onlyRole(_LOCKER_ROLE)
+        onlyUnrecoveredAddress(_tokenHolder)
         onlyValidExpirationTimestamp(_expirationTimestamp)
         returns (bool success_, uint256 lockId_)
     {
