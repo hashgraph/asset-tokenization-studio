@@ -1029,7 +1029,7 @@ describe("ERC1410 Tests", () => {
           value: amount,
           data: data,
         }),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
     });
 
     it("GIVEN an account WHEN transfer more than its balance THEN transaction fails", async () => {
@@ -1575,7 +1575,7 @@ describe("ERC1410 Tests", () => {
             data,
             operatorData,
           ),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       expect(canTransfer[0]).to.be.equal(false);
       expect(canTransfer[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });
@@ -1600,7 +1600,7 @@ describe("ERC1410 Tests", () => {
         erc1410Facet
           .connect(signer_C)
           .controllerRedeemByPartition(_PARTITION_ID_1, signer_D.address, amount, data, operatorData),
-      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+      ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRoles");
       expect(canRedeem[0]).to.be.equal(false);
       expect(canRedeem[1]).to.be.equal(EIP1066_CODES.INSUFFICIENT_FUNDS);
     });

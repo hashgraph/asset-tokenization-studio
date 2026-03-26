@@ -3,6 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ILock } from "./ILock.sol";
 import { Lock } from "./Lock.sol";
+import { _LOCKER_ROLE } from "../../../constants/roles.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
@@ -18,7 +19,7 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) external override returns (bool success_, uint256 lockId_) {
+    ) external override onlyUnpaused onlyRole(_LOCKER_ROLE) returns (bool success_, uint256 lockId_) {
         (success_, lockId_) = LockStorageWrapper.lockByPartition(
             _DEFAULT_PARTITION,
             _amount,

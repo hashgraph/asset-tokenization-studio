@@ -57,6 +57,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
         address _userAddress,
         uint256 _amount
     ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) {
+        _requireFreezeRoles();
         ERC1410StorageWrapper.requireValidAddress(_userAddress);
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC3643StorageWrapper.freezeTokens(_userAddress, _amount);
@@ -79,6 +80,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
         address _userAddress,
         uint256 _amount
     ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) {
+        _requireFreezeRoles();
         ERC1410StorageWrapper.requireValidAddress(_userAddress);
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         ERC3643StorageWrapper.unfreezeTokens(_userAddress, _amount, 0);
@@ -97,6 +99,7 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
      * @param _freeze Array of freeze statuses
      */
     function batchSetAddressFrozen(address[] calldata _userAddresses, bool[] calldata _freeze) external onlyUnpaused {
+        _requireFreezeRoles();
         require(_userAddresses.length == _freeze.length, "Freeze: arrays length mismatch");
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
