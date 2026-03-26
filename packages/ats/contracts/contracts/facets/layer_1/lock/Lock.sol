@@ -12,6 +12,7 @@ import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { LockModifiers } from "../../../infrastructure/utils/LockModifiers.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
  * @title Lock
@@ -66,9 +67,16 @@ abstract contract Lock is
             _amount,
             _tokenHolder,
             _expirationTimestamp,
-            msg.sender
+            EvmAccessors.getMsgSender()
         );
-        emit LockedByPartition(msg.sender, _tokenHolder, _partition, lockId_, _amount, _expirationTimestamp);
+        emit LockedByPartition(
+            EvmAccessors.getMsgSender(),
+            _tokenHolder,
+            _partition,
+            lockId_,
+            _amount,
+            _expirationTimestamp
+        );
     }
 
     /**
@@ -98,8 +106,13 @@ abstract contract Lock is
         onlyWithLockedExpirationTimestamp(_partition, _tokenHolder, _lockId)
         returns (bool success_)
     {
-        success_ = LockStorageWrapper.releaseByPartition(_partition, _lockId, _tokenHolder, msg.sender);
-        emit LockByPartitionReleased(msg.sender, _tokenHolder, _partition, _lockId);
+        success_ = LockStorageWrapper.releaseByPartition(
+            _partition,
+            _lockId,
+            _tokenHolder,
+            EvmAccessors.getMsgSender()
+        );
+        emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _partition, _lockId);
     }
 
     /**
@@ -124,10 +137,15 @@ abstract contract Lock is
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _LOCKER_ROLE;
         roles[1] = _CONTROLLER_ROLE;
-        AccessControlStorageWrapper.checkAnyRole(roles, msg.sender);
+        AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        success_ = LockStorageWrapper.releaseByPartition(_partition, _lockId, _tokenHolder, msg.sender);
-        emit LockByPartitionReleased(msg.sender, _tokenHolder, _partition, _lockId);
+        success_ = LockStorageWrapper.releaseByPartition(
+            _partition,
+            _lockId,
+            _tokenHolder,
+            EvmAccessors.getMsgSender()
+        );
+        emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _partition, _lockId);
     }
 
     /**
@@ -140,6 +158,6 @@ abstract contract Lock is
         bytes32 _partition,
         uint256 _lockId
     ) external view virtual returns (LockData memory lockData_) {
-        lockData_ = LockStorageWrapper.getLock(_partition, msg.sender, _lockId);
+        lockData_ = LockStorageWrapper.getLock(_partition, EvmAccessors.getMsgSender(), _lockId);
     }
 }

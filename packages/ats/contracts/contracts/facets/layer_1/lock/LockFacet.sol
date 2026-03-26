@@ -7,6 +7,7 @@ import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol
 import { IStaticFunctionSelectors } from "../../../infrastructure/proxy/IStaticFunctionSelectors.sol";
 import { _LOCK_RESOLVER_KEY } from "../../../constants/resolverKeys.sol";
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
+import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 contract LockFacet is Lock, IStaticFunctionSelectors {
     // ========================================================================
@@ -23,7 +24,7 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
             _amount,
             _tokenHolder,
             _expirationTimestamp,
-            msg.sender
+            EvmAccessors.getMsgSender()
         );
     }
 
@@ -44,8 +45,13 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         onlyWithLockedExpirationTimestamp(_DEFAULT_PARTITION, _tokenHolder, _lockId)
         returns (bool success_)
     {
-        success_ = LockStorageWrapper.releaseByPartition(_DEFAULT_PARTITION, _lockId, _tokenHolder, msg.sender);
-        emit LockByPartitionReleased(msg.sender, _tokenHolder, _DEFAULT_PARTITION, _lockId);
+        success_ = LockStorageWrapper.releaseByPartition(
+            _DEFAULT_PARTITION,
+            _lockId,
+            _tokenHolder,
+            EvmAccessors.getMsgSender()
+        );
+        emit LockByPartitionReleased(EvmAccessors.getMsgSender(), _tokenHolder, _DEFAULT_PARTITION, _lockId);
     }
 
     // ========================================================================
@@ -56,7 +62,7 @@ contract LockFacet is Lock, IStaticFunctionSelectors {
         bytes32 _partition,
         uint256 _lockId
     ) external view override returns (LockData memory lockData_) {
-        lockData_ = LockStorageWrapper.getLock(_partition, msg.sender, _lockId);
+        lockData_ = LockStorageWrapper.getLock(_partition, EvmAccessors.getMsgSender(), _lockId);
     }
 
     function getLockedAmountForByPartition(
