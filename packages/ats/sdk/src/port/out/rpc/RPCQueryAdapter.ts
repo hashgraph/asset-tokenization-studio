@@ -64,6 +64,7 @@ import {
   KpiLinkedRate__factory,
   ScheduledCouponListingFacet__factory,
   NominalValue__factory,
+  VotingFacet__factory,
 } from "@hashgraph/asset-tokenization-contracts";
 import { ScheduledSnapshot } from "@domain/context/security/ScheduledSnapshot";
 import { VotingRights } from "@domain/context/equity/VotingRights";
@@ -428,7 +429,7 @@ export class RPCQueryAdapter {
   async getVotingFor(address: EvmAddress, target: EvmAddress, voting: number): Promise<VotingFor> {
     LogService.logTrace(`Getting voting for`);
 
-    const votingFor = await this.connect(Equity__factory, address.toString()).getVotingFor(voting, target.toString());
+    const votingFor = await this.connect(VotingFacet__factory, address.toString()).getVotingFor(voting, target.toString());
 
     return new VotingFor(new BigDecimal(votingFor.tokenBalance), Number(votingFor.decimals), votingFor.isDisabled);
   }
@@ -436,7 +437,7 @@ export class RPCQueryAdapter {
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
     LogService.logTrace(`Getting voting`);
 
-    const { registeredVoting_, isDisabled_ } = await this.connect(Equity__factory, address.toString()).getVoting(
+    const { registeredVoting_, isDisabled_ } = await this.connect(VotingFacet__factory, address.toString()).getVoting(
       voting,
     );
 
@@ -451,7 +452,7 @@ export class RPCQueryAdapter {
   async getVotingsCount(address: EvmAddress): Promise<number> {
     LogService.logTrace(`Getting votings count`);
 
-    const votingsCount = await this.connect(Equity__factory, address.toString()).getVotingCount();
+    const votingsCount = await this.connect(VotingFacet__factory, address.toString()).getVotingCount();
 
     return Number(votingsCount);
   }
@@ -1439,13 +1440,13 @@ export class RPCQueryAdapter {
 
   async getVotingHolders(address: EvmAddress, voteId: number, start: number, end: number): Promise<string[]> {
     LogService.logTrace(`Getting voting holders for vote ${voteId} for security ${address.toString()}`);
-    return await this.connect(Equity__factory, address.toString()).getVotingHolders(voteId, start, end);
+    return await this.connect(VotingFacet__factory, address.toString()).getVotingHolders(voteId, start, end);
   }
 
   async getTotalVotingHolders(address: EvmAddress, voteId: number): Promise<number> {
     LogService.logTrace(`Getting total voting holders for vote ${voteId} for security ${address.toString()}`);
 
-    const total = await this.connect(Equity__factory, address.toString()).getTotalVotingHolders(voteId);
+    const total = await this.connect(VotingFacet__factory, address.toString()).getTotalVotingHolders(voteId);
 
     return Number(total);
   }

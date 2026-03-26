@@ -83,6 +83,8 @@ import {
   HoldTokenHolderFacet__factory,
   ICoupon,
   IEquity,
+  IVoting,
+  VotingFacet__factory,
   KpiLinkedRate__factory,
   Kpis__factory,
   KycFacet__factory,
@@ -611,13 +613,13 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `equity: ${security} ,
       recordDate :${recordDate} , `,
     );
-    const votingStruct: IEquity.VotingStruct = {
+    const votingStruct: IVoting.VotingStruct = {
       recordDate: recordDate.toBigInt(),
       data: data,
     };
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      VotingFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "setVoting",
       [votingStruct],
       GAS.SET_VOTING_RIGHTS,
@@ -682,7 +684,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Cancelling voting: ${votingId} for equity: ${security}`);
 
     return this.executeTransaction(
-      Equity__factory.connect(security.toString(), this.getSignerOrProvider()),
+      VotingFacet__factory.connect(security.toString(), this.getSignerOrProvider()),
       "cancelVoting",
       [votingId],
       GAS.CANCEL_VOTING,
