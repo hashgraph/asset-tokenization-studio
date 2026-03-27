@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-27T15:35:43.489Z
+ * Generated: 2026-03-27T18:05:23.325Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -318,6 +318,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer) => new BondUSAFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSAFacetTimeTravel__factory(signer),
   },
@@ -366,6 +367,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer) => new BondUSAFixedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSAFixedRateFacetTimeTravel__factory(signer),
   },
@@ -414,6 +416,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer) => new BondUSAKpiLinkedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSAKpiLinkedRateFacetTimeTravel__factory(signer),
   },
@@ -838,6 +841,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
       { name: "s", signature: "s()", topic0: "0x86b714e2bcf834e812b3983ace300ed9ae7fd686d06f6014aaacc3da43d5982d" },
     ],
+    errors: [{ name: "InterestRateIsKpiLinked", signature: "InterestRateIsKpiLinked()", selector: "0x68eba14f" }],
     factory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacet__factory(signer),
     timeTravelFactory: (signer) => new BondUSASustainabilityPerformanceTargetRateFacetTimeTravel__factory(signer),
   },

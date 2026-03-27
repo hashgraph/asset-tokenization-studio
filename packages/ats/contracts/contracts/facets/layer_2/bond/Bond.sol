@@ -13,9 +13,12 @@ import { MaturityModifiers } from "../../../infrastructure/utils/MaturityModifie
 import { DateValidationModifiers } from "../../../infrastructure/utils/DateValidationModifiers.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
+import { InterestRateStorageWrapper } from "../../../domain/asset/InterestRateStorageWrapper.sol";
 import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
 import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
+
+error InterestRateIsKpiLinked();
 
 /**
  * @title Bond
@@ -175,6 +178,16 @@ abstract contract Bond is
     }
 
     function _prepareCoupon(IBondRead.Coupon calldata _newCoupon) internal virtual returns (IBondRead.Coupon memory) {
+        // For KPI-linked rate bonds, rate must be PENDING (0), rate must be 0, and rateDecimals must be 0
+        if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
+            if (
+                _newCoupon.rateStatus != IBondRead.RateCalculationStatus.PENDING ||
+                _newCoupon.rate != 0 ||
+                _newCoupon.rateDecimals != 0
+            ) {
+                revert InterestRateIsKpiLinked();
+            }
+        }
         return _newCoupon;
     }
 }
