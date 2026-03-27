@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-24T10:44:01.625Z
+ * Generated: 2026-03-27T07:39:25.297Z
  * Facets: 202
  * Infrastructure: 2
  *
@@ -10991,6 +10991,12 @@ export const INFRASTRUCTURE_CONTRACTS: Record<string, ContractDefinition> = {
         signature:
           "function deployEquity(((bool arePartitionsProtected, bool isMultiPartition, address resolver, (bytes32 key, uint256 version) resolverProxyConfiguration, (bytes32 role, address[] members)[] rbacs, bool isControllable, bool isWhiteList, uint256 maxSupply, (string name, string symbol, string isin, uint8 decimals) erc20MetadataInfo, bool clearingActive, bool internalKycActivated, address[] externalPauses, address[] externalControlLists, address[] externalKycLists, bool erc20VotesActivated, address compliance, address identityRegistry) security, (bool votingRight, bool informationRight, bool liquidationRight, bool subscriptionRight, bool conversionRight, bool redemptionRight, bool putRight, uint8 dividendRight, bytes3 currency, uint256 nominalValue, uint8 nominalValueDecimals) equityDetails) _equityData, (uint8 regulationType, uint8 regulationSubType, (bool countriesControlListType, string listOfCountries, string info) additionalSecurityData) _factoryRegulationData) returns (address equityAddress_)",
         selector: "0xfb3c59d8",
+      },
+      {
+        name: "deployProxy",
+        signature:
+          "function deployProxy(address _resolver, bytes32 _configKey, uint256 _version, (bytes32 role, address[] members)[] _rbacs) returns (address proxyAddress_)",
+        selector: "0x8d0672db",
       },
       {
         name: "getAppliedRegulationData",
