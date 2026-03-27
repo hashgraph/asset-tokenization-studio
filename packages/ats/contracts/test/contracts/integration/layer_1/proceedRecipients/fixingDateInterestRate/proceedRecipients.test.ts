@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
 import {
-  ProceedRecipientsKpiLinkedRateFacetTimeTravel,
+  type IAsset,
   ResolverProxy,
-  AccessControl,
+  ProceedRecipientsKpiLinkedRateFacetTimeTravel,
   ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel,
   TimeTravelFacet,
   CouponFacetTimeTravel,
@@ -23,8 +23,8 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
   let signer_A: HardhatEthersSigner;
 
   let diamond: ResolverProxy;
+  let asset: IAsset;
   let proceedRecipientsFacet: ProceedRecipientsKpiLinkedRateFacetTimeTravel;
-  let accessControlFacet: AccessControl;
   let couponKpiLinkedRateFacet: CouponFacetTimeTravel;
   let scheduledTasksFacet: ScheduledCrossOrderedTasksKpiLinkedRateFacetTimeTravel;
   let timeTravelFacet: TimeTravelFacet;
@@ -46,12 +46,13 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
     diamond = base.diamond;
     signer_A = base.deployer;
 
+    asset = await ethers.getContractAt("IAsset", diamond.target, signer_A);
+
     proceedRecipientsFacet = await ethers.getContractAt(
       "ProceedRecipientsKpiLinkedRateFacetTimeTravel",
       diamond.target,
       signer_A,
     );
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
     couponKpiLinkedRateFacet = await ethers.getContractAt(
       "CouponKpiLinkedRateFacetTimeTravel",
       diamond.target,
@@ -64,8 +65,8 @@ describe("Proceed Recipients fixing Date Interest RateTests", () => {
     );
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target);
 
-    await accessControlFacet.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
-    await accessControlFacet.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE, signer_A.address);
+    await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
   }
 
   beforeEach(async () => {

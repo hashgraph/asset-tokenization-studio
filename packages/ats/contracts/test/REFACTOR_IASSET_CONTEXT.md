@@ -63,7 +63,7 @@ await asset.otherMethod();
 
 ## File Status
 
-### DONE (24 files)
+### DONE (26 files)
 
 - [x] layer_1/accessControl/accessControl.test.ts
 - [x] layer_1/bond/bond.test.ts
@@ -73,8 +73,12 @@ await asset.otherMethod();
 - [x] layer_1/corporateActions/corporateActions.test.ts
 - [x] layer_1/ERC1400/ERC1643/erc1643.test.ts
 - [x] layer_1/ERC1400/ERC1644/erc1644.test.ts
+- [x] layer_1/ERC1400/ERC20/erc20.test.ts
 - [x] layer_1/ERC1400/ERC20Permit/erc20Permit.test.ts
 - [x] layer_1/ERC1400/ERC20Votes/erc20Votes.test.ts
+- [x] layer_1/ERC1400/ERC1594/erc1594.test.ts
+- [x] layer_1/externalControlLists/externalControlList.test.ts
+- [x] layer_1/externalKycLists/externalKycList.test.ts
 - [x] layer_1/externalPauses/externalPause.test.ts
 - [x] layer_1/interestRates/fixedRate/fixedRate.test.ts
 - [x] layer_1/interestRates/kpiLinkedRate/kpiLinkedRate.test.ts (pauseFacet replaced; kpiLinkedRateFacet kept — excluded from IAsset)
@@ -92,31 +96,24 @@ await asset.otherMethod();
 
 - [x] layer_1/kyc/kyc.test.ts — file is empty, no changes needed
 
-### IN PROGRESS (by background agents)
+### IN PROGRESS (by background agents, session 3)
 
-- [ ] layer_1/ERC1400/ERC1410/erc1410.test.ts (agent ab0ca8e460e8d85d7)
-- [ ] layer_1/ERC1400/ERC1594/erc1594.test.ts (agent ab0ca8e460e8d85d7)
-- [ ] layer_1/ERC3643/erc3643.test.ts (agent ab68a55cd7e4bf45c)
-- [ ] layer_1/externalControlLists/externalControlList.test.ts (agent ab68a55cd7e4bf45c)
-- [ ] layer_1/externalKycLists/externalKycList.test.ts (agent ab68a55cd7e4bf45c)
-
-### PENDING (19 files)
-
-- [ ] layer_1/adjustBalances/adjustBalances.test.ts
-- [ ] layer_1/bond/kpiLinkedRate/bondKpiLinkedRate.test.ts
-- [ ] layer_1/bond/sustainabilityPerformanceTargetRate/bondSustainabilityPerformanceTargetRate.test.ts
-- [ ] layer_1/clearing/clearing.test.ts
-- [ ] layer_1/coupon/coupon.test.ts
-- [ ] layer_1/equity/equity.test.ts
-- [ ] layer_1/ERC1400/ERC20/erc20.test.ts
-- [ ] layer_1/hold/hold.test.ts
-- [ ] layer_1/proceedRecipients/fixingDateInterestRate/proceedRecipients.test.ts
-- [ ] layer_1/protectedPartitions/protectedPartitions.test.ts
-- [ ] layer_1/scheduledTasks/scheduledBalanceAdjustments/scheduledBalanceAdjustments.test.ts
-- [ ] layer_1/scheduledTasks/scheduledCouponListing/scheduledCouponListing.test.ts
-- [ ] layer_1/scheduledTasks/scheduledSnapshots/scheduledSnapshots.test.ts
-- [ ] layer_1/scheduledTasks/scheduledTasks/scheduledTasks.test.ts
-- [ ] layer_1/snapshots/snapshots.test.ts
-- [ ] layer_1/totalBalance/totalBalance.test.ts
-- [ ] layer_1/transferAndLock/transferAndLock.test.ts
-- [ ] layer_2/nominalValue/nominalValueMigration.test.ts
+- [ ] layer_1/ERC1400/ERC1410/erc1410.test.ts (agent ab36949c7f65f85a3)
+- [ ] layer_1/ERC3643/erc3643.test.ts (agent a48dd7db515c73805)
+- [ ] layer_1/hold/hold.test.ts (agent a90110c65968792a6)
+- [ ] layer_1/clearing/clearing.test.ts (agent a2cfdc98fbf43e383)
+- [ ] layer_1/adjustBalances/adjustBalances.test.ts (agent a93959b58fa24cfdd)
+- [ ] layer_1/snapshots/snapshots.test.ts (agent a93959b58fa24cfdd)
+- [ ] layer_1/totalBalance/totalBalance.test.ts (agent a93959b58fa24cfdd)
+- [ ] layer_1/coupon/coupon.test.ts (agent a1731470f6463ecd1)
+- [ ] layer_1/equity/equity.test.ts (agent a1731470f6463ecd1)
+- [ ] layer_1/bond/kpiLinkedRate/bondKpiLinkedRate.test.ts (agent a1731470f6463ecd1)
+- [ ] layer_1/bond/sustainabilityPerformanceTargetRate/bondSustainabilityPerformanceTargetRate.test.ts (agent a1731470f6463ecd1)
+- [ ] layer_1/scheduledTasks/scheduledBalanceAdjustments/scheduledBalanceAdjustments.test.ts (agent a7449380bca5b7518)
+- [ ] layer_1/scheduledTasks/scheduledCouponListing/scheduledCouponListing.test.ts (agent a7449380bca5b7518)
+- [ ] layer_1/scheduledTasks/scheduledSnapshots/scheduledSnapshots.test.ts (agent a7449380bca5b7518)
+- [ ] layer_1/scheduledTasks/scheduledTasks/scheduledTasks.test.ts (agent a7449380bca5b7518)
+- [ ] layer_1/proceedRecipients/fixingDateInterestRate/proceedRecipients.test.ts (agent a7449380bca5b7518)
+- [ ] layer_1/transferAndLock/transferAndLock.test.ts (agent af01493b6fb44be9e)
+- [ ] layer_1/protectedPartitions/protectedPartitions.test.ts (agent af01493b6fb44be9e)
+- [ ] layer_2/nominalValue/nominalValueMigration.test.ts (agent af01493b6fb44be9e)

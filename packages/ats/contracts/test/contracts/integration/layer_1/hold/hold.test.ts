@@ -15,27 +15,7 @@ import {
   dateToUnixTimestamp,
   DEFAULT_PARTITION,
 } from "@scripts";
-import {
-  ResolverProxy,
-  PauseFacet,
-  IERC1410,
-  ControlListFacet,
-  ERC20Facet,
-  TimeTravelFacet,
-  KycFacet,
-  SsiManagementFacet,
-  ClearingActionsFacet,
-  Equity,
-  LockFacet,
-  SnapshotsFacet,
-  IERC3643,
-  ERC1644Facet,
-  AccessControlFacet,
-  AdjustBalancesFacet,
-  CapFacet,
-  DiamondFacet,
-} from "@contract-types";
-import { Contract } from "ethers";
+import { ResolverProxy, DiamondFacet, IAsset } from "@contract-types";
 
 const _DEFAULT_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000001";
 const _WRONG_PARTITION = "0x0000000000000000000000000000000000000000000000000000000000000321";
@@ -71,24 +51,9 @@ describe("Hold Tests", () => {
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
 
+  let asset: IAsset;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let holdFacet: any;
-  let pauseFacet: PauseFacet;
-  let lock: LockFacet;
-  let erc1410Facet: IERC1410;
-  let controlListFacet: ControlListFacet;
-  let erc20Facet: ERC20Facet;
-  let timeTravelFacet: TimeTravelFacet;
-  let kycFacet: KycFacet;
-  let ssiManagementFacet: SsiManagementFacet;
-  let clearingActionsFacet: ClearingActionsFacet;
-  let equityFacet: Equity;
-  let accessControlFacet: AccessControlFacet;
-  let capFacet: CapFacet;
-  let adjustBalancesFacet: AdjustBalancesFacet;
-  let snapshotFacet: SnapshotsFacet;
-  let erc3643Facet: IERC3643;
-  let erc1644Facet: ERC1644Facet;
   let diamondCutFacet: DiamondFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
@@ -171,34 +136,17 @@ describe("Hold Tests", () => {
 
     const uniqueFragments = Array.from(fragmentMap.values());
 
-    holdFacet = new Contract(diamond.target, uniqueFragments, signer_A);
+    holdFacet = new ethers.Contract(diamond.target, uniqueFragments, signer_A);
 
-    lock = await ethers.getContractAt("LockFacet", diamond.target, signer_A);
-    pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target, signer_D);
-    erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_B);
-    kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
-    ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("Equity", diamond.target, signer_A);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
-    adjustBalancesFacet = await ethers.getContractAt("AdjustBalancesFacet", diamond.target, signer_A);
-    clearingActionsFacet = await ethers.getContractAt("ClearingActionsFacet", diamond.target, signer_A);
-    snapshotFacet = await ethers.getContractAt("SnapshotsFacet", diamond.target);
-
-    capFacet = await ethers.getContractAt("CapFacet", diamond.target, signer_A);
-    accessControlFacet = await ethers.getContractAt("AccessControlFacet", diamond.target, signer_A);
-    erc20Facet = await ethers.getContractAt("ERC20Facet", diamond.target, signer_A);
-    controlListFacet = await ethers.getContractAt("ControlListFacet", diamond.target, signer_E);
-    erc3643Facet = await ethers.getContractAt("IERC3643", diamond.target, signer_A);
-    erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.target, signer_A);
     diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.target, signer_A);
 
     // Set the initial RBACs
-    await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
-    await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await kycFacet.grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
-    await kycFacet.grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_A).addIssuer(signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
+    await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
-    await erc1410Facet.issueByPartition({
+    await asset.connect(signer_B).issueByPartition({
       partition: _DEFAULT_PARTITION,
       tokenHolder: signer_A.address,
       value: _AMOUNT,
@@ -221,7 +169,8 @@ describe("Hold Tests", () => {
     signer_D = base.user3;
     signer_E = base.user4;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    await executeRbac(asset, set_initRbacs());
 
     await setFacets({ diamond });
   }
@@ -235,7 +184,8 @@ describe("Hold Tests", () => {
     signer_D = base.user3;
     signer_E = base.user4;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    await executeRbac(asset, set_initRbacs());
 
     await setFacets({ diamond });
   }
@@ -256,7 +206,7 @@ describe("Hold Tests", () => {
       holdThirdPartyType_expected: ThirdPartyType,
       holdThirdPartyAddress_expected: string,
     ) {
-      const balance = await erc1410Facet.balanceOf(signer_A.address);
+      const balance = await asset.balanceOf(signer_A.address);
       const heldAmount = await holdFacet.getHeldAmountForByPartition(_DEFAULT_PARTITION, signer_A.address);
       const holdCount = await holdFacet.getHoldCountForByPartition(_DEFAULT_PARTITION, signer_A.address);
       const holdIds = await holdFacet.getHoldsIdForByPartition(_DEFAULT_PARTITION, signer_A.address, 0, 100);
@@ -305,12 +255,12 @@ describe("Hold Tests", () => {
       it("GIVEN an account with snapshot role WHEN takeSnapshot and Hold THEN transaction succeeds", async () => {
         const EXPIRATION_TIMESTAMP = dateToUnixTimestamp(`2030-01-01T00:00:35Z`);
 
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._LOCKER_ROLE, signer_A.address);
 
         // snapshot
-        await snapshotFacet.connect(signer_A).takeSnapshot();
+        await asset.connect(signer_A).takeSnapshot();
 
         // Operations
         const hold = {
@@ -326,45 +276,45 @@ describe("Hold Tests", () => {
         await holdFacet.connect(signer_A).createHoldByPartition(_DEFAULT_PARTITION, hold);
 
         // snapshot
-        await snapshotFacet.connect(signer_A).takeSnapshot();
+        await asset.connect(signer_A).takeSnapshot();
 
         // Operations
         holdIdentifier.holdId = 1;
         await holdFacet.connect(signer_A).releaseHoldByPartition(holdIdentifier, 1);
         holdIdentifier.holdId = 2;
         await holdFacet.connect(signer_A).executeHoldByPartition(holdIdentifier, signer_B.address, 1);
-        await timeTravelFacet.changeSystemTimestamp(EXPIRATION_TIMESTAMP + 1);
+        await asset.connect(signer_A).changeSystemTimestamp(EXPIRATION_TIMESTAMP + 1);
         holdIdentifier.holdId = 3;
         await holdFacet.connect(signer_A).reclaimHoldByPartition(holdIdentifier);
 
         // snapshot
-        await snapshotFacet.connect(signer_A).takeSnapshot();
+        await asset.connect(signer_A).takeSnapshot();
 
         // checks
-        const snapshot_Balance_Of_A_1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_A.address);
-        const snapshot_Balance_Of_B_1 = await snapshotFacet.balanceOfAtSnapshot(1, signer_B.address);
-        const snapshot_HeldBalance_Of_A_1 = await snapshotFacet.heldBalanceOfAtSnapshot(1, signer_A.address);
-        const snapshot_Total_Supply_1 = await snapshotFacet.totalSupplyAtSnapshot(1);
+        const snapshot_Balance_Of_A_1 = await asset.balanceOfAtSnapshot(1, signer_A.address);
+        const snapshot_Balance_Of_B_1 = await asset.balanceOfAtSnapshot(1, signer_B.address);
+        const snapshot_HeldBalance_Of_A_1 = await asset.heldBalanceOfAtSnapshot(1, signer_A.address);
+        const snapshot_Total_Supply_1 = await asset.totalSupplyAtSnapshot(1);
 
         expect(snapshot_Balance_Of_A_1).to.equal(_AMOUNT);
         expect(snapshot_Balance_Of_B_1).to.equal(0);
         expect(snapshot_HeldBalance_Of_A_1).to.equal(0);
         expect(snapshot_Total_Supply_1).to.equal(_AMOUNT);
 
-        const snapshot_Balance_Of_A_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_A.address);
-        const snapshot_Balance_Of_B_2 = await snapshotFacet.balanceOfAtSnapshot(2, signer_B.address);
-        const snapshot_HeldBalance_Of_A_2 = await snapshotFacet.heldBalanceOfAtSnapshot(2, signer_A.address);
-        const snapshot_Total_Supply_2 = await snapshotFacet.totalSupplyAtSnapshot(2);
+        const snapshot_Balance_Of_A_2 = await asset.balanceOfAtSnapshot(2, signer_A.address);
+        const snapshot_Balance_Of_B_2 = await asset.balanceOfAtSnapshot(2, signer_B.address);
+        const snapshot_HeldBalance_Of_A_2 = await asset.heldBalanceOfAtSnapshot(2, signer_A.address);
+        const snapshot_Total_Supply_2 = await asset.totalSupplyAtSnapshot(2);
 
         expect(snapshot_Balance_Of_A_2).to.equal(_AMOUNT - 4);
         expect(snapshot_Balance_Of_B_2).to.equal(0);
         expect(snapshot_HeldBalance_Of_A_2).to.equal(4);
         expect(snapshot_Total_Supply_2).to.equal(_AMOUNT);
 
-        const snapshot_Balance_Of_A_3 = await snapshotFacet.balanceOfAtSnapshot(3, signer_A.address);
-        const snapshot_Balance_Of_B_3 = await snapshotFacet.balanceOfAtSnapshot(3, signer_B.address);
-        const snapshot_HeldBalance_Of_A_3 = await snapshotFacet.heldBalanceOfAtSnapshot(3, signer_A.address);
-        const snapshot_Total_Supply_3 = await snapshotFacet.totalSupplyAtSnapshot(3);
+        const snapshot_Balance_Of_A_3 = await asset.balanceOfAtSnapshot(3, signer_A.address);
+        const snapshot_Balance_Of_B_3 = await asset.balanceOfAtSnapshot(3, signer_B.address);
+        const snapshot_HeldBalance_Of_A_3 = await asset.heldBalanceOfAtSnapshot(3, signer_A.address);
+        const snapshot_Total_Supply_3 = await asset.totalSupplyAtSnapshot(3);
 
         expect(snapshot_Balance_Of_A_3).to.equal(_AMOUNT - 2);
         expect(snapshot_Balance_Of_B_3).to.equal(1);
@@ -376,13 +326,13 @@ describe("Hold Tests", () => {
     describe("Paused", () => {
       beforeEach(async () => {
         // Pausing the token
-        await pauseFacet.pause();
+        await asset.connect(signer_D).pause();
       });
 
       // Create
       it("GIVEN a paused Token WHEN createHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
         await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)).to.be.revertedWithCustomError(
-          pauseFacet,
+          asset,
           "TokenIsPaused",
         );
       });
@@ -390,32 +340,32 @@ describe("Hold Tests", () => {
       it("GIVEN a paused Token WHEN createHoldFromByPartition THEN transaction fails with TokenIsPaused", async () => {
         await expect(
           holdFacet.createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
       it("GIVEN a paused Token WHEN operatorCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
         await expect(
           holdFacet.operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
       it("GIVEN a paused Token WHEN controllerCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
         await expect(
           holdFacet.controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
       // Execute
       it("GIVEN a paused Token WHEN executeHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
         await expect(
           holdFacet.executeHoldByPartition(holdIdentifier, signer_C.address, 1),
-        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
       // Release
       it("GIVEN a paused Token WHEN releaseHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
         await expect(holdFacet.releaseHoldByPartition(holdIdentifier, 1)).to.be.revertedWithCustomError(
-          pauseFacet,
+          asset,
           "TokenIsPaused",
         );
       });
@@ -423,7 +373,7 @@ describe("Hold Tests", () => {
       // Reclaim
       it("GIVEN a paused Token WHEN reclaimHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
         await expect(holdFacet.reclaimHoldByPartition(holdIdentifier)).to.be.revertedWithCustomError(
-          pauseFacet,
+          asset,
           "TokenIsPaused",
         );
       });
@@ -431,17 +381,17 @@ describe("Hold Tests", () => {
 
     describe("Clearing active", () => {
       it("GIVEN a token in clearing mode THEN hold creation fails with ClearingIsActivated", async () => {
-        await clearingActionsFacet.activateClearing();
+        await asset.connect(signer_A).activateClearing();
         await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)).to.be.revertedWithCustomError(
-          holdFacet,
+          asset,
           "ClearingIsActivated",
         );
         await expect(
           holdFacet.createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "ClearingIsActivated");
+        ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
         await expect(
           holdFacet.operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "ClearingIsActivated");
+        ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
       });
     });
 
@@ -452,7 +402,7 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_D)
             .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(erc20Facet, "InsufficientAllowance");
+        ).to.be.revertedWithCustomError(asset, "InsufficientAllowance");
       });
 
       it("GIVEN an account without operator authorization WHEN operatorCreateHoldByPartition THEN transaction fails with Unauthorized", async () => {
@@ -460,7 +410,7 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "Unauthorized");
+        ).to.be.revertedWithCustomError(asset, "Unauthorized");
       });
 
       it("GIVEN an account without CONTROLLER role WHEN controllerCreateHoldByPartition THEN transaction fails with AccountHasNoRole", async () => {
@@ -468,7 +418,7 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "AccountHasNoRole");
+        ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
       });
     });
 
@@ -477,46 +427,46 @@ describe("Hold Tests", () => {
       it("GIVEN a blacklisted destination account WHEN executeHoldByPartition THEN transaction fails with AccountIsBlocked", async () => {
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
-        await controlListFacet.addToControlList(signer_C.address);
+        await asset.connect(signer_E).addToControlList(signer_C.address);
 
         await expect(
           holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, 1),
-        ).to.be.revertedWithCustomError(controlListFacet, "AccountIsBlocked");
+        ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
       });
 
       it("GIVEN a blacklisted origin account WHEN executeHoldByPartition THEN transaction fails with AccountIsBlocked", async () => {
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
-        await controlListFacet.addToControlList(signer_A.address);
+        await asset.connect(signer_E).addToControlList(signer_A.address);
 
         await expect(
           holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_B.address, 1),
-        ).to.be.revertedWithCustomError(controlListFacet, "AccountIsBlocked");
+        ).to.be.revertedWithCustomError(asset, "AccountIsBlocked");
       });
     });
 
     describe("KYC", () => {
       it("Given a non kyc account WHEN executeHoldByPartition THEN transaction fails with InvalidKycStatus", async () => {
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
-        await kycFacet.revokeKyc(signer_A.address);
+        await asset.connect(signer_B).revokeKyc(signer_A.address);
         await expect(
           holdFacet.connect(signer_A).executeHoldByPartition(holdIdentifier, signer_B.address, 1),
-        ).to.be.revertedWithCustomError(kycFacet, "InvalidKycStatus");
+        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
         await expect(
           holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_A.address, 1),
-        ).to.be.revertedWithCustomError(kycFacet, "InvalidKycStatus");
+        ).to.be.revertedWithCustomError(asset, "InvalidKycStatus");
       });
     });
 
     describe("Create with wrong input arguments", () => {
       it("Given a invalid _from address when createHoldFromByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
-        await erc20Facet.connect(signer_A).approve(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).approve(signer_B.address, _AMOUNT);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .createHoldFromByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
 
       it("Given a invalid _from address when operatorCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
@@ -531,7 +481,7 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
 
       it("Given token with partition protected WHEN operatorCreateHoldByPartition THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -545,10 +495,11 @@ describe("Hold Tests", () => {
         });
         await executeRbac(base.accessControlFacet, set_initRbacs());
         diamond = base.diamond;
+        asset = await ethers.getContractAt("IAsset", diamond.target);
         await setFacets({ diamond });
         const operatorData = "0xab56";
 
-        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
         await expect(
           holdFacet
             .connect(signer_B)
@@ -568,16 +519,16 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .controllerCreateHoldByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
       it("Given noControllable token when controllerCreateHoldByPartition THEN transaction fails with TokenIsNotControllable", async () => {
-        await erc1644Facet.finalizeControllable();
+        await asset.connect(signer_C).finalizeControllable();
 
         await expect(
           holdFacet
             .connect(signer_C)
             .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(erc1644Facet, "TokenIsNotControllable");
+        ).to.be.revertedWithCustomError(asset, "TokenIsNotControllable");
       });
       it("GIVEN a Token WHEN creating hold with amount bigger than balance THEN transaction fails with InsufficientBalance", async () => {
         const AmountLargerThanBalance = 1000 * _AMOUNT;
@@ -591,42 +542,42 @@ describe("Hold Tests", () => {
         };
 
         await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold_wrong)).to.be.revertedWithCustomError(
-          erc20Facet,
+          asset,
           "InsufficientBalance",
         );
 
-        await erc20Facet.connect(signer_A).approve(signer_B.address, AmountLargerThanBalance);
+        await asset.connect(signer_A).approve(signer_B.address, AmountLargerThanBalance);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(erc20Facet, "InsufficientBalance");
+        ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
 
-        await erc20Facet.connect(signer_A).decreaseAllowance(signer_B.address, AmountLargerThanBalance);
+        await asset.connect(signer_A).decreaseAllowance(signer_B.address, AmountLargerThanBalance);
 
-        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(erc20Facet, "InsufficientBalance");
+        ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
 
-        await erc1410Facet.connect(signer_A).revokeOperator(signer_B.address);
+        await asset.connect(signer_A).revokeOperator(signer_B.address);
 
         await expect(
           holdFacet
             .connect(signer_C)
             .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(erc20Facet, "InsufficientBalance");
+        ).to.be.revertedWithCustomError(asset, "InsufficientBalance");
       });
 
       it("GIVEN msg.sender recovering WHEN createHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+        await asset.connect(signer_A).recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
 
         await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)).to.be.revertedWithCustomError(
-          erc3643Facet,
+          asset,
           "WalletRecovered",
         );
       });
@@ -640,11 +591,11 @@ describe("Hold Tests", () => {
           data: _DATA,
         };
 
-        await erc3643Facet.recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
+        await asset.connect(signer_A).recoveryAddress(signer_C.address, signer_B.address, ADDRESS_ZERO);
 
         await expect(
           holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold_with_destination),
-        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
       it("GIVEN a Token WHEN createHoldByPartition passing empty escrow THEN transaction fails with ZeroAddressNotAllowed", async () => {
@@ -657,39 +608,39 @@ describe("Hold Tests", () => {
         };
 
         await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold_wrong)).to.be.revertedWithCustomError(
-          holdFacet,
+          asset,
           "ZeroAddressNotAllowed",
         );
 
-        await erc20Facet.connect(signer_A).approve(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).approve(signer_B.address, _AMOUNT);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
 
-        await erc20Facet.connect(signer_A).decreaseAllowance(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).decreaseAllowance(signer_B.address, _AMOUNT);
 
-        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
 
-        await erc1410Facet.connect(signer_A).revokeOperator(signer_B.address);
+        await asset.connect(signer_A).revokeOperator(signer_B.address);
 
         await expect(
           holdFacet
             .connect(signer_C)
             .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
 
       it("GIVEN a Token WHEN createHoldByPartition passing wrong expirationTimestamp THEN transaction fails with WrongExpirationTimestamp", async () => {
-        await timeTravelFacet.changeSystemTimestamp(currentTimestamp);
+        await asset.connect(signer_A).changeSystemTimestamp(currentTimestamp);
         const wrongExpirationTimestamp = currentTimestamp - 1;
 
         const hold_wrong = {
@@ -701,68 +652,68 @@ describe("Hold Tests", () => {
         };
 
         await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold_wrong)).to.be.revertedWithCustomError(
-          erc20Facet,
+          asset,
           "WrongExpirationTimestamp",
         );
 
-        await erc20Facet.connect(signer_A).approve(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).approve(signer_B.address, _AMOUNT);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(equityFacet, "WrongExpirationTimestamp");
+        ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
 
-        await erc20Facet.connect(signer_A).decreaseAllowance(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).decreaseAllowance(signer_B.address, _AMOUNT);
 
-        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(lock, "WrongExpirationTimestamp");
+        ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
 
-        await erc1410Facet.connect(signer_A).revokeOperator(signer_B.address);
+        await asset.connect(signer_A).revokeOperator(signer_B.address);
 
         await expect(
           holdFacet
             .connect(signer_C)
             .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold_wrong, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(lock, "WrongExpirationTimestamp");
+        ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
       });
 
       it("GIVEN a wrong partition WHEN creating hold THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
         await expect(holdFacet.createHoldByPartition(_WRONG_PARTITION, hold)).to.be.revertedWithCustomError(
-          erc1410Facet,
+          asset,
           "PartitionNotAllowedInSinglePartitionMode",
         );
 
-        await erc20Facet.connect(signer_A).approve(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).approve(signer_B.address, _AMOUNT);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .createHoldFromByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(erc1410Facet, "PartitionNotAllowedInSinglePartitionMode");
+        ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
 
-        await erc20Facet.connect(signer_A).decreaseAllowance(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).decreaseAllowance(signer_B.address, _AMOUNT);
 
-        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .operatorCreateHoldByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(erc1410Facet, "PartitionNotAllowedInSinglePartitionMode");
+        ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
 
-        await erc1410Facet.connect(signer_A).revokeOperator(signer_B.address);
+        await asset.connect(signer_A).revokeOperator(signer_B.address);
 
         await expect(
           holdFacet
             .connect(signer_C)
             .controllerCreateHoldByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-        ).to.be.revertedWithCustomError(erc1410Facet, "PartitionNotAllowedInSinglePartitionMode");
+        ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
       });
     });
 
@@ -792,14 +743,14 @@ describe("Hold Tests", () => {
 
       it("GIVEN a Token WHEN createHoldByPartition hold THEN transaction succeeds", async () => {
         await expect(holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold))
-          .to.emit(holdFacet, "HeldByPartition")
+          .to.emit(asset, "HeldByPartition")
           .withArgs(signer_A.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), EMPTY_HEX_BYTES);
 
         await checkCreatedHold(ThirdPartyType.NULL);
       });
 
       it("GIVEN a Token WHEN createHoldFromByPartition hold THEN transaction succeeds", async () => {
-        await erc20Facet.connect(signer_A).approve(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).approve(signer_B.address, _AMOUNT);
 
         const operatorData = EMPTY_HEX_BYTES;
 
@@ -808,7 +759,7 @@ describe("Hold Tests", () => {
             .connect(signer_B)
             .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, operatorData),
         )
-          .to.emit(holdFacet, "HeldFromByPartition")
+          .to.emit(asset, "HeldFromByPartition")
           .withArgs(signer_B.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), operatorData);
 
         await checkCreatedHold(ThirdPartyType.AUTHORIZED, signer_B.address, operatorData);
@@ -817,17 +768,17 @@ describe("Hold Tests", () => {
       it("GIVEN a Token WHEN operatorCreateHoldByPartition hold THEN transaction succeeds", async () => {
         const operatorData = "0xab56";
 
-        await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+        await asset.connect(signer_A).authorizeOperator(signer_B.address);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .operatorCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, operatorData),
         )
-          .to.emit(holdFacet, "OperatorHeldByPartition")
+          .to.emit(asset, "OperatorHeldByPartition")
           .withArgs(signer_B.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), operatorData);
 
-        await erc1410Facet.connect(signer_A).revokeOperator(signer_B.address);
+        await asset.connect(signer_A).revokeOperator(signer_B.address);
 
         await checkCreatedHold(ThirdPartyType.OPERATOR, ADDRESS_ZERO, operatorData);
       });
@@ -840,7 +791,7 @@ describe("Hold Tests", () => {
             .connect(signer_C)
             .controllerCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, hold, operatorData),
         )
-          .to.emit(holdFacet, "ControllerHeldByPartition")
+          .to.emit(asset, "ControllerHeldByPartition")
           .withArgs(signer_C.address, signer_A.address, _DEFAULT_PARTITION, 1, Object.values(hold), operatorData);
 
         await checkCreatedHold(ThirdPartyType.CONTROLLER, ADDRESS_ZERO, operatorData);
@@ -853,7 +804,7 @@ describe("Hold Tests", () => {
 
         await expect(
           holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, 1),
-        ).to.be.revertedWithCustomError(holdFacet, "WrongHoldId");
+        ).to.be.revertedWithCustomError(asset, "WrongHoldId");
       });
 
       it("GIVEN a wrong escrow id WHEN executeHoldByPartition THEN transaction fails with IsNotEscrow", async () => {
@@ -861,14 +812,14 @@ describe("Hold Tests", () => {
 
         await expect(
           holdFacet.connect(signer_C).executeHoldByPartition(holdIdentifier, signer_C.address, 1),
-        ).to.be.revertedWithCustomError(holdFacet, "IsNotEscrow");
+        ).to.be.revertedWithCustomError(asset, "IsNotEscrow");
       });
 
       it("GIVEN a wrong partition WHEN executeHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
         holdIdentifier.partition = _WRONG_PARTITION;
         await expect(
           holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, 1),
-        ).to.be.revertedWithCustomError(erc1410Facet, "PartitionNotAllowedInSinglePartitionMode");
+        ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
       });
 
       it("GIVEN a hold WHEN executeHoldByPartition for an amount larger than the total held amount THEN transaction fails with InsufficientHoldBalance", async () => {
@@ -876,7 +827,7 @@ describe("Hold Tests", () => {
 
         await expect(
           holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, 2 * _AMOUNT),
-        ).to.be.revertedWithCustomError(holdFacet, "InsufficientHoldBalance");
+        ).to.be.revertedWithCustomError(asset, "InsufficientHoldBalance");
       });
 
       it("GIVEN a hold WHEN executeHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached", async () => {
@@ -885,15 +836,15 @@ describe("Hold Tests", () => {
 
         hold.expirationTimestamp = finalDate - 1;
 
-        await timeTravelFacet.changeSystemTimestamp(initDate);
+        await asset.connect(signer_A).changeSystemTimestamp(initDate);
 
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
-        await timeTravelFacet.changeSystemTimestamp(finalDate);
+        await asset.connect(signer_A).changeSystemTimestamp(finalDate);
 
         await expect(
           holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, 1),
-        ).to.be.revertedWithCustomError(holdFacet, "HoldExpirationReached");
+        ).to.be.revertedWithCustomError(asset, "HoldExpirationReached");
       });
 
       it("GIVEN a hold with a destination WHEN executeHoldByPartition to another destination THEN transaction fails with InvalidDestinationAddress", async () => {
@@ -903,7 +854,7 @@ describe("Hold Tests", () => {
 
         await expect(
           holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, _AMOUNT),
-        ).to.be.revertedWithCustomError(holdFacet, "InvalidDestinationAddress");
+        ).to.be.revertedWithCustomError(asset, "InvalidDestinationAddress");
       });
     });
 
@@ -913,7 +864,7 @@ describe("Hold Tests", () => {
 
         await expect(
           holdFacet.connect(signer_B).releaseHoldByPartition(holdIdentifier, 1),
-        ).to.be.revertedWithCustomError(holdFacet, "WrongHoldId");
+        ).to.be.revertedWithCustomError(asset, "WrongHoldId");
       });
 
       it("GIVEN a wrong escrow WHEN releaseHoldByPartition THEN transaction fails with IsNotEscrow", async () => {
@@ -921,14 +872,14 @@ describe("Hold Tests", () => {
 
         await expect(
           holdFacet.connect(signer_C).releaseHoldByPartition(holdIdentifier, 1),
-        ).to.be.revertedWithCustomError(holdFacet, "IsNotEscrow");
+        ).to.be.revertedWithCustomError(asset, "IsNotEscrow");
       });
 
       it("GIVEN a wrong partition WHEN releaseHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
         holdIdentifier.partition = _WRONG_PARTITION;
         await expect(
           holdFacet.connect(signer_B).releaseHoldByPartition(holdIdentifier, 1),
-        ).to.be.revertedWithCustomError(erc1410Facet, "PartitionNotAllowedInSinglePartitionMode");
+        ).to.be.revertedWithCustomError(asset, "PartitionNotAllowedInSinglePartitionMode");
       });
 
       it("GIVEN a hold WHEN releaseHoldByPartition for an amount larger than the total held amount THEN transaction fails with InsufficientHoldBalance", async () => {
@@ -936,7 +887,7 @@ describe("Hold Tests", () => {
 
         await expect(
           holdFacet.connect(signer_B).releaseHoldByPartition(holdIdentifier, 2 * _AMOUNT),
-        ).to.be.revertedWithCustomError(holdFacet, "InsufficientHoldBalance");
+        ).to.be.revertedWithCustomError(asset, "InsufficientHoldBalance");
       });
 
       it("GIVEN hold WHEN releaseHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached", async () => {
@@ -945,15 +896,15 @@ describe("Hold Tests", () => {
 
         hold.expirationTimestamp = finalDate - 1;
 
-        await timeTravelFacet.changeSystemTimestamp(initDate);
+        await asset.connect(signer_A).changeSystemTimestamp(initDate);
 
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
-        await timeTravelFacet.changeSystemTimestamp(finalDate);
+        await asset.connect(signer_A).changeSystemTimestamp(finalDate);
 
         await expect(
           holdFacet.connect(signer_B).releaseHoldByPartition(holdIdentifier, 1),
-        ).to.be.revertedWithCustomError(holdFacet, "HoldExpirationReached");
+        ).to.be.revertedWithCustomError(asset, "HoldExpirationReached");
       });
     });
 
@@ -963,7 +914,7 @@ describe("Hold Tests", () => {
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
         await expect(holdFacet.reclaimHoldByPartition(holdIdentifier)).to.be.revertedWithCustomError(
-          holdFacet,
+          asset,
           "WrongHoldId",
         );
       });
@@ -971,7 +922,7 @@ describe("Hold Tests", () => {
       it("GIVEN a wrong partition WHEN reclaimHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode", async () => {
         holdIdentifier.partition = _WRONG_PARTITION;
         await expect(holdFacet.connect(signer_B).reclaimHoldByPartition(holdIdentifier)).to.be.revertedWithCustomError(
-          erc1410Facet,
+          asset,
           "PartitionNotAllowedInSinglePartitionMode",
         );
       });
@@ -980,7 +931,7 @@ describe("Hold Tests", () => {
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
         await expect(holdFacet.connect(signer_B).reclaimHoldByPartition(holdIdentifier)).to.be.revertedWithCustomError(
-          holdFacet,
+          asset,
           "HoldExpirationNotReached",
         );
       });
@@ -988,12 +939,12 @@ describe("Hold Tests", () => {
 
     describe("Execute OK", () => {
       it("GIVEN hold with no destination WHEN executeHoldByPartition THEN transaction succeeds", async () => {
-        const balance_before = await erc1410Facet.balanceOf(signer_C.address);
+        const balance_before = await asset.balanceOf(signer_C.address);
 
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
         await expect(holdFacet.connect(signer_B).executeHoldByPartition(holdIdentifier, signer_C.address, _AMOUNT))
-          .to.emit(holdFacet, "HoldByPartitionExecuted")
+          .to.emit(asset, "HoldByPartitionExecuted")
           .withArgs(signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT, signer_C.address);
 
         await checkCreatedHold_expected(
@@ -1012,7 +963,7 @@ describe("Hold Tests", () => {
           ADDRESS_ZERO,
         );
 
-        const balance_after = await erc1410Facet.balanceOf(signer_C.address);
+        const balance_after = await asset.balanceOf(signer_C.address);
 
         expect(balance_after).to.equal(balance_before + BigInt(_AMOUNT));
       });
@@ -1023,7 +974,7 @@ describe("Hold Tests", () => {
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
         await expect(holdFacet.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT))
-          .to.emit(holdFacet, "HoldByPartitionReleased")
+          .to.emit(asset, "HoldByPartitionReleased")
           .withArgs(signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT);
 
         await checkCreatedHold_expected(
@@ -1044,18 +995,18 @@ describe("Hold Tests", () => {
       });
 
       it("GIVEN a hold created by an approved user WHEN releaseHoldByPartition THEN allowance is restored", async () => {
-        await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
+        await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
         await holdFacet
           .connect(signer_B)
           .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES);
 
-        expect(await erc20Facet.allowance(signer_A.address, signer_B.address)).to.be.equal(ZERO);
+        expect(await asset.allowance(signer_A.address, signer_B.address)).to.be.equal(ZERO);
 
         await expect(holdFacet.connect(signer_B).releaseHoldByPartition(holdIdentifier, _AMOUNT))
-          .to.emit(erc20Facet, "Approval")
+          .to.emit(asset, "Approval")
           .withArgs(signer_A.address, signer_B.address, _AMOUNT);
 
-        expect(await erc20Facet.allowance(signer_A.address, signer_B.address)).to.be.equal(_AMOUNT);
+        expect(await asset.allowance(signer_A.address, signer_B.address)).to.be.equal(_AMOUNT);
       });
     });
 
@@ -1066,14 +1017,14 @@ describe("Hold Tests", () => {
 
         hold.expirationTimestamp = finalDate - 1;
 
-        await timeTravelFacet.changeSystemTimestamp(initDate);
+        await asset.connect(signer_A).changeSystemTimestamp(initDate);
 
         await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold);
 
-        await timeTravelFacet.changeSystemTimestamp(finalDate);
+        await asset.connect(signer_A).changeSystemTimestamp(finalDate);
 
         await expect(holdFacet.connect(signer_B).reclaimHoldByPartition(holdIdentifier))
-          .to.emit(holdFacet, "HoldByPartitionReclaimed")
+          .to.emit(asset, "HoldByPartitionReclaimed")
           .withArgs(signer_B.address, signer_A.address, _DEFAULT_PARTITION, 1, _AMOUNT);
 
         await checkCreatedHold_expected(
@@ -1095,20 +1046,20 @@ describe("Hold Tests", () => {
     });
 
     it("GIVEN a hold created by an approved user WHEN reclaimHoldByPartition THEN allowance is restored", async () => {
-      await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
+      await asset.connect(signer_A).increaseAllowance(signer_B.address, _AMOUNT);
       await holdFacet
         .connect(signer_B)
         .createHoldFromByPartition(_DEFAULT_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES);
 
-      expect(await erc20Facet.allowance(signer_A.address, signer_B.address)).to.be.equal(ZERO);
+      expect(await asset.allowance(signer_A.address, signer_B.address)).to.be.equal(ZERO);
 
-      await timeTravelFacet.changeSystemTimestamp(hold.expirationTimestamp + 1);
+      await asset.connect(signer_A).changeSystemTimestamp(hold.expirationTimestamp + 1);
 
       await expect(holdFacet.reclaimHoldByPartition(holdIdentifier))
-        .to.emit(erc20Facet, "Approval")
+        .to.emit(asset, "Approval")
         .withArgs(signer_A.address, signer_B.address, _AMOUNT);
 
-      expect(await erc20Facet.allowance(signer_A.address, signer_B.address)).to.be.equal(_AMOUNT);
+      expect(await asset.allowance(signer_A.address, signer_B.address)).to.be.equal(_AMOUNT);
     });
 
     describe("Protected Create Hold By Partition", () => {
@@ -1150,14 +1101,15 @@ describe("Hold Tests", () => {
         signer_D = base.user3;
         signer_E = base.user4;
 
-        await executeRbac(base.accessControlFacet, set_initRbacs());
+        asset = await ethers.getContractAt("IAsset", diamond.target);
+        await executeRbac(asset, set_initRbacs());
         await setFacets({ diamond });
       }
 
       beforeEach(async () => {
         await loadFixture(protectedEquityTokenFixture);
 
-        const name = (await erc20Facet.getERC20Metadata()).info.name;
+        const name = (await asset.getERC20Metadata()).info.name;
         const version = (await diamondCutFacet.getConfigInfo()).version_.toString();
         const chainId = await network.provider.send("eth_chainId");
 
@@ -1176,7 +1128,7 @@ describe("Hold Tests", () => {
       });
 
       it("GIVEN a paused Token WHEN protectedCreateHoldByPartition THEN transaction fails with TokenIsPaused", async () => {
-        await pauseFacet.pause();
+        await asset.connect(signer_D).pause();
 
         const message = {
           _partition: _DEFAULT_PARTITION,
@@ -1189,11 +1141,11 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
-        ).to.be.revertedWithCustomError(pauseFacet, "TokenIsPaused");
+        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
       it("GIVEN a token in clearing mode WHEN protectedCreateHoldByPartition THEN transaction fails with ClearingIsActivated", async () => {
-        await clearingActionsFacet.activateClearing();
+        await asset.connect(signer_A).activateClearing();
 
         const message = {
           _partition: _DEFAULT_PARTITION,
@@ -1206,7 +1158,7 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
-        ).to.be.revertedWithCustomError(holdFacet, "ClearingIsActivated");
+        ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
       });
 
       it("GIVEN a zero _from address WHEN protectedCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
@@ -1214,7 +1166,7 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, ADDRESS_ZERO, protectedHold, "0x1234"),
-        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
 
       it("GIVEN a zero escrow address WHEN protectedCreateHoldByPartition THEN transaction fails with ZeroAddressNotAllowed", async () => {
@@ -1224,27 +1176,27 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.revertedWithCustomError(holdFacet, "ZeroAddressNotAllowed");
+        ).to.be.revertedWithCustomError(asset, "ZeroAddressNotAllowed");
       });
 
       it("GIVEN a from user recovering WHEN protectedCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-        await erc3643Facet.recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
+        await asset.connect(signer_A).recoveryAddress(signer_A.address, signer_B.address, ADDRESS_ZERO);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
       it("GIVEN a hold user recovering WHEN protectedCreateHoldByPartition THEN transaction fails with WalletRecovered", async () => {
-        await erc3643Facet.recoveryAddress(protectedHold.hold.to, signer_B.address, ADDRESS_ZERO);
+        await asset.connect(signer_A).recoveryAddress(protectedHold.hold.to, signer_B.address, ADDRESS_ZERO);
 
         await expect(
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, "0x1234"),
-        ).to.be.revertedWithCustomError(erc3643Facet, "WalletRecovered");
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
       it("GIVEN a invalid timestamp WHEN protectedCreateHoldByPartition THEN transaction fails with WrongExpirationTimestamp", async () => {
@@ -1260,7 +1212,7 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
-        ).to.be.revertedWithCustomError(lock, "WrongExpirationTimestamp");
+        ).to.be.revertedWithCustomError(asset, "WrongExpirationTimestamp");
       });
 
       it("GIVEN an account without protected partition role WHEN protectedCreateHoldByPartition THEN transaction fails with AccountHasNoRole", async () => {
@@ -1275,7 +1227,7 @@ describe("Hold Tests", () => {
           holdFacet
             .connect(signer_C)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
-        ).to.be.revertedWithCustomError(accessControlFacet, "AccountHasNoRole");
+        ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
       });
 
       it("GIVEN valid parameters and signature WHEN protectedCreateHoldByPartition THEN transaction succeeds", async () => {
@@ -1291,7 +1243,7 @@ describe("Hold Tests", () => {
             .connect(signer_B)
             .protectedCreateHoldByPartition(_DEFAULT_PARTITION, signer_A.address, protectedHold, signature),
         )
-          .to.emit(holdFacet, "ProtectedHeldByPartition")
+          .to.emit(asset, "ProtectedHeldByPartition")
           .withArgs(
             signer_B.address,
             signer_A.address,
@@ -1386,6 +1338,7 @@ describe("Hold Tests", () => {
       });
       await executeRbac(base.accessControlFacet, set_initRbacs());
       diamond = base.diamond;
+      asset = await ethers.getContractAt("IAsset", diamond.target);
       await setFacets({ diamond });
 
       currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
@@ -1414,6 +1367,7 @@ describe("Hold Tests", () => {
       });
       await executeRbac(base.accessControlFacet, set_initRbacs());
       diamond = base.diamond;
+      asset = await ethers.getContractAt("IAsset", diamond.target);
       await setFacets({ diamond });
 
       currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
@@ -1435,57 +1389,57 @@ describe("Hold Tests", () => {
 
     it("GIVEN a Token WHEN createHoldByPartition for wrong partition THEN transaction fails with InvalidPartition", async () => {
       await expect(holdFacet.createHoldByPartition(_WRONG_PARTITION, hold)).to.be.revertedWithCustomError(
-        erc1410Facet,
+        asset,
         "InvalidPartition",
       );
 
-      await erc1410Facet.connect(signer_A).authorizeOperator(signer_B.address);
+      await asset.connect(signer_A).authorizeOperator(signer_B.address);
 
       await expect(
         holdFacet
           .connect(signer_B)
           .operatorCreateHoldByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-      ).to.be.revertedWithCustomError(erc1410Facet, "InvalidPartition");
+      ).to.be.revertedWithCustomError(asset, "InvalidPartition");
 
-      await erc1410Facet.connect(signer_A).revokeOperator(signer_B.address);
+      await asset.connect(signer_A).revokeOperator(signer_B.address);
 
       await expect(
         holdFacet
           .connect(signer_C)
           .controllerCreateHoldByPartition(_WRONG_PARTITION, signer_A.address, hold, EMPTY_HEX_BYTES),
-      ).to.be.revertedWithCustomError(erc1410Facet, "InvalidPartition");
+      ).to.be.revertedWithCustomError(asset, "InvalidPartition");
     });
 
     describe("Adjust balances", () => {
       async function setPreBalanceAdjustment() {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address);
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_A.address);
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._ADJUSTMENT_BALANCE_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._CAP_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
 
-        await capFacet.connect(signer_A).setMaxSupply(maxSupply_Original);
-        await capFacet.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply_Partition_1_Original);
-        await capFacet.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_2, maxSupply_Partition_2_Original);
+        await asset.connect(signer_A).setMaxSupply(maxSupply_Original);
+        await asset.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply_Partition_1_Original);
+        await asset.connect(signer_A).setMaxSupplyByPartition(_PARTITION_ID_2, maxSupply_Partition_2_Original);
 
-        await erc1410Facet.connect(signer_A).issueByPartition({
+        await asset.connect(signer_A).issueByPartition({
           partition: _PARTITION_ID_1,
           tokenHolder: signer_A.address,
           value: balanceOf_A_Original[0],
           data: EMPTY_HEX_BYTES,
         });
-        await erc1410Facet.connect(signer_A).issueByPartition({
+        await asset.connect(signer_A).issueByPartition({
           partition: _PARTITION_ID_2,
           tokenHolder: signer_A.address,
           value: balanceOf_A_Original[1],
           data: EMPTY_HEX_BYTES,
         });
-        await erc1410Facet.connect(signer_A).issueByPartition({
+        await asset.connect(signer_A).issueByPartition({
           partition: _PARTITION_ID_1,
           tokenHolder: signer_B.address,
           value: balanceOf_B_Original[0],
           data: EMPTY_HEX_BYTES,
         });
-        await erc1410Facet.connect(signer_A).issueByPartition({
+        await asset.connect(signer_A).issueByPartition({
           partition: _PARTITION_ID_2,
           tokenHolder: signer_B.address,
           value: balanceOf_B_Original[1],
@@ -1496,8 +1450,8 @@ describe("Hold Tests", () => {
       it("GIVEN a hold WHEN adjustBalances THEN hold amount gets updated succeeds", async () => {
         await setPreBalanceAdjustment();
 
-        const balance_Before = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
+        const balance_Before = await asset.balanceOf(signer_A.address);
+        const balance_Before_Partition_1 = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD
         const hold = {
@@ -1518,7 +1472,7 @@ describe("Hold Tests", () => {
         const hold_Before = await holdFacet.getHoldForByPartition(holdIdentifier);
 
         // adjustBalances
-        await adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
+        await asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
 
         // scheduled two balance updates
 
@@ -1533,11 +1487,11 @@ describe("Hold Tests", () => {
           factor: adjustFactor,
           decimals: adjustDecimals,
         };
-        await equityFacet.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
-        await equityFacet.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData_2);
+        await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData);
+        await asset.connect(signer_B).setScheduledBalanceAdjustment(balanceAdjustmentData_2);
 
         // wait for first scheduled balance adjustment only
-        await timeTravelFacet.changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:00:03Z"));
+        await asset.connect(signer_A).changeSystemTimestamp(dateToUnixTimestamp("2030-01-01T00:00:03Z"));
 
         const hold_TotalAmount_After = await holdFacet.getHeldAmountFor(signer_A.address);
         const hold_TotalAmount_After_Partition_1 = await holdFacet.getHeldAmountForByPartition(
@@ -1545,8 +1499,8 @@ describe("Hold Tests", () => {
           signer_A.address,
         );
         const hold_After = await holdFacet.getHoldForByPartition(holdIdentifier);
-        const balance_After = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_After_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
+        const balance_After = await asset.balanceOf(signer_A.address);
+        const balance_After_Partition_1 = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         expect(hold_TotalAmount_After).to.be.equal(hold_TotalAmount_Before * BigInt(adjustFactor * adjustFactor));
         expect(hold_TotalAmount_After_Partition_1).to.be.equal(
@@ -1562,10 +1516,10 @@ describe("Hold Tests", () => {
 
       it("GIVEN a hold WHEN adjustBalances THEN execute succeed", async () => {
         await setPreBalanceAdjustment();
-        const balance_Before_A = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_Before_Partition_1_A = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
-        const balance_Before_C = await erc1410Facet.balanceOf(signer_C.address);
-        const balance_Before_Partition_1_C = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_C.address);
+        const balance_Before_A = await asset.balanceOf(signer_A.address);
+        const balance_Before_Partition_1_A = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
+        const balance_Before_C = await asset.balanceOf(signer_C.address);
+        const balance_Before_Partition_1_C = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_C.address);
 
         // HOLD TWICE
         const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
@@ -1590,23 +1544,17 @@ describe("Hold Tests", () => {
         );
 
         // adjustBalances
-        await adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
+        await asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
 
         // EXECUTE HOLD
         await holdFacet
           .connect(signer_B)
           .executeHoldByPartition(holdIdentifier, signer_C.address, hold.amount * adjustFactor);
 
-        const balance_After_Execute_A = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_After_Execute_Partition_1_A = await erc1410Facet.balanceOfByPartition(
-          _PARTITION_ID_1,
-          signer_A.address,
-        );
-        const balance_After_Execute_C = await erc1410Facet.balanceOf(signer_C.address);
-        const balance_After_Execute_Partition_1_C = await erc1410Facet.balanceOfByPartition(
-          _PARTITION_ID_1,
-          signer_C.address,
-        );
+        const balance_After_Execute_A = await asset.balanceOf(signer_A.address);
+        const balance_After_Execute_Partition_1_A = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
+        const balance_After_Execute_C = await asset.balanceOf(signer_C.address);
+        const balance_After_Execute_Partition_1_C = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_C.address);
         const held_Amount_After = await holdFacet.getHeldAmountFor(signer_A.address);
         const held_Amount_After_Partition_1 = await holdFacet.getHeldAmountForByPartition(
           _PARTITION_ID_1,
@@ -1637,8 +1585,8 @@ describe("Hold Tests", () => {
 
       it("GIVEN a hold WHEN adjustBalances THEN release succeed", async () => {
         await setPreBalanceAdjustment();
-        const balance_Before = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
+        const balance_Before = await asset.balanceOf(signer_A.address);
+        const balance_Before_Partition_1 = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD TWICE
         const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
@@ -1663,16 +1611,13 @@ describe("Hold Tests", () => {
         );
 
         // adjustBalances
-        await adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
+        await asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
 
         // RELEASE HOLD
         await holdFacet.connect(signer_B).releaseHoldByPartition(holdIdentifier, hold.amount * adjustFactor);
 
-        const balance_After_Release = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_After_Release_Partition_1 = await erc1410Facet.balanceOfByPartition(
-          _PARTITION_ID_1,
-          signer_A.address,
-        );
+        const balance_After_Release = await asset.balanceOf(signer_A.address);
+        const balance_After_Release_Partition_1 = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
         const held_Amount_After = await holdFacet.getHeldAmountFor(signer_A.address);
         const held_Amount_After_Partition_1 = await holdFacet.getHeldAmountForByPartition(
           _PARTITION_ID_1,
@@ -1695,8 +1640,8 @@ describe("Hold Tests", () => {
 
       it("GIVEN a hold WHEN adjustBalances THEN reclaim succeed", async () => {
         await setPreBalanceAdjustment();
-        const balance_Before = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
+        const balance_Before = await asset.balanceOf(signer_A.address);
+        const balance_Before_Partition_1 = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD TWICE
         const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
@@ -1721,19 +1666,16 @@ describe("Hold Tests", () => {
         );
 
         // adjustBalances
-        await adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
+        await asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
 
         // RECLAIM HOLD
-        await timeTravelFacet.changeSystemTimestamp(
-          (await ethers.provider.getBlock("latest"))!.timestamp + 2 * ONE_SECOND,
-        );
+        await asset
+          .connect(signer_A)
+          .changeSystemTimestamp((await ethers.provider.getBlock("latest"))!.timestamp + 2 * ONE_SECOND);
         await holdFacet.connect(signer_B).reclaimHoldByPartition(holdIdentifier);
 
-        const balance_After_Release = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_After_Release_Partition_1 = await erc1410Facet.balanceOfByPartition(
-          _PARTITION_ID_1,
-          signer_A.address,
-        );
+        const balance_After_Release = await asset.balanceOf(signer_A.address);
+        const balance_After_Release_Partition_1 = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
         const held_Amount_After = await holdFacet.getHeldAmountFor(signer_A.address);
         const held_Amount_After_Partition_1 = await holdFacet.getHeldAmountForByPartition(
           _PARTITION_ID_1,
@@ -1756,8 +1698,8 @@ describe("Hold Tests", () => {
 
       it("GIVEN a hold WHEN adjustBalances THEN hold succeeds", async () => {
         await setPreBalanceAdjustment();
-        const balance_Before = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
+        const balance_Before = await asset.balanceOf(signer_A.address);
+        const balance_Before_Partition_1 = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
         // HOLD BEFORE BALANCE ADJUSTMENT
         const currentTimestamp = (await ethers.provider.getBlock("latest"))!.timestamp;
@@ -1779,16 +1721,13 @@ describe("Hold Tests", () => {
         );
 
         // adjustBalances
-        await adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
+        await asset.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
 
         // HOLD AFTER BALANCE ADJUSTMENT
         await holdFacet.connect(signer_A).createHoldByPartition(_PARTITION_ID_1, hold);
 
-        const balance_After_Hold = await erc1410Facet.balanceOf(signer_A.address);
-        const balance_After_Hold_Partition_1 = await erc1410Facet.balanceOfByPartition(
-          _PARTITION_ID_1,
-          signer_A.address,
-        );
+        const balance_After_Hold = await asset.balanceOf(signer_A.address);
+        const balance_After_Hold_Partition_1 = await asset.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
         const held_Amount_After = await holdFacet.getHeldAmountFor(signer_A.address);
         const held_Amount_After_Partition_1 = await holdFacet.getHeldAmountForByPartition(
           _PARTITION_ID_1,
