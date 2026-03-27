@@ -443,12 +443,12 @@ describe("ExternalControlList Management Tests", () => {
         data: "0x",
       };
       await expect(erc1410Facet.issueByPartition(issueBody)).to.be.revertedWithCustomError(
-        controlList,
+        externalControlListManagement,
         "AccountIsBlocked",
       );
       await initMock1.addToWhitelist(issueBody.tokenHolder);
       await expect(erc1410Facet.issueByPartition(issueBody)).to.be.revertedWithCustomError(
-        controlList,
+        externalControlListManagement,
         "AccountIsBlocked",
       );
     });

@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { IERC20Votes } from "./IERC20Votes.sol";
-import { IERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20Votes/IERC20VotesStorageWrapper.sol";
 import { Checkpoints } from "../../../../infrastructure/utils/Checkpoints.sol";
 import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
 import { ERC20VotesStorageWrapper } from "../../../../domain/asset/ERC20VotesStorageWrapper.sol";

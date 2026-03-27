@@ -3057,6 +3057,13 @@ describe("Clearing Tests", () => {
         const balance_Before = await erc1410Facet.balanceOf(signer_A.address);
         const balance_Before_Partition_1 = await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, signer_A.address);
 
+        console.log("=== INITIAL STATE ===");
+        console.log("balance_Before:", balance_Before.toString());
+        console.log("balance_Before_Partition_1:", balance_Before_Partition_1.toString());
+        console.log("_AMOUNT:", _AMOUNT.toString());
+        console.log("adjustFactor:", adjustFactor);
+        console.log("adjustDecimals:", adjustDecimals);
+
         // CLEARING BEFORE BALANCE ADJUSTMENT
         // CLEARING TRANSFER
         clearingOperation.partition = _PARTITION_ID_1;
@@ -3070,11 +3077,21 @@ describe("Clearing Tests", () => {
         await clearingFacet
           .connect(signer_B)
           .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
+
+        const balance_After_Transfers_Before = await erc1410Facet.balanceOf(signer_A.address);
+        console.log("=== AFTER 3 TRANSFERS (BEFORE adjust) ===");
+        console.log("balance:", balance_After_Transfers_Before.toString());
+
         // CLEARING CREATE HOLD
         await clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold);
         await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
         await clearingFacet.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
         await clearingFacet.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold);
+
+        const balance_After_Holds_Before = await erc1410Facet.balanceOf(signer_A.address);
+        console.log("=== AFTER 3 HOLDS (BEFORE adjust) ===");
+        console.log("balance:", balance_After_Holds_Before.toString());
+
         // CLEARING REDEEM
         await clearingFacet.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
         await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
@@ -3086,9 +3103,24 @@ describe("Clearing Tests", () => {
           _PARTITION_ID_1,
           signer_A.address,
         );
+        const balance_After_Clearings_Before = await erc1410Facet.balanceOf(signer_A.address);
+
+        console.log("=== AFTER ALL CLEARINGS (BEFORE adjust) ===");
+        console.log("balance:", balance_After_Clearings_Before.toString());
+        console.log("cleared_Amount_Before:", cleared_Amount_Before.toString());
+        console.log("cleared_Amount_Before_Partition_1:", cleared_Amount_Before_Partition_1.toString());
+        console.log("Expected cleared (9 * _AMOUNT):", (9n * BigInt(_AMOUNT)).toString());
 
         // adjustBalances
         await adjustBalancesFacet.connect(signer_C).adjustBalances(adjustFactor, adjustDecimals);
+
+        const balance_After_Adjust = await erc1410Facet.balanceOf(signer_A.address);
+        console.log("=== AFTER adjustBalances ===");
+        console.log("balance after adjust:", balance_After_Adjust.toString());
+        console.log(
+          "Expected balance after adjust:",
+          ((balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor)).toString(),
+        );
 
         // CLEARING AFTER BALANCE ADJUSTMENT
         // CLEARING TRANSFER
@@ -3102,11 +3134,29 @@ describe("Clearing Tests", () => {
         await clearingFacet
           .connect(signer_B)
           .operatorClearingTransferByPartition(clearingOperationFrom, _AMOUNT, signer_C.address);
+
+        const balance_After_Transfers_After = await erc1410Facet.balanceOf(signer_A.address);
+        console.log("=== AFTER 3 TRANSFERS (AFTER adjust) ===");
+        console.log("balance:", balance_After_Transfers_After.toString());
+        console.log(
+          "Expected:",
+          ((balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor) - BigInt(3 * _AMOUNT)).toString(),
+        );
+
         // CLEARING CREATE HOLD
         await clearingFacet.connect(signer_A).clearingCreateHoldByPartition(clearingOperation, hold);
         await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
         await clearingFacet.connect(signer_B).clearingCreateHoldFromByPartition(clearingOperationFrom, hold);
         await clearingFacet.connect(signer_B).operatorClearingCreateHoldByPartition(clearingOperationFrom, hold);
+
+        const balance_After_Holds_After = await erc1410Facet.balanceOf(signer_A.address);
+        console.log("=== AFTER 3 HOLDS (AFTER adjust) ===");
+        console.log("balance:", balance_After_Holds_After.toString());
+        console.log(
+          "Expected:",
+          ((balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor) - BigInt(6 * _AMOUNT)).toString(),
+        );
+
         // CLEARING REDEEM
         await clearingFacet.connect(signer_A).clearingRedeemByPartition(clearingOperation, _AMOUNT);
         await erc20Facet.increaseAllowance(signer_B.address, _AMOUNT);
@@ -3122,6 +3172,30 @@ describe("Clearing Tests", () => {
         const cleared_Amount_After_Partition_1 = await clearingFacet.getClearedAmountForByPartition(
           _PARTITION_ID_1,
           signer_A.address,
+        );
+
+        console.log("=== FINAL STATE ===");
+        console.log("balance_After_Clearing:", balance_After_Clearing.toString());
+        console.log("cleared_Amount_After:", cleared_Amount_After.toString());
+        console.log("balance + cleared:", (balance_After_Clearing + cleared_Amount_After).toString());
+        console.log("");
+        console.log("=== EXPECTATIONS ===");
+        console.log(
+          "Expected balance:",
+          ((balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor) - BigInt(9 * _AMOUNT)).toString(),
+        );
+        console.log(
+          "Expected cleared:",
+          (cleared_Amount_Before * BigInt(adjustFactor) + BigInt(9 * _AMOUNT)).toString(),
+        );
+        console.log("Expected balance + cleared:", (balance_Before * BigInt(adjustFactor)).toString());
+        console.log("");
+        console.log(
+          "Diff balance:",
+          (
+            balance_After_Clearing -
+            ((balance_Before - BigInt(9 * _AMOUNT)) * BigInt(adjustFactor) - BigInt(9 * _AMOUNT))
+          ).toString(),
         );
 
         expect(balance_After_Clearing).to.be.equal(

@@ -8,7 +8,6 @@ import {
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from "../../../constants/values.sol";
 import { IEquity } from "./IEquity.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";

@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _CONTROLLER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 import { BasicTransferInfo, OperatorTransferData } from "./IERC1410.sol";
 import { IERC1410Management } from "./IERC1410Management.sol";
-import { IERC1410StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1410/IERC1410StorageWrapper.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";

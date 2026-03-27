@@ -3,9 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IClearingActions } from "./IClearingActions.sol";
 import { IClearing } from "./IClearing.sol";
-import { IClearingStorageWrapper } from "../../../domain/asset/clearing/IClearingStorageWrapper.sol";
 import { _CLEARING_VALIDATOR_ROLE, _CLEARING_ROLE } from "../../../constants/roles.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -14,9 +12,16 @@ import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWra
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
+import { PartitionValidationModifiers } from "../../../infrastructure/utils/PartitionValidationModifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ClearingActions is IClearingActions, AccessControlModifiers, PauseModifiers, ClearingModifiers {
+abstract contract ClearingActions is
+    IClearingActions,
+    AccessControlModifiers,
+    PauseModifiers,
+    ClearingModifiers,
+    PartitionValidationModifiers
+{
     function initializeClearing(bool _clearingActive) external {
         _checkNotInitialized(ClearingStorageWrapper.isClearingInitialized());
         ClearingStorageWrapper.initializeClearing(_clearingActive);
@@ -84,9 +89,14 @@ abstract contract ClearingActions is IClearingActions, AccessControlModifiers, P
 
     function reclaimClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    ) external override onlyUnpaused onlyWithValidClearingId(_clearingOperationIdentifier) returns (bool success_) {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
-        ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition)
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        returns (bool success_)
+    {
         ERC1594StorageWrapper.requireIdentified(_clearingOperationIdentifier.tokenHolder, address(0));
         ClearingStorageWrapper.requireClearingActivated();
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, true);

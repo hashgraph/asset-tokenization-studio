@@ -10,7 +10,6 @@ import {
     ISustainabilityPerformanceTargetRate
 } from "../../facets/layer_2/interestRate/sustainabilityPerformanceTargetRate/ISustainabilityPerformanceTargetRate.sol";
 /* solhint-enable max-line-length */
-import { IInterestRateStorageWrapper } from "./interestRate/IInterestRateStorageWrapper.sol";
 
 // --- Storage structs ---
 

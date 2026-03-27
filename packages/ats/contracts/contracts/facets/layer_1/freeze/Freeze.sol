@@ -6,7 +6,6 @@ import { _FREEZE_MANAGER_ROLE, _AGENT_ROLE } from "../../../constants/roles.sol"
 import { _DEFAULT_PARTITION } from "../../../constants/values.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { ExternalListManagementStorageWrapper } from "../../../domain/core/ExternalListManagementStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";

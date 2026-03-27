@@ -3,7 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ISnapshots, HolderBalance } from "./ISnapshots.sol";
 import { _SNAPSHOT_ROLE } from "../../../constants/roles.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { SnapshotsStorageWrapper } from "../../../domain/asset/SnapshotsStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";

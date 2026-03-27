@@ -13,7 +13,6 @@ import { ERC3643StorageWrapper } from "../../../../domain/core/ERC3643StorageWra
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC20StorageWrapper } from "../../../../domain/asset/ERC20StorageWrapper.sol";
-import { IERC20StorageWrapper } from "../../../../domain/asset/ERC1400/ERC20/IERC20StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { _checkNotInitialized } from "../../../../services/InitializationErrors.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";

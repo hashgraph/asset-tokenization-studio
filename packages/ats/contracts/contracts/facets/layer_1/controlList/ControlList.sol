@@ -3,10 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IControlList } from "./IControlList.sol";
 import { _CONTROL_LIST_ROLE } from "../../../constants/roles.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { ControlListStorageWrapper } from "../../../domain/core/ControlListStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import { IControlListStorageWrapper } from "../../../domain/core/controlList/IControlListStorageWrapper.sol";
 abstract contract ControlList is IControlList, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initializeControlList(bool _isWhiteList) external override onlyNotControlListInitialized {

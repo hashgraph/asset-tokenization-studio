@@ -3,9 +3,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _CLEARING_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
-import { IClearingStorageWrapper } from "./clearing/IClearingStorageWrapper.sol";
-import { IERC1410StorageWrapper } from "./ERC1400/ERC1410/IERC1410StorageWrapper.sol";
-import { IERC20StorageWrapper } from "./ERC1400/ERC20/IERC20StorageWrapper.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";

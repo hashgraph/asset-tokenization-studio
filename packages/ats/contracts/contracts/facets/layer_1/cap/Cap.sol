@@ -2,9 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap } from "./ICap.sol";
-import { ICapStorageWrapper } from "../../../domain/asset/cap/ICapStorageWrapper.sol";
 import { _CAP_ROLE } from "../../../constants/roles.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";

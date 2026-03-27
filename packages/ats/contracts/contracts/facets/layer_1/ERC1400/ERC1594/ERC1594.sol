@@ -4,7 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _ISSUER_ROLE, _AGENT_ROLE, _WILD_CARD_ROLE } from "../../../../constants/roles.sol";
 import { _DEFAULT_PARTITION } from "../../../../constants/values.sol";
 import { IERC1594 } from "./IERC1594.sol";
-import { IERC1594StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1594/IERC1594StorageWrapper.sol";
 import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";

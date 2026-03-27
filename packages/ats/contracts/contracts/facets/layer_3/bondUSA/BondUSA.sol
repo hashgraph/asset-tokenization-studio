@@ -8,7 +8,6 @@ import { RegulationData, AdditionalSecurityData } from "../../../constants/regul
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { SecurityStorageWrapper } from "../../../domain/asset/SecurityStorageWrapper.sol";
 import { BondModifiers } from "../../../services/asset/BondModifiers.sol";
-import { IBondStorageWrapper } from "../../../domain/asset/bond/IBondStorageWrapper.sol";
 
 abstract contract BondUSA is IBondUSA, Bond, BondModifiers {
     // solhint-disable func-name-mixedcase

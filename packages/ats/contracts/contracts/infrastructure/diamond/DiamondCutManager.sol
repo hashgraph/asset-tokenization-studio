@@ -6,8 +6,6 @@ import { Pause } from "../../facets/layer_1/pause/Pause.sol";
 import { AccessControl } from "../../facets/layer_1/accessControl/AccessControl.sol";
 import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
 import { IDiamondLoupe } from "../proxy/IDiamondLoupe.sol";
-import { AccessControlStorageWrapper } from "../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../domain/core/PauseModifiers.sol";
 
 abstract contract DiamondCutManager is AccessControl, Pause, DiamondCutManagerWrapper {
     modifier validateConfigurationId(bytes32 _configurationId) {

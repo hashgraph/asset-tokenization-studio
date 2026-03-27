@@ -442,8 +442,32 @@ library ClearingOps {
         bytes32 partition = _clearingOperationIdentifier.partition;
         address _from = _clearingOperationIdentifier.tokenHolder;
 
-        ClearingStorageWrapper.multiplyTotalClearedAmount(_from, _amount);
-        ClearingStorageWrapper.multiplyTotalClearedAmountByPartition(_from, partition, _amount);
+        // Update total cleared amounts with factor (like reference implementation)
+        uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
+        uint256 totalLabaf = AdjustBalancesStorageWrapper.getTotalClearedLabaf(_from);
+        uint256 totalLabafByPartition = AdjustBalancesStorageWrapper.getTotalClearedLabafByPartition(partition, _from);
+        uint256 clearingLabaf = AdjustBalancesStorageWrapper.getClearingLabafById(_clearingOperationIdentifier);
+
+        // Multiply total cleared amount by factor if ABAF != total LABAF
+        if (abaf != totalLabaf) {
+            uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, totalLabaf);
+            ClearingStorageWrapper.multiplyTotalClearedAmount(_from, factor);
+            AdjustBalancesStorageWrapper.setTotalClearedLabaf(_from, abaf);
+        }
+
+        // Multiply total cleared amount by partition by factor if needed
+        if (abaf != totalLabafByPartition) {
+            uint256 factorByPartition = AdjustBalancesStorageWrapper.calculateFactor(abaf, totalLabafByPartition);
+            ClearingStorageWrapper.multiplyTotalClearedAmountByPartition(_from, partition, factorByPartition);
+            AdjustBalancesStorageWrapper.setTotalClearedLabafByPartition(partition, _from, abaf);
+        }
+
+        // Update clearing-specific amount if needed
+        if (abaf != clearingLabaf) {
+            uint256 clearingFactor = AdjustBalancesStorageWrapper.calculateFactor(abaf, clearingLabaf);
+            ClearingStorageWrapper.updateClearingAmountById(_clearingOperationIdentifier, clearingFactor);
+            AdjustBalancesStorageWrapper.setClearedLabafById(_clearingOperationIdentifier, abaf);
+        }
 
         if (_to != address(0)) {
             transferClearingBalance(partition, _to, _amount);
@@ -486,6 +510,14 @@ library ClearingOps {
         IClearing.ClearingOperationIdentifier memory _clearingOperationIdentifier,
         address _destination
     ) internal {
+        // Trigger pending scheduled tasks and sync balance adjustments
+        // This is critical for clearing creation after adjustBalances
+        TokenCoreOps.triggerAndSyncAll(
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.tokenHolder,
+            _destination
+        );
+
         TokenCoreOps.updateAccountSnapshot(
             _clearingOperationIdentifier.tokenHolder,
             _clearingOperationIdentifier.partition
@@ -496,17 +528,14 @@ library ClearingOps {
             _clearingOperationIdentifier.partition
         );
 
-        // Update clearing LABAF to current ABAF (same pattern as reference _adjustClearingBalances)
         uint256 abaf = AdjustBalancesStorageWrapper.getAbaf();
-        uint256 clearingLabaf = AdjustBalancesStorageWrapper.getClearingLabafById(_clearingOperationIdentifier);
 
-        if (abaf != clearingLabaf) {
-            uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, clearingLabaf);
-            ClearingStorageWrapper.updateClearingAmountById(_clearingOperationIdentifier, factor);
-            AdjustBalancesStorageWrapper.setClearedLabafById(_clearingOperationIdentifier, abaf);
-        }
+        // For NEW clearings created BEFORE adjustBalances, clearingLabaf will be 0 (converted to 1 by zeroToOne)
+        // For NEW clearings created AFTER adjustBalances, we should set clearingLabaf = abaf
+        // For EXISTING clearings created BEFORE adjustBalances, we should NOT update them here
+        // (they will be updated during EXECUTION in adjustClearingBalances)
 
-        // Update total cleared LABAF if needed
+        // Update total cleared amount and LABAF if needed (like Reference implementation's _updateTotalCleared)
         uint256 totalLabaf = AdjustBalancesStorageWrapper.getTotalClearedLabaf(
             _clearingOperationIdentifier.tokenHolder
         );
@@ -516,15 +545,28 @@ library ClearingOps {
         );
 
         if (abaf != totalLabaf) {
+            uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(abaf, totalLabaf);
+            ClearingStorageWrapper.multiplyTotalClearedAmount(_clearingOperationIdentifier.tokenHolder, factor);
             AdjustBalancesStorageWrapper.setTotalClearedLabaf(_clearingOperationIdentifier.tokenHolder, abaf);
         }
+
         if (abaf != totalLabafByPartition) {
+            uint256 factorByPartition = AdjustBalancesStorageWrapper.calculateFactor(abaf, totalLabafByPartition);
+            ClearingStorageWrapper.multiplyTotalClearedAmountByPartition(
+                _clearingOperationIdentifier.tokenHolder,
+                _clearingOperationIdentifier.partition,
+                factorByPartition
+            );
             AdjustBalancesStorageWrapper.setTotalClearedLabafByPartition(
                 _clearingOperationIdentifier.partition,
                 _clearingOperationIdentifier.tokenHolder,
                 abaf
             );
         }
+
+        // Set clearing LABAF to current ABAF for new clearings
+        // This ensures clearings created AFTER adjustBalances have LABAF = ABAF
+        AdjustBalancesStorageWrapper.setClearedLabafById(_clearingOperationIdentifier, abaf);
     }
 
     function updateClearing(
@@ -538,6 +580,11 @@ library ClearingOps {
         uint256 _abaf = AdjustBalancesStorageWrapper.getAbaf();
 
         abaf_ = _abaf;
+
+        // Early return if factor is 1 (clearing created after balance adjustment)
+        if (_abaf == clearingLabaf) {
+            return abaf_;
+        }
 
         uint256 factor = AdjustBalancesStorageWrapper.calculateFactor(_abaf, clearingLabaf);
 

@@ -12,7 +12,6 @@ import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlS
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../../domain/asset/ERC1644StorageWrapper.sol";

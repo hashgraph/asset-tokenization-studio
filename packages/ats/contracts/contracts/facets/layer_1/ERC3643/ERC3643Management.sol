@@ -5,7 +5,6 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _AGENT_ROLE, _TREX_OWNER_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Management } from "./IERC3643Management.sol";
-import { IERC3643StorageWrapper } from "../../../domain/asset/ERC3643/IERC3643StorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";

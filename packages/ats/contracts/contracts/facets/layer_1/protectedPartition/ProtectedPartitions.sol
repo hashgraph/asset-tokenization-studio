@@ -3,12 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IProtectedPartitions } from "./IProtectedPartitions.sol";
 import { _PROTECTED_PARTITIONS_ROLE } from "../../../constants/roles.sol";
-import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
-import {
-    IProtectedPartitionsStorageWrapper
-} from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 
 abstract contract ProtectedPartitions is IProtectedPartitions, Modifiers {
     // solhint-disable-next-line func-name-mixedcase

@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-26T08:56:22.451Z
+ * Generated: 2026-03-27T08:07:24.929Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -929,36 +929,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function reclaimClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x67e57fe2",
       },
-    ],
-    events: [
-      {
-        name: "ClearingActivated",
-        signature: "ClearingActivated(address)",
-        topic0: "0x569080e4e18c204a1d28f09348d781d7cfb170428b2fd33e1f9b7df132674e15",
-      },
-      {
-        name: "ClearingDeactivated",
-        signature: "ClearingDeactivated(address)",
-        topic0: "0xdb053585e5b33d19247ef59f5b465bcbb9774e6e5ce23932a7e3ffe829cd80a1",
-      },
-      {
-        name: "ClearingOperationApproved",
-        signature: "ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType,bytes)",
-        topic0: "0x02f980b59ce0d0d56d120ea10fd65c1761039caa1b51c65ab99a770ecbf956e9",
-      },
-      {
-        name: "ClearingOperationCanceled",
-        signature: "ClearingOperationCanceled(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
-        topic0: "0x730f579c3f3d2d652106a07acfb467c6ad517dde94018569f5a1def7c0c4a0ad",
-      },
-      {
-        name: "ClearingOperationReclaimed",
-        signature: "ClearingOperationReclaimed(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
-        topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
-      },
-    ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
     ],
     factory: (signer) => new ClearingActionsFacet__factory(getLibLinks("clearingOps") as any, signer),
     timeTravelFactory: (signer) =>

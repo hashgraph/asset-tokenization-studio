@@ -7,19 +7,14 @@ import { IKyc } from "../../layer_1/kyc/IKyc.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
 import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
-import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { ControlListModifiers } from "../../../infrastructure/utils/ControlListModifiers.sol";
 import { KycModifiers } from "../../../infrastructure/utils/KycModifiers.sol";
 import { MaturityModifiers } from "../../../infrastructure/utils/MaturityModifiers.sol";
 import { DateValidationModifiers } from "../../../infrastructure/utils/DateValidationModifiers.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
 import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
-import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
-import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
-import { IClearing } from "../../layer_1/clearing/IClearing.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 /**

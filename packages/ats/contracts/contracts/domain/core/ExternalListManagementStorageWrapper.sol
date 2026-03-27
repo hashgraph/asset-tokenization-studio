@@ -5,9 +5,6 @@ import { AddressValidation } from "../../infrastructure/utils/AddressValidation.
 import { Pagination } from "../../infrastructure/utils/Pagination.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IExternalControlList } from "../../facets/layer_1/externalControlList/IExternalControlList.sol";
-import {
-    IExternalControlListManagement
-} from "../../facets/layer_1/externalControlList/IExternalControlListManagement.sol";
 import { IExternalKycList } from "../../facets/layer_1/externalKycList/IExternalKycList.sol";
 import { IKyc } from "../../facets/layer_1/kyc/IKyc.sol";
 import {

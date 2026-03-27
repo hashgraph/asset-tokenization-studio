@@ -161,6 +161,7 @@ library AdjustBalancesStorageWrapper {
         ERC20StorageWrapper.adjustDecimals(_decimals);
         CapStorageWrapper.adjustMaxSupply(_factor);
         updateAbaf(_factor);
+
         emit IAdjustBalancesStorageWrapper.AdjustmentBalanceSet(EvmAccessors.getMsgSender(), _factor, _decimals);
     }
 
