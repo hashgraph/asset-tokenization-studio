@@ -152,8 +152,9 @@ abstract contract Bond is
         requireValidTimestamp(_newCoupon.fixingDate)
         returns (uint256 couponID_)
     {
+        IBondRead.Coupon memory coupon = _prepareCoupon(_newCoupon);
         bytes32 corporateActionID;
-        (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(_newCoupon);
+        (corporateActionID, couponID_) = BondStorageWrapper.setCoupon(coupon);
     }
 
     /**
@@ -176,5 +177,9 @@ abstract contract Bond is
         emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
         success_ = BondStorageWrapper.setMaturityDate(_newMaturityDate);
         return success_;
+    }
+
+    function _prepareCoupon(IBondRead.Coupon calldata _newCoupon) internal virtual returns (IBondRead.Coupon memory) {
+        return _newCoupon;
     }
 }

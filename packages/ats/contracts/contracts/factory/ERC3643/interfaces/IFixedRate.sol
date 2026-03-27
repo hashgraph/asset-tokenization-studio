@@ -9,6 +9,8 @@ interface TRexIFixedRate {
 
     event RateUpdated(address indexed operator, uint256 newRate, uint8 newRateDecimals);
 
+    error InterestRateIsFixed();
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_FixedRate(FixedRateData calldata _initData) external;
 
