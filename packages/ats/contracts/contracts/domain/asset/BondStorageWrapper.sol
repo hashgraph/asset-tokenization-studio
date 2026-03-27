@@ -21,6 +21,7 @@ import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/T
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
+import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
 struct BondDataStorage {
     bytes3 currency;
@@ -162,6 +163,18 @@ library BondStorageWrapper {
                 couponID,
                 registeredCoupon_.coupon
             );
+            registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
+        }
+
+        // Calculate KPI Linked rate on-the-fly if needed
+        if (
+            registeredCoupon_.coupon.fixingDate != 0 &&
+            registeredCoupon_.coupon.rateStatus != IBondRead.RateCalculationStatus.SET &&
+            registeredCoupon_.coupon.fixingDate <= TimeTravelStorageWrapper.getBlockTimestamp() &&
+            InterestRateStorageWrapper.isKpiLinkedRateInitialized()
+        ) {
+            (registeredCoupon_.coupon.rate, registeredCoupon_.coupon.rateDecimals) = KpiLinkedRateLib
+                .calculateKpiLinkedInterestRate(couponID, registeredCoupon_.coupon);
             registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
         }
     }
