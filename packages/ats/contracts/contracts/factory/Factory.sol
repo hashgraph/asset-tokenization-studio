@@ -457,8 +457,15 @@ contract Factory is IFactory {
             )
         {
             // success
-        } catch {
-            // facet not present - skip initialization
+        } catch (bytes memory reason) {
+            // Re-revert if the facet is present but initialization failed (non-empty revert data)
+            if (reason.length > 0) {
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    revert(add(reason, 32), mload(reason))
+                }
+            }
+            // Empty revert data means facet not present - skip initialization
         }
     }
 

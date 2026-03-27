@@ -337,18 +337,18 @@ describe("ERC1594 Tests", () => {
         );
 
         // redeem from with data fails
-        await expect(erc1594Facet.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA)).to.be.rejectedWith(
-          "AccountIsBlocked",
-        );
+        await expect(
+          erc1594Facet.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA),
+        ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
 
         // Update blacklist
         await controlList.connect(signer_A).removeFromControlList(signer_C.address);
         await controlList.connect(signer_A).addToControlList(signer_E.address);
 
         // redeem from with data fails
-        await expect(erc1594Facet.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA)).to.be.rejectedWith(
-          "AccountIsBlocked",
-        );
+        await expect(
+          erc1594Facet.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA),
+        ).to.be.revertedWithCustomError(controlList, "AccountIsBlocked");
       });
     });
     describe("Clearing", () => {

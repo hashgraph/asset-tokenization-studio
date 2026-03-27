@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-27T08:07:24.929Z
+ * Generated: 2026-03-27T15:35:43.489Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -2415,6 +2415,7 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xa7fd66e9450da5029fb2dfd59586274386eb4c169bfc873e265aa29d3df59424",
       },
     ],
+    errors: [{ name: "InterestRateIsFixed", signature: "InterestRateIsFixed()", selector: "0x849d4eb8" }],
     factory: (signer) => new FixedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new FixedRateFacetTimeTravel__factory(signer),
   },

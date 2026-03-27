@@ -82,19 +82,28 @@ describe("Bond Fixed Rate Tests", () => {
   it("GIVEN a fixed rate bond WHEN setting a coupon with non pending status THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rateStatus = 1;
 
-    await expect(bondFixedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
+    await expect(bondFixedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+      bondFixedRateFacet,
+      "InterestRateIsFixed",
+    );
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with rate non 0 THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rate = 1;
 
-    await expect(bondFixedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
+    await expect(bondFixedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+      bondFixedRateFacet,
+      "InterestRateIsFixed",
+    );
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with rate decimals non 0 THEN transaction fails with InterestRateIsFixed", async () => {
     couponData.rateDecimals = 1;
 
-    await expect(bondFixedRateFacet.setCoupon(couponData)).to.be.rejectedWith("InterestRateIsFixed");
+    await expect(bondFixedRateFacet.setCoupon(couponData)).to.be.revertedWithCustomError(
+      bondFixedRateFacet,
+      "InterestRateIsFixed",
+    );
   });
 
   it("GIVEN a fixed rate bond WHEN setting a coupon with pending status THEN transaction success", async () => {
