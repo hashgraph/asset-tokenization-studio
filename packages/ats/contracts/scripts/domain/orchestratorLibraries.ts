@@ -224,10 +224,11 @@ export async function deployOrchestratorLibraries(signer: Signer): Promise<Orche
   info(`   ✓ HoldOps deployed at ${holdOpsAddr}`);
   info(`   ✓ ClearingReadOps deployed at ${clearingReadOpsAddr}`);
 
-  // Phase 2: Deploy ClearingOps (depends on TokenCoreOps)
+  // Phase 2: Deploy ClearingOps (depends on TokenCoreOps and HoldOps)
   const clearingOps = await new ClearingOps__factory(
     {
       [LIBRARY_KEYS.tokenCoreOps]: tokenCoreOpsAddr,
+      [LIBRARY_KEYS.holdOps]: holdOpsAddr,
     } as any,
     signer,
   ).deploy();

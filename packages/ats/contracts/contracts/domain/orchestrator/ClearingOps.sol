@@ -9,11 +9,13 @@ import { NonceStorageWrapper } from "../core/NonceStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { IClearing } from "../../facets/layer_1/clearing/IClearing.sol";
+import { IClearingActions } from "../../facets/layer_1/clearing/IClearingActions.sol";
 import { IClearingStorageWrapper } from "../asset/clearing/IClearingStorageWrapper.sol";
 import { ICompliance } from "../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IERC3643Management } from "../../facets/layer_1/ERC3643/IERC3643Management.sol";
 import { Hold } from "../../facets/layer_1/hold/IHold.sol";
 import { ThirdPartyType } from "../asset/types/ThirdPartyType.sol";
+import { HoldOps } from "./HoldOps.sol";
 import { _checkNounceAndDeadline } from "../../infrastructure/utils/ERC712.sol";
 import { LowLevelCall } from "../../infrastructure/utils/LowLevelCall.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
@@ -203,19 +205,29 @@ library ClearingOps {
     function approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public returns (bool success_, bytes memory operationData_, bytes32 partition_) {
-        return handleClearingOperationByPartition(_clearingOperationIdentifier);
+        return
+            handleClearingOperationByPartition(
+                _clearingOperationIdentifier,
+                IClearingActions.ClearingActionType.Approve
+            );
     }
 
     function cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public returns (bool success_) {
-        (success_, , ) = handleClearingOperationByPartition(_clearingOperationIdentifier);
+        (success_, , ) = handleClearingOperationByPartition(
+            _clearingOperationIdentifier,
+            IClearingActions.ClearingActionType.Cancel
+        );
     }
 
     function reclaimClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
     ) public returns (bool success_) {
-        (success_, , ) = handleClearingOperationByPartition(_clearingOperationIdentifier);
+        (success_, , ) = handleClearingOperationByPartition(
+            _clearingOperationIdentifier,
+            IClearingActions.ClearingActionType.Reclaim
+        );
     }
 
     // ============================================================================
@@ -348,7 +360,8 @@ library ClearingOps {
     // ============================================================================
 
     function handleClearingOperationByPartition(
-        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
+        IClearingActions.ClearingActionType _operationType
     ) internal returns (bool success_, bytes memory operationData_, bytes32 partition_) {
         partition_ = _clearingOperationIdentifier.partition;
 
@@ -356,23 +369,78 @@ library ClearingOps {
             _clearingOperationIdentifier
         );
 
+        // Get destination for beforeClearingOperation (like reference implementation)
+        address destination;
         if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
-            (success_, operationData_) = clearingTransferExecution(_clearingOperationIdentifier, data);
+            destination = data.destination;
         } else if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
-            (success_, operationData_) = clearingRedeemExecution(_clearingOperationIdentifier, data);
+            destination = address(0);
         } else {
-            (success_, operationData_) = clearingHoldCreationExecution(_clearingOperationIdentifier, data);
+            // HoldCreation: restore to holder for Cancel/Reclaim, no transfer for Approve
+            destination = _clearingOperationIdentifier.tokenHolder;
+        }
+
+        // For Cancel/Reclaim, adjust destination to restore to holder
+        if (_operationType != IClearingActions.ClearingActionType.Approve) {
+            destination = _clearingOperationIdentifier.tokenHolder;
+        }
+
+        // Call beforeClearingOperation to apply ABAF adjustments (like reference's _beforeClearingOperation)
+        beforeClearingOperation(_clearingOperationIdentifier, destination);
+
+        // Initialize operationData_ as empty (only HoldCreation fills it)
+        bytes memory holdData;
+
+        if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Transfer) {
+            clearingTransferExecution(_clearingOperationIdentifier, data, _operationType);
+            success_ = true;
+        } else if (_clearingOperationIdentifier.clearingOperationType == IClearing.ClearingOperationType.Redeem) {
+            clearingRedeemExecution(_clearingOperationIdentifier, data, _operationType);
+            success_ = true;
+        } else {
+            holdData = clearingHoldCreationExecution(_clearingOperationIdentifier, data, _operationType);
+            if (holdData.length > 0) {
+                operationData_ = holdData;
+            }
+            success_ = true;
+        }
+
+        // Restore allowance and remove clearing (like reference's _restoreAllowanceAndRemoveClearing)
+        if (_operationType != IClearingActions.ClearingActionType.Approve) {
+            restoreAllowanceAndRemoveClearing(_clearingOperationIdentifier);
+        } else {
+            ClearingStorageWrapper.removeClearing(_clearingOperationIdentifier);
         }
     }
 
     function clearingTransferExecution(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
-        IClearing.ClearingOperationBasicInfo memory data
-    ) internal returns (bool success_, bytes memory operationData_) {
-        address destination = data.destination;
-        adjustClearingBalances(_clearingOperationIdentifier, destination, data.amount);
+        IClearing.ClearingOperationBasicInfo memory /* data */,
+        IClearingActions.ClearingActionType _operationType
+    ) internal {
+        // Get the ABAF-adjusted amount from storage (already updated by beforeClearingOperation)
+        IClearing.ClearingTransferData memory transferData = ClearingStorageWrapper.getClearingTransferForByPartition(
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.clearingId
+        );
 
-        if (_clearingOperationIdentifier.tokenHolder != destination) {
+        // Determine destination: original for Approve, holder for Cancel/Reclaim
+        address destination;
+        if (_operationType == IClearingActions.ClearingActionType.Approve) {
+            destination = transferData.destination;
+        } else {
+            destination = _clearingOperationIdentifier.tokenHolder;
+        }
+
+        // Transfer the ABAF-adjusted amount
+        transferClearingBalance(_clearingOperationIdentifier.partition, destination, transferData.amount);
+
+        // Only check identity/compliance for Approve operations with different destination
+        if (
+            _operationType == IClearingActions.ClearingActionType.Approve &&
+            _clearingOperationIdentifier.tokenHolder != destination
+        ) {
             TokenCoreOps.checkIdentity(_clearingOperationIdentifier.tokenHolder, destination);
             TokenCoreOps.checkCompliance(_clearingOperationIdentifier.tokenHolder, destination, false);
 
@@ -386,48 +454,86 @@ library ClearingOps {
                         ICompliance.transferred.selector,
                         _clearingOperationIdentifier.tokenHolder,
                         destination,
-                        data.amount
+                        transferData.amount
                     ),
                     IERC3643Management.ComplianceCallFailed.selector
                 );
             }
         }
-
-        ClearingStorageWrapper.removeClearing(_clearingOperationIdentifier);
-
-        operationData_ = abi.encode(data.amount, data.expirationTimestamp, destination);
-
-        success_ = true;
     }
 
     function clearingRedeemExecution(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
-        IClearing.ClearingOperationBasicInfo memory data
-    ) internal returns (bool success_, bytes memory operationData_) {
-        adjustClearingBalances(_clearingOperationIdentifier, address(0), data.amount);
+        IClearing.ClearingOperationBasicInfo memory /* data */,
+        IClearingActions.ClearingActionType _operationType
+    ) internal {
+        // Get the ABAF-adjusted amount from storage (already updated by beforeClearingOperation)
+        IClearing.ClearingRedeemData memory redeemData = ClearingStorageWrapper.getClearingRedeemForByPartition(
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.clearingId
+        );
 
-        TokenCoreOps.checkIdentity(_clearingOperationIdentifier.tokenHolder, address(0));
-        TokenCoreOps.checkCompliance(_clearingOperationIdentifier.tokenHolder, address(0), false);
+        // For Approve: nothing to transfer (tokens are burned)
+        // For Cancel/Reclaim: restore ABAF-adjusted amount to holder
+        if (_operationType != IClearingActions.ClearingActionType.Approve) {
+            transferClearingBalance(
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.tokenHolder,
+                redeemData.amount
+            );
+        }
 
-        ClearingStorageWrapper.removeClearing(_clearingOperationIdentifier);
-
-        operationData_ = abi.encode(data.amount, data.expirationTimestamp);
-
-        success_ = true;
+        // Only check identity/compliance for Approve operations
+        if (_operationType == IClearingActions.ClearingActionType.Approve) {
+            TokenCoreOps.checkIdentity(_clearingOperationIdentifier.tokenHolder, address(0));
+            TokenCoreOps.checkCompliance(_clearingOperationIdentifier.tokenHolder, address(0), false);
+        }
     }
 
     function clearingHoldCreationExecution(
         IClearing.ClearingOperationIdentifier calldata _clearingOperationIdentifier,
-        IClearing.ClearingOperationBasicInfo memory data
-    ) internal returns (bool success_, bytes memory operationData_) {
-        address destination = data.destination;
-        adjustClearingBalances(_clearingOperationIdentifier, destination, data.amount);
+        IClearing.ClearingOperationBasicInfo memory /* data */,
+        IClearingActions.ClearingActionType _operationType
+    ) internal returns (bytes memory operationData_) {
+        // Get the ABAF-adjusted amount from storage (already updated by beforeClearingOperation)
+        IClearing.ClearingHoldCreationData memory holdCreationData = ClearingStorageWrapper
+            .getClearingHoldCreationForByPartition(
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.tokenHolder,
+                _clearingOperationIdentifier.clearingId
+            );
 
-        ClearingStorageWrapper.removeClearing(_clearingOperationIdentifier);
+        // For HoldCreation: ALWAYS restore balance to holder
+        // For Approve: restore ABAF-adjusted amount (after clearing amount update)
+        // For Cancel/Reclaim: restore ABAF-adjusted amount to holder
+        address destination = _clearingOperationIdentifier.tokenHolder;
 
-        operationData_ = abi.encode(data.amount, data.expirationTimestamp, destination);
+        // Transfer the ABAF-adjusted amount to holder
+        transferClearingBalance(_clearingOperationIdentifier.partition, destination, holdCreationData.amount);
 
-        success_ = true;
+        // For Approve: create hold from holder's balance with ABAF-adjusted amount
+        // Return operationData_ (holdId) only for Approve operations
+        if (_operationType == IClearingActions.ClearingActionType.Approve) {
+            Hold memory hold = Hold({
+                amount: holdCreationData.amount,
+                expirationTimestamp: holdCreationData.holdExpirationTimestamp,
+                escrow: holdCreationData.holdEscrow,
+                to: holdCreationData.holdTo,
+                data: holdCreationData.holdData
+            });
+
+            (, uint256 holdId) = HoldOps.createHoldByPartition(
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.tokenHolder,
+                hold,
+                holdCreationData.operatorData,
+                holdCreationData.operatorType
+            );
+
+            operationData_ = abi.encode(holdId);
+        }
+        // removeClearing is now handled in handleClearingOperationByPartition
     }
 
     // ============================================================================
@@ -511,7 +617,7 @@ library ClearingOps {
         address _destination
     ) internal {
         // Trigger pending scheduled tasks and sync balance adjustments
-        // This is critical for clearing creation after adjustBalances
+        // This applies ABAF factor to existing balances (like reference's _triggerAndSyncAll)
         TokenCoreOps.triggerAndSyncAll(
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.tokenHolder,
@@ -564,9 +670,14 @@ library ClearingOps {
             );
         }
 
-        // Set clearing LABAF to current ABAF for new clearings
-        // This ensures clearings created AFTER adjustBalances have LABAF = ABAF
-        AdjustBalancesStorageWrapper.setClearedLabafById(_clearingOperationIdentifier, abaf);
+        // Update individual clearing amount (like Reference implementation's _updateClearing)
+        // This is critical: we must update the clearing amount BEFORE reading it in execution functions
+        uint256 clearingLabaf = AdjustBalancesStorageWrapper.getClearingLabafById(_clearingOperationIdentifier);
+        if (abaf != clearingLabaf) {
+            uint256 clearingFactor = AdjustBalancesStorageWrapper.calculateFactor(abaf, clearingLabaf);
+            ClearingStorageWrapper.updateClearingAmountById(_clearingOperationIdentifier, clearingFactor);
+            AdjustBalancesStorageWrapper.setClearedLabafById(_clearingOperationIdentifier, abaf);
+        }
     }
 
     function updateClearing(
