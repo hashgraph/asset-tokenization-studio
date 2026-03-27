@@ -3,7 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import { type ResolverProxy, type CorporateActions, EquityUSA, TimeTravelFacet } from "@contract-types";
+import { type ResolverProxy, type IAsset, TimeTravelFacet } from "@contract-types";
 import { ATS_ROLES } from "@scripts";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployEquityTokenFixture } from "@test";
@@ -17,8 +17,7 @@ describe("Corporate Actions Tests", () => {
   let signer_B: HardhatEthersSigner;
   let signer_C: HardhatEthersSigner;
 
-  let corporateActionsFacet: CorporateActions;
-  let equityFacet: EquityUSA;
+  let asset: IAsset;
   let timeTravelFacet: TimeTravelFacet;
 
   async function deploySecurityFixtureSinglePartition() {
@@ -27,7 +26,9 @@ describe("Corporate Actions Tests", () => {
     signer_A = base.deployer;
     signer_B = base.user1;
     signer_C = base.user2;
-    await executeRbac(base.accessControlFacet, [
+
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+    await executeRbac(asset, [
       {
         role: ATS_ROLES._PAUSER_ROLE,
         members: [signer_B.address],
@@ -38,8 +39,6 @@ describe("Corporate Actions Tests", () => {
       },
     ]);
 
-    corporateActionsFacet = await ethers.getContractAt("CorporateActionsFacet", diamond.target, signer_A);
-    equityFacet = await ethers.getContractAt("EquityUSAFacetTimeTravel", diamond.target, signer_A);
     timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
   }
 
@@ -65,23 +64,23 @@ describe("Corporate Actions Tests", () => {
     const encoded = ethers.AbiCoder.defaultAbiCoder().encode(["bytes32", "bytes"], [actionType, encodedDividendData]);
     const contentHash = ethers.keccak256(encoded);
 
-    const actionContentHashExistsBefore = await corporateActionsFacet.actionContentHashExists(contentHash);
+    const actionContentHashExistsBefore = await asset.actionContentHashExists(contentHash);
 
-    await equityFacet.connect(signer_C).setDividend(dividendData);
+    await asset.connect(signer_C).setDividend(dividendData);
 
     // check list members
-    const listCount = await corporateActionsFacet.getCorporateActionCount();
-    const listMembers = await corporateActionsFacet.getCorporateActionIds(0, listCount);
-    const listCountByType = await corporateActionsFacet.getCorporateActionCountByType(actionType);
-    const listMembersByType = await corporateActionsFacet.getCorporateActionIdsByType(actionType, 0, listCount);
-    const corporateAction = await corporateActionsFacet.getCorporateAction(corporateActionId_1);
-    const actionContentHashExistsAfter = await corporateActionsFacet.actionContentHashExists(contentHash);
+    const listCount = await asset.getCorporateActionCount();
+    const listMembers = await asset.getCorporateActionIds(0, listCount);
+    const listCountByType = await asset.getCorporateActionCountByType(actionType);
+    const listMembersByType = await asset.getCorporateActionIdsByType(actionType, 0, listCount);
+    const corporateAction = await asset.getCorporateAction(corporateActionId_1);
+    const actionContentHashExistsAfter = await asset.actionContentHashExists(contentHash);
 
     // Get all corporate actions with pagination
-    const corporateActions = await corporateActionsFacet.getCorporateActions(0, listCount);
+    const corporateActions = await asset.getCorporateActions(0, listCount);
 
     // Get all corporate actions by type with pagination
-    const corporateActionsByType = await corporateActionsFacet.getCorporateActionsByType(actionType, 0, listCount);
+    const corporateActionsByType = await asset.getCorporateActionsByType(actionType, 0, listCount);
 
     expect(listCount).to.equal(1);
     expect(listMembers.length).to.equal(listCount);

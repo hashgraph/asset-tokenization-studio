@@ -3,15 +3,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers.js";
-import {
-  type ResolverProxy,
-  type ERC1644Facet,
-  type PauseFacet,
-  type AccessControl,
-  type IERC1410,
-  SsiManagementFacet,
-  KycFacet,
-} from "@contract-types";
+import { type ResolverProxy, type IAsset } from "@contract-types";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { grantRoleAndPauseToken } from "../../../../../common";
 import { deployEquityTokenFixture } from "@test";
@@ -30,12 +22,7 @@ describe("ERC1644 Tests", () => {
   let signer_D: HardhatEthersSigner;
   let signer_E: HardhatEthersSigner;
 
-  let erc1644Facet: ERC1644Facet;
-  let accessControlFacet: AccessControl;
-  let pauseFacet: PauseFacet;
-  let erc1410Facet: IERC1410;
-  let kycFacet: KycFacet;
-  let ssiManagementFacet: SsiManagementFacet;
+  let asset: IAsset;
 
   describe("single partition", () => {
     async function deploySecurityFixtureSinglePartition() {
@@ -47,7 +34,8 @@ describe("ERC1644 Tests", () => {
       signer_D = base.user3;
       signer_E = base.user4;
 
-      await executeRbac(base.accessControlFacet, [
+      asset = await ethers.getContractAt("IAsset", diamond.target);
+      await executeRbac(asset, [
         {
           role: ATS_ROLES._PAUSER_ROLE,
           members: [signer_B.address],
@@ -69,16 +57,6 @@ describe("ERC1644 Tests", () => {
           members: [signer_A.address],
         },
       ]);
-
-      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
-
-      erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.target);
-
-      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
-
-      erc1410Facet = await ethers.getContractAt("IERC1410", diamond.target, signer_B);
-      kycFacet = await ethers.getContractAt("KycFacet", diamond.target, signer_B);
-      ssiManagementFacet = await ethers.getContractAt("SsiManagementFacet", diamond.target, signer_A);
     }
 
     beforeEach(async () => {
@@ -86,55 +64,46 @@ describe("ERC1644 Tests", () => {
     });
 
     it("GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized", async () => {
-      await expect(erc1644Facet.initialize_ERC1644(false)).to.be.rejectedWith("AlreadyInitialized");
+      await expect(asset.initialize_ERC1644(false)).to.be.rejectedWith("AlreadyInitialized");
     });
 
     describe("Paused", () => {
       beforeEach(async () => {
         // Granting Role to account C and Pause
-        await grantRoleAndPauseToken(
-          accessControlFacet,
-          pauseFacet,
-          ATS_ROLES._CONTROLLER_ROLE,
-          signer_A,
-          signer_B,
-          signer_C.address,
-        );
+        await grantRoleAndPauseToken(asset, asset, ATS_ROLES._CONTROLLER_ROLE, signer_A, signer_B, signer_C.address);
       });
       it("GIVEN a paused Token WHEN controllerTransfer THEN transaction fails with TokenIsPaused", async () => {
         // controller transfer fails
         await expect(
-          erc1644Facet.connect(signer_C).controllerTransfer(signer_D.address, signer_E.address, amount, "0x", "0x"),
-        ).to.be.revertedWithCustomError(erc1644Facet, "TokenIsPaused");
+          asset.connect(signer_C).controllerTransfer(signer_D.address, signer_E.address, amount, "0x", "0x"),
+        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
 
       it("GIVEN a paused Token WHEN controllerRedeem THEN transaction fails with TokenIsPaused", async () => {
         // remove document
         await expect(
-          erc1644Facet.connect(signer_C).controllerRedeem(signer_D.address, amount, "0x", "0x"),
-        ).to.be.revertedWithCustomError(erc1644Facet, "TokenIsPaused");
+          asset.connect(signer_C).controllerRedeem(signer_D.address, amount, "0x", "0x"),
+        ).to.be.revertedWithCustomError(asset, "TokenIsPaused");
       });
     });
 
     describe("AccessControl", () => {
       it("GIVEN an account without admin role WHEN finalizeControllable THEN transaction fails with AccountHasNoRole", async () => {
         // controller finalize fails
-        await expect(erc1644Facet.connect(signer_C).finalizeControllable()).to.be.rejectedWith("AccountHasNoRole");
+        await expect(asset.connect(signer_C).finalizeControllable()).to.be.rejectedWith("AccountHasNoRole");
       });
 
       it("GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole", async () => {
         // controller transfer fails
         await expect(
-          erc1644Facet
-            .connect(signer_C)
-            .controllerTransfer(signer_D.address, signer_E.address, amount, data, operatorData),
+          asset.connect(signer_C).controllerTransfer(signer_D.address, signer_E.address, amount, data, operatorData),
         ).to.be.rejectedWith("AccountHasNoRole");
       });
 
       it("GIVEN an account without controller role WHEN controllerRedeem THEN transaction fails with AccountHasNoRole", async () => {
         // controller redeem fails
         await expect(
-          erc1644Facet.connect(signer_C).controllerRedeem(signer_D.address, amount, data, operatorData),
+          asset.connect(signer_C).controllerRedeem(signer_D.address, amount, data, operatorData),
         ).to.be.rejectedWith("AccountHasNoRole");
       });
     });
@@ -143,9 +112,9 @@ describe("ERC1644 Tests", () => {
       beforeEach(async () => {
         // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
         // Granting Role to account C
-        await ssiManagementFacet.addIssuer(signer_E.address);
-        await kycFacet.grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await erc1410Facet.connect(signer_B).issueByPartition({
+        await asset.connect(signer_A).addIssuer(signer_E.address);
+        await asset.connect(signer_B).grantKyc(signer_D.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
+        await asset.connect(signer_B).issueByPartition({
           partition: DEFAULT_PARTITION,
           tokenHolder: signer_D.address,
           value: amount * 2,
@@ -155,62 +124,60 @@ describe("ERC1644 Tests", () => {
 
       it("GIVEN a controllable token " + "WHEN controllerTransfer " + "THEN transaction succeeds", async () => {
         expect(
-          await erc1644Facet
+          await asset
             .connect(signer_B)
             .controllerTransfer(signer_D.address, signer_E.address, amount, data, operatorData),
         )
-          .to.emit(erc1644Facet, "ControllerTransfer")
+          .to.emit(asset, "ControllerTransfer")
           .withArgs(signer_B.address, signer_D.address, signer_E.address, amount, data, data);
-        expect(await erc1410Facet.totalSupply()).to.equal(amount * 2);
-        expect(await erc1410Facet.balanceOf(signer_D.address)).to.equal(amount);
-        expect(await erc1410Facet.balanceOf(signer_E.address)).to.equal(amount);
-        expect(await erc1410Facet.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(amount * 2);
-        expect(await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.equal(amount);
-        expect(await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.equal(amount);
+        expect(await asset.totalSupply()).to.equal(amount * 2);
+        expect(await asset.balanceOf(signer_D.address)).to.equal(amount);
+        expect(await asset.balanceOf(signer_E.address)).to.equal(amount);
+        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(amount * 2);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.equal(amount);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.equal(amount);
       });
 
       it("GIVEN a controllable token " + "WHEN controllerRedeem " + "THEN transaction succeeds", async () => {
-        expect(await erc1644Facet.connect(signer_B).controllerRedeem(signer_D.address, amount, data, operatorData))
-          .to.emit(erc1644Facet, "ControllerRedemption")
+        expect(await asset.connect(signer_B).controllerRedeem(signer_D.address, amount, data, operatorData))
+          .to.emit(asset, "ControllerRedemption")
           .withArgs(signer_B.address, signer_D.address, amount, data, data);
-        expect(await erc1410Facet.totalSupply()).to.equal(amount);
-        expect(await erc1410Facet.balanceOf(signer_D.address)).to.equal(amount);
-        expect(await erc1410Facet.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(amount);
-        expect(await erc1410Facet.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.equal(amount);
+        expect(await asset.totalSupply()).to.equal(amount);
+        expect(await asset.balanceOf(signer_D.address)).to.equal(amount);
+        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.equal(amount);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.equal(amount);
       });
     });
 
     describe("finalizeControllable", () => {
       beforeEach(async () => {
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-        await expect(erc1644Facet.connect(signer_A).finalizeControllable())
-          .to.emit(erc1644Facet, "FinalizedControllerFeature")
+        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_A.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await expect(asset.connect(signer_A).finalizeControllable())
+          .to.emit(asset, "FinalizedControllerFeature")
           .withArgs(signer_A.address);
       });
 
       it("GIVEN an account with admin role WHEN finalizeControllable THEN transaction succeeds", async () => {
-        const isControllable = await erc1644Facet.isControllable();
+        const isControllable = await asset.isControllable();
         expect(isControllable).to.equal(false);
       });
 
       it("GIVEN finalizeControllable WHEN controllerTransfer THEN TokenIsNotControllable", async () => {
         await expect(
-          erc1644Facet.controllerTransfer(signer_D.address, signer_E.address, amount, data, operatorData),
-        ).to.revertedWithCustomError(erc1644Facet, "TokenIsNotControllable");
+          asset.controllerTransfer(signer_D.address, signer_E.address, amount, data, operatorData),
+        ).to.revertedWithCustomError(asset, "TokenIsNotControllable");
       });
 
       it("GIVEN finalizeControllable WHEN controllerRedeem THEN TokenIsNotControllable", async () => {
-        await expect(
-          erc1644Facet.controllerRedeem(signer_E.address, amount, data, operatorData),
-        ).to.revertedWithCustomError(erc1644Facet, "TokenIsNotControllable");
+        await expect(asset.controllerRedeem(signer_E.address, amount, data, operatorData)).to.revertedWithCustomError(
+          asset,
+          "TokenIsNotControllable",
+        );
       });
 
       it("GIVEN finalizeControllable WHEN finalizeControllable THEN TokenIsNotControllable", async () => {
-        await expect(erc1644Facet.finalizeControllable()).to.revertedWithCustomError(
-          erc1644Facet,
-          "TokenIsNotControllable",
-        );
+        await expect(asset.finalizeControllable()).to.revertedWithCustomError(asset, "TokenIsNotControllable");
       });
     });
   });
@@ -229,18 +196,13 @@ describe("ERC1644 Tests", () => {
       signer_D = base.user3;
       signer_E = base.user4;
 
-      await executeRbac(base.accessControlFacet, [
+      asset = await ethers.getContractAt("IAsset", diamond.target);
+      await executeRbac(asset, [
         {
           role: ATS_ROLES._PAUSER_ROLE,
           members: [signer_B.address],
         },
       ]);
-
-      accessControlFacet = await ethers.getContractAt("AccessControl", diamond.target);
-
-      erc1644Facet = await ethers.getContractAt("ERC1644Facet", diamond.target);
-
-      pauseFacet = await ethers.getContractAt("PauseFacet", diamond.target);
     }
 
     beforeEach(async () => {
@@ -250,31 +212,32 @@ describe("ERC1644 Tests", () => {
     describe("NotAllowedInMultiPartitionMode", () => {
       beforeEach(async () => {
         // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_C.address);
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
-        await accessControlFacet.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROLLER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
+        await asset.connect(signer_A).grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_C.address);
       });
 
       it("GIVEN an account with controller role WHEN controllerTransfer THEN NotAllowedInMultiPartitionMode", async () => {
         // check is controllable
-        const isControllable = await erc1644Facet.isControllable();
+        const isControllable = await asset.isControllable();
         expect(isControllable).to.equal(true);
 
         // controller transfer
         await expect(
-          erc1644Facet.controllerTransfer(signer_D.address, signer_E.address, amount, data, operatorData),
-        ).to.revertedWithCustomError(erc1644Facet, "NotAllowedInMultiPartitionMode");
+          asset.controllerTransfer(signer_D.address, signer_E.address, amount, data, operatorData),
+        ).to.revertedWithCustomError(asset, "NotAllowedInMultiPartitionMode");
       });
 
       it("GIVEN an account with controller role WHEN controllerRedeem THEN NotAllowedInMultiPartitionMode", async () => {
         // check is controllable
-        const isControllable = await erc1644Facet.isControllable();
+        const isControllable = await asset.isControllable();
         expect(isControllable).to.equal(true);
 
         // controller transfer
-        await expect(
-          erc1644Facet.controllerRedeem(signer_D.address, amount, data, operatorData),
-        ).to.revertedWithCustomError(erc1644Facet, "NotAllowedInMultiPartitionMode");
+        await expect(asset.controllerRedeem(signer_D.address, amount, data, operatorData)).to.revertedWithCustomError(
+          asset,
+          "NotAllowedInMultiPartitionMode",
+        );
       });
     });
   });
