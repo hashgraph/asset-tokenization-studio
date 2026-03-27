@@ -92,6 +92,24 @@ contract Factory is IFactory, Common {
         _;
     }
 
+    /**
+     * @notice Deploy a ResolverProxy with the given configuration.
+     * @param _resolver The BusinessLogicResolver to use
+     * @param _configKey The configuration key (e.g., LOAN_CONFIG_ID)
+     * @param _version The configuration version
+     * @param _rbacs Array of RBAC role assignments
+     * @return proxyAddress_ Address of the deployed ResolverProxy
+     */
+    function deployProxy(
+        IBusinessLogicResolver _resolver,
+        bytes32 _configKey,
+        uint256 _version,
+        IResolverProxy.Rbac[] calldata _rbacs
+    ) external checkResolver(_resolver) checkAdmins(_rbacs) returns (address proxyAddress_) {
+        proxyAddress_ = address(new ResolverProxy(_resolver, _configKey, _version, _rbacs));
+        emit ProxyDeployed(proxyAddress_, _resolver, _configKey, _version, _rbacs);
+    }
+
     function deployEquity(
         EquityData calldata _equityData,
         FactoryRegulationData calldata _factoryRegulationData
