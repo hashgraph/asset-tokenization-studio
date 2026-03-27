@@ -10,6 +10,7 @@ import {
     IScheduledCrossOrderedTasks
 } from "../../facets/layer_2/scheduledTask/scheduledCrossOrderedTask/IScheduledCrossOrderedTasks.sol";
 import { IEquity } from "../../facets/layer_2/equity/IEquity.sol";
+import { IBondRead } from "../../facets/layer_2/bond/IBondRead.sol";
 import { ISnapshotsStorageWrapper } from "../../facets/layer_1/snapshot/ISnapshots.sol";
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION,
@@ -28,6 +29,8 @@ import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol
 import { BondStorageWrapper } from "./BondStorageWrapper.sol";
 import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
+import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
+import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
 
 library ScheduledTasksStorageWrapper {
     error WrongTimestamp(uint256 timeStamp);
@@ -326,8 +329,21 @@ library ScheduledTasksStorageWrapper {
 
         bytes32 actionId = abi.decode(data, (bytes32));
 
-        BondStorageWrapper.addToCouponsOrderedList(uint256(actionId));
+        // Get the coupon ID (index) from the corporate action
+        (, uint256 couponID, ) = CorporateActionsStorageWrapper.getCorporateAction(actionId);
+
+        BondStorageWrapper.addToCouponsOrderedList(couponID);
         uint256 pos = BondStorageWrapper.getCouponsOrderedListTotal();
+
+        // Calculate and set SPT interest rate if SPT rate is initialized
+        if (InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()) {
+            IBondRead.RegisteredCoupon memory registeredCoupon = BondStorageWrapper.getCoupon(couponID);
+
+            (uint256 rate, uint8 rateDecimals) = SustainabilityPerformanceTargetRateLib
+                .calculateSustainabilityPerformanceTargetInterestRate(couponID, registeredCoupon.coupon);
+
+            BondStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
+        }
 
         CorporateActionsStorageWrapper.updateCorporateActionResult(
             actionId,

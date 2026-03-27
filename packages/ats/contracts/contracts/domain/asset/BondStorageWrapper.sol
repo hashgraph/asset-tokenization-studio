@@ -19,6 +19,8 @@ import { ERC20StorageWrapper } from "./ERC20StorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../core/ERC3643StorageWrapper.sol";
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
+import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
+import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
 
 struct BondDataStorage {
     bytes3 currency;
@@ -144,6 +146,24 @@ library BondStorageWrapper {
         }
 
         registeredCoupon_.snapshotId = CorporateActionsStorageWrapper.getUintResultAt(actionId, SNAPSHOT_RESULT_ID);
+
+        // Calculate SPT rate on-the-fly if needed (similar to _getCouponAdjustedAt pattern in inheritance-based impl)
+        // This ensures the rate is available when getCoupon is called, not just during scheduled task triggers
+        if (
+            registeredCoupon_.coupon.fixingDate != 0 &&
+            registeredCoupon_.coupon.rateStatus != IBondRead.RateCalculationStatus.SET &&
+            registeredCoupon_.coupon.fixingDate <= TimeTravelStorageWrapper.getBlockTimestamp() &&
+            InterestRateStorageWrapper.isSustainabilityPerformanceTargetRateInitialized()
+        ) {
+            (
+                registeredCoupon_.coupon.rate,
+                registeredCoupon_.coupon.rateDecimals
+            ) = SustainabilityPerformanceTargetRateLib.calculateSustainabilityPerformanceTargetInterestRate(
+                couponID,
+                registeredCoupon_.coupon
+            );
+            registeredCoupon_.coupon.rateStatus = IBondRead.RateCalculationStatus.SET;
+        }
     }
 
     function getCouponFor(
