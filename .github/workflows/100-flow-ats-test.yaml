@@ -76,4 +76,4 @@ jobs:
 
       - name: Upload coverage report
         if: ${{ !cancelled() && always() }}
-        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v5.4.0
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v5.4.0
