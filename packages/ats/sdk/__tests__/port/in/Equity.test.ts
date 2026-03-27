@@ -10,13 +10,9 @@ import {
   RoleRequest,
   Role,
   Equity,
-  SetDividendRequest,
-  GetDividendRequest,
-  GetAllDividendsRequest,
   SetVotingRightsRequest,
   GetVotingRightsRequest,
   GetAllVotingRightsRequest,
-  GetDividendForRequest,
   GetVotingRightsForRequest,
   CancelVotingRequest,
   SetScheduledBalanceAdjustmentRequest,
@@ -167,67 +163,6 @@ describe("🧪 Equity test", () => {
 
     console.log("equity: " + JSON.stringify(equity));
   }, 600_000);
-
-  it("Dividends", async () => {
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._CORPORATEACTIONS_ROLE,
-      }),
-    );
-
-    const amount = "1";
-    const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
-    const executionTimestamp = recordTimestamp + 1000;
-
-    await Equity.setDividend(
-      new SetDividendRequest({
-        securityId: equity.evmDiamondAddress!.toString(),
-        amountPerUnitOfSecurity: amount,
-        recordTimestamp: recordTimestamp.toString(),
-        executionTimestamp: executionTimestamp.toString(),
-      }),
-    );
-
-    const dividend = await Equity.getDividend(
-      new GetDividendRequest({
-        securityId: equity.evmDiamondAddress!.toString(),
-        dividendId: 1,
-      }),
-    );
-
-    const allDividends = await Equity.getAllDividends(
-      new GetAllDividendsRequest({
-        securityId: equity.evmDiamondAddress!.toString(),
-      }),
-    );
-
-    const dividendFor = await Equity.getDividendFor(
-      new GetDividendForRequest({
-        securityId: equity.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        dividendId: 1,
-      }),
-    );
-
-    expect(dividend.amountPerUnitOfSecurity).toEqual(amount);
-    expect(dividend.amountDecimals).toEqual(0);
-    expect(dividend.dividendId).toEqual(1);
-    expect(dividend.executionDate.getTime() / 1000).toEqual(executionTimestamp);
-    expect(dividend.recordDate.getTime() / 1000).toEqual(recordTimestamp);
-    expect(dividendFor.tokenBalance).toEqual("0");
-    expect(dividendFor.decimals).toEqual("0");
-    expect(allDividends.length).toEqual(1);
-
-    await Role.revokeRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!.toString(),
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._CORPORATEACTIONS_ROLE,
-      }),
-    );
-  }, 60_000);
 
   it("VotingRights", async () => {
     await Role.grantRole(

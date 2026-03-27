@@ -6,15 +6,14 @@ import { AssetType } from "@domain/model/asset-type.enum"
 import { Asset } from "@domain/model/asset"
 import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id"
 import {
-  Bond,
-  Coupon,
-  Equity,
+  Dividend,
   Security,
   GetAllCouponsRequest,
   GetAllDividendsRequest,
   GetTotalCouponHoldersRequest,
   GetTotalDividendHoldersRequest,
   GetTotalTokenHoldersAtSnapshotRequest,
+  Coupon,
 } from "@hashgraph/asset-tokenization-sdk"
 
 export class OnChainDistributionRepository implements OnChainDistributionRepositoryPort {
@@ -59,7 +58,7 @@ export class OnChainDistributionRepository implements OnChainDistributionReposit
           securityId: tokenId,
           dividendId: corporateActionId,
         })
-        return await Equity.getTotalDividendHolders(dividendRequest)
+        return await Dividend.getTotalDividendHolders(dividendRequest)
       }
 
       default:
@@ -104,7 +103,7 @@ export class OnChainDistributionRepository implements OnChainDistributionReposit
 
   private async getDividendsForAsset(asset: Asset): Promise<Distribution[]> {
     const request = new GetAllDividendsRequest({ securityId: asset.hederaTokenAddress })
-    const dividends = await Equity.getAllDividends(request)
+    const dividends = await Dividend.getAllDividends(request)
     const now = new Date()
 
     const futureDividends = dividends

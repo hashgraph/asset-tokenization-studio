@@ -5,10 +5,6 @@ import { CommandBus } from "@core/command/CommandBus";
 import {
   CreateEquityRequest,
   GetEquityDetailsRequest,
-  SetDividendRequest,
-  GetDividendForRequest,
-  GetDividendRequest,
-  GetAllDividendsRequest,
   SetVotingRightsRequest,
   CancelVotingRequest,
   SetScheduledBalanceAdjustmentRequest,
@@ -18,12 +14,9 @@ import {
   GetScheduledBalanceAdjustmentCountRequest,
   GetScheduledBalanceAdjustmentRequest,
   GetAllScheduledBalanceAdjustmentsRequest,
-  GetDividendHoldersRequest,
-  GetTotalDividendHoldersRequest,
   GetVotingHoldersRequest,
   GetTotalVotingHoldersRequest,
   CreateTrexSuiteEquityRequest,
-  CancelDividendRequest,
   CancelScheduledBalanceAdjustmentRequest,
 } from "../request";
 import { HederaIdPropsFixture, TransactionIdFixture } from "@test/fixtures/shared/DataFixture";
@@ -43,25 +36,17 @@ import EquityToken from "./Equity";
 import {
   CreateEquityRequestFixture,
   CreateTrexSuiteEquityRequestFixture,
-  DividendFixture,
   EquityDetailsFixture,
-  GetAllDividendsRequestFixture,
   GetAllScheduledBalanceAdjustmentsRequestFixture,
   GetAllVotingRightsRequestFixture,
-  GetDividendHoldersRequestFixture,
-  GetDividendForRequestFixture,
-  GetDividendRequestFixture,
   GetEquityDetailsRequestFixture,
   GetScheduledBalanceAdjustmentCountRequestFixture,
   GetScheduledBalanceAdjustmentRequestFixture,
-  GetTotalDividendHoldersRequestFixture,
   GetTotalVotingHoldersRequestFixture,
   GetVotingHoldersRequestFixture,
   GetVotingRightsForRequestFixture,
   GetVotingRightsRequestFixture,
   ScheduledBalanceAdjustmentFixture,
-  SetDividendRequestFixture,
-  CancelDividendRequestFixture,
   SetScheduledBalanceAdjustmentRequestFixture,
   CancelScheduledBalanceAdjustmentRequestFixture,
   SetVotingRightsRequestFixture,
@@ -76,17 +61,10 @@ import { CancelVotingCommand } from "@command/equity/votingRights/cancel/CancelV
 import { GetVotingForQuery } from "@query/equity/votingRights/getVotingFor/GetVotingForQuery";
 import { GetVotingQuery } from "@query/equity/votingRights/getVoting/GetVotingQuery";
 import { GetVotingCountQuery } from "@query/equity/votingRights/getVotingCount/GetVotingCountQuery";
-import { SetDividendCommand } from "@command/equity/dividends/set/SetDividendCommand";
-import { CancelDividendCommand } from "@command/equity/dividends/cancel/CancelDividendCommand";
-import { GetDividendForQuery } from "@query/equity/dividends/getDividendFor/GetDividendForQuery";
-import { GetDividendQuery } from "@query/equity/dividends/getDividend/GetDividendQuery";
-import { GetDividendsCountQuery } from "@query/equity/dividends/getDividendsCount/GetDividendsCountQuery";
 import { SetScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand";
 import { GetScheduledBalanceAdjustmentQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery";
 import { GetScheduledBalanceAdjustmentCountQuery } from "@query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery";
 import { CancelScheduledBalanceAdjustmentCommand } from "@command/equity/balanceAdjustments/cancelScheduledBalanceAdjustment/CancelScheduledBalanceAdjustmentCommand";
-import { GetDividendHoldersQuery } from "@query/equity/dividends/getDividendHolders/GetDividendHoldersQuery";
-import { GetTotalDividendHoldersQuery } from "@query/equity/dividends/getTotalDividendHolders/GetTotalDividendHoldersQuery";
 import { GetVotingHoldersQuery } from "@query/equity/votingRights/getVotingHolders/GetVotingHoldersQuery";
 import { GetTotalVotingHoldersQuery } from "@query/equity/votingRights/getTotalVotingHolders/GetTotalVotingHoldersQuery";
 import { CreateTrexSuiteEquityCommand } from "@command/equity/createTrexSuite/CreateTrexSuiteEquityCommand";
@@ -98,10 +76,6 @@ describe("Equity", () => {
 
   let createEquityRequest: CreateEquityRequest;
   let getEquityDetailsRequest: GetEquityDetailsRequest;
-  let setDividendRequest: SetDividendRequest;
-  let getDividendForRequest: GetDividendForRequest;
-  let getDividendRequest: GetDividendRequest;
-  let getAllDividendsRequest: GetAllDividendsRequest;
   let setVotingRightsRequest: SetVotingRightsRequest;
   let cancelVotingRequest: CancelVotingRequest;
   let getVotingRightsForRequest: GetVotingRightsForRequest;
@@ -112,12 +86,9 @@ describe("Equity", () => {
   let getScheduledBalanceAdjustmentRequest: GetScheduledBalanceAdjustmentRequest;
   let cancelScheduledBalanceAdjustmentRequest: CancelScheduledBalanceAdjustmentRequest;
   let getAllScheduledBalanceAdjustmentsRequest: GetAllScheduledBalanceAdjustmentsRequest;
-  let getDividendHoldersRequest: GetDividendHoldersRequest;
-  let getTotalDividendHoldersRequest: GetTotalDividendHoldersRequest;
   let getVotingHoldersRequest: GetVotingHoldersRequest;
   let getTotalVotingHoldersRequest: GetTotalVotingHoldersRequest;
   let createTrexSuiteEquityRequest: CreateTrexSuiteEquityRequest;
-  let cancelDividendRequest: CancelDividendRequest;
 
   let handleValidationSpy: jest.SpyInstance;
 
@@ -756,347 +727,6 @@ describe("Equity", () => {
     });
   });
 
-  describe("setDividend", () => {
-    setDividendRequest = new SetDividendRequest(SetDividendRequestFixture.create());
-    it("should set dividends successfully", async () => {
-      const expectedResponse = {
-        payload: 1,
-        transactionId: transactionId,
-      };
-
-      commandBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await EquityToken.setDividend(setDividendRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("SetDividendRequest", setDividendRequest);
-
-      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new SetDividendCommand(
-          setDividendRequest.securityId,
-          setDividendRequest.recordTimestamp,
-          setDividendRequest.executionTimestamp,
-          setDividendRequest.amountPerUnitOfSecurity,
-        ),
-      );
-
-      expect(result).toEqual(expectedResponse);
-    });
-
-    it("should throw an error if command execution fails", async () => {
-      const error = new Error("Command execution failed");
-      commandBusMock.execute.mockRejectedValue(error);
-
-      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow("Command execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("SetDividendRequest", setDividendRequest);
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new SetDividendCommand(
-          setDividendRequest.securityId,
-          setDividendRequest.recordTimestamp,
-          setDividendRequest.executionTimestamp,
-          setDividendRequest.amountPerUnitOfSecurity,
-        ),
-      );
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      setDividendRequest = new SetDividendRequest({
-        ...SetDividendRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if recordTimestamp is invalid", async () => {
-      setDividendRequest = new SetDividendRequest({
-        ...SetDividendRequestFixture.create(),
-        recordTimestamp: (Math.ceil(new Date().getTime() / 1000) - 100).toString(),
-      });
-
-      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if executionTimestamp is invalid", async () => {
-      const time = Math.ceil(new Date().getTime() / 1000);
-      setDividendRequest = new SetDividendRequest({
-        ...SetDividendRequestFixture.create(),
-        recordTimestamp: time.toString(),
-        executionTimestamp: (time - 100).toString(),
-      });
-
-      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if amountPerUnitOfSecurity is invalid", async () => {
-      setDividendRequest = new SetDividendRequest({
-        ...SetDividendRequestFixture.create(),
-        amountPerUnitOfSecurity: "invalid",
-      });
-
-      await expect(EquityToken.setDividend(setDividendRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("cancelDividend", () => {
-    cancelDividendRequest = new CancelDividendRequest(CancelDividendRequestFixture.create());
-
-    it("should cancel dividend successfully", async () => {
-      const expectedResponse = {
-        payload: true,
-        transactionId: transactionId,
-      };
-
-      commandBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await EquityToken.cancelDividend(cancelDividendRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("CancelDividendRequest", cancelDividendRequest);
-
-      expect(commandBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(commandBusMock.execute).toHaveBeenCalledWith(
-        new CancelDividendCommand(cancelDividendRequest.securityId, cancelDividendRequest.dividendId),
-      );
-
-      expect(result).toEqual(expectedResponse);
-    });
-
-    it("should throw an error if command execution fails", async () => {
-      const error = new Error("Command execution failed");
-      commandBusMock.execute.mockRejectedValue(error);
-
-      await expect(EquityToken.cancelDividend(cancelDividendRequest)).rejects.toThrow("Command execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("CancelDividendRequest", cancelDividendRequest);
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      cancelDividendRequest = new CancelDividendRequest({
-        ...CancelDividendRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(EquityToken.cancelDividend(cancelDividendRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("getDividendFor", () => {
-    getDividendForRequest = new GetDividendForRequest(GetDividendForRequestFixture.create());
-    it("should get dividends for successfully", async () => {
-      const expectedResponse = {
-        tokenBalance: new BigDecimal(BigInt(10)),
-        decimals: 1,
-        isDisabled: false,
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await EquityToken.getDividendFor(getDividendForRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendForRequest", getDividendForRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendForQuery(
-          getDividendForRequest.targetId,
-          getDividendForRequest.securityId,
-          getDividendForRequest.dividendId,
-        ),
-      );
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          tokenBalance: expectedResponse.tokenBalance.toString(),
-          decimals: expectedResponse.decimals.toString(),
-          isDisabled: expectedResponse.isDisabled,
-        }),
-      );
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(EquityToken.getDividendFor(getDividendForRequest)).rejects.toThrow("Query execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendForRequest", getDividendForRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendForQuery(
-          getDividendForRequest.targetId,
-          getDividendForRequest.securityId,
-          getDividendForRequest.dividendId,
-        ),
-      );
-    });
-
-    it("should throw error if targetId is invalid", async () => {
-      getDividendForRequest = new GetDividendForRequest({
-        ...GetDividendForRequestFixture.create(),
-        targetId: "invalid",
-      });
-
-      await expect(EquityToken.getDividendFor(getDividendForRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      getDividendForRequest = new GetDividendForRequest({
-        ...GetDividendForRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(EquityToken.getDividendFor(getDividendForRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if dividendId is invalid", async () => {
-      getDividendForRequest = new GetDividendForRequest({
-        ...GetDividendForRequestFixture.create(),
-        dividendId: 0,
-      });
-
-      await expect(EquityToken.getDividendFor(getDividendForRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("getDividend", () => {
-    getDividendRequest = new GetDividendRequest(GetDividendRequestFixture.create());
-    it("should get dividends successfully", async () => {
-      const expectedResponse = {
-        dividend: DividendFixture.create(),
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await EquityToken.getDividend(getDividendRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendRequest", getDividendRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendQuery(getDividendRequest.securityId, getDividendRequest.dividendId),
-      );
-
-      expect(result).toEqual(
-        expect.objectContaining({
-          dividendId: getDividendRequest.dividendId,
-          amountPerUnitOfSecurity: expectedResponse.dividend.amountPerUnitOfSecurity.toString(),
-          recordDate: new Date(expectedResponse.dividend.recordTimeStamp * ONE_THOUSAND),
-          executionDate: new Date(expectedResponse.dividend.executionTimeStamp * ONE_THOUSAND),
-          isDisabled: expectedResponse.dividend.isDisabled,
-        }),
-      );
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(EquityToken.getDividend(getDividendRequest)).rejects.toThrow("Query execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetDividendRequest", getDividendRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendQuery(getDividendRequest.securityId, getDividendRequest.dividendId),
-      );
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      getDividendRequest = new GetDividendRequest({
-        ...GetDividendRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(EquityToken.getDividend(getDividendRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if dividendId is invalid", async () => {
-      getDividendRequest = new GetDividendRequest({
-        ...GetDividendRequestFixture.create(),
-        dividendId: -1,
-      });
-
-      await expect(EquityToken.getDividend(getDividendRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("getAllDividends", () => {
-    getAllDividendsRequest = new GetAllDividendsRequest(GetAllDividendsRequestFixture.create());
-    it("should get all dividends successfully", async () => {
-      const expectedResponse = {
-        payload: 1,
-      };
-
-      const expectedResponse2 = {
-        dividend: DividendFixture.create(),
-      };
-
-      queryBusMock.execute.mockResolvedValueOnce(expectedResponse).mockResolvedValueOnce(expectedResponse2);
-
-      const result = await EquityToken.getAllDividends(getAllDividendsRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllDividendsRequest", getAllDividendsRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(2);
-
-      expect(queryBusMock.execute).toHaveBeenNthCalledWith(
-        1,
-        new GetDividendsCountQuery(getAllDividendsRequest.securityId),
-      );
-
-      expect(queryBusMock.execute).toHaveBeenNthCalledWith(
-        2,
-        new GetDividendQuery(getAllDividendsRequest.securityId, 1),
-      );
-
-      expect(result).toEqual(
-        expect.arrayContaining([
-          {
-            dividendId: 1,
-            amountPerUnitOfSecurity: expectedResponse2.dividend.amountPerUnitOfSecurity.toString(),
-            amountDecimals: expectedResponse2.dividend.amountDecimals,
-            recordDate: new Date(expectedResponse2.dividend.recordTimeStamp * ONE_THOUSAND),
-            executionDate: new Date(expectedResponse2.dividend.executionTimeStamp * ONE_THOUSAND),
-            isDisabled: expectedResponse2.dividend.isDisabled,
-          },
-        ]),
-      );
-    });
-
-    it("should return empty array if count is 0", async () => {
-      const expectedResponse = {
-        payload: 0,
-      };
-      queryBusMock.execute.mockResolvedValueOnce(expectedResponse);
-
-      const result = await EquityToken.getAllDividends(getAllDividendsRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllDividendsRequest", getAllDividendsRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetDividendsCountQuery(getAllDividendsRequest.securityId));
-
-      expect(result).toStrictEqual([]);
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(EquityToken.getAllDividends(getAllDividendsRequest)).rejects.toThrow("Query execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith("GetAllDividendsRequest", getAllDividendsRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(new GetVotingCountQuery(getAllDividendsRequest.securityId));
-    });
-  });
-
   describe("setScheduledBalanceAdjustment", () => {
     setScheduledBalanceAdjustmentRequest = new SetScheduledBalanceAdjustmentRequest(
       SetScheduledBalanceAdjustmentRequestFixture.create(),
@@ -1485,162 +1115,6 @@ describe("Equity", () => {
 
       expect(queryBusMock.execute).toHaveBeenCalledWith(
         new GetScheduledBalanceAdjustmentCountQuery(getAllScheduledBalanceAdjustmentsRequest.securityId),
-      );
-    });
-  });
-
-  describe("getDividendHolders", () => {
-    getDividendHoldersRequest = new GetDividendHoldersRequest(GetDividendHoldersRequestFixture.create());
-    it("should get dividend token holders successfully", async () => {
-      const expectedResponse = {
-        payload: [transactionId],
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await EquityToken.getDividendHolders(getDividendHoldersRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(GetDividendHoldersRequest.name, getDividendHoldersRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendHoldersQuery(
-          getDividendHoldersRequest.securityId,
-          getDividendHoldersRequest.dividendId,
-          getDividendHoldersRequest.start,
-          getDividendHoldersRequest.end,
-        ),
-      );
-      expect(result).toStrictEqual(expectedResponse.payload);
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow("Query execution failed");
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(GetDividendHoldersRequest.name, getDividendHoldersRequest);
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetDividendHoldersQuery(
-          getDividendHoldersRequest.securityId,
-          getDividendHoldersRequest.dividendId,
-          getDividendHoldersRequest.start,
-          getDividendHoldersRequest.end,
-        ),
-      );
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      getDividendHoldersRequest = new GetDividendHoldersRequest({
-        ...GetDividendHoldersRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if dividendId is invalid", async () => {
-      getDividendHoldersRequest = new GetDividendHoldersRequest({
-        ...GetDividendHoldersRequestFixture.create(),
-        dividendId: -1,
-      });
-
-      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw error if start is invalid", async () => {
-      getDividendHoldersRequest = new GetDividendHoldersRequest({
-        ...GetDividendHoldersRequestFixture.create(),
-        start: -1,
-      });
-
-      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-    it("should throw error if end is invalid", async () => {
-      getDividendHoldersRequest = new GetDividendHoldersRequest({
-        ...GetDividendHoldersRequestFixture.create(),
-        end: -1,
-      });
-
-      await expect(EquityToken.getDividendHolders(getDividendHoldersRequest)).rejects.toThrow(ValidationError);
-    });
-  });
-
-  describe("getTotalDividendHolders", () => {
-    getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest(GetTotalDividendHoldersRequestFixture.create());
-    it("should get total dividend holders successfully", async () => {
-      const expectedResponse = {
-        payload: 1,
-      };
-
-      queryBusMock.execute.mockResolvedValue(expectedResponse);
-
-      const result = await EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest);
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetTotalDividendHoldersRequest.name,
-        getTotalDividendHoldersRequest,
-      );
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetTotalDividendHoldersQuery(
-          getTotalDividendHoldersRequest.securityId,
-          getTotalDividendHoldersRequest.dividendId,
-        ),
-      );
-
-      expect(result).toEqual(expectedResponse.payload);
-    });
-
-    it("should throw an error if query execution fails", async () => {
-      const error = new Error("Query execution failed");
-      queryBusMock.execute.mockRejectedValue(error);
-
-      await expect(EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest)).rejects.toThrow(
-        "Query execution failed",
-      );
-
-      expect(handleValidationSpy).toHaveBeenCalledWith(
-        GetTotalDividendHoldersRequest.name,
-        getTotalDividendHoldersRequest,
-      );
-
-      expect(queryBusMock.execute).toHaveBeenCalledTimes(1);
-
-      expect(queryBusMock.execute).toHaveBeenCalledWith(
-        new GetTotalDividendHoldersQuery(
-          getTotalDividendHoldersRequest.securityId,
-          getTotalDividendHoldersRequest.dividendId,
-        ),
-      );
-    });
-
-    it("should throw error if securityId is invalid", async () => {
-      getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest({
-        ...GetTotalDividendHoldersRequestFixture.create(),
-        securityId: "invalid",
-      });
-
-      await expect(EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest)).rejects.toThrow(
-        ValidationError,
-      );
-    });
-
-    it("should throw error if dividendId is invalid", async () => {
-      getTotalDividendHoldersRequest = new GetTotalDividendHoldersRequest({
-        ...GetTotalDividendHoldersRequestFixture.create(),
-        dividendId: -1,
-      });
-
-      await expect(EquityToken.getTotalDividendHolders(getTotalDividendHoldersRequest)).rejects.toThrow(
-        ValidationError,
       );
     });
   });
