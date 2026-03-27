@@ -140,5 +140,5 @@ CLAUDE.md
 .tasks/
 
 
-scripts/ats/validate-sdk-contracts/__pycache__
-scripts/ats/validate-sdk-contracts/output
+scripts/ats/validate-sdk-contracts/__pycache__/
+scripts/ats/validate-sdk-contracts/output/

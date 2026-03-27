@@ -17,6 +17,12 @@ The script identifies three types of validation results:
 ### Basic Usage
 
 ```bash
+npm run ats:scritp:validate-sdk-contracts
+```
+
+Or directly:
+
+```bash
 python3 scripts/ats/validate-sdk-contracts/validate_sdk_contracts.py
 ```
 
@@ -70,7 +76,7 @@ Structured data with complete validation results:
 
 ```json
 {
-  "missing": [{ "FacetName": ["method1", "method2"] }],
+  "missing": [{ "FacetName": [{ "method": "methodName", "signature": "function methodName(...) external" }] }],
   "diff": [{ "FacetName": { "methodName": { "contract_params": 2, "sdk_params": 3 } } }],
   "success": [{ "FacetName": ["method1", "method2"] }],
   "sdk_unmatched": ["SDKFacet1", "SDKFacet2"],
@@ -163,7 +169,9 @@ Results: 312 contract methods analysed
   diff    : 0
 
 ── missing by facet ─────────────────────
-  Cap: 2 method(s)
+  Cap (2):
+    ✗ function initialize_Cap( uint256 maxSupply, ... ) external
+    ✗ function setMaxSupplyByPartition( bytes32 _partition, ... ) external
   ...
 
 ── diff (wrong param count) ─────────────
