@@ -22,18 +22,37 @@ Quick start guide to run the Asset Tokenization Studio web application.
 
 ## Installation
 
-### 1. Clone the Repository
+### Clone the Repository
 
 ```bash
 git clone https://github.com/hashgraph/asset-tokenization-studio.git
 cd asset-tokenization-studio
 ```
 
-### 2. Setup ATS
+## ATS Configuration
 
-You have two options:
+### Create Environment File
 
-#### Option A: Quick Setup (Recommended)
+```bash
+cp apps/ats/web/.env.example apps/ats/web/.env
+```
+
+### Configure Environment Variables (Optional)
+
+Edit `apps/ats/web/.env`:
+
+#### WalletConnect Configuration (Optional)
+
+Required only if using HashPack, Blade, or other non-MetaMask wallets. You need a Reown project ID (https://reown.com/):
+
+```bash
+# Get your project ID from https://cloud.walletconnect.com
+REACT_APP_PROJECT_ID=your_project_id_here
+```
+
+> **Note**: MetaMask connects directly and does not require WalletConnect configuration.
+
+### Build ATS
 
 Run this single command from the monorepo root to install dependencies and build everything:
 
@@ -43,88 +62,13 @@ npm run ats:setup
 
 This will automatically install dependencies, build contracts, and build the SDK.
 
-#### Option B: Manual Setup
-
-If you prefer to run each step manually:
-
-```bash
-# Install dependencies
-npm ci
-
-# Build contracts and SDK
-npm run ats:contracts:build
-npm run ats:sdk:build
-```
-
-## Configuration
-
-### Create Environment File
-
-```bash
-cd apps/ats/web
-cp .env.example .env
-```
-
-### Configure Environment Variables
-
-Edit `apps/ats/web/.env`:
-
-#### Network Configuration
-
-```bash
-# Hedera Mirror Node
-REACT_APP_MIRROR_NODE=https://testnet.mirrornode.hedera.com/api/v1/
-
-# Hedera JSON-RPC Relay
-REACT_APP_RPC_NODE=https://testnet.hashio.io/api
-```
-
-#### WalletConnect Configuration (Optional)
-
-Required only if using HashPack, Blade, or other non-MetaMask wallets:
-
-```bash
-# Get your project ID from https://cloud.walletconnect.com
-REACT_APP_PROJECT_ID=your_project_id_here
-```
-
-> **Note**: MetaMask connects directly and does not require WalletConnect configuration.
-
-#### Contract Addresses
-
-```bash
-# Business Logic Resolver Contract ID
-REACT_APP_RPC_RESOLVER=0.0.12345678
-
-# T-REX Factory Contract ID
-REACT_APP_RPC_FACTORY=0.0.87654321
-```
-
-> **Note**: Replace the contract IDs with your deployed contract addresses. See the [Deployed Addresses](../developer-guides/contracts/deployed-addresses.md) for testnet/mainnet addresses, or the [Deployment Guide](../developer-guides/contracts/deployment.md) for instructions on deploying your own contracts.
-
-#### Optional Configuration
-
-```bash
-# Show cookie disclaimer popup
-REACT_APP_SHOW_DISCLAIMER=true
-```
-
 ## Running the Application
 
-### From Monorepo Root
-
 ```bash
-npm run ats:web:dev
+npm run ats:web:start
 ```
 
-### From Web Directory
-
-```bash
-cd apps/ats/web
-npm run dev
-```
-
-The application will be available at **http://localhost:5173**
+The application will be available at **http://localhost:4173/**
 
 ### Application Interface
 
@@ -192,8 +136,8 @@ Available operations appear in tabs. The tabs you see depend on your assigned ro
 ### Port Already in Use
 
 ```bash
-# Kill process on port 5173
-lsof -ti:5173 | xargs kill -9
+# Kill process on port 4173
+lsof -ti:4173 | xargs kill -9
 
 # Or change port in vite.config.ts
 ```
