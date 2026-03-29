@@ -77,13 +77,13 @@ library KpiLinkedRateLib {
             (uint256 previousRate, uint8 previousRateDecimals) = _previousRate(couponID);
 
             // Adjust decimals to match current rate decimals
-            previousRate = DecimalsLib.calculateDecimalsAdjustment(
+            uint256 adjustedPreviousRate = DecimalsLib.calculateDecimalsAdjustment(
                 previousRate,
                 previousRateDecimals,
                 kpiData.rateDecimals
             );
 
-            rate_ = previousRate + kpiData.missedPenalty;
+            rate_ = adjustedPreviousRate + kpiData.missedPenalty;
 
             // Cap at maxRate
             if (rate_ > kpiData.maxRate) {

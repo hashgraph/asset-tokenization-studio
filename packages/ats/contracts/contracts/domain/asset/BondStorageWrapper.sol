@@ -313,9 +313,13 @@ library BondStorageWrapper {
     function getPreviousCouponInOrderedList(uint256 couponID) internal view returns (uint256 previousCouponID_) {
         uint256 orderedListLength = getCouponsOrderedListTotalAdjustedAt(TimeTravelStorageWrapper.getBlockTimestamp());
 
-        if (orderedListLength < 2) return (0);
+        if (orderedListLength < 2) {
+            return 0;
+        }
 
-        if (getCouponFromOrderedListAt(0) == couponID) return (0);
+        if (getCouponFromOrderedListAt(0) == couponID) {
+            return 0;
+        }
 
         orderedListLength--;
         uint256 previousCouponId;
@@ -323,7 +327,9 @@ library BondStorageWrapper {
         for (uint256 index = 0; index < orderedListLength; index++) {
             previousCouponId = getCouponFromOrderedListAt(index);
             uint256 couponIdAtNext = getCouponFromOrderedListAt(index + 1);
-            if (couponIdAtNext == couponID) break;
+            if (couponIdAtNext == couponID) {
+                break;
+            }
         }
 
         return previousCouponId;

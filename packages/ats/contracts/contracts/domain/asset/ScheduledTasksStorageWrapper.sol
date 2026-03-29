@@ -22,7 +22,8 @@ import {
     SNAPSHOT_RESULT_ID,
     COUPON_LISTING_RESULT_ID,
     SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    COUPON_LISTING_TASK_TYPE
 } from "../../constants/values.sol";
 import { SnapshotsStorageWrapper } from "./SnapshotsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "./AdjustBalancesStorageWrapper.sol";
@@ -31,6 +32,7 @@ import { CorporateActionsStorageWrapper } from "../core/CorporateActionsStorageW
 import { TimeTravelStorageWrapper } from "../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 import { InterestRateStorageWrapper } from "./InterestRateStorageWrapper.sol";
 import { SustainabilityPerformanceTargetRateLib } from "./SustainabilityPerformanceTargetRateLib.sol";
+import { KpiLinkedRateLib } from "./KpiLinkedRateLib.sol";
 
 library ScheduledTasksStorageWrapper {
     error WrongTimestamp(uint256 timeStamp);
@@ -56,6 +58,9 @@ library ScheduledTasksStorageWrapper {
             max = scheduledTasksLength;
         }
 
+        uint256 processed = 0;
+
+        // Iterate from NEWEST to OLDEST
         for (uint256 j = 1; j <= max; j++) {
             uint256 pos = scheduledTasksLength - j;
 
@@ -76,12 +81,16 @@ library ScheduledTasksStorageWrapper {
                 } else if (callbackType == bytes32("crossOrdered")) {
                     onScheduledCrossOrderedTaskTriggered(pos, scheduledTasksLength, currentScheduledTask);
                 }
+
+                processed++;
+                // Note: scheduledTasksLength is not decremented because we use pop (removes from end)
+                // and pos is calculated from original length
             } else {
                 break;
             }
         }
 
-        return 0;
+        return processed;
     }
 
     function addScheduledSnapshot(uint256 _newScheduledTimestamp, bytes32 _actionId) internal {
@@ -168,10 +177,10 @@ library ScheduledTasksStorageWrapper {
 
         ScheduledTasksDataStorage storage scheduledCouponListing = scheduledCouponListingStorage();
 
-        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListing);
+        uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledCouponListing);
 
-        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
-            uint256 pos = scheduledTaskCount - i;
+        for (uint256 i; i < length; ) {
+            uint256 pos = length - 1 - i;
 
             ScheduledTask memory scheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(
                 scheduledCouponListing,
@@ -180,6 +189,9 @@ library ScheduledTasksStorageWrapper {
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
                 total_++;
+                unchecked {
+                    ++i;
+                }
             } else {
                 break;
             }
@@ -217,10 +229,10 @@ library ScheduledTasksStorageWrapper {
 
         ScheduledTasksDataStorage storage scheduledBalanceAdjustments = scheduledBalanceAdjustmentStorage();
 
-        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustments);
+        uint256 length = ScheduledTasksLib.getScheduledTaskCount(scheduledBalanceAdjustments);
 
-        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
-            uint256 pos = scheduledTaskCount - i;
+        for (uint256 i; i < length; ) {
+            uint256 pos = length - 1 - i;
 
             ScheduledTask memory scheduledTask = ScheduledTasksLib.getScheduledTasksByIndex(
                 scheduledBalanceAdjustments,
@@ -238,6 +250,9 @@ library ScheduledTasksStorageWrapper {
                 );
                 pendingABAF_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;
+                unchecked {
+                    ++i;
+                }
             } else {
                 break;
             }
@@ -345,6 +360,18 @@ library ScheduledTasksStorageWrapper {
             BondStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
         }
 
+        // Calculate and set KPI-linked interest rate if KPI-linked rate is initialized
+        if (InterestRateStorageWrapper.isKpiLinkedRateInitialized()) {
+            IBondRead.RegisteredCoupon memory registeredCoupon = BondStorageWrapper.getCoupon(couponID);
+
+            (uint256 rate, uint8 rateDecimals) = KpiLinkedRateLib.calculateKpiLinkedInterestRate(
+                couponID,
+                registeredCoupon.coupon
+            );
+
+            BondStorageWrapper.updateCouponRate(couponID, registeredCoupon.coupon, rate, rateDecimals);
+        }
+
         CorporateActionsStorageWrapper.updateCorporateActionResult(
             actionId,
             COUPON_LISTING_RESULT_ID,
@@ -384,6 +411,10 @@ library ScheduledTasksStorageWrapper {
         }
         if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
             triggerScheduledBalanceAdjustments(1);
+            return;
+        }
+        if (taskType == COUPON_LISTING_TASK_TYPE) {
+            triggerScheduledCouponListing(1);
             return;
         }
     }
