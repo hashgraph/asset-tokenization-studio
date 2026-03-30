@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface IERC1594 {
+import { IERC1594StorageWrapper } from "../../../../domain/asset/ERC1400/ERC1594/IERC1594StorageWrapper.sol";
+
+interface IERC1594 is IERC1594StorageWrapper {
     event TransferWithData(address indexed sender, address indexed to, uint256 amount, bytes data);
 
     event TransferFromWithData(

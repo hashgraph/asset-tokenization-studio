@@ -68,9 +68,7 @@ describe("Lock Tests", () => {
     return [rbacIssuer, rbacLocker, rbacPausable, rbacKYC, rbacSSI, rbacCorporateAction];
   }
 
-  async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-
+  async function setFacets(asset: IAsset) {
     await asset.connect(signer_A).addIssuer(signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_B.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -90,9 +88,12 @@ describe("Lock Tests", () => {
     signer_B = base.user1;
     signer_C = base.user2;
     signer_D = base.user3;
+
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
     await executeRbac(asset, set_initRbacs());
 
-    await setFacets({ diamond });
+    await setFacets(asset);
   }
 
   async function deploySecurityFixtureSinglePartition() {
@@ -102,9 +103,12 @@ describe("Lock Tests", () => {
     signer_B = base.user1;
     signer_C = base.user2;
     signer_D = base.user3;
+
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
     await executeRbac(asset, set_initRbacs());
 
-    await setFacets({ diamond });
+    await setFacets(asset);
   }
 
   beforeEach(async () => {

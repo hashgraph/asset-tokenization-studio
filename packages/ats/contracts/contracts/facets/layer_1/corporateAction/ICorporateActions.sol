@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface ICorporateActions {
+import {
+    ICorporateActionsStorageWrapper
+} from "../../../domain/asset/corporateAction/ICorporateActionsStorageWrapper.sol";
+
+interface ICorporateActions is ICorporateActionsStorageWrapper {
     /**
      * @dev Returns a corporate action info
      *

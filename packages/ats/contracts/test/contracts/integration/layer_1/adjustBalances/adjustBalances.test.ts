@@ -180,8 +180,8 @@ describe("Adjust Balances Tests", () => {
       const latestBLRVersion = Number(await blr.getLatestVersion());
 
       // Get current facet IDs from the diamond to build the new configuration version
-      const diamondFacet = await ethers.getContractAt("DiamondFacet", baseDiamond.target);
-      const existingFacetIds = await diamondFacet.getFacetIds();
+      asset = await ethers.getContractAt("IAsset", baseDiamond.target);
+      const existingFacetIds = await asset.getFacetIds();
 
       // All facets use latestBLRVersion (mirrors the scripts' createBatchConfiguration approach)
       const allFacetIds = [...existingFacetIds, migrationResolverKey];
@@ -197,9 +197,7 @@ describe("Adjust Balances Tests", () => {
 
       // Dynamically get the new config version and upgrade the diamond
       const newConfigVersion = Number(await blr.getLatestVersionByConfiguration(EQUITY_CONFIG_ID));
-      await diamondFacet.connect(deployer).updateConfigVersion(newConfigVersion);
-
-      const asset = await ethers.getContractAt("IAsset", baseDiamond.target);
+      await asset.connect(deployer).updateConfigVersion(newConfigVersion);
 
       // Set up standard roles
       await executeRbac(asset, [

@@ -13,7 +13,6 @@ describe("ScheduledCouponListing Tests", () => {
   let signer_A: HardhatEthersSigner;
 
   let asset: IAsset;
-  let couponFacet: CouponFacetTimeTravel;
 
   let startingDate = 0;
   let maturityDate = 0;
@@ -40,7 +39,6 @@ describe("ScheduledCouponListing Tests", () => {
     signer_A = base.deployer;
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
-    couponFacet = await ethers.getContractAt("CouponKpiLinkedRateFacetTimeTravel", diamond.target);
 
     // Grant corporate action role to signer_A
     await asset.grantRole(ATS_ROLES._CORPORATE_ACTION_ROLE, signer_A.address);
@@ -62,7 +60,7 @@ describe("ScheduledCouponListing Tests", () => {
         const fixingDate = startingDate + TIME_PERIODS_S.MONTH * (i + 1);
         const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
 
-        await couponFacet.setCoupon({
+        await asset.setCoupon({
           recordDate: fixingDate.toString(),
           executionDate: executionDate.toString(),
           rate: 0,
@@ -86,7 +84,7 @@ describe("ScheduledCouponListing Tests", () => {
         const fixingDate = startingDate + TIME_PERIODS_S.MONTH * (i + 1);
         const executionDate = fixingDate + TIME_PERIODS_S.WEEK;
 
-        await couponFacet.setCoupon({
+        await asset.setCoupon({
           recordDate: fixingDate.toString(),
           executionDate: executionDate.toString(),
           rate: 0,

@@ -4,10 +4,9 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _WILD_CARD_ROLE } from "../constants/roles.sol";
 import { IClearing } from "../facets/layer_1/clearing/IClearing.sol";
 import { SecurityStorageWrapper } from "./asset/security/SecurityStorageWrapper.sol";
+import { ICommon } from "./ICommon.sol";
 
-abstract contract Common is SecurityStorageWrapper {
-    error AlreadyInitialized();
-
+abstract contract Common is ICommon, SecurityStorageWrapper {
     modifier onlyUninitialized(bool _initialized) override {
         _checkUninitialized(_initialized);
         _;

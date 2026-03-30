@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface IBond {
+import { IBondStorageWrapper } from "../../../domain/asset/bond/IBondStorageWrapper.sol";
+
+interface IBond is IBondStorageWrapper {
     event MaturityDateUpdated(
         address indexed bondId,
         uint256 indexed maturityDate,

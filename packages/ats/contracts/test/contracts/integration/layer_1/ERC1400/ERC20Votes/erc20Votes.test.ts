@@ -20,14 +20,13 @@ describe("ERC20Votes Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
-  let timeTravelFacet: TimeTravel;
 
   const ABAF = 200;
   const DECIMALS = 2;
   const block = 100;
 
   async function checkVotingPowerAfterAdjustment() {
-    await timeTravelFacet.changeSystemBlocknumber(block + 1);
+    await asset.changeSystemBlocknumber(block + 1);
 
     const votesA1 = await asset.getPastVotes(signer_A.address, block - 1);
     const votesA2 = await asset.getVotes(signer_A.address);
@@ -78,8 +77,6 @@ describe("ERC20Votes Tests", () => {
         members: [signer_A.address],
       },
     ]);
-
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
@@ -108,8 +105,8 @@ describe("ERC20Votes Tests", () => {
         },
       });
 
-      const erc20VotesFacetInactive = await ethers.getContractAt("ERC20Votes", base.diamond.target);
-      const isActivated = await erc20VotesFacetInactive.isActivated();
+      const newAsset = await ethers.getContractAt("IAsset", base.diamond.target);
+      const isActivated = await newAsset.isActivated();
       expect(isActivated).to.equal(false);
     });
   });
@@ -117,7 +114,7 @@ describe("ERC20Votes Tests", () => {
   describe("Clock and Clock Mode", () => {
     it("GIVEN any state WHEN clock THEN returns current block number", async () => {
       const blockNumber = 1000;
-      await timeTravelFacet.changeSystemBlocknumber(blockNumber);
+      await asset.changeSystemBlocknumber(blockNumber);
       const clockValue = await asset.clock();
       expect(clockValue).to.equal(blockNumber);
     });
@@ -178,7 +175,7 @@ describe("ERC20Votes Tests", () => {
   describe("Voting Power", () => {
     async function checkTotalSupply(amount: number) {
       const now = await asset.clock();
-      await timeTravelFacet.changeSystemBlocknumber(now + 100n);
+      await asset.changeSystemBlocknumber(now + 100n);
       const totalSupply = await asset.getPastTotalSupply(now);
       expect(totalSupply).to.equal(amount);
     }
@@ -262,7 +259,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("Past Votes", () => {
     beforeEach(async () => {
-      await timeTravelFacet.changeSystemBlocknumber(1);
+      await asset.changeSystemBlocknumber(1);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -285,12 +282,12 @@ describe("ERC20Votes Tests", () => {
       const block_2 = 200;
       const block_3 = 300;
 
-      await timeTravelFacet.changeSystemBlocknumber(block_1);
+      await asset.changeSystemBlocknumber(block_1);
 
       await asset.delegate(signer_A.address);
       await asset.connect(signer_B).delegate(signer_B.address);
 
-      await timeTravelFacet.changeSystemBlocknumber(block_2);
+      await asset.changeSystemBlocknumber(block_2);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -299,7 +296,7 @@ describe("ERC20Votes Tests", () => {
         data: "0x",
       });
 
-      await timeTravelFacet.changeSystemBlocknumber(block_3);
+      await asset.changeSystemBlocknumber(block_3);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -315,7 +312,7 @@ describe("ERC20Votes Tests", () => {
         data: "0x",
       });
 
-      await timeTravelFacet.changeSystemBlocknumber(block_3 + 1);
+      await asset.changeSystemBlocknumber(block_3 + 1);
 
       const pastVotesA1 = await asset.getPastVotes(signer_A.address, block_1);
       const pastVotesA2 = await asset.getPastVotes(signer_A.address, block_2);
@@ -375,7 +372,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("Balance adjustments", () => {
     beforeEach(async () => {
-      await timeTravelFacet.changeSystemBlocknumber(1);
+      await asset.changeSystemBlocknumber(1);
       await asset.delegate(signer_A.address);
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -397,7 +394,7 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN an ERC20Votes when adjusting balances and delegating THEN values updated", async () => {
-      await timeTravelFacet.changeSystemBlocknumber(block);
+      await asset.changeSystemBlocknumber(block);
 
       await asset.adjustBalances(ABAF, DECIMALS);
 
@@ -413,7 +410,7 @@ describe("ERC20Votes Tests", () => {
     it("GIVEN an ERC20Votes when adjusting balances and transferring THEN values updated", async () => {
       await asset.connect(signer_B).delegate(signer_B.address);
 
-      await timeTravelFacet.changeSystemBlocknumber(block);
+      await asset.changeSystemBlocknumber(block);
 
       await asset.adjustBalances(ABAF, DECIMALS);
 
@@ -429,8 +426,8 @@ describe("ERC20Votes Tests", () => {
 
   describe("Scheduled Balance adjustments", () => {
     beforeEach(async () => {
-      await timeTravelFacet.changeSystemBlocknumber(1);
-      await timeTravelFacet.changeSystemTimestamp(1);
+      await asset.changeSystemBlocknumber(1);
+      await asset.changeSystemTimestamp(1);
       await asset.delegate(signer_A.address);
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -450,8 +447,8 @@ describe("ERC20Votes Tests", () => {
         decimals: DECIMALS,
       });
 
-      await timeTravelFacet.changeSystemBlocknumber(block);
-      await timeTravelFacet.changeSystemTimestamp(timestamp + 1);
+      await asset.changeSystemBlocknumber(block);
+      await asset.changeSystemTimestamp(timestamp + 1);
 
       await expect(asset.delegate(signer_B.address))
         .to.emit(asset, "DelegateVotesChanged")
@@ -473,8 +470,8 @@ describe("ERC20Votes Tests", () => {
         decimals: DECIMALS,
       });
 
-      await timeTravelFacet.changeSystemBlocknumber(block);
-      await timeTravelFacet.changeSystemTimestamp(timestamp + 1);
+      await asset.changeSystemBlocknumber(block);
+      await asset.changeSystemTimestamp(timestamp + 1);
 
       await expect(asset.transferByPartition(DEFAULT_PARTITION, { to: signer_B.address, value: amount * ABAF }, "0x"))
         .to.emit(asset, "DelegateVotesChanged")
@@ -488,7 +485,7 @@ describe("ERC20Votes Tests", () => {
 
   describe("Checkpoints lookup optimization", () => {
     beforeEach(async () => {
-      await timeTravelFacet.changeSystemBlocknumber(1);
+      await asset.changeSystemBlocknumber(1);
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
         tokenHolder: signer_A.address,
@@ -499,14 +496,14 @@ describe("ERC20Votes Tests", () => {
 
     it("GIVEN many checkpoints (>5) WHEN getPastVotes THEN uses optimized binary search with sqrt", async () => {
       // First delegate to establish voting power
-      await timeTravelFacet.changeSystemBlocknumber(50);
+      await asset.changeSystemBlocknumber(50);
       await asset.connect(signer_A).delegate(signer_B.address);
 
       // Create more than 5 checkpoints to trigger sqrt optimization
       let currentBlock = 100;
 
       for (let i = 0; i < 10; i++) {
-        await timeTravelFacet.changeSystemBlocknumber(currentBlock);
+        await asset.changeSystemBlocknumber(currentBlock);
 
         // Issue more tokens to create total supply checkpoints
         await asset.issueByPartition({
@@ -527,7 +524,7 @@ describe("ERC20Votes Tests", () => {
       }
 
       // Move forward to query past votes
-      await timeTravelFacet.changeSystemBlocknumber(currentBlock + 100);
+      await asset.changeSystemBlocknumber(currentBlock + 100);
 
       // Query votes at various past blocks - this will trigger the sqrt optimization
       const pastVotes1 = await asset.getPastVotes(signer_B.address, 200);
@@ -563,7 +560,7 @@ describe("ERC20Votes Tests", () => {
       let currentBlock = 100;
 
       for (let i = 0; i < 12; i++) {
-        await timeTravelFacet.changeSystemBlocknumber(currentBlock);
+        await asset.changeSystemBlocknumber(currentBlock);
         currentBlock += 50;
 
         await asset.issueByPartition({
@@ -574,7 +571,7 @@ describe("ERC20Votes Tests", () => {
         });
       }
 
-      await timeTravelFacet.changeSystemBlocknumber(currentBlock + 100);
+      await asset.changeSystemBlocknumber(currentBlock + 100);
 
       // Query at a timepoint that should hit the lower branch of sqrt optimization
       const pastTotalSupply = await asset.getPastTotalSupply(currentBlock - 100);
@@ -582,7 +579,7 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN empty checkpoints WHEN getPastVotes with timepoint THEN returns zero", async () => {
-      await timeTravelFacet.changeSystemBlocknumber(1000);
+      await asset.changeSystemBlocknumber(1000);
 
       // Query past votes for an address with no delegation history
       const pastVotes = await asset.getPastVotes(signer_D.address, 500);
@@ -590,10 +587,10 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN checkpoints WHEN getPastTotalSupply at block 0 THEN returns zero", async () => {
-      await timeTravelFacet.changeSystemBlocknumber(1);
+      await asset.changeSystemBlocknumber(1);
       await asset.connect(signer_A).delegate(signer_A.address);
 
-      await timeTravelFacet.changeSystemBlocknumber(100);
+      await asset.changeSystemBlocknumber(100);
 
       // Query total supply before any issuance
       const pastTotalSupply = await asset.getPastTotalSupply(0);
@@ -601,7 +598,7 @@ describe("ERC20Votes Tests", () => {
     });
 
     it("GIVEN delegation at early block WHEN getPastVotes at block before ABAF checkpoint THEN returns correct value", async () => {
-      await timeTravelFacet.changeSystemBlocknumber(10);
+      await asset.changeSystemBlocknumber(10);
 
       await asset.issueByPartition({
         partition: DEFAULT_PARTITION,
@@ -614,7 +611,7 @@ describe("ERC20Votes Tests", () => {
       await asset.connect(signer_A).delegate(signer_A.address);
 
       // Move to a later block
-      await timeTravelFacet.changeSystemBlocknumber(100);
+      await asset.changeSystemBlocknumber(100);
 
       const pastVotes = await asset.getPastVotes(signer_A.address, 5);
       expect(pastVotes).to.equal(0);

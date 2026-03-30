@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface ICoupon {
+import { ICouponStorageWrapper } from "../../../domain/asset/coupon/ICouponStorageWrapper.sol";
+
+interface ICoupon is ICouponStorageWrapper {
     /// @notice Status of the coupon rate calculation process
     enum RateCalculationStatus {
         PENDING,
@@ -47,6 +49,15 @@ interface ICoupon {
         uint256 denominator;
         bool recordDateReached;
     }
+
+    /**
+     * @notice Emitted when a coupon is created or updated for a security.
+     * @param corporateActionId Unique identifier grouping related corporate actions.
+     * @param couponId Identifier of the created or updated coupon.
+     * @param operator Address that performed the operation.
+     * @param coupon Coupon struct containing recordDate, executionDate, rate, and period.
+     */
+    event CouponSet(bytes32 corporateActionId, uint256 couponId, address indexed operator, ICoupon.Coupon coupon);
 
     /**
      * @notice Sets a new coupon for the security

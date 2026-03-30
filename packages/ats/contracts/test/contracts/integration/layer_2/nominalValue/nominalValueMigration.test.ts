@@ -27,8 +27,8 @@ async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deploy
 
   const latestBLRVersion = Number(await blr.getLatestVersion());
 
-  const diamondFacet = await ethers.getContractAt("DiamondFacet", baseDiamond.target);
-  const existingFacetIds = await diamondFacet.getFacetIds();
+  const asset = await ethers.getContractAt("IAsset", baseDiamond.target);
+  const existingFacetIds = await asset.getFacetIds();
 
   const allFacetIds = [...existingFacetIds, migrationResolverKey];
   const facetConfigs = allFacetIds.map((id: string) => ({ id, version: latestBLRVersion }));
@@ -41,7 +41,7 @@ async function addMigrationFacetToDiamond(base: Awaited<ReturnType<typeof deploy
   }
 
   const newConfigVersion = Number(await blr.getLatestVersionByConfiguration(configId));
-  await diamondFacet.connect(deployer).updateConfigVersion(newConfigVersion);
+  await asset.connect(deployer).updateConfigVersion(newConfigVersion);
 
   return base;
 }

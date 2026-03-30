@@ -108,28 +108,18 @@ describe("Sustainability Performance Target Rate Tests", () => {
     await uninitializedDiamond.waitForDeployment();
 
     // Get facets for the uninitialized diamond
-    const uninitializedAccessControl = await ethers.getContractAt(
-      "AccessControlFacet",
-      uninitializedDiamond.target,
-      signer_A,
-    );
+    const newasset = await ethers.getContractAt("IAsset", uninitializedDiamond.target, signer_A);
 
     // Set up roles
-    await executeRbac(uninitializedAccessControl, [
+    await executeRbac(newasset, [
       {
         role: ATS_ROLES._PROCEED_RECIPIENT_MANAGER_ROLE,
         members: [signer_A.address],
       },
     ]);
 
-    const uninitializedProceedFacet = await ethers.getContractAt(
-      "ProceedRecipientsFacet",
-      uninitializedDiamond.target,
-      signer_A,
-    );
-
     // Add proceed recipients
-    await uninitializedProceedFacet.connect(signer_A).addProceedRecipient(project1, "0x");
+    await newasset.connect(signer_A).addProceedRecipient(project1, "0x");
 
     const uninitializedFacet = await ethers.getContractAt(
       "SustainabilityPerformanceTargetRateFacet",

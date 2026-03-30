@@ -52,8 +52,7 @@ describe("Transfer and lock Tests", () => {
     ];
   }
 
-  async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-    asset = await ethers.getContractAt("IAsset", diamond.target);
+  async function setFacets(asset: IAsset) {
     await asset.connect(signer_A).addIssuer(signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
     await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -75,7 +74,7 @@ describe("Transfer and lock Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, set_initRbacs());
-    await setFacets({ diamond });
+    await setFacets(asset);
   }
 
   async function deploySecurityFixtureSinglePartition() {
@@ -89,7 +88,7 @@ describe("Transfer and lock Tests", () => {
 
     asset = await ethers.getContractAt("IAsset", diamond.target);
     await executeRbac(asset, set_initRbacs());
-    await setFacets({ diamond });
+    await setFacets(asset);
   }
 
   beforeEach(async () => {

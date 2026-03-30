@@ -14,6 +14,7 @@ const amount = 1;
 const data = "0x1234";
 const operatorData = "0x5678";
 const EMPTY_VC_ID = EMPTY_STRING;
+
 describe("ERC1644 Tests", () => {
   let diamond: ResolverProxy;
   let signer_A: HardhatEthersSigner;

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-library ArrayLib {
-    error ContradictoryValuesInArray(uint256 lowerIndex, uint256 upperIndex);
+import { IArrayLib } from "./IArrayLib.sol";
 
+library ArrayLib {
     function checkUniqueValues(address[] memory _addresses, bool[] memory _bools) internal pure {
         uint256 length = _addresses.length;
         uint256 innerIndex;
@@ -13,7 +13,7 @@ library ArrayLib {
             }
             for (; innerIndex < length; ) {
                 if (_addresses[index] == _addresses[innerIndex] && _bools[index] != _bools[innerIndex])
-                    revert ContradictoryValuesInArray(index, innerIndex);
+                    revert IArrayLib.ContradictoryValuesInArray(index, innerIndex);
                 unchecked {
                     ++innerIndex;
                 }
@@ -33,7 +33,7 @@ library ArrayLib {
             }
             for (; innerIndex < length; ) {
                 if (_bytes32s[index] == _bytes32s[innerIndex] && _bools[index] != _bools[innerIndex])
-                    revert ContradictoryValuesInArray(index, innerIndex);
+                    revert IArrayLib.ContradictoryValuesInArray(index, innerIndex);
                 unchecked {
                     ++innerIndex;
                 }

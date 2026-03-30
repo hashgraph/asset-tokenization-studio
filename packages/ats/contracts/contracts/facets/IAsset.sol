@@ -77,6 +77,11 @@ import { IBondUSA } from "./layer_3/bondUSA/IBondUSA.sol";
 import { IEquityUSA } from "./layer_3/equityUSA/IEquityUSA.sol";
 import { ITransferAndLock } from "./layer_3/transferAndLock/ITransferAndLock.sol";
 import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
+import { IDiamond } from "../infrastructure/proxy/IDiamond.sol";
+import { IArrayLib } from "../infrastructure/utils/IArrayLib.sol";
+import { IExternalListManagement } from "../domain/core/externalList/IExternalListManagement.sol";
+import { ICommon } from "../domain/ICommon.sol";
+import { IScheduledTasksCommon } from "../domain/asset/scheduledTask/IScheduledTasksCommon.sol";
 
 /**
  * @title IAsset
@@ -94,7 +99,12 @@ import { ITimeTravel } from "../test/testTimeTravel/ITimeTravel.sol";
  */
 // solhint-disable no-empty-blocks
 interface IAsset is
+    ICommon,
+    IArrayLib,
+    IScheduledTasksCommon,
     ITimeTravel,
+    IExternalListManagement,
+    IDiamond,
     IAccessControl,
     ICap,
     IClearingActions,

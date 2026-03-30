@@ -195,7 +195,6 @@ describe("ProtectedPartitions Tests", () => {
   let protectedClearingOperation: ProtectedClearingOperationData;
   let complianceMock: ComplianceMock;
   let complianceMockAddress: string;
-  let diamondCutFacet: DiamondFacet;
 
   async function grant_WILD_CARD_ROLE_and_issue_tokens(
     wildCard_Account: string,
@@ -215,7 +214,6 @@ describe("ProtectedPartitions Tests", () => {
 
   async function setFacets(address: string, compliance?: string) {
     asset = await ethers.getContractAt("IAsset", address);
-    diamondCutFacet = await ethers.getContractAt("DiamondFacet", address);
 
     if (compliance) {
       complianceMock = await ethers.getContractAt("ComplianceMock", compliance);
@@ -233,7 +231,7 @@ describe("ProtectedPartitions Tests", () => {
     await setFacets(diamond_ProtectedPartitions.target as string, complianceMockAddress);
 
     domain.name = (await asset.getERC20Metadata()).info.name;
-    domain.version = (await diamondCutFacet.getConfigInfo()).version_.toString();
+    domain.version = (await asset.getConfigInfo()).version_.toString();
     domain.chainId = await network.provider.send("eth_chainId");
     domain.verifyingContract = diamond_ProtectedPartitions.target as string;
     await grantKyc();
@@ -563,7 +561,7 @@ describe("ProtectedPartitions Tests", () => {
 
         basicTransferInfo.to = signer_C.address;
 
-        await asset.transferByPartition(DEFAULT_PARTITION, basicTransferInfo, "0x1234");
+        await asset.connect(signer_B).transferByPartition(DEFAULT_PARTITION, basicTransferInfo, "0x1234");
       });
 
       it("GIVEN a protected token and a WILD CARD account WHEN performing an ERC1410 operator transfer By partition THEN transaction succeeds", async () => {

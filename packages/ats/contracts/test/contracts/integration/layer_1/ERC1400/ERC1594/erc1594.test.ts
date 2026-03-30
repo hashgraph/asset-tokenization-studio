@@ -133,12 +133,6 @@ describe("ERC1594 Tests", () => {
   });
 
   describe("Single partition mode", () => {
-    let erc1594Issuer: IAsset;
-    let erc1594Transferor: IAsset;
-    let erc1594Approved: IAsset;
-    let erc1410SnapshotFacet: IERC1410;
-    let erc20Facet: ERC20Facet;
-
     async function deploySecurityFixtureSinglePartition() {
       const base = await deployEquityTokenFixture({
         equityDataParams: {
@@ -178,12 +172,6 @@ describe("ERC1594 Tests", () => {
           members: [signer_B.address],
         },
       ]);
-
-      erc1594Issuer = asset.connect(signer_C) as IAsset;
-      erc1594Transferor = asset.connect(signer_E) as IAsset;
-      erc1594Approved = asset.connect(signer_D) as IAsset;
-      erc20Facet = (await ethers.getContractAt("ERC20Facet", diamond.target, signer_E)) as ERC20Facet;
-      erc1410SnapshotFacet = (await ethers.getContractAt("IERC1410", diamond.target)) as IERC1410;
 
       await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
       await asset.connect(signer_A).addIssuer(signer_E.address);
@@ -303,29 +291,25 @@ describe("ERC1594 Tests", () => {
         await asset.connect(signer_B).activateClearing();
       });
       it("GIVEN a token with clearing mode active WHEN transfer THEN transaction fails with ClearingIsActivated", async () => {
-        const clearingInterface = await ethers.getContractAt("IClearing", diamond.target);
-
         // transfer with data fails
         await expect(
           asset.connect(signer_C).transferWithData(signer_D.address, AMOUNT, DATA),
-        ).to.be.revertedWithCustomError(clearingInterface, "ClearingIsActivated");
+        ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
 
         // transfer from with data fails
         await expect(
           asset.connect(signer_C).transferFromWithData(signer_E.address, signer_D.address, AMOUNT, DATA),
-        ).to.be.revertedWithCustomError(clearingInterface, "ClearingIsActivated");
+        ).to.be.revertedWithCustomError(asset, "ClearingIsActivated");
       });
 
       it("GIVEN a token with clearing mode active WHEN redeem THEN transaction fails with ClearingIsActivated", async () => {
-        const clearingInterface = await ethers.getContractAt("IClearing", diamond.target);
-
         await expect(asset.connect(signer_C).redeem(AMOUNT, DATA)).to.be.revertedWithCustomError(
-          clearingInterface,
+          asset,
           "ClearingIsActivated",
         );
 
         await expect(asset.connect(signer_C).redeemFrom(signer_E.address, AMOUNT, DATA)).to.be.revertedWithCustomError(
-          clearingInterface,
+          asset,
           "ClearingIsActivated",
         );
       });
@@ -333,9 +317,9 @@ describe("ERC1594 Tests", () => {
     describe("Paused", () => {
       beforeEach(async () => {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await erc1594Issuer.issue(signer_C.address, AMOUNT, DATA);
-        await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
-        await erc20Facet.connect(signer_E).increaseAllowance(signer_C.address, AMOUNT);
+        await asset.issue(signer_C.address, AMOUNT, DATA);
+        await asset.issue(signer_E.address, AMOUNT, DATA);
+        await asset.connect(signer_E).increaseAllowance(signer_C.address, AMOUNT);
         await asset.connect(signer_B).pause();
       });
 
@@ -406,9 +390,9 @@ describe("ERC1594 Tests", () => {
         "_FROM_signer_B.addressLOCKED_ERROR_ID or _TO_signer_B.addressLOCKED_ERROR_ID",
       async () => {
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await erc1594Issuer.issue(signer_C.address, AMOUNT, DATA);
-        await erc20Facet.connect(signer_C).increaseAllowance(signer_A.address, AMOUNT);
-        await erc20Facet.connect(signer_E).increaseAllowance(signer_C.address, AMOUNT);
+        await asset.issue(signer_C.address, AMOUNT, DATA);
+        await asset.connect(signer_C).increaseAllowance(signer_A.address, AMOUNT);
+        await asset.connect(signer_E).increaseAllowance(signer_C.address, AMOUNT);
         // Blacklisting accounts
         await asset.connect(signer_A).grantRole(ATS_ROLES._CONTROL_LIST_ROLE, signer_A.address);
         await asset.connect(signer_A).addToControlList(signer_C.address);
@@ -418,14 +402,14 @@ describe("ERC1594 Tests", () => {
           EIP1066_CODES.DISALLOWED_OR_STOP,
           getSelector(asset, "AccountIsBlocked"),
         ]);
-        await erc1594Issuer.issue(signer_D.address, AMOUNT, DATA);
+        await asset.issue(signer_D.address, AMOUNT, DATA);
         expect(await asset.connect(signer_D).canTransfer(signer_C.address, AMOUNT, DATA)).to.be.deep.equal([
           false,
           EIP1066_CODES.DISALLOWED_OR_STOP,
           getSelector(asset, "AccountIsBlocked"),
         ]);
 
-        await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
+        await asset.issue(signer_E.address, AMOUNT, DATA);
         expect(
           await asset.connect(signer_C).canTransferFrom(signer_E.address, signer_D.address, AMOUNT, DATA),
         ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "AccountIsBlocked")]);
@@ -433,7 +417,7 @@ describe("ERC1594 Tests", () => {
         expect(
           await asset.connect(signer_A).canTransferFrom(signer_C.address, signer_D.address, AMOUNT, DATA),
         ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "AccountIsBlocked")]);
-        await erc20Facet.connect(signer_E).increaseAllowance(signer_A.address, AMOUNT);
+        await asset.connect(signer_E).increaseAllowance(signer_A.address, AMOUNT);
         expect(
           await asset.connect(signer_A).canTransferFrom(signer_E.address, signer_C.address, AMOUNT, DATA),
         ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "AccountIsBlocked")]);
@@ -445,8 +429,8 @@ describe("ERC1594 Tests", () => {
           "WHEN canTransfer or canTransferFrom " +
           "THEN transaction returns _FROM_signer_K.addressYC_ERROR_ID or _TO_signer_K.addressYC_ERROR_ID",
         async () => {
-          await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
-          await erc20Facet.connect(signer_E).increaseAllowance(signer_B.address, AMOUNT);
+          await asset.issue(signer_E.address, AMOUNT, DATA);
+          await asset.connect(signer_E).increaseAllowance(signer_B.address, AMOUNT);
           await asset.connect(signer_B).revokeKyc(signer_E.address);
           // non kyc'd sender
           expect(await asset.connect(signer_E).canTransfer(signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
@@ -458,13 +442,13 @@ describe("ERC1594 Tests", () => {
             await asset.connect(signer_B).canTransferFrom(signer_E.address, signer_A.address, AMOUNT, DATA),
           ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "InvalidKycStatus")]);
           // non kyc'd receiver
-          await erc1594Issuer.issue(signer_D.address, AMOUNT, DATA);
+          await asset.issue(signer_D.address, AMOUNT, DATA);
           expect(await asset.connect(signer_D).canTransfer(signer_E.address, AMOUNT, DATA)).to.be.deep.equal([
             false,
             EIP1066_CODES.DISALLOWED_OR_STOP,
             getSelector(asset, "InvalidKycStatus"),
           ]);
-          await erc20Facet.connect(signer_D).increaseAllowance(signer_A.address, AMOUNT);
+          await asset.connect(signer_D).increaseAllowance(signer_A.address, AMOUNT);
           expect(
             await asset.connect(signer_A).canTransferFrom(signer_D.address, signer_E.address, AMOUNT, DATA),
           ).to.be.deep.equal([false, EIP1066_CODES.DISALLOWED_OR_STOP, getSelector(asset, "InvalidKycStatus")]);
@@ -508,23 +492,20 @@ describe("ERC1594 Tests", () => {
       );
       it("GIVEN non kyc account " + "WHEN issue " + "THEN transaction reverts with InvalidKycStatus", async () => {
         await asset.connect(signer_B).revokeKyc(signer_E.address);
-        await expect(erc1594Issuer.issue(signer_E.address, AMOUNT, DATA)).to.revertedWithCustomError(
-          asset,
-          "InvalidKycStatus",
-        );
+        await expect(asset.issue(signer_E.address, AMOUNT, DATA)).to.revertedWithCustomError(asset, "InvalidKycStatus");
       });
     });
 
     it("GIVEN a zero address in to WHEN canTransfer and canTransferFrom THEN responds _TO_signer_N.addressULL_ERROR_ID", async () => {
       await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-      await erc1594Issuer.issue(signer_A.address, AMOUNT, DATA);
+      await asset.issue(signer_A.address, AMOUNT, DATA);
       expect(await asset.canTransfer(ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
         false,
         EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
         getSelector(asset, "ZeroAddressNotAllowed"),
       ]);
-      await erc1594Issuer.issue(signer_D.address, AMOUNT, DATA);
-      await erc20Facet.connect(signer_D).increaseAllowance(signer_A.address, AMOUNT);
+      await asset.issue(signer_D.address, AMOUNT, DATA);
+      await asset.connect(signer_D).increaseAllowance(signer_A.address, AMOUNT);
       expect(await asset.canTransferFrom(signer_D.address, ethers.ZeroAddress, AMOUNT, DATA)).to.be.deep.equal([
         false,
         EIP1066_CODES.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
@@ -548,7 +529,7 @@ describe("ERC1594 Tests", () => {
       ]);
 
       await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-      await erc20Facet.connect(signer_C).approve(signer_A.address, AMOUNT);
+      await asset.connect(signer_C).approve(signer_A.address, AMOUNT);
       expect(await asset.canTransferFrom(signer_C.address, signer_D.address, AMOUNT, DATA)).to.be.deep.equal([
         false,
         EIP1066_CODES.INSUFFICIENT_FUNDS,
@@ -558,39 +539,33 @@ describe("ERC1594 Tests", () => {
 
     it("GIVEN an account with issuer role WHEN issue THEN transaction succeeds", async () => {
       // issue succeeds
-      expect(await erc1594Issuer.issue(signer_E.address, AMOUNT / 2, DATA))
-        .to.emit(erc1594Issuer, "Issued")
+      expect(await asset.issue(signer_E.address, AMOUNT / 2, DATA))
+        .to.emit(asset, "Issued")
         .withArgs(signer_C.address, signer_E.address, AMOUNT / 2);
-      expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT / 2);
-      expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-      expect(await erc1410SnapshotFacet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(
-        AMOUNT / 2,
-      );
-      expect(await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
+      expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
+      expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
+      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
+      expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
     });
 
     it("GIVEN an account with balance WHEN transferWithData THEN transaction success", async () => {
-      await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
+      await asset.connect(signer_C).issue(signer_E.address, AMOUNT, DATA);
 
-      expect(await erc1594Transferor.canTransfer(signer_D.address, AMOUNT / 2, DATA)).to.be.deep.equal([
+      expect(await asset.connect(signer_E).canTransfer(signer_D.address, AMOUNT / 2, DATA)).to.be.deep.equal([
         true,
         EIP1066_CODES.SUCCESS,
         ethers.ZeroHash,
       ]);
-      expect(await erc1594Transferor.transferWithData(signer_D.address, AMOUNT / 2, DATA))
-        .to.emit(erc1594Transferor, "Transferred")
+      expect(await asset.connect(signer_E).transferWithData(signer_D.address, AMOUNT / 2, DATA))
+        .to.emit(asset, "Transferred")
         .withArgs(signer_E.address, signer_D.address, AMOUNT / 2);
 
-      expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT);
-      expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-      expect(await erc1410SnapshotFacet.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
-      expect(await erc1410SnapshotFacet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(
-        AMOUNT / 2,
-      );
-      expect(await erc1410SnapshotFacet.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.be.equal(
-        AMOUNT / 2,
-      );
-      expect(await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT);
+      expect(await asset.totalSupply()).to.be.equal(AMOUNT);
+      expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
+      expect(await asset.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
+      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
+      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.be.equal(AMOUNT / 2);
+      expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT);
     });
 
     it(
@@ -598,115 +573,97 @@ describe("ERC1594 Tests", () => {
         "WHEN transferFromWithData " +
         "THEN transaction success",
       async () => {
-        await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
-        await erc20Facet.approve(signer_D.address, AMOUNT / 2);
+        await asset.connect(signer_C).issue(signer_E.address, AMOUNT, DATA);
+        await asset.connect(signer_E).approve(signer_D.address, AMOUNT / 2);
 
         expect(
-          await erc1594Approved.canTransferFrom(signer_E.address, signer_D.address, AMOUNT / 2, DATA),
+          await asset.connect(signer_D).canTransferFrom(signer_E.address, signer_D.address, AMOUNT / 2, DATA),
         ).to.be.deep.equal([true, EIP1066_CODES.SUCCESS, ethers.ZeroHash]);
-        expect(await erc1594Approved.transferFromWithData(signer_E.address, signer_D.address, AMOUNT / 2, DATA))
-          .to.emit(erc1594Transferor, "Transferred")
+        expect(await asset.connect(signer_D).transferFromWithData(signer_E.address, signer_D.address, AMOUNT / 2, DATA))
+          .to.emit(asset, "Transferred")
           .withArgs(signer_E.address, signer_D.address, AMOUNT / 2);
 
-        expect(await erc20Facet.allowance(signer_E.address, signer_D.address)).to.be.equal(0);
-        expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT);
-        expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await erc1410SnapshotFacet.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
-        expect(await erc1410SnapshotFacet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(
-          AMOUNT / 2,
-        );
-        expect(await erc1410SnapshotFacet.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.be.equal(
-          AMOUNT / 2,
-        );
-        expect(await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT);
+        expect(await asset.allowance(signer_E.address, signer_D.address)).to.be.equal(0);
+        expect(await asset.totalSupply()).to.be.equal(AMOUNT);
+        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_D.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT);
       },
     );
 
     it("GIVEN an account with balance WHEN redeem THEN transaction succeeds", async () => {
       // issue succeeds
-      await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
+      await asset.connect(signer_C).issue(signer_E.address, AMOUNT, DATA);
 
-      expect(await erc1594Transferor.redeem(AMOUNT / 2, DATA))
-        .to.emit(erc1594Issuer, "Redeemed")
+      expect(await asset.connect(signer_E).redeem(AMOUNT / 2, DATA))
+        .to.emit(asset, "Redeemed")
         .withArgs(signer_E.address, signer_E.address, AMOUNT / 2);
-      expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT / 2);
-      expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-      expect(await erc1410SnapshotFacet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(
-        AMOUNT / 2,
-      );
-      expect(await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
+      expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
+      expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
+      expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
+      expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
     });
 
     it(
       "GIVEN an account with balance and another with allowance " + "WHEN redeemFrom " + "THEN transaction succeeds",
       async () => {
         // issue succeeds
-        await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
+        await asset.issue(signer_E.address, AMOUNT, DATA);
 
-        await erc20Facet.connect(signer_E).approve(signer_D.address, AMOUNT / 2);
+        await asset.connect(signer_E).approve(signer_D.address, AMOUNT / 2);
 
-        expect(await erc1594Approved.connect(signer_D).redeemFrom(signer_E.address, AMOUNT / 2, DATA))
-          .to.emit(erc1594Issuer, "Redeemed")
+        expect(await asset.connect(signer_D).redeemFrom(signer_E.address, AMOUNT / 2, DATA))
+          .to.emit(asset, "Redeemed")
           .withArgs(signer_D.address, signer_E.address, AMOUNT / 2);
 
-        expect(await erc20Facet.connect(signer_E).allowance(signer_E.address, signer_D.address)).to.be.equal(0);
-        expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT / 2);
-        expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await erc1410SnapshotFacet.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(
-          AMOUNT / 2,
-        );
-        expect(await erc1410SnapshotFacet.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
+        expect(await asset.connect(signer_E).allowance(signer_E.address, signer_D.address)).to.be.equal(0);
+        expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOfByPartition(DEFAULT_PARTITION, signer_E.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.totalSupplyByPartition(DEFAULT_PARTITION)).to.be.equal(AMOUNT / 2);
       },
     );
 
     describe("Recovered Addresses", () => {
-      let erc3643ManagementFacet: ERC3643ManagementFacet;
-      let erc3643ReadFacet: ERC3643ReadFacet;
-
       beforeEach(async () => {
-        erc3643ManagementFacet = (await ethers.getContractAt(
-          "ERC3643ManagementFacet",
-          diamond.target,
-          signer_A,
-        )) as ERC3643ManagementFacet;
-        erc3643ReadFacet = (await ethers.getContractAt("ERC3643ReadFacet", diamond.target)) as ERC3643ReadFacet;
-
         // Grant AGENT_ROLE to signer_A for recovery operations
         await asset.grantRole(ATS_ROLES._AGENT_ROLE, signer_A.address);
 
         // Issue tokens to signer_E and signer_C
-        await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
+        await asset.issue(signer_E.address, AMOUNT, DATA);
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await erc1594Issuer.issue(signer_C.address, AMOUNT, DATA);
+        await asset.issue(signer_C.address, AMOUNT, DATA);
       });
 
       it("GIVEN a recovered msgSender WHEN redeemFrom THEN transaction fails with WalletRecovered", async () => {
         // Approve BEFORE recovering the address
-        await erc20Facet.connect(signer_E).approve(signer_C.address, AMOUNT / 2);
+        await asset.connect(signer_E).approve(signer_C.address, AMOUNT / 2);
 
         // Recover signer_C's address
-        await erc3643ManagementFacet.recoveryAddress(signer_C.address, signer_D.address, ethers.ZeroAddress);
+        await asset.recoveryAddress(signer_C.address, signer_D.address, ethers.ZeroAddress);
 
         // Verify recovery was successful
-        expect(await erc3643ReadFacet.isAddressRecovered(signer_C.address)).to.be.true;
+        expect(await asset.isAddressRecovered(signer_C.address)).to.be.true;
 
         // signer_C is now recovered and cannot call redeemFrom
         await expect(
           asset.connect(signer_C).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
-        ).to.be.revertedWithCustomError(erc3643ManagementFacet, "WalletRecovered");
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
 
       it("GIVEN a recovered tokenHolder WHEN redeemFrom THEN transaction fails with WalletRecovered", async () => {
         // Recover signer_E's address
-        await erc3643ManagementFacet.recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);
+        await asset.recoveryAddress(signer_E.address, signer_D.address, ethers.ZeroAddress);
 
         // Verify recovery was successful
-        expect(await erc3643ReadFacet.isAddressRecovered(signer_E.address)).to.be.true;
+        expect(await asset.isAddressRecovered(signer_E.address)).to.be.true;
 
         // Try to redeem from recovered address (signer_E) using signer_C
         await expect(
           asset.connect(signer_C).redeemFrom(signer_E.address, AMOUNT / 2, DATA),
-        ).to.be.revertedWithCustomError(erc3643ManagementFacet, "WalletRecovered");
+        ).to.be.revertedWithCustomError(asset, "WalletRecovered");
       });
     });
 
@@ -755,11 +712,6 @@ describe("ERC1594 Tests", () => {
           },
         ]);
 
-        erc1594Issuer = asset.connect(signer_C) as IAsset;
-        erc1594Transferor = asset.connect(signer_E) as IAsset;
-        erc20Facet = (await ethers.getContractAt("ERC20Facet", diamond.target, signer_E)) as ERC20Facet;
-        erc1410SnapshotFacet = (await ethers.getContractAt("IERC1410", diamond.target)) as IERC1410;
-
         // Setup KYC
         await asset.connect(signer_A).addIssuer(signer_E.address);
         await asset.connect(signer_B).grantKyc(signer_E.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
@@ -769,41 +721,41 @@ describe("ERC1594 Tests", () => {
         await asset.connect(signer_A).protectPartitions();
 
         // Issue tokens to signer_E
-        await erc1594Issuer.issue(signer_E.address, AMOUNT, DATA);
+        await asset.connect(signer_C).issue(signer_E.address, AMOUNT, DATA);
       });
 
       it("GIVEN protected partitions and wildcard role WHEN transferWithData THEN transaction succeeds", async () => {
-        expect(await erc1594Transferor.transferWithData(signer_D.address, AMOUNT / 2, DATA))
-          .to.emit(erc1594Transferor, "Transferred")
+        expect(await asset.connect(signer_E).transferWithData(signer_D.address, AMOUNT / 2, DATA))
+          .to.emit(asset, "Transferred")
           .withArgs(signer_E.address, signer_D.address, AMOUNT / 2);
 
-        expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await erc1410SnapshotFacet.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
       });
 
       it("GIVEN protected partitions and wildcard role WHEN transferFromWithData THEN transaction succeeds", async () => {
         // Issue tokens to signer_C first
         await asset.connect(signer_B).grantKyc(signer_C.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_E.address);
-        await erc1594Issuer.issue(signer_C.address, AMOUNT, DATA);
+        await asset.connect(signer_C).issue(signer_C.address, AMOUNT, DATA);
 
         // signer_C approves signer_E (who has wildcard role) to transfer
-        await erc20Facet.connect(signer_C).approve(signer_E.address, AMOUNT / 2);
+        await asset.connect(signer_C).approve(signer_E.address, AMOUNT / 2);
 
-        expect(await erc1594Transferor.transferFromWithData(signer_C.address, signer_D.address, AMOUNT / 2, DATA))
+        expect(await asset.connect(signer_E).transferFromWithData(signer_C.address, signer_D.address, AMOUNT / 2, DATA))
           .to.emit(asset, "Transferred")
           .withArgs(signer_C.address, signer_D.address, AMOUNT / 2);
 
-        expect(await erc1410SnapshotFacet.balanceOf(signer_C.address)).to.be.equal(AMOUNT / 2);
-        expect(await erc1410SnapshotFacet.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOf(signer_C.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOf(signer_D.address)).to.be.equal(AMOUNT / 2);
       });
 
       it("GIVEN protected partitions and wildcard role WHEN redeem THEN transaction succeeds", async () => {
-        expect(await erc1594Transferor.redeem(AMOUNT / 2, DATA))
-          .to.emit(erc1594Transferor, "Redeemed")
+        expect(await asset.connect(signer_E).redeem(AMOUNT / 2, DATA))
+          .to.emit(asset, "Redeemed")
           .withArgs(ethers.ZeroAddress, signer_E.address, AMOUNT / 2);
 
-        expect(await erc1410SnapshotFacet.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
-        expect(await erc1410SnapshotFacet.totalSupply()).to.be.equal(AMOUNT / 2);
+        expect(await asset.balanceOf(signer_E.address)).to.be.equal(AMOUNT / 2);
+        expect(await asset.totalSupply()).to.be.equal(AMOUNT / 2);
       });
 
       it("GIVEN protected partitions without wildcard role WHEN transferWithData THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
@@ -815,7 +767,7 @@ describe("ERC1594 Tests", () => {
 
       it("GIVEN protected partitions without wildcard role WHEN transferFromWithData THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         // signer_E approves signer_D (who doesn't have wildcard role)
-        await erc20Facet.approve(signer_D.address, AMOUNT / 2);
+        await asset.approve(signer_D.address, AMOUNT / 2);
 
         await expect(
           asset.connect(signer_D).transferFromWithData(signer_E.address, signer_C.address, AMOUNT / 2, DATA),
@@ -832,7 +784,7 @@ describe("ERC1594 Tests", () => {
 
       it("GIVEN protected partitions without wildcard role WHEN redeemFrom THEN transaction fails with PartitionsAreProtectedAndNoRole", async () => {
         // signer_E approves signer_D (who doesn't have wildcard role)
-        await erc20Facet.approve(signer_D.address, AMOUNT / 2);
+        await asset.approve(signer_D.address, AMOUNT / 2);
 
         await expect(
           asset.connect(signer_D).redeemFrom(signer_E.address, AMOUNT / 2, DATA),

@@ -12,6 +12,7 @@ import { IERC3643Management } from "../../../../facets/layer_1/ERC3643/IERC3643M
 import { ICompliance } from "../../../../facets/layer_1/ERC3643/ICompliance.sol";
 import { IIdentityRegistry } from "../../../../facets/layer_1/ERC3643/IIdentityRegistry.sol";
 import { LowLevelCall } from "../../../../infrastructure/utils/LowLevelCall.sol";
+import { IExternalListManagement } from "../../../../domain/core/externalList/IExternalListManagement.sol";
 
 abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWrapper2 {
     using LowLevelCall for address;
@@ -180,7 +181,12 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, CapStorageWra
 
         // Format validation
         if (_from == ZERO_ADDRESS || _to == ZERO_ADDRESS) {
-            return (false, Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE, ZeroAddressNotAllowed.selector, EMPTY_BYTES);
+            return (
+                false,
+                Eip1066.NOT_FOUND_UNEQUAL_OR_OUT_OF_RANGE,
+                IExternalListManagement.ZeroAddressNotAllowed.selector,
+                EMPTY_BYTES
+            );
         }
 
         bool checkSender = _from != _msgSender() && !_hasRole(_protectedPartitionsRole(_partition), _msgSender());

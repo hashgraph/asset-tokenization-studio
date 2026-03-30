@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
-interface ICap {
+import { ICapStorageWrapper } from "../../../domain/asset/cap/ICapStorageWrapper.sol";
+
+interface ICap is ICapStorageWrapper {
     struct PartitionCap {
         bytes32 partition;
         uint256 maxSupply;

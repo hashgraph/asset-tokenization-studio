@@ -14,7 +14,6 @@ describe("ERC20Permit Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
-  let diamondCutFacet: DiamondFacet;
 
   beforeEach(async () => {
     const base = await deployEquityTokenFixture();
@@ -30,8 +29,6 @@ describe("ERC20Permit Tests", () => {
         members: [signer_A.address],
       },
     ]);
-
-    diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.target);
   });
 
   describe("Single Partition", () => {
@@ -39,7 +36,7 @@ describe("ERC20Permit Tests", () => {
       it("GIVEN a deployed contract WHEN DOMAIN_SEPARATOR is called THEN the correct domain separator is returned", async () => {
         const domainSeparator = await asset.DOMAIN_SEPARATOR();
         const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
+        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
         const domain = {
           name: CONTRACT_NAME,
           version: CONTRACT_VERSION,
@@ -163,7 +160,7 @@ describe("ERC20Permit Tests", () => {
         const nonce = await asset.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
         const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
+        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
 
         const domain = {
           name: CONTRACT_NAME,
@@ -202,7 +199,7 @@ describe("ERC20Permit Tests", () => {
         const nonce = await asset.nonces(signer_A.address);
         const expiry = (await getDltTimestamp()) + 3600; // 1 hour in the future
         const CONTRACT_NAME = (await asset.getERC20Metadata()).info.name;
-        const CONTRACT_VERSION = (await diamondCutFacet.getConfigInfo()).version_.toString();
+        const CONTRACT_VERSION = (await asset.getConfigInfo()).version_.toString();
 
         const domain = {
           name: CONTRACT_NAME,

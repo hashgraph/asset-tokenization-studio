@@ -49,10 +49,6 @@ describe("Snapshots Tests", () => {
     await executeRbac(asset, set_initRbacs());
   }
 
-  async function setFacets(diamond: ResolverProxy) {
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-  }
-
   function set_initRbacs(): any[] {
     return [
       {
@@ -454,8 +450,9 @@ describe("Snapshots Tests", () => {
     });
     const diamond = base.diamond;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
-    await setFacets(diamond);
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
+    await executeRbac(asset, set_initRbacs());
     await asset.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);
     await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);
 
@@ -563,8 +560,9 @@ describe("Snapshots Tests", () => {
     });
     const diamond = base.diamond;
 
-    await executeRbac(base.accessControlFacet, set_initRbacs());
-    await setFacets(diamond);
+    asset = await ethers.getContractAt("IAsset", diamond.target);
+
+    await executeRbac(asset, set_initRbacs());
 
     await asset.connect(signer_A).grantRole(ATS_ROLES._SNAPSHOT_ROLE, signer_C.address);
     await asset.connect(signer_A).grantRole(ATS_ROLES._ISSUER_ROLE, signer_A.address);

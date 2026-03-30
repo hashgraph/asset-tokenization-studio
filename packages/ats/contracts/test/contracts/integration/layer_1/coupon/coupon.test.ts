@@ -55,7 +55,6 @@ describe("Coupon Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
-  let timeTravelFacet: TimeTravel;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -114,8 +113,6 @@ describe("Coupon Tests", () => {
         members: [signer_A.address],
       },
     ]);
-
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
 
     await asset.connect(signer_A).addIssuer(signer_A.address);
 
@@ -360,7 +357,7 @@ describe("Coupon Tests", () => {
         couponRateStatus,
       ]);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
     await asset.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
@@ -432,7 +429,7 @@ describe("Coupon Tests", () => {
         couponRateStatus,
       ]);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
     await asset.connect(signer_A).revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
@@ -573,7 +570,7 @@ describe("Coupon Tests", () => {
     expect(couponAmountForBefore.numerator).to.equal(0);
     expect(couponAmountForBefore.denominator).to.equal(0);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
     await asset.revokeRole(ATS_ROLES._ISSUER_ROLE, signer_C.address);
 
     const couponFor = await asset.getCouponFor(1, signer_A.address);
@@ -635,7 +632,7 @@ describe("Coupon Tests", () => {
 
     await asset.connect(signer_C).setCoupon(couponData);
 
-    await timeTravelFacet.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponExecutionDateInSeconds + 1);
 
     await expect(asset.connect(signer_C).cancelCoupon(1)).to.be.revertedWithCustomError(asset, "CouponAlreadyExecuted");
   });
@@ -645,7 +642,7 @@ describe("Coupon Tests", () => {
 
     await asset.connect(signer_C).setCoupon(couponData);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
 
     await expect(asset.connect(signer_C).cancelCoupon(1))
       .to.emit(asset, "CouponCancelled")
@@ -705,7 +702,7 @@ describe("Coupon Tests", () => {
 
     await asset.connect(signer_A).setCoupon(couponData);
 
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
 
     // Trigger scheduled tasks by performing an action
     await asset.connect(signer_A).issueByPartition({
@@ -753,7 +750,7 @@ describe("Coupon Tests", () => {
     await asset.connect(signer_A).setCoupon(couponData);
 
     // Time travel past record date but DON'T trigger snapshot
-    await timeTravelFacet.changeSystemTimestamp(couponRecordDateInSeconds + 1);
+    await asset.changeSystemTimestamp(couponRecordDateInSeconds + 1);
 
     // Query couponFor without triggering snapshot - should use current balance path
     const couponFor = await asset.getCouponFor(1, signer_A.address);

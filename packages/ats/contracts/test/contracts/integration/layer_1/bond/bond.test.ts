@@ -30,7 +30,6 @@ describe("Bond Tests", () => {
   let signer_D: HardhatEthersSigner;
 
   let asset: IAsset;
-  let timeTravelFacet: TimeTravel;
 
   async function deploySecurityFixture(isMultiPartition = false) {
     const base = await deployBondTokenFixture({
@@ -49,6 +48,8 @@ describe("Bond Tests", () => {
     signer_B = base.user1;
     signer_C = base.user2;
     signer_D = base.user3;
+
+    asset = await ethers.getContractAt("IAsset", diamond.target);
 
     await executeRbac(asset, [
       {
@@ -89,9 +90,6 @@ describe("Bond Tests", () => {
       },
     ]);
 
-    asset = await ethers.getContractAt("IAsset", diamond.target);
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
-
     await asset.connect(signer_A).addIssuer(signer_A.address);
 
     await asset.connect(signer_B).grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -109,8 +107,7 @@ describe("Bond Tests", () => {
 
   describe("Initialization", () => {
     it("GIVEN a bond variable rate WHEN deployed THEN securityType is BOND_VARIABLE_RATE", async () => {
-      const erc20Facet = await ethers.getContractAt("ERC20", diamond.target);
-      const metadata = await erc20Facet.getERC20Metadata();
+      const metadata = await asset.getERC20Metadata();
       expect(metadata.securityType).to.be.equal(SecurityType.BOND_VARIABLE_RATE);
     });
 
@@ -274,7 +271,7 @@ describe("Bond Tests", () => {
           data: "0x",
         });
 
-        await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
+        await asset.changeSystemTimestamp(maturityDate + 1);
 
         await expect(asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, DEFAULT_PARTITION, amount))
           .to.emit(asset, "RedeemedByPartition")
@@ -291,7 +288,7 @@ describe("Bond Tests", () => {
           data: "0x",
         });
 
-        await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
+        await asset.changeSystemTimestamp(maturityDate + 1);
 
         await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_A.address))
           .to.emit(asset, "RedeemedByPartition")
@@ -336,7 +333,7 @@ describe("Bond Tests", () => {
           data: "0x",
         });
 
-        await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
+        await asset.changeSystemTimestamp(maturityDate + 1);
 
         await expect(asset.connect(signer_A).redeemAtMaturityByPartition(signer_A.address, _PARTITION_ID, amount))
           .to.emit(asset, "RedeemedByPartition")
@@ -359,7 +356,7 @@ describe("Bond Tests", () => {
           data: "0x",
         });
 
-        await timeTravelFacet.changeSystemTimestamp(maturityDate + 1);
+        await asset.changeSystemTimestamp(maturityDate + 1);
 
         await expect(asset.connect(signer_A).fullRedeemAtMaturity(signer_A.address))
           .to.emit(asset, "RedeemedByPartition")
@@ -378,7 +375,7 @@ describe("Bond Tests", () => {
         await asset.connect(signer_B).grantKyc(newUser.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
 
         // Move time past maturity
-        await timeTravelFacet.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
+        await asset.changeSystemTimestamp(maturityDate + TIME_PERIODS_S.DAY);
 
         // Call fullRedeemAtMaturity on account with zero balance (signer_A has _MATURITY_REDEEMER_ROLE)
         await expect(asset.connect(signer_A).fullRedeemAtMaturity(newUser.address)).to.not.be.reverted;

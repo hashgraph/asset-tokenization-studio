@@ -18,7 +18,6 @@ describe("Corporate Actions Tests", () => {
   let signer_C: HardhatEthersSigner;
 
   let asset: IAsset;
-  let timeTravelFacet: TimeTravelFacet;
 
   async function deploySecurityFixtureSinglePartition() {
     const base = await deployEquityTokenFixture();
@@ -38,15 +37,13 @@ describe("Corporate Actions Tests", () => {
         members: [signer_C.address],
       },
     ]);
-
-    timeTravelFacet = await ethers.getContractAt("TimeTravelFacet", diamond.target, signer_A);
   }
 
   beforeEach(async () => {
     await loadFixture(deploySecurityFixtureSinglePartition);
   });
   it("GIVEN a token with a corporate action the functions returns the data", async () => {
-    const currentTimestamp = await timeTravelFacet.blockTimestamp();
+    const currentTimestamp = await asset.blockTimestamp();
     const ONE_DAY = 86400n; // 24 hours in seconds
 
     const dividendData = {
@@ -89,7 +86,7 @@ describe("Corporate Actions Tests", () => {
     expect(listMembersByType.length).to.equal(listCountByType);
     expect(listMembersByType[0]).to.equal(corporateActionId_1);
     expect(corporateAction.actionType_.toUpperCase()).to.equal(actionType.toUpperCase());
-    expect(corporateAction.actionTypeId_).to.equal(BigInt(listMembersByType[0]));
+    expect(corporateAction.actionTypeIndex_).to.equal(BigInt(listMembersByType[0]));
     expect(corporateAction.data_.toUpperCase()).to.equal(encodedDividendData.toUpperCase());
     expect(corporateAction.isDisabled_).to.be.false;
     expect(actionContentHashExistsBefore).to.be.false;
@@ -97,29 +94,29 @@ describe("Corporate Actions Tests", () => {
 
     // Validate getCorporateActions response
     expect(corporateActions.actionTypes_.length).to.equal(1);
-    expect(corporateActions.actionTypeIds_.length).to.equal(1);
+    expect(corporateActions.actionTypeIndex_.length).to.equal(1);
     expect(corporateActions.datas_.length).to.equal(1);
     expect(corporateActions.isDisabled_.length).to.equal(1);
 
     expect(corporateActions.actionTypes_[0].toUpperCase()).to.equal(actionType.toUpperCase());
-    expect(corporateActions.actionTypeIds_[0]).to.equal(BigInt(corporateActionId_1));
+    expect(corporateActions.actionTypeIndex_[0]).to.equal(BigInt(corporateActionId_1));
     expect(corporateActions.datas_[0].toUpperCase()).to.equal(encodedDividendData.toUpperCase());
     expect(corporateActions.isDisabled_[0]).to.be.false;
 
     // Validate getCorporateActionsByType response
     expect(corporateActionsByType.actionTypes_.length).to.equal(1);
-    expect(corporateActionsByType.actionTypeIds_.length).to.equal(1);
+    expect(corporateActionsByType.actionTypeIndex_.length).to.equal(1);
     expect(corporateActionsByType.datas_.length).to.equal(1);
     expect(corporateActionsByType.isDisabled_.length).to.equal(1);
 
     expect(corporateActionsByType.actionTypes_[0].toUpperCase()).to.equal(actionType.toUpperCase());
-    expect(corporateActionsByType.actionTypeIds_[0]).to.equal(BigInt(corporateActionId_1));
+    expect(corporateActionsByType.actionTypeIndex_[0]).to.equal(BigInt(corporateActionId_1));
     expect(corporateActionsByType.datas_[0].toUpperCase()).to.equal(encodedDividendData.toUpperCase());
     expect(corporateActionsByType.isDisabled_[0]).to.be.false;
 
     // Cross-validate that getCorporateActions and getCorporateActionsByType return the same data
     expect(corporateActions.actionTypes_[0]).to.equal(corporateActionsByType.actionTypes_[0]);
-    expect(corporateActions.actionTypeIds_[0]).to.equal(corporateActionsByType.actionTypeIds_[0]);
+    expect(corporateActions.actionTypeIndex_[0]).to.equal(corporateActionsByType.actionTypeIndex_[0]);
     expect(corporateActions.datas_[0]).to.equal(corporateActionsByType.datas_[0]);
     expect(corporateActions.isDisabled_[0]).to.equal(corporateActionsByType.isDisabled_[0]);
   });

@@ -163,11 +163,9 @@ describe("Proceed Recipients Tests", () => {
 
     it("GIVEN a listed proceed recipient WHEN unauthorized user updates its data THEN it reverts with AccountHasNoRole", async () => {
       await expect(
-        proceedRecipientsFacet
-          .connect(signer_B)
-          .updateProceedRecipientData(PROCEED_RECIPIENT_2, PROCEED_RECIPIENT_1_DATA, {
-            gasLimit: GAS_LIMIT.default,
-          }),
+        asset.connect(signer_B).updateProceedRecipientData(PROCEED_RECIPIENT_2, PROCEED_RECIPIENT_1_DATA, {
+          gasLimit: GAS_LIMIT.default,
+        }),
       ).to.be.revertedWithCustomError(asset, "AccountHasNoRole");
     });
 
