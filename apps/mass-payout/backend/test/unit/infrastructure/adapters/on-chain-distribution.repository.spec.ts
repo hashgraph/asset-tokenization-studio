@@ -4,7 +4,7 @@ import { OnChainDistributionRepository } from "@infrastructure/adapters/on-chain
 import { AssetType } from "@domain/model/asset-type.enum"
 import { Asset } from "@domain/model/asset"
 import { CorporateActionDetails, DistributionType, PayoutSubtype, AmountType } from "@domain/model/distribution"
-import { Bond, Dividend, Coupon } from "@hashgraph/asset-tokenization-sdk"
+import { Dividend, Coupon } from "@hashgraph/asset-tokenization-sdk"
 import { AssetUtils } from "@test/shared/asset.utils"
 import { DistributionUtils } from "@test/shared/distribution.utils"
 import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id"
@@ -13,9 +13,6 @@ import { faker } from "@faker-js/faker"
 
 jest.mock("@hashgraph/asset-tokenization-sdk", () => ({
   Bond: {},
-  Coupon: {
-    getAllCoupons: jest.fn(),
-  },
   Coupon: {
     getAllCoupons: jest.fn(),
     getTotalCouponHolders: jest.fn(),
