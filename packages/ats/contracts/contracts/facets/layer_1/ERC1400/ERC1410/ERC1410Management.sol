@@ -8,8 +8,7 @@ import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
@@ -17,7 +16,7 @@ import { _checkNotInitialized } from "../../../../services/InitializationErrors.
 import { ERC1644StorageWrapper } from "../../../../domain/asset/ERC1644StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
-abstract contract ERC1410Management is IERC1410Management, AccessControlModifiers, PauseModifiers {
+abstract contract ERC1410Management is IERC1410Management, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410(bool _multiPartition) external override {
         _checkNotInitialized(ERC1410StorageWrapper.isERC1410Initialized());

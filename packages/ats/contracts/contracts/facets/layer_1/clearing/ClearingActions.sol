@@ -4,24 +4,15 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IClearingActions } from "./IClearingActions.sol";
 import { IClearing } from "./IClearing.sol";
 import { _CLEARING_VALIDATOR_ROLE, _CLEARING_ROLE } from "../../../constants/roles.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { ClearingOps } from "../../../domain/orchestrator/ClearingOps.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
-import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
-import { PartitionValidationModifiers } from "../../../infrastructure/utils/PartitionValidationModifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract ClearingActions is
-    IClearingActions,
-    AccessControlModifiers,
-    PauseModifiers,
-    ClearingModifiers,
-    PartitionValidationModifiers
-{
+abstract contract ClearingActions is IClearingActions, Modifiers {
     function initializeClearing(bool _clearingActive) external {
         _checkNotInitialized(ClearingStorageWrapper.isClearingInitialized());
         ClearingStorageWrapper.initializeClearing(_clearingActive);

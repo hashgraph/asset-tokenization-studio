@@ -3,10 +3,9 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICorporateActions } from "./ICorporateActions.sol";
 import { _CORPORATE_ACTION_ROLE } from "../../../constants/roles.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-abstract contract CorporateActions is ICorporateActions, PauseModifiers, AccessControlModifiers {
+abstract contract CorporateActions is ICorporateActions, Modifiers {
     function addCorporateAction(
         bytes32 _actionType,
         bytes memory _data

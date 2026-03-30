@@ -5,17 +5,10 @@ import { IBond } from "./IBond.sol";
 import { IBondRead } from "./IBondRead.sol";
 import { IKyc } from "../../layer_1/kyc/IKyc.sol";
 import { _CORPORATE_ACTION_ROLE, _BOND_MANAGER_ROLE, _MATURITY_REDEEMER_ROLE } from "../../../constants/roles.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
-import { ControlListModifiers } from "../../../infrastructure/utils/ControlListModifiers.sol";
-import { KycModifiers } from "../../../infrastructure/utils/KycModifiers.sol";
-import { MaturityModifiers } from "../../../infrastructure/utils/MaturityModifiers.sol";
-import { DateValidationModifiers } from "../../../infrastructure/utils/DateValidationModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { BondStorageWrapper } from "../../../domain/asset/BondStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { InterestRateStorageWrapper } from "../../../domain/asset/InterestRateStorageWrapper.sol";
-import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
 error InterestRateIsKpiLinked();
@@ -30,18 +23,7 @@ error InterestRateIsKpiLinked();
  * @notice Inherit from this contract to gain access to bond management functions
  * @author Asset Tokenization Studio Team
  */
-abstract contract Bond is
-    IBond,
-    TimestampProvider,
-    PauseModifiers,
-    AccessControlModifiers,
-    ControlListModifiers,
-    KycModifiers,
-    MaturityModifiers,
-    DateValidationModifiers,
-    ERC1410Modifiers,
-    ERC3643Modifiers
-{
+abstract contract Bond is IBond, TimestampProvider, Modifiers {
     /**
      * @dev Redeems all tokens at maturity for a token holder
      *

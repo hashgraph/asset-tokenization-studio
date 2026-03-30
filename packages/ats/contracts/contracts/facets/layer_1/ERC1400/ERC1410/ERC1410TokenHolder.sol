@@ -10,13 +10,13 @@ import {
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 
-abstract contract ERC1410TokenHolder is IERC1410TokenHolder, PauseModifiers {
+abstract contract ERC1410TokenHolder is IERC1410TokenHolder, Modifiers {
     function transferByPartition(
         bytes32 _partition,
         BasicTransferInfo calldata _basicTransferInfo,

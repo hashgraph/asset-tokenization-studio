@@ -6,8 +6,6 @@ import { _LOCKER_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
 import { BasicTransferInfo } from "../../layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-//import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-//import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import {

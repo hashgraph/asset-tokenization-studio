@@ -10,14 +10,10 @@ import {
 } from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { _WILD_CARD_ROLE } from "../../../constants/roles.sol";
-import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
-import { LockModifiers } from "../../../infrastructure/utils/LockModifiers.sol";
-import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
 
 /**
  * @title HoldTokenHolder
@@ -31,14 +27,7 @@ import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModif
  * - LockModifiers: lock expiration validation
  * - PartitionModifiers: partition protection checks
  */
-abstract contract HoldTokenHolder is
-    IHoldTokenHolder,
-    PauseModifiers,
-    ClearingModifiers,
-    ERC3643Modifiers,
-    LockModifiers,
-    PartitionModifiers
-{
+abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
     /**
      * @notice Create a hold by partition
      * @dev Validates partition, expiration timestamp, and address recovery status

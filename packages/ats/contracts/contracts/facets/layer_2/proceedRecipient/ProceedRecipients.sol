@@ -3,13 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { IProceedRecipients } from "./IProceedRecipients.sol";
 import { _PROCEED_RECIPIENT_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProceedRecipientsStorageWrapper } from "../../../domain/asset/ProceedRecipientsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 
-abstract contract ProceedRecipients is IProceedRecipients, AccessControlModifiers, PauseModifiers {
+abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ProceedRecipients(
         address[] calldata _proceedRecipients,

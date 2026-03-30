@@ -6,15 +6,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _AGENT_ROLE, _TREX_OWNER_ROLE } from "../../../constants/roles.sol";
 import { IERC3643Management } from "./IERC3643Management.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
 
-abstract contract ERC3643Management is IERC3643Management, AccessControlModifiers, PauseModifiers, ERC3643Modifiers {
+abstract contract ERC3643Management is IERC3643Management, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC3643(address _compliance, address _identityRegistry) external {
         _checkNotInitialized(ERC3643StorageWrapper.isERC3643Initialized());

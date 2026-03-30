@@ -3,11 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ISsiManagement } from "./ISsiManagement.sol";
 import { _SSI_MANAGER_ROLE } from "../../../constants/roles.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
 
-abstract contract SsiManagement is ISsiManagement, AccessControlModifiers, PauseModifiers {
+abstract contract SsiManagement is ISsiManagement, Modifiers {
     function setRevocationRegistryAddress(
         address _revocationRegistryAddress
     ) external override onlyUnpaused onlyRole(_SSI_MANAGER_ROLE) returns (bool success_) {

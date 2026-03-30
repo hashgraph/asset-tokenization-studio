@@ -3,15 +3,14 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _KYC_ROLE, _INTERNAL_KYC_MANAGER_ROLE } from "../../../constants/roles.sol";
 import { IKyc } from "./IKyc.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { KycStorageWrapper } from "../../../domain/core/KycStorageWrapper.sol";
 import { SsiManagementStorageWrapper } from "../../../domain/core/SsiManagementStorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract Kyc is IKyc, AccessControlModifiers, TimestampProvider, PauseModifiers {
+abstract contract Kyc is IKyc, TimestampProvider, Modifiers {
     function initializeInternalKyc(bool _internalKycActivated) external {
         _checkNotInitialized(KycStorageWrapper.isKycInitialized());
         KycStorageWrapper.initializeInternalKyc(_internalKycActivated);

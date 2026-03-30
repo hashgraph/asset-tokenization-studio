@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC1644StorageWrapper } from "../../domain/asset/ERC1644StorageWrapper.sol";
+import { _checkNotInitialized } from "../InitializationErrors.sol";
 
 /**
  * @title StateModifiers
@@ -37,7 +38,7 @@ abstract contract StateModifiers {
      * @param _initialized The initialized flag to check
      */
     modifier onlyUninitialized(bool _initialized) {
-        require(!_initialized, "Already initialized");
+        _checkNotInitialized(_initialized);
         _;
     }
 }

@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-30T15:07:37.001Z
+ * Generated: 2026-03-30T19:10:59.714Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -240,7 +240,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AccountAssignedToRole", signature: "AccountAssignedToRole(bytes32,address)", selector: "0xa6006e94" },
       {
         name: "AccountNotAssignedToRole",
@@ -266,9 +265,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "function adjustBalances(uint256 factor, uint8 decimals) returns (bool success_)",
         selector: "0xe2d77e44",
       },
-    ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
     ],
     factory: (signer) => new AdjustBalancesFacet__factory(signer),
     timeTravelFactory: (signer) => new AdjustBalancesFacetTimeTravel__factory(signer),
@@ -880,9 +876,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x99b69647",
       },
     ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-    ],
     factory: (signer) => new CapFacet__factory(signer),
     timeTravelFactory: (signer) => new CapFacetTimeTravel__factory(signer),
   },
@@ -1239,7 +1232,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       {
         name: "DuplicatedCorporateAction",
         signature: "DuplicatedCorporateAction(bytes32,bytes)",
@@ -1488,9 +1480,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x5adaa49e",
       },
     ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-    ],
     factory: (signer) => new EquityUSAFacet__factory(getLibLinks("clearingReadOps") as any, signer),
     timeTravelFactory: (signer) => new EquityUSAFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
@@ -1564,9 +1553,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function protectedTransferFromByPartition(bytes32 _partition, address _from, address _to, uint256 _amount, (uint256 deadline, uint256 nounce, bytes signature) _protectionData) returns (bytes32)",
         selector: "0x99b5ef4a",
       },
-    ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
     ],
     factory: (signer) => new ERC1410ManagementFacet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) =>
@@ -1787,7 +1773,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "DocumentDoesNotExist", signature: "DocumentDoesNotExist(bytes32)", selector: "0xc2e54650" },
       { name: "EmptyHASH", signature: "EmptyHASH()", selector: "0x402e72be" },
       { name: "EmptyName", signature: "EmptyName()", selector: "0x2ef13105" },
@@ -2088,7 +2073,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AddressNotVerified", signature: "AddressNotVerified()", selector: "0x209d2853" },
       { name: "CannotRecoverWallet", signature: "CannotRecoverWallet()", selector: "0x505389ae" },
       { name: "ComplianceCallFailed", signature: "ComplianceCallFailed()", selector: "0x67fba102" },
@@ -2866,7 +2850,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "InvalidDates", signature: "InvalidDates()", selector: "0xd937486c" },
       { name: "InvalidKycStatus", signature: "InvalidKycStatus()", selector: "0xfc855b1b" },
       { name: "InvalidZeroAddress", signature: "InvalidZeroAddress()", selector: "0xf6b2911f" },
@@ -2996,9 +2979,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       { name: "pause", signature: "function pause() returns (bool success_)", selector: "0x8456cb59" },
       { name: "unpause", signature: "function unpause() returns (bool success_)", selector: "0x3f4ba83a" },
     ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-    ],
     factory: (signer) => new PauseFacet__factory(signer),
     timeTravelFactory: (signer) => new PauseFacetTimeTravel__factory(signer),
   },
@@ -3071,7 +3051,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       {
         name: "ProceedRecipientAlreadyExists",
         signature: "ProceedRecipientAlreadyExists(address)",
@@ -3151,7 +3130,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       {
         name: "ProceedRecipientAlreadyExists",
         signature: "ProceedRecipientAlreadyExists(address)",
@@ -3231,7 +3209,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       {
         name: "ProceedRecipientAlreadyExists",
         signature: "ProceedRecipientAlreadyExists(address)",
@@ -3587,9 +3564,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0x9657ddb9",
       },
     ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-    ],
     factory: (signer) => new SnapshotsFacet__factory(getLibLinks("clearingReadOps") as any, signer),
     timeTravelFactory: (signer) => new SnapshotsFacetTimeTravel__factory(getLibLinks("clearingReadOps") as any, signer),
   },
@@ -3653,7 +3627,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
       { name: "AccountIsNotIssuer", signature: "AccountIsNotIssuer(address)", selector: "0xcd324f53" },
       { name: "ListedIssuer", signature: "ListedIssuer(address)", selector: "0xcb2beece" },
       { name: "UnlistedIssuer", signature: "UnlistedIssuer(address)", selector: "0xd1243a92" },

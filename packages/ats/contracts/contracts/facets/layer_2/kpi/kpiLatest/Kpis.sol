@@ -4,10 +4,10 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IKpis } from "./IKpis.sol";
 import { _KPI_MANAGER_ROLE } from "../../../../constants/roles.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../../services/Modifiers.sol";
 import { KpisStorageWrapper } from "../../../../domain/asset/KpisStorageWrapper.sol";
 
-abstract contract Kpis is IKpis, PauseModifiers {
+abstract contract Kpis is IKpis, Modifiers {
     function addKpiData(uint256 _date, uint256 _value, address _project) external onlyUnpaused {
         AccessControlStorageWrapper.checkRole(_KPI_MANAGER_ROLE, msg.sender);
         KpisStorageWrapper.requireValidDate(_date, _project);

@@ -8,15 +8,14 @@ import {
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from "../../../constants/values.sol";
 import { IEquity } from "./IEquity.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { CorporateActionsStorageWrapper } from "../../../domain/core/CorporateActionsStorageWrapper.sol";
 import { AdjustBalancesStorageWrapper } from "../../../domain/asset/AdjustBalancesStorageWrapper.sol";
 import { ScheduledTasksStorageWrapper } from "../../../domain/asset/ScheduledTasksStorageWrapper.sol";
 import { EquityStorageWrapper, EquityDataStorage } from "../../../domain/asset/EquityStorageWrapper.sol";
 import { IEquityStorageWrapper } from "../../../domain/asset/equity/IEquityStorageWrapper.sol";
 
-abstract contract Equity is IEquity, AccessControlModifiers, PauseModifiers {
+abstract contract Equity is IEquity, Modifiers {
     function setDividends(
         Dividend calldata _newDividend
     ) external override onlyUnpaused onlyRole(_CORPORATE_ACTION_ROLE) returns (uint256 dividendID_) {

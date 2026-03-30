@@ -10,11 +10,6 @@ import { _checkNotInitialized } from "../../services/InitializationErrors.sol";
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     error Unimplemented();
 
-    modifier onlyUninitialized(bool _initialized) {
-        _checkNotInitialized(_initialized);
-        _;
-    }
-
     // solhint-disable-next-line func-name-mixedcase
     function initialize_BusinessLogicResolver()
         external

@@ -4,13 +4,13 @@ pragma solidity >=0.8.0 <0.9.0;
 import { IERC1410Read } from "./IERC1410Read.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../../domain/asset/ERC1594StorageWrapper.sol";
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../../services/Modifiers.sol";
 import { PauseStorageWrapper } from "../../../../domain/core/PauseStorageWrapper.sol";
 import { IPauseStorageWrapper } from "../../../../domain/core/pause/IPauseStorageWrapper.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 import { Eip1066 } from "../../../../constants/eip1066.sol";
 
-abstract contract ERC1410Read is IERC1410Read, TimestampProvider, PauseModifiers {
+abstract contract ERC1410Read is IERC1410Read, TimestampProvider, Modifiers {
     function balanceOf(address _tokenHolder) external view returns (uint256) {
         return ERC1410StorageWrapper.balanceOfAdjustedAt(_tokenHolder, _getBlockTimestamp());
     }

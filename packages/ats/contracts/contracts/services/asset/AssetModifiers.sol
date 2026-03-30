@@ -32,6 +32,7 @@ import { ClearingModifiers } from "./ClearingModifiers.sol";
 import { ComplianceModifiers } from "./ComplianceModifiers.sol";
 import { EquityModifiers } from "./EquityModifiers.sol";
 import { ERC20Modifiers } from "./ERC20Modifiers.sol";
+import { ERC1410Modifiers } from "./ERC1410Modifiers.sol";
 import { ERC3643Modifiers } from "./ERC3643Modifiers.sol";
 import { ExpirationModifiers } from "./ExpirationModifiers.sol";
 import { InterestRateModifiers } from "./InterestRateModifiers.sol";
@@ -46,6 +47,7 @@ abstract contract AssetModifiers is
     ClearingModifiers,
     ComplianceModifiers,
     EquityModifiers,
+    ERC1410Modifiers,
     ERC20Modifiers,
     ERC3643Modifiers,
     ExpirationModifiers,

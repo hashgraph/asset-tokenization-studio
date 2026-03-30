@@ -5,16 +5,15 @@ import { _CONTROLLER_ROLE, _ISSUER_ROLE, _AGENT_ROLE } from "../../../constants/
 import { IERC3643Operations } from "./IERC3643Operations.sol";
 import { IERC1644StorageWrapper } from "../../../domain/asset/ERC1400/ERC1644/IERC1644StorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { ERC1594StorageWrapper } from "../../../domain/asset/ERC1594StorageWrapper.sol";
 import { ERC1644StorageWrapper } from "../../../domain/asset/ERC1644StorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 
-abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, PauseModifiers, ERC3643Modifiers {
+abstract contract ERC3643Operations is IERC3643Operations, TimestampProvider, Modifiers {
     function burn(address _userAddress, uint256 _amount) external onlyUnpaused {
         ERC1644StorageWrapper.requireControllable();
         ERC1410StorageWrapper.requireWithoutMultiPartition();

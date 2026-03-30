@@ -8,11 +8,7 @@ import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrappe
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
-import { LockModifiers } from "../../../infrastructure/utils/LockModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
 /**
@@ -23,15 +19,7 @@ import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
  * Provides functionality for locking tokens with expiration timestamps
  * and role-based access control. Inherits LockModifiers for expiration validation.
  */
-abstract contract Lock is
-    ILock,
-    TimestampProvider,
-    AccessControlModifiers,
-    ERC1410Modifiers,
-    ERC3643Modifiers,
-    LockModifiers,
-    PauseModifiers
-{
+abstract contract Lock is ILock, TimestampProvider, Modifiers {
     /**
      * @notice Lock tokens by partition
      * @dev Only callable by LOCKER_ROLE

@@ -3,13 +3,12 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { ICap } from "./ICap.sol";
 import { _CAP_ROLE } from "../../../constants/roles.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { _checkNotInitialized } from "../../../services/InitializationErrors.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
 
-abstract contract Cap is ICap, TimestampProvider, PauseModifiers, AccessControlModifiers {
+abstract contract Cap is ICap, TimestampProvider, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(uint256 maxSupply, PartitionCap[] calldata partitionCap) external override {
         _checkNotInitialized(CapStorageWrapper.isCapInitialized());

@@ -9,7 +9,7 @@ import {
     IProtectedPartitionsStorageWrapper
 } from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { CapStorageWrapper } from "../../../domain/core/CapStorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -18,9 +18,8 @@ import { ERC1644StorageWrapper } from "../../../domain/asset/ERC1644StorageWrapp
 import { ClearingStorageWrapper } from "../../../domain/asset/ClearingStorageWrapper.sol";
 import { TokenCoreOps } from "../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
 
-abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, PauseModifiers, ERC3643Modifiers {
+abstract contract ERC3643Batch is IERC3643Batch, TimestampProvider, Modifiers {
     function batchTransfer(
         address[] calldata _toList,
         uint256[] calldata _amounts

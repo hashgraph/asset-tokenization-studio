@@ -8,8 +8,7 @@ import {
     IProtectedPartitionsStorageWrapper
 } from "../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -19,22 +18,8 @@ import { ClearingReadOps } from "../../../domain/orchestrator/ClearingReadOps.so
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { ThirdPartyType } from "../../../domain/asset/types/ThirdPartyType.sol";
 import { TimeTravelStorageWrapper } from "../../../test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol";
-import { ClearingModifiers } from "../../../infrastructure/utils/ClearingModifiers.sol";
-import { PartitionModifiers } from "../../../infrastructure/utils/PartitionModifiers.sol";
-import { ERC3643Modifiers } from "../../../infrastructure/utils/ERC3643Modifiers.sol";
-import { ERC1410Modifiers } from "../../../infrastructure/utils/ERC1410Modifiers.sol";
-import { ExpirationModifiers } from "../../../infrastructure/utils/ExpirationModifiers.sol";
 
-abstract contract ClearingHoldCreation is
-    IClearingHoldCreation,
-    AccessControlModifiers,
-    PauseModifiers,
-    ClearingModifiers,
-    PartitionModifiers,
-    ERC3643Modifiers,
-    ERC1410Modifiers,
-    ExpirationModifiers
-{
+abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         Hold calldata _hold
