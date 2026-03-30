@@ -76,26 +76,11 @@ npm run deploy:hedera:testnet
 If everything goes well you could see this message:
 
 ```
-💾 Deployment output saved: packages/ats/contracts/deployments/hedera-testnet/newBlr-2026-03-28T15-54-16-062.json
-[INFO] ════════════════════════════════════════════════════════════
-[INFO] ✨ DEPLOYMENT COMPLETE
-[INFO] ════════════════════════════════════════════════════════════
-[INFO] ⏱️  Total time: 2362.67s
-[INFO] ⛽ Total gas: 452192906
-[INFO] 📦 Facets deployed: 196
-[INFO] ⚙️  Configurations created: 5
-[INFO] ════════════════════════════════════════════════════════════
+...
 [INFO] ---
 [SUCCESS] ✅ Deployment completed successfully!
 INFO] ---
-[INFO] 📋 Deployment Summary:
-[INFO]    ProxyAdmin: 0xbbef...37a2
-[INFO]    BLR Proxy: 0x0f07...2272
-[INFO]    Factory Proxy: 0x8440...232B
-[INFO]    Total Facets: 196
-[INFO]    Equity Config Version: 0
-[INFO]    Bond Config Version: 0
-[INFO]    Total Contracts: 3
+...
 
 ```
 
