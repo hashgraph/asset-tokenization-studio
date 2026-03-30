@@ -11,12 +11,7 @@ Complete guide for setting up the Asset Tokenization Studio development environm
 
 ## Overview
 
-This guide covers the complete setup process for developers who want to:
-
-- Build and deploy smart contracts
-- Integrate the ATS SDK into their projects
-- Contribute to the ATS codebase
-- Customize contract functionality
+This guide walks you through cloning the repo, building all components, deploying the smart contracts, and running the web application.
 
 ## Prerequisites
 
@@ -53,7 +48,7 @@ npm run ats:web:build
 
 ## Step 3: Smart Contracts Setup
 
-### Configure Hardhat
+### Configure Environment
 
 Navigate to the contracts directory:
 
@@ -67,54 +62,96 @@ Create `.env` file:
 cp .env.example .env
 ```
 
-Configure environment variables:
-
-```bash
-# Hedera Network
-HEDERA_NETWORK=testnet
-
-# Operator Account (for deploying contracts)
-OPERATOR_ID=0.0.12345678
-OPERATOR_KEY=302e020100300506032b657004220420...
-
-# JSON-RPC Relay
-JSON_RPC_RELAY_URL=https://testnet.hashio.io/api
-```
+Edit `.env` with your private key and endpoints. See `packages/ats/contracts/.env.example` for all available variables, or the [Contract Deployment Guide](../developer-guides/contracts/deployment.md#2-configure-environment) for a minimal testnet example.
 
 ### Deploy Contracts
 
-See the [Contract Deployment Guide](../developer-guides/contracts/deployment.md) for detailed instructions on deploying the Business Logic Resolver, Diamond Proxy, and Factory contracts.
-
-## Step 4: SDK Setup
-
-The SDK is built as part of step 2. To use it in your own project:
+From `packages/ats/contracts/`:
 
 ```bash
-npm install @hashgraph/asset-tokenization-contracts @hashgraph/asset-tokenization-sdk
+# Example for testnet, replace with your target network
+npm run deploy:hedera:testnet
 ```
 
-See the [SDK Integration Guide](../developer-guides/sdk-integration.md) for usage examples.
+If everything goes well you could see this message:
 
-## Step 5: Web Application Setup
+```
+💾 Deployment output saved: packages/ats/contracts/deployments/hedera-testnet/newBlr-2026-03-28T15-54-16-062.json
+[INFO] ════════════════════════════════════════════════════════════
+[INFO] ✨ DEPLOYMENT COMPLETE
+[INFO] ════════════════════════════════════════════════════════════
+[INFO] ⏱️  Total time: 2362.67s
+[INFO] ⛽ Total gas: 452192906
+[INFO] 📦 Facets deployed: 196
+[INFO] ⚙️  Configurations created: 5
+[INFO] ════════════════════════════════════════════════════════════
+[INFO] ---
+[SUCCESS] ✅ Deployment completed successfully!
+INFO] ---
+[INFO] 📋 Deployment Summary:
+[INFO]    ProxyAdmin: 0xbbef...37a2
+[INFO]    BLR Proxy: 0x0f07...2272
+[INFO]    Factory Proxy: 0x8440...232B
+[INFO]    Total Facets: 196
+[INFO]    Equity Config Version: 0
+[INFO]    Bond Config Version: 0
+[INFO]    Total Contracts: 3
+
+```
+
+## Step 4: Web Application Setup
 
 Configure the web application:
 
 ```bash
 cd apps/ats/web
-cp .env.local.example .env.local
+cp .env.example .env
 ```
 
-Edit `.env.local` with your configuration:
+Edit `.env` with your deployed contract IDs and endpoints. See `apps/ats/web/.env.example` for all available variables (preconfigured for testnet).
+
+#### Network Configuration
 
 ```bash
-VITE_NETWORK=testnet
-VITE_JSON_RPC_RELAY_URL=https://testnet.hashio.io/api
-VITE_MIRROR_NODE_URL=https://testnet.mirrornode.hedera.com
-VITE_WALLET_CONNECT_PROJECT_ID=your_project_id
+# Hedera Mirror Node
+REACT_APP_MIRROR_NODE=https://testnet.mirrornode.hedera.com/api/v1/
 
-# Your deployed contract IDs
-VITE_BUSINESS_LOGIC_RESOLVER_ID=0.0.12345678
-VITE_TREX_FACTORY_ID=0.0.87654321
+# Hedera JSON-RPC Relay
+REACT_APP_RPC_NODE=https://testnet.hashio.io/api
+```
+
+#### WalletConnect Configuration (Optional)
+
+Required only if using HashPack, Blade, or other non-MetaMask wallets:
+
+```bash
+# Get your project ID from https://cloud.walletconnect.com
+REACT_APP_PROJECT_ID=your_project_id_here
+```
+
+> **Note**: MetaMask connects directly and does not require WalletConnect configuration.
+
+#### Contract Addresses
+
+You can find the address of your deployed contracts in hedera testnet at package/ats/contracts/deployments/hedera-testnet/newBlr-<date>.json
+For REACT_APP_RPC_RESOLVER use infrastructure/blr/proxyContractId address
+For REACT_APP_RPC_FACTORY use infrastructure/factory/proxyContractId address
+
+```bash
+# Business Logic Resolver Contract ID
+REACT_APP_RPC_RESOLVER=0.0.12345678
+
+# Factory Contract ID
+REACT_APP_RPC_FACTORY=0.0.87654321
+```
+
+> **Note**: Replace the contract IDs with your deployed contract addresses. See the [Deployed Addresses](../developer-guides/contracts/deployed-addresses.md) for testnet/mainnet addresses, or the [Deployment Guide](../developer-guides/contracts/deployment.md) for instructions on deploying your own contracts.
+
+#### Optional Configuration
+
+```bash
+# Show cookie disclaimer popup
+REACT_APP_SHOW_DISCLAIMER=true
 ```
 
 Run the development server:
@@ -123,72 +160,6 @@ Run the development server:
 npm run dev
 # Or from root: npm run ats:web:dev
 ```
-
-## Step 6: Running Tests
-
-### Contract Tests
-
-```bash
-cd packages/ats/contracts
-npm run test
-
-# With coverage
-npm run test:coverage
-```
-
-### SDK Tests
-
-```bash
-cd packages/ats/sdk
-npm run test
-```
-
-### Web Application Tests
-
-```bash
-cd apps/ats/web
-npm run test
-```
-
-## Development Workflow
-
-### Making Changes
-
-1. **Contracts**: Edit in `packages/ats/contracts/contracts/`
-2. **SDK**: Edit in `packages/ats/sdk/src/`
-3. **Web App**: Edit in `apps/ats/web/src/`
-
-### Rebuilding After Changes
-
-```bash
-# If you change contracts
-npm run ats:contracts:build
-
-# If you change SDK
-npm run ats:sdk:build
-
-# Web app rebuilds automatically in dev mode
-```
-
-### Linting and Formatting
-
-```bash
-# Lint all code
-npm run lint
-
-# Fix linting issues
-npm run lint:fix
-
-# Format code
-npm run format
-```
-
-## Next Steps
-
-- [Developer Guides](../developer-guides/index.md) - Learn about architecture and patterns
-- [Contract Development](../developer-guides/contracts/index.md) - Deploy and customize contracts
-- [SDK Integration](../developer-guides/sdk-integration.md) - Integrate ATS into your project
-- [API Documentation](../api/index.md) - Technical reference
 
 ## Troubleshooting
 
@@ -216,6 +187,15 @@ npm run clean
 npm run compile
 ```
 
+### Port Already in Use
+
+```bash
+# Kill process on port 5173
+lsof -ti:5173 | xargs kill -9
+
+# Or change port in vite.config.ts
+```
+
 ### Version Mismatches
 
 Ensure all packages use compatible versions:
@@ -226,8 +206,15 @@ npm list @hashgraph/asset-tokenization-contracts
 npm list @hashgraph/asset-tokenization-sdk
 ```
 
-## Need Help?
+### Contract Not Found
 
-- [GitHub Issues](https://github.com/hashgraph/asset-tokenization-studio/issues)
-- [Developer Guides](../developer-guides/index.md)
-- [Hedera Discord](https://hedera.com/discord)
+- Verify contract IDs in `.env` are correct
+- Ensure contracts are deployed to the network you're using
+- Check that the Business Logic Resolver and Factory are properly configured
+
+## Next Steps
+
+- [Developer Guides](../developer-guides/index.md) - Learn about architecture and patterns
+- [Contract Development](../developer-guides/contracts/index.md) - Deploy and customize contracts
+- [SDK Integration](../developer-guides/sdk-integration.md) - Integrate ATS into your project
+- [API Documentation](../api/index.md) - Technical reference

@@ -49,7 +49,7 @@ npm install
 # Environment Variables
 
 Environment variables should be included in a ".env" file located in `apps/ats/web/`.
-Please refer to ".env.sample" to see the list of variables that must be defined alongside some default values that you could use to start up the application.
+Please refer to ".env.example" to see the list of variables that must be defined alongside some default values that you could use to start up the application.
 
 Below is a description of what each variable represents.
 
