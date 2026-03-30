@@ -14,7 +14,7 @@
 
 import { isinGenerator } from "@thomaschaplin/isin-generator";
 import { ethers } from "hardhat";
-import { ZeroAddress, ZeroHash } from "ethers";
+import { ZeroAddress, ethers as ethersTypes } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { deployAtsInfrastructureFixture } from "../infrastructure.fixture";
 import { ATS_ROLES, createLoanConfiguration, LOAN_CONFIG_ID } from "@scripts/domain";
@@ -39,10 +39,12 @@ import {
   ExternalControlListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
   ProceedRecipientsFacet__factory,
+  TimeTravelFacet__factory,
   TestFactory__factory,
 } from "@contract-types";
 import type { TestFactory } from "@contract-types";
 import { decodeEvent } from "@scripts/infrastructure";
+import { DeepPartial } from "@scripts";
 
 /**
  * Default loan token parameters for test fixtures.
@@ -61,7 +63,24 @@ export const DEFAULT_LOAN_PARAMS = {
   internalKycActivated: true,
   nominalValue: 100,
   nominalValueDecimals: 2,
+  erc20VotesActivated: false,
 } as const;
+
+interface DeployLoanTokenFixtureParams {
+  name: string;
+  symbol: string;
+  isin: string;
+  decimals: number;
+  maxSupply: ethersTypes.BigNumberish;
+  isWhiteList: boolean;
+  isControllable: boolean;
+  arePartitionsProtected: boolean;
+  isMultiPartition: boolean;
+  clearingActive: boolean;
+  internalKycActivated: boolean;
+  nominalValueDecimals: number;
+  erc20VotesActivated: boolean;
+}
 
 /**
  * Fixture: Deploy ATS infrastructure + single Loan token via TestFactory
@@ -75,7 +94,7 @@ export const DEFAULT_LOAN_PARAMS = {
  * @param params - Optional custom loan token parameters
  * @returns Infrastructure + deployed loan token + connected facets
  */
-export async function deployLoanTokenFixture(params: Partial<typeof DEFAULT_LOAN_PARAMS> = {}) {
+export async function deployLoanTokenFixture(params: DeepPartial<DeployLoanTokenFixtureParams> = {}) {
   // Merge with defaults
   const p = {
     ...DEFAULT_LOAN_PARAMS,
@@ -92,8 +111,8 @@ export async function deployLoanTokenFixture(params: Partial<typeof DEFAULT_LOAN
     facetAddresses[facet.name] = facet.address;
   }
 
-  // Create Loan configuration in BLR (registers all 45 facets)
-  await createLoanConfiguration(blr, facetAddresses);
+  // Create Loan configuration in BLR (registers all 45 facets including AmortizationFacet)
+  await createLoanConfiguration(blr, facetAddresses, true);
 
   // Deploy TestFactory
   const testFactory = await new TestFactory__factory(deployer).deploy();
@@ -133,6 +152,7 @@ export async function deployLoanTokenFixture(params: Partial<typeof DEFAULT_LOAN
   );
   const externalPauseManagementFacet = ExternalPauseManagementFacet__factory.connect(proxyAddress, deployer);
   const proceedRecipientsFacet = ProceedRecipientsFacet__factory.connect(proxyAddress, deployer);
+  const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initialize_ControlList(p.isWhiteList);
   await erc1410ManagementFacet.initialize_ERC1410(p.isMultiPartition);
@@ -149,7 +169,7 @@ export async function deployLoanTokenFixture(params: Partial<typeof DEFAULT_LOAN
   await externalControlListManagementFacet.initialize_ExternalControlLists([]);
   await kycFacet.initializeInternalKyc(p.internalKycActivated);
   await externalKycListManagementFacet.initialize_ExternalKycLists([]);
-  await erc20VotesFacet.initialize_ERC20Votes(false);
+  await erc20VotesFacet.initialize_ERC20Votes(p.erc20VotesActivated);
   await erc3643ManagementFacet.initialize_ERC3643(ZeroAddress, ZeroAddress);
   await nominalValueFacet.initialize_NominalValue(p.nominalValue, p.nominalValueDecimals);
 
@@ -183,5 +203,6 @@ export async function deployLoanTokenFixture(params: Partial<typeof DEFAULT_LOAN
     externalControlListManagementFacet,
     externalPauseManagementFacet,
     proceedRecipientsFacet,
+    timeTravelFacet,
   };
 }

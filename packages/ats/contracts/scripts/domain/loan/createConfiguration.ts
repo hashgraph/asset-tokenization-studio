@@ -31,12 +31,14 @@ import { BusinessLogicResolver } from "@contract-types";
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
  *
- * Note: Loan does NOT include TimeTravel variants (per spec).
+ * Note: Loan does NOT include TimeTravel variants (per spec). TimeTravelFacet
+ * is injected automatically by the deploy script in test environments.
  */
 const LOAN_FACETS = [
   // Loan Functionality
-  "NominalValueFacet",
   "CouponFacet",
+  "NominalValueFacet",
+  "AmortizationFacet",
   "ProceedRecipientsFacet",
 
   // Core Functionality
@@ -148,15 +150,22 @@ const LOAN_FACETS = [
 export async function createLoanConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
+  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
   // Build facet data with resolver keys from registry
-  const facets = LOAN_FACETS.map((name) => {
-    const facetDef = atsRegistry.getFacetDefinition(name);
+  const baseFacets = useTimeTravel ? [...LOAN_FACETS, "TimeTravelFacet"] : LOAN_FACETS;
+  const facetNames = useTimeTravel
+    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
+    : baseFacets;
+
+  const facets = facetNames.map((name) => {
+    const baseName = name.replace(/TimeTravel$/, "");
+    const facetDef = atsRegistry.getFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${name}`);
+      throw new Error(`No resolver key found for facet: ${baseName}`);
     }
     return {
       facetName: name,

@@ -37,6 +37,7 @@ import {
   ExternalKycListManagementFacet__factory,
   ExternalControlListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
+  TimeTravelFacet__factory,
   TestFactory__factory,
 } from "@contract-types";
 import type { TestFactory } from "@contract-types";
@@ -90,8 +91,8 @@ export async function deployLoanPortfolioTokenFixture(params: Partial<typeof DEF
     facetAddresses[facet.name] = facet.address;
   }
 
-  // Create Loan Portfolio configuration in BLR (registers all 48 facets)
-  await createLoanPortfolioConfiguration(blr, facetAddresses);
+  // Create Loan Portfolio configuration in BLR (registers all 49 facets)
+  await createLoanPortfolioConfiguration(blr, facetAddresses, true);
 
   // Deploy TestFactory
   const testFactory = await new TestFactory__factory(deployer).deploy();
@@ -129,6 +130,7 @@ export async function deployLoanPortfolioTokenFixture(params: Partial<typeof DEF
     deployer,
   );
   const externalPauseManagementFacet = ExternalPauseManagementFacet__factory.connect(proxyAddress, deployer);
+  const timeTravelFacet = TimeTravelFacet__factory.connect(proxyAddress, deployer);
 
   await controlListFacet.initialize_ControlList(p.isWhiteList);
   await erc1410ManagementFacet.initialize_ERC1410(p.isMultiPartition);
@@ -177,5 +179,6 @@ export async function deployLoanPortfolioTokenFixture(params: Partial<typeof DEF
     externalKycListManagementFacet,
     externalControlListManagementFacet,
     externalPauseManagementFacet,
+    timeTravelFacet,
   };
 }

@@ -24,7 +24,7 @@ import { atsRegistry } from "../atsRegistry";
 import { BusinessLogicResolver } from "@contract-types";
 
 /**
- * Loan Portfolio-specific facets list (48 facets total).
+ * Loan Portfolio Facets
  *
  * This is an explicit positive list of all facets required for loan portfolio tokens.
  * Includes all infrastructure facets EXCEPT:
@@ -36,7 +36,8 @@ import { BusinessLogicResolver } from "@contract-types";
  * Note: DiamondFacet combines DiamondCutFacet + DiamondLoupeFacet functionality,
  * so we only include DiamondFacet to avoid selector collisions.
  *
- * Note: Loan Portfolio does NOT include TimeTravel variants (per spec).
+ * Note: Loan Portfolio does NOT include TimeTravel variants (per spec). TimeTravelFacet
+ * is injected automatically by the deploy script in test environments.
  */
 const LOAN_PORTFOLIO_FACETS = [
   // Core Functionality
@@ -71,6 +72,7 @@ const LOAN_PORTFOLIO_FACETS = [
 
   // Nominal Value
   "NominalValueFacet",
+  "AmortizationFacet",
 
   // Hold
   "HoldReadFacet",
@@ -152,15 +154,22 @@ const LOAN_PORTFOLIO_FACETS = [
 export async function createLoanPortfolioConfiguration(
   blrContract: BusinessLogicResolver,
   facetAddresses: Record<string, string>,
+  useTimeTravel: boolean = false,
   partialBatchDeploy: boolean = false,
   batchSize: number = DEFAULT_BATCH_SIZE,
   confirmations: number = 0,
 ): Promise<OperationResult<ConfigurationData, ConfigurationError>> {
+  const baseFacets = useTimeTravel ? [...LOAN_PORTFOLIO_FACETS, "TimeTravelFacet"] : LOAN_PORTFOLIO_FACETS;
+  const facetNames = useTimeTravel
+    ? baseFacets.map((name) => (name === "TimeTravelFacet" || name.endsWith("TimeTravel") ? name : `${name}TimeTravel`))
+    : baseFacets;
+
   // Build facet data with resolver keys from registry
-  const facets = LOAN_PORTFOLIO_FACETS.map((name) => {
-    const facetDef = atsRegistry.getFacetDefinition(name);
+  const facets = facetNames.map((name) => {
+    const baseName = name.replace(/TimeTravel$/, "");
+    const facetDef = atsRegistry.getFacetDefinition(baseName);
     if (!facetDef?.resolverKey?.value) {
-      throw new Error(`No resolver key found for facet: ${name}`);
+      throw new Error(`No resolver key found for facet: ${baseName}`);
     }
     return {
       facetName: name,
