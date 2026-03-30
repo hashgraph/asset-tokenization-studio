@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-30T14:51:24.888Z
+ * Generated: 2026-03-30T15:07:37.001Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -1823,9 +1823,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xaa4ea38e",
       },
       { name: "isControllable", signature: "function isControllable() view returns (bool)", selector: "0x4c783bf5" },
-    ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
     ],
     factory: (signer) => new ERC1644Facet__factory(getLibLinks("tokenCoreOps") as any, signer),
     timeTravelFactory: (signer) => new ERC1644FacetTimeTravel__factory(getLibLinks("tokenCoreOps") as any, signer),
