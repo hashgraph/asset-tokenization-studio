@@ -38,7 +38,7 @@ abstract contract ClearingHoldCreation is
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         Hold calldata _hold
-    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
+    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
         ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
@@ -46,7 +46,6 @@ abstract contract ClearingHoldCreation is
         LockStorageWrapper.requireValidExpirationTimestamp(_clearingOperation.expirationTimestamp);
         LockStorageWrapper.requireValidExpirationTimestamp(_hold.expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();
-        ClearingStorageWrapper.requireClearingActivated();
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
             _clearingOperation,
             msg.sender,
@@ -59,7 +58,7 @@ abstract contract ClearingHoldCreation is
     function clearingCreateHoldFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         Hold calldata _hold
-    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
+    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
@@ -71,7 +70,6 @@ abstract contract ClearingHoldCreation is
         LockStorageWrapper.requireValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         );
-        ClearingStorageWrapper.requireClearingActivated();
         {
             LockStorageWrapper.requireValidExpirationTimestamp(_hold.expirationTimestamp);
             _requireUnProtectedPartitionsOrWildCardRole();
@@ -97,7 +95,7 @@ abstract contract ClearingHoldCreation is
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         Hold calldata _hold
-    ) external override onlyUnpaused returns (bool success_, uint256 clearingId_) {
+    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
@@ -109,7 +107,6 @@ abstract contract ClearingHoldCreation is
         LockStorageWrapper.requireValidExpirationTimestamp(
             _clearingOperationFrom.clearingOperation.expirationTimestamp
         );
-        ClearingStorageWrapper.requireClearingActivated();
         {
             ERC1410StorageWrapper.requireOperator(
                 _clearingOperationFrom.clearingOperation.partition,
