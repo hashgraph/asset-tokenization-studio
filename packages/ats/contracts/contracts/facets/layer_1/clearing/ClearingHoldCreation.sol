@@ -45,10 +45,10 @@ abstract contract ClearingHoldCreation is
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(_hold.to)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
         ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
@@ -71,11 +71,11 @@ abstract contract ClearingHoldCreation is
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
+        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(_hold.to)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
         ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
@@ -110,11 +110,11 @@ abstract contract ClearingHoldCreation is
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
+        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(_hold.to)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_hold.to);
         ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
         ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(

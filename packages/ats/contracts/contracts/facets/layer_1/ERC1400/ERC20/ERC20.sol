@@ -8,7 +8,7 @@ import {
     IProtectedPartitionsStorageWrapper
 } from "../../../../domain/core/protectedPartition/IProtectedPartitionsStorageWrapper.sol";
 import { AccessControlStorageWrapper } from "../../../../domain/core/AccessControlStorageWrapper.sol";
-import { PauseModifiers } from "../../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../../services/Modifiers.sol";
 import { ERC3643StorageWrapper } from "../../../../domain/core/ERC3643StorageWrapper.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import { ERC1410StorageWrapper } from "../../../../domain/asset/ERC1410StorageWrapper.sol";
@@ -18,17 +18,18 @@ import { _checkNotInitialized } from "../../../../services/InitializationErrors.
 import { TokenCoreOps } from "../../../../domain/orchestrator/TokenCoreOps.sol";
 import { TimestampProvider } from "../../../../infrastructure/utils/TimestampProvider.sol";
 
-abstract contract ERC20 is IERC20, TimestampProvider, PauseModifiers {
+abstract contract ERC20 is IERC20, TimestampProvider, Modifiers {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(ERC20Metadata calldata erc20Metadata) external override {
         _checkNotInitialized(ERC20StorageWrapper.isERC20Initialized());
         ERC20StorageWrapper.initializeERC20(erc20Metadata);
     }
 
-    function approve(address spender, uint256 value) external override onlyUnpaused returns (bool) {
+    function approve(
+        address spender,
+        uint256 value
+    ) external override onlyUnpaused onlyUnrecoveredAddress(msg.sender) onlyUnrecoveredAddress(spender) returns (bool) {
         ERC1594StorageWrapper.requireCompliant(msg.sender, spender, false);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(spender);
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         return ERC20StorageWrapper.approve(msg.sender, spender, value);
     }

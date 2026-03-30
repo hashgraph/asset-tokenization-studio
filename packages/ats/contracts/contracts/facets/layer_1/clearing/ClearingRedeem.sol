@@ -43,9 +43,9 @@ abstract contract ClearingRedeem is
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        onlyUnrecoveredAddress(msg.sender)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
@@ -64,9 +64,9 @@ abstract contract ClearingRedeem is
         external
         override
         onlyUnpaused
-        onlyClearingActivated
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         returns (bool success_, uint256 clearingId_)
     {
@@ -100,15 +100,15 @@ abstract contract ClearingRedeem is
         onlyUnpaused
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
+        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
-        ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         {
             ERC1410StorageWrapper.requireOperator(
                 _clearingOperationFrom.clearingOperation.partition,

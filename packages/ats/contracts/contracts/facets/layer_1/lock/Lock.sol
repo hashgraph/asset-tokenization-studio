@@ -60,9 +60,9 @@ abstract contract Lock is
         onlyUnpaused
         onlyRole(_LOCKER_ROLE)
         onlyValidExpirationTimestamp(_expirationTimestamp)
+        onlyUnrecoveredAddress(_tokenHolder)
         returns (bool success_, uint256 lockId_)
     {
-        ERC3643StorageWrapper.requireUnrecoveredAddress(_tokenHolder);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         (success_, lockId_) = LockStorageWrapper.lockByPartition(
             _partition,
