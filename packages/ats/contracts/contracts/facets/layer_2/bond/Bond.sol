@@ -72,7 +72,6 @@ abstract contract Bond is
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyValidMaturityDate(_getBlockTimestamp())
     {
-        BondStorageWrapper.requireValidMaturityDate(_getBlockTimestamp());
         bytes32[] memory partitions = ERC1410StorageWrapper.partitionsOf(_tokenHolder);
         for (uint256 i = 0; i < partitions.length; i++) {
             bytes32 partition = partitions[i];

@@ -49,7 +49,6 @@ abstract contract ClearingActions is
     {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
-        ClearingStorageWrapper.requireClearingActivated();
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
 
         // Check identity verification for tokenHolder
@@ -75,7 +74,6 @@ abstract contract ClearingActions is
     ) external override onlyUnpaused onlyRole(_CLEARING_VALIDATOR_ROLE) onlyClearingActivated returns (bool success_) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperationIdentifier.partition);
         ClearingStorageWrapper.requireValidClearingId(_clearingOperationIdentifier);
-        ClearingStorageWrapper.requireClearingActivated();
         ClearingStorageWrapper.requireExpirationTimestamp(_clearingOperationIdentifier, false);
         success_ = ClearingOps.cancelClearingOperationByPartition(_clearingOperationIdentifier);
         emit ClearingOperationCanceled(
