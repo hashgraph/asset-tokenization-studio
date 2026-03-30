@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-27T18:05:23.325Z
+ * Generated: 2026-03-30T14:51:24.888Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -3838,9 +3838,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-    ],
     factory: (signer) => new TransferAndLockFacet__factory(signer),
     timeTravelFactory: (signer) => new TransferAndLockFacetTimeTravel__factory(signer),
   },
@@ -3872,9 +3869,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
-    ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
     ],
     factory: (signer) => new TransferAndLockFixedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new TransferAndLockFixedRateFacetTimeTravel__factory(signer),
@@ -3908,9 +3902,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
     ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
-    ],
     factory: (signer) => new TransferAndLockKpiLinkedRateFacet__factory(signer),
     timeTravelFactory: (signer) => new TransferAndLockKpiLinkedRateFacetTimeTravel__factory(signer),
   },
@@ -3942,9 +3933,6 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature: "PartitionTransferredAndLocked(bytes32,address,address,uint256,bytes,uint256,uint256)",
         topic0: "0xc2b09c570c5d1b74fb7cc5594554d1aa9fe25ad5b037856dfd980f3bbe17dda9",
       },
-    ],
-    errors: [
-      { name: "AccessControlRequired", signature: "AccessControlRequired(bytes32,address)", selector: "0x10210dec" },
     ],
     factory: (signer) => new TransferAndLockSustainabilityPerformanceTargetRateFacet__factory(signer),
     timeTravelFactory: (signer) =>

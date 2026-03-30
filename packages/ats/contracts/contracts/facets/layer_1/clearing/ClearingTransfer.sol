@@ -23,10 +23,16 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
         address _to
-    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        returns (bool success_, uint256 clearingId_)
+    {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
-        LockStorageWrapper.requireValidExpirationTimestamp(_clearingOperation.expirationTimestamp);
         ERC1410StorageWrapper.requireValidAddress(_to);
         ERC3643StorageWrapper.requireUnrecoveredAddress(EvmAccessors.getMsgSender());
         ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
@@ -49,6 +55,7 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         override
         onlyUnpaused
         onlyClearingActivated
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         notZeroAddress(_clearingOperationFrom.from)
         notZeroAddress(_to)
         returns (bool success_, uint256 clearingId_)
@@ -57,9 +64,6 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
             _clearingOperationFrom.clearingOperation.partition
         );
         _requireUnProtectedPartitionsOrWildCardRole();
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        );
         {
             ERC3643StorageWrapper.requireUnrecoveredAddress(EvmAccessors.getMsgSender());
             ERC3643StorageWrapper.requireUnrecoveredAddress(_to);
@@ -86,14 +90,18 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
+        returns (bool success_, uint256 clearingId_)
+    {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
         _requireUnProtectedPartitionsOrWildCardRole();
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        );
         {
             ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
             ERC1410StorageWrapper.requireValidAddress(_to);

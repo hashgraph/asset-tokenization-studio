@@ -37,11 +37,17 @@ abstract contract ClearingRedeem is
     function clearingRedeemByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount
-    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        returns (bool success_, uint256 clearingId_)
+    {
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
-        LockStorageWrapper.requireValidExpirationTimestamp(_clearingOperation.expirationTimestamp);
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperation,
             _amount,
@@ -58,18 +64,16 @@ abstract contract ClearingRedeem is
         external
         override
         onlyUnpaused
-        onlyUnrecoveredAddress(_clearingOperationFrom.from)
-        onlyUnrecoveredAddress(msg.sender)
         onlyClearingActivated
+        onlyUnrecoveredAddress(msg.sender)
+        onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         returns (bool success_, uint256 clearingId_)
     {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
         _requireUnProtectedPartitionsOrWildCardRole();
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        );
         ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
@@ -90,15 +94,19 @@ abstract contract ClearingRedeem is
     function operatorClearingRedeemByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
-    ) external override onlyUnpaused onlyClearingActivated returns (bool success_, uint256 clearingId_) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyClearingActivated
+        onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
+        returns (bool success_, uint256 clearingId_)
+    {
         ERC3643StorageWrapper.requireUnrecoveredAddress(_clearingOperationFrom.from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
         _requireUnProtectedPartitionsOrWildCardRole();
-        LockStorageWrapper.requireValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        );
         ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
         ERC3643StorageWrapper.requireUnrecoveredAddress(msg.sender);
         {

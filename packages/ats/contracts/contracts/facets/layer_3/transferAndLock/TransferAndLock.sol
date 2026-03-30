@@ -6,8 +6,9 @@ import { _LOCKER_ROLE, _WILD_CARD_ROLE } from "../../../constants/roles.sol";
 import { ITransferAndLock } from "./ITransferAndLock.sol";
 import { BasicTransferInfo } from "../../layer_1/ERC1400/ERC1410/IERC1410.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
-import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+//import { AccessControlModifiers } from "../../../infrastructure/utils/AccessControlModifiers.sol";
+//import { PauseModifiers } from "../../../domain/core/PauseModifiers.sol";
+import { Modifiers } from "../../../services/Modifiers.sol";
 import { ProtectedPartitionsStorageWrapper } from "../../../domain/core/ProtectedPartitionsStorageWrapper.sol";
 import {
     IProtectedPartitionsStorageWrapper
@@ -16,16 +17,22 @@ import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapp
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { EvmAccessors } from "../../../infrastructure/utils/EvmAccessors.sol";
 
-abstract contract TransferAndLock is ITransferAndLock, AccessControlModifiers, PauseModifiers {
+abstract contract TransferAndLock is ITransferAndLock, Modifiers {
     function transferAndLockByPartition(
         bytes32 _partition,
         address _to,
         uint256 _amount,
         bytes calldata _data,
         uint256 _expirationTimestamp
-    ) external override onlyUnpaused onlyRole(_LOCKER_ROLE) returns (bool success_, uint256 lockId_) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_LOCKER_ROLE)
+        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        returns (bool success_, uint256 lockId_)
+    {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
-        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1410StorageWrapper.transferByPartition(
             EvmAccessors.getMsgSender(),
@@ -58,9 +65,15 @@ abstract contract TransferAndLock is ITransferAndLock, AccessControlModifiers, P
         uint256 _amount,
         bytes calldata _data,
         uint256 _expirationTimestamp
-    ) external override onlyUnpaused onlyRole(_LOCKER_ROLE) returns (bool success_, uint256 lockId_) {
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_LOCKER_ROLE)
+        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        returns (bool success_, uint256 lockId_)
+    {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
-        LockStorageWrapper.requireValidExpirationTimestamp(_expirationTimestamp);
         _requireUnProtectedPartitionsOrWildCardRole();
         ERC1410StorageWrapper.transferByPartition(
             EvmAccessors.getMsgSender(),
