@@ -13,6 +13,7 @@ import {
   ClearingActionsFacet__factory,
   ControlListFacet,
   DiamondFacet,
+  DividendFacet,
   Equity,
   ERC20Facet,
   ERC3643Management,
@@ -173,6 +174,7 @@ describe("Clearing Tests", () => {
   let protectedPartitionsFacet: ProtectedPartitions;
   let noncesFacet: NoncesFacet;
   let diamondCutFacet: DiamondFacet;
+  let dividendFacet: DividendFacet;
 
   const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
   let currentTimestamp = 0;
@@ -221,6 +223,7 @@ describe("Clearing Tests", () => {
     protectedPartitionsFacet = await ethers.getContractAt("ProtectedPartitions", diamond.target, signer_A);
     noncesFacet = await ethers.getContractAt("NoncesFacet", diamond.target, signer_A);
     diamondCutFacet = await ethers.getContractAt("DiamondFacet", diamond.target, signer_A);
+    dividendFacet = await ethers.getContractAt("DividendFacet", diamond.target, signer_A);
 
     await ssiManagementFacet.connect(signer_A).addIssuer(signer_A.address);
     await kycFacet.grantKyc(signer_A.address, EMPTY_VC_ID, ZERO, MAX_UINT256, signer_A.address);
@@ -643,12 +646,12 @@ describe("Clearing Tests", () => {
           amountDecimals: 0,
         };
 
-        const dividendId = await equityFacet.connect(signer_A).setDividend.staticCall(dividendInput);
-        await equityFacet.connect(signer_A).setDividend(dividendInput);
+        const dividendId = await dividendFacet.connect(signer_A).setDividend.staticCall(dividendInput);
+        await dividendFacet.connect(signer_A).setDividend(dividendInput);
 
         await timeTravelFacet.changeSystemTimestamp(recordDate + 1n);
 
-        const dividendFor = await equityFacet.getDividendFor(dividendId, signer_A.address);
+        const dividendFor = await dividendFacet.getDividendFor(dividendId, signer_A.address);
 
         const currentBalance = await erc1410Facet.balanceOf(signer_A.address);
         const clearedAmount = await clearingFacet.getClearedAmountFor(signer_A.address);

@@ -19,6 +19,7 @@ import { ILock } from "../facets/layer_1/lock/ILock.sol";
 import { ISecurity } from "../facets/layer_2/security/ISecurity.sol";
 import { IBondRead } from "../facets/layer_2/bond/IBondRead.sol";
 import { ICoupon } from "../facets/layer_2/coupon/ICoupon.sol";
+import { IDividend } from "../facets/layer_2/dividend/IDividend.sol";
 import { RegulationData, AdditionalSecurityData } from "../constants/regulation.sol";
 import { ICap } from "../facets/layer_1/cap/ICap.sol";
 import { IERC20 } from "../facets/layer_1/ERC1400/ERC20/IERC20.sol";
@@ -515,7 +516,7 @@ abstract contract Internals is Modifiers {
     ) internal virtual returns (bytes32 corporateActionId_, uint256 couponID_);
     function _cancelCoupon(uint256 _couponId) internal virtual returns (bool success_);
     function _setDividend(
-        IEquity.Dividend calldata _newDividend
+        IDividend.Dividend calldata _newDividend
     ) internal virtual returns (bytes32 corporateActionId_, uint256 dividendId_);
     function _cancelDividend(uint256 _dividendId) internal virtual returns (bool success_);
     function _setHeldLabafById(
@@ -982,7 +983,7 @@ abstract contract Internals is Modifiers {
     function _getDividendAmountFor(
         uint256 _dividendID,
         address _account
-    ) internal view virtual returns (IEquity.DividendAmountFor memory dividendAmountFor_);
+    ) internal view virtual returns (IDividend.DividendAmountFor memory dividendAmountFor_);
     function _getDividendHolders(
         uint256 _dividendID,
         uint256 _pageIndex,
@@ -994,12 +995,12 @@ abstract contract Internals is Modifiers {
         internal
         view
         virtual
-        returns (IEquity.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_);
+        returns (IDividend.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_);
     function _getDividendsCount() internal view virtual returns (uint256 dividendCount_);
     function _getDividendFor(
         uint256 _dividendID,
         address _account
-    ) internal view virtual returns (IEquity.DividendFor memory dividendFor_);
+    ) internal view virtual returns (IDividend.DividendFor memory dividendFor_);
     function _getERC20Metadata() internal view virtual returns (IERC20.ERC20Metadata memory erc20Metadata_);
     /// @dev DEPRECATED – MIGRATION: Remove once all legacy tokens have been migrated.
     function _equityNominalValue() internal view virtual returns (uint256);
