@@ -3,29 +3,26 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import { _EQUITY_STORAGE_POSITION } from "../../../constants/storagePositions.sol";
 import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID,
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE
 } from "../../../constants/values.sol";
 import { IEquity } from "../../../facets/layer_2/equity/IEquity.sol";
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IEquityStorageWrapper } from "../../../domain/asset/equity/IEquityStorageWrapper.sol";
-import { VotingStorageWrapper } from "../voting/VotingStorageWrapper.sol";
+import { DividendStorageWrapper } from "../dividend/DividendStorageWrapper.sol";
 
-abstract contract EquityStorageWrapper is IEquityStorageWrapper, VotingStorageWrapper {
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
+abstract contract EquityStorageWrapper is IEquityStorageWrapper, DividendStorageWrapper {
     struct EquityDataStorage {
-        bool votingRight;
-        bool informationRight;
-        bool liquidationRight;
-        bool subscriptionRight;
-        bool conversionRight;
-        bool redemptionRight;
-        bool putRight;
-        IEquity.DividendType dividendRight;
+        bool votingRight; //TODO remove in future refactor
+        bool informationRight; //TODO remove in future refactor
+        bool liquidationRight; //TODO remove in future refactor
+        bool subscriptionRight; //TODO remove in future refactor
+        bool conversionRight; //TODO remove in future refactor
+        bool redemptionRight; //TODO remove in future refactor
+        bool putRight; //TODO remove in future refactor
+        IEquity.DividendType dividendRight; //TODO remove in future refactor
         bytes3 currency;
         /// @deprecated Kept for storage layout compatibility. Use NominalValueStorageWrapper instead.
         // solhint-disable-next-line var-name-mixedcase
@@ -85,39 +82,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, VotingStorageWr
         _setPutRight(_equityDetailsData.putRight);
         _setDividendRight(_equityDetailsData.dividendRight);
         _setEquityCurrency(_equityDetailsData.currency);
-    }
-
-    function _setDividend(
-        IEquity.Dividend calldata _newDividend
-    ) internal override returns (bytes32 corporateActionId_, uint256 dividendId_) {
-        bytes memory data = abi.encode(_newDividend);
-
-        (corporateActionId_, dividendId_) = _addCorporateAction(DIVIDEND_CORPORATE_ACTION_TYPE, data);
-
-        _initDividend(corporateActionId_, data);
-    }
-
-    function _cancelDividend(uint256 _dividendId) internal override returns (bool success_) {
-        IEquity.RegisteredDividend memory registeredDividend;
-        bytes32 corporateActionId;
-        (registeredDividend, corporateActionId, ) = _getDividend(_dividendId);
-        if (registeredDividend.dividend.executionDate <= _blockTimestamp()) {
-            revert IEquityStorageWrapper.DividendAlreadyExecuted(corporateActionId, _dividendId);
-        }
-        _cancelCorporateAction(corporateActionId);
-        success_ = true;
-        emit DividendCancelled(_dividendId, _msgSender());
-    }
-
-    function _initDividend(bytes32 _actionId, bytes memory _data) internal override {
-        if (_actionId == bytes32(0)) {
-            revert IEquityStorageWrapper.DividendCreationFailed();
-        }
-
-        IEquity.Dividend memory newDividend = abi.decode(_data, (IEquity.Dividend));
-
-        _addScheduledCrossOrderedTask(newDividend.recordDate, SNAPSHOT_TASK_TYPE);
-        _addScheduledSnapshot(newDividend.recordDate, _actionId);
     }
 
     function _setScheduledBalanceAdjustment(
@@ -181,105 +145,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, VotingStorageWr
             nominalValue: _getNominalValue(),
             nominalValueDecimals: _getNominalValueDecimals()
         });
-    }
-
-    /**
-     * @dev returns the properties and related snapshots (if any) of a dividend.
-     *
-     * @param _dividendID The dividend Id
-     */
-    function _getDividend(
-        uint256 _dividendID
-    )
-        internal
-        view
-        override
-        returns (IEquity.RegisteredDividend memory registeredDividend_, bytes32 corporateActionId_, bool isDisabled_)
-    {
-        corporateActionId_ = _getCorporateActionIdByTypeIndex(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1);
-
-        bytes memory data;
-        (, , data, isDisabled_) = _getCorporateAction(corporateActionId_);
-
-        assert(data.length > 0);
-        (registeredDividend_.dividend) = abi.decode(data, (IEquity.Dividend));
-
-        registeredDividend_.snapshotId = _getUintResultAt(corporateActionId_, SNAPSHOT_RESULT_ID);
-    }
-
-    /**
-     * @dev returns the properties and related snapshots (if any) of a dividend.
-     *
-     * @param _dividendID The dividend Id
-     * @param _account The account
-     */
-    function _getDividendFor(
-        uint256 _dividendID,
-        address _account
-    ) internal view override returns (IEquity.DividendFor memory dividendFor_) {
-        (IEquity.RegisteredDividend memory registeredDividend, , bool isDisabled) = _getDividend(_dividendID);
-
-        dividendFor_.amount = registeredDividend.dividend.amount;
-        dividendFor_.amountDecimals = registeredDividend.dividend.amountDecimals;
-        dividendFor_.recordDate = registeredDividend.dividend.recordDate;
-        dividendFor_.executionDate = registeredDividend.dividend.executionDate;
-        dividendFor_.isDisabled = isDisabled;
-
-        (
-            dividendFor_.tokenBalance,
-            dividendFor_.decimals,
-            dividendFor_.recordDateReached
-        ) = _getSnapshotBalanceForIfDateReached(
-            registeredDividend.dividend.recordDate,
-            registeredDividend.snapshotId,
-            _account
-        );
-    }
-
-    function _getDividendAmountFor(
-        uint256 _dividendID,
-        address _account
-    ) internal view override returns (IEquity.DividendAmountFor memory dividendAmountFor_) {
-        IEquity.DividendFor memory dividendFor = _getDividendFor(_dividendID, _account);
-
-        if (!dividendFor.recordDateReached) return dividendAmountFor_;
-
-        dividendAmountFor_.recordDateReached = true;
-
-        dividendAmountFor_.numerator = dividendFor.tokenBalance * dividendFor.amount;
-
-        dividendAmountFor_.denominator = 10 ** (dividendFor.decimals + dividendFor.amountDecimals);
-    }
-
-    function _getDividendsCount() internal view override returns (uint256 dividendCount_) {
-        return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
-    }
-
-    function _getDividendHolders(
-        uint256 _dividendID,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view override returns (address[] memory holders_) {
-        IEquity.RegisteredDividend memory registeredDividend;
-        (registeredDividend, , ) = _getDividend(_dividendID);
-
-        if (registeredDividend.dividend.recordDate >= _blockTimestamp()) return new address[](0);
-
-        if (registeredDividend.snapshotId != 0)
-            return _tokenHoldersAt(registeredDividend.snapshotId, _pageIndex, _pageLength);
-
-        return _getTokenHolders(_pageIndex, _pageLength);
-    }
-
-    function _getTotalDividendHolders(uint256 _dividendID) internal view override returns (uint256) {
-        IEquity.RegisteredDividend memory registeredDividend;
-        (registeredDividend, , ) = _getDividend(_dividendID);
-
-        if (registeredDividend.dividend.recordDate >= _blockTimestamp()) return 0;
-
-        if (registeredDividend.snapshotId != 0) return _totalTokenHoldersAt(registeredDividend.snapshotId);
-
-        return _getTotalTokenHolders();
     }
 
     function _getScheduledBalanceAdjustment(

@@ -4,7 +4,7 @@ import { OnChainDistributionRepository } from "@infrastructure/adapters/on-chain
 import { AssetType } from "@domain/model/asset-type.enum"
 import { Asset } from "@domain/model/asset"
 import { CorporateActionDetails, DistributionType, PayoutSubtype, AmountType } from "@domain/model/distribution"
-import { Coupon, Equity } from "@hashgraph/asset-tokenization-sdk"
+import { Dividend, Coupon } from "@hashgraph/asset-tokenization-sdk"
 import { AssetUtils } from "@test/shared/asset.utils"
 import { DistributionUtils } from "@test/shared/distribution.utils"
 import { CorporateActionId } from "@domain/model/value-objects/corporate-action-id"
@@ -17,7 +17,7 @@ jest.mock("@hashgraph/asset-tokenization-sdk", () => ({
     getAllCoupons: jest.fn(),
     getTotalCouponHolders: jest.fn(),
   },
-  Equity: {
+  Dividend: {
     getAllDividends: jest.fn(),
     getTotalDividendHolders: jest.fn(),
   },
@@ -32,7 +32,7 @@ jest.mock("@hashgraph/asset-tokenization-sdk", () => ({
 }))
 
 const mockCoupon = Coupon as jest.Mocked<typeof Coupon>
-const mockEquity = Equity as jest.Mocked<typeof Equity>
+const mockDividend = Dividend as jest.Mocked<typeof Dividend>
 import { Security } from "@hashgraph/asset-tokenization-sdk"
 const mockSecurity = Security as jest.Mocked<typeof Security>
 
@@ -82,11 +82,11 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockEquity.getAllDividends.mockResolvedValue(mockDividends)
+      mockDividend.getAllDividends.mockResolvedValue(mockDividends)
 
       await repository.getAllDistributionsByAsset(equityAsset)
 
-      expect(mockEquity.getAllDividends).toHaveBeenCalledWith(expect.any(Object))
+      expect(mockDividend.getAllDividends).toHaveBeenCalledWith(expect.any(Object))
     })
 
     it("should return empty array for unsupported asset types", async () => {
@@ -254,7 +254,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockEquity.getAllDividends.mockResolvedValue(mockDividends)
+      mockDividend.getAllDividends.mockResolvedValue(mockDividends)
 
       const result = await repository.getAllDistributionsByAsset(equityAsset)
 
@@ -279,7 +279,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockEquity.getAllDividends.mockResolvedValue(mockDividends)
+      mockDividend.getAllDividends.mockResolvedValue(mockDividends)
 
       const result = await repository.getAllDistributionsByAsset(equityAsset)
 
@@ -287,7 +287,7 @@ describe(OnChainDistributionRepository.name, () => {
     })
 
     it("should return empty array when no dividends exist", async () => {
-      mockEquity.getAllDividends.mockResolvedValue([])
+      mockDividend.getAllDividends.mockResolvedValue([])
 
       const result = await repository.getAllDistributionsByAsset(equityAsset)
 
@@ -326,7 +326,7 @@ describe(OnChainDistributionRepository.name, () => {
           isDisabled: false,
         },
       ]
-      mockEquity.getAllDividends.mockResolvedValue(mockDividends)
+      mockDividend.getAllDividends.mockResolvedValue(mockDividends)
 
       const result = await repository.getAllDistributionsByAsset(equityAsset)
 
@@ -368,7 +368,7 @@ describe(OnChainDistributionRepository.name, () => {
         },
       })
       const expectedCount = 180
-      mockEquity.getTotalDividendHolders.mockResolvedValue(expectedCount)
+      mockDividend.getTotalDividendHolders.mockResolvedValue(expectedCount)
 
       const result = await repository.getHoldersCountForCorporateActionId(distribution)
 

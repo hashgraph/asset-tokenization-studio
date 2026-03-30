@@ -82,6 +82,7 @@ import { IArrayLib } from "../infrastructure/utils/IArrayLib.sol";
 import { IExternalListManagement } from "../domain/core/externalList/IExternalListManagement.sol";
 import { ICommon } from "../domain/ICommon.sol";
 import { IScheduledTasksCommon } from "../domain/asset/scheduledTask/IScheduledTasksCommon.sol";
+import { IDividend } from "./layer_2/dividend/IDividend.sol";
 
 /**
  * @title IAsset
@@ -152,5 +153,6 @@ interface IAsset is
     IVoting,
     IBondUSA,
     IEquityUSA,
-    ITransferAndLock
+    ITransferAndLock,
+    IDividend
 {}

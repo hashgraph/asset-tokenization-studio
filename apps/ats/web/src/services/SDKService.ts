@@ -16,6 +16,7 @@ import {
   CreateEquityRequest,
   DividendForViewModel,
   DividendViewModel,
+  Dividend,
   Equity,
   EquityDetailsViewModel,
   Factory,
@@ -555,32 +556,32 @@ export class SDKService {
 
   // DIVIDENDS ////////////////////////////////////////////
   public static async setDividend(req: SetDividendRequest): Promise<number> {
-    const response = await Equity.setDividend(req);
+    const response = await Dividend.setDividend(req);
     return response.payload;
   }
 
   public static async getDividendFor(req: GetDividendForRequest): Promise<DividendForViewModel> {
-    return await Equity.getDividendFor(req);
+    return await Dividend.getDividendFor(req);
   }
 
   public static async getDividendAmountFor(req: GetDividendForRequest): Promise<DividendAmountForViewModel> {
-    return await Equity.getDividendAmountFor(req);
+    return await Dividend.getDividendAmountFor(req);
   }
 
   public static async getDividend(req: GetDividendRequest): Promise<DividendViewModel> {
-    return await Equity.getDividend(req);
+    return await Dividend.getDividend(req);
   }
 
   public static async getAllDividends(req: GetAllDividendsRequest): Promise<DividendViewModel[]> {
-    return await Equity.getAllDividends(req);
+    return await Dividend.getAllDividends(req);
   }
 
   public static async getDividendHolders(req: GetDividendHoldersRequest): Promise<string[]> {
-    return await Equity.getDividendHolders(req);
+    return await Dividend.getDividendHolders(req);
   }
 
   public static async getTotalDividendHolders(req: GetTotalDividendHoldersRequest): Promise<number> {
-    return await Equity.getTotalDividendHolders(req);
+    return await Dividend.getTotalDividendHolders(req);
   }
 
   // SPLIT & REVERSE SPLIT ////////////////////////////////////////////
