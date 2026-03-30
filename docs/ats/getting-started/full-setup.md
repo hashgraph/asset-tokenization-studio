@@ -133,7 +133,7 @@ REACT_APP_PROJECT_ID=your_project_id_here
 
 #### Contract Addresses
 
-You can find the address of your deployed contracts in hedera testnet at package/ats/contracts/deployments/hedera-testnet/newBlr-<date>.json
+You can find the address of your deployed contracts in hedera testnet at `package/ats/contracts/deployments/hedera-testnet/newBlr-<DATE>.json`
 For REACT_APP_RPC_RESOLVER use infrastructure/blr/proxyContractId address
 For REACT_APP_RPC_FACTORY use infrastructure/factory/proxyContractId address
 
