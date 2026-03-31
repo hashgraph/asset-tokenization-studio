@@ -11,7 +11,16 @@
 
 import { Signer } from "ethers";
 import { Factory__factory, ProxyAdmin } from "@contract-types";
-import { DeployProxyResult, deployProxy, info, section, success, error as logError } from "@scripts/infrastructure";
+import {
+  DeployProxyResult,
+  deployProxy,
+  info,
+  section,
+  success,
+  error as logError,
+  GAS_LIMIT,
+  hederaGasOverrides,
+} from "@scripts/infrastructure";
 
 /**
  * Options for deploying Factory.
@@ -92,6 +101,10 @@ export async function deployFactory(signer: Signer, options: DeployFactoryOption
       implementationArgs: [],
       existingProxyAdmin,
       initData: "0x", // Factory is stateless, no initialization needed
+      overrides: {
+        gasLimit: GAS_LIMIT.high,
+        ...hederaGasOverrides(),
+      },
     });
 
     const factoryAddress = proxyResult.proxyAddress;

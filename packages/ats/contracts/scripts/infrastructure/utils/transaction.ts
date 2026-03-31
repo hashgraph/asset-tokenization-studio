@@ -10,8 +10,29 @@
  */
 
 import { ContractTransactionResponse, ContractTransactionReceipt, Provider } from "ethers";
-import { DEFAULT_TRANSACTION_TIMEOUT } from "../constants";
+import { DEFAULT_TRANSACTION_TIMEOUT, GAS_LIMIT } from "../constants";
+import { isInstantMiningNetwork } from "../networkConfig";
 import { info, warn, debug } from "./logging";
+
+/**
+ * Returns `{ gasPrice: GAS_LIMIT.gasPrice }` on real networks (Hedera) and `{}`
+ * on instant-mining networks (Hardhat/local).
+ *
+ * Use this anywhere an explicit gasPrice is needed to skip eth_estimateGas on
+ * Hedera without inflating fake ETH costs in Hardhat tests.
+ */
+export function hederaGasOverrides(): { gasPrice: bigint } | Record<string, never> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const hre = require("hardhat");
+    if (isInstantMiningNetwork(hre?.network?.name ?? "unknown")) {
+      return {};
+    }
+  } catch {
+    // Not running inside Hardhat (e.g. standalone tsx script) — use Hedera price
+  }
+  return { gasPrice: GAS_LIMIT.gasPrice };
+}
 
 /**
  * Default number of block confirmations to wait for transaction finality.
