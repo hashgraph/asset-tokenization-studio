@@ -41,7 +41,7 @@ The Mass Payout contracts provide a framework for executing bulk payment distrib
 
 2. Configure environment variables:
    ```bash
-   cp .env.sample .env
+   cp .env.example .env
    # Edit .env with your configuration
    ```
 

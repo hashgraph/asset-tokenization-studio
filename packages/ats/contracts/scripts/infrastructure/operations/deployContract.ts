@@ -12,6 +12,8 @@
 import { Contract, ContractFactory, ContractTransactionReceipt, Overrides } from "ethers";
 import {
   DeploymentResult,
+  DEFAULT_TRANSACTION_TIMEOUT,
+  hederaGasOverrides,
   debug,
   error as logError,
   extractRevertReason,
@@ -89,11 +91,11 @@ export async function deployContract(
       }
     }
 
-    // Prepare deployment overrides
-    const deployOverrides: Overrides = { ...overrides };
-
-    // Note: Gas estimation in ethers v6 is done differently
-    // For now, we rely on the network's estimation or explicit overrides
+    // Prepare deployment overrides.
+    // gasPrice is set to skip eth_estimateGas issues on Hedera relay.
+    // gasLimit is NOT defaulted here so Hardhat can auto-estimate it for large contracts
+    // (e.g. TimeTravel facets). Callers that need a fixed limit pass it via overrides.
+    const deployOverrides: Overrides = { ...hederaGasOverrides(), ...overrides };
 
     // Deploy contract
     const contract = await factory.deploy(...args, deployOverrides);
@@ -103,8 +105,14 @@ export async function deployContract(
       info(`Transaction sent: ${deployTx.hash}`);
     }
 
-    // Wait for deployment
-    await contract.waitForDeployment();
+    // Wait for deployment with timeout to avoid hanging on Hedera
+    const deployTimeout = DEFAULT_TRANSACTION_TIMEOUT * 3;
+    await Promise.race([
+      contract.waitForDeployment(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`waitForDeployment timed out after ${deployTimeout}ms`)), deployTimeout),
+      ),
+    ]);
     const contractAddress = await contract.getAddress();
 
     // Validate deployment
