@@ -10,7 +10,16 @@
 
 import { Signer } from "ethers";
 import { TransparentUpgradeableProxy, TransparentUpgradeableProxy__factory } from "@contract-types";
-import { error as logError, info, section, success, validateAddress, GAS_LIMIT } from "@scripts/infrastructure";
+import {
+  error as logError,
+  info,
+  section,
+  success,
+  validateAddress,
+  GAS_LIMIT,
+  DEFAULT_TRANSACTION_TIMEOUT,
+  hederaGasOverrides,
+} from "@scripts/infrastructure";
 
 /**
  * Deploy TransparentUpgradeableProxy contract.
@@ -63,9 +72,17 @@ export async function deployTransparentProxy(
       initData,
       {
         gasLimit: GAS_LIMIT.default,
+        ...hederaGasOverrides(),
       },
     );
-    await proxy.waitForDeployment();
+
+    const deployTimeout = DEFAULT_TRANSACTION_TIMEOUT * 3; // 3 minutes for Hedera testnet
+    await Promise.race([
+      proxy.waitForDeployment(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`waitForDeployment timed out after ${deployTimeout}ms`)), deployTimeout),
+      ),
+    ]);
 
     success("TransparentUpgradeableProxy deployment complete");
     info(`  Proxy: ${await proxy.getAddress()}`);

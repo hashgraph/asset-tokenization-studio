@@ -18,6 +18,9 @@ import {
   section,
   success,
   validateAddress,
+  DEFAULT_TRANSACTION_TIMEOUT,
+  GAS_LIMIT,
+  hederaGasOverrides,
 } from "@scripts/infrastructure";
 
 /**
@@ -46,8 +49,19 @@ export async function deployProxyAdmin(signer: Signer, overrides?: Overrides): P
   try {
     info("Deploying ProxyAdmin...");
 
-    const proxyAdmin = await new ProxyAdmin__factory(signer).deploy((overrides || {}) as any);
-    await proxyAdmin.waitForDeployment();
+    const proxyAdmin = await new ProxyAdmin__factory(signer).deploy({
+      gasLimit: GAS_LIMIT.default,
+      ...hederaGasOverrides(),
+      ...overrides,
+    } as any);
+
+    const deployTimeout = DEFAULT_TRANSACTION_TIMEOUT * 3;
+    await Promise.race([
+      proxyAdmin.waitForDeployment(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`waitForDeployment timed out after ${deployTimeout}ms`)), deployTimeout),
+      ),
+    ]);
 
     success("ProxyAdmin deployment complete");
     info(`  ProxyAdmin: ${await proxyAdmin.getAddress()}`);

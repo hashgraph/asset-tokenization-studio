@@ -230,7 +230,7 @@ This will remove previous build artifacts and reinstall dependencies before buil
 
 Each application has its own .env configuration file.
 
-- ATS Web App: apps/ats/web/.env.local
+- ATS Web App: apps/ats/web/.env
   Defines Hedera endpoints, resolver and factory IDs, and WalletConnect settings.
 
 - Mass Payout Backend: apps/mass-payout/backend/.env
@@ -239,7 +239,7 @@ Each application has its own .env configuration file.
 - Mass Payout Frontend: apps/mass-payout/frontend/.env
   Requires VITE_API_URL and VITE_PORT.
 
-Sample files are provided (.env.sample or .env.example) in each module.
+Sample files are provided as `.env.example` in each module.
 
 ## Development Workflows
 
