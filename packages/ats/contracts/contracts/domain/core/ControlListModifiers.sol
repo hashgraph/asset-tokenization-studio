@@ -13,12 +13,12 @@ import { EvmAccessors } from "../../infrastructure/utils/EvmAccessors.sol";
  */
 abstract contract ControlListModifiers {
     modifier onlyListedAllowed(address _account) {
-        ControlListStorageWrapper._checkControlList(_account);
+        ControlListStorageWrapper.checkControlList(_account);
         _;
     }
 
     modifier onlySenderListedAllowed() {
-        ControlListStorageWrapper._checkControlList(EvmAccessors.getMsgSender());
+        ControlListStorageWrapper.checkControlList(EvmAccessors.getMsgSender());
         _;
     }
 }

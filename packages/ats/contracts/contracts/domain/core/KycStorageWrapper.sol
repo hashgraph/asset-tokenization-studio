@@ -60,10 +60,6 @@ library KycStorageWrapper {
         if (!verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
     }
 
-    function _checkValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal view {
-        if (!verifyKycStatus(_kycStatus, _account)) revert IKyc.InvalidKycStatus();
-    }
-
     // --- Read functions ---
 
     function getKycStatusFor(address _account, uint256 _timestamp) internal view returns (IKyc.KycStatus) {

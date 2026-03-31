@@ -4,8 +4,6 @@ pragma solidity >=0.8.0 <0.9.0;
 import { _LOCKER_ROLE, _CONTROLLER_ROLE } from "../../../constants/roles.sol";
 import { ILock } from "./ILock.sol";
 import { AccessControlStorageWrapper } from "../../../domain/core/AccessControlStorageWrapper.sol";
-import { ERC3643StorageWrapper } from "../../../domain/core/ERC3643StorageWrapper.sol";
-import { ERC1410StorageWrapper } from "../../../domain/asset/ERC1410StorageWrapper.sol";
 import { LockStorageWrapper } from "../../../domain/asset/LockStorageWrapper.sol";
 import { TimestampProvider } from "../../../infrastructure/utils/TimestampProvider.sol";
 import { Modifiers } from "../../../services/Modifiers.sol";
@@ -49,9 +47,9 @@ abstract contract Lock is ILock, TimestampProvider, Modifiers {
         onlyRole(_LOCKER_ROLE)
         onlyValidExpirationTimestamp(_expirationTimestamp)
         onlyUnrecoveredAddress(_tokenHolder)
+        onlyDefaultPartition(_partition)
         returns (bool success_, uint256 lockId_)
     {
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         (success_, lockId_) = LockStorageWrapper.lockByPartition(
             _partition,
             _amount,
@@ -123,12 +121,11 @@ abstract contract Lock is ILock, TimestampProvider, Modifiers {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) external onlyUnpaused returns (bool success_) {
+    ) external onlyUnpaused onlyDefaultPartition(_partition) returns (bool success_) {
         bytes32[] memory roles = new bytes32[](2);
         roles[0] = _LOCKER_ROLE;
         roles[1] = _CONTROLLER_ROLE;
         AccessControlStorageWrapper.checkAnyRole(roles, EvmAccessors.getMsgSender());
-        ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         success_ = LockStorageWrapper.releaseByPartition(
             _partition,
             _lockId,

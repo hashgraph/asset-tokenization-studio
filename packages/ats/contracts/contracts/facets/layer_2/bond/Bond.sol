@@ -98,8 +98,8 @@ abstract contract Bond is IBond, TimestampProvider, Modifiers {
         onlyListedAllowed(_tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
         onlyValidMaturityDate(_getBlockTimestamp())
+        onlyValidMaturityDate(_getBlockTimestamp())
     {
-        BondStorageWrapper.requireValidMaturityDate(_getBlockTimestamp());
         ERC1410StorageWrapper.redeemByPartition(_partition, _tokenHolder, msg.sender, _amount, "", "");
     }
 
@@ -151,8 +151,14 @@ abstract contract Bond is IBond, TimestampProvider, Modifiers {
      */
     function updateMaturityDate(
         uint256 _newMaturityDate
-    ) external override onlyUnpaused onlyRole(_BOND_MANAGER_ROLE) returns (bool success_) {
-        BondStorageWrapper.requireValidMaturityDate(_newMaturityDate);
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(_BOND_MANAGER_ROLE)
+        onlyValidMaturityDate(_newMaturityDate)
+        returns (bool success_)
+    {
         emit MaturityDateUpdated(address(this), _newMaturityDate, BondStorageWrapper.getMaturityDate());
         success_ = BondStorageWrapper.setMaturityDate(_newMaturityDate);
         return success_;

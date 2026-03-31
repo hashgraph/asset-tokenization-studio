@@ -50,14 +50,8 @@ library ControlListStorageWrapper {
 
     // --- Guard functions ---
 
-    function checkControlList(address _account) internal view {
-        if (!isAbleToAccess(_account)) {
-            revert IControlListStorageWrapper.AccountIsBlocked(_account);
-        }
-    }
-
     // solhint-disable-next-line ordering
-    function _checkControlList(address _account) internal view {
+    function checkControlList(address _account) internal view {
         if (!isAbleToAccess(_account)) {
             revert IControlListStorageWrapper.AccountIsBlocked(_account);
         }

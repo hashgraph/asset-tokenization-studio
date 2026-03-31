@@ -56,8 +56,14 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
-    ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) notZeroAddress(_userAddress) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_userAddress)
+        notZeroAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
         _requireFreezeRoles();
         ERC3643StorageWrapper.freezeTokens(_userAddress, _amount);
         emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
@@ -78,8 +84,14 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function unfreezePartialTokens(
         address _userAddress,
         uint256 _amount
-    ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) notZeroAddress(_userAddress) {
-        ERC1410StorageWrapper.requireWithoutMultiPartition();
+    )
+        external
+        override
+        onlyUnpaused
+        onlyUnrecoveredAddress(_userAddress)
+        notZeroAddress(_userAddress)
+        onlyWithoutMultiPartition
+    {
         _requireFreezeRoles();
         ERC3643StorageWrapper.unfreezeTokens(_userAddress, _amount, 0);
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
@@ -124,11 +136,10 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function batchFreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) {
+    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
         require(_userAddresses.length == _amounts.length, "Freeze: arrays length mismatch");
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
             ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
-            ERC1410StorageWrapper.requireWithoutMultiPartition();
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.freezeTokens(_userAddresses[i], _amounts[i]);
             emit TokensFrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
@@ -149,11 +160,10 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function batchUnfreezePartialTokens(
         address[] calldata _userAddresses,
         uint256[] calldata _amounts
-    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) {
+    ) external onlyUnpaused onlyValidInputAmountsArrayLength(_userAddresses, _amounts) onlyWithoutMultiPartition {
         require(_userAddresses.length == _amounts.length, "Freeze: arrays length mismatch");
         for (uint256 i = 0; i < _userAddresses.length; ++i) {
             ERC1410StorageWrapper.requireValidAddress(_userAddresses[i]);
-            ERC1410StorageWrapper.requireWithoutMultiPartition();
             ERC3643StorageWrapper.requireUnrecoveredAddress(_userAddresses[i]);
             ERC3643StorageWrapper.unfreezeTokens(_userAddresses[i], _amounts[i], 0);
             emit TokensUnfrozen(_userAddresses[i], _amounts[i], _DEFAULT_PARTITION);
