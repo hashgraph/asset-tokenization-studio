@@ -38,9 +38,9 @@ import {
   ExternalControlListManagementFacet__factory,
   ExternalPauseManagementFacet__factory,
   TimeTravelFacet__factory,
-  TestFactory__factory,
+  Factory__factory,
 } from "@contract-types";
-import type { TestFactory } from "@contract-types";
+
 import { decodeEvent } from "@scripts/infrastructure";
 
 /**
@@ -83,7 +83,7 @@ export async function deployLoanPortfolioTokenFixture(params: Partial<typeof DEF
 
   // Load base infrastructure (BLR + all facets deployed)
   const infrastructure = await loadFixture(deployAtsInfrastructureFixture);
-  const { blr, deployer } = infrastructure;
+  const { blr, deployer, factory } = infrastructure;
 
   // Build facet addresses map from deployment.facets array
   const facetAddresses: Record<string, string> = {};
@@ -94,19 +94,15 @@ export async function deployLoanPortfolioTokenFixture(params: Partial<typeof DEF
   // Create Loan Portfolio configuration in BLR (registers all 49 facets)
   await createLoanPortfolioConfiguration(blr, facetAddresses, true);
 
-  // Deploy TestFactory
-  const testFactory = await new TestFactory__factory(deployer).deploy();
-  await testFactory.waitForDeployment();
-
   // Deploy ResolverProxy via TestFactory
   const rbacs = [{ role: ATS_ROLES._DEFAULT_ADMIN_ROLE, members: [deployer.address] }];
 
   // Get BLR proxy address (use deployment data to avoid TypeScript type mismatch)
   const blrProxyAddress = infrastructure.deployment.infrastructure.blr.proxy;
 
-  const tx = await testFactory.deployProxy(blrProxyAddress, LOAN_PORTFOLIO_CONFIG_ID, 1, rbacs);
+  const tx = await factory.deployProxy(blrProxyAddress, LOAN_PORTFOLIO_CONFIG_ID, 1, rbacs);
   const receipt = await tx.wait();
-  const proxyAddress = (await decodeEvent(testFactory, "ProxyDeployed", receipt)).proxy;
+  const proxyAddress = (await decodeEvent(factory, "ProxyDeployed", receipt)).proxyAddress;
 
   // Connect commonly used facets to the proxy
   const accessControlFacet = AccessControlFacet__factory.connect(proxyAddress, deployer);
@@ -155,7 +151,7 @@ export async function deployLoanPortfolioTokenFixture(params: Partial<typeof DEF
     ...infrastructure,
 
     // TestFactory
-    testFactory: testFactory as TestFactory,
+    testFactory: factory,
 
     // Token
     tokenAddress: proxyAddress,
