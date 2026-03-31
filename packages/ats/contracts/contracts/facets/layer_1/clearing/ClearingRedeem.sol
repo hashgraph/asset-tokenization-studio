@@ -52,13 +52,13 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
         onlyClearingActivated
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
+        notZeroAddress(_clearingOperationFrom.from)
         returns (bool success_, uint256 clearingId_)
     {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
         _requireUnProtectedPartitionsOrWildCardRole();
-        ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
         (success_, clearingId_) = ClearingOps.clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
@@ -86,13 +86,13 @@ abstract contract ClearingRedeem is IClearingRedeem, TimestampProvider, Modifier
         onlyWithValidExpirationTimestamp(_clearingOperationFrom.clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        notZeroAddress(_clearingOperationFrom.from)
         returns (bool success_, uint256 clearingId_)
     {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
         _requireUnProtectedPartitionsOrWildCardRole();
-        ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
         {
             ERC1410StorageWrapper.requireOperator(
                 _clearingOperationFrom.clearingOperation.partition,

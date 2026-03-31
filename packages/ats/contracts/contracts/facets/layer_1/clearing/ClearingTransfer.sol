@@ -31,11 +31,11 @@ abstract contract ClearingTransfer is IClearingTransfer, TimestampProvider, Modi
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(EvmAccessors.getMsgSender())
         onlyUnrecoveredAddress(_to)
+        notZeroAddress(_to)
         returns (bool success_, uint256 clearingId_)
     {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
-        ERC1410StorageWrapper.requireValidAddress(_to);
         (success_, clearingId_) = ClearingOps.clearingTransferCreation(
             _clearingOperation,
             _amount,

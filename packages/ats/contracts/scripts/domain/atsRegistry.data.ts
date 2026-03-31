@@ -10,7 +10,7 @@
  *
  * Import from '@scripts/domain' instead of this file directly.
  *
- * Generated: 2026-03-30T19:10:59.714Z
+ * Generated: 2026-03-31T07:58:24.868Z
  * Facets: 68
  * Infrastructure: 2
  *
@@ -308,6 +308,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "MaturityDateUpdated",
+        signature: "MaturityDateUpdated(address,uint256,uint256)",
+        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+      },
+      {
         name: "on",
         signature: "on(address,bytes32,uint256)",
         topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
@@ -357,6 +362,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "MaturityDateUpdated",
+        signature: "MaturityDateUpdated(address,uint256,uint256)",
+        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+      },
+      {
         name: "on",
         signature: "on(address,bytes32,uint256)",
         topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
@@ -405,6 +415,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
       },
     ],
     events: [
+      {
+        name: "MaturityDateUpdated",
+        signature: "MaturityDateUpdated(address,uint256,uint256)",
+        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+      },
       {
         name: "on",
         signature: "on(address,bytes32,uint256)",
@@ -831,6 +846,11 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
     ],
     events: [
       {
+        name: "MaturityDateUpdated",
+        signature: "MaturityDateUpdated(address,uint256,uint256)",
+        topic0: "0x2e73bd0100c5816065f3ccb1e56ff5a3c5fefe2ee0ea490cc32c50004d59ff6f",
+      },
+      {
         name: "on",
         signature: "on(address,bytes32,uint256)",
         topic0: "0x0e81a3e75de9a324032d08e6d14c0e2b509aaa75489e4531bcbd54d949f33989",
@@ -925,6 +945,33 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         signature:
           "function reclaimClearingOperationByPartition((uint8 clearingOperationType, bytes32 partition, address tokenHolder, uint256 clearingId) _clearingOperationIdentifier) returns (bool success_)",
         selector: "0x67e57fe2",
+      },
+    ],
+    events: [
+      {
+        name: "ClearingActivated",
+        signature: "ClearingActivated(address)",
+        topic0: "0x569080e4e18c204a1d28f09348d781d7cfb170428b2fd33e1f9b7df132674e15",
+      },
+      {
+        name: "ClearingDeactivated",
+        signature: "ClearingDeactivated(address)",
+        topic0: "0xdb053585e5b33d19247ef59f5b465bcbb9774e6e5ce23932a7e3ffe829cd80a1",
+      },
+      {
+        name: "ClearingOperationApproved",
+        signature: "ClearingOperationApproved(address,address,bytes32,uint256,IClearing.ClearingOperationType,bytes)",
+        topic0: "0x02f980b59ce0d0d56d120ea10fd65c1761039caa1b51c65ab99a770ecbf956e9",
+      },
+      {
+        name: "ClearingOperationCanceled",
+        signature: "ClearingOperationCanceled(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
+        topic0: "0x730f579c3f3d2d652106a07acfb467c6ad517dde94018569f5a1def7c0c4a0ad",
+      },
+      {
+        name: "ClearingOperationReclaimed",
+        signature: "ClearingOperationReclaimed(address,address,bytes32,uint256,IClearing.ClearingOperationType)",
+        topic0: "0x0732b59e2bff7ce1143581074f475d0ac1c2f9f702f6380def68b47959e48f7a",
       },
     ],
     factory: (signer) => new ClearingActionsFacet__factory(getLibLinks("clearingOps") as any, signer),
@@ -2615,6 +2662,33 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
         selector: "0xf8bafc1c",
       },
     ],
+    events: [
+      {
+        name: "HeldByPartition",
+        signature: "HeldByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0x8aaecda291be1880bb8f1b74d739076b63e172f3758535440d4781002a135663",
+      },
+      {
+        name: "HeldFromByPartition",
+        signature: "HeldFromByPartition(address,address,bytes32,uint256,Hold,bytes)",
+        topic0: "0x89e7674560e6cad671bf2d392a62a88b25b960e62476504e038081c3aabe7ece",
+      },
+      {
+        name: "HoldByPartitionExecuted",
+        signature: "HoldByPartitionExecuted(address,bytes32,uint256,uint256,address)",
+        topic0: "0x4fb20409d1b2a56fa4c5b29c11d9b1e148649db67860c5648a8a86f35edf8582",
+      },
+      {
+        name: "HoldByPartitionReclaimed",
+        signature: "HoldByPartitionReclaimed(address,address,bytes32,uint256,uint256)",
+        topic0: "0xee0ec155026031ca64823d8fbf00832ff3f96c7da0994432ddc1a32c72022a09",
+      },
+      {
+        name: "HoldByPartitionReleased",
+        signature: "HoldByPartitionReleased(address,bytes32,uint256,uint256)",
+        topic0: "0x6c167944f4b372d42d168efc93004d7e517cb82a501d67490af33f95530ca50e",
+      },
+    ],
     factory: (signer) => new HoldTokenHolderFacet__factory(signer),
     timeTravelFactory: (signer) => new HoldTokenHolderFacetTimeTravel__factory(signer),
   },
@@ -2948,6 +3022,22 @@ export const FACET_REGISTRY: Record<string, FacetDefinition> = {
           "function releaseByPartition(bytes32 _partition, uint256 _lockId, address _tokenHolder) returns (bool success_)",
         selector: "0xdc6a3e75",
       },
+    ],
+    events: [
+      {
+        name: "LockByPartitionReleased",
+        signature: "LockByPartitionReleased(address,address,bytes32,uint256)",
+        topic0: "0x6b9cdd97822563ef24ac6b58b361df36a653662e434bb96e40fa50ae5c9de688",
+      },
+      {
+        name: "LockedByPartition",
+        signature: "LockedByPartition(address,address,bytes32,uint256,uint256,uint256)",
+        topic0: "0x1f36cfc418f72043825aa85b5d279c03191ab83364af0ec5f170d67f1a7ba152",
+      },
+    ],
+    errors: [
+      { name: "from", signature: "from()", selector: "0xd5ce3389" },
+      { name: "LockExpirationNotReached", signature: "LockExpirationNotReached()", selector: "0xe8232ac2" },
     ],
     factory: (signer) => new LockFacet__factory(signer),
     timeTravelFactory: (signer) => new LockFacetTimeTravel__factory(signer),

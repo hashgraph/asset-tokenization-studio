@@ -34,8 +34,7 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     function updateProceedRecipientData(
         address _proceedRecipient,
         bytes calldata _data
-    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) {
-        ERC1410StorageWrapper.requireValidAddress(_proceedRecipient);
+    ) external override onlyUnpaused onlyRole(_PROCEED_RECIPIENT_MANAGER_ROLE) notZeroAddress(_proceedRecipient) {
         ProceedRecipientsStorageWrapper.requireProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.setProceedRecipientData(_proceedRecipient, _data);
         emit ProceedRecipientDataUpdated(msg.sender, _proceedRecipient, _data);
@@ -61,8 +60,10 @@ abstract contract ProceedRecipients is IProceedRecipients, Modifiers {
     }
 
     // Internal functions for override in rate-specific variants
-    function _addProceedRecipientInternal(address _proceedRecipient, bytes calldata _data) internal {
-        ERC1410StorageWrapper.requireValidAddress(_proceedRecipient);
+    function _addProceedRecipientInternal(
+        address _proceedRecipient,
+        bytes calldata _data
+    ) internal notZeroAddress(_proceedRecipient) {
         ProceedRecipientsStorageWrapper.requireNotProceedRecipient(_proceedRecipient);
         ProceedRecipientsStorageWrapper.addProceedRecipient(_proceedRecipient, _data);
         emit ProceedRecipientAdded(msg.sender, _proceedRecipient, _data);

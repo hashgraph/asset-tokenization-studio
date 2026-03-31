@@ -66,11 +66,10 @@ abstract contract ERC1410Management is IERC1410Management, Modifiers {
 
     function operatorTransferByPartition(
         OperatorTransferData calldata _operatorTransferData
-    ) external override returns (bytes32) {
+    ) external override notZeroAddress(_operatorTransferData.to) returns (bytes32) {
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_operatorTransferData.partition);
         ERC1410StorageWrapper.requireOperator(_operatorTransferData.partition, _operatorTransferData.from);
         _requireUnProtectedPartitionsOrWildCardRole();
-        ERC1410StorageWrapper.requireValidAddress(_operatorTransferData.to);
         ERC1594StorageWrapper.requireCanTransferFromByPartition(
             _operatorTransferData.from,
             _operatorTransferData.to,

@@ -56,10 +56,9 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function freezePartialTokens(
         address _userAddress,
         uint256 _amount
-    ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) {
+    ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) notZeroAddress(_userAddress) {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         _requireFreezeRoles();
-        ERC1410StorageWrapper.requireValidAddress(_userAddress);
         ERC3643StorageWrapper.freezeTokens(_userAddress, _amount);
         emit TokensFrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }
@@ -79,10 +78,9 @@ abstract contract Freeze is IFreeze, TimestampProvider, Modifiers {
     function unfreezePartialTokens(
         address _userAddress,
         uint256 _amount
-    ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) {
+    ) external override onlyUnpaused onlyUnrecoveredAddress(_userAddress) notZeroAddress(_userAddress) {
         ERC1410StorageWrapper.requireWithoutMultiPartition();
         _requireFreezeRoles();
-        ERC1410StorageWrapper.requireValidAddress(_userAddress);
         ERC3643StorageWrapper.unfreezeTokens(_userAddress, _amount, 0);
         emit TokensUnfrozen(_userAddress, _amount, _DEFAULT_PARTITION);
     }

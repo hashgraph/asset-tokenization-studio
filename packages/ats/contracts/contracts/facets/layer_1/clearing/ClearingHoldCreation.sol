@@ -32,9 +32,9 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_hold.to)
+        notZeroAddress(_hold.escrow)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_clearingOperation.partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         (success_, clearingId_) = ClearingOps.clearingHoldCreationCreation(
@@ -59,10 +59,10 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_hold.to)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        notZeroAddress(_hold.escrow)
+        notZeroAddress(_clearingOperationFrom.from)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
-        ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );
@@ -98,10 +98,10 @@ abstract contract ClearingHoldCreation is IClearingHoldCreation, Modifiers {
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_hold.to)
         onlyUnrecoveredAddress(_clearingOperationFrom.from)
+        notZeroAddress(_hold.escrow)
+        notZeroAddress(_clearingOperationFrom.from)
         returns (bool success_, uint256 clearingId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
-        ERC1410StorageWrapper.requireValidAddress(_clearingOperationFrom.from);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         );

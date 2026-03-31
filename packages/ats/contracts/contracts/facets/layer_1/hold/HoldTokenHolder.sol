@@ -54,9 +54,9 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         onlyValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_hold.to)
+        notZeroAddress(_hold.escrow)
         returns (bool success_, uint256 holdId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(
@@ -101,10 +101,10 @@ abstract contract HoldTokenHolder is IHoldTokenHolder, Modifiers {
         onlyUnrecoveredAddress(msg.sender)
         onlyUnrecoveredAddress(_hold.to)
         onlyUnrecoveredAddress(_from)
+        notZeroAddress(_from)
+        notZeroAddress(_hold.escrow)
         returns (bool success_, uint256 holdId_)
     {
-        ERC1410StorageWrapper.requireValidAddress(_from);
-        ERC1410StorageWrapper.requireValidAddress(_hold.escrow);
         ERC1410StorageWrapper.requireDefaultPartitionWithSinglePartition(_partition);
         _requireUnProtectedPartitionsOrWildCardRole();
         (success_, holdId_) = HoldStorageWrapper.createHoldByPartition(

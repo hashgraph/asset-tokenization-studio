@@ -37,8 +37,7 @@ abstract contract Kyc is IKyc, TimestampProvider, Modifiers {
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
-    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) returns (bool success_) {
-        ERC1410StorageWrapper.requireValidAddress(_account);
+    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) notZeroAddress(_account) returns (bool success_) {
         KycStorageWrapper.requireValidKycStatus(KycStatus.NOT_GRANTED, _account);
         KycStorageWrapper.requireValidDates(_validFrom, _validTo, _getBlockTimestamp());
         SsiManagementStorageWrapper.requireIssuer(_issuer);
@@ -48,8 +47,7 @@ abstract contract Kyc is IKyc, TimestampProvider, Modifiers {
 
     function revokeKyc(
         address _account
-    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) returns (bool success_) {
-        ERC1410StorageWrapper.requireValidAddress(_account);
+    ) external virtual override onlyUnpaused onlyRole(_KYC_ROLE) notZeroAddress(_account) returns (bool success_) {
         success_ = KycStorageWrapper.revokeKyc(_account);
         emit KycRevoked(_account, msg.sender);
     }
