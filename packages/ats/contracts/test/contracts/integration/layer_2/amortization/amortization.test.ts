@@ -20,7 +20,7 @@ const TOKENS_TO_REDEEM = 500;
 const RECORD_DATE_OFFSET = 400;
 const EXECUTION_DATE_OFFSET = 1200;
 
-describe("AmortizationFacet — Loan Token", () => {
+describe("AmortizationFacet", () => {
   let amortizationFacet: AmortizationFacet;
   let accessControlFacet: AccessControlFacet;
   let pauseFacet: PauseFacet;
