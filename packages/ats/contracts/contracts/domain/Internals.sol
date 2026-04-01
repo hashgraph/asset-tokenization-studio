@@ -1320,7 +1320,11 @@ abstract contract Internals is Modifiers {
         uint256 _amortizationID,
         address _tokenHolder
     ) internal view virtual returns (uint256 tokenAmount_, uint8 decimals_);
-    function _getActiveAmortizationIds() internal view virtual returns (uint256[] memory activeIds_);
+    function _getActiveAmortizationIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (uint256[] memory activeIds_);
+    function _getTotalActiveAmortizationIds() internal view virtual returns (uint256);
     function _getTotalDividendHolders(uint256 _dividendID) internal view virtual returns (uint256);
     function _getTotalFrozenLabaf(address _tokenHolder) internal view virtual returns (uint256 labaf_);
     function _getTotalFrozenLabafByPartition(

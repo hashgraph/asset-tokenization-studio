@@ -63,6 +63,7 @@ abstract contract Amortization is IAmortization, Internals {
         onlyWithoutMultiPartition
         onlyRole(_AMORTIZATION_ROLE)
         onlyMatchingActionType(AMORTIZATION_CORPORATE_ACTION_TYPE, _amortizationID - 1)
+        onlyPositiveTokenAmount(_tokenAmount, _amortizationID)
         returns (uint256 holdId_)
     {
         return _setAmortizationHold(_amortizationID, _tokenHolder, _tokenAmount);
@@ -190,13 +191,14 @@ abstract contract Amortization is IAmortization, Internals {
         return _getTotalActiveAmortizationHoldHolders(_amortizationID);
     }
 
-    function getActiveAmortizationIds()
-        external
-        view
-        override
-        onlyWithoutMultiPartition
-        returns (uint256[] memory activeIds_)
-    {
-        return _getActiveAmortizationIds();
+    function getActiveAmortizationIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override onlyWithoutMultiPartition returns (uint256[] memory activeIds_) {
+        return _getActiveAmortizationIds(_pageIndex, _pageLength);
+    }
+
+    function getTotalActiveAmortizationIds() external view override onlyWithoutMultiPartition returns (uint256) {
+        return _getTotalActiveAmortizationIds();
     }
 }
